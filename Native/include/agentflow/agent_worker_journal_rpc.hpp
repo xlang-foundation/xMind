@@ -1,5 +1,5 @@
 #pragma once
-#include <functional>
+#include "agentflow/agent_worker_journal_host.hpp"
 #include "agentflow/agent_worker_rpc.hpp"
 #include "agentflow/agent_worker_records.hpp"
 
@@ -31,9 +31,6 @@ public:
     AgentWorkerToolTurnRecord commit_workspace_turn(const std::string& attempt);
     Run complete_run(const std::string& final_attempt);
 private:AgentWorkerRpcPeer& peer_;
-};
-struct AgentWorkerJournalModelHooks {
-    std::function<ModelCallReservation(const std::string&,std::stop_token)> reserve,start,finish;
 };
 // Bind only this captured backend lease to its exact authenticated channel.
 // Completion uses backend-captured model facts, never a supplied assistant.

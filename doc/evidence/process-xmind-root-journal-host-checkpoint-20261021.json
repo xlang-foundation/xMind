@@ -1,0 +1,60 @@
+{
+  "scope": "Typed backend journal authority extracted from packet handler; all existing RPC journal calls now delegate to it. Native Journal object and production transport switch are not implemented by this checkpoint.",
+  "gate": {
+    "recordedAt": "2026-10-21T22:34:26.841Z",
+    "sourceParent": "3099f696eaae6269fd5da1975834f3cb5cad4371",
+    "sourcePatchSha256": "cd39a62f35ef5163e4481dbde38d44f4284296c5e67044c9a9a76d60fcf0fdde",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 49216,
+      "launchedAt": "2026-10-21T22:29:41.191Z",
+      "completedAt": "2026-10-21T22:32:13.326Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e1642788a04659d302a35d91e99985de8165d3ee4f3e7e35693da5ea1df1e30c"
+    },
+    "test": {
+      "pid": 11408,
+      "launchedAt": "2026-10-21T22:32:17.688Z",
+      "completedAt": "2026-10-21T22:34:24.148Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f202d6392d9225830d06e97a98cd21a3140df5303bf71d59ff09bb7e38865300"
+    },
+    "total": 18,
+    "failed": 0,
+    "passed": 18,
+    "seconds": 126.41,
+    "projectFiles": 2773,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 136,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "ea1a16bf8f829f4c7cee72b76525018575fd7912ef22b720cdfe810ed8ea2efc",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-xmind-root-journal-host-20261021-binaries-before-test.json": "a3c003d5f39f1aeef1215aab04075beeaff9452a305986463706523c2fd38681",
+    "doc/evidence/process-xmind-root-journal-host-20261021-build-terminal.json": "26ea9127c9e515885475c791887c8e9c1d4d02de59998a40f9abb168b5a662a7",
+    "doc/evidence/process-xmind-root-journal-host-20261021-build.log": "e1642788a04659d302a35d91e99985de8165d3ee4f3e7e35693da5ea1df1e30c",
+    "doc/evidence/process-xmind-root-journal-host-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-xmind-root-journal-host-20261021-ctest-terminal.json": "2defbce641747044da07d446f74625c26fd578605e0790074fd7f4882f54d903",
+    "doc/evidence/process-xmind-root-journal-host-20261021-ctest.log": "f202d6392d9225830d06e97a98cd21a3140df5303bf71d59ff09bb7e38865300",
+    "doc/evidence/process-xmind-root-journal-host-20261021-gate.json": "deb58c1c77bb0c40c5afd18ec0244854255bf4da4fb63b66ac327a539b5d1b2a",
+    "doc/evidence/process-xmind-root-journal-host-20261021-inputs-before-build.json": "8ecfe37e149436ee0b79d59d7185e5faacec52e0b4e07a1de0568536ccab4101",
+    "doc/evidence/process-xmind-root-journal-host-20261021-LastTest.log": "b32a113cfab78c22a20d844683d6af897ec142c3e026bd538b58b6b0855d902a",
+    "doc/evidence/process-xmind-root-journal-host-20261021-source.patch": "cd39a62f35ef5163e4481dbde38d44f4284296c5e67044c9a9a76d60fcf0fdde",
+    "doc/evidence/process-xmind-root-journal-host-20261021-test-inventory.json": "3ac387199621994680b4b948c3a07b5e5b0c74d940cabfbdae2e4cac0504f5d8"
+  },
+  "fullSuite": false,
+  "installed": false
+}

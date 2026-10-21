@@ -1,0 +1,30 @@
+#include "agentflow/agent_worker_journal_host.hpp"
+#include "agentflow/persistence_service.hpp"
+#include "agentflow/agent_worker_file_host.hpp"
+namespace agentflow {
+namespace {
+std::string attempt(std::string value){if(value.empty()||value.size()>128||value.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw std::invalid_argument("Invalid worker journal attempt");return value;}
+}
+AgentWorkerJournalHost::AgentWorkerJournalHost(PersistenceService& store,AgentWorkerLeaseSpec lease,Deadline deadline,std::stop_token cancel,AgentWorkerJournalModelHooks hooks):store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel),hooks_(std::move(hooks)){(void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();}
+AgentWorkerJournalHost::AgentWorkerJournalHost(PersistenceService& store,AgentWorkerFileHost& files,Deadline deadline,std::stop_token cancel,AgentWorkerJournalModelHooks hooks):AgentWorkerJournalHost(store,files.lease(),deadline,cancel,std::move(hooks)){workspace_=true;}
+void AgentWorkerJournalHost::check(std::stop_token cancel)const{if(cancel.stop_requested()||owner_cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal owner cancelled");if(std::chrono::steady_clock::now()>=deadline_)throw AgentWorkerAuthorityExpired("Worker journal deadline elapsed");}
+AgentWorkerJournalValue AgentWorkerJournalHost::read(AgentWorkerJournalRead query,std::stop_token cancel){check(cancel);auto result=store_.read_agent_worker_journal(lease_,std::move(query)).get();check(cancel);return result;}
+Run AgentWorkerJournalHost::run(std::string id,std::stop_token cancel){return std::get<Run>(read({AgentWorkerJournalReadKind::run,std::move(id)},cancel));}
+Session AgentWorkerJournalHost::session(std::string id,std::stop_token cancel){return std::get<Session>(read({AgentWorkerJournalReadKind::session,std::move(id)},cancel));}
+std::vector<Message> AgentWorkerJournalHost::history(std::string id,std::stop_token cancel){return std::get<std::vector<Message>>(read({AgentWorkerJournalReadKind::history,std::move(id)},cancel));}
+std::vector<Event> AgentWorkerJournalHost::events(std::string id,std::int64_t after,std::stop_token cancel){return std::get<std::vector<Event>>(read({AgentWorkerJournalReadKind::events,std::move(id),after},cancel));}
+RootBudgetRecord AgentWorkerJournalHost::root_budget(std::string id,std::stop_token cancel){return std::get<RootBudgetRecord>(read({AgentWorkerJournalReadKind::root_budget,std::move(id)},cancel));}
+ChildAdmissionRecord AgentWorkerJournalHost::child_admission(std::string id,std::stop_token cancel){return std::get<ChildAdmissionRecord>(read({AgentWorkerJournalReadKind::child_admission,std::move(id)},cancel));}
+bool AgentWorkerJournalHost::coding_workspace_admitted(std::stop_token cancel){(void)run(lease_.owner_run_id,cancel);return workspace_;}
+std::int64_t AgentWorkerJournalHost::remaining_ms(std::stop_token cancel){(void)run(lease_.owner_run_id,cancel);const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline_-std::chrono::steady_clock::now()).count();if(remaining<0||remaining>3600000)throw AgentWorkerAuthorityExpired("Worker journal execution window elapsed");return remaining;}
+Run AgentWorkerJournalHost::begin_run(std::stop_token cancel){check(cancel);return store_.start_agent_worker_run(lease_,deadline_,owner_cancel_,cancel).get();}
+ModelCallReservation AgentWorkerJournalHost::reserve_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.reserve?hooks_.reserve(id,cancel):store_.reserve_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+ModelCallReservation AgentWorkerJournalHost::start_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.start?hooks_.start(id,cancel):store_.start_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+ModelCallReservation AgentWorkerJournalHost::finish_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.finish?hooks_.finish(id,cancel):store_.finish_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+Event AgentWorkerJournalHost::model_event(std::string id,std::int64_t ordinal,std::string kind,std::string json,std::stop_token cancel){check(cancel);auto result=store_.agent_worker_model_event(lease_,attempt(std::move(id)),ordinal,std::move(kind),std::move(json)).get();check(cancel);return result;}
+Event AgentWorkerJournalHost::tool_event(std::string id,std::int64_t ordinal,bool returned,std::stop_token cancel){check(cancel);auto result=store_.agent_worker_tool_event(lease_,attempt(std::move(id)),ordinal,returned,deadline_,owner_cancel_,cancel).get();check(cancel);return result;}
+Event AgentWorkerJournalHost::workspace_tool_event(std::string id,std::int64_t ordinal,bool returned,std::stop_token cancel){check(cancel);if(!workspace_)throw Conflict("Worker coding journal was not admitted");auto result=store_.agent_worker_workspace_tool_event(lease_,attempt(std::move(id)),ordinal,returned,deadline_,owner_cancel_,cancel).get();check(cancel);return result;}
+AgentWorkerToolTurnRecord AgentWorkerJournalHost::commit_read_turn(std::string id,std::stop_token cancel){check(cancel);auto result=store_.commit_agent_worker_read_turn(lease_,attempt(std::move(id)),deadline_,owner_cancel_,cancel).get();check(cancel);return result;}
+AgentWorkerToolTurnRecord AgentWorkerJournalHost::commit_workspace_turn(std::string id,std::stop_token cancel){check(cancel);if(!workspace_)throw Conflict("Worker coding journal was not admitted");auto result=store_.commit_agent_worker_workspace_turn(lease_,attempt(std::move(id)),deadline_,owner_cancel_,cancel).get();check(cancel);return result;}
+Run AgentWorkerJournalHost::complete_run(std::string id,std::stop_token cancel){check(cancel);return store_.complete_agent_worker_run(lease_,attempt(std::move(id)),deadline_,owner_cancel_,cancel).get();}
+}

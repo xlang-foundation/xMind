@@ -1,3 +1,22 @@
+## Typed worker journal service — 2026-10-21
+
+AgentWorkerJournalHost now owns the typed backend operations for worker reads,
+execution windows, model funding, event acknowledgements, canonical turn commits
+and completion. The temporary packet adapter delegates to this host. Shared
+lease checks and SQLite transactions remain in PersistenceService/repository;
+coding methods require an actual AgentWorkerFileHost. The native Journal()
+object, client switch and packet removal remain unfinished.
+
+The focused gate passes 18/18 in 126.41 seconds, including the unchanged exact
+219-request peer, forged journal receipt checks, actual distinct xmind workers,
+cancellation, graph/coding/delegation and physical retirement. It freezes 2773
+project files, 16 SDK headers, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and all 136 native binary hashes/file sets. Source parent3099f696;
+native ea1a16bf8f829f4c7cee72b76525018575fd7912ef22b720cdfe810ed8ea2efc;
+SDK1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3.
+No full suite, live provider, new installation or rendered product acceptance
+is claimed. [Evidence](evidence/process-xmind-root-journal-host-checkpoint-20261021.json).
+
 ## Native worker model service calls — 2026-10-21
 
 Production process-read/process-code xmind workers now bind a private ticket to
