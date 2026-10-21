@@ -1,3 +1,26 @@
+## Authenticated process worker RPC — 2026-10-20
+
+The process client and endpoint use the existing authenticated worker channel
+over xlang3 SDK C++ remote objects. Only the durable process host can bind the
+endpoint. Exact invocation scope remains backend-owned; unknown methods and
+forged authority fields fail before command dispatch. Uncertain effects and
+unrecorded results remain distinct fail-stop outcomes.
+
+Five actual-child scenarios verify approved xlang3 command execution, policy
+denial, cancellation during approval, lost result delivery and failed result
+recording. Native operation and output facts survive worker death, and host
+reconstruction cannot replay the command. The independent synthetic model peer
+observes exactly 78 intended requests across the complete worker contract.
+
+The serial Release build and **62/62 focused contracts pass in 187.78 seconds**,
+with 2718 project inputs, 16 SDK headers, 1870 pure-library files, 76 runtime files,
+18598 Node dependencies and 133 native binaries unchanged across validation.
+[Scope and raw evidence](evidence/process-worker-rpc-focused-20261020.json).
+
+The controlled RPC child uses a test executable. The production unified xmind
+coding-worker command port, wait/stop and background continuation remain open.
+This adds no full-suite, installed, hosted, rendered or live-provider acceptance.
+
 ## Durable native process ownership — 2026-10-20
 
 Foreground run_process claims now bind exact actual model calls and worker leases

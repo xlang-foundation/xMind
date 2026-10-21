@@ -1,0 +1,78 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T06:41:36.778Z",
+    "sourceParent": "1fcd76fb85258a052120dd31578aa059dcb9aaae",
+    "sourcePatchSha256": "6dc896cec6248ca85cb0a7f8094ec24a4c48d65f89cefc8bd72bf82aac8abcfb",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 45064,
+      "launchedAt": "2026-10-21T06:37:54.078Z",
+      "completedAt": "2026-10-21T06:38:23.768Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb"
+    },
+    "test": {
+      "pid": 55600,
+      "launchedAt": "2026-10-21T06:38:26.473Z",
+      "completedAt": "2026-10-21T06:41:34.296Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6fc49228c72bac5eb50b77ec2b543722f0ab2a13d226ed0e96cef5b3495db01d"
+    },
+    "total": 62,
+    "failed": 0,
+    "passed": 62,
+    "seconds": 187.78,
+    "projectFiles": 2718,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "89ad97e0a23d336f583d0bc258899b0e383e3a810f5085e7acd4f14cbab9e317",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-build.log": "9212160823063c26fb9749bba9f268600646a8360c7289d5bf7540e174d9f4f6",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-build-terminal.json": "cb6983dba6a0f8fa1df17fdca15973ae305b522a05f06fb96b217c27d090b7c0",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-ctest.log": "7d8e8b7c610abd0160ed0874a3a9b6b475ab511d6c09743794618b4ec5893883",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-ctest-terminal.json": "5a58a37ca1a5fe285664e9d3745149fb84b9f51669a005d102d8aba91cf9a237",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-LastTest.log": "603b64baf314346fcd41a068c154bad5a6bc3fe2018cfad69cf62a289d4b71ad",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-test-inventory.json": "bd3b5abb8a3373e63051f4da0a337ad6f6491ced9fec7baef7015013431d287e",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-gate.json": "62c269e91448fd42e6a50a32f74edee714ab517230f87a8a51bb7d7b47b0338b",
+    "doc/evidence/process-worker-rpc-diagnostic-20261020-source.patch": "6dc896cec6248ca85cb0a7f8094ec24a4c48d65f89cefc8bd72bf82aac8abcfb",
+    "doc/evidence/process-worker-rpc-focused-20261020-build.log": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb",
+    "doc/evidence/process-worker-rpc-focused-20261020-build-terminal.json": "0ac337df0ede42eab834ebc37b14624def4b09d1cbd01e8a29a7c76e9f301269",
+    "doc/evidence/process-worker-rpc-focused-20261020-ctest.log": "6fc49228c72bac5eb50b77ec2b543722f0ab2a13d226ed0e96cef5b3495db01d",
+    "doc/evidence/process-worker-rpc-focused-20261020-ctest-terminal.json": "a16bd1b59284d1826683356ffd21f64a1e03310aed4c29a29bb51236c7cfb4a1",
+    "doc/evidence/process-worker-rpc-focused-20261020-LastTest.log": "cb748b48b4bebbe12099fc59074b29a291877a4fc8cdcb951faa9dce4d61aea7",
+    "doc/evidence/process-worker-rpc-focused-20261020-test-inventory.json": "b149b60c6d26e1d811e550c76100f2e926c5ecbef84a030dc2c76667758cc9bd",
+    "doc/evidence/process-worker-rpc-focused-20261020-gate.json": "983bd4813db4e2fc331c973f888639b29b5a9dd014a7143a6ee55ee04cb81022",
+    "doc/evidence/process-worker-rpc-focused-20261020-source.patch": "6dc896cec6248ca85cb0a7f8094ec24a4c48d65f89cefc8bd72bf82aac8abcfb",
+    "doc/evidence/process-worker-rpc-focused-20261020-binaries-before-test.json": "822bc495b0f6eaef1619a582c01b330ecd7d2ee85ba042f6a0290814d292bff4",
+    "doc/evidence/process-worker-rpc-focused-20261020-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "verified": [
+    "Process client and authenticated RPC endpoint bind only the durable native process host and exact captured scope",
+    "Actual child processes invoke real approved xlang3 commands through SDK C++ remote objects",
+    "Five actual-child cases cover approval, policy denial, approval cancellation, lost result delivery and failed result recording",
+    "Durable operation and exact output survive worker death and reconstructed host cannot replay the command",
+    "Uncertain effects and unrecorded results cross RPC as distinct fail-stop outcomes",
+    "Independent synthetic model peer observes exactly 78 intended requests; all 62 focused contracts pass with complete inputs unchanged"
+  ],
+  "limitations": [
+    "Controlled native child fixture uses a test executable; production unified xmind coding-worker command port is not yet connected",
+    "Foreground command RPC only; wait/stop/background continuation remains unfinished",
+    "No full native suite, installed, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}
