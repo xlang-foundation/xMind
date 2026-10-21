@@ -90,11 +90,11 @@ struct AgentWorkerCallableClaimRecord {
 };
 // An explicit read vocabulary, never arbitrary repository reflection. The
 // backend validates the exact captured lease in the same transaction as a read.
-enum class AgentWorkerJournalReadKind {run,session,history,events,root_budget};
+enum class AgentWorkerJournalReadKind {run,session,history,events,root_budget,child_admission};
 struct AgentWorkerJournalRead {
     AgentWorkerJournalReadKind kind;
     std::string target;
     std::int64_t after=0;
 };
-using AgentWorkerJournalValue=std::variant<Run,Session,std::vector<Message>,std::vector<Event>,RootBudgetRecord>;
+using AgentWorkerJournalValue=std::variant<Run,Session,std::vector<Message>,std::vector<Event>,RootBudgetRecord,ChildAdmissionRecord>;
 }

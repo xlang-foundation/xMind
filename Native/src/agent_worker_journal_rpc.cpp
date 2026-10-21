@@ -25,6 +25,7 @@ RunState state(const std::string& v){for(const auto s:{RunState::queued,RunState
 AgentWorkerJournalReadKind kind(const std::string& method){
     if(method=="journal.run")return AgentWorkerJournalReadKind::run;if(method=="journal.session")return AgentWorkerJournalReadKind::session;
     if(method=="journal.history")return AgentWorkerJournalReadKind::history;if(method=="journal.events")return AgentWorkerJournalReadKind::events;
+    if(method=="journal.child_admission")return AgentWorkerJournalReadKind::child_admission;
     if(method=="journal.root_budget")return AgentWorkerJournalReadKind::root_budget;throw AgentWorkerRpcRemoteError("unsupported");
 }
 std::string encode(const AgentWorkerJournalValue& input){
@@ -36,6 +37,7 @@ std::string encode(const AgentWorkerJournalValue& input){
                 if constexpr(std::is_same_v<T,std::vector<Message>>)v.push_back({{"sequence",item.sequence},{"role",item.role},{"json",item.json}});
                 else v.push_back({{"sequence",item.sequence},{"run_id",item.run_id},{"kind",item.kind},{"json",item.json}});
             }
+        }else if constexpr(std::is_same_v<T,ChildAdmissionRecord>){if(value.kind!=ChildAdmissionKind::delegated_leaf||value.preset_id!="workspace.inspect"||value.preset_revision!=1)throw AgentWorkerRpcRemoteError("rejected");v={{"kind","delegated_leaf"},{"root_run_id",value.root_run_id},{"batch_id",value.batch_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};
         }else if constexpr(std::is_same_v<T,RootBudgetRecord>){const auto& s=value.spec;
             v={{"root_run_id",value.root_run_id},{"spec",{{"policy_id",s.policy_id},{"policy_revision",s.policy_revision},{"workspace_identity",s.workspace_identity},{"provider_identity_json",s.provider_identity_json},{"max_children",s.max_children},{"max_parallel",s.max_parallel},{"max_model_calls",s.max_model_calls},{"wall_limit_ms",s.wall_limit_ms}}},
                 {"children_admitted",value.children_admitted},{"model_calls_reserved",value.model_calls_reserved},{"parent_calls_held",value.parent_calls_held},{"revision",value.revision},{"planned_children_reserved",value.planned_children_reserved},{"parent_model_calls_reserved",value.parent_model_calls_reserved}};
@@ -49,6 +51,7 @@ AgentWorkerJournalValue decode(AgentWorkerJournalReadKind k,const std::string& b
         case AgentWorkerJournalReadKind::session:{object(v,5);Session s{text(v.at("id")),text(v.at("title")),text(v.at("parent_id")),{},text(v.at("fork_boundary_type"))};if(!v.at("fork_boundary_sequence").is_null())s.fork_boundary_sequence=integer(v.at("fork_boundary_sequence"));return s;}
         case AgentWorkerJournalReadKind::history:{rows(v);std::vector<Message> result;for(const auto& m:v){object(m,3);const auto seq=integer(m.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(m.at("role")),text(m.at("json"))});}return result;}
         case AgentWorkerJournalReadKind::events:{rows(v);std::vector<Event> result;for(const auto& e:v){object(e,4);const auto seq=integer(e.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(e.at("run_id")),text(e.at("kind")),text(e.at("json"))});}return result;}
+        case AgentWorkerJournalReadKind::child_admission:{object(v,5);if(text(v.at("kind"))!="delegated_leaf"||text(v.at("preset_id"))!="workspace.inspect"||integer(v.at("preset_revision"))!=1||text(v.at("root_run_id")).empty()||text(v.at("batch_id")).empty())invalid();return ChildAdmissionRecord{ChildAdmissionKind::delegated_leaf,text(v.at("root_run_id")),text(v.at("batch_id")),"workspace.inspect",1};}
         case AgentWorkerJournalReadKind::root_budget:{object(v,8);const auto& s=v.at("spec");object(s,8);return RootBudgetRecord{text(v.at("root_run_id")),{text(s.at("policy_id")),integer(s.at("policy_revision")),text(s.at("workspace_identity")),text(s.at("provider_identity_json")),integer(s.at("max_children")),integer(s.at("max_parallel")),integer(s.at("max_model_calls")),integer(s.at("wall_limit_ms"))},integer(v.at("children_admitted")),integer(v.at("model_calls_reserved")),integer(v.at("parent_calls_held")),integer(v.at("revision")),integer(v.at("planned_children_reserved")),integer(v.at("parent_model_calls_reserved"))};}
         }invalid();
     }catch(const Json::exception&){invalid();}
@@ -81,6 +84,15 @@ Session AgentWorkerJournalClient::session(const std::string& id){return std::get
 std::vector<Message> AgentWorkerJournalClient::run_history(const std::string& id){return std::get<std::vector<Message>>(call(peer_,"journal.history",id));}
 std::vector<Event> AgentWorkerJournalClient::events(const std::string& id,std::int64_t after){return std::get<std::vector<Event>>(call(peer_,"journal.events",id,after));}
 RootBudgetRecord AgentWorkerJournalClient::root_budget(const std::string& id){return std::get<RootBudgetRecord>(call(peer_,"journal.root_budget",id));}
+ChildAdmissionRecord AgentWorkerJournalClient::child_admission(const std::string& id){
+    if(id!=peer_.scope().run_id||id==peer_.scope().root_id)throw Conflict("Worker child admission differs from its captured owner");
+    auto result=std::get<ChildAdmissionRecord>(call(peer_,"journal.child_admission",id));if(result.root_run_id!=peer_.scope().root_id)invalid();return result;
+}
+AgentWorkerChannel::Deadline AgentWorkerJournalClient::execution_deadline(){
+    const auto before=std::chrono::steady_clock::now();
+    try{const auto value=parse(peer_.call("journal.execution_window","{}"));object(value,1);const auto remaining=integer(value.at("remaining_ms"));if(remaining<0||remaining>3600000)invalid();return before+std::chrono::milliseconds(remaining);}
+    catch(const Json::exception&){invalid();}catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker execution window rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker execution window cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker execution window elapsed");throw;}
+}
 Run AgentWorkerJournalClient::begin_run(){
     try{const auto result=std::get<Run>(decode(AgentWorkerJournalReadKind::run,peer_.call("journal.begin_run","{}")));if(result.id!=peer_.scope().run_id||result.state!=RunState::running)invalid();return result;}
     catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker startup rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker startup cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker startup deadline elapsed");throw;}
@@ -118,6 +130,7 @@ static AgentWorkerRpcHandler bind_journal_rpc(PersistenceService& store,AgentWor
     return [&store,lease=std::move(lease),deadline,owner_cancel,workspace,hooks=std::move(hooks)](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
         const bool reserve=method=="journal.reserve_model",start=method=="journal.start_model",finish=method=="journal.finish_model",complete=method=="journal.complete_run";auto check=[&]{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");};
         try{check();const auto v=parse(payload);
+            if(method=="journal.execution_window"){object(v,0);(void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();check();const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline-std::chrono::steady_clock::now()).count();if(remaining<0||remaining>3600000)throw AgentWorkerRpcRemoteError("timeout");return Json{{"remaining_ms",remaining}}.dump();}
             if(method=="journal.begin_run"){object(v,0);return encode(store.start_agent_worker_run(lease,deadline,owner_cancel,cancel).get());}
             if(method=="journal.model_event"){object(v,4);const auto result=store.agent_worker_model_event(lease,attempt_id(v.at("attempt_id")),integer(v.at("ordinal")),text(v.at("kind")),text(v.at("json"))).get();check();return encode(std::vector<Event>{result});}
             if(method=="journal.tool_event"){object(v,3);const auto phase=text(v.at("phase"));if(phase!="started"&&phase!="returned")invalid();const auto result=store.agent_worker_tool_event(lease,attempt_id(v.at("attempt_id")),integer(v.at("ordinal")),phase=="returned",deadline,owner_cancel,cancel).get();check();return encode(std::vector<Event>{result});}

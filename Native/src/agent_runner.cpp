@@ -394,7 +394,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     std::optional<std::vector<std::string>> tool_allowlist,bool resume_dynamic_child,
     std::vector<AgentPermissionRule> permission_rules) {
     if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
-    if(read_workspace_&&(!graph_instructions.empty()||tool_allowlist||resume_dynamic_child||budget||!permission_rules.empty()))throw std::invalid_argument("Read workspace execution requires its captured ordinary admission");
+    if(read_workspace_&&(!graph_instructions.empty()||tool_allowlist||resume_dynamic_child||!permission_rules.empty()))throw std::invalid_argument("Read workspace execution requires its captured backend policy");
     auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
     validate_agent_tool_allowlist(effective_tool_allowlist);
     auto inherited_permission_layers=settings_.inherited_permission_rule_layers;
@@ -417,7 +417,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 throw std::invalid_argument("Pinned process placement requires its owning worker executor");
         }
     }
-    if(read_workspace_&&!admitted.parent_id.empty())throw std::invalid_argument("Read workspace child admission is not implemented");
+    if(read_workspace_&&!admitted.parent_id.empty()&&coding_workspace_)throw std::invalid_argument("Delegated read worker cannot acquire coding authority");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_){
         auto membership=admitted.parent_id.empty()?saved_workspace_membership(journal_,id):
@@ -547,9 +547,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 }
             }else budget=std::make_shared<RootExecutionBudget>(journal_,saved,local_deadline,token);
         }
-        if(leaf){const auto saved=budget->snapshot();if(!workspace_||workspace_->identity()!=saved.spec.workspace_identity)throw std::invalid_argument("Delegated leaf workspace identity changed");
-            if(execution_identity(settings_,provider.model)!=saved.spec.provider_identity_json)throw std::invalid_argument("Delegated leaf provider identity changed");
-            journal_.append_event(id,dynamic_child?"agent.plan.preset":"agent.delegation.preset",Json{{"preset_id",dynamic_child?child_preset->id:"workspace.inspect"},{"preset_revision",1},{"root_run_id",budget->root_id()},{"tool_policy",dynamic_child&&!child_preset->readonly?"approval_controlled":"read_only"}}.dump()).get();}
+        if(leaf){const auto saved=budget->snapshot();if((read_workspace_?read_workspace_->workspace_id():(workspace_?workspace_->identity():std::string{}))!=saved.spec.workspace_identity)throw std::invalid_argument("Delegated leaf workspace identity changed");
+            if(!read_workspace_&&execution_identity(settings_,provider.model)!=saved.spec.provider_identity_json)throw std::invalid_argument("Delegated leaf provider identity changed");
+            if(!read_workspace_)journal_.append_event(id,dynamic_child?"agent.plan.preset":"agent.delegation.preset",Json{{"preset_id",dynamic_child?child_preset->id:"workspace.inspect"},{"preset_revision",1},{"root_run_id",budget->root_id()},{"tool_policy",dynamic_child&&!child_preset->readonly?"approval_controlled":"read_only"}}.dump()).get();}
         const auto run_deadline=budget?budget->deadline():local_deadline;
         timer=std::jthread([&,run_deadline](std::stop_token ending) {
             std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);

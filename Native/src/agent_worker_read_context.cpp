@@ -23,7 +23,8 @@ AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,Persiste
 AgentWorkerReadContext::~AgentWorkerReadContext()=default;
 void AgentWorkerReadContext::check(std::stop_token cancel){
     if(cancel.stop_requested()||owner_cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker read context cancelled");if(std::chrono::steady_clock::now()>=owner_.deadline)throw AgentWorkerAuthorityExpired("Worker read context deadline elapsed");
-    const auto run=std::get<Run>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get());if(run.state!=RunState::running||lease_.root_run_id!=lease_.owner_run_id)throw Conflict("Worker read context requires its running ordinary root");
+    const auto run=std::get<Run>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get());if(run.state!=RunState::running)throw Conflict("Worker read context requires its running owner");
+    if(lease_.root_run_id!=lease_.owner_run_id)(void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
 }
 AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token cancel){
     check(cancel);Preview result;auto instructions=policy_.instructions;

@@ -25,8 +25,11 @@ template<class T,class F> std::future<T> owned(F action){
 class OrdinaryJournal final:public AgentWorkerOrdinaryJournal {
 public:
     OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
-        if(scope_.root_id!=scope_.run_id)throw Conflict("Ordinary worker journal requires its captured root");
-        const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.run_id);
+        const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.root_id);
+        if(scope_.root_id!=scope_.run_id){
+            if(workspace_||run.parent_id!=scope_.root_id||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.spec.policy_id!="native.delegation"||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker child journal differs from bounded delegated admission");
+            admission_=client_.child_admission(scope_.run_id);session_=run.session_id;return;
+        }
         if(!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||(budget.spec.policy_id!="native.direct-agent"&&budget.spec.policy_id!="native.context")||budget.spec.policy_revision!=1||budget.spec.max_children!=0||budget.spec.max_parallel!=0||budget.spec.workspace_identity!=scope_.workspace_id)
             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
         session_=run.session_id;
@@ -37,7 +40,7 @@ public:
     std::future<Session> session(std::string id)override{return owned<Session>([&]{std::lock_guard lock(mutex_);if(id!=session_)throw Conflict("Worker session differs from captured admission");return client_.session(id);});}
     std::future<std::vector<Message>> run_history(std::string id)override{return owned<std::vector<Message>>([&]{std::lock_guard lock(mutex_);own(id);return client_.run_history(id);});}
     std::future<std::vector<Event>> events(std::string id,std::int64_t after)override{return owned<std::vector<Event>>([&]{std::lock_guard lock(mutex_);own(id);return client_.events(id,after);});}
-    std::future<RootBudgetRecord> root_budget(std::string id)override{return owned<RootBudgetRecord>([&]{std::lock_guard lock(mutex_);own(id);return client_.root_budget(id);});}
+    std::future<RootBudgetRecord> root_budget(std::string id)override{return owned<RootBudgetRecord>([&]{std::lock_guard lock(mutex_);root(id);return client_.root_budget(id);});}
     std::future<Run> transition(std::string id,RunState expected,RunState next,std::string json)override{return owned<Run>([&]{
         std::lock_guard lock(mutex_);own(id);
         if((expected==RunState::queued||expected==RunState::running)&&(next==RunState::failed||next==RunState::cancelled))throw AgentTerminalHandoff(next);
@@ -45,13 +48,13 @@ public:
         live();return client_.begin_run();
     });}
     std::future<ModelCallReservation> reserve_model_call(std::string root,std::string owner,std::string attempt,ModelCallRole role)override{return owned<ModelCallReservation>([&]{
-        std::lock_guard lock(mutex_);own(root);own(owner);if(role!=ModelCallRole::parent)throw Conflict("Ordinary worker funding role differs");live();return client_.reserve_model_call(attempt);
+        std::lock_guard lock(mutex_);this->root(root);own(owner);if(role!=(scope_.root_id==scope_.run_id?ModelCallRole::parent:ModelCallRole::leaf))throw Conflict("Ordinary worker funding role differs");live();return client_.reserve_model_call(attempt);
     });}
     std::future<ModelCallReservation> start_model_call(std::string root,std::string owner,std::string attempt)override{return owned<ModelCallReservation>([&]{
-        std::lock_guard lock(mutex_);own(root);own(owner);live();auto actual=client_.start_model_call(attempt);progress_.current_attempt=attempt;progress_.canonical_assistant.clear();progress_.model_event_ordinal=0;calls_.clear();return actual;
+        std::lock_guard lock(mutex_);this->root(root);own(owner);live();auto actual=client_.start_model_call(attempt);progress_.current_attempt=attempt;progress_.canonical_assistant.clear();progress_.model_event_ordinal=0;calls_.clear();return actual;
     });}
     std::future<ModelCallReservation> finish_model_call(std::string root,std::string owner,std::string attempt,std::optional<std::string> assistant)override{return owned<ModelCallReservation>([&]{
-        std::lock_guard lock(mutex_);own(root);own(owner);if(attempt!=progress_.current_attempt)throw Conflict("Worker model attempt changed before retirement");
+        std::lock_guard lock(mutex_);this->root(root);own(owner);if(attempt!=progress_.current_attempt)throw Conflict("Worker model attempt changed before retirement");
         if(!assistant)throw AgentTerminalHandoff(cancel_.stop_requested()?RunState::cancelled:RunState::failed);
         // The supplied assistant is never sent as authority. Backend formatting
         // and supplied model facts define the canonical receipt and tool calls.
@@ -75,7 +78,7 @@ public:
         std::lock_guard lock(mutex_);own(id);if(progress_.canonical_assistant.empty()||assistant!=progress_.canonical_assistant||!calls_.empty())throw Conflict("Worker completion differs from its canonical final model");return client_.complete_run(progress_.current_attempt);
     });}
     std::future<bool> append_a2a_task_event([[maybe_unused]] std::string run_id,[[maybe_unused]] std::string operation_id,[[maybe_unused]] std::string json)override{throw std::logic_error("Ordinary worker journal capability is not admitted: append_a2a_task_event");}
-    std::future<ChildAdmissionRecord> child_admission([[maybe_unused]] std::string child)override{throw std::logic_error("Ordinary worker journal capability is not admitted: child_admission");}
+    std::future<ChildAdmissionRecord> child_admission(std::string child)override{return owned<ChildAdmissionRecord>([&]{std::lock_guard lock(mutex_);own(child);if(!admission_)throw Conflict("Root worker has no child admission");return client_.child_admission(child);});}
     std::future<void> commit_dynamic_tool_turn([[maybe_unused]] std::string root,[[maybe_unused]] std::string call)override{throw std::logic_error("Ordinary worker journal capability is not admitted: commit_dynamic_tool_turn");}
     std::future<Run> complete_dynamic_owner([[maybe_unused]] std::string root,[[maybe_unused]] std::string assistant_json,[[maybe_unused]] std::string segment_id,[[maybe_unused]] std::int64_t measured_active_elapsed_ms)override{throw std::logic_error("Ordinary worker journal capability is not admitted: complete_dynamic_owner");}
     std::future<ContextStatusObservation> context_status_observation([[maybe_unused]] ContextScope scope,[[maybe_unused]] ContextBinding binding)override{throw std::logic_error("Ordinary worker journal capability is not admitted: context_status_observation");}
@@ -110,6 +113,8 @@ public:
     std::future<Run> start_prompt_run([[maybe_unused]] std::string id,[[maybe_unused]] std::string session_id,[[maybe_unused]] std::string prompt_json,[[maybe_unused]] std::optional<RootBudgetSpec> budget={},[[maybe_unused]] std::optional<DynamicPlanCapabilities> dynamic={},[[maybe_unused]] std::string inbox_id={})override{throw std::logic_error("Ordinary worker journal capability is not admitted: start_prompt_run");}
 
 private:
+    void root(const std::string& id)const{if(id!=scope_.root_id)throw Conflict("Worker journal root differs from captured budget");}
+    std::optional<ChildAdmissionRecord> admission_;
     void own(const std::string& id)const{if(id!=scope_.run_id)throw Conflict("Worker journal owner differs from captured root");}
     void live()const{if(cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal execution cancelled");}
     AgentWorkerRpcPeer* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;

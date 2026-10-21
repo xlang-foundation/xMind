@@ -4,6 +4,8 @@
 #include "agentflow/agent_worker_read_workspace.hpp"
 #include "agentflow/agent_worker_closed_ports.hpp"
 #include "agentflow/agent_runner.hpp"
+#include "agentflow/root_execution_budget.hpp"
+#include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/http_stream_transport.hpp"
 
 namespace agentflow {
@@ -23,12 +25,16 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerRpcPeer& peer,std:
     settings.provider=agent_worker_model_config(admission);
     settings.max_output_tokens=admission.max_output_tokens;
     settings.instructions.clear();
-    settings.max_turns=static_cast<std::size_t>(budget.spec.max_model_calls);
+    const bool leaf=peer.scope().root_id!=peer.scope().run_id;
+    if(leaf&&coding)throw Conflict("Delegated worker cannot acquire coding assembly");
+    settings.max_turns=leaf?4:static_cast<std::size_t>(budget.spec.max_model_calls);
     settings.run_timeout=std::chrono::milliseconds(budget.spec.wall_limit_ms);
     settings.a2a_enabled=false;
     AgentRunner runner(*journal,*closed.context,std::move(settings),
         AgentRunnerPorts{model,closed.catalogue,closed.tools,closed.runtime,workspace,coding_workspace});
-    auto run=runner.execute(peer.scope().run_id,cancel);
+    std::shared_ptr<RootExecutionBudget> shared;
+    if(leaf)shared=std::make_shared<RootExecutionBudget>(*journal,budget,AgentWorkerJournalClient(peer).execution_deadline(),cancel);
+    auto run=runner.execute(peer.scope().run_id,cancel,{},std::move(shared));
     return {std::move(run),journal->progress()};
 }
 AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerRpcPeer& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,false);}

@@ -14,8 +14,9 @@ Run completed(PersistenceService& store,const AgentWorkerLeaseSpec& lease){
     const auto captured=store.agent_worker_lease(lease.generation).get();
     const auto run=store.run(lease.owner_run_id).get();
     if(captured.spec!=lease||captured.state!="retired"||captured.retirement_reason!="completed"||
-       lease.owner_run_id!=lease.root_run_id||run.id!=lease.root_run_id||run.state!=RunState::completed||run.graph_root||!run.parent_id.empty())
+       run.id!=lease.owner_run_id||run.state!=RunState::completed||run.graph_root||(lease.root_run_id==lease.owner_run_id?!run.parent_id.empty():run.parent_id!=lease.root_run_id))
         throw Conflict("Worker drain has no captured canonical completion");
+    if(lease.root_run_id!=lease.owner_run_id){const auto child=store.child_admission(run.id).get();if(child.kind!=ChildAdmissionKind::delegated_leaf||child.root_run_id!=lease.root_run_id||child.preset_id!="workspace.inspect"||child.preset_revision!=1)throw Conflict("Completed worker differs from captured child admission");}
     return run;
 }
 }

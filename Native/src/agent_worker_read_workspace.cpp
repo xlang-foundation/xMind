@@ -21,6 +21,7 @@ public:
             throw std::invalid_argument("Worker read workspace has no captured native workspace");
         const auto budget=journal_->root_budget(scope_.root_id).get();if(budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker read workspace differs from its root admission");
         provider_identity_=budget.spec.provider_identity_json;policy_id_=budget.spec.policy_id;
+        if(scope_.root_id!=scope_.run_id){auto value=nlohmann::json::parse(provider_identity_);value["model_id"]=model_.admission().model_id;provider_identity_=value.dump();}
     }
     std::string workspace_id()const override{return scope_.workspace_id;}
     std::int64_t workspace_revision()const override{return scope_.workspace_revision;}

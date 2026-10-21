@@ -2810,6 +2810,7 @@ Run Repository::transition(const std::string& id,RunState expected,RunState next
     if(child_plan)changed_one(db.execute("UPDATE dynamic_plans SET state='completed',state_sequence=state_sequence+1 WHERE id=? AND state='active' AND EXISTS(SELECT 1 FROM dynamic_plan_owners WHERE plan_id=dynamic_plans.id AND owner_run_id=?)",{child_plan->id,id}));
     if(terminal(next)) impl_->cancel_waiting(id);
     impl_->event(id,"run."+state_name(next),json);
+    if(worker&&worker->root_run_id!=worker->owner_run_id)impl_->event(id,"agent.delegation.preset",Json{{"preset_id","workspace.inspect"},{"preset_revision",1},{"root_run_id",worker->root_run_id},{"tool_policy","read_only"}}.dump());
     transaction.commit(); result.state=next; return result;
 }
 Event Repository::append_event(const std::string& id,const std::string& kind,const std::string& json) {
@@ -3436,6 +3437,8 @@ AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerL
         if(query.target!=owner.id)throw Conflict("Worker cannot read another run history");result=run_history(owner.id);break;
     case AgentWorkerJournalReadKind::events:
         if(query.target!=owner.id)throw Conflict("Worker cannot read another run events");result=events(owner.id,query.after);break;
+    case AgentWorkerJournalReadKind::child_admission:
+        if(query.target!=expected.owner_run_id||!worker_delegated_owner(*this,expected))throw Conflict("Worker may inspect only its exact delegated admission");result=child_admission(query.target);break;
     case AgentWorkerJournalReadKind::root_budget:
         if(query.target!=expected.root_run_id)throw Conflict("Worker cannot read another root budget");result=root_budget(query.target);break;
     default:throw std::invalid_argument("Unsupported worker journal read");

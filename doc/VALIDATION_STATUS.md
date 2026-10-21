@@ -1,3 +1,23 @@
+## Actual concurrent delegated xmind runners — 2026-10-21
+
+Two distinct product xmind processes now execute the native runner through SDK
+IPC journal/model/read methods with exact admitted child records and a shared
+root budget. A native model callback barrier proves concurrent entry. One child
+uses its captured named model; each reads an actual file, consumes its canonical
+result and preserves four child messages. Both physically exit zero before the
+parent joins results, retaining four charges and one held parent continuation.
+
+**7/7 focused contracts pass in 66.69 seconds**, with complete frozen source/
+SDK/library/dependency/133-binary sets. Existing independent HTTP peer remains
+at 185 requests. New delegated responses use a synthetic native model gateway.
+Two failed startup/diagnostic runs are preserved; temporary diagnostic code was
+removed. [Scope and raw evidence](evidence/process-worker-delegated-runner-budget-20261021.json).
+
+Production delegation scheduler dispatch remains in-process and must be wired
+to this worker path. Delegated failure/deadline/RPC and context variants, planning,
+graph/default placement, full suite and updated installed/rendered/live-provider
+acceptance remain unfinished.
+
 ## Delegated worker backend admission and lifecycle — 2026-10-21
 
 The repository now accepts exact admitted read-only delegated child worker
