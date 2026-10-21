@@ -219,6 +219,11 @@ public:
     AgentWorkerProcessClaimRecord claim_agent_worker_process_effect(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,const std::string& operation_id);
     AgentWorkerProcessClaimRecord record_agent_worker_process_result(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerProcessClaimRecord agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call);
+    AgentWorkerRemoteClaimRecord claim_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
+    AgentWorkerRemoteClaimRecord start_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
+    AgentWorkerRemoteClaimRecord claim_agent_worker_remote_effect(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&,const std::string& operation_id);
+    AgentWorkerRemoteClaimRecord record_agent_worker_remote_result(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&,bool success,const std::string& actual_output_json);
+    AgentWorkerRemoteClaimRecord agent_worker_remote_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
     // Backend coding admission only; results come from captured read/file claims.
     AgentWorkerToolTurnRecord commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);

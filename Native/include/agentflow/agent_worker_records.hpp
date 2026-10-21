@@ -6,6 +6,7 @@
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
 #include "agentflow/agent_process_tool_host.hpp"
+#include "agentflow/agent_remote_tool_host.hpp"
 #include <variant>
 #include <stdexcept>
 
@@ -63,6 +64,15 @@ struct AgentWorkerFileClaimRecord {
 struct AgentWorkerProcessClaimRecord {
     AgentWorkerModelClaimSpec model;
     AgentProcessToolInvocation invocation;
+    std::string state;
+    std::vector<std::string> operation_ids;
+    bool success=false;
+    std::string actual_output_json,output_binding;
+};
+// Backend-owned exact remote invocation and its single native dispatch receipt.
+struct AgentWorkerRemoteClaimRecord {
+    AgentWorkerModelClaimSpec model;
+    AgentRemoteToolInvocation invocation;
     std::string state;
     std::vector<std::string> operation_ids;
     bool success=false;

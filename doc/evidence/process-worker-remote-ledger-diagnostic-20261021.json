@@ -1,0 +1,168 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T09:11:03.176Z",
+    "sourceParent": "6ecb6a3c18e5bf4b93c2413b602e7a6853634fd8",
+    "sourcePatchSha256": "1cb848c6c209785788142c26c71ecd78949ff82dd01161a4aad6e06f2e9ea8fa",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 62480,
+      "launchedAt": "2026-10-21T09:05:08.262Z",
+      "completedAt": "2026-10-21T09:10:54.456Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "10746f8bcabe2a225a5476be86a4ea2a12173b8c85a9b5b4d08aaa72b4cd9bb8"
+    },
+    "test": {
+      "pid": 57108,
+      "launchedAt": "2026-10-21T09:10:57.780Z",
+      "completedAt": "2026-10-21T09:11:00.045Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "5d0b240e38cdc975199693b63b8f455a7e31eee8dd0a6a266c53f27f8b1bfa6e"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 2.21,
+    "projectFiles": 2723,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9b7e4b56be2c889eacb70c4628a460aeff21d2ad0549b2d1ca7b36e1a54cc2cf",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "runs": [
+    {
+      "name": "process-worker-private-namespace-diagnostic-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T09:03:34.749Z",
+        "sourceParent": "6ecb6a3c18e5bf4b93c2413b602e7a6853634fd8",
+        "sourcePatchSha256": "fa3aab87e48458aee5e8f4f5eb60f81d998f0b5bc8c029348c98f930475246fb",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 54712,
+          "launchedAt": "2026-10-21T09:02:57.567Z",
+          "completedAt": "2026-10-21T09:03:27.520Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "0281489a933ef2e3b4931ff39b2cb18fb6d143e3e5db8d90aa86ed91b1aab5f8"
+        },
+        "test": {
+          "pid": 15400,
+          "launchedAt": "2026-10-21T09:03:30.430Z",
+          "completedAt": "2026-10-21T09:03:31.869Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "6108593a3e09ce9bd60748ef7fd2e84817b60ec6afdee817bfb7cc720514c5e5"
+        },
+        "total": 1,
+        "failed": 0,
+        "passed": 1,
+        "seconds": 1.39,
+        "projectFiles": 2722,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "9b7e4b56be2c889eacb70c4628a460aeff21d2ad0549b2d1ca7b36e1a54cc2cf",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      }
+    },
+    {
+      "name": "process-worker-remote-ledger-diagnostic-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T09:11:03.176Z",
+        "sourceParent": "6ecb6a3c18e5bf4b93c2413b602e7a6853634fd8",
+        "sourcePatchSha256": "1cb848c6c209785788142c26c71ecd78949ff82dd01161a4aad6e06f2e9ea8fa",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 62480,
+          "launchedAt": "2026-10-21T09:05:08.262Z",
+          "completedAt": "2026-10-21T09:10:54.456Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "10746f8bcabe2a225a5476be86a4ea2a12173b8c85a9b5b4d08aaa72b4cd9bb8"
+        },
+        "test": {
+          "pid": 57108,
+          "launchedAt": "2026-10-21T09:10:57.780Z",
+          "completedAt": "2026-10-21T09:11:00.045Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "5d0b240e38cdc975199693b63b8f455a7e31eee8dd0a6a266c53f27f8b1bfa6e"
+        },
+        "total": 2,
+        "failed": 0,
+        "passed": 2,
+        "seconds": 2.21,
+        "projectFiles": 2723,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "9b7e4b56be2c889eacb70c4628a460aeff21d2ad0549b2d1ca7b36e1a54cc2cf",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      }
+    }
+  ],
+  "files": {
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-build.log": "0281489a933ef2e3b4931ff39b2cb18fb6d143e3e5db8d90aa86ed91b1aab5f8",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-build-terminal.json": "aeeec3f7ea5675d716687d8a077ec0ed0a34fe2812c675032ddb6b0e4d4f8a27",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-ctest.log": "6108593a3e09ce9bd60748ef7fd2e84817b60ec6afdee817bfb7cc720514c5e5",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-ctest-terminal.json": "f820ed13135981f74ebde202a894676c97a1f4f6dca9ac56d5f64393e46bca21",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-LastTest.log": "1c0d63d8422208fc95e1e5612e951545aaec31fa6092ebd1e9b591a1d06030ee",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-test-inventory.json": "5cf797cf9582b0f3777be7f16c4ac39252765f19427b50b28d323bf8d3321020",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-gate.json": "8ce157a64ab3642aca3d9ddc47ae8bf6b4ba11a7447f16c0aec10fd6efb028b4",
+    "doc/evidence/process-worker-private-namespace-diagnostic-20261021-source.patch": "fa3aab87e48458aee5e8f4f5eb60f81d998f0b5bc8c029348c98f930475246fb",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-build.log": "10746f8bcabe2a225a5476be86a4ea2a12173b8c85a9b5b4d08aaa72b4cd9bb8",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-build-terminal.json": "5ad193a96a0c75c1eeca501967e7ec7d8b3ef86a3612d82c4577af15573bd759",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-ctest.log": "5d0b240e38cdc975199693b63b8f455a7e31eee8dd0a6a266c53f27f8b1bfa6e",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-ctest-terminal.json": "004ffbda09ea748bd5a843c85e49f556f315b7414b9c7076f3e352a70af67f91",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-LastTest.log": "baaa2d1304e900a9c351db56e06ae96bd82a958dbabddefbd2b84e22c7ebebf1",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-test-inventory.json": "f165717f24bb68e62fe9c97396fec1fa4e4e5eda7b7ba4533a08c6e7404c0171",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-gate.json": "810936c24fa8adbea8c880d1463e9a08452c941f248f6316d19aaf50adf118ba",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-source.patch": "1cb848c6c209785788142c26c71ecd78949ff82dd01161a4aad6e06f2e9ea8fa",
+    "doc/evidence/process-worker-remote-ledger-diagnostic-20261021-binaries-before-test.json": "67d18ec367b49b9ed96315e068fe4851cee77ced34d056ad0d97ce0c4bc0f7f9"
+  },
+  "verified": [
+    "Private native-agent-worker namespace rejects generic information reads, writes and comparisons including process and future remote records",
+    "Typed remote claims require the current exact fully finished captured model response and actual provider call ordinal",
+    "One executing approved native MCP/A2A operation binds exact alias and arguments to one remote invocation",
+    "Concurrent duplicate admission, duplicate effect binding, changed calls, cancellation and expiry reject",
+    "Injected SQLite effect-binding failure rolls back receipt and event atomically; exact acknowledged output is write-once",
+    "Worker retirement retains pending calls as uncertain; late actual results remain recordable without effect replay; SQLite reopen retains both",
+    "Remote invocation codec resides in shared model-value library so persistence owns typed values without agent runtime dependency"
+  ],
+  "limitations": [
+    "Remote ledger fixture uses synthetic model, worker and native operation identities; no peer effect or authenticated RPC in this fixture",
+    "Canonical remote tool-turn commit, native worker remote host, IPC and production catalogue integration remain unfinished",
+    "Only ledger and remote-host targets were built; xmind.exe is unchanged from preceding full-native checkpoint",
+    "No new full-suite, installation, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

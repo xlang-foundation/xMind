@@ -1638,6 +1638,7 @@ void Repository::delete_session(const std::string& id) {
         if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.model.owner_run_id') WHERE i.category='native-agent-worker-read-claims' AND json_extract(i.payload,'$.state') IN ('awaiting_dispatch','executing') AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker read");
         if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.model.owner_run_id') WHERE i.category='native-agent-worker-file-claims' AND json_extract(i.payload,'$.state') IN ('awaiting_dispatch','executing') AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker file call");
         if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.model.owner_run_id') WHERE i.category='native-agent-worker-process-claims' AND json_extract(i.payload,'$.state') IN ('awaiting_dispatch','executing') AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker process call");
+        if(!db.execute("SELECT i.id FROM information i JOIN runs r ON r.id=json_extract(i.payload,'$.model.owner_run_id') WHERE i.category='native-agent-worker-remote-claims' AND json_extract(i.payload,'$.state') IN ('awaiting_dispatch','executing') AND r.session_id=? LIMIT 1",{target}).rows.empty())throw Conflict("Session has an active native worker remote call");
         if(!db.execute("SELECT id FROM runs WHERE session_id=? AND state IN ('queued','running','paused') LIMIT 1",{target}).rows.empty()||
            !db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE r.session_id=? AND o.state IN ('awaiting_approval','ready','executing','uncertain') LIMIT 1",{target}).rows.empty()||
            !db.execute("SELECT id FROM context_idle_owners WHERE session_id=? AND state='active' LIMIT 1",{target}).rows.empty()||
@@ -3046,6 +3047,7 @@ void require_database_idle(XlangSqlite& db,bool allow_refresh=false){
     require_empty("SELECT id FROM information WHERE category='native-agent-worker-read-claims' AND json_extract(payload,'$.state') IN ('awaiting_dispatch','executing') LIMIT 1","an active worker read");
     require_empty("SELECT id FROM information WHERE category='native-agent-worker-file-claims' AND json_extract(payload,'$.state') IN ('awaiting_dispatch','executing') LIMIT 1","an active worker file call");
     require_empty("SELECT id FROM information WHERE category='native-agent-worker-process-claims' AND json_extract(payload,'$.state') IN ('awaiting_dispatch','executing') LIMIT 1","an active worker process call");
+    require_empty("SELECT id FROM information WHERE category='native-agent-worker-remote-claims' AND json_extract(payload,'$.state') IN ('awaiting_dispatch','executing') LIMIT 1","an active worker remote call");
     require_empty("SELECT id FROM runs WHERE state IN ('queued','running','paused') LIMIT 1","a queued, running or paused run");
     require_empty("SELECT attempt_id FROM agent_model_call_reservations WHERE state IN ('reserved','started') LIMIT 1","an active model call");
     require_empty("SELECT id FROM delegation_batches WHERE state IN ('accepted','working') LIMIT 1","an active delegation batch");
@@ -3128,11 +3130,13 @@ constexpr const char* worker_event_category="native-agent-worker-model-events";
 constexpr const char* worker_read_category="native-agent-worker-read-claims";
 constexpr const char* worker_file_category="native-agent-worker-file-claims";
 constexpr const char* worker_file_effect_category="native-agent-worker-file-effects";
+constexpr const char* worker_remote_category="native-agent-worker-remote-claims";
+constexpr const char* worker_remote_effect_category="native-agent-worker-remote-effects";
 constexpr const char* worker_process_category="native-agent-worker-process-claims";
 constexpr const char* worker_process_effect_category="native-agent-worker-process-effects";
 constexpr const char* worker_turn_category="native-agent-worker-tool-turns";
 constexpr const char* worker_tool_event_category="native-agent-worker-tool-events";
-bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category||category==worker_read_category||category==worker_file_category||category==worker_file_effect_category||category==worker_turn_category||category==worker_tool_event_category;}
+bool worker_private_category(const std::string& category){return category.starts_with("native-agent-worker-");}
 void worker_digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid worker payload binding");}
 Json worker_spec_json(const AgentWorkerLeaseSpec& spec){
     bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.workspace_id,4096);
@@ -3223,6 +3227,30 @@ AgentWorkerProcessClaimRecord read_worker_process(XlangSqlite& db,const std::str
         else if(record.success||!record.actual_output_json.empty()||!record.output_binding.empty())throw DatabaseError("Unacknowledged worker process has output");return record;
     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker process");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker process");}
 }
+Json worker_remote_json(const AgentWorkerRemoteClaimRecord& record){return {{"version",1},{"model",worker_claim_spec_json(record.model)},{"invocation",record.invocation.serialize()},{"state",record.state},{"operation_ids",record.operation_ids},{"success",record.success},{"actual_output_json",record.actual_output_json},{"output_binding",record.output_binding}};}
+std::string worker_remote_effect_key(const AgentRemoteToolInvocation&,const std::string& id){return id;}
+Json worker_remote_effect_binding(XlangSqlite& db,const AgentWorkerRemoteClaimRecord& record,const std::string& id){
+    bounded_identity(id);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_remote_effect_category),worker_remote_effect_key(record.invocation,id)}).rows;
+    if(rows.size()!=1)throw DatabaseError("Worker process operation has no unique private binding");
+    const auto value=Json::parse(text(rows[0][0]));
+    if(!value.is_object()||value.size()!=5||value.at("version")!=1||value.at("model")!=worker_claim_spec_json(record.model)||value.at("invocation_binding")!=context_digest(record.invocation.serialize())||value.at("operation_id")!=id||!value.at("operation_spec_binding").is_string())throw DatabaseError("Worker process operation binding differs");
+    worker_digest(value.at("operation_spec_binding").get<std::string>());return value;
+}
+AgentWorkerRemoteClaimRecord read_worker_remote(XlangSqlite& db,const std::string& root,const std::string& attempt,const std::string& call){
+    const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_remote_category),worker_tool_call_key(root,attempt,call)}).rows;
+    if(rows.empty())throw NotFound("Worker process claim not found");
+    try{
+        const auto value=Json::parse(text(rows[0][0]));const auto& m=value.at("model");AgentWorkerRemoteClaimRecord record;
+        record.model={m.at("generation").get<std::string>(),m.at("root_run_id").get<std::string>(),m.at("owner_run_id").get<std::string>(),m.at("attempt_id").get<std::string>(),m.at("request_binding").get<std::string>()};
+        record.invocation=AgentRemoteToolInvocation::parse(value.at("invocation").get<std::string>());record.state=value.at("state").get<std::string>();record.operation_ids=value.at("operation_ids").get<std::vector<std::string>>();record.success=value.at("success").get<bool>();record.actual_output_json=value.at("actual_output_json").get<std::string>();record.output_binding=value.at("output_binding").get<std::string>();
+        if(record.model.root_run_id!=root||record.model.attempt_id!=attempt||record.invocation.attempt_id!=attempt||record.invocation.call_id!=call||record.invocation.run_id!=record.model.owner_run_id||worker_remote_json(record)!=value)throw DatabaseError("Stored worker remote binding differs");
+        if(record.state!="awaiting_dispatch"&&record.state!="executing"&&record.state!="returned"&&record.state!="uncertain")throw DatabaseError("Invalid worker remote state");
+        if(record.operation_ids.size()>1||(record.state=="awaiting_dispatch"&&!record.operation_ids.empty())||(record.success&&record.operation_ids.empty()))throw DatabaseError("Invalid worker remote effect facts");
+        std::set<std::string> seen;for(const auto& id:record.operation_ids){if(!seen.insert(id).second)throw DatabaseError("Duplicate worker remote operation");(void)worker_remote_effect_binding(db,record,id);}
+        if(record.state=="returned"){(void)object_json(record.actual_output_json);if(record.output_binding!=context_digest(record.actual_output_json))throw DatabaseError("Stored worker remote output differs");}
+        else if(record.success||!record.actual_output_json.empty()||!record.output_binding.empty())throw DatabaseError("Unacknowledged worker remote has output");return record;
+    }catch(const Json::exception&){throw DatabaseError("Invalid stored worker remote");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker remote");}
+}
 Json worker_turn_json(const AgentWorkerToolTurnRecord& turn){return {{"version",1},{"model",worker_claim_spec_json(turn.model)},{"message_sequences",turn.message_sequences},{"messages_binding",turn.messages_binding}};}
 Json worker_turn_messages(XlangSqlite& db,const AgentWorkerToolTurnRecord& turn){
     if(turn.message_sequences.size()<2||turn.message_sequences.size()>65)throw DatabaseError("Invalid worker tool turn size");Json messages=Json::array();std::int64_t previous=0;
@@ -3259,6 +3287,21 @@ template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(R
     for(const auto& tool:actual.tool_calls)if(tool.id==call.call_id){++matches;if(tool.name!=call.tool_name||tool.arguments_json!=call.arguments_json)throw Conflict("Worker read differs from the actual provider tool call");}
     if(matches!=1)throw Conflict("Worker read provider call identity is absent or ambiguous");
     const auto args=Json::parse(object_json(call.arguments_json,(file||process)?4*1024*1024:2*1024*1024));const auto folder=args.value("folder_id",lease.workspace_id);if(call.folder_id!=folder)throw Conflict("Worker workspace folder differs from actual provider arguments");return model.spec;
+}
+AgentWorkerModelClaimSpec worker_remote_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentRemoteToolInvocation& call){
+    (void)call.serialize();worker_current_scope(repository,db,lease);
+    if(lease.owner_run_id!=lease.root_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent"||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker remote differs from its ordinary workspace owner");
+    if(!call.tool_name.starts_with("mcp_")&&!call.tool_name.starts_with("a2a_delegate_"))throw Conflict("Worker workspace tool is not admitted");
+    const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
+    if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker remote has no actual model receipt");
+    const auto reservation=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,call.attempt_id}).rows;
+    const auto latest=db.execute("SELECT json_extract(payload,'$.attempt_id') FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? ORDER BY seq DESC LIMIT 1",{lease.owner_run_id,lease.root_run_id}).rows;
+    if(reservation.size()!=1||text(reservation[0][0])!="finished"||text(reservation[0][1])!=model.actual_assistant_json||latest.size()!=1||text(latest[0][0])!=call.attempt_id)throw Conflict("Worker remote requires its latest fully retired model attempt");
+    const auto actual=decode_agent_model_completion(model.actual_response_json);std::size_t matches=0;
+    if(actual.finish_reason!="tool_calls")throw Conflict("Worker remote requires a tool response");
+    for(const auto& tool:actual.tool_calls)if(tool.id==call.call_id){++matches;if(tool.name!=call.tool_name||tool.arguments_json!=call.arguments_json)throw Conflict("Worker remote differs from the actual provider tool call");}
+    if(matches!=1)throw Conflict("Worker remote provider call identity is absent or ambiguous");
+    (void)object_json(call.arguments_json,4*1024*1024);if(call.tool_index>=actual.tool_calls.size()||actual.tool_calls[call.tool_index].id!=call.call_id)throw Conflict("Worker remote call index differs from its actual model ordinal");return model.spec;
 }
 AgentWorkerModelClaimSpec worker_read_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentWorkspaceInvocation& call){return worker_workspace_authority(repository,db,lease,call,false);}
 AgentWorkerModelClaimSpec worker_file_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentFileToolInvocation& call){return worker_workspace_authority(repository,db,lease,call,true);}
@@ -3531,6 +3574,35 @@ AgentWorkerProcessClaimRecord Repository::record_agent_worker_process_result(con
     record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_process_json(record).dump(),std::string(worker_process_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.process.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
 }
 AgentWorkerProcessClaimRecord Repository::agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_process(impl_->database,root,attempt,call);}
+AgentWorkerRemoteClaimRecord Repository::claim_agent_worker_remote(const AgentWorkerLeaseSpec& lease,const AgentRemoteToolInvocation& call){
+    auto& db=impl_->database;Transaction tx(db);const auto model=worker_remote_authority(*this,db,lease,call);AgentWorkerRemoteClaimRecord record{model,call,"awaiting_dispatch"};
+    const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_remote_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id),worker_remote_json(record).dump()});if(inserted.affected_rows!=1)throw Conflict("Worker remote call was already claimed; no replay is authorized");
+    impl_->event(lease.owner_run_id,"worker.remote.claimed",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id}}.dump());tx.commit();return record;
+}
+AgentWorkerRemoteClaimRecord Repository::start_agent_worker_remote(const AgentWorkerLeaseSpec& lease,const AgentRemoteToolInvocation& call){
+    auto& db=impl_->database;Transaction tx(db);const auto model=worker_remote_authority(*this,db,lease,call);auto record=read_worker_remote(db,lease.root_run_id,call.attempt_id,call.call_id);
+    if(worker_claim_spec_json(record.model)!=worker_claim_spec_json(model)||record.invocation.serialize()!=call.serialize()||record.state!="awaiting_dispatch")throw Conflict("Worker remote call cannot start again or change its binding");
+    record.state="executing";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_remote_json(record).dump(),std::string(worker_remote_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.remote.dispatching",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id}}.dump());tx.commit();return record;
+}
+AgentWorkerRemoteClaimRecord Repository::claim_agent_worker_remote_effect(const AgentWorkerLeaseSpec& lease,const AgentRemoteToolInvocation& call,const std::string& id){
+    auto& db=impl_->database;Transaction tx(db);const auto model=worker_remote_authority(*this,db,lease,call);auto record=read_worker_remote(db,lease.root_run_id,call.attempt_id,call.call_id);
+    if(worker_claim_spec_json(record.model)!=worker_claim_spec_json(model)||record.invocation.serialize()!=call.serialize()||record.state!="executing"||!record.operation_ids.empty())throw Conflict("Worker remote effect lacks its exact executing invocation");
+    const auto op=operation(id);const auto plan=Json::parse(object_json(op.spec.arguments_json));
+    const auto expected_tool=call.tool_name.starts_with("mcp_")?"mcp_tool":"a2a_delegate";
+    if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||op.spec.workspace!=lease.workspace_id||op.spec.tool!=expected_tool||plan.at("alias")!=call.tool_name||Json::parse(object_json(plan.at("arguments_json").get<std::string>(),4*1024*1024))!=Json::parse(object_json(call.arguments_json,4*1024*1024)))throw Conflict("Worker remote native operation differs from its captured call");
+    const auto binding=Json{{"version",1},{"model",worker_claim_spec_json(model)},{"invocation_binding",context_digest(call.serialize())},{"operation_id",id},{"operation_spec_binding",worker_operation_binding(op)}};
+    const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_remote_effect_category),worker_remote_effect_key(call,id),binding.dump()});if(inserted.affected_rows!=1)throw Conflict("Native worker remote operation was already bound; no replay is authorized");
+    record.operation_ids.push_back(id);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_remote_json(record).dump(),std::string(worker_remote_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.remote.effect_claimed",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_id",id}}.dump());tx.commit();return record;
+}
+AgentWorkerRemoteClaimRecord Repository::record_agent_worker_remote_result(const AgentWorkerLeaseSpec& lease,const AgentRemoteToolInvocation& call,bool success,const std::string& output){
+    (void)object_json(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_remote(db,lease.root_run_id,call.attempt_id,call.call_id);
+    if(read_worker_lease(db,lease.generation).spec!=lease||record.model.generation!=lease.generation||record.model.owner_run_id!=lease.owner_run_id||record.invocation.serialize()!=call.serialize()||(success&&(record.operation_ids.empty()||record.state=="awaiting_dispatch")))throw Conflict("Worker remote result differs from its captured dispatch");
+    if(record.state=="returned"){if(record.success!=success||record.actual_output_json!=output)throw Conflict("Acknowledged worker remote result changed");tx.commit();return record;}
+    for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_remote_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded))throw Conflict("Worker remote result has an unresolved or inconsistent native effect");}
+
+    record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_remote_json(record).dump(),std::string(worker_remote_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.remote.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
+}
+AgentWorkerRemoteClaimRecord Repository::agent_worker_remote_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_remote(impl_->database,root,attempt,call);}
 AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& generation,const std::string& reason){
     const std::set<std::string> reasons{"completed","cancelled","worker_exit","backend_recovery","dispatch_error"};if(!reasons.contains(reason))throw std::invalid_argument("Invalid worker retirement reason");auto& db=database;auto lease=read_worker_lease(db,generation);
     if(lease.state=="retired"){if(lease.retirement_reason!=reason)throw Conflict("Worker retirement observation changed");return lease;}
@@ -3539,6 +3611,8 @@ AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& genera
     for(const auto& row:files){const auto saved=Json::parse(text(row[0]));const auto call=AgentFileToolInvocation::parse(saved.at("invocation").get<std::string>());auto record=read_worker_file(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_file_json(record).dump(),std::string(worker_file_category),worker_tool_call_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.file.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_ids",record.operation_ids}}.dump());}
     const auto processes=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_process_category),generation}).rows;
     for(const auto& row:processes){const auto saved=Json::parse(text(row[0]));const auto call=AgentProcessToolInvocation::parse(saved.at("invocation").get<std::string>());auto record=read_worker_process(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_process_json(record).dump(),std::string(worker_process_category),worker_tool_call_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.process.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_ids",record.operation_ids}}.dump());}
+    const auto remotes=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_remote_category),generation}).rows;
+    for(const auto& row:remotes){const auto saved=Json::parse(text(row[0]));const auto call=AgentRemoteToolInvocation::parse(saved.at("invocation").get<std::string>());auto record=read_worker_remote(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_remote_json(record).dump(),std::string(worker_remote_category),worker_tool_call_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.remote.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_ids",record.operation_ids}}.dump());}
     const auto reads=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_read_category),generation}).rows;
     for(const auto& row:reads){const auto saved=Json::parse(text(row[0]));const auto& invocation=saved.at("invocation").get<std::string>();const auto call=AgentWorkspaceInvocation::parse(invocation);auto record=read_worker_read(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_read_json(record).dump(),std::string(worker_read_category),worker_tool_call_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.read.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"dispatched",record.dispatched}}.dump());}
     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.spec.generation')=?",{std::string(worker_claim_category),generation}).rows;

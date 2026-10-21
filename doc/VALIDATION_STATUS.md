@@ -1,3 +1,26 @@
+## Durable worker remote-call ownership — 2026-10-21
+
+Typed remote claims bind the exact current finished model call and ordinal to
+one approved native operation, checking workspace, alias and arguments. Claims
+reject duplicate dispatch; effect binding and events roll back atomically on
+SQLite failure. Exact results are write-once, unresolved calls become uncertain
+on retirement, and late actual results remain recordable without replay.
+
+The generic information API now reserves the complete native-agent-worker
+namespace, closing omitted process-record access and protecting future remote
+records. The remote invocation codec moved into the shared value library.
+
+The targeted ledger and native remote-host build passes **2/2 contracts** in
+2.21 seconds, with 2723 project inputs and all frozen SDK, libraries, dependencies
+and 133 binary file sets unchanged. Synthetic identities explicitly scope the
+ledger fixture; native peer effects are separately tested.
+[Scope, patches and raw evidence](evidence/process-worker-remote-ledger-diagnostic-20261021.json).
+
+Canonical remote tool-turn handling, native worker remote host, authenticated
+IPC and production catalogue integration remain unfinished. This target does
+not rebuild xmind.exe and adds no full-suite, installation, rendered or
+live-provider acceptance.
+
 ## Remote dispatch backend authority — 2026-10-21
 
 The native remote-tool owner can attach a backend-only live authority callback.

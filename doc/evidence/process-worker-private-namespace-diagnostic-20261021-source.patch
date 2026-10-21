@@ -1,0 +1,26 @@
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index a384f06d..93ade49a 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3132,7 +3132,7 @@ constexpr const char* worker_process_category="native-agent-worker-process-claim
+ constexpr const char* worker_process_effect_category="native-agent-worker-process-effects";
+ constexpr const char* worker_turn_category="native-agent-worker-tool-turns";
+ constexpr const char* worker_tool_event_category="native-agent-worker-tool-events";
+-bool worker_private_category(const std::string& category){return category==worker_lease_category||category==worker_current_category||category==worker_claim_category||category==worker_event_category||category==worker_read_category||category==worker_file_category||category==worker_file_effect_category||category==worker_turn_category||category==worker_tool_event_category;}
++bool worker_private_category(const std::string& category){return category.starts_with("native-agent-worker-");}
+ void worker_digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid worker payload binding");}
+ Json worker_spec_json(const AgentWorkerLeaseSpec& spec){
+     bounded_identity(spec.generation);bounded_identity(spec.root_run_id);bounded_identity(spec.owner_run_id);bounded_identity(spec.workspace_id,4096);
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index e81d09c5..da566b1b 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -227,7 +227,7 @@ void ledger(const std::string& path,const std::vector<std::string>& imports){
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
+-        for(const auto* category:{"native-agent-worker-leases","native-agent-worker-current","native-agent-worker-model-claims","native-agent-worker-model-events","native-agent-worker-read-claims","native-agent-worker-file-claims","native-agent-worker-file-effects","native-agent-worker-tool-turns","native-agent-worker-tool-events"}){rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});rejects<std::invalid_argument>([&]{store.information(category,original.generation).get();});}
++        for(const auto* category:{"native-agent-worker-leases","native-agent-worker-current","native-agent-worker-model-claims","native-agent-worker-model-events","native-agent-worker-read-claims","native-agent-worker-file-claims","native-agent-worker-file-effects","native-agent-worker-process-claims","native-agent-worker-process-effects","native-agent-worker-remote-claims","native-agent-worker-remote-effects","native-agent-worker-future-private-record","native-agent-worker-tool-turns","native-agent-worker-tool-events"}){rejects<std::invalid_argument>([&]{store.put_information(category,"forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information(category,"forged","{}",{}).get();});rejects<std::invalid_argument>([&]{store.information(category,original.generation).get();});}
+         pending=claim(original,"attempt-one");start(store,"worker-root",pending.attempt_id,false);rejects<Conflict>([&]{store.claim_agent_worker_model(pending).get();});store.start_model_call("worker-root","worker-root",pending.attempt_id).get();
+         start(store,"foreign-root","foreign-attempt");auto foreign=pending;foreign.root_run_id="foreign-root";foreign.owner_run_id="foreign-root";foreign.attempt_id="foreign-attempt";rejects<Conflict>([&]{store.claim_agent_worker_model(foreign).get();});
+         auto first=store.claim_agent_worker_model(pending),second=store.claim_agent_worker_model(pending);unsigned admitted=0,rejected=0;for(auto* result:{&first,&second}){try{require(result->get().state=="dispatching","Claim must precede physical dispatch");++admitted;}catch(const Conflict&){++rejected;}}require(admitted==1&&rejected==1,"Concurrent duplicates must issue exactly one dispatch claim");
