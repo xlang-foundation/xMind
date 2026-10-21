@@ -309,7 +309,13 @@ int run_server(int argc,char** argv) {
         agentflow::AgentRootExecutorFactory root_executor_factory;
         const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto worker_image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));
         if(process_worker){root_executor_factory=[image=worker_image,process_code](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return process_code?agentflow::make_agent_worker_coding_executor(store,settings,image):agentflow::make_agent_worker_read_executor(store,settings,image);};}
-        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){settings.delegated_execution=agentflow::make_agent_worker_delegated_executor(persistence,worker_image);if(process_worker){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}}};
+        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){
+            settings.delegated_execution=agentflow::make_agent_worker_delegated_executor(persistence,worker_image);
+            if(!process_worker)return;
+            settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};
+            if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}
+            settings.tool_allowlist->push_back("delegate_tasks");
+        };
 #endif
         if(options.contains("--model")) {
 #if defined(_WIN32)
@@ -332,7 +338,7 @@ int run_server(int argc,char** argv) {
             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
             if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             if(options.contains("--model-tools")) settings.provider.tools=options.at("--model-tools")=="supported"?agentflow::Capability::supported:(options.at("--model-tools")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
-            if(!process_worker&&settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
             const auto purpose=provider_purpose(settings.provider.endpoint);
             const auto* key=std::getenv("XMIND_API_KEY");
             if(key && *key) {
@@ -361,7 +367,7 @@ int run_server(int argc,char** argv) {
             bind_workspace_membership(settings);
             // The configured profile generation enables the registered leaf
             // policy only when its actual workspace/model tools are eligible.
-            if(!process_worker&&settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
             std::vector<agentflow::ProviderProfileExecutionPolicy> policies;
             std::vector<agentflow::ProviderProfileRoute> routes;
             const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format,agentflow::ChatDialect dialect=agentflow::ChatDialect::openai){

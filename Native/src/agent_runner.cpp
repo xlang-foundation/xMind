@@ -226,7 +226,9 @@ std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& m
         // that local model controls still select the captured model and wire.
         if(identity.at("model_id")!=selected.at("model_id")||identity.at("wire")!=selected.at("wire")||
            (identity.size()!=6&&identity!=selected))throw Conflict("Read worker model differs from captured provider identity");
-        const auto policy=read_workspace_->execution_policy_id();if(policy!="native.direct-agent"&&policy!="native.context")throw Conflict("Unsupported captured worker execution policy");
+        const auto policy=read_workspace_->execution_policy_id();
+        if(policy=="native.delegation"){const auto budget=read_workspace_->captured_budget();if(!budget||budget->policy_id!=policy||budget->policy_revision!=1||budget->workspace_identity!=read_workspace_->workspace_id()||Json::parse(budget->provider_identity_json)!=identity||budget->max_children<1||budget->max_children>8||budget->max_parallel<1||budget->max_parallel>2||budget->max_model_calls!=static_cast<std::int64_t>(settings_.max_turns)||budget->wall_limit_ms!=settings_.run_timeout.count())throw Conflict("Worker delegation budget differs from captured policy");return budget;}
+        if(policy!="native.direct-agent"&&policy!="native.context")throw Conflict("Unsupported captured worker execution policy");
         return RootBudgetSpec{policy,1,read_workspace_->workspace_id(),captured,0,0,
             static_cast<std::int64_t>(std::min(settings_.max_turns,std::size_t{32})),settings_.run_timeout.count()};
     }
@@ -532,7 +534,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     try {
         if(run_workspace_tools&&!saved_workspace_membership(journal_,id)){Json folders=Json::array();for(const auto& folder:run_workspace_tools->folders())folders.push_back({{"folder_id",folder.folder_id},{"root",folder.root}});
             journal_.append_event(id,"agent.workspace_membership",Json{{"workspace_id",run_workspace_tools->workspace_id()},{"revision",run_workspace_tools->revision()},{"primary_folder_id",run_workspace_tools->folders().front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump()).get();}
-        const auto local_deadline=std::chrono::steady_clock::now()+settings_.run_timeout;
+        const auto captured_deadline=read_workspace_?read_workspace_->execution_deadline():std::nullopt;
+        const auto local_deadline=captured_deadline?*captured_deadline:std::chrono::steady_clock::now()+settings_.run_timeout;
         if(!leaf&&admitted.parent_id.empty()&&execution_budget(provider.model)){
             const auto saved=journal_.root_budget(id).get();const auto expected=execution_budget(provider.model);
             if(saved.spec.workspace_identity!=expected->workspace_identity||saved.spec.policy_id!=expected->policy_id||saved.spec.policy_revision!=expected->policy_revision||saved.spec.provider_identity_json!=expected->provider_identity_json||saved.spec.max_children!=expected->max_children||saved.spec.max_parallel!=expected->max_parallel||saved.spec.max_model_calls!=expected->max_model_calls||saved.spec.wall_limit_ms!=expected->wall_limit_ms)throw Conflict("Root execution no longer matches its admitted immutable policy");
@@ -618,7 +621,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         };
         reload_history();
         std::set<std::string> worker_callables;if(coding_workspace_)for(const auto& name:coding_workspace_->callable_tool_names())if(!worker_callables.insert(name).second)throw Conflict("Duplicate backend worker callable alias");
-        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!(tool.name=="delegate_tasks"&&!leaf)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
         if(read_workspace_)request=prepare_workspace_window();
         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
@@ -999,7 +1002,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         invocation.folder_id=invocation.workspace_id;invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
                         if(call.name=="run_process"){Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process-tool arguments");}if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}}
                         auto result=process_tool_host->invoke(invocation,token);exact_output=result.output_json;output=Json::parse(result.output_json);success=result.success;
-                    }else if((is_agent_read_tool(call.name)&&(call.name!="language_server"||language_servers_||read_workspace_))||(read_workspace_&&is_agent_guidance_tool(call.name))){
+                    }else if((is_agent_read_tool(call.name)&&(call.name!="language_server"||language_servers_||read_workspace_))||(read_workspace_&&(is_agent_guidance_tool(call.name)||(call.name=="delegate_tasks"&&!leaf)))){
                         if(!read_tool_host)throw ToolAccessDenied("Workspace read is not admitted for this run");
                         AgentWorkspaceInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
                         invocation.workspace_id=read_workspace_?read_workspace_->workspace_id():(run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity());invocation.workspace_revision=read_workspace_?read_workspace_->workspace_revision():(run_workspace_tools?run_workspace_tools->revision():1);

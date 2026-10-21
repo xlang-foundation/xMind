@@ -16,7 +16,7 @@ AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,Age
     const bool leaf=lease_.owner_run_id!=lease_.root_run_id;
     if(leaf)(void)store.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
     if(!gateway_||!preview_||!admit_||
-       store.root_budget(lease_.root_run_id).get().spec.policy_id!=(leaf?"native.delegation":"native.context")||
+       (leaf?store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation":(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"))||
        policy_.binding.provider_identity_json!=lease_.provider_identity_json)
         throw Conflict("Worker context differs from captured ordinary context root");
     const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};

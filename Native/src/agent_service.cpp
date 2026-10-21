@@ -108,8 +108,8 @@ struct AgentService::Impl {
     Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,std::shared_ptr<AgentRootExecutor> execution,Prepared)
         :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),work_pool(root_admission->executor()),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
-         children(settings.delegation||settings.planning?std::make_shared<NativeChildExecutor>():nullptr),
-         delegation(settings.delegation?std::make_shared<DelegationExecutor>(store,children):nullptr),
+         children(settings.delegation||settings.planning?(execution&&execution->shared_children()?execution->shared_children():std::make_shared<NativeChildExecutor>()):nullptr),
+         delegation(settings.delegation?(execution&&execution->shared_delegation()?execution->shared_delegation():std::make_shared<DelegationExecutor>(store,children)):nullptr),
          planning(settings.planning?std::make_shared<DynamicPlanExecutor>(store,children):nullptr),
          runner(store,std::move(settings),delegation,planning),root_executor(std::move(execution)),limit(capacity),owned_limit(capacity+count){
         if(count==0||count>16||capacity==0||capacity>4096)throw std::invalid_argument("Invalid agent worker capacity");

@@ -1,3 +1,23 @@
+## Parent worker delegation through xlang3 IPC — 2026-10-21
+
+An actual parent xmind runner now calls the backend delegation capability through
+the existing authenticated tool RPC. Native lease/model/guidance checks precede
+scheduling, actual results are durably recorded before delivery, and canonical
+tool commit precedes further parent funding. One parent and two child processes
+use the same bound image, retain six shared charges, consume the parent hold and
+physically drain. The root service/executor share one bounded child pool.
+
+Server process-read and process-code modes now expose the captured delegation
+tool and pass their actual read/coding contracts. A leaf cannot acquire nested
+delegation authority. **9/9 focused contracts pass in 70.44 seconds**, with
+191 controlled HTTP requests and frozen source/SDK/library/dependency/133-binary
+sets/hashes. The first missing-catalogue run is preserved.
+[Scope and raw evidence](evidence/process-worker-parent-delegation-catalogue-20261021.json).
+
+Parent failure/deadline/permission/counting variants, planning, graph/default
+placement, broader/full regression and updated installed/rendered/live-provider
+client acceptance remain open. The server default remains thread execution.
+
 ## Delegated scheduler broader regression — 2026-10-21
 
 **65/65 selected native contracts pass in 229.70 seconds** on committed

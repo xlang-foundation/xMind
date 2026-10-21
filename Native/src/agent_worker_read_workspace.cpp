@@ -1,6 +1,7 @@
 #include "agentflow/agent_worker_read_workspace.hpp"
 #include "agentflow/agent_worker_run_journal.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/agent_worker_read_rpc.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
@@ -20,6 +21,7 @@ public:
         if(scope_.workspace_id.empty()||scope_.workspace_id=="workspace:none"||scope_.workspace_revision<=0||scope_.workspace_revision>9007199254740991LL)
             throw std::invalid_argument("Worker read workspace has no captured native workspace");
         const auto budget=journal_->root_budget(scope_.root_id).get();if(budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker read workspace differs from its root admission");
+        budget_=budget.spec;deadline_=AgentWorkerJournalClient(peer).execution_deadline();
         provider_identity_=budget.spec.provider_identity_json;policy_id_=budget.spec.policy_id;
         if(scope_.root_id!=scope_.run_id){auto value=nlohmann::json::parse(provider_identity_);value["model_id"]=model_.admission().model_id;provider_identity_=value.dump();}
     }
@@ -27,11 +29,13 @@ public:
     std::int64_t workspace_revision()const override{return scope_.workspace_revision;}
     std::string provider_identity_json()const override{return provider_identity_;}
     std::string execution_policy_id()const override{return policy_id_;}
+    std::optional<RootBudgetSpec> captured_budget()const override{return budget_;}
+    std::optional<std::chrono::steady_clock::time_point> execution_deadline()const override{return deadline_;}
     ModelRequest prepare_request(std::stop_token cancel)override{return model_.prepare_request(cancel);}
     ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return model_.rebuild_request(attempt,request,cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return std::make_unique<AgentWorkerReadClient>(peer_);}
 private:
-    AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;
+    AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;RootBudgetSpec budget_;std::chrono::steady_clock::time_point deadline_;
 };
 }
 std::shared_ptr<AgentRunnerReadWorkspace> make_agent_worker_read_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerReadWorkspace>(peer,std::move(journal));}
@@ -44,6 +48,8 @@ public:
     std::int64_t workspace_revision()const override{return read_->workspace_revision();}
     std::string provider_identity_json()const override{return read_->provider_identity_json();}
     std::string execution_policy_id()const override{return read_->execution_policy_id();}
+    std::optional<RootBudgetSpec> captured_budget()const override{return read_->captured_budget();}
+    std::optional<std::chrono::steady_clock::time_point> execution_deadline()const override{return read_->execution_deadline();}
     ModelRequest prepare_request(std::stop_token cancel)override{return read_->prepare_request(cancel);}
     ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return read_->rebuild_request(attempt,request,cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}

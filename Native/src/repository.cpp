@@ -20,7 +20,7 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
-bool ordinary_worker_policy(const std::string& policy){return policy=="native.direct-agent"||policy=="native.context";}
+bool ordinary_worker_policy(const std::string& policy){return policy=="native.direct-agent"||policy=="native.context"||policy=="native.delegation";}
 Json worker_provider_identity(Repository&,const std::string&,const std::string&);
 bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
@@ -2181,7 +2181,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
     bounded_identity(attempt);const auto role_name=std::string(call_role(role));auto& db=impl_->database;Transaction transaction(db);
     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||role!=(owner==root?ModelCallRole::parent:ModelCallRole::leaf))throw Conflict("Worker funding owner differs from captured admission");}
     const auto budget=root_budget(root);const auto parent=run(root),actor=run(owner);
-    if(worker&&!((owner==root&&budget.spec.policy_id=="native.direct-agent")||worker_delegated_owner(*this,*worker)))throw Conflict("Worker reserve requires ordinary direct-agent admission");
+    if(worker&&!((owner==root&&(budget.spec.policy_id=="native.direct-agent"||budget.spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)))throw Conflict("Worker reserve requires ordinary direct-agent admission");
     if(worker)worker_require_tool_turns(db,*worker);
     if(parent.state!=RunState::running || actor.state!=RunState::running)throw Conflict("Model attempt requires its running execution owners");
     if(role==ModelCallRole::parent){if(owner!=root||parent.graph_root)throw Conflict("Parent model attempt owner differs");}
@@ -2205,7 +2205,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
 ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker){
     auto& db=impl_->database;Transaction transaction(db);(void)root_budget(root);const auto parent=run(root),actor=run(owner);
     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||worker_attempt_generation(db,root,owner,attempt)!=std::optional<std::string>{worker->generation})throw Conflict("Worker cannot start an attempt funded by another authority");}
-    if(worker&&!((owner==root&&root_budget(root).spec.policy_id=="native.direct-agent")||worker_delegated_owner(*this,*worker)))throw Conflict("Worker start requires ordinary direct-agent admission");
+    if(worker&&!((owner==root&&(root_budget(root).spec.policy_id=="native.direct-agent"||root_budget(root).spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)))throw Conflict("Worker start requires ordinary direct-agent admission");
     if(worker)worker_require_tool_turns(db,*worker);
     if(parent.state!=RunState::running||actor.state!=RunState::running)throw Conflict("Model attempt owners are not running");
     const auto rows=db.execute("SELECT role,state,purpose,inference_step_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
@@ -3315,7 +3315,9 @@ bool worker_read_tool(const std::string& name){const std::set<std::string> reads
 template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
     (void)call.serialize();worker_current_scope(repository,db,lease);
     if(((file||process)?(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id)):!worker_agent_owner(repository,lease))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
-    if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):!worker_read_tool(call.tool_name))throw Conflict("Worker workspace tool is not admitted");
+    const bool delegation=!file&&!process&&call.tool_name=="delegate_tasks";
+    if(delegation&&(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.delegation"))throw Conflict("Worker delegation differs from owning root policy");
+    if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):(!worker_read_tool(call.tool_name)&&!delegation))throw Conflict("Worker workspace tool is not admitted");
     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read has no actual model receipt");
     const auto reservation=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,call.attempt_id}).rows;
@@ -3548,7 +3550,7 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
     // Check the admitted vocabulary even for an already committed turn. A read
     // channel must never acknowledge a coding turn through idempotent lookup.
-    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
+    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(call.name=="delegate_tasks"&&lease.root_run_id==lease.owner_run_id&&root_budget(lease.root_run_id).spec.policy_id=="native.delegation")&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
     if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
     std::set<std::string> calls;std::vector<std::string> outputs;
     for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");

@@ -20,6 +20,8 @@ struct AgentWorkerReadRequestPolicy {
     std::optional<ProviderHistoryOwner> history_owner;
     std::optional<ChatProviderConfig> history_provider;
     std::optional<AgentWorkerContextPolicy> context;
+    // Backend-only orchestration. The worker supplies no assistant or result.
+    std::function<AgentReadToolResult(const AgentWorkspaceInvocation&,const std::string&,std::stop_token)> delegation;
 };
 // Backend-owned ordinary read context. Preparing a request works on copies of
 // real native guidance state. Only admission of a claimed, exact model request

@@ -10,6 +10,7 @@
 #include "agentflow/restore_executor.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/agent_authority.hpp"
+#include "agentflow/delegation_executor.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -55,6 +56,8 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     PersistenceService& store_;
     AgentSettings settings_;
     bool coding_=false,delegated_=false;
+    std::shared_ptr<NativeChildExecutor> children_;
+    std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<const BoundProcessExecutable> image_;
     std::unique_ptr<WorkspaceTools> primary_;
     std::shared_ptr<ProcessExecutor> process_catalogue_;
@@ -66,8 +69,9 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
         if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation","read_repository_instructions","list_skills","load_skill"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
+        if(!delegated_&&settings_.delegation&&!request.agent_tools&&!settings_.tool_allowlist)selected->push_back("delegate_tasks");
         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
-        auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
+        auto definitions=primary_->definitions();if(!delegated_&&settings_.delegation)definitions.push_back(DelegationExecutor::definition());if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
         for(auto definition:SkillContext::definitions())definitions.push_back(std::move(definition));
         if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
@@ -75,13 +79,13 @@ class WorkspaceExecutor final:public AgentRootExecutor {
         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
             if(coding_&&callable_tool(name)&&found!=definitions.end()){result.push_back(*found);continue;}
             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
-            if((!is_agent_read_tool(name)&&!is_agent_guidance_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+            if((!is_agent_read_tool(name)&&!is_agent_guidance_tool(name)&&!(name=="delegate_tasks"&&!delegated_&&settings_.delegation)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
         return result;
     }
 public:
     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={})
         :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),image_(std::move(image)){
-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||(!coding_&&!delegated_&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
+        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||(delegated_&&settings_.delegation)||settings_.planning||(!coding_&&!delegated_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
@@ -91,9 +95,12 @@ public:
             settings_.language_server_registry=language_catalogue_;settings_.language_servers=language_catalogue_->profiles();
         }
         if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
-        validator_=std::make_unique<AgentRunner>(store_,settings_);
+        if(!delegated_&&settings_.delegation){if(!settings_.delegated_execution)settings_.delegated_execution=make_agent_worker_delegated_executor(store_,image_);children_=std::make_shared<NativeChildExecutor>();delegation_=std::make_shared<DelegationExecutor>(store_,children_);}
+        validator_=std::make_unique<AgentRunner>(store_,settings_,delegation_);
         gateway_=gateway?std::move(gateway):make_persistence_agent_model_gateway(store_,settings_.credential);
     }
+    std::shared_ptr<NativeChildExecutor> shared_children()const override{return children_;}
+    std::shared_ptr<DelegationExecutor> shared_delegation()const override{return delegation_;}
     void validate(const AgentRootExecutionRequest& request)const override{
         if(!request.placement.empty()&&request.placement!="process")throw std::invalid_argument("Only process placement can enter a process worker executor");
         const auto selected=model(request);const auto models=validator_->models();
@@ -138,6 +145,7 @@ public:
         if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n"+settings_.instruction_policy.instructions;
         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
+        if(delegation_)for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
         for(const auto& definition:selected_tools)if(definition.name=="language_server"||((definition.name=="list_skills"||definition.name=="load_skill")&&!callable_tool(definition.name)))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
@@ -157,6 +165,13 @@ public:
                 {delegated_?ContextScopeKind::execution:ContextScopeKind::session,delegated_?request.run_id:admitted.session_id},provider_identity.dump(),
                 context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
             policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
+        }
+        if(delegation_){
+            auto frozen=settings_;frozen.provider.model=model(request);frozen.tool_allowlist=std::vector<std::string>{};for(const auto& tool:policy.tools)frozen.tool_allowlist->push_back(tool.name);frozen.selectable_models=validator_->models();
+            if(!request.agent_instructions.empty())frozen.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
+            if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);
+            auto shared_budget=std::make_shared<RootExecutionBudget>(store_,budget,deadline,cancel);
+            policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,stop)};};
         }
         if(settings_.context)policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;

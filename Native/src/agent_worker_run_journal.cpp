@@ -30,7 +30,8 @@ public:
             if(workspace_||run.parent_id!=scope_.root_id||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.spec.policy_id!="native.delegation"||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker child journal differs from bounded delegated admission");
             admission_=client_.child_admission(scope_.run_id);session_=run.session_id;return;
         }
-        if(!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||(budget.spec.policy_id!="native.direct-agent"&&budget.spec.policy_id!="native.context")||budget.spec.policy_revision!=1||budget.spec.max_children!=0||budget.spec.max_parallel!=0||budget.spec.workspace_identity!=scope_.workspace_id)
+        const bool delegation=budget.spec.policy_id=="native.delegation";
+        if(budget.root_run_id!=scope_.root_id||!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||(!delegation&&budget.spec.policy_id!="native.direct-agent"&&budget.spec.policy_id!="native.context")||budget.spec.policy_revision!=1||(delegation?(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2):(budget.spec.max_children!=0||budget.spec.max_parallel!=0))||budget.spec.workspace_identity!=scope_.workspace_id)
             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
         session_=run.session_id;
     }

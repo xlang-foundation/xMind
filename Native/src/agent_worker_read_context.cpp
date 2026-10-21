@@ -2,6 +2,8 @@
 #include "agentflow/agent_model_values.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/repository_instruction_context.hpp"
+#include "agentflow/delegation_executor.hpp"
+#include "agentflow/agent_permissions.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <set>
@@ -14,7 +16,7 @@ AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,Persiste
     if(!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||policy_.instructions.size()>65536||policy_.instructions.find('\0')!=std::string::npos||policy_.instruction_suffix.size()>65536||policy_.instruction_suffix.find('\0')!=std::string::npos||policy_.tools.size()>64)throw std::invalid_argument("Invalid backend worker read context");
     if(bool(policy_.history_owner)!=bool(policy_.history_provider))throw std::invalid_argument("Worker session history requires its captured provider route");
     if(policy_.history_owner&&(policy_.history_owner->root_run_id!=lease_.root_run_id||policy_.history_owner->owner_run_id!=lease_.owner_run_id||policy_.history_owner->role!=(lease_.root_run_id==lease_.owner_run_id?ModelCallRole::parent:ModelCallRole::leaf)||policy_.history_owner->scope.kind!=(lease_.root_run_id==lease_.owner_run_id?ContextScopeKind::session:ContextScopeKind::execution)||policy_.history_owner->provider_identity_json!=lease_.provider_identity_json))throw Conflict("Worker history differs from captured model ownership");
-    std::set<std::string> names;for(const auto& tool:policy_.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name))||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
+    std::set<std::string> names;for(const auto& tool:policy_.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!(tool.name=="delegate_tasks"&&policy_.delegation&&lease_.root_run_id==lease_.owner_run_id))||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
     const auto count=owner_.workspace_members?owner_.workspace_members->folders().size():1;
     for(std::size_t index=0;index<count;++index){auto* context=owner_.repository_context(index);if(!context)throw std::invalid_argument("Worker read context requires actual native guidance");contexts_.push_back(std::make_unique<RepositoryInstructionContext>(*context));}
     auto read_owner=owner_;read_owner.guidance_instruction_bytes=policy_.instructions.size()+policy_.instruction_suffix.size();read_owner.repository_context=[this](std::size_t index){return contexts_.at(index).get();};read_owner.offered_tool=[this](const std::string& name){return std::any_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==name;});};
@@ -50,6 +52,22 @@ void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest
     store_.append_event(lease_.owner_run_id,"agent.repository_scope",Json{{"snapshot","worker_before_model_dispatch"},{"attempt_id",attempt},{"contexts",std::move(metadata)}}.dump()).get();check(cancel);contexts_=std::move(candidate.contexts);admitted_attempt_=attempt;
 }
 AgentReadToolResult AgentWorkerReadContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){
-    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");check(cancel);if(call.attempt_id!=admitted_attempt_)throw Conflict("Worker read has no actually admitted guidance window");return native_->invoke(call,cancel);
+    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");check(cancel);if(call.attempt_id!=admitted_attempt_)throw Conflict("Worker read has no actually admitted guidance window");
+    if(call.tool_name!="delegate_tasks")return native_->invoke(call,cancel);
+    if(!policy_.delegation||lease_.root_run_id!=lease_.owner_run_id||!owner_.offered_tool(call.tool_name)||std::none_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==call.tool_name;}))throw Conflict("Worker has no captured delegation capability");
+    const auto claimed=store_.claim_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,cancel).get();
+    AgentReadToolResult result;bool denied=agent_permission_denies(owner_.permission_rules,call.tool_name,"*");for(const auto& layer:owner_.inherited_permission_layers)denied=denied||agent_permission_denies(layer,call.tool_name,"*");
+    if(denied)result={false,R"({"error":{"code":"agent_permission_denied","message":"The selected agent policy denied delegation before dispatch"}})"};
+    else if(!contexts_.front()->skills().ready(cancel))result={false,R"({"error":{"code":"repository_instructions_required","message":"Updated repository or skill guidance must be delivered before delegation"}})"};
+    else{
+        store_.start_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,cancel).get();
+        try{const auto actual=store_.agent_worker_model_claim(claimed.model.root_run_id,claimed.model.attempt_id).get();result=policy_.delegation(call,actual.actual_assistant_json,cancel);}
+        catch(const RootBudgetExhausted&){result={false,R"({"error":{"code":"delegation_budget_exhausted","message":"No additional children were admitted within the shared root budget"}})"};}
+        catch(const DelegationCapacityUnavailable&){result={false,R"({"error":{"code":"delegation_capacity_unavailable","message":"The bounded delegation queue has no available capacity"}})"};}
+        catch(const std::invalid_argument&){result={false,R"({"error":{"code":"invalid_delegation_request","message":"The delegation request did not match its registered preset"}})"};}
+        catch(...){throw AgentWorkerReadOutcomeUnrecorded("Delegation outcome requires ownership recovery; no replay is authorized");}
+    }
+    try{store_.record_agent_worker_read_result(lease_,call,result.success,result.output_json).get();}catch(...){throw AgentWorkerReadOutcomeUnrecorded("Delegation result could not be recorded before delivery");}
+    check(cancel);return result;
 }
 }

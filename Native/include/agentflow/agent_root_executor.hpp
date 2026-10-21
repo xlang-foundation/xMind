@@ -6,6 +6,8 @@
 
 namespace agentflow {
 struct WorkspaceMembershipSnapshot;
+class NativeChildExecutor;
+class DelegationExecutor;
 struct AgentRootExecutionRequest {
     std::string run_id,model_id,agent_instructions;
     std::optional<std::vector<std::string>> agent_tools;
@@ -21,6 +23,8 @@ struct AgentRootExecutionRequest {
 class AgentRootExecutor {
 public:
     virtual ~AgentRootExecutor()=default;
+    virtual std::shared_ptr<NativeChildExecutor> shared_children()const{return {};}
+    virtual std::shared_ptr<DelegationExecutor> shared_delegation()const{return {};}
     virtual void validate(const AgentRootExecutionRequest&)const=0;
     virtual Run execute(const AgentRootExecutionRequest&,std::stop_token)=0;
 };
