@@ -1,3 +1,26 @@
+## Complete current-source native qualification — 2026-10-20
+
+Committed source `20ad8c8d5f85efe33c9300497fe1e62a1bef9294` passes the complete
+actual CTest inventory: **161/161 in 1069.78 seconds**. Serial Release build and
+CTest both terminate successfully. The gate freezes and verifies file sets and
+hashes for 2698 tracked project inputs, 16 SDK headers, 1870 allowed pure-library
+sources, 76 SDK runtime files, 18598 Node dependency files and all 133 native
+executables/DLLs. Native `xmind.exe` is
+`470190ab1883d56d229f5ddf0f09f68d59f3d95e07290ed70a7653067c21f082`;
+the paired runtime remains `1ff2a8e7…`.
+[Inventory, exact scope and raw evidence](evidence/agent-placement-current-full-native-20261020.json).
+
+This complete native gate includes placement/ownership and standalone worker
+entry, existing thread-backend coding and effect approvals, providers, MCP/A2A,
+graphs/context, CLI and managed-profile/view lifecycle contracts. Local-profile
+and local-view cases legitimately run 466.40 and 133.59 seconds; both pass.
+
+Fixtures use synthetic providers or no inference. Installed59, preserved user
+owners/history/settings and prior real-provider coding remain separate evidence.
+Worker effects/context/planning/graphs, managed process mode, generic authenticated
+Local/Nexus execution protocol, large-history paging and broader recovery remain
+unfinished. No new installed, live-rendered or live-provider acceptance is claimed.
+
 ## Placement ownership and queued snapshots — 2026-10-20
 
 The low-level local AgentRunner now rejects a persisted process-placement root
