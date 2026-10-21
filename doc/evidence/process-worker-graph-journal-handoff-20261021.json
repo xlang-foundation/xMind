@@ -1,0 +1,93 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:03:03.554Z",
+    "sourceParent": "98760f1555c38b4013e78fc34acc29aa84a091fa",
+    "sourcePatchSha256": "f6a124f9b1c8ba75150360efc67c67765f4f1ba94fd95e01f47dc40c7800fe21",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 55516,
+      "launchedAt": "2026-10-21T17:00:35.192Z",
+      "completedAt": "2026-10-21T17:01:43.414Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2cb0b0f8c9c250bf2af34caa890482019fe4f789db988cedb06de4014c212c89"
+    },
+    "test": {
+      "pid": 66476,
+      "launchedAt": "2026-10-21T17:01:46.494Z",
+      "completedAt": "2026-10-21T17:03:00.603Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f986461b5aa63c2cb4b2a373b45f93b8d0b0401c7bb351e90a70cb339ed03306"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 74.06,
+    "projectFiles": 2750,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "697abaae936409ee79d4e570697f018c93b3edb5295ae1b3a1f42dae05bb3c74",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-build.log": "2cb0b0f8c9c250bf2af34caa890482019fe4f789db988cedb06de4014c212c89",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-build-terminal.json": "be527868450877a0025c265e308ea04346436844f855c93eaa7cd406b0167d5d",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-ctest.log": "f986461b5aa63c2cb4b2a373b45f93b8d0b0401c7bb351e90a70cb339ed03306",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-ctest-terminal.json": "c582872617c6410a906fc23f0867b4d929aa737f89b18a67757303208806eced",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-LastTest.log": "a99702e200971fa24d2fd071a2191a7352e266f1046fbbcfafb6e853fc08c2e4",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-gate.json": "8510bfaeacfef9d0809881ce0c5d3023e2a3858b0e92b1023dceee6dffcef3b2",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-source.patch": "f6a124f9b1c8ba75150360efc67c67765f4f1ba94fd95e01f47dc40c7800fe21",
+    "doc/evidence/process-worker-graph-journal-handoff-20261021-binaries-before-test.json": "c43a408dddb9752cdea25ec5712ce2e76313c5cd4caaddccd29f8986c6767207",
+    "doc/evidence/process-worker-graph-journal-link-20261021-build.log": "d60b905d331c2780fe87b7667826f2350442d9e4c3f238ae6d756d0ea8e37008",
+    "doc/evidence/process-worker-graph-journal-link-20261021-build-terminal.json": "82c7d94948beaaa87a0abe50da6497142267a12dccd05e023977e76e49fda0ca",
+    "doc/evidence/process-worker-graph-journal-link-20261021-ctest.log": "f10bc37d91ef44cb77d10d674fa64071cd2fce00c47f7ff94b58f6f1bdb94384",
+    "doc/evidence/process-worker-graph-journal-link-20261021-ctest-terminal.json": "7f877488d22e972504455c9d4bcded26bb926c7f1ea140fa7266abdbe053851a",
+    "doc/evidence/process-worker-graph-journal-link-20261021-LastTest.log": "c33b63dee6fae6ebb00261bf8aba5363a5aa3477c61243579584b7ea622edbe2",
+    "doc/evidence/process-worker-graph-journal-link-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-journal-link-20261021-gate.json": "4b2479e83b1dd143872d0bdf11e897c4ba5ffa57283073db6aeaf4e6b61e4bbb",
+    "doc/evidence/process-worker-graph-journal-link-20261021-source.patch": "cca01409c461b49bfa255e8977425427489aa8d2c7a8f93a6f5ab861ce41eae2",
+    "doc/evidence/process-worker-graph-journal-link-20261021-binaries-before-test.json": "5dc75a0dc6a49135f8cbd78852d416124a126298adf9e0c56b4ebeca964d5f79",
+    "doc/evidence/process-worker-graph-journal-20261021-build.log": "c6eebe1c2fd5dda8e464a4827fe8a60c13c672031b7aa9f40809140eb236a527",
+    "doc/evidence/process-worker-graph-journal-20261021-build-terminal.json": "e2743da871f05f080f8e0dd80c04b37f21c89868057e39c9ae5c21b013576fc7",
+    "doc/evidence/process-worker-graph-journal-20261021-source.patch": "778316205b53c84621feec055030cf7dcb4206ab0b9224d7d00c28ca7487399a"
+  },
+  "verified": [
+    "Backend graph child journal read returns only exact kind, captured root and derived graph_node_path; repository lease/active-segment checks and rejection of another target precede encoding",
+    "Graph client codec strictly decodes the three-field admission, nested path and scoped root without accepting backend identity or dynamic-plan authority fields",
+    "Actual authenticated SDK IPC fixture adds a third graph child process, constructs its ordinary nested journal, rejects coding assembly, validates typed leaf reserve/start/finish and accepts backend-funded canonical reserve attempt handoff",
+    "Parent/ordinary leaf/typed graph role fixture rejects 84 forged lifecycle/admission replies, including malformed graph path, substituted root/kind and extra private authority field",
+    "Real repository fixture verifies minimal graph admission RPC, sibling-history rejection and blocked untyped funding without model charges",
+    "Nine focused contracts pass in 74.06 seconds; existing worker HTTP peer observes 219 requests; full frozen input and 133-native-binary sets verified"
+  ],
+  "failedRuns": [
+    {
+      "name": "process-worker-graph-journal-20261021",
+      "cause": "Ledger test called journal RPC encoder without linking journal library; added test target dependency"
+    },
+    {
+      "name": "process-worker-graph-journal-link-20261021",
+      "cause": "Typed graph reserve fixture incorrectly rejected a valid backend-selected canonical attempt ID. Updated malformed reserved-ID case and added explicit positive canonical handoff assertion; start/finish remain exact-ID scoped."
+    }
+  ],
+  "limitations": [
+    "Synthetic graph journal replies prove real IPC decoding and journal construction, not actual graph worker model/context dispatch",
+    "Graph context window, runner dispatch, graph coding tools, ordinary/no-context graph placement and default process selection remain unfinished",
+    "Earlier 0xC0000005 worker access violation remains unresolved; this passing gate does not establish a fix",
+    "Latest complete native 162-test pass predates graph boundary/journal patches",
+    "Planning, combined parent compaction/overflow and updated installed/rendered/live-provider acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

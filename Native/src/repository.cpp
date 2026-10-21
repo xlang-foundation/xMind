@@ -3456,7 +3456,7 @@ AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerL
     case AgentWorkerJournalReadKind::events:
         if(query.target!=owner.id)throw Conflict("Worker cannot read another run events");result=events(owner.id,query.after);break;
     case AgentWorkerJournalReadKind::child_admission:
-        if(query.target!=expected.owner_run_id||!worker_delegated_owner(*this,expected))throw Conflict("Worker may inspect only its exact delegated admission");result=child_admission(query.target);break;
+        if(query.target!=expected.owner_run_id||(!worker_delegated_owner(*this,expected)&&!worker_graph_owner(*this,expected)))throw Conflict("Worker may inspect only its exact child admission");result=child_admission(query.target);break;
     case AgentWorkerJournalReadKind::root_budget:
         if(query.target!=expected.root_run_id)throw Conflict("Worker cannot read another root budget");result=root_budget(query.target);break;
     default:throw std::invalid_argument("Unsupported worker journal read");

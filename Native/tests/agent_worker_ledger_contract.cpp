@@ -8,6 +8,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
 #include "agentflow/graph.hpp"
+#include "agentflow/agent_worker_journal_rpc.hpp"
 #include <filesystem>
 #include <algorithm>
 #include <future>

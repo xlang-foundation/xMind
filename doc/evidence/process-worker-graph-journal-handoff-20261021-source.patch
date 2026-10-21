@@ -1,0 +1,184 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 45b785ce..034ea58e 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -931,7 +931,7 @@ if(BUILD_TESTING)
+       set_tests_properties(native_agent_worker_coding_server_contract PROPERTIES TIMEOUT 60)
+     endif()
+     target_include_directories(agentflow_agent_worker_ledger_contract PRIVATE third_party)
+-    target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent)
++    target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent agentflow_worker_journal_rpc)
+     add_custom_command(TARGET agentflow_agent_worker_ledger_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_ledger_contract>")
+     if(AGENTFLOW_NODE_EXECUTABLE)
+diff --git a/Native/src/agent_worker_journal_rpc.cpp b/Native/src/agent_worker_journal_rpc.cpp
+index 1c43b8a5..11893201 100644
+--- a/Native/src/agent_worker_journal_rpc.cpp
++++ b/Native/src/agent_worker_journal_rpc.cpp
+@@ -3,6 +3,7 @@
+ #include "agentflow/agent_worker_file_host.hpp"
+ #include "nlohmann/json.hpp"
+ #include <limits>
++#include <algorithm>
+ #include <set>
+ #include <type_traits>
+ 
+@@ -37,7 +38,7 @@ std::string encode(const AgentWorkerJournalValue& input){
+                 if constexpr(std::is_same_v<T,std::vector<Message>>)v.push_back({{"sequence",item.sequence},{"role",item.role},{"json",item.json}});
+                 else v.push_back({{"sequence",item.sequence},{"run_id",item.run_id},{"kind",item.kind},{"json",item.json}});
+             }
+-        }else if constexpr(std::is_same_v<T,ChildAdmissionRecord>){if(value.kind!=ChildAdmissionKind::delegated_leaf||value.preset_id!="workspace.inspect"||value.preset_revision!=1)throw AgentWorkerRpcRemoteError("rejected");v={{"kind","delegated_leaf"},{"root_run_id",value.root_run_id},{"batch_id",value.batch_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};
++        }else if constexpr(std::is_same_v<T,ChildAdmissionRecord>){if(value.kind==ChildAdmissionKind::graph_agent){v={{"kind","graph_agent"},{"root_run_id",value.root_run_id},{"graph_node_path",value.graph_node_path}};}else{if(value.kind!=ChildAdmissionKind::delegated_leaf||value.preset_id!="workspace.inspect"||value.preset_revision!=1)throw AgentWorkerRpcRemoteError("rejected");v={{"kind","delegated_leaf"},{"root_run_id",value.root_run_id},{"batch_id",value.batch_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};}
+         }else if constexpr(std::is_same_v<T,RootBudgetRecord>){const auto& s=value.spec;
+             v={{"root_run_id",value.root_run_id},{"spec",{{"policy_id",s.policy_id},{"policy_revision",s.policy_revision},{"workspace_identity",s.workspace_identity},{"provider_identity_json",s.provider_identity_json},{"max_children",s.max_children},{"max_parallel",s.max_parallel},{"max_model_calls",s.max_model_calls},{"wall_limit_ms",s.wall_limit_ms}}},
+                 {"children_admitted",value.children_admitted},{"model_calls_reserved",value.model_calls_reserved},{"parent_calls_held",value.parent_calls_held},{"revision",value.revision},{"planned_children_reserved",value.planned_children_reserved},{"parent_model_calls_reserved",value.parent_model_calls_reserved}};
+@@ -51,7 +52,7 @@ AgentWorkerJournalValue decode(AgentWorkerJournalReadKind k,const std::string& b
+         case AgentWorkerJournalReadKind::session:{object(v,5);Session s{text(v.at("id")),text(v.at("title")),text(v.at("parent_id")),{},text(v.at("fork_boundary_type"))};if(!v.at("fork_boundary_sequence").is_null())s.fork_boundary_sequence=integer(v.at("fork_boundary_sequence"));return s;}
+         case AgentWorkerJournalReadKind::history:{rows(v);std::vector<Message> result;for(const auto& m:v){object(m,3);const auto seq=integer(m.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(m.at("role")),text(m.at("json"))});}return result;}
+         case AgentWorkerJournalReadKind::events:{rows(v);std::vector<Event> result;for(const auto& e:v){object(e,4);const auto seq=integer(e.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(e.at("run_id")),text(e.at("kind")),text(e.at("json"))});}return result;}
+-        case AgentWorkerJournalReadKind::child_admission:{object(v,5);if(text(v.at("kind"))!="delegated_leaf"||text(v.at("preset_id"))!="workspace.inspect"||integer(v.at("preset_revision"))!=1||text(v.at("root_run_id")).empty()||text(v.at("batch_id")).empty())invalid();return ChildAdmissionRecord{ChildAdmissionKind::delegated_leaf,text(v.at("root_run_id")),text(v.at("batch_id")),"workspace.inspect",1};}
++        case AgentWorkerJournalReadKind::child_admission:{if(text(v.at("kind"))=="graph_agent"){object(v,3);const auto path=text(v.at("graph_node_path"));if(text(v.at("root_run_id")).empty()||path.empty()||path.size()>259||path.front()=='/'||path.back()=='/'||path.find("//")!=std::string::npos||path.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-/")!=std::string::npos||std::count(path.begin(),path.end(),'/')>3)invalid();ChildAdmissionRecord result;result.kind=ChildAdmissionKind::graph_agent;result.root_run_id=text(v.at("root_run_id"));result.graph_node_path=path;return result;}object(v,5);if(text(v.at("kind"))!="delegated_leaf"||text(v.at("preset_id"))!="workspace.inspect"||integer(v.at("preset_revision"))!=1||text(v.at("root_run_id")).empty()||text(v.at("batch_id")).empty())invalid();return ChildAdmissionRecord{ChildAdmissionKind::delegated_leaf,text(v.at("root_run_id")),text(v.at("batch_id")),"workspace.inspect",1};}
+         case AgentWorkerJournalReadKind::root_budget:{object(v,8);const auto& s=v.at("spec");object(s,8);return RootBudgetRecord{text(v.at("root_run_id")),{text(s.at("policy_id")),integer(s.at("policy_revision")),text(s.at("workspace_identity")),text(s.at("provider_identity_json")),integer(s.at("max_children")),integer(s.at("max_parallel")),integer(s.at("max_model_calls")),integer(s.at("wall_limit_ms"))},integer(v.at("children_admitted")),integer(v.at("model_calls_reserved")),integer(v.at("parent_calls_held")),integer(v.at("revision")),integer(v.at("planned_children_reserved")),integer(v.at("parent_model_calls_reserved"))};}
+         }invalid();
+     }catch(const Json::exception&){invalid();}
+@@ -65,7 +66,7 @@ std::string encode_attempt(const ModelCallReservation& r){auto value=Json{{"root
+ ModelCallReservation attempt_call(AgentWorkerRpcPeer& peer,const std::string& method,const std::string& attempt,const std::string& expected_state){
+     try{const auto v=parse(peer.call(method,Json{{"attempt_id",attempt}}.dump()));object(v,8);const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
+         if(text(v.at("root_run_id"))!=scope.root_id||text(v.at("owner_run_id"))!=scope.run_id||(attempt_id(v.at("attempt_id"))!=attempt&&method!="journal.reserve_model")||text(v.at("role"))!=(role==ModelCallRole::parent?"parent":"leaf")||text(v.at("state"))!=expected_state||text(v.at("purpose"))!="inference")invalid();
+-        const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(scope.root_id==scope.run_id){if(budget.spec.policy_id=="native.delegation"){if(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else{if(budget.spec.policy_id!="native.delegation")invalid();(void)AgentWorkerJournalClient(peer).child_admission(scope.run_id);}}else if(attempt_id(v.at("attempt_id"))!=attempt)invalid();
++        const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(scope.root_id==scope.run_id){if(budget.spec.policy_id=="native.delegation"){if(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else{const auto child=AgentWorkerJournalClient(peer).child_admission(scope.run_id);if(budget.spec.policy_id=="native.graph-context"){if(child.kind!=ChildAdmissionKind::graph_agent||budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)invalid();}else if(budget.spec.policy_id!="native.delegation"||child.kind!=ChildAdmissionKind::delegated_leaf)invalid();}}else if(attempt_id(v.at("attempt_id"))!=attempt)invalid();
+         const auto assistant=text(v.at("actual_assistant_json"));if((expected_state=="finished")==assistant.empty())invalid();return {scope.root_id,attempt_id(v.at("attempt_id")),scope.run_id,role,expected_state,ModelCallPurpose::inference,step,assistant};
+     }catch(const Json::exception&){invalid();}
+     catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker model funding rejected");if(e.code()=="budget_exhausted")throw RootBudgetExhausted("Worker root model allowance exhausted");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker model funding cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker funding deadline elapsed");throw;}
+diff --git a/Native/src/agent_worker_run_journal.cpp b/Native/src/agent_worker_run_journal.cpp
+index b2b1d5df..76906051 100644
+--- a/Native/src/agent_worker_run_journal.cpp
++++ b/Native/src/agent_worker_run_journal.cpp
+@@ -27,8 +27,9 @@ public:
+     OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
+         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.root_id);
+         if(scope_.root_id!=scope_.run_id){
+-            if(workspace_||run.parent_id!=scope_.root_id||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.spec.policy_id!="native.delegation"||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker child journal differs from bounded delegated admission");
+-            admission_=client_.child_admission(scope_.run_id);session_=run.session_id;return;
++            admission_=client_.child_admission(scope_.run_id);const bool graph=admission_->kind==ChildAdmissionKind::graph_agent;
++            if(workspace_||run.parent_id.empty()||(!graph&&run.parent_id!=scope_.root_id)||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||budget.root_run_id!=scope_.root_id||budget.spec.policy_id!=(graph?"native.graph-context":"native.delegation")||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id||(graph&&(budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)))throw Conflict("Worker child journal differs from captured admission");
++            session_=run.session_id;return;
+         }
+         const bool delegation=budget.spec.policy_id=="native.delegation";
+         if(budget.root_run_id!=scope_.root_id||!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||(!delegation&&budget.spec.policy_id!="native.direct-agent"&&budget.spec.policy_id!="native.context")||budget.spec.policy_revision!=1||(delegation?(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2):(budget.spec.max_children!=0||budget.spec.max_parallel!=0))||budget.spec.workspace_identity!=scope_.workspace_id)
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index c558ce81..78b0873a 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3456,7 +3456,7 @@ AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerL
+     case AgentWorkerJournalReadKind::events:
+         if(query.target!=owner.id)throw Conflict("Worker cannot read another run events");result=events(owner.id,query.after);break;
+     case AgentWorkerJournalReadKind::child_admission:
+-        if(query.target!=expected.owner_run_id||!worker_delegated_owner(*this,expected))throw Conflict("Worker may inspect only its exact delegated admission");result=child_admission(query.target);break;
++        if(query.target!=expected.owner_run_id||(!worker_delegated_owner(*this,expected)&&!worker_graph_owner(*this,expected)))throw Conflict("Worker may inspect only its exact child admission");result=child_admission(query.target);break;
+     case AgentWorkerJournalReadKind::root_budget:
+         if(query.target!=expected.root_run_id)throw Conflict("Worker cannot read another root budget");result=root_budget(query.target);break;
+     default:throw std::invalid_argument("Unsupported worker journal read");
+diff --git a/Native/tests/agent_worker_graph_admission_fixture.hpp b/Native/tests/agent_worker_graph_admission_fixture.hpp
+index 530b56cd..0b747a54 100644
+--- a/Native/tests/agent_worker_graph_admission_fixture.hpp
++++ b/Native/tests/agent_worker_graph_admission_fixture.hpp
+@@ -14,7 +14,7 @@ void graph_worker_admission(PersistenceService& store){
+     // Membership must remain byte-equivalent JSON to the root snapshot.
+     auto stale=two;++stale.workspace_revision;rejects<Conflict>([&]{store.admit_agent_worker(stale).get();});
+     const auto deadline=std::chrono::steady_clock::now()+10s;
+-    for(auto* owner:{&one,&two}){*owner=store.admit_agent_worker(*owner).get().spec;store.start_agent_worker_run(*owner,deadline).get();require(std::get<Run>(store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::run,owner->owner_run_id}).get()).state==RunState::running,"Graph worker may read its own started owner");rejects<Conflict>([&]{store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::history,owner==&one?two.owner_run_id:one.owner_run_id}).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(*owner,"untyped-graph-attempt",deadline).get();});}
++    for(auto* owner:{&one,&two}){*owner=store.admit_agent_worker(*owner).get().spec;store.start_agent_worker_run(*owner,deadline).get();const auto child_scope=AgentWorkerScope{owner->root_run_id,owner->owner_run_id,owner->workspace_id,owner->generation,owner->workspace_revision};const auto rpc=bind_agent_worker_journal_rpc(store,*owner,child_scope,deadline);const auto value=Json::parse(rpc("journal.child_admission",Json{{"target",owner->owner_run_id},{"after",0}}.dump(),{},{}));require(value.size()==3&&value.at("kind")=="graph_agent"&&value.at("root_run_id")==root_id&&value.at("graph_node_path")== (owner==&one?"one":"two"),"Graph journal RPC must return only its exact derived node path and root");rejects<AgentWorkerRpcRemoteError>([&]{rpc("journal.child_admission",Json{{"target",root_id},{"after",0}}.dump(),{},{});});require(std::get<Run>(store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::run,owner->owner_run_id}).get()).state==RunState::running,"Graph worker may read its own started owner");rejects<Conflict>([&]{store.read_agent_worker_journal(*owner,{AgentWorkerJournalReadKind::history,owner==&one?two.owner_run_id:one.owner_run_id}).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(*owner,"untyped-graph-attempt",deadline).get();});}
+     require(store.root_budget(root_id).get().model_calls_reserved==0,"Graph worker enrollment cannot bypass typed graph-context funding");
+     for(const auto* owner:{&one,&two}){store.terminate_agent_worker(*owner,RunState::cancelled,"cancelled").get();store.settle_graph_child(owner->owner_run_id).get();rejects<Conflict>([&]{store.validate_agent_worker_model_window(*owner,deadline).get();});}
+     store.transition(tool.owner_run_id,RunState::queued,RunState::cancelled).get();store.settle_graph_child(tool.owner_run_id).get();store.retire_graph_context_owner(root_id,RunState::cancelled,R"({"reason":"synthetic graph admission fixture done"})","graph-worker-segment",1).get();
+diff --git a/Native/tests/agent_worker_journal_role_fixture.hpp b/Native/tests/agent_worker_journal_role_fixture.hpp
+index 0c24df88..3e8aa885 100644
+--- a/Native/tests/agent_worker_journal_role_fixture.hpp
++++ b/Native/tests/agent_worker_journal_role_fixture.hpp
+@@ -2,6 +2,7 @@
+ // This proves client scope/role decoding, not repository child admission.
+ #pragma once
+ #include "agentflow/agent_worker_journal_rpc.hpp"
++#include "agentflow/agent_worker_run_journal.hpp"
+ #include "agentflow/process_executor.hpp"
+ #include "nlohmann/json.hpp"
+ #include <iostream>
+@@ -10,16 +11,19 @@ using namespace agentflow;
+ using Json=nlohmann::json;
+ using Clock=std::chrono::steady_clock;
+ using namespace std::chrono_literals;
+-inline void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
++inline void check(bool value,const char* message){if(!value){std::cerr<<message<<std::endl;throw std::runtime_error(message);}}
+ inline std::string child(AgentWorkerRpcPeer& peer,const std::string& method){
+     if(method!="fixture.run")throw AgentWorkerRpcRemoteError("unsupported");
+     const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
+-    AgentWorkerJournalClient journal(peer);unsigned rejected=0;
++    AgentWorkerJournalClient journal(peer);unsigned rejected=0;const bool graph=scope.root_id=="journal-graph-root";
++    if(graph){const auto owned=make_agent_worker_ordinary_journal(peer,{});check(owned->child_admission(scope.run_id).get().graph_node_path=="outer/reader","Graph journal must retain its scoped nested path");bool denied=false;try{(void)make_agent_worker_coding_journal(peer,{});}catch(const Conflict&){denied=true;}check(denied,"Graph journal cannot acquire coding assembly");}
+     for(const auto* phase:{"reserve","start","finish"}){
+         auto invoke=[&](const std::string& attempt){if(std::string(phase)=="reserve")return journal.reserve_model_call(attempt);if(std::string(phase)=="start")return journal.start_model_call(attempt);return journal.finish_model_call(attempt);};
+         const auto actual=invoke("correct");
++        if(graph&&std::string(phase)=="reserve"){const auto remapped=invoke("remapped");check(remapped.attempt_id=="canonical-attempt"&&remapped.inference_step_id=="synthetic-step"&&remapped.role==ModelCallRole::leaf,"Typed graph reserve must accept its backend-funded canonical attempt handoff");}
+         check(actual.root_run_id==scope.root_id&&actual.owner_run_id==scope.run_id&&actual.role==role&&actual.attempt_id=="correct","Journal receipt must retain its exact captured root, owner and derived role");
+-        for(const auto* attempt:{"wrong-role","wrong-root","wrong-owner","wrong-attempt","wrong-state","wrong-purpose","wrong-step","wrong-assistant"}){
++        std::vector<std::string> invalid_attempts={"wrong-role","wrong-root","wrong-owner","wrong-attempt","wrong-state","wrong-purpose","wrong-step","wrong-assistant"};if(graph)for(const auto* value:{"wrong-graph-path","wrong-graph-root","wrong-graph-extra","wrong-graph-kind"})invalid_attempts.push_back(value);
++        for(const auto& attempt:invalid_attempts){
+             bool invalid=false;try{(void)invoke(attempt);}catch(const AgentWorkerProtocolError&){invalid=true;}
+             check(invalid,"Forged journal receipt must be rejected before constructing a reservation");++rejected;
+         }
+@@ -27,20 +31,24 @@ inline std::string child(AgentWorkerRpcPeer& peer,const std::string& method){
+     return Json{{"pid",GetCurrentProcessId()},{"role",role==ModelCallRole::parent?"parent":"leaf"},{"rejected",rejected}}.dump();
+ }
+ inline void parent(std::shared_ptr<const BoundProcessExecutable> image){
+-    for(const bool leaf:{false,true}){
++    for(unsigned mode=0;mode<3;++mode){const bool leaf=mode!=0,graph=mode==2;
+         const auto deadline=Clock::now()+15s;
+-        AgentWorkerScope scope{"journal-role-root",leaf?"journal-role-leaf":"journal-role-root","workspace:none",leaf?"journal-leaf-generation":"journal-parent-generation",1};
++        AgentWorkerScope scope{graph?"journal-graph-root":"journal-role-root",leaf?"journal-role-leaf":"journal-role-root","workspace:none",leaf?"journal-leaf-generation":"journal-parent-generation",1};
+         auto worker=AgentWorkerProcess::launch(image,scope,deadline);
+-        unsigned calls=0;
++        unsigned calls=0;std::string active_attempt;
+         AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
++            if(graph&&method=="journal.run")return Json{{"id",scope.run_id},{"session_id","synthetic-graph-session"},{"state","queued"},{"parent_id","nested-graph-invocation"},{"node_id","reader"},{"graph_root",false},{"provider_context_json",""}}.dump();
++            if(graph&&method=="journal.root_budget")return Json{{"root_run_id",scope.root_id},{"spec",{{"policy_id","native.graph-context"},{"policy_revision",1},{"workspace_identity","workspace:none"},{"provider_identity_json",R"({"wire":"responses","model_id":"synthetic-graph-model"})"},{"max_children",8},{"max_parallel",2},{"max_model_calls",32},{"wall_limit_ms",20000}}},{"children_admitted",1},{"model_calls_reserved",0},{"parent_calls_held",0},{"revision",1},{"planned_children_reserved",0},{"parent_model_calls_reserved",0}}.dump();
++            if(graph&&method=="journal.child_admission"){Json value={{"kind","graph_agent"},{"root_run_id",scope.root_id},{"graph_node_path","outer/reader"}};if(active_attempt=="wrong-graph-path")value["graph_node_path"]="outer//reader";if(active_attempt=="wrong-graph-root")value["root_run_id"]="foreign-root";if(active_attempt=="wrong-graph-extra")value["backend_identity"]="must-not-be-public";if(active_attempt=="wrong-graph-kind")value["kind"]="dynamic_agent";return value.dump();}
+             if(method!="journal.reserve_model"&&method!="journal.start_model"&&method!="journal.finish_model")throw AgentWorkerRpcRemoteError("unsupported");
+-            ++calls;const auto attempt=Json::parse(payload).at("attempt_id").get<std::string>();
++            ++calls;const auto attempt=Json::parse(payload).at("attempt_id").get<std::string>();active_attempt=attempt;
+             const std::string state=method=="journal.reserve_model"?"reserved":method=="journal.start_model"?"started":"finished";
+-            Json value={{"root_run_id",scope.root_id},{"owner_run_id",scope.run_id},{"attempt_id",attempt},{"role",leaf?"leaf":"parent"},{"state",state},{"purpose","inference"},{"inference_step_id",""},{"actual_assistant_json",state=="finished"?R"({"role":"assistant","content":"synthetic receipt"})":""}};
++            Json value={{"root_run_id",scope.root_id},{"owner_run_id",scope.run_id},{"attempt_id",attempt},{"role",leaf?"leaf":"parent"},{"state",state},{"purpose","inference"},{"inference_step_id",graph?"synthetic-step":""},{"actual_assistant_json",state=="finished"?R"({"role":"assistant","content":"synthetic receipt"})":""}};
+             if(attempt=="wrong-role")value["role"]=leaf?"parent":"leaf";
+             if(attempt=="wrong-root")value["root_run_id"]="foreign-root";
+             if(attempt=="wrong-owner")value["owner_run_id"]="foreign-owner";
+-            if(attempt=="wrong-attempt")value["attempt_id"]="foreign-attempt";
++            if(attempt=="remapped")value["attempt_id"]="canonical-attempt";
++            if(attempt=="wrong-attempt")value["attempt_id"]=graph&&state=="reserved"?"invalid attempt":"foreign-attempt";
+             if(attempt=="wrong-state")value["state"]="interrupted";
+             if(attempt=="wrong-purpose")value["purpose"]="context_compaction";
+             if(attempt=="wrong-step")value["inference_step_id"]="invalid step";
+@@ -49,9 +57,9 @@ inline void parent(std::shared_ptr<const BoundProcessExecutable> image){
+         },deadline);
+         worker->channel().send({"fixture.boot","journal_role"},deadline);peer.start();
+         const auto result=Json::parse(peer.call("fixture.run","{}"));
+-        check(result.at("pid")==worker->pid()&&result.at("role")== (leaf?"leaf":"parent")&&result.at("rejected")==24&&calls==27,"Actual scoped child must validate all journal lifecycle replies and reject 24 forged receipts");
++        check(result.at("pid")==worker->pid()&&result.at("role")== (leaf?"leaf":"parent")&&result.at("rejected")== (graph?36:24)&&calls==(graph?40:27),"Actual scoped child must validate all journal lifecycle replies and reject 24 forged receipts");
+         peer.stop();check(worker->wait(Clock::now()+5s)==0,"Journal role fixture child must physically retire");
+     }
+-    std::cout<<"Actual SDK IPC journal role codec passed parent/leaf reserve/start/finish and 48 forged receipt rejections; synthetic replies only, no child admission or funding."<<std::endl;
++    std::cout<<"Actual SDK IPC journal role codec passed parent/leaf/typed-graph reserve/start/finish and 84 forged receipt rejections; synthetic replies only, no child admission or funding."<<std::endl;
+ }
+ }
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 7f7ace1b..846bba36 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -8,6 +8,7 @@
+ #include "agentflow/xlang_sqlite.hpp"
+ #include "nlohmann/json.hpp"
+ #include "agentflow/graph.hpp"
++#include "agentflow/agent_worker_journal_rpc.hpp"
+ #include <filesystem>
+ #include <algorithm>
+ #include <future>

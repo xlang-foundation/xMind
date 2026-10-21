@@ -1,3 +1,19 @@
+## Scoped graph worker journal IPC — 2026-10-21
+
+Graph child journals now expose only their captured root and derived node path,
+validate typed native.graph-context leaf replies and construct nested ordinary
+read journals while rejecting coding assembly. An actual third SDK IPC fixture
+process verifies these values, valid backend canonical-attempt handoff and 84
+forged-reply rejections across parent/leaf/graph roles. The real repository fixture
+checks minimal graph admission encoding and preserves blocked untyped funding.
+**9/9 focused contracts pass in 74.06 seconds**, with existing 219 controlled HTTP
+requests and frozen 133-binary/input sets.
+[Scope, corrected fixture and raw evidence](evidence/process-worker-graph-journal-handoff-20261021.json).
+
+Actual graph context/runner dispatch, coding/no-context graph placement, planning
+and default selection remain unfinished. The earlier access violation is unresolved.
+Current full regression and installed/rendered/live-provider acceptance remain open.
+
 ## Graph worker admission boundary — 2026-10-21
 
 Repository admission now binds graph-agent workers to their captured node model,
