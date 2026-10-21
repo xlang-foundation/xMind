@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-10-21T03:30:21.844Z",
+  "gate": {
+    "recordedAt": "2026-10-21T03:30:13.630Z",
+    "sourceParent": "2e5012ec0131bd065662f68f1c2fa8ed3faeb853",
+    "sourcePatchSha256": "5e5eaf36d7274b2d9c42febe19915d0e79ed946ab79f3c7183914c25ed893a73",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 65488,
+      "launchedAt": "2026-10-21T03:19:03.614Z",
+      "completedAt": "2026-10-21T03:27:10.590Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b50a61cc13a323b21499a1e35fec77981fe9aefdf46fa3468f423b1a8a67a959"
+    },
+    "test": {
+      "pid": 58996,
+      "launchedAt": "2026-10-21T03:27:13.756Z",
+      "completedAt": "2026-10-21T03:30:11.161Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "99cedc72442a62119dafa5cb3296e22ec8e713472294220c6686f62ff1cba791"
+    },
+    "total": 61,
+    "failed": 0,
+    "passed": 61,
+    "seconds": 177.36,
+    "projectFiles": 2698,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5cc4850bee602e4b947eddcda26b1b43e37e73ab739cf403350dfdf53d527e0b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/file-invocation-wire-focused-20261020-build.log": "b50a61cc13a323b21499a1e35fec77981fe9aefdf46fa3468f423b1a8a67a959",
+    "doc/evidence/file-invocation-wire-focused-20261020-build-terminal.json": "dbe57855bc3dcf86380a421695990ebabbdb77ef0712b92f99e18a3298f9c3a6",
+    "doc/evidence/file-invocation-wire-focused-20261020-ctest.log": "99cedc72442a62119dafa5cb3296e22ec8e713472294220c6686f62ff1cba791",
+    "doc/evidence/file-invocation-wire-focused-20261020-ctest-terminal.json": "7e5275d6b5f03a413579be2260451a7984be3681171827e5d9ae32b8092d7dea",
+    "doc/evidence/file-invocation-wire-focused-20261020-LastTest.log": "ebf9de5800688799ba1eafbab23c695f504714fbe13a8b35d11a3745291b1515",
+    "doc/evidence/file-invocation-wire-focused-20261020-test-inventory.json": "b477dc3fdefd264758a33430e109ec6114b616212c99732d28aa191d7517c8ab",
+    "doc/evidence/file-invocation-wire-focused-20261020-gate.json": "cb5dc46dc0ad6c6c42aab1775efe1474e83bd25790198b60bbe101dcab6380f5"
+  },
+  "scope": "Strict native file invocation value codec; preparation for authenticated backend-owned file RPC",
+  "verified": [
+    "Exact run, attempt, call, workspace, folder, revision, tool and argument values survive serialization and parsing",
+    "Unknown authority fields, duplicate keys, missing fields, nested or invalid types, unsupported versions and unsafe revisions are rejected",
+    "Opaque argument bytes retain their native 4 MiB limit; wire escaping is bounded separately and authenticated frame limits remain independent",
+    "Native local file host applies the same metadata validation; existing actual approval, partial patch, revocation and restart contracts remain covered",
+    "Serial Release build and 61 focused contracts pass with frozen source, SDK, runtime, pure libraries, dependencies and native binary sets"
+  ],
+  "limitations": [
+    "Codec only; no file RPC endpoint or durable worker effect ledger is enabled",
+    "Process-read remains read-only; mixed canonical tool turns and coding worker composition remain unfinished",
+    "No new full-suite, installed, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

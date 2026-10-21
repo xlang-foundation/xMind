@@ -1,3 +1,19 @@
+## File invocation wire values — 2026-10-20
+
+The native file-call envelope now has a strict codec preserving exact arguments
+and admitted run/attempt/call/workspace/folder/revision/tool values. It rejects
+duplicate, missing or unknown fields, forged authority, invalid types, unsupported
+versions and revisions outside the safe integer range. The local file host uses
+the same metadata validation. The native 4 MiB argument limit is preserved;
+authenticated transport frame limits remain separate.
+
+The serial Release build and **61/61 focused contracts pass in 177.36 seconds**,
+with frozen source, SDK, pure libraries, runtime, dependencies and binary sets.
+[Exact scope and raw evidence](evidence/file-invocation-wire-focused-20261020.json).
+This prepares a value boundary only: worker file RPC, durable effect claims and
+mixed canonical tool turns remain unfinished. No new full-suite, installed,
+rendered or live-provider acceptance is claimed.
+
 ## File-effect authority at mutation — 2026-10-20
 
 The backend rechecks private owner authority after approval, immediately before

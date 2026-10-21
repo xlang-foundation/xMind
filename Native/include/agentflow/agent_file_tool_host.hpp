@@ -7,6 +7,7 @@
 #include <memory>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace agentflow {
@@ -21,6 +22,11 @@ struct AgentFileToolInvocation {
     std::int32_t protocol_version=1;
     std::string run_id,attempt_id,call_id,workspace_id,folder_id,tool_name,arguments_json;
     std::int64_t workspace_revision=0;
+    // Exact values only: no approval, operation ID, path/root capability or
+    // owner policy may be added to this envelope. Transport frame limits are
+    // enforced separately after RPC/channel encoding.
+    std::string serialize()const;
+    static AgentFileToolInvocation parse(std::string_view);
 };
 struct AgentFileToolResult {bool success=false;std::string output_json;};
 class AgentFileToolHost {

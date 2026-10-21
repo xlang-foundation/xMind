@@ -27,8 +27,26 @@ struct Task{
     ~Task(){stop.request_stop();if(result.valid())result.wait();}
 };
 Operation pending(PersistenceService& store,std::size_t previous,Task* task=nullptr){const auto deadline=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<deadline){const auto operations=store.operations("run").get();if(operations.size()>previous){for(const auto& operation:operations)if(operation.state==OperationState::awaiting_approval)return operation;}if(task&&task->result.wait_for(0ms)==std::future_status::ready){const auto result=task->result.get();throw std::runtime_error("File task "+task->label+" returned before expected approval: "+result.output_json);}std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual approval proposal deadline");}
+void wire_contract(){
+    AgentFileToolInvocation call;call.run_id="wire-run";call.attempt_id="wire-attempt";call.call_id="provider-call";
+    call.workspace_id="wire-workspace";call.folder_id="wire-folder";call.workspace_revision=9007199254740991LL;
+    call.tool_name="create_file";call.arguments_json="{ \"path\" : \"a.txt\", \"content\" : \"hello\\n\" }";
+    const auto wire=call.serialize();const auto value=Json::parse(wire);
+    need(AgentFileToolInvocation::parse(wire).serialize()==wire&&AgentFileToolInvocation::parse(wire).arguments_json==call.arguments_json,"File wire must preserve every admitted value and exact argument bytes");
+    for(const auto* field:{"operation_id","approval_id","root","owner_policy"}){auto extra=value;extra[field]="forged";rejects<std::invalid_argument>([&]{AgentFileToolInvocation::parse(extra.dump());});}
+    for(auto it=value.begin();it!=value.end();++it){auto missing=value;missing.erase(it.key());rejects<std::invalid_argument>([&]{AgentFileToolInvocation::parse(missing.dump());});auto wrong=value;wrong[it.key()]=Json::array();rejects<std::invalid_argument>([&]{AgentFileToolInvocation::parse(wrong.dump());});}
+    for(const auto& revision:std::vector<Json>{0,-1,1.0,9007199254740992ULL,18446744073709551615ULL}){auto wrong=value;wrong["workspace_revision"]=revision;rejects<std::invalid_argument>([&]{AgentFileToolInvocation::parse(wrong.dump());});}
+    for(const auto& version:std::vector<Json>{0,2,1.0,18446744073709551615ULL}){auto wrong=value;wrong["protocol_version"]=version;rejects<std::invalid_argument>([&]{AgentFileToolInvocation::parse(wrong.dump());});}
+    rejects<std::invalid_argument>([&]{AgentFileToolInvocation::parse(wire.substr(0,wire.size()-1)+",\"run_id\":\"wire-run\"}");});
+    auto invalid=call;invalid.call_id=std::string("bad\0id",6);rejects<std::invalid_argument>([&]{invalid.serialize();});
+    invalid=call;invalid.tool_name="run_process";rejects<std::invalid_argument>([&]{invalid.serialize();});
+    call.arguments_json=std::string(4*1024*1024,'x');need(AgentFileToolInvocation::parse(call.serialize()).arguments_json==call.arguments_json,"File wire must retain the native argument byte limit");
+    call.arguments_json.push_back('x');rejects<std::invalid_argument>([&]{call.serialize();});
+    std::cout<<"Strict file invocation wire preserves exact arguments and rejects forged authority, duplicates, invalid types and out-of-range values.\n";
+}
 }
 int main(int argc,char** argv){if(argc!=3)return 2;try{
+    wire_contract();
     Directory directory;const auto primary=directory.path/"primary",secondary=directory.path/"secondary";std::filesystem::create_directory(primary);std::filesystem::create_directory(secondary);
     WorkspaceTools workspace(primary.string()),attached(secondary.string());const auto workspace_id=workspace.identity(),attached_id=attached.identity();
     WorkspaceToolSet members(workspace_id,7,{{workspace_id,workspace.root_path()},{attached_id,attached.root_path()}});
