@@ -463,7 +463,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             }catch(const DynamicPlanUnavailable&){return journal_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
              catch(const std::invalid_argument&){return journal_.transition(id,resume_dynamic_child?RunState::running:RunState::queued,RunState::failed,R"({"reason":"dynamic_child_configuration_changed"})").get();}
         }
-        if(!leaf&&budget&&(!graph_agent||!settings_.context||budget->root_id()!=admission.root_run_id||
+        const bool graph_proxy=graph_agent&&read_workspace_;
+        if(graph_proxy){const auto captured=read_workspace_->captured_budget();if(!budget||!captured||captured->policy_id!="native.graph-context"||captured->policy_revision!=1||captured->workspace_identity!=read_workspace_->workspace_id()||captured->max_children!=8||captured->max_parallel<1||captured->max_parallel>2||captured->max_model_calls!=32||captured->wall_limit_ms!=settings_.run_timeout.count()||budget->snapshot().spec.policy_id!=captured->policy_id)throw Conflict("Graph read worker differs from captured shared context admission");}
+        if(!leaf&&budget&&(!graph_agent||(!settings_.context&&!graph_proxy)||budget->root_id()!=admission.root_run_id||
             budget->snapshot().spec.policy_id!="native.graph-context"))
             throw std::invalid_argument("Registered graph agent requires its exact shared graph context budget");
     }else if(budget)throw std::invalid_argument("Normal agent root must acquire its own durable budget");
@@ -878,7 +880,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                             context_digest(serialize_provider_history_projection(provider,request))}).get();
                     }
                 }
-                reservation=planning_continuation.empty()?budget->reserve(id,leaf?ModelCallRole::leaf:ModelCallRole::parent,token):budget->reserve_continuation(planning_continuation,token);
+                reservation=planning_continuation.empty()?budget->reserve(id,leaf||graph_agent?ModelCallRole::leaf:ModelCallRole::parent,token):budget->reserve_continuation(planning_continuation,token);
                 planning_continuation.clear();
             }
             ModelCompletion response;Json reply;

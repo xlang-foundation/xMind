@@ -1,3 +1,19 @@
+## Actual graph-agent xmind IPC runners — 2026-10-21
+
+Two distinct actual xmind graph-agent processes now execute concurrently through
+SDK IPC with captured models, backend-owned graph context/clock and leaf funding.
+Each performs one native file read and final response, retaining two count callbacks
+and two inference calls. SQLite proves four completed typed leaf groups and four
+shared charges. Both workers physically drain before the controller settles and
+completes its checkpoint-derived join with measured active time.
+**9/9 focused contracts pass in 74.77 seconds**; existing 219-request HTTP and
+84-forgery IPC scopes remain passing. The first missing graph retirement path is
+preserved. [Scope and raw receipts](evidence/process-worker-graph-runner-drain-20261021.json).
+
+Production graph scheduler placement, nested/failure/coding/no-context graph cases,
+planning/default selection, full current regression and installed/rendered/live-provider
+acceptance remain open. The earlier access violation remains unresolved.
+
 ## Scoped graph worker journal IPC — 2026-10-21
 
 Graph child journals now expose only their captured root and derived node path,

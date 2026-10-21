@@ -14,9 +14,9 @@ Run completed(PersistenceService& store,const AgentWorkerLeaseSpec& lease){
     const auto captured=store.agent_worker_lease(lease.generation).get();
     const auto run=store.run(lease.owner_run_id).get();
     if(captured.spec!=lease||captured.state!="retired"||captured.retirement_reason!="completed"||
-       run.id!=lease.owner_run_id||run.state!=RunState::completed||run.graph_root||(lease.root_run_id==lease.owner_run_id?!run.parent_id.empty():run.parent_id!=lease.root_run_id))
+       run.id!=lease.owner_run_id||run.state!=RunState::completed||run.graph_root||(lease.root_run_id==lease.owner_run_id?!run.parent_id.empty():(run.parent_id.empty()||store.child_admission(run.id).get().root_run_id!=lease.root_run_id)))
         throw Conflict("Worker drain has no captured canonical completion");
-    if(lease.root_run_id!=lease.owner_run_id){const auto child=store.child_admission(run.id).get();if(child.kind!=ChildAdmissionKind::delegated_leaf||child.root_run_id!=lease.root_run_id||child.preset_id!="workspace.inspect"||child.preset_revision!=1)throw Conflict("Completed worker differs from captured child admission");}
+    if(lease.root_run_id!=lease.owner_run_id){const auto child=store.child_admission(run.id).get();if(child.root_run_id!=lease.root_run_id||!((child.kind==ChildAdmissionKind::delegated_leaf&&child.preset_id=="workspace.inspect"&&child.preset_revision==1)||(child.kind==ChildAdmissionKind::graph_agent&&!child.graph_node_path.empty()&&store.root_budget(lease.root_run_id).get().spec.policy_id=="native.graph-context")))throw Conflict("Completed worker differs from captured child admission");}
     return run;
 }
 }

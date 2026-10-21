@@ -1,0 +1,359 @@
+Start testing: Oct 21 10:09 Pacific Daylight Time
+----------------------------------------------------------
+18/162 Testing: native_provider_history_bridge_contract
+18/162 Test: native_provider_history_bridge_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_provider_history_bridge_contract.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_provider_history_bridge_contract" start time: Oct 21 10:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Provider history bridge passed validated Claude, Gemini and DeepSeek conversion; Responses-only receipt retention; immutable history; same-wire replay; fail-closed unknown/corrupt receipts; and Claude-to-Gemini/Responses canonical tool conversion.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_history_bridge_contract" end time: Oct 21 10:09 Pacific Daylight Time
+"native_provider_history_bridge_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/162 Testing: native_context_repository_contract
+26/162 Test: native_context_repository_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_context_repository_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_context_repository_contract" start time: Oct 21 10:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native context repository complete-group/projection/count/funding/overflow/idle/atomic migration boundary assertions passed; synthetic provider DTOs only.
+<end of output>
+Test time =   4.05 sec
+----------------------------------------------------------
+Test Passed.
+"native_context_repository_contract" end time: Oct 21 10:09 Pacific Daylight Time
+"native_context_repository_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+29/162 Testing: native_context_engine_contract
+29/162 Test: native_context_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/context_engine_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_context_engine_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_context_engine_contract" start time: Oct 21 10:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native context engine contract passed actual repeated/mid-run/session compaction, original users and exact canonical replay, real file reads, independent counts/usage, idle manual ownership, clean signed human pause/reopen/held overflow and pre-admission count-failure retirement, second/late/generic failure refusal, full-authority/source isolation and durable receipt/publication/final-binding faults with no recovery replay. Provider replies/counts/opaque data/key are synthetic.
+<end of output>
+Test time =   5.66 sec
+----------------------------------------------------------
+Test Passed.
+"native_context_engine_contract" end time: Oct 21 10:09 Pacific Daylight Time
+"native_context_engine_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+81/162 Testing: native_agent_worker_model_rpc_contract
+81/162 Test: native_agent_worker_model_rpc_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_model_rpc_contract" start time: Oct 21 10:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native RPC case normal child_pid=32124 creation_time=134370761938127493
+Native RPC case cancel child_pid=29820 creation_time=134370761940326426
+Owned cancel worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.
+Native RPC case crash child_pid=30372 creation_time=134370761942356439
+Streaming crash retirement: exit_code=73 claim=uncertain
+Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained.
+Native RPC case delivery child_pid=64800 creation_time=134370761943623529
+Native RPC case overflow child_pid=68084 creation_time=134370761944835237
+Owned overflow worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.
+Native RPC case other_error child_pid=59636 creation_time=134370761946266078
+Post-drain terminal write fault verified: exact exited child retained, durable ownership rolled back, no model replay.
+Owned other_error worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.
+Native RPC case completion child_pid=16804 creation_time=134370761948050224
+Native RPC case completion_delivery child_pid=5000 creation_time=134370761949672726
+Native completed drain preserved lost completion reply and nonzero exit without terminal rewrite or replay.
+Native RPC case completion_rollback child_pid=65304 creation_time=134370761951092834
+Observed injected completion retirement fault; run/history/events/lease rollback verified.
+Native RPC case completion_hold child_pid=55756 creation_time=134370761952657701
+Completed drain physical capacity verified: child_pid=55756 creation_time=134370761952657701; timeout retained one occupied root slot and queued work until explicit exit, without model replay.
+Native RPC case runner child_pid=57440 creation_time=134370761954212048
+Actual AgentRunner executed in child PID 57440 through queued startup, scoped funding, backend stream acknowledgements and canonical completion.
+Native RPC case runner_error child_pid=23056 creation_time=134370761955743733
+Actual child AgentRunner provider failure verified: terminal handoff before drain, no fabricated Run, one retained charged attempt, post-exit atomic retirement.
+Native RPC case runner_cancel child_pid=65724 creation_time=134370761957229734
+Actual child AgentRunner cancellation verified: explicit controller stop reached the real runner and model, cancelled handoff before drain, one retained charge and post-exit atomic retirement.
+Native read RPC case read child_pid=3096 creation_time=134370761958835215
+Actual child read turn continued through a second native model call and canonical completion.
+Actual child read RPC read verified durable dispatch count 1 and exact native outcome.
+Native read RPC case read_delivery child_pid=62056 creation_time=134370761960849166
+Actual child read RPC read_delivery verified durable dispatch count 1 and exact native outcome.
+Native read RPC case read_denied child_pid=27160 creation_time=134370761962079504
+Actual child read RPC read_denied verified durable dispatch count 0 and exact native outcome.
+Native read RPC case read_cancel child_pid=60716 creation_time=134370761963708668
+Actual child read RPC read_cancel verified durable dispatch count 0 and exact native outcome.
+Native read RPC case read_turn_delivery child_pid=41584 creation_time=134370761965402204
+Actual read-turn lost delivery retained one canonical committed turn.
+Actual child read RPC read_turn_delivery verified durable dispatch count 1 and exact native outcome.
+Native read RPC case read_turn_rollback child_pid=45236 creation_time=134370761967091915
+Observed injected read-turn storage fault; history/events rollback verified.
+Actual child read RPC read_turn_rollback verified durable dispatch count 1 and exact native outcome.
+Actual child file RPC file_create child_pid=35864 creation_time=134370761968657609
+Actual child file RPC file_create verified backend-owned native effects and durable receipts without replay.
+Actual child file RPC file_denied child_pid=68228 creation_time=134370761971618522
+Actual child file RPC file_denied verified backend-owned native effects and durable receipts without replay.
+Actual child file RPC file_cancel child_pid=63000 creation_time=134370761973170708
+Actual child file RPC file_cancel verified backend-owned native effects and durable receipts without replay.
+Actual child file RPC file_delivery child_pid=19860 creation_time=134370761974850643
+Actual child file RPC file_delivery verified backend-owned native effects and durable receipts without replay.
+Actual child file RPC file_unrecorded child_pid=14308 creation_time=134370761977792949
+Actual child file RPC file_unrecorded verified backend-owned native effects and durable receipts without replay.
+Native context RPC child_pid=13832 creation_time=134370761981357922
+Worker explicit empty tool catalogue verified: backend guidance/history retained, no default tools, forged catalogue/read rejected without funding.
+Native worker control intent verified: strict bounded versioned terminal replies; no child reason or fabricated durable Run.
+Actual child backend context verified: previews withheld two reads, three native model windows matched guidance/history, one fresh read dispatched, twenty-four changed requests rejected.
+Native read AgentRunner RPC child_pid=59140 creation_time=134370761987210332
+Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.
+Native read AgentRunner RPC child_pid=68120 creation_time=134370761991075248
+Native read approval cancellation child_pid=68120 creation_time=134370761991075248
+Actual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.
+Native read AgentRunner RPC child_pid=13024 creation_time=134370761994477848
+Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.
+Native worker assembly verified in captured child: production journal, model gateway, read workspace, closed ports, backend controls and shared AgentRunner.
+Native read AgentRunner RPC child_pid=65860 creation_time=134370761998134692
+Native read approval cancellation child_pid=65860 creation_time=134370761998134692
+Actual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.
+AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle.
+AgentService shared physical worker verified: canonical completion held exact live child and one occupied slot; next queued action started only after exact child exit and supervisor drain.
+AgentService queued placement verified: catalogue changed process to thread while queued; pinned prompt and job still dispatched one actual process child.
+AgentService immutable workspace capture verified: one admission snapshot, queued callback changed to revision eight, actual child retained revision seven and its exact original folder set.
+Low-level placement boundary verified: inline process execution, mismatched worker prompt and unknown placement rejected before model/worker dispatch; admitted prompt retained without a model charge.
+Production worker factory product_factory verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+Production worker factory product_factory_read verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+Production worker factory product_factory_denied verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+Production worker factory product_factory_attached verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+Explicit thread placement verified: configured worker bypassed, no worker lease, actual native model result retained.
+Busy profile worker cancellation verified: mutation rejected before factory invocation, exact child PID/birth exited before idle, one model charge and uncertain cancelled receipt retained without fabricated completion.
+Provider-profile worker factory verified: inactive candidate retained old owner; selected second profile then restored first; three actual child roots, four prepared executors, distinct encrypted credential references and exact immutable profile provenance.
+Native supervisor completion verified: actual xmind child, captured backend policy, one execution, canonical facts, exact physical drain and read-only reobservation.
+Native supervisor startup failure verified: retained child and lease, no restart or model, exact physical exit before durable dispatch_error.
+Native supervisor concurrent cancellation verified: live provider stream, joined-caller drain guard, exact ownership retained, HTTP abort, durable cancelled cause and post-exit retirement.
+Actual delegated xmind PID 23440 birth 134370762028371302 owner actual-delegated-one
+Actual delegated xmind PID 42360 birth 134370762029191022 owner actual-delegated-two
+Actual concurrent delegated xmind runners passed SDK IPC journal/model/read calls, named model binding, two canonical native file reads, four shared charges and physical drain before join; synthetic native model gateway, production scheduler placement remains open.
+Completed worker differs from captured child admission
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:63070
+Completed worker differs from captured child admission
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:63070',
+  stdout: 'Native RPC case normal child_pid=32124 creation_time=134370761938127493\r\n' +
+    'Native RPC case cancel child_pid=29820 creation_time=134370761940326426\r\n' +
+    'Owned cancel worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n' +
+    'Native RPC case crash child_pid=30372 creation_time=134370761942356439\r\n' +
+    'Streaming crash retirement: exit_code=73 claim=uncertain\r\n' +
+    'Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained.\r\n' +
+    'Native RPC case delivery child_pid=64800 creation_time=134370761943623529\r\n' +
+    'Native RPC case overflow child_pid=68084 creation_time=134370761944835237\r\n' +
+    'Owned overflow worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n' +
+    'Native RPC case other_error child_pid=59636 creation_time=134370761946266078\r\n' +
+    'Post-drain terminal write fault verified: exact exited child retained, durable ownership rolled back, no model replay.\r\n' +
+    'Owned other_error worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n' +
+    'Native RPC case completion child_pid=16804 creation_time=134370761948050224\r\n' +
+    'Native RPC case completion_delivery child_pid=5000 creation_time=134370761949672726\r\n' +
+    'Native completed drain preserved lost completion reply and nonzero exit without terminal rewrite or replay.\r\n' +
+    'Native RPC case completion_rollback child_pid=65304 creation_time=134370761951092834\r\n' +
+    'Observed injected completion retirement fault; run/history/events/lease rollback verified.\r\n' +
+    'Native RPC case completion_hold child_pid=55756 creation_time=134370761952657701\r\n' +
+    'Completed drain physical capacity verified: child_pid=55756 creation_time=134370761952657701; timeout retained one occupied root slot and queued work until explicit exit, without model replay.\r\n' +
+    'Native RPC case runner child_pid=57440 creation_time=134370761954212048\r\n' +
+    'Actual AgentRunner executed in child PID 57440 through queued startup, scoped funding, backend stream acknowledgements and canonical completion.\r\n' +
+    'Native RPC case runner_error child_pid=23056 creation_time=134370761955743733\r\n' +
+    'Actual child AgentRunner provider failure verified: terminal handoff before drain, no fabricated Run, one retained charged attempt, post-exit atomic retirement.\r\n' +
+    'Native RPC case runner_cancel child_pid=65724 creation_time=134370761957229734\r\n' +
+    'Actual child AgentRunner cancellation verified: explicit controller stop reached the real runner and model, cancelled handoff before drain, one retained charge and post-exit atomic retirement.\r\n' +
+    'Native read RPC case read child_pid=3096 creation_time=134370761958835215\r\n' +
+    'Actual child read turn continued through a second native model call and canonical completion.\r\n' +
+    'Actual child read RPC read verified durable dispatch count 1 and exact native outcome.\r\n' +
+    'Native read RPC case read_delivery child_pid=62056 creation_time=134370761960849166\r\n' +
+    'Actual child read RPC read_delivery verified durable dispatch count 1 and exact native outcome.\r\n' +
+    'Native read RPC case read_denied child_pid=27160 creation_time=134370761962079504\r\n' +
+    'Actual child read RPC read_denied verified durable dispatch count 0 and exact native outcome.\r\n' +
+    'Native read RPC case read_cancel child_pid=60716 creation_time=134370761963708668\r\n' +
+    'Actual child read RPC read_cancel verified durable dispatch count 0 and exact native outcome.\r\n' +
+    'Native read RPC case read_turn_delivery child_pid=41584 creation_time=134370761965402204\r\n' +
+    'Actual read-turn lost delivery retained one canonical committed turn.\r\n' +
+    'Actual child read RPC read_turn_delivery verified durable dispatch count 1 and exact native outcome.\r\n' +
+    'Native read RPC case read_turn_rollback child_pid=45236 creation_time=134370761967091915\r\n' +
+    'Observed injected read-turn storage fault; history/events rollback verified.\r\n' +
+    'Actual child read RPC read_turn_rollback verified durable dispatch count 1 and exact native outcome.\r\n' +
+    'Actual child file RPC file_create child_pid=35864 creation_time=134370761968657609\r\n' +
+    'Actual child file RPC file_create verified backend-owned native effects and durable receipts without replay.\r\n' +
+    'Actual child file RPC file_denied child_pid=68228 creation_time=134370761971618522\r\n' +
+    'Actual child file RPC file_denied verified backend-owned native effects and durable receipts without replay.\r\n' +
+    'Actual child file RPC file_cancel child_pid=63000 creation_time=134370761973170708\r\n' +
+    'Actual child file RPC file_cancel verified backend-owned native effects and durable receipts without replay.\r\n' +
+    'Actual child file RPC file_delivery child_pid=19860 creation_time=134370761974850643\r\n' +
+    'Actual child file RPC file_delivery verified backend-owned native effects and durable receipts without replay.\r\n' +
+    'Actual child file RPC file_unrecorded child_pid=14308 creation_time=134370761977792949\r\n' +
+    'Actual child file RPC file_unrecorded verified backend-owned native effects and durable receipts without replay.\r\n' +
+    'Native context RPC child_pid=13832 creation_time=134370761981357922\r\n' +
+    'Worker explicit empty tool catalogue verified: backend guidance/history retained, no default tools, forged catalogue/read rejected without funding.\r\n' +
+    'Native worker control intent verified: strict bounded versioned terminal replies; no child reason or fabricated durable Run.\r\n' +
+    'Actual child backend context verified: previews withheld two reads, three native model windows matched guidance/history, one fresh read dispatched, twenty-four changed requests rejected.\r\n' +
+    'Native read AgentRunner RPC child_pid=59140 creation_time=134370761987210332\r\n' +
+    'Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.\r\n' +
+    'Native read AgentRunner RPC child_pid=68120 creation_time=134370761991075248\r\n' +
+    'Native read approval cancellation child_pid=68120 creation_time=134370761991075248\r\n' +
+    'Actual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.\r\n' +
+    'Native read AgentRunner RPC child_pid=13024 creation_time=134370761994477848\r\n' +
+    'Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.\r\n' +
+    'Native worker assembly verified in captured child: production journal, model gateway, read workspace, closed ports, backend controls and shared AgentRunner.\r\n' +
+    'Native read AgentRunner RPC child_pid=65860 creation_time=134370761998134692\r\n' +
+    'Native read approval cancellation child_pid=65860 creation_time=134370761998134692\r\n' +
+    'Actual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.\r\n' +
+    'AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle.\r\n' +
+    'AgentService shared physical worker verified: canonical completion held exact live child and one occupied slot; next queued action started only after exact child exit and supervisor drain.\r\n' +
+    'AgentService queued placement verified: catalogue changed process to thread while queued; pinned prompt and job still dispatched one actual process child.\r\n' +
+    'AgentService immutable workspace capture verified: one admission snapshot, queued callback changed to revision eight, actual child retained revision seven and its exact original folder set.\r\n' +
+    'Low-level placement boundary verified: inline process execution, mismatched worker prompt and unknown placement rejected before model/worker dispatch; admitted prompt retained without a model charge.\r\n' +
+    'Production worker factory product_factory verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n' +
+    'Production worker factory product_factory_read verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n' +
+    'Production worker factory product_factory_denied verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n' +
+    'Production worker factory product_factory_attached verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n' +
+    'Explicit thread placement verified: configured worker bypassed, no worker lease, actual native model result retained.\r\n' +
+    'Busy profile worker cancellation verified: mutation rejected before factory invocation, exact child PID/birth exited before idle, one model charge and uncertain cancelled receipt retained without fabricated completion.\r\n' +
+    'Provider-profile worker factory verified: inactive candidate retained old owner; selected second profile then restored first; three actual child roots, four prepared executors, distinct encrypted credential references and exact immutable profile provenance.\r\n' +
+    'Native supervisor completion verified: actual xmind child, captured backend policy, one execution, canonical facts, exact physical drain and read-only reobservation.\r\n' +
+    'Native supervisor startup failure verified: retained child and lease, no restart or model, exact physical exit before durable dispatch_error.\r\n' +
+    'Native supervisor concurrent cancellation verified: live provider stream, joined-caller drain guard, exact ownership retained, HTTP abort, durable cancelled cause and post-exit retirement.\r\n' +
+    'Actual delegated xmind PID 23440 birth 134370762028371302 owner actual-del'... 365 more characters,
+  stderr: 'Completed worker differs from captured child admission\r\n'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =  11.03 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_model_rpc_contract" end time: Oct 21 10:10 Pacific Daylight Time
+"native_agent_worker_model_rpc_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+82/162 Testing: native_agent_worker_server_contract
+82/162 Test: native_agent_worker_server_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_server_contract" start time: Oct 21 10:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Unified server process-read entry verified: authenticated public session/run/history/events, actual distinct worker PID, native file bytes, one read dispatch, two controlled model windows and canonical completion.
+<end of output>
+Test time =   0.64 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_server_contract" end time: Oct 21 10:10 Pacific Daylight Time
+"native_agent_worker_server_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+83/162 Testing: native_agent_worker_coding_server_contract
+83/162 Test: native_agent_worker_coding_server_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_coding_server_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_coding_server_contract" start time: Oct 21 10:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Unified process-code server verified actual child AgentRunner, authenticated public approval, one native creation, mixed canonical history and two controlled model windows.
+<end of output>
+Test time =   1.12 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_coding_server_contract" end time: Oct 21 10:10 Pacific Daylight Time
+"native_agent_worker_coding_server_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+84/162 Testing: native_agent_worker_ledger_contract
+84/162 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_ledger_contract" start time: Oct 21 10:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Delegated worker ledger verified queued admission, named provider binding, shared funding, four-turn cap, read-only authority, canonical child history, sibling-independent completion and cancellation without refund; synthetic process identities, no child runner dispatch.
+Graph worker admission boundary verified exact registered node/model, active graph segment, captured membership, sibling isolation, tool-node rejection and no untyped funding; synthetic identities, no graph worker dispatch.
+Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.
+Durable process claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no command dispatch or process RPC.
+Durable remote claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no remote peer dispatch or worker RPC.
+Durable callable claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no callable peer dispatch or worker RPC.
+Durable process control ledger binds wait and stop to one captured service with distinct call receipts, no duplicate control, exact canonical observations and read-only rejection. Synthetic job facts; no native process control or RPC.
+Mixed workspace turns preserve exact ordered read/file/process/remote/callable results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.
+Atomic online worker terminal boundary: rollback, exact identity, queued cancellation, interrupted reservations and retained charges verified.
+Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; no child AgentRunner RPC is implemented.
+Independent peer observed exactly one native model request; rejected duplicates caused no extra HTTP.
+<end of output>
+Test time =   1.82 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_ledger_contract" end time: Oct 21 10:10 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+88/162 Testing: native_agent_runner_contract
+88/162 Test: native_agent_runner_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_runner_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_runner_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_runner_contract" start time: Oct 21 10:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native agent loop/atomicity contracts passed using a synthetic inference peer and real filesystem tools; no live model was called
+<end of output>
+Test time =   9.78 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_runner_contract" end time: Oct 21 10:10 Pacific Daylight Time
+"native_agent_runner_contract" time elapsed: 00:00:09
+----------------------------------------------------------
+
+100/162 Testing: native_agent_remote_tool_host_contract
+100/162 Test: native_agent_remote_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_remote_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_remote_tool_host_contract" start time: Oct 21 10:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Durable native remote host approved verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native remote host denied verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native remote host policy verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native remote host cancel verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native remote host unrecorded verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native remote host retired verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Native callable pre-effect authority allowed verified actual approval, current guidance and xlang3 effect boundary.
+Native callable pre-effect authority revoked verified actual approval, current guidance and xlang3 effect boundary.
+Durable native callable host approved verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native callable host array verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native callable host denied verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native callable host policy verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native callable host cancel verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native callable host unrecorded verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Durable native callable host retired verified actual approval, peer-effect count, receipt and reconstruction replay rejection.
+Remote invocation codec retained literal Unicode bytes and rejected worker-selected authority, duplicate fields and invalid numeric bounds.
+Remote backend authority rejected an approved MCP operation before send and retained a known failed receipt without replay.
+Remote-tool owner: actual approvals, inherited denial, admitted membership/catalogue, pending/completed replay rejection, root guidance delivery/change and xlang3 SQLite restart pass. MCP client/model identities are synthetic; no worker IPC, live provider or GUI acceptance.
+<end of output>
+Test time =   4.26 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_remote_tool_host_contract" end time: Oct 21 10:10 Pacific Daylight Time
+"native_agent_remote_tool_host_contract" time elapsed: 00:00:04
+----------------------------------------------------------
+
+End testing: Oct 21 10:10 Pacific Daylight Time

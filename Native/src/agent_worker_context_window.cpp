@@ -5,18 +5,23 @@
 #include <algorithm>
 
 namespace agentflow {
-namespace {AgentModelGateway& required_gateway(const std::shared_ptr<AgentModelGateway>& gateway){if(!gateway)throw std::invalid_argument("Context owner requires its backend gateway");return *gateway;}}
+namespace {RootExecutionBudget context_budget(PersistenceService& store,const AgentWorkerLeaseSpec& lease,AgentWorkerChannel::Deadline deadline,std::stop_token cancel){
+    auto record=store.root_budget(lease.root_run_id).get();
+    if(record.spec.policy_id=="native.graph-context"){const auto captured=store.graph_context_owner(lease.root_run_id).get();if(!captured.segment||captured.segment->state!="open")throw Conflict("Graph worker context requires its owning active segment");return RootExecutionBudget(store,std::move(record),deadline,cancel,captured.segment,captured.authority.backend_identity);}
+    return RootExecutionBudget(store,std::move(record),deadline,cancel);
+}
+AgentModelGateway& required_gateway(const std::shared_ptr<AgentModelGateway>& gateway){if(!gateway)throw std::invalid_argument("Context owner requires its backend gateway");return *gateway;}}
 AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,AgentWorkerLeaseSpec lease,
     ChatProviderConfig provider,AgentWorkerContextPolicy policy,std::shared_ptr<AgentModelGateway> gateway,
     Preview preview,Admit admit,AgentWorkerChannel::Deadline deadline,std::stop_token cancel)
     :store_(store),lease_(std::move(lease)),provider_(std::move(provider)),policy_(std::move(policy)),gateway_(std::move(gateway)),
      preview_(std::move(preview)),admit_(std::move(admit)),deadline_(deadline),owner_cancel_(cancel),
-     budget_(store,store.root_budget(lease_.root_run_id).get(),deadline,cancel),
+     budget_(context_budget(store,lease_,deadline,cancel)),
      manager_(store,required_gateway(gateway_),provider_,policy_.runtime,model_message_from_history){
     const bool leaf=lease_.owner_run_id!=lease_.root_run_id;
     if(leaf)(void)store.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
     if(!gateway_||!preview_||!admit_||
-       (leaf?store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation":(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"))||
+       (leaf?(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.graph-context"):(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"))||
        policy_.binding.provider_identity_json!=lease_.provider_identity_json)
         throw Conflict("Worker context differs from captured ordinary context root");
     const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};

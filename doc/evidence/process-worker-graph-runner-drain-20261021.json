@@ -1,0 +1,85 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:13:14.208Z",
+    "sourceParent": "3fe19b4ef442ce9a4bed292787e9be1c166e5ae5",
+    "sourcePatchSha256": "acfd12dfe49823621e00da1f1b8f914c149c7e374ca02c4e20c99aeb3e0827a0",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 47124,
+      "launchedAt": "2026-10-21T17:10:57.404Z",
+      "completedAt": "2026-10-21T17:11:53.643Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ed2ce6743f652043ecef60fa4987058e9f60b83268e4698d9d506d448286debe"
+    },
+    "test": {
+      "pid": 40848,
+      "launchedAt": "2026-10-21T17:11:56.567Z",
+      "completedAt": "2026-10-21T17:13:11.381Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "12e4ba7c8eb9effefefe1ad196848ff2c019ebfa7621ba80f0ad18a780789a39"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 74.77,
+    "projectFiles": 2751,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "0a2bf9ac66c27545754e0e7fcbd4fa3b0430a3b8791f8448e57f24711b00c443",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-runner-drain-20261021-build.log": "ed2ce6743f652043ecef60fa4987058e9f60b83268e4698d9d506d448286debe",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-build-terminal.json": "71ec76d05d63d12cd5b469857d0719faef3088b00c52f59623bdb09c80059287",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-ctest.log": "12e4ba7c8eb9effefefe1ad196848ff2c019ebfa7621ba80f0ad18a780789a39",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-ctest-terminal.json": "e4c6db9c3e59488f46f5fdff814875228f2a852e0be8cbf0449b716ee1d08791",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-LastTest.log": "e4e41dfe6d06a0edad450ffe35c95c4263dad174a30b47847b3077badd41db49",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-gate.json": "29c9a3efc3f25e6cc3212213d642f7cd255e5165f23920d7fd8baab5b1246f03",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-source.patch": "acfd12dfe49823621e00da1f1b8f914c149c7e374ca02c4e20c99aeb3e0827a0",
+    "doc/evidence/process-worker-graph-runner-drain-20261021-binaries-before-test.json": "22c62a574ae29991501b4f35034f64e1c454c1d0555a7f2cbdb00535ed81d96c",
+    "doc/evidence/process-worker-graph-runner-20261021-build.log": "f31d8c8b83915a8fb2e8f2442d280dec78fdd0c12810ed206d64fe6a84a11de9",
+    "doc/evidence/process-worker-graph-runner-20261021-build-terminal.json": "7c56b9e6971415cf2e1bf2031afd000aee88c90f0b306469514b81e90ccaf0ca",
+    "doc/evidence/process-worker-graph-runner-20261021-ctest.log": "cdaef59d58cc4a73fd4562271f05e37932547ea6a7b252b60e85dabac5340083",
+    "doc/evidence/process-worker-graph-runner-20261021-ctest-terminal.json": "9b04cd9abb75876e9eb83df7bc0c8ab537c037af9141f67809a0f43942f3c9d6",
+    "doc/evidence/process-worker-graph-runner-20261021-LastTest.log": "43619aef51ae22eb937974ff1fc61d462869340ec92eec3c6483a7591d2ed672",
+    "doc/evidence/process-worker-graph-runner-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-runner-20261021-gate.json": "e96d080ea51368676d048c38d78adf1fb8039e0d9fbd89f1797063b89982ee8f",
+    "doc/evidence/process-worker-graph-runner-20261021-source.patch": "7d1d50ab87ad6cf3cff42d21dba936e4e2da7e6486d06ee07244fbc7d660c01e",
+    "doc/evidence/process-worker-graph-runner-20261021-binaries-before-test.json": "d6c0053866241bd0cb307bafe78e7f4fac5694274ac14536e18b8663bcb73b41"
+  },
+  "verified": [
+    "Two actual xmind graph-agent processes execute concurrently through scoped xlang3 SDK IPC model/journal/read capabilities with two distinct backend-captured models",
+    "Backend context window retains the ultimate graph open segment and private backend identity; context authority and typed funding remain in C++/embedded-xlang3 repository",
+    "Worker runner accepts its captured graph budget and uses leaf role; graph coding assembly remains rejected",
+    "Each process consumes its actual native file-read result, commits four-message history and final answer, with two count and two inference callbacks; graph SQLite audit proves four completed typed leaf groups",
+    "Exactly four shared model charges remain; controller root stays running until both exact workers physically drain and settle, then completes its checkpoint-derived join with actual measured active elapsed time",
+    "Completed drain validates actual graph child admission and supports ultimate-root ownership through nested parent ancestry; actual nested graph process execution is not covered here",
+    "Nine focused contracts pass in 74.77 seconds with frozen 2751 project inputs, SDK/libraries/runtime/dependencies and 133 native binaries; prior 219-request HTTP and 84-forgery IPC scopes remain passing"
+  ],
+  "failedRun": {
+    "name": "process-worker-graph-runner-20261021",
+    "cause": "Both graph runner loops completed but completed-drain helper still allowed delegated_leaf only; added exact captured graph-agent admission while retaining process, image, lease and canonical completion checks"
+  },
+  "limitations": [
+    "Graph model/count responses are supplied by a synthetic native gateway; actual product processes, SDK IPC, native filesystem reads and persistence are real",
+    "Production GraphRunner/GraphService scheduler callback placement remains unfinished; this fixture explicitly owns the two graph supervisors",
+    "Actual nested graph process dispatch, graph cancellation/failure, graph coding tools and no-context graph mode need further integration/verification",
+    "Earlier 0xC0000005 worker access violation remains unresolved; this passing gate does not establish a fix",
+    "Planning/default process selection, parent compaction/overflow, full current native regression and updated installed/rendered/live-provider acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

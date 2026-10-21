@@ -23,7 +23,7 @@ struct AgentWorkerSupervisor::Impl {
     Impl(PersistenceService& persistence,std::shared_ptr<const BoundProcessExecutable> image,
         AgentWorkerScope captured_scope,std::string captured_identity,AgentWorkerChannel::Deadline until,bool launch_now=true)
         :store(persistence),deadline(until),image(std::move(image)),scope(std::move(captured_scope)),identity(std::move(captured_identity)){
-        if(scope.root_id!=scope.run_id){const auto admitted=store.child_admission(scope.run_id).get();if(admitted.kind!=ChildAdmissionKind::delegated_leaf||admitted.root_run_id!=scope.root_id||admitted.preset_id!="workspace.inspect"||admitted.preset_revision!=1)throw std::invalid_argument("Worker supervisor requires exact delegated child admission");}
+        if(scope.root_id!=scope.run_id){const auto admitted=store.child_admission(scope.run_id).get();if(admitted.root_run_id!=scope.root_id||!((admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1)||(admitted.kind==ChildAdmissionKind::graph_agent&&!admitted.graph_node_path.empty())))throw std::invalid_argument("Worker supervisor requires exact agent child admission");}
         if(launch_now)launch();
     }
     void launch(){
