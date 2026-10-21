@@ -27,6 +27,8 @@ private:
     std::shared_ptr<AgentProcessToolHost> process_;
     std::unique_ptr<AgentWorkerProcessHost> processes_;
     std::unique_ptr<AgentWorkerRemoteHost> remotes_;
+    std::function<std::vector<ModelToolDefinition>(std::stop_token)> refresh_catalogue_;
+    bool remote_catalogue_invalidated_=false;
     std::vector<std::string> joined_process_notes_;
     std::map<std::string,bool> joined_attempts_;
     bool join_outcome_unrecorded_=false;

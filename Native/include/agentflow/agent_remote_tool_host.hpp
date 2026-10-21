@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/agent_permissions.hpp"
+#include "agentflow/model_provider.hpp"
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -53,6 +54,8 @@ struct AgentRemoteToolOwnerContext {
     std::function<bool(const std::string&)> offered_tool;
     std::function<McpToolRegistry*(const std::string&)> mcp_registry;
     std::function<A2aAgentToolRegistry*(const std::string&)> a2a_registry;
+    // Backend-owned discovery after a known no-effect catalogue invalidation.
+    std::function<std::vector<ModelToolDefinition>(std::stop_token)> refresh_catalogue;
     std::chrono::steady_clock::time_point deadline;
     std::chrono::milliseconds approval_timeout{600000};
     // Native worker authority only. The registry supplies its claimed operation

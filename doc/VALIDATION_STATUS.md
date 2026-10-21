@@ -1,3 +1,26 @@
+## Worker remote catalogue refresh — 2026-10-21
+
+Known no-effect MCP invalidation now schedules backend-owned discovery before
+the next model window. The factory reapplies its selected allowlist, retains
+peer lifetimes and never accepts child-selected endpoints or registries.
+Coding windows may change remote tools while preserving fixed native tools;
+model admission still compares the exact full backend-prepared request.
+
+An actual unified xmind child receives a changed alias over three HTTP model
+windows. The invalidated call retains a durable failed result with no operation
+IDs; the replacement has a distinct call ID and produces exactly one approved
+peer file effect and exact canonical acknowledgement. The initial fixture
+reused its call ID and correctly failed request serialization; raw failure is
+preserved. **3/3 focused contracts pass in 30.38 seconds**, with frozen source,
+SDK, library, dependency and 133-binary file sets unchanged. The model peer
+observes exactly 99 requests.
+[Scope, patches and raw evidence](evidence/process-worker-catalogue-refresh-identities-20261021.json).
+
+The transition fixture uses native synthetic registries. Configured HTTP
+subscription notification through factory rediscovery remains to verify.
+Broader regression for refresh, remaining capabilities/default placement,
+installation and fresh rendered/live-provider acceptance remain open.
+
 ## Configured MCP/A2A production worker regression — 2026-10-21
 
 Owner-registered A2A discovery now has production-factory acceptance through

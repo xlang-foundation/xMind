@@ -832,7 +832,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 if(encoded_metadata!=delivered_repository_metadata){journal_.append_event(id,"agent.repository_scope",encoded_metadata).get();delivered_repository_metadata=encoded_metadata;}
             }
             auto response_started=std::chrono::steady_clock::now();
-            if(read_workspace_){auto window=prepare_workspace_window();if(window.tools.size()!=request.tools.size()||!std::equal(window.tools.begin(),window.tools.end(),request.tools.begin(),[](const auto& a,const auto& b){return a.name==b.name&&a.description==b.description&&a.input_schema_json==b.input_schema_json;}))throw Conflict("Read workspace changed its admitted catalogue");request=std::move(window);}
+            if(read_workspace_){auto window=prepare_workspace_window();const auto fixed=[](std::vector<ModelToolDefinition> tools){std::erase_if(tools,[](const auto& tool){return is_agent_remote_tool(tool.name);});return tools;};const auto previous=coding_workspace_?fixed(request.tools):request.tools,current=coding_workspace_?fixed(window.tools):window.tools;if(current.size()!=previous.size()||!std::equal(current.begin(),current.end(),previous.begin(),[](const auto& a,const auto& b){return a.name==b.name&&a.description==b.description&&a.input_schema_json==b.input_schema_json;}))throw Conflict("Read workspace changed its admitted native catalogue");request=std::move(window);}
             std::optional<std::int64_t> first_token_ms;
             std::optional<ModelCallReservation> reservation;
             std::optional<PreparedModelContext> prepared_context;

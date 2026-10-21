@@ -33,11 +33,20 @@ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,Age
     }
     if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_remote_tool(tool.name);})){
         if(!remote_owner||remote_owner->run_id!=owner.run_id||remote_owner->primary_workspace!=owner.primary_workspace||remote_owner->workspace_members!=owner.workspace_members||remote_owner->deadline!=deadline)throw Conflict("Coding remote catalogue lacks its captured native registry owner");
-        auto context=std::move(*remote_owner);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);
+        auto context=std::move(*remote_owner);refresh_catalogue_=std::move(context.refresh_catalogue);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=[this](const std::string& name){return std::any_of(tools_.begin(),tools_.end(),[&](const auto& tool){return tool.name==name;});};context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);
         remotes_=std::make_unique<AgentWorkerRemoteHost>(store,files_->lease(),std::move(context),deadline,cancel);
     }
 }
-ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){auto request=reads_.prepare(cancel);request.tools=tools_;for(const auto& note:joined_process_notes_)request.messages.push_back({MessageRole::system,note});return request;}
+ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){
+    {std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);
+    if(remote_catalogue_invalidated_){
+        if(!refresh_catalogue_)throw Conflict("Invalidated worker remote catalogue has no native discovery owner");
+        auto definitions=refresh_catalogue_(cancel);auto next=tools_;std::erase_if(next,[](const auto& tool){return is_agent_remote_tool(tool.name);});
+        for(auto& tool:definitions){if(!is_agent_remote_tool(tool.name)||next.size()>=64||std::any_of(next.begin(),next.end(),[&](const auto& existing){return existing.name==tool.name;}))throw Conflict("Invalid refreshed worker remote catalogue");next.push_back(std::move(tool));}
+        tools_=std::move(next);remote_catalogue_invalidated_=false;
+    }}
+    auto request=reads_.prepare(cancel);request.tools=tools_;for(const auto& note:joined_process_notes_)request.messages.push_back({MessageRole::system,note});return request;
+}
 void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
     if(encode_agent_model_request(prepare(cancel))!=encode_agent_model_request(request))throw Conflict("Coding request changed backend history, guidance or catalogue");
     auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
@@ -101,7 +110,7 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_remotes(const AgentWorkerSc
     auto dispatch=bind_agent_worker_remote_rpc(*remotes_,scope);
     return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
         if(method!="remote.invoke")return dispatch(method,payload,std::move(sink),cancel);
-        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);const auto call=AgentRemoteToolInvocation::parse(payload);if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Remote call lacks its actually admitted guidance window");return dispatch(method,payload,std::move(sink),cancel);}
+        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);const auto call=AgentRemoteToolInvocation::parse(payload);if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Remote call lacks its actually admitted guidance window");const auto result=dispatch(method,payload,std::move(sink),cancel);const auto value=nlohmann::json::parse(result);if(!value.at("success").get<bool>()){const auto output=nlohmann::json::parse(value.at("output_json").get<std::string>());if(output.contains("error")&&output.at("error").value("code",std::string{})=="remote_catalogue_changed")remote_catalogue_invalidated_=true;}return result;}
         catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
         catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}

@@ -146,6 +146,13 @@ public:
         if(remote_tools){
             AgentRemoteToolOwnerContext context;context.run_id=request.run_id;context.primary_workspace=owner.primary_workspace;context.workspace_members=&members;context.repository_context=contexts.front().get();context.offered_tool=owner.offered_tool;context.deadline=deadline;context.approval_timeout=owner.approval_timeout;
             context.mcp_registry=[&](const std::string& name){return remote_tools->mcp(name);};context.a2a_registry=[&](const std::string& name){return remote_tools->a2a(name);};
+            context.refresh_catalogue=[&](std::stop_token stop){
+                if(stop.stop_requested()||cancel.stop_requested())throw ToolCancelled("Worker remote discovery cancelled");
+                auto next=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);std::vector<ModelToolDefinition> definitions;const auto allowed=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+                for(const auto& tool:next->definitions())if(!allowed||std::find(allowed->begin(),allowed->end(),tool.name)!=allowed->end())definitions.push_back(tool);
+                if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&std::none_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;}))throw Conflict("Selected remote tool disappeared during discovery");
+                if(stop.stop_requested()||cancel.stop_requested())throw ToolCancelled("Worker remote discovery cancelled");next->observe(request.run_id);remote_tools=std::move(next);return definitions;
+            };
             remote_owner=std::move(context);remote_tools->observe(request.run_id);
         }
         auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{request.run_id,request.run_id,membership.workspace_id,generation(),membership.revision},budget.spec.provider_identity_json,deadline);
