@@ -1,3 +1,14 @@
+## Counted parent/child IPC context — 2026-10-21
+
+Actual Responses parent and two delegated xmind workers now pass six inference
+and six HTTP token-count windows. Embedded xlang3 SQLite audit proves two typed
+parent groups, four leaf groups and six completed physical input bindings. Exact
+canonical joins, six shared charges, consumed parent hold and three retired workers
+remain verified. **9/9 focused contracts pass in 74.61 seconds**, with 219 controlled
+HTTP requests. [Scope and raw receipts](evidence/process-worker-parent-counted-20261021.json).
+Parent compaction/overflow combined with delegation, planning, graph/default
+placement, full regression and installed/rendered/live-provider acceptance remain open.
+
 ## Parent IPC lost-result handling — 2026-10-21
 
 Supervisor now retains trusted backend outcome_unrecorded independently of worker

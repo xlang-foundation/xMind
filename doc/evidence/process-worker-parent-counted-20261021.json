@@ -1,0 +1,67 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T16:11:11.938Z",
+    "sourceParent": "8c78e2f254decccd2291db4898c6344b571daa2a",
+    "sourcePatchSha256": "133786954afdc883e4ef86e63d50709a3b7e2adbcbc9496b1dae6684e86e01df",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 23512,
+      "launchedAt": "2026-10-21T16:08:43.487Z",
+      "completedAt": "2026-10-21T16:09:51.084Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7"
+    },
+    "test": {
+      "pid": 64020,
+      "launchedAt": "2026-10-21T16:09:54.300Z",
+      "completedAt": "2026-10-21T16:11:08.958Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4369b116cea6f3065069be95e2de89ba9fb308fd89ec5e3b6d9025bc505c4cc4"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 74.61,
+    "projectFiles": 2748,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "92943a738094cc0a075ae48f441f0df68b1e5a43885a312e49fb0027c596ed4b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-parent-counted-20261021-build.log": "361b86e3b85cbcf337ca2c5e47fd5e0c72ed4ad280debeae5cbdf32e14993ba7",
+    "doc/evidence/process-worker-parent-counted-20261021-build-terminal.json": "61f247763f00be07ca8987c0d93b522bd4568393a77da7220be4e26db2bda457",
+    "doc/evidence/process-worker-parent-counted-20261021-ctest.log": "4369b116cea6f3065069be95e2de89ba9fb308fd89ec5e3b6d9025bc505c4cc4",
+    "doc/evidence/process-worker-parent-counted-20261021-ctest-terminal.json": "fd3d08ee1a0fce21e071e52993e8fb38d298625edf1755f2619f19169954e9b1",
+    "doc/evidence/process-worker-parent-counted-20261021-LastTest.log": "bf29175d32b567e364081aee2cce76e62957f957e9248b2e5570bd308b6c48f8",
+    "doc/evidence/process-worker-parent-counted-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-parent-counted-20261021-gate.json": "5e3989a22c50e449fe288cdfe6afbbc1bc9d611f76b670c99544722425a68a81",
+    "doc/evidence/process-worker-parent-counted-20261021-source.patch": "133786954afdc883e4ef86e63d50709a3b7e2adbcbc9496b1dae6684e86e01df",
+    "doc/evidence/process-worker-parent-counted-20261021-binaries-before-test.json": "d75c0936f856f22cb7892a2135dd5737c34907c7513ca65c8975535fac54236f"
+  },
+  "verified": [
+    "Actual process parent delegates through SDK IPC to two same-image xmind child workers using Responses wire and backend context policy",
+    "Independent HTTP peer observes six inference calls and six token-count requests, canonical native delegation join and actual child file read results",
+    "Embedded xlang3 SQLite audit proves two completed typed parent inference groups, four completed typed leaf groups and six completed physical members with original input bindings",
+    "Six shared charges retained, parent continuation hold consumed, three distinct same-image process leases each admitted/retired exactly once",
+    "Nine focused contracts pass with 219 controlled HTTP requests and complete frozen input/binary sets"
+  ],
+  "limitations": [
+    "Controlled output, not live-provider acceptance",
+    "This test covers ordinary counted parent delegation, not parent compaction/overflow combined with delegation",
+    "Planning, graph/default placement, full current regression and installed/rendered/live-provider acceptance remain open"
+  ],
+  "passed": true
+}
