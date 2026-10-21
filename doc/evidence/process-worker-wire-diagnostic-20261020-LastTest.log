@@ -1,0 +1,21 @@
+Start testing: Oct 20 23:01 Pacific Daylight Time
+----------------------------------------------------------
+102/162 Testing: native_agent_process_tool_host_contract
+102/162 Test: native_agent_process_tool_host_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_process_tool_host_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_process_tool_host_contract" start time: Oct 20 23:01 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Process-owner actual receipt: {"elapsed_ms":136,"exit_code":0,"independently_verified":false,"job_id":"ea7d2a77df28b50064530d1c6319ef66","operation_id":"ea7d2a77df28b50064530d1c6319ef66","output_artifact":{"operation_id":"ea7d2a77df28b50064530d1c6319ef66","state":"complete","stderr_bytes":0,"stdout_bytes":18},"pid":60436,"process_tree_retired":true,"profile_id":"xlang3","stderr":{"byte_count":0,"data":"","encoding":"utf-8","retained_bytes":0},"stdout":{"byte_count":18,"data":"owner-process-ok\r\n","encoding":"utf-8","retained_bytes":18},"termination":"exited","truncated":false}
+Process-owner actual folders: {"attached_marker_content":"actual attached process\n","attached_marker_exists":true,"primary_marker_exists":false}
+process tool owner contract passed
+<end of output>
+Test time =   0.50 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_process_tool_host_contract" end time: Oct 20 23:01 Pacific Daylight Time
+"native_agent_process_tool_host_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 20 23:01 Pacific Daylight Time

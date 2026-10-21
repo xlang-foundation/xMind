@@ -1,0 +1,66 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T06:01:10.257Z",
+    "sourceParent": "1ddd8e7abd37ebd0c144b75665aba4a8cf1c8e9b",
+    "sourcePatchSha256": "e33606325dcb31506113f658ff4235bbd3b2f16ed01dfc48dcce54873c264510",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 43348,
+      "launchedAt": "2026-10-21T05:58:40.840Z",
+      "completedAt": "2026-10-21T06:01:04.091Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8b8386cf6a8c2017dca3cea6c3754f1c25d760ca41d0bfbfa7a0945901d284fd"
+    },
+    "test": {
+      "pid": 12340,
+      "launchedAt": "2026-10-21T06:01:06.990Z",
+      "completedAt": "2026-10-21T06:01:07.558Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2ffa29d0fe8f5d502c56364c650573e054006eb5c404c2363e010f89f2b2b11c"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.51,
+    "projectFiles": 2712,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5489cff7be66f7edd72dbbec16126b79450d6ae5f8a7339458470a2c4e361207",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-wire-diagnostic-20261020-build.log": "8b8386cf6a8c2017dca3cea6c3754f1c25d760ca41d0bfbfa7a0945901d284fd",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-build-terminal.json": "b43d0fa19b2f12567fc4303e2de3b5155bc0b88e14b2790cc9a09499ba783651",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-ctest.log": "2ffa29d0fe8f5d502c56364c650573e054006eb5c404c2363e010f89f2b2b11c",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-ctest-terminal.json": "e280a291d8ded25b8793a1e4baf566f32a477bb40ad6e216810672d9d66460d7",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-LastTest.log": "4e98e49854de7d1122c399395437944c4d94ea27ca6a9d0ad2882ae8fb75300b",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-test-inventory.json": "9eb6666436cfa6a283ca7c47d358858ed5ef551921160a2c3ba353f66bef2b59",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-gate.json": "20d485cffbfa54f519b8ffd7009dae20c2640fcd09fe5be6f3c650041e0174b6",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-source.patch": "e33606325dcb31506113f658ff4235bbd3b2f16ed01dfc48dcce54873c264510",
+    "doc/evidence/process-worker-wire-diagnostic-20261020-binaries-before-test.json": "71fd420a031df53c402cf5f202ed39089f5e8f57edee346ef6001cd16e96e1f0"
+  },
+  "verified": [
+    "Exact nine-field process invocation wire codec with bounded identities, revision and argument bytes",
+    "Rejects caller-supplied operation, approval, executable, root, owner policy and expiry fields, duplicates, nested values and malformed revisions",
+    "Native process owner consumes the same validator and retains its own executable bindings and approvals",
+    "Existing actual approved xlang3 command runs in its captured attached folder and its receipt survives SQLite reopen"
+  ],
+  "limitations": [
+    "One targeted native contract; no new full or focused suite acceptance",
+    "Durable worker process claims, authenticated process RPC, coding-worker process ports and command continuation remain unfinished",
+    "No installation or rendered client validation"
+  ],
+  "passed": true
+}

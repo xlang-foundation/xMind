@@ -1,3 +1,20 @@
+## Process worker invocation boundary — 2026-10-20
+
+The native process owner now consumes a strict nine-field invocation codec.
+It preserves exact scoped values and Unicode call IDs, rejecting additional
+authority fields, duplicates, nested values and invalid revisions. The backend
+continues to choose executable bindings, approvals, operation IDs and expiry.
+The targeted native process-host contract passes, including one actual approved
+xlang3 command in an attached folder and SQLite receipt reopen. All source and
+dependency inputs remain frozen across validation.
+[Final source scope and raw evidence](evidence/process-worker-wire-final-20261020.json).
+The preceding passing diagnostic is also retained; the final run follows removal
+of a trailing blank line found by the staged whitespace check.
+
+This is a process wire/owner boundary checkpoint. Durable worker process claims,
+authenticated process RPC and coding-worker command continuation remain open.
+It adds no broader-suite, installed or rendered acceptance.
+
 ## Production native coding workers — 2026-10-20
 
 The actual AgentRunner now runs in a coding worker using the unified xmind

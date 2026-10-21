@@ -52,6 +52,13 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         auto host=make_agent_process_tool_host(store,owner);
         const auto call=[&](const std::string& id,const std::string& tool,Json args){AgentProcessToolInvocation value;value.run_id="run";value.attempt_id="attempt-1";value.call_id=id;value.workspace_id=workspace_id;value.workspace_revision=7;value.folder_id=workspace_id;value.tool_name=tool;value.arguments_json=args.dump();return value;};
         auto invocation=call("primary-\xe9\x9b\xaa","run_process",{{"profile","xlang3"},{"arguments",Json::array()},{"workdir","."}});
+        const auto wire=invocation.serialize();need(AgentProcessToolInvocation::parse(wire).serialize()==wire,"Process wire must preserve exact scoped values and UTF-8 call IDs");
+        for(const auto* tool:{"run_process","wait_process","stop_process"}){auto value=invocation;value.tool_name=tool;need(AgentProcessToolInvocation::parse(value.serialize()).tool_name==tool,"All admitted process tools must round trip");}
+        for(const auto* field:{"operation_id","approval_id","executable","root","owner_policy","expires_unix_ms"}){auto value=Json::parse(wire);value[field]="forged";rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(value.dump());});}
+        for(const auto* field:{"protocol_version","run_id","attempt_id","call_id","workspace_id","folder_id","workspace_revision","tool_name","arguments_json"}){auto missing=Json::parse(wire);missing.erase(field);rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(missing.dump());});auto nested=Json::parse(wire);nested[field]=Json::object();rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(nested.dump());});}
+        rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(wire.substr(0,wire.size()-1)+",\"call_id\":\"forged\"}");});
+        for(const auto revision:{Json(0),Json(-1),Json(1.5),Json(9007199254740992ULL)}){auto value=Json::parse(wire);value["workspace_revision"]=revision;rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(value.dump());});}
+        {auto value=invocation;value.tool_name="create_file";rejects<std::invalid_argument>([&]{value.serialize();});value=invocation;value.call_id.push_back('\0');rejects<std::invalid_argument>([&]{value.serialize();});}
         auto invalid=invocation;invalid.protocol_version=2;rejects<std::invalid_argument>([&]{host->invoke(invalid);});
         invalid=invocation;invalid.run_id="foreign";rejects<ToolAccessDenied>([&]{host->invoke(invalid);});
         invalid=invocation;invalid.workspace_id=attached_id;rejects<ToolAccessDenied>([&]{host->invoke(invalid);});

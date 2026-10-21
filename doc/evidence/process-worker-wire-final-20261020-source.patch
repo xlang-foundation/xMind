@@ -1,0 +1,139 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index a0af8581..c2d35e95 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -95,7 +95,7 @@ endif()
+ # Production persistence must call SQLite through embedded xlang3.
+ add_library(agentflow_models STATIC src/agent_model_values.cpp src/model_stream.cpp src/model_request.cpp src/responses_stream.cpp src/responses_request.cpp src/responses_context.cpp src/anthropic_request.cpp src/anthropic_stream.cpp src/anthropic_history.cpp src/gemini_request.cpp src/gemini_stream.cpp src/gemini_history.cpp src/gemini_model_policy.cpp src/deepseek_request.cpp src/deepseek_model_policy.cpp src/provider_model_policy.cpp src/provider_history_bridge.cpp)
+ target_include_directories(agentflow_models PUBLIC include PRIVATE third_party)
+-target_sources(agentflow_models PRIVATE src/agent_workspace_invocation.cpp src/agent_file_invocation.cpp)
++target_sources(agentflow_models PRIVATE src/agent_workspace_invocation.cpp src/agent_file_invocation.cpp src/agent_process_invocation.cpp)
+ target_link_libraries(agentflow_core PRIVATE agentflow_models)
+ add_library(agentflow_mcp_wire STATIC src/mcp_wire.cpp src/mcp_requests.cpp src/mcp_handshake.cpp src/mcp_subscriptions.cpp src/mcp_http_metadata.cpp src/mcp_http_stream.cpp src/mcp_tool_codec.cpp)
+ target_link_libraries(agentflow_core PRIVATE agentflow_mcp_wire)
+diff --git a/Native/include/agentflow/agent_process_tool_host.hpp b/Native/include/agentflow/agent_process_tool_host.hpp
+index d19a2663..cf9b52d3 100644
+--- a/Native/include/agentflow/agent_process_tool_host.hpp
++++ b/Native/include/agentflow/agent_process_tool_host.hpp
+@@ -6,6 +6,7 @@
+ #include <memory>
+ #include <stop_token>
+ #include <string>
++#include <string_view>
+ #include <vector>
+ 
+ namespace agentflow {
+@@ -21,6 +22,8 @@ struct AgentProcessToolInvocation {
+     std::int32_t protocol_version=1;
+     std::string run_id,attempt_id,call_id,workspace_id,folder_id,tool_name,arguments_json;
+     std::int64_t workspace_revision=0;
++    std::string serialize()const;
++    static AgentProcessToolInvocation parse(std::string_view);
+ };
+ struct AgentProcessToolResult {bool success=false;std::string output_json;};
+ class AgentProcessOwnerHost {
+@@ -29,6 +32,7 @@ public:
+     virtual AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token cancel={})=0;
+ };
+ bool is_agent_process_tool(const std::string& name);
++void validate_agent_process_tool_invocation(const AgentProcessToolInvocation&);
+ 
+ // Trusted backend construction only; none of these capabilities are worker
+ // request fields. This adapter is not authenticated IPC or durable RPC dedup.
+diff --git a/Native/src/agent_process_invocation.cpp b/Native/src/agent_process_invocation.cpp
+new file mode 100644
+index 00000000..cfc766a8
+--- /dev/null
++++ b/Native/src/agent_process_invocation.cpp
+@@ -0,0 +1,53 @@
++#include "agentflow/agent_process_tool_host.hpp"
++#include "nlohmann/json.hpp"
++#include <algorithm>
++#include <set>
++namespace agentflow {
++using Json=nlohmann::json;
++namespace {
++bool bounded_id(const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&std::none_of(value.begin(),value.end(),[](unsigned char c){return c<0x21||c>0x7e;});}
++}
++bool is_agent_process_tool(const std::string& name){
++    return name=="run_process"||name=="wait_process"||name=="stop_process";
++}
++void validate_agent_process_tool_invocation(const AgentProcessToolInvocation& call){
++    const auto text=[](const std::string& value,std::size_t limit){return !value.empty()&&value.size()<=limit&&value.find('\0')==std::string::npos;};
++    if(call.protocol_version!=1||!bounded_id(call.run_id,128)||!bounded_id(call.attempt_id,128)||
++       !text(call.call_id,256)||!text(call.workspace_id,256)||!text(call.folder_id,256)||
++       call.workspace_revision<1||call.workspace_revision>9007199254740991LL||
++       !is_agent_process_tool(call.tool_name)||call.arguments_json.size()>4*1024*1024)
++        throw std::invalid_argument("Invalid process-tool invocation envelope");
++}
++std::string AgentProcessToolInvocation::serialize()const{
++    validate_agent_process_tool_invocation(*this);
++    return Json{{"protocol_version",protocol_version},{"run_id",run_id},{"attempt_id",attempt_id},
++        {"call_id",call_id},{"workspace_id",workspace_id},{"folder_id",folder_id},
++        {"workspace_revision",workspace_revision},{"tool_name",tool_name},{"arguments_json",arguments_json}}.dump();
++}
++AgentProcessToolInvocation AgentProcessToolInvocation::parse(std::string_view wire){
++    // A JSON string can expand one source byte to six escaped bytes. This
++    // value bound preserves the native 4 MiB argument limit without claiming
++    // that every such call fits a separately bounded authenticated frame.
++    if(wire.size()>6*4*1024*1024+16384)throw std::invalid_argument("Process invocation wire exceeds limits");
++    Json value;std::set<std::string> keys;
++    try{
++        value=Json::parse(wire,[&](int depth,Json::parse_event_t event,Json& item){
++            if(depth>1)throw std::invalid_argument("Nested process invocation envelope");
++            if(event==Json::parse_event_t::key&&!keys.insert(item.get<std::string>()).second)
++                throw std::invalid_argument("Duplicate process invocation field");
++            return true;
++        });
++        static const std::set<std::string> expected={"protocol_version","run_id","attempt_id","call_id","workspace_id","folder_id","workspace_revision","tool_name","arguments_json"};
++        if(!value.is_object()||keys!=expected||value.size()!=expected.size())throw std::invalid_argument("Invalid process invocation fields");
++        for(const auto* field:{"run_id","attempt_id","call_id","workspace_id","folder_id","tool_name","arguments_json"})
++            if(!value.at(field).is_string())throw std::invalid_argument("Invalid process invocation text");
++        if(!value.at("protocol_version").is_number_integer()||value.at("protocol_version")!=1||
++           !value.at("workspace_revision").is_number_integer()||value.at("workspace_revision")<1||
++           value.at("workspace_revision")>9007199254740991LL)throw std::invalid_argument("Invalid process invocation version or revision");
++        AgentProcessToolInvocation call;call.run_id=value.at("run_id");call.attempt_id=value.at("attempt_id");
++        call.call_id=value.at("call_id");call.workspace_id=value.at("workspace_id");call.folder_id=value.at("folder_id");
++        call.workspace_revision=value.at("workspace_revision");call.tool_name=value.at("tool_name");call.arguments_json=value.at("arguments_json");
++        validate_agent_process_tool_invocation(call);return call;
++    }catch(const Json::exception&){throw std::invalid_argument("Invalid process invocation JSON");}
++}
++}
+diff --git a/Native/src/agent_process_tool_host.cpp b/Native/src/agent_process_tool_host.cpp
+index 1fe35f72..601953e7 100644
+--- a/Native/src/agent_process_tool_host.cpp
++++ b/Native/src/agent_process_tool_host.cpp
+@@ -28,7 +28,7 @@ public:
+     }
+     AgentProcessToolResult invoke(const AgentProcessToolInvocation& call,std::stop_token cancel)override{
+         if(cancel.stop_requested())throw ToolCancelled("Process-tool invocation cancelled before preparation");
+-        if(call.protocol_version!=1||!bounded_id(call.attempt_id,128)||call.call_id.empty()||call.call_id.size()>256||call.call_id.find('\0')!=std::string::npos||call.arguments_json.size()>4*1024*1024)throw std::invalid_argument("Invalid process-tool invocation envelope");
++        validate_agent_process_tool_invocation(call);
+         if(call.run_id!=owner_.run_id||call.workspace_id!=workspace_id_||call.workspace_revision!=revision_)throw ToolAccessDenied("Process-tool invocation differs from its admitted owner");
+         if(!is_agent_process_tool(call.tool_name)||!owner_.offered_tool(call.tool_name))throw ToolAccessDenied("Process tool is outside the admitted catalogue");
+         if(store_.run(owner_.run_id).get().state!=RunState::running)throw ToolAccessDenied("Process-tool owner is no longer running");
+@@ -66,6 +66,5 @@ private:
+     std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
+ };
+ }
+-bool is_agent_process_tool(const std::string& name){return name=="run_process"||name=="wait_process"||name=="stop_process";}
+ std::unique_ptr<AgentProcessOwnerHost> make_agent_process_tool_host(PersistenceService& store,AgentProcessToolOwnerContext owner){return std::make_unique<LocalProcessToolHost>(store,std::move(owner));}
+ }
+diff --git a/Native/tests/agent_process_tool_host_contract.cpp b/Native/tests/agent_process_tool_host_contract.cpp
+index 38ee7278..fb801977 100644
+--- a/Native/tests/agent_process_tool_host_contract.cpp
++++ b/Native/tests/agent_process_tool_host_contract.cpp
+@@ -52,6 +52,13 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
+         auto host=make_agent_process_tool_host(store,owner);
+         const auto call=[&](const std::string& id,const std::string& tool,Json args){AgentProcessToolInvocation value;value.run_id="run";value.attempt_id="attempt-1";value.call_id=id;value.workspace_id=workspace_id;value.workspace_revision=7;value.folder_id=workspace_id;value.tool_name=tool;value.arguments_json=args.dump();return value;};
+         auto invocation=call("primary-\xe9\x9b\xaa","run_process",{{"profile","xlang3"},{"arguments",Json::array()},{"workdir","."}});
++        const auto wire=invocation.serialize();need(AgentProcessToolInvocation::parse(wire).serialize()==wire,"Process wire must preserve exact scoped values and UTF-8 call IDs");
++        for(const auto* tool:{"run_process","wait_process","stop_process"}){auto value=invocation;value.tool_name=tool;need(AgentProcessToolInvocation::parse(value.serialize()).tool_name==tool,"All admitted process tools must round trip");}
++        for(const auto* field:{"operation_id","approval_id","executable","root","owner_policy","expires_unix_ms"}){auto value=Json::parse(wire);value[field]="forged";rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(value.dump());});}
++        for(const auto* field:{"protocol_version","run_id","attempt_id","call_id","workspace_id","folder_id","workspace_revision","tool_name","arguments_json"}){auto missing=Json::parse(wire);missing.erase(field);rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(missing.dump());});auto nested=Json::parse(wire);nested[field]=Json::object();rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(nested.dump());});}
++        rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(wire.substr(0,wire.size()-1)+",\"call_id\":\"forged\"}");});
++        for(const auto revision:{Json(0),Json(-1),Json(1.5),Json(9007199254740992ULL)}){auto value=Json::parse(wire);value["workspace_revision"]=revision;rejects<std::invalid_argument>([&]{AgentProcessToolInvocation::parse(value.dump());});}
++        {auto value=invocation;value.tool_name="create_file";rejects<std::invalid_argument>([&]{value.serialize();});value=invocation;value.call_id.push_back('\0');rejects<std::invalid_argument>([&]{value.serialize();});}
+         auto invalid=invocation;invalid.protocol_version=2;rejects<std::invalid_argument>([&]{host->invoke(invalid);});
+         invalid=invocation;invalid.run_id="foreign";rejects<ToolAccessDenied>([&]{host->invoke(invalid);});
+         invalid=invocation;invalid.workspace_id=attached_id;rejects<ToolAccessDenied>([&]{host->invoke(invalid);});

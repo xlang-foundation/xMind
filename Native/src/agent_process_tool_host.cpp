@@ -28,7 +28,7 @@ public:
     }
     AgentProcessToolResult invoke(const AgentProcessToolInvocation& call,std::stop_token cancel)override{
         if(cancel.stop_requested())throw ToolCancelled("Process-tool invocation cancelled before preparation");
-        if(call.protocol_version!=1||!bounded_id(call.attempt_id,128)||call.call_id.empty()||call.call_id.size()>256||call.call_id.find('\0')!=std::string::npos||call.arguments_json.size()>4*1024*1024)throw std::invalid_argument("Invalid process-tool invocation envelope");
+        validate_agent_process_tool_invocation(call);
         if(call.run_id!=owner_.run_id||call.workspace_id!=workspace_id_||call.workspace_revision!=revision_)throw ToolAccessDenied("Process-tool invocation differs from its admitted owner");
         if(!is_agent_process_tool(call.tool_name)||!owner_.offered_tool(call.tool_name))throw ToolAccessDenied("Process tool is outside the admitted catalogue");
         if(store_.run(owner_.run_id).get().state!=RunState::running)throw ToolAccessDenied("Process-tool owner is no longer running");
@@ -66,6 +66,5 @@ private:
     std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
 };
 }
-bool is_agent_process_tool(const std::string& name){return name=="run_process"||name=="wait_process"||name=="stop_process";}
 std::unique_ptr<AgentProcessOwnerHost> make_agent_process_tool_host(PersistenceService& store,AgentProcessToolOwnerContext owner){return std::make_unique<LocalProcessToolHost>(store,std::move(owner));}
 }

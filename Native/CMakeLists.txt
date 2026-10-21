@@ -95,7 +95,7 @@ endif()
 # Production persistence must call SQLite through embedded xlang3.
 add_library(agentflow_models STATIC src/agent_model_values.cpp src/model_stream.cpp src/model_request.cpp src/responses_stream.cpp src/responses_request.cpp src/responses_context.cpp src/anthropic_request.cpp src/anthropic_stream.cpp src/anthropic_history.cpp src/gemini_request.cpp src/gemini_stream.cpp src/gemini_history.cpp src/gemini_model_policy.cpp src/deepseek_request.cpp src/deepseek_model_policy.cpp src/provider_model_policy.cpp src/provider_history_bridge.cpp)
 target_include_directories(agentflow_models PUBLIC include PRIVATE third_party)
-target_sources(agentflow_models PRIVATE src/agent_workspace_invocation.cpp src/agent_file_invocation.cpp)
+target_sources(agentflow_models PRIVATE src/agent_workspace_invocation.cpp src/agent_file_invocation.cpp src/agent_process_invocation.cpp)
 target_link_libraries(agentflow_core PRIVATE agentflow_models)
 add_library(agentflow_mcp_wire STATIC src/mcp_wire.cpp src/mcp_requests.cpp src/mcp_handshake.cpp src/mcp_subscriptions.cpp src/mcp_http_metadata.cpp src/mcp_http_stream.cpp src/mcp_tool_codec.cpp)
 target_link_libraries(agentflow_core PRIVATE agentflow_mcp_wire)
