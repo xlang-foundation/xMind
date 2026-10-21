@@ -1,3 +1,22 @@
+## Production ordinary read-worker factory — 2026-10-20
+
+`make_agent_worker_read_executor` captures backend settings, executable and
+credential gateway, validates ordinary admission, and retains a supervisor through
+physical drain. AgentService fixtures use the production factory for four actual
+product children: empty tools, exact primary-folder read, inherited backend denial
+despite selected-agent allow, and an attached-folder read with a primary-file decoy.
+The independent peer checks ordered instructions, output limit 32, canonical tool
+continuation and all 55 intentional synthetic HTTP windows. Full provider identity
+and exact model charges are retained. The serial build and 54 focused contracts pass
+in 158.53 seconds with frozen inputs and 133 native binary file sets unchanged.
+[Raw evidence and limits](evidence/worker-production-factory-members-focused-20261020.json).
+
+Server selection and public placement remain unwired. Worker effects, graphs,
+context and other unsupported capabilities are rejected. Dedicated service fault,
+cancellation, shutdown and recovery qualification remain open; uncertain physical
+observations retain capacity without replacement or replay. This is no new full-suite,
+installed, hosted, rendered-client or live-provider acceptance.
+
 ## Canonical worker permission denials — 2026-10-20
 
 Native worker reads now deliver and persist the same typed result for agent-policy

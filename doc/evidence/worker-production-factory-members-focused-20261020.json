@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-21T01:13:45.709Z",
+  "gate": {
+    "recordedAt": "2026-10-21T01:13:35.038Z",
+    "sourceParent": "0e4919745cd830bc1c2ec28d360d4c2d5bc37278",
+    "sourcePatchSha256": "4b272b2428ecf809117071c30cf10e37a08be15a6a32fd6d04a0ac675b17be52",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 33096,
+      "launchedAt": "2026-10-21T01:09:49.345Z",
+      "completedAt": "2026-10-21T01:10:50.947Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "65505c6e5d1668d048f1952f211fda1dbf34d239868e24b8b4ce4c7e83bdd549"
+    },
+    "test": {
+      "pid": 48384,
+      "launchedAt": "2026-10-21T01:10:53.565Z",
+      "completedAt": "2026-10-21T01:13:32.140Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0cc19c77ca936d04db66be960bcd7594723444ddfd3282cf44481efb750a3cf2"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 158.53,
+    "projectFiles": 2696,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "577e3c311ea834c4b405e1a503bf2d19f4cc3a7644ff4eec097f2049a69dd173",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/worker-production-factory-members-focused-20261020-build.log": "65505c6e5d1668d048f1952f211fda1dbf34d239868e24b8b4ce4c7e83bdd549",
+    "doc/evidence/worker-production-factory-members-focused-20261020-build-terminal.json": "5cc2018a8d69acb8199cf9578074549c77dfcfc5c0c44f82d6693260244b269f",
+    "doc/evidence/worker-production-factory-members-focused-20261020-ctest.log": "0cc19c77ca936d04db66be960bcd7594723444ddfd3282cf44481efb750a3cf2",
+    "doc/evidence/worker-production-factory-members-focused-20261020-ctest-terminal.json": "12a84a4b5cca01c3a85dbb1f2810da852767ba975d50ccd0e35a16415fa40275",
+    "doc/evidence/worker-production-factory-members-focused-20261020-LastTest.log": "69c6f9ad4ef0d7c0d4b33eb2132d8ac88e86e02e552586db7a1c3bf6ed78f20e",
+    "doc/evidence/worker-production-factory-members-focused-20261020-test-inventory.json": "0d9db7c8801c8891348d92cd3aac078a7fe2b858cdc2889e360152faaa25ae45",
+    "doc/evidence/worker-production-factory-members-focused-20261020-gate.json": "af749478a2d6006251035353741cc274167a4b71af5091243453dfd92ea159c3"
+  },
+  "scope": "Production ordinary read worker factory used by actual AgentService with four independent synthetic child runs",
+  "verified": [
+    "Captures native AgentSettings, bound executable, credential gateway and full provider identity in the backend",
+    "Rejects unsupported edit settings; explicit empty or registered read tool catalogue required",
+    "Uses immutable admitted workspace value; opens primary and attached native folder handles; rejects changed execution budget and existing membership receipt",
+    "Actual distinct product children complete empty-tools, exact native primary read, base deny versus selected allow, and attached-folder read with a primary-file decoy",
+    "Independent HTTP peer checks ordered base, selected-agent, repository and backend suffix instructions, output limit 32, exact canonical continuation and seven factory windows",
+    "Base denial causes no read dispatch or file bytes; positive reads dispatch once each and preserve exact history",
+    "Actual service idle follows supervisor physical drain; original execution deadline retained across observations",
+    "54 focused contracts pass with all frozen inputs, dependencies and 133 native binary file sets unchanged"
+  ],
+  "limitations": [
+    "Server selection and public process placement are not wired",
+    "Factory covers ordinary read roots; writes, processes, MCP/A2A, context, planning, delegation and graphs are explicitly rejected pending worker support",
+    "Dedicated service cancellation, shutdown, provider failure, lease-admission failure, storage failure and recovery qualification remain open",
+    "Unconfirmed OS launch or physical observation retains the same supervisor and physical capacity; automated reconciliation and recovery are not implemented",
+    "No new full-suite, installed, hosted, rendered-client or live-provider acceptance"
+  ],
+  "passed": true
+}
