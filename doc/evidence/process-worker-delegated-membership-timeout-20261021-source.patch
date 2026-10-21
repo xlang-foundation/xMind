@@ -1,0 +1,18 @@
+diff --git a/Native/tests/responses_agent_http_contract.mjs b/Native/tests/responses_agent_http_contract.mjs
+index 966e0655..3591b7cd 100644
+--- a/Native/tests/responses_agent_http_contract.mjs
++++ b/Native/tests/responses_agent_http_contract.mjs
+@@ -95,7 +95,12 @@ async function stop(){if(child&&child.exitCode===null){const exited=new Promise(
+ async function api(path,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
+ function command(...args){const result=spawnSync(cli,[String(port),...args],{env,encoding:'utf8',windowsHide:true,timeout:15000});const diagnostic=JSON.stringify({command:args[0],status:result.status,signal:result.signal,stdoutBytes:Buffer.byteLength(result.stdout??''),stderrBytes:Buffer.byteLength(result.stderr??'')});assert.ifError(result.error);assert.equal(result.status,0,diagnostic+' '+result.stderr);assert.equal(result.signal,null,diagnostic);assert.ok(result.stdout?.trim(), 'Native CLI returned empty JSON output: '+diagnostic);try{return JSON.parse(result.stdout);}catch(error){throw new Error('Native CLI returned invalid JSON: '+diagnostic,{cause:error});}}
+ async function until(read,predicate){const deadline=Date.now()+15000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await read();if(predicate(value))return value;await delay(15);}throw new Error('Responses observation deadline');}
+-async function run(id,prompt,state='completed'){await api('/v1/sessions',{id,title:id});const value=command('run',id,prompt);await until(()=>api('/v1/runs/'+value.id),record=>record.state===state);return value;}
++async function run(id,prompt,state='completed'){
++ await api('/v1/sessions',{id,title:id});const value=command('run',id,prompt);
++ try{await until(async()=>{const record=await api('/v1/runs/'+value.id);if(state==='completed'&&['failed','cancelled'].includes(record.state))throw new Error('Unexpected terminal state');return record;},record=>record.state===state);}
++ catch(error){const record=await api('/v1/runs/'+value.id),events=command('events',value.id),children=await api('/v1/runs/'+value.id+'/children');throw new Error('Responses run observation '+JSON.stringify({state:record.state,parentMembership:events.some(event=>event.kind==='agent.workspace_membership'),childStates:children.map(child=>child.run.state),childWorkerAdmissions:(await ownedTree(value.id)).filter(event=>event.kind==='worker.lease.admitted').length}));}
++ return value;
++}
+ function opaqueHistory(history,owner){
+  assert.deepEqual(history.map(item=>item.role),['user','assistant','tool','assistant']);const flow=opaqueFlows.get(owner);assert.equal(flow.length,2);
+  for(const [index,record]of history.filter(item=>item.role==='assistant').entries()){

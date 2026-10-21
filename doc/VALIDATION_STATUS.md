@@ -1,3 +1,23 @@
+## Direct server delegated IPC membership — 2026-10-21
+
+The broader gate found 64/65 passing: actual Responses server delegation waited
+with a running parent, no captured workspace receipt, two queued children and
+zero worker admissions. Direct servers without a registry now capture a verified
+revision-1 primary-folder snapshot. Registered groups retain their existing
+membership path. Bounded failure diagnostics and all failed runs are preserved.
+
+**1/1 native server Responses contract passes in 12.04 seconds**. The actual
+server/CLI/HTTP path now verifies two distinct retired xmind IPC children with
+exact inherited workspace receipts, six parent/leaf calls, canonical file reads,
+whole opaque continuation, per-owner metrics and SQLite reopen without replay.
+Complete source/SDK/library/dependency/133-binary sets/hashes remain frozen.
+[Scope and 37 raw receipts](evidence/process-worker-delegated-primary-membership-20261021.json).
+
+This controlled HTTP/SSE peer uses synthetic provider responses. Broader/full
+regression on corrected source, parent worker orchestration, planning, graph/
+default placement, further delegated cases and updated installed/rendered/
+live-provider client acceptance remain open.
+
 ## Production delegated scheduling through xmind IPC — 2026-10-21
 
 DelegationExecutor now dispatches through a captured backend port; server

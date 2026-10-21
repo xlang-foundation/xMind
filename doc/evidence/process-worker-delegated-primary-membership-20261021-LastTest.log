@@ -1,0 +1,19 @@
+Start testing: Oct 21 07:52 Pacific Daylight Time
+----------------------------------------------------------
+43/162 Testing: native_responses_agent_http_contract
+43/162 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_responses_agent_http_contract" start time: Oct 21 07:52 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  12.03 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 21 07:53 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:12
+----------------------------------------------------------
+
+End testing: Oct 21 07:53 Pacific Daylight Time

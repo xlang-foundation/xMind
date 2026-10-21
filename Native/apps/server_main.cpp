@@ -202,24 +202,23 @@ int run_server(int argc,char** argv) {
                 std::string(reinterpret_cast<const char*>(private_root.data()),private_root.size()));
         }
         const auto bind_workspace_membership=[&](agentflow::AgentSettings& settings){
-            if(!settings.workspace||!workspace_registry)return;
+            if(!settings.workspace)return;
             const agentflow::WorkspaceTools primary(*settings.workspace);
             const auto workspace_id=primary.identity();const auto primary_root=primary.root_path();
             const auto registry=workspace_registry;
             settings.workspace_membership_snapshot=[registry,workspace_id,primary_root]{
-                try {
+                if(registry)try {
                     const auto group=registry->get(workspace_id);agentflow::WorkspaceMembershipSnapshot snapshot;
                     snapshot.workspace_id=group.workspace_id;snapshot.revision=group.revision;snapshot.folders.reserve(group.folders.size());
                     for(const auto& folder:group.folders)snapshot.folders.push_back({folder.folder_id,folder.root});
                     return snapshot;
-                } catch(const std::out_of_range&) {
-                    // Existing local profiles may predate explicit workspace
-                    // registration. Preserve their primary-folder capability;
-                    // registration can later expand this to multiple roots.
-                    const agentflow::WorkspaceTools verified(primary_root);
-                    if(verified.identity()!=workspace_id||verified.root_path()!=primary_root)throw;
-                    return agentflow::WorkspaceMembershipSnapshot{workspace_id,1,{{workspace_id,primary_root}}};
-                }
+                } catch(const std::out_of_range&) {}
+                // A direct server and an unregistered local profile both own
+                // one verified primary folder. Capture it before execution so
+                // process children inherit the exact same immutable snapshot.
+                const agentflow::WorkspaceTools verified(primary_root);
+                if(verified.identity()!=workspace_id||verified.root_path()!=primary_root)throw agentflow::Conflict("Primary workspace identity changed before capture");
+                return agentflow::WorkspaceMembershipSnapshot{workspace_id,1,{{workspace_id,primary_root}}};
             };
         };
         std::vector<agentflow::XlangPythonToolRegistration> xlang_python_tools;

@@ -1,0 +1,30 @@
+Start testing: Oct 21 07:49 Pacific Daylight Time
+----------------------------------------------------------
+43/162 Testing: native_responses_agent_http_contract
+43/162 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_responses_agent_http_contract" start time: Oct 21 07:49 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:97
+async function until(read,predicate){const deadline=Date.now()+15000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await read();if(predicate(value))return value;await delay(15);}throw new Error('Responses observation deadline');}
+                                                                                                                                                                                                              ^
+
+Error: Responses observation deadline
+    at until (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:97:207)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processTimers (node:internal/timers:520:9)
+    at async run (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:100:2)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:144:47
+
+Node.js v22.19.0
+<end of output>
+Test time =  18.79 sec
+----------------------------------------------------------
+Test Failed.
+"native_responses_agent_http_contract" end time: Oct 21 07:50 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:18
+----------------------------------------------------------
+
+End testing: Oct 21 07:50 Pacific Daylight Time

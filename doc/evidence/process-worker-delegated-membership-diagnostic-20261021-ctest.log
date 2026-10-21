@@ -1,0 +1,24 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 43: native_responses_agent_http_contract
+1/1 Test #43: native_responses_agent_http_contract ...***Failed   18.79 sec
+file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:97
+async function until(read,predicate){const deadline=Date.now()+15000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await read();if(predicate(value))return value;await delay(15);}throw new Error('Responses observation deadline');}
+                                                                                                                                                                                                              ^
+
+Error: Responses observation deadline
+    at until (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:97:207)
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processTimers (node:internal/timers:520:9)
+    at async run (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:100:2)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:144:47
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  18.81 sec
+
+The following tests FAILED:
+	 43 - native_responses_agent_http_contract (Failed)
+Errors while running CTest

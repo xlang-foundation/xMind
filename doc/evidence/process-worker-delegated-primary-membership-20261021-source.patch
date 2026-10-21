@@ -1,0 +1,78 @@
+diff --git a/Native/apps/server_main.cpp b/Native/apps/server_main.cpp
+index 70815e0e..fd339c76 100644
+--- a/Native/apps/server_main.cpp
++++ b/Native/apps/server_main.cpp
+@@ -202,24 +202,23 @@ int run_server(int argc,char** argv) {
+                 std::string(reinterpret_cast<const char*>(private_root.data()),private_root.size()));
+         }
+         const auto bind_workspace_membership=[&](agentflow::AgentSettings& settings){
+-            if(!settings.workspace||!workspace_registry)return;
++            if(!settings.workspace)return;
+             const agentflow::WorkspaceTools primary(*settings.workspace);
+             const auto workspace_id=primary.identity();const auto primary_root=primary.root_path();
+             const auto registry=workspace_registry;
+             settings.workspace_membership_snapshot=[registry,workspace_id,primary_root]{
+-                try {
++                if(registry)try {
+                     const auto group=registry->get(workspace_id);agentflow::WorkspaceMembershipSnapshot snapshot;
+                     snapshot.workspace_id=group.workspace_id;snapshot.revision=group.revision;snapshot.folders.reserve(group.folders.size());
+                     for(const auto& folder:group.folders)snapshot.folders.push_back({folder.folder_id,folder.root});
+                     return snapshot;
+-                } catch(const std::out_of_range&) {
+-                    // Existing local profiles may predate explicit workspace
+-                    // registration. Preserve their primary-folder capability;
+-                    // registration can later expand this to multiple roots.
+-                    const agentflow::WorkspaceTools verified(primary_root);
+-                    if(verified.identity()!=workspace_id||verified.root_path()!=primary_root)throw;
+-                    return agentflow::WorkspaceMembershipSnapshot{workspace_id,1,{{workspace_id,primary_root}}};
+-                }
++                } catch(const std::out_of_range&) {}
++                // A direct server and an unregistered local profile both own
++                // one verified primary folder. Capture it before execution so
++                // process children inherit the exact same immutable snapshot.
++                const agentflow::WorkspaceTools verified(primary_root);
++                if(verified.identity()!=workspace_id||verified.root_path()!=primary_root)throw agentflow::Conflict("Primary workspace identity changed before capture");
++                return agentflow::WorkspaceMembershipSnapshot{workspace_id,1,{{workspace_id,primary_root}}};
+             };
+         };
+         std::vector<agentflow::XlangPythonToolRegistration> xlang_python_tools;
+diff --git a/Native/tests/responses_agent_http_contract.mjs b/Native/tests/responses_agent_http_contract.mjs
+index 966e0655..e3596419 100644
+--- a/Native/tests/responses_agent_http_contract.mjs
++++ b/Native/tests/responses_agent_http_contract.mjs
+@@ -95,7 +95,12 @@ async function stop(){if(child&&child.exitCode===null){const exited=new Promise(
+ async function api(path,body){const response=await fetch(`http://127.0.0.1:${port}${path}`,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(10000)});assert.ok(response.ok,await response.clone().text());return response.json();}
+ function command(...args){const result=spawnSync(cli,[String(port),...args],{env,encoding:'utf8',windowsHide:true,timeout:15000});const diagnostic=JSON.stringify({command:args[0],status:result.status,signal:result.signal,stdoutBytes:Buffer.byteLength(result.stdout??''),stderrBytes:Buffer.byteLength(result.stderr??'')});assert.ifError(result.error);assert.equal(result.status,0,diagnostic+' '+result.stderr);assert.equal(result.signal,null,diagnostic);assert.ok(result.stdout?.trim(), 'Native CLI returned empty JSON output: '+diagnostic);try{return JSON.parse(result.stdout);}catch(error){throw new Error('Native CLI returned invalid JSON: '+diagnostic,{cause:error});}}
+ async function until(read,predicate){const deadline=Date.now()+15000;while(Date.now()<deadline){if(peerError)throw peerError;const value=await read();if(predicate(value))return value;await delay(15);}throw new Error('Responses observation deadline');}
+-async function run(id,prompt,state='completed'){await api('/v1/sessions',{id,title:id});const value=command('run',id,prompt);await until(()=>api('/v1/runs/'+value.id),record=>record.state===state);return value;}
++async function run(id,prompt,state='completed'){
++ await api('/v1/sessions',{id,title:id});const value=command('run',id,prompt);
++ try{await until(async()=>{const record=await api('/v1/runs/'+value.id);if(state==='completed'&&['failed','cancelled'].includes(record.state))throw new Error('Unexpected terminal state');return record;},record=>record.state===state);}
++ catch(error){const record=await api('/v1/runs/'+value.id),events=command('events',value.id),children=await api('/v1/runs/'+value.id+'/children');throw new Error('Responses run observation '+JSON.stringify({state:record.state,parentMembership:events.some(event=>event.kind==='agent.workspace_membership'),childStates:children.map(child=>child.run.state),childWorkerAdmissions:(await ownedTree(value.id)).filter(event=>event.kind==='worker.lease.admitted').length}));}
++ return value;
++}
+ function opaqueHistory(history,owner){
+  assert.deepEqual(history.map(item=>item.role),['user','assistant','tool','assistant']);const flow=opaqueFlows.get(owner);assert.equal(flow.length,2);
+  for(const [index,record]of history.filter(item=>item.role==='assistant').entries()){
+@@ -137,13 +142,20 @@ try{
+  const opaqueChildren=command('children',opaqueRun.id);assert.equal(opaqueChildren.length,2);assert.deepEqual(new Set(opaqueChildren.map(item=>item.task_id)),new Set(['inspect-left','inspect-right']));assert.deepEqual(opaqueChildren,await api('/v1/runs/'+opaqueRun.id+'/children'));
+  const opaqueParentHistory=command('history','terminal-opaque');opaqueHistory(opaqueParentHistory,'parent');const opaqueParentEvents=command('events',opaqueRun.id);ownedAttemptAudit(opaqueParentEvents,opaqueRun.id,opaqueRun.id,'parent');assert.deepEqual(command('operations',opaqueRun.id),[]);
+  const joined=JSON.parse(opaqueParentHistory[2].data.content);assert.equal(joined.source,'native_delegation');assert.equal(joined.children.length,2);assert.ok(!JSON.stringify(joined).includes('encrypted_content')&&!JSON.stringify(joined).includes('provider_items'));
++ const parentMembership=opaqueParentEvents.find(event=>event.kind==='agent.workspace_membership')?.data;
++ assert.ok(parentMembership?.workspace_id);assert.equal(parentMembership.revision,1);assert.equal(parentMembership.folders.length,1);assert.equal(parentMembership.folders[0].folder_id,parentMembership.workspace_id);
++ const workerPids=new Set();
+  const opaqueChildHistories=new Map(),opaqueChildEvents=new Map();
+  for(const record of opaqueChildren){
+   assert.equal(record.kind,'delegated_leaf');assert.equal(record.run.parent_id,opaqueRun.id);assert.equal(record.run.session_id,'terminal-opaque');assert.equal(record.run.state,'completed');assert.equal(record.preset_id,'workspace.inspect');assert.equal(record.preset_revision,1);const owner=record.task_id==='inspect-left'?'left':'right';
+   const history=command('child-history',opaqueRun.id,record.run.id);opaqueHistory(history,owner);assert.deepEqual(history,await api('/v1/runs/'+opaqueRun.id+'/children/'+record.run.id+'/history'));assert.equal(JSON.parse(history[2].data.content).content,'Actual opaque '+owner+' fixture bytes\n');assert.deepEqual(command('operations',record.run.id),[]);
+-  const events=command('events',record.run.id);ownedAttemptAudit(events,record.run.id,opaqueRun.id,'leaf');assert.deepEqual(events.filter(event=>event.kind==='tool.started').map(event=>event.data.name),['read_file']);assert.deepEqual(events.filter(event=>event.kind==='tool.completed').map(event=>event.data.name),['read_file']);
++  const events=command('events',record.run.id);
++  assert.deepEqual(events.find(event=>event.kind==='agent.workspace_membership')?.data,parentMembership,'Actual IPC child inherits the exact captured primary workspace');
++  const leases=events.filter(event=>event.kind==='worker.lease.admitted'),retired=events.filter(event=>event.kind==='worker.lease.retired');assert.equal(leases.length,1);assert.equal(retired.length,1);assert.equal(retired[0].data.reason,'completed');assert.equal(retired[0].data.generation,leases[0].data.generation);assert.ok(leases[0].data.pid>0&&leases[0].data.pid!==child.pid);workerPids.add(leases[0].data.pid);
++  ownedAttemptAudit(events,record.run.id,opaqueRun.id,'leaf');assert.deepEqual(events.filter(event=>event.kind==='tool.started').map(event=>event.data.name),['read_file']);assert.deepEqual(events.filter(event=>event.kind==='tool.completed').map(event=>event.data.name),['read_file']);
+   const result=joined.children.find(item=>item.child_run_id===record.run.id);assert.equal(events.filter(event=>event.kind==='delegation.child.settled').length,1);assert.deepEqual(events.find(event=>event.kind==='delegation.child.settled').data,result);assert.equal(result.task_id,record.task_id);assert.equal(result.child_state,'completed');for(const name of ['content','model','usage','elapsed_ms','first_token_ms'])assert.deepEqual(result[name],history.at(-1).data[name],'Join derives this child’s actual last assistant response');opaqueChildHistories.set(record.run.id,history);opaqueChildEvents.set(record.run.id,events);
+  }
++ assert.equal(workerPids.size,2,'Actual server delegation uses two distinct retired xmind child processes');
+  const accepted=opaqueParentEvents.filter(event=>event.kind==='delegation.batch.accepted'),settled=opaqueParentEvents.filter(event=>event.kind==='delegation.batch.settled');assert.equal(accepted.length,1);assert.equal(settled.length,1);assert.equal(accepted[0].data.batch_id,joined.batch_id);assert.deepEqual(settled[0].data.result,joined);assert.equal(opaqueParentEvents.filter(event=>event.kind==='delegation.child.settled').length,0,'Child settlements belong to their own durable owners');assert.ok(opaqueParentEvents.filter(event=>event.kind==='budget.model_call.reserved').at(-1).seq>settled[0].seq,'Parent continuation follows observed leaf settlement');
+  const opaqueTreeEvents=await ownedTree(opaqueRun.id);assert.equal(opaqueTreeEvents.filter(event=>event.kind==='delegation.child.settled').length,2);assert.deepEqual(command('tree-events',opaqueRun.id,'0'),opaqueTreeEvents.slice(0,256));assert.equal(new Set(opaqueTreeEvents.filter(event=>event.kind==='budget.model_call.reserved').map(event=>event.data.attempt_id)).size,6);assert.deepEqual(new Set(opaqueTreeEvents.map(event=>event.run_id)),new Set([opaqueRun.id,...opaqueChildren.map(record=>record.run.id)]));
+  const opaqueRequestCount=requests.length;await stop();await start();assert.equal(requests.length,opaqueRequestCount,'Reopen does not replay successful parent/leaf model calls');assert.deepEqual(command('history','terminal-opaque'),opaqueParentHistory);assert.deepEqual(command('children',opaqueRun.id),opaqueChildren);assert.deepEqual(command('events',opaqueRun.id),opaqueParentEvents);assert.deepEqual(await ownedTree(opaqueRun.id),opaqueTreeEvents);for(const record of opaqueChildren){assert.deepEqual(command('child-history',opaqueRun.id,record.run.id),opaqueChildHistories.get(record.run.id));assert.deepEqual(command('events',record.run.id),opaqueChildEvents.get(record.run.id));}

@@ -1,0 +1,28 @@
+Start testing: Oct 21 07:51 Pacific Daylight Time
+----------------------------------------------------------
+43/162 Testing: native_responses_agent_http_contract
+43/162 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_server.exe" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind_cli.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_responses_agent_http_contract" start time: Oct 21 07:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:101
+ catch(error){const record=await api('/v1/runs/'+value.id),events=command('events',value.id),children=await api('/v1/runs/'+value.id+'/children');throw new Error('Responses run observation '+JSON.stringify({state:record.state,parentMembership:events.some(event=>event.kind==='agent.workspace_membership'),childStates:children.map(child=>child.run.state),childWorkerAdmissions:(await ownedTree(value.id)).filter(event=>event.kind==='worker.lease.admitted').length}));}
+                                                                                                                                                        ^
+
+Error: Responses run observation {"state":"running","parentMembership":false,"childStates":["queued","queued"],"childWorkerAdmissions":0}
+    at run (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:101:153)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:141:47
+
+Node.js v22.19.0
+<end of output>
+Test time =  18.88 sec
+----------------------------------------------------------
+Test Failed.
+"native_responses_agent_http_contract" end time: Oct 21 07:51 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:18
+----------------------------------------------------------
+
+End testing: Oct 21 07:51 Pacific Daylight Time
