@@ -119,7 +119,7 @@ inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Admission metadata must omit backend destinations, credentials and deadlines");
     for(const auto* payload:{R"({"model_id":"unadmitted"})",R"({"endpoint":"unadmitted"})","[]"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
     std::stop_source metadata_stop;metadata_stop.request_stop();rejects<TransportCancelled>([&]{AgentWorkerModelClient(peer).admission(metadata_stop.get_token());});
-    rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,journal.native);});
+    const auto model_only=make_agent_worker_read_workspace(peer,journal.native);check(model_only->workspace_id()=="workspace:none"&&model_only->captured_budget()->workspace_identity=="workspace:none","Model-only proxy must retain its exact absence of workspace authority");
     rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,{});});
     struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,foreign);});

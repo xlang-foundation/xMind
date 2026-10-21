@@ -13,14 +13,15 @@ using Json=nlohmann::json;
 struct AgentWorkerReadContext::Preview {ModelRequest request;std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;std::optional<ProviderHistoryReplaySpec> replay;};
 AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,PersistenceService& store,AgentWorkerLeaseSpec lease,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,std::stop_token cancel)
     :store_(store),lease_(std::move(lease)),owner_(std::move(owner)),policy_(std::move(policy)),owner_cancel_(cancel){
-    if(!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||policy_.instructions.size()>65536||policy_.instructions.find('\0')!=std::string::npos||policy_.instruction_suffix.size()>65536||policy_.instruction_suffix.find('\0')!=std::string::npos||policy_.tools.size()>64)throw std::invalid_argument("Invalid backend worker read context");
+    const bool model_only=lease_.workspace_id=="workspace:none";
+    if((model_only?(owner_.primary_workspace||owner_.workspace_members||!policy_.tools.empty()||bool(policy_.delegation)):(!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool))||policy_.instructions.size()>65536||policy_.instructions.find('\0')!=std::string::npos||policy_.instruction_suffix.size()>65536||policy_.instruction_suffix.find('\0')!=std::string::npos||policy_.tools.size()>64)throw std::invalid_argument("Invalid backend worker read context");
     if(bool(policy_.history_owner)!=bool(policy_.history_provider))throw std::invalid_argument("Worker session history requires its captured provider route");
     if(policy_.history_owner&&(policy_.history_owner->root_run_id!=lease_.root_run_id||policy_.history_owner->owner_run_id!=lease_.owner_run_id||policy_.history_owner->role!=(lease_.root_run_id==lease_.owner_run_id?ModelCallRole::parent:ModelCallRole::leaf)||policy_.history_owner->scope.kind!=(lease_.root_run_id==lease_.owner_run_id?ContextScopeKind::session:ContextScopeKind::execution)||policy_.history_owner->provider_identity_json!=lease_.provider_identity_json))throw Conflict("Worker history differs from captured model ownership");
     std::set<std::string> names;for(const auto& tool:policy_.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!(tool.name=="delegate_tasks"&&policy_.delegation&&lease_.root_run_id==lease_.owner_run_id))||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
-    const auto count=owner_.workspace_members?owner_.workspace_members->folders().size():1;
+    const auto count=model_only?0:owner_.workspace_members?owner_.workspace_members->folders().size():1;
     for(std::size_t index=0;index<count;++index){auto* context=owner_.repository_context(index);if(!context)throw std::invalid_argument("Worker read context requires actual native guidance");contexts_.push_back(std::make_unique<RepositoryInstructionContext>(*context));}
     auto read_owner=owner_;read_owner.guidance_instruction_bytes=policy_.instructions.size()+policy_.instruction_suffix.size();read_owner.repository_context=[this](std::size_t index){return contexts_.at(index).get();};read_owner.offered_tool=[this](const std::string& name){return std::any_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==name;});};
-    native_=std::make_unique<AgentWorkerReadHost>(journal,store_,lease_,std::move(read_owner),owner_cancel_);
+    if(!model_only)native_=std::make_unique<AgentWorkerReadHost>(journal,store_,lease_,std::move(read_owner),owner_cancel_);
 }
 AgentWorkerReadContext::~AgentWorkerReadContext()=default;
 void AgentWorkerReadContext::check(std::stop_token cancel){
@@ -30,7 +31,7 @@ void AgentWorkerReadContext::check(std::stop_token cancel){
 }
 AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token cancel){
     check(cancel);Preview result;auto instructions=policy_.instructions;
-    const auto selected=store_.initialize_run_skills(lease_.owner_run_id,lease_.workspace_id).get();
+    const auto selected=contexts_.empty()?SkillSelections{}:store_.initialize_run_skills(lease_.owner_run_id,lease_.workspace_id).get();
     for(std::size_t index=0;index<contexts_.size();++index){auto copy=std::make_unique<RepositoryInstructionContext>(*contexts_[index]);if(!index)copy->skills().restore(selected,cancel);if(index)instructions+="\n\nRepository guidance for registered workspace folder "+owner_.workspace_members->folders().at(index).folder_id+" (paths relative to this folder):\n";instructions+=copy->prepare(cancel);result.contexts.push_back(std::move(copy));}
     instructions+=policy_.instruction_suffix;
     if(instructions.size()>65536)throw ToolFileError("Combined backend worker instructions exceed limits");if(!instructions.empty())result.request.messages.push_back({MessageRole::system,std::move(instructions)});
@@ -52,7 +53,7 @@ void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest
     store_.append_event(lease_.owner_run_id,"agent.repository_scope",Json{{"snapshot","worker_before_model_dispatch"},{"attempt_id",attempt},{"contexts",std::move(metadata)}}.dump()).get();check(cancel);contexts_=std::move(candidate.contexts);admitted_attempt_=attempt;
 }
 AgentReadToolResult AgentWorkerReadContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){
-    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");check(cancel);if(call.attempt_id!=admitted_attempt_)throw Conflict("Worker read has no actually admitted guidance window");
+    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");check(cancel);if(!native_)throw Conflict("Model-only worker has no workspace tool authority");if(call.attempt_id!=admitted_attempt_)throw Conflict("Worker read has no actually admitted guidance window");
     if(call.tool_name!="delegate_tasks")return native_->invoke(call,cancel);
     if(!policy_.delegation||lease_.root_run_id!=lease_.owner_run_id||!owner_.offered_tool(call.tool_name)||std::none_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==call.tool_name;}))throw Conflict("Worker has no captured delegation capability");
     const auto claimed=store_.claim_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,cancel).get();

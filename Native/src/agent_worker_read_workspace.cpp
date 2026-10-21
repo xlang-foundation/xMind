@@ -18,7 +18,7 @@ class WorkerReadWorkspace final:public AgentRunnerReadWorkspace {
 public:
     WorkerReadWorkspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):peer_(peer),model_(peer),journal_(std::move(journal)),scope_(peer.scope()){
         if(!journal_||!journal_->bound_to(peer))throw std::invalid_argument("Worker read workspace requires its exact captured peer and journal");
-        if(scope_.workspace_id.empty()||scope_.workspace_id=="workspace:none"||scope_.workspace_revision<=0||scope_.workspace_revision>9007199254740991LL)
+        if(scope_.workspace_id.empty()||(scope_.workspace_id=="workspace:none"&&scope_.root_id!=scope_.run_id)||scope_.workspace_revision<=0||scope_.workspace_revision>9007199254740991LL)
             throw std::invalid_argument("Worker read workspace has no captured native workspace");
         const auto budget=journal_->root_budget(scope_.root_id).get();if(budget.spec.workspace_identity!=scope_.workspace_id)throw Conflict("Worker read workspace differs from its root admission");
         budget_=budget.spec;deadline_=AgentWorkerJournalClient(peer).execution_deadline();

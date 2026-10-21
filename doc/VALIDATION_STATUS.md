@@ -1,3 +1,19 @@
+## Model-only roots through native xmind IPC — 2026-10-21
+
+The existing executor now supports ordinary roots without a workspace, including
+a model declaring no tool support. The backend supplies no native tools, rejects
+workspace capabilities and skips workspace skills/guidance. Both root kinds share
+one supervisor lifecycle. The authenticated server test verifies one inference,
+a distinct xmind worker, two canonical messages and exact completed retirement.
+**10/10 focused contracts pass in 88.70 seconds** with frozen inputs unchanged.
+The initial 8/10 fixture failure and all raw receipts are preserved.
+[Scope and raw receipts](evidence/process-worker-model-only-guard-20261021.json).
+
+Default execution remains thread. Managed-owner/profile integration, planning,
+remaining capability wiring, full current regression and updated installed/
+rendered/live-provider acceptance remain open. The earlier intermittent access
+violation remains unresolved.
+
 ## Graph IPC contract registered in CI — 2026-10-21
 
 The CI expected set now includes the separate graph contract without token

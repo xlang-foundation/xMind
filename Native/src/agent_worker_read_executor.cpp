@@ -68,6 +68,7 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+        if(!primary_){if(selected&&!selected->empty())throw std::invalid_argument("Model-only worker cannot acquire tools");return {};}
         if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation","read_repository_instructions","list_skills","load_skill"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
         if(!delegated_&&settings_.delegation&&!request.agent_tools&&!settings_.tool_allowlist)selected->push_back("delegate_tasks");
         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
@@ -85,11 +86,11 @@ class WorkspaceExecutor final:public AgentRootExecutor {
 public:
     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={},bool graph=false)
         :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),graph_(graph),image_(std::move(image)){
-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_)&&settings_.delegation)||settings_.planning||(!coding_&&!delegated_&&!graph_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
+        if(!image_||(!settings_.workspace&&(coding_||delegated_||graph_||settings_.delegation||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch))||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_)&&settings_.delegation)||settings_.planning||(!coding_&&settings_.workspace&&!delegated_&&!graph_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
-        primary_=std::make_unique<WorkspaceTools>(*settings_.workspace);
+        if(settings_.workspace)primary_=std::make_unique<WorkspaceTools>(*settings_.workspace);
         if(!settings_.language_servers.empty()){
             language_catalogue_=settings_.language_server_registry?settings_.language_server_registry:std::make_shared<LanguageServerToolRegistry>(*primary_,settings_.language_servers);
             settings_.language_server_registry=language_catalogue_;settings_.language_servers=language_catalogue_->profiles();
@@ -107,6 +108,7 @@ public:
         if(!bounded(selected,256)||(!settings_.provider_identity&&std::find(models.begin(),models.end(),selected)==models.end()))throw std::invalid_argument("Worker model is not configured");
         if(request.agent_instructions.size()>32768||request.agent_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid worker agent instructions");
         validate_agent_permission_rules(request.agent_permissions);(void)tools(request);
+        if(!primary_){if(request.workspace)throw std::invalid_argument("Model-only worker cannot acquire workspace membership");if(!validator_->execution_budget(selected))throw std::invalid_argument("Model-only worker requires its ordinary budget");return;}
         if(!request.workspace)throw std::invalid_argument("Worker requires captured workspace membership");
         const auto& membership=*request.workspace;
         if(membership.workspace_id!=primary_->identity()||membership.revision<1||membership.revision>9007199254740991LL||membership.folders.empty()||membership.folders.size()>256||membership.folders.front().root!=primary_->root_path()||membership.folders.front().folder_id!=membership.workspace_id)throw std::invalid_argument("Worker workspace differs from its backend owner");
@@ -131,6 +133,12 @@ public:
         if(!delegated_&&!graph_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0))throw Conflict("Worker root differs from immutable admission or was already executed");
         if(graph_){const auto child=store_.child_admission(request.run_id).get();const auto captured=store_.graph_context_owner(root).get();const auto node=std::find_if(captured.authority.agents.begin(),captured.authority.agents.end(),[&](const auto& item){return item.node_id==child.graph_node_path;});if(child.kind!=ChildAdmissionKind::graph_agent||child.root_run_id!=root||budget.spec.policy_id!="native.graph-context"||captured.authority.token_context!=settings_.context.has_value()||!captured.segment||captured.segment->state!="open"||!shared->segment_open()||shared->segment_id()!=captured.segment->id||node==captured.authority.agents.end()||node->model_id!=model(request)||node->turn_limit!=static_cast<std::int64_t>(settings_.max_turns)||node->backend_identity!=context_authority_identity(settings_,model(request),primary_->identity(),agent_authority_credentials(store_,settings_)))throw Conflict("Graph worker differs from captured scheduler authority");provider_identity=Json::parse(node->provider_identity_json);shared->check(cancel);}
         if(cancel.stop_requested())return store_.transition(request.run_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
+        if(!primary_){
+            AgentWorkerReadRequestPolicy policy;policy.instructions=settings_.instructions;if(!request.agent_instructions.empty())policy.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions:\n"+settings_.instruction_policy.instructions;policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+            if(settings_.context)policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};auto provider=settings_.provider;provider.model=model(request);if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
+            if(settings_.provider_identity){policy.history_owner=ProviderHistoryOwner{root,request.run_id,ModelCallRole::parent,{ContextScopeKind::session,admitted.session_id},provider_identity.dump(),context_authority_identity(settings_,provider.model,"workspace:none",agent_authority_credentials(store_,settings_))};policy.history_provider=provider;}
+            AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.deadline=deadline;return supervise(request,root,"workspace:none",1,provider_identity,deadline,std::move(owner),std::move(policy),std::move(provider),cancel);
+        }
         const auto& membership=*request.workspace;WorkspaceToolSet members(membership.workspace_id,membership.revision,membership.folders);
         std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;Json folders=Json::array();
         AgentWorkerReadRequestPolicy policy;policy.instructions=settings_.instructions;
@@ -214,7 +222,10 @@ public:
             for(const auto& tool:settings_.xlang_python_tools)if(owner.offered_tool(tool.definition.name))context.bindings.push_back({tool.definition,[binding=&tool](const std::string& arguments,std::stop_token stop){return binding->execution==XlangPythonExecution::worker?binding->callable.invoke_json_worker(arguments,stop):binding->callable.invoke_json(arguments,stop);}});
             if(!context.bindings.empty())callable_owner=std::move(context);
         }
-        auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{root,request.run_id,membership.workspace_id,generation(),membership.revision},provider_identity.dump(),deadline);
+        return supervise(request,root,membership.workspace_id,membership.revision,provider_identity,deadline,std::move(owner),std::move(policy),std::move(provider),cancel,std::move(remote_owner),std::move(callable_owner));
+    }
+    Run supervise(const AgentRootExecutionRequest& request,const std::string& root,const std::string& workspace_id,std::int64_t workspace_revision,const Json& provider_identity,Clock::time_point deadline,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::stop_token cancel,std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={}){
+        auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{root,request.run_id,workspace_id,generation(),workspace_revision},provider_identity.dump(),deadline);
         // An observation failure cannot release the physical slot. Retain this
         // same supervisor, including uncertain launch before a returned handle;
         // no new child, model dispatch or durable terminal write is retried.

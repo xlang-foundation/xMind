@@ -1,0 +1,90 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T18:18:10.548Z",
+    "sourceParent": "80a8b72b73f7ec3a7856c45a80f1cbfcbcee8c9b",
+    "sourcePatchSha256": "408b39dca43362d42c36acf1f76410fbc1f7cf7deb0b4b9464f5d992c787b6f0",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 44948,
+      "launchedAt": "2026-10-21T18:15:16.212Z",
+      "completedAt": "2026-10-21T18:16:35.903Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "992cfa82c0d4648d2663ba1b080ed8c43d2ee62c59bf8a6e2c260e28b95c69a5"
+    },
+    "test": {
+      "pid": 18604,
+      "launchedAt": "2026-10-21T18:16:38.864Z",
+      "completedAt": "2026-10-21T18:18:07.613Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "de2cc2411b3da0031642344fb2f5bf4cc94856ae03921bebc401196957b4fe44"
+    },
+    "total": 10,
+    "failed": 0,
+    "passed": 10,
+    "seconds": 88.7,
+    "projectFiles": 2753,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "f0b6cf84f4128fda4911fb85c7362a05b68c4debc7952ff8da6b89e0008bebe9",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-model-only-20261021-build.log": "b428ff8be4513c649d22ef802656d8b6b7ab480800aa23bd69d900d9d4ed50c6",
+    "doc/evidence/process-worker-model-only-20261021-build-terminal.json": "f2945fdff3b0c08434702a0026b18535c0a54ec1927b7586e543aa9707ca5099",
+    "doc/evidence/process-worker-model-only-20261021-ctest.log": "290ca315af44e09f0a0bbad8c5a8ecc5d8f822c38bc7f7e33cda254dea8e3449",
+    "doc/evidence/process-worker-model-only-20261021-ctest-terminal.json": "5e13d03ff82d5c71a288820de1d494f4be56a5228cad3401392a6afe38b25771",
+    "doc/evidence/process-worker-model-only-20261021-LastTest.log": "f49805b3782bdca93630cd5ff8be5c3c28de3b04298155abeca848e13ae09423",
+    "doc/evidence/process-worker-model-only-20261021-test-inventory.json": "3de968ea14524407e995ec4661da007203440d39922c8e5eb29b707cdcb6d41b",
+    "doc/evidence/process-worker-model-only-20261021-gate.json": "053fcd4e3e77e215a3610bc931c2f29972cdd1688bc15318c5aa63c84a007c2f",
+    "doc/evidence/process-worker-model-only-20261021-source.patch": "2695ff8d68fc16642c00ebb135bd130539c00f6c8f6ecd7b267618d2fcec0a48",
+    "doc/evidence/process-worker-model-only-20261021-binaries-before-test.json": "e4454dea48d5bc7152254ef2a9d08972cbc5c1b37190a07f9d7edfddc2cc0052",
+    "doc/evidence/process-worker-model-only-guard-20261021-build.log": "992cfa82c0d4648d2663ba1b080ed8c43d2ee62c59bf8a6e2c260e28b95c69a5",
+    "doc/evidence/process-worker-model-only-guard-20261021-build-terminal.json": "9cefa65a47827a24beb5d1347256b6d1c408915709c1ac128f21132b68a03b44",
+    "doc/evidence/process-worker-model-only-guard-20261021-ctest.log": "de2cc2411b3da0031642344fb2f5bf4cc94856ae03921bebc401196957b4fe44",
+    "doc/evidence/process-worker-model-only-guard-20261021-ctest-terminal.json": "a7620d5dca91f217c4b926aea9eeb7bd8c02dc65b5b9e2909d4dfbb5f5e8fae1",
+    "doc/evidence/process-worker-model-only-guard-20261021-LastTest.log": "2b4e720171d6c822995ca6b9aac9831192efc26a0a54cf6c54a48b4e5435d454",
+    "doc/evidence/process-worker-model-only-guard-20261021-test-inventory.json": "3de968ea14524407e995ec4661da007203440d39922c8e5eb29b707cdcb6d41b",
+    "doc/evidence/process-worker-model-only-guard-20261021-gate.json": "0b8d5541f1990c438a8d12c424d61601b6fd267b72d94b327f76ea06df91f247",
+    "doc/evidence/process-worker-model-only-guard-20261021-source.patch": "408b39dca43362d42c36acf1f76410fbc1f7cf7deb0b4b9464f5d992c787b6f0",
+    "doc/evidence/process-worker-model-only-guard-20261021-binaries-before-test.json": "9b998282908ddeeef3c924b4fdaacf97c0fcdf9725fd6f38b1127a269b42f9a3"
+  },
+  "verified": [
+    "Existing workspace executor now supports ordinary roots with no workspace and an empty native tool catalogue",
+    "Backend model-only request owner rejects workspace/delegation tools and skips workspace skills and guidance; child model windows reject nonempty tools for workspace:none",
+    "No-workspace language-server owners/configuration are rejected before construction",
+    "One shared supervisor lifecycle retains exact physical drain, cancellation, fail-stop and lease retirement for workspace and model-only roots",
+    "Authenticated explicit process-read server without workspace or declared tool support completes one controlled inference through a distinct xmind worker, two canonical history messages and one completed retirement",
+    "Existing file/process/counted-context/graph/delegation/remote scopes remain covered by ten passing contracts in 88.70 seconds"
+  ],
+  "failedGate": {
+    "scope": "process-worker-model-only-20261021",
+    "passed": 8,
+    "failed": 2,
+    "causes": [
+      "Old instrumentation expected the newly supported model-only proxy to be rejected; replaced with exact captured no-workspace assertion",
+      "HTTP peer assumed tools was always present; corrected to require omission for the unsupported-tools provider"
+    ],
+    "runtimeCorrection": "Added no-workspace language-server rejection found during review; no deadlines or budgets changed"
+  },
+  "limitations": [
+    "Synthetic HTTP/model peers only; no new live-provider execution",
+    "Default server execution remains thread; managed owner/profile integration, planning and remaining default capability wiring remain open",
+    "No-workspace counted context, cancellation/failure and saved-profile combinations need further direct acceptance",
+    "Earlier intermittent access violation remains unresolved",
+    "Full current regression and updated installed/rendered acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

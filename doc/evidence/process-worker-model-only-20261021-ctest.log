@@ -1,0 +1,106 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start  18: native_provider_history_bridge_contract
+ 1/10 Test  #18: native_provider_history_bridge_contract .........   Passed    0.03 sec
+      Start  26: native_context_repository_contract
+ 2/10 Test  #26: native_context_repository_contract ..............   Passed    4.09 sec
+      Start  29: native_context_engine_contract
+ 3/10 Test  #29: native_context_engine_contract ..................   Passed    5.82 sec
+      Start  81: native_agent_worker_model_rpc_contract
+ 4/10 Test  #81: native_agent_worker_model_rpc_contract ..........***Failed    2.37 sec
+Native RPC case normal child_pid=44632 creation_time=134370800548995422
+Native RPC case cancel child_pid=21784 creation_time=134370800551297476
+Owned cancel worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.
+Native RPC case crash child_pid=60560 creation_time=134370800553486242
+Streaming crash retirement: exit_code=73 claim=uncertain
+Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained.
+Native RPC case delivery child_pid=45880 creation_time=134370800554737360
+Native RPC case overflow child_pid=55232 creation_time=134370800555945397
+Owned overflow worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.
+Native RPC case other_error child_pid=42472 creation_time=134370800557408797
+Post-drain terminal write fault verified: exact exited child retained, durable ownership rolled back, no model replay.
+Owned other_error worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.
+Native RPC case completion child_pid=55692 creation_time=134370800559167635
+Native RPC case completion_delivery child_pid=25732 creation_time=134370800560931078
+Native completed drain preserved lost completion reply and nonzero exit without terminal rewrite or replay.
+Native RPC case completion_rollback child_pid=17772 creation_time=134370800562191610
+Observed injected completion retirement fault; run/history/events/lease rollback verified.
+Native RPC case completion_hold child_pid=33976 creation_time=134370800563916317
+Completed drain physical capacity verified: child_pid=33976 creation_time=134370800563916317; timeout retained one occupied root slot and queued work until explicit exit, without model replay.
+Native RPC case runner child_pid=62976 creation_time=134370800565441115
+Expected child fixture rejection
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51501
+Expected child fixture rejection
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_model_rpc_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51501',
+  stdout: 'Native RPC case normal child_pid=44632 creation_time=134370800548995422\r\n' +
+    'Native RPC case cancel child_pid=21784 creation_time=134370800551297476\r\n' +
+    'Owned cancel worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n' +
+    'Native RPC case crash child_pid=60560 creation_time=134370800553486242\r\n' +
+    'Streaming crash retirement: exit_code=73 claim=uncertain\r\n' +
+    'Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained.\r\n' +
+    'Native RPC case delivery child_pid=45880 creation_time=134370800554737360\r\n' +
+    'Native RPC case overflow child_pid=55232 creation_time=134370800555945397\r\n' +
+    'Owned overflow worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n' +
+    'Native RPC case other_error child_pid=42472 creation_time=134370800557408797\r\n' +
+    'Post-drain terminal write fault verified: exact exited child retained, durable ownership rolled back, no model replay.\r\n' +
+    'Owned other_error worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n' +
+    'Native RPC case completion child_pid=55692 creation_time=134370800559167635\r\n' +
+    'Native RPC case completion_delivery child_pid=25732 creation_time=134370800560931078\r\n' +
+    'Native completed drain preserved lost completion reply and nonzero exit without terminal rewrite or replay.\r\n' +
+    'Native RPC case completion_rollback child_pid=17772 creation_time=134370800562191610\r\n' +
+    'Observed injected completion retirement fault; run/history/events/lease rollback verified.\r\n' +
+    'Native RPC case completion_hold child_pid=33976 creation_time=134370800563916317\r\n' +
+    'Completed drain physical capacity verified: child_pid=33976 creation_time=134370800563916317; timeout retained one occupied root slot and queued work until explicit exit, without model replay.\r\n' +
+    'Native RPC case runner child_pid=62976 creation_time=134370800565441115\r\n',
+  stderr: 'Expected child fixture rejection\r\n'
+}
+
+Node.js v22.19.0
+
+      Start  82: native_agent_worker_graph_no_context_contract
+ 5/10 Test  #82: native_agent_worker_graph_no_context_contract ...   Passed    4.98 sec
+      Start  83: native_agent_worker_server_contract
+ 6/10 Test  #83: native_agent_worker_server_contract .............***Failed    1.51 sec
+Unified process-read server graph verified authenticated public graph submission, actual distinct xmind worker, canonical file bytes and exact worker retirement without token management.
+file:///D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs:6
+let requests=0,providerFailure,child,serverOutput='',serverError='';const peer=createServer((request,response)=>{let bytes='';request.on('data',b=>bytes+=b);request.on('end',()=>{try{assert.equal(request.headers.authorization,'Bearer '+key);assert.ok(!bytes.includes(key));const body=JSON.parse(bytes);assert.equal(body.model,'server-worker-fixture');assert.equal(body.stream,true);if(requests<4)assert.match(body.messages[0].content,/SERVER_WORKER_GUIDANCE/);assert.deepEqual(body.tools.map(t=>t.function.name).sort(),requests<2?['delegate_tasks','find_files','glob_files','list_files','read_file','search_files']:requests<4?['read_file']:[]);assert.ok(++requests<=5);
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ^
+
+TypeError: Cannot read properties of undefined (reading 'map')
+    at IncomingMessage.<anonymous> (file:///D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs:6:489)
+    at IncomingMessage.emit (node:events:519:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+Node.js v22.19.0
+
+      Start  84: native_agent_worker_coding_server_contract
+ 7/10 Test  #84: native_agent_worker_coding_server_contract ......   Passed    1.11 sec
+      Start  85: native_agent_worker_ledger_contract
+ 8/10 Test  #85: native_agent_worker_ledger_contract .............   Passed    1.84 sec
+      Start  89: native_agent_runner_contract
+ 9/10 Test  #89: native_agent_runner_contract ....................   Passed    9.83 sec
+      Start 101: native_agent_remote_tool_host_contract
+10/10 Test #101: native_agent_remote_tool_host_contract ..........   Passed    4.35 sec
+
+80% tests passed, 2 tests failed out of 10
+
+Total Test time (real) =  35.95 sec
+
+The following tests FAILED:
+	 81 - native_agent_worker_model_rpc_contract (Failed)
+	 83 - native_agent_worker_server_contract (Failed)
+Errors while running CTest
