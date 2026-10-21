@@ -1,0 +1,61 @@
+diff --git a/Tools/ci-native.ps1 b/Tools/ci-native.ps1
+index 2dff2cc3..b0be9e58 100644
+--- a/Tools/ci-native.ps1
++++ b/Tools/ci-native.ps1
+@@ -222,7 +222,7 @@ Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release'
+ @{schemaVersion=1;sourceRevision=$ciProvenance.xmind;expectedContracts=$ciExpected;contractsSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'contracts.json') -Algorithm SHA256).Hash.ToLowerInvariant();ctestSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'native-ctest.log') -Algorithm SHA256).Hash.ToLowerInvariant();exitCode=0}|ConvertTo-Json -Depth 4|Set-Content (Join-Path $ciEvidence 'native-gate.json')
+ $ciBundle=Join-Path $ciRoot 'build/native-distribution'
+ if(Test-Path -LiteralPath $ciBundle){throw 'Fresh native distribution directory required; do not mix old and unified binaries.'}
+-New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses'),(Join-Path $ciBundle 'worker')|Out-Null
++New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses')|Out-Null
+ foreach($ciBinary in @('xmind.exe','xlang3_runtime.dll')){
+     Copy-Item -LiteralPath (Join-Path $ciNative ('Release/'+$ciBinary)) -Destination $ciBundle
+ }
+@@ -245,7 +245,6 @@ Get-ChildItem -LiteralPath (Join-Path $ciRelease 'modules') -Recurse -File | Whe
+     New-Item -ItemType Directory -Force -Path (Split-Path $ciTarget -Parent)|Out-Null
+     Copy-Item -LiteralPath $_.FullName -Destination $ciTarget
+ }
+-Copy-Item -LiteralPath (Join-Path $ciNative 'Release/worker/agent_worker.py') -Destination (Join-Path $ciBundle 'worker/agent_worker.py')
+ Copy-Item -LiteralPath (Join-Path $ciRelease 'xlang3.exe') -Destination $ciBundle
+ Copy-Item -LiteralPath (Join-Path $ciEvidence 'provenance.json') -Destination $ciBundle
+ foreach($ciLicenseRoot in @(@{path=$ciRoot;label='xmind'},@{path=$ciRuntime;label='xlang3'})){
+diff --git a/extensions/vscode/native-runtime.js b/extensions/vscode/native-runtime.js
+index 4462cabf..f6ff452f 100644
+--- a/extensions/vscode/native-runtime.js
++++ b/extensions/vscode/native-runtime.js
+@@ -8,8 +8,7 @@ const crypto = require('node:crypto');
+ const MANIFEST_NAME = 'native-runtime-manifest.json';
+ const REQUIRED_NATIVE = Object.freeze([
+   'xmind.exe', 'xlang3_runtime.dll', 'xlang3.exe',
+-  'modules/xlang_json.x3pkg.dll', 'modules/xlang_sqlite3.x3pkg.dll',
+-  'worker/agent_worker.py'
++  'modules/xlang_json.x3pkg.dll', 'modules/xlang_sqlite3.x3pkg.dll'
+ ]);
+ const RETIRED_NATIVE = new Set(['xmind_server.exe', 'xmind_cli.exe', 'xmind_admin.exe', 'xmind_schema_worker.exe']);
+ const REQUIRED_STDLIB = Object.freeze(['os.py', 'json/__init__.py', 'encodings/__init__.py', 'importlib/__init__.py']);
+diff --git a/extensions/vscode/tests/native-runtime-package.test.js b/extensions/vscode/tests/native-runtime-package.test.js
+index a5b10a5d..d3f07b9e 100644
+--- a/extensions/vscode/tests/native-runtime-package.test.js
++++ b/extensions/vscode/tests/native-runtime-package.test.js
+@@ -40,7 +40,7 @@ test('staging preserves accepted native bytes and pure source while excluding in
+   for(const name of ['python.exe','synthetic.pyc','synthetic.pyd'])await fs.writeFile(path.join(f.options.stdlibSource,name),'Synthetic excluded bytes');
+   for(const directory of ['__pycache__','site-packages','.config']){await fs.mkdir(path.join(f.options.stdlibSource,directory));await fs.writeFile(path.join(f.options.stdlibSource,directory,'hidden.py'),'Synthetic excluded bytes');}
+   const result=await(await packager).stageNativeRuntime(f.options);
+-  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,26);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
++  assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,25);assert.equal(result.nativeExecuted,false);assert.equal(result.configAccessed,false);assert.equal(result.installed,false);
+   const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.sourceManifestSha256,f.options.bundleManifestSha256);
+   assert.ok(verified.manifest.files['wheels/pydantic_core-2.50.1+xlang3-py3-none-win_amd64.whl']);
+   for(const name of REQUIRED_NATIVE)assert.deepEqual(await fs.readFile(path.join(f.options.out,name)),await fs.readFile(path.join(f.options.bundle,name)));
+@@ -58,10 +58,10 @@ test('pip bootstrap preserves pure code and TLS data but rejects native or misma
+ 
+ test('unified staging binds one product executable and rejects legacy launcher injection',async t=>{
+  const f=await fixture(t);const result=await(await packager).stageNativeRuntime(f.options);
+- assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,26);
++ assert.equal(result.nativeFiles,REQUIRED_NATIVE.length);assert.equal(result.pureSourceFiles,5);assert.equal(result.files,25);
+  const verified=await verifyNativeRuntime(f.options.out);assert.equal(verified.manifest.schemaVersion,1);
+  assert.equal(verified.manifest.files['xmind.exe'],f.manifest.files['xmind.exe']);
+- for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
++ for(const name of ['xmind_server.exe','xmind_cli.exe','xmind_admin.exe','xmind_schema_worker.exe','worker/agent_worker.py'])await assert.rejects(fs.stat(path.join(f.options.out,name)),{code:'ENOENT'});
+  const mixed=await fixture(t);const bytes=Buffer.from('Synthetic unwanted legacy launcher');await fs.writeFile(path.join(mixed.options.bundle,'xmind_server.exe'),bytes);mixed.manifest.files['xmind_server.exe']=hash(bytes);await mixed.save();
+  await assert.rejects((await packager).stageNativeRuntime(mixed.options),/unsupported/);await assert.rejects(fs.stat(mixed.options.out),{code:'ENOENT'});
+ });

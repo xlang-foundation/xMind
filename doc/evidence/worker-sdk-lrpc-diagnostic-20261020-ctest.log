@@ -1,0 +1,13 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 84: native_agent_worker_channel_contract
+1/1 Test #84: native_agent_worker_channel_contract ...***Failed    5.51 sec
+Agent worker channel deadline elapsed
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   5.53 sec
+
+The following tests FAILED:
+	 84 - native_agent_worker_channel_contract (Failed)
+Errors while running CTest

@@ -3368,13 +3368,29 @@ Event Repository::agent_worker_tool_event(const AgentWorkerLeaseSpec& lease,cons
     const auto event=impl_->event(lease.owner_run_id,kind,json);changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_tool_event_category),key,Json{{"version",1},{"model",worker_claim_spec_json(authority)},{"ordinal",ordinal},{"returned",returned},{"event_sequence",event.sequence}}.dump()}));tx.commit();return event;
 }
 AgentWorkerToolTurnRecord Repository::commit_agent_worker_read_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
+    return commit_agent_worker_tool_turn(lease,attempt,false);
+}
+AgentWorkerToolTurnRecord Repository::commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
+    return commit_agent_worker_tool_turn(lease,attempt,true);
+}
+AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool allow_files){
     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
     if(lease.owner_run_id!=lease.root_run_id||root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent")throw Conflict("Worker read turn requires ordinary direct-agent ownership");
     const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.spec.owner_run_id!=lease.owner_run_id||model.spec.generation!=lease.generation||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read turn has no actual assistant receipt");
-    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
+    // Check the admitted vocabulary even for an already committed turn. A read
+    // channel must never acknowledge a coding turn through idempotent lookup.
+    for(const auto& call:actual.tool_calls)if(!worker_read_tool(call.name)&&!(allow_files&&is_agent_file_tool(call.name)))throw Conflict("Worker turn contains an unsupported tool");
+    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
     std::set<std::string> calls;std::vector<std::string> outputs;
-    for(const auto& call:actual.tool_calls){if(!worker_read_tool(call.name))throw Conflict("Read-only worker turn contains an unsupported tool");if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");const auto read=read_worker_read(db,lease.root_run_id,attempt,call.id);
+    for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");
+        if(is_agent_file_tool(call.name)){
+            const auto file=read_worker_file(db,lease.root_run_id,attempt,call.id);
+            if(file.state!="returned"||worker_claim_spec_json(file.model)!=worker_claim_spec_json(model.spec)||file.invocation.tool_name!=call.name||file.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker workspace turn has an unfinished or changed actual file result");
+            (void)worker_file_authority(*this,db,lease,file.invocation);
+            outputs.push_back(Json{{"content",file.actual_output_json},{"tool_call_id",call.id}}.dump());continue;
+        }
+        const auto read=read_worker_read(db,lease.root_run_id,attempt,call.id);
         if(read.state!="returned"||worker_claim_spec_json(read.model)!=worker_claim_spec_json(model.spec)||read.invocation.tool_name!=call.name||read.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker read turn has an unfinished or changed actual result");
         (void)worker_read_authority(*this,db,lease,read.invocation);outputs.push_back(Json{{"content",read.actual_output_json},{"tool_call_id",call.id}}.dump());
     }

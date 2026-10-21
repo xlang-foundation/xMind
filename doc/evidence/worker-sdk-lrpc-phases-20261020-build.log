@@ -1,0 +1,7 @@
+
+  Checking File Globs
+  agentflow_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process.lib
+  agentflow_secrets.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secrets.lib
+  agentflow_worker_channel.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_channel.lib
+  agent_worker_channel_contract.cpp
+  agentflow_agent_worker_channel_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_worker_channel_contract.exe

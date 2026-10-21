@@ -1,5 +1,10 @@
 #include "agentflow/agent_worker_channel.hpp"
 #include "nlohmann/json.hpp"
+#include "xlang3/cpp/runtime.h"
+#include <condition_variable>
+#include <cstring>
+#include <map>
+#include <thread>
 #define NOMINMAX
 #include <windows.h>
 #include <bcrypt.h>
@@ -78,32 +83,46 @@ std::wstring wide(const std::string& text){
 std::wstring quote(const std::wstring& text){
     std::wstring out=L"\"";std::size_t slashes=0;for(wchar_t c:text){if(c==L'\\'){++slashes;continue;}out.append(c==L'\"'?slashes*2+1:slashes,L'\\');slashes=0;out.push_back(c);}out.append(slashes*2,L'\\');out.push_back(L'\"');return out;
 }
-// Cancellation retires the actual pending OVERLAPPED before its storage or
-// event is released. Partial reads/writes never cause a frame retry.
+// Native C++ remote objects use the SDK's shared-memory LRPC transport.
+// A rendezvous accepts one frame only while its owning reader is waiting.
+// Tool execution never runs in an IPC callback, so callbacks stay bounded.
 struct IoStatistics {std::atomic<std::uint64_t> pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;};
-void transfer(HANDLE pipe,void* bytes,std::size_t size,bool writing,Clock::time_point deadline,std::stop_token stop,IoStatistics* statistics=nullptr){
-    std::size_t offset=0;while(offset<size){check(deadline,stop);Handle event(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!event.value)throw std::runtime_error("Cannot create worker I/O event");
-        OVERLAPPED overlap{};overlap.hEvent=event.value;DWORD done=0;
-        const auto count=static_cast<DWORD>(std::min<std::size_t>(size-offset,65536));auto* data=static_cast<char*>(bytes)+offset;
-        const BOOL immediate=writing?WriteFile(pipe,data,count,&done,&overlap):ReadFile(pipe,data,count,&done,&overlap);
-        if(!immediate){if(GetLastError()!=ERROR_IO_PENDING)throw AgentWorkerProtocolError("Agent worker channel closed");
-            if(statistics)++(writing?statistics->pending_writes:statistics->pending_reads);
-            try{for(;;){check(deadline,stop);const auto waited=WaitForSingleObject(event.value,10);if(waited==WAIT_OBJECT_0)break;if(waited!=WAIT_TIMEOUT)throw std::runtime_error("Cannot observe worker I/O");}}
-            catch(...){if(statistics)++(writing?statistics->cancelled_writes:statistics->cancelled_reads);CancelIoEx(pipe,&overlap);GetOverlappedResult(pipe,&overlap,&done,TRUE);throw;}
-            if(!GetOverlappedResult(pipe,&overlap,&done,FALSE))throw AgentWorkerProtocolError("Agent worker channel closed");
-        }
-        if(!done||done>count)throw AgentWorkerProtocolError("Agent worker channel closed");offset+=done;
+struct Inbox {
+    std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;std::string frame;
+};
+class WorkerRemoteObjects {
+public:
+    std::int64_t Deliver(std::string token,std::string frame){
+        if(frame.empty()||frame.size()>AgentWorkerFrameCodec::max_frame_bytes)protocol();auto inbox=find(token);
+        std::lock_guard lock(inbox->mutex);if(inbox->closed)return -1;if(!inbox->waiting||!inbox->frame.empty())return 0;
+        inbox->frame=std::move(frame);inbox->changed.notify_one();return 1;
     }
-}
-void write_packet(HANDLE pipe,const std::string& bytes,Clock::time_point deadline,std::stop_token stop,IoStatistics* statistics=nullptr){
-    if(bytes.empty()||bytes.size()>AgentWorkerFrameCodec::max_frame_bytes)protocol();
-    std::array<unsigned char,4> header{};const auto size=static_cast<std::uint32_t>(bytes.size());for(unsigned i=0;i<4;++i)header[i]=static_cast<unsigned char>(size>>(8*i));
-    transfer(pipe,header.data(),header.size(),true,deadline,stop,statistics);transfer(pipe,const_cast<char*>(bytes.data()),bytes.size(),true,deadline,stop,statistics);
-}
-std::string read_packet(HANDLE pipe,Clock::time_point deadline,std::stop_token stop,std::size_t limit=AgentWorkerFrameCodec::max_frame_bytes,IoStatistics* statistics=nullptr){
-    std::array<unsigned char,4> header{};transfer(pipe,header.data(),header.size(),false,deadline,stop,statistics);std::uint32_t size=0;for(unsigned i=0;i<4;++i)size|=static_cast<std::uint32_t>(header[i])<<(8*i);
-    if(!size||size>limit)protocol();std::string bytes(size,'\0');transfer(pipe,bytes.data(),bytes.size(),false,deadline,stop,statistics);return bytes;
-}
+    std::int64_t Close(std::string token){auto inbox=find(token);std::lock_guard lock(inbox->mutex);inbox->closed=true;inbox->changed.notify_all();return 1;}
+    void add(const std::string& token,std::shared_ptr<Inbox> inbox){std::lock_guard lock(mutex_);if(!inboxes_.emplace(token,inbox).second)protocol();}
+    void remove(const std::string& token){std::lock_guard lock(mutex_);inboxes_.erase(token);}
+    BEGIN_PACKAGE(WorkerRemoteObjects)
+        APISET().AddFunc<2>("deliver",&WorkerRemoteObjects::Deliver);
+        APISET().AddFunc<1>("close",&WorkerRemoteObjects::Close);
+    END_PACKAGE
+private:
+    std::shared_ptr<Inbox> find(const std::string& token){std::lock_guard lock(mutex_);auto found=inboxes_.find(token);if(found==inboxes_.end())protocol();auto inbox=found->second.lock();if(!inbox)protocol();return inbox;}
+    std::mutex mutex_;std::map<std::string,std::weak_ptr<Inbox>> inboxes_;
+};
+struct WorkerIpcHost {
+    WorkerRemoteObjects objects;X::Runtime runtime;std::uint32_t port=0;
+    WorkerIpcHost(){
+        auto package=runtime.RegisterPackage("xmind_worker",objects);runtime.RegisterRemoteObject("xmind_worker",package);
+        for(unsigned attempt=0;attempt<24;++attempt){auto random=new_agent_worker_channel_key();std::uint32_t value=0;std::copy_n(random.view().begin(),sizeof(value),reinterpret_cast<std::uint8_t*>(&value));port=20000+value%40000;
+            try{runtime.LrpcListen(port);return;}catch(const std::exception&){}}
+        throw std::runtime_error("Cannot start xMind shared-memory IPC listener");
+    }
+};
+WorkerIpcHost& ipc_host(){static WorkerIpcHost host;return host;}
+std::string new_route(){auto key=new_agent_worker_channel_key();return hex(key.view());}
+struct MappingView {
+    void* value=nullptr;explicit MappingView(HANDLE handle,DWORD access):value(MapViewOfFile(handle,access,0,0,8192)){if(!value)throw std::runtime_error("Cannot map private worker bootstrap");}
+    ~MappingView(){UnmapViewOfFile(value);}
+};
 std::uint64_t birth(HANDLE process){FILETIME created{},exit{},kernel{},user{};if(!GetProcessTimes(process,&created,&exit,&kernel,&user))throw std::runtime_error("Cannot identify worker creation");return (static_cast<std::uint64_t>(created.dwHighDateTime)<<32)|created.dwLowDateTime;}
 std::vector<wchar_t> environment(){
     std::array<wchar_t,32768> text{};const auto size=GetWindowsDirectoryW(text.data(),static_cast<UINT>(text.size()));if(!size||size>=text.size())throw std::runtime_error("Cannot obtain worker system directory");
@@ -142,29 +161,57 @@ AgentWorkerMessage AgentWorkerFrameCodec::decode(const std::string& frame){
 SecretBytes new_agent_worker_channel_key(){std::array<std::uint8_t,32> bytes{};if(BCryptGenRandom(nullptr,bytes.data(),static_cast<ULONG>(bytes.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw std::runtime_error("Cannot create worker capability");SecretBytes key(bytes);SecureZeroMemory(bytes.data(),bytes.size());return key;}
 
 struct AgentWorkerChannel::Impl {
-    Handle pipe;AgentWorkerScope scope;AgentWorkerFrameCodec codec;std::mutex reader,writer;std::atomic<bool> poisoned=false;IoStatistics statistics;
-    Impl(Handle handle,AgentWorkerScope binding,SecretBytes key,AgentWorkerSide side):pipe(std::move(handle)),scope(std::move(binding)),codec(scope,std::move(key),side){}
+    AgentWorkerScope scope;AgentWorkerFrameCodec codec;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;IoStatistics statistics;
+    std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0;Handle peer;
+    X::Runtime client;X::Value remote;
+    Impl(AgentWorkerScope binding,SecretBytes key,AgentWorkerSide side,std::string route):scope(std::move(binding)),codec(scope,std::move(key),side),local(std::move(route)){ipc_host().objects.add(local,inbox);}
+    ~Impl(){ipc_host().objects.remove(local);}
+    void attach(std::uint32_t port,std::string route,HANDLE process){
+        if(port<1||port>65535||route.size()!=64)protocol();remote_port=port;remote_route=std::move(route);
+        HANDLE duplicate=nullptr;if(!DuplicateHandle(GetCurrentProcess(),process,GetCurrentProcess(),&duplicate,SYNCHRONIZE,FALSE,0))throw std::runtime_error("Cannot retain IPC peer identity");peer=Handle(duplicate);
+        const auto endpoint="lrpc:"+std::to_string(port);X3LrpcEndpointInfo info{};info.size=sizeof(info);
+        if(x3_runtime_probe_remote(client.get(),endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=GetProcessId(process))protocol();
+        remote=client.ImportRemote("xmind_worker",endpoint.c_str());
+    }
+    void live(){if(peer.value&&WaitForSingleObject(peer.value,0)!=WAIT_TIMEOUT)protocol();}
 };
 AgentWorkerChannel::AgentWorkerChannel(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
-AgentWorkerChannel::~AgentWorkerChannel()=default;
+AgentWorkerChannel::~AgentWorkerChannel(){close();}
 const AgentWorkerScope& AgentWorkerChannel::scope()const noexcept{return impl_->scope;}
 AgentWorkerChannelStatistics AgentWorkerChannel::statistics()const noexcept{const auto& s=impl_->statistics;return {s.pending_reads.load(),s.pending_writes.load(),s.cancelled_reads.load(),s.cancelled_writes.load()};}
-void AgentWorkerChannel::close()noexcept{impl_->poisoned=true;impl_->pipe=Handle();}
+void AgentWorkerChannel::close()noexcept{
+    if(impl_->closed.exchange(true))return;impl_->poisoned=true;
+    {std::lock_guard lock(impl_->inbox->mutex);impl_->inbox->closed=true;impl_->inbox->changed.notify_all();}
+    try{if(impl_->remote_port){impl_->live();impl_->remote["close"](impl_->remote_route);}}catch(...){}
+}
 void AgentWorkerChannel::send(const AgentWorkerMessage& message,Deadline deadline,std::stop_token stop){
-    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();try{check(deadline,stop);write_packet(impl_->pipe.value,impl_->codec.encode(message),deadline,stop,&impl_->statistics);}catch(...){impl_->poisoned=true;throw;}
+    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();++impl_->statistics.pending_writes;
+    try{check(deadline,stop);const auto frame=impl_->codec.encode(message);const std::vector<X::Value> arguments{X::Value(impl_->client,impl_->remote_route),X::Value(impl_->client,frame)};
+        for(;;){check(deadline,stop);impl_->live();X::Value reply;if(!impl_->remote["deliver"].Call(arguments,reply)||!reply.IsInt64())protocol();const auto result=reply.ToInt64();if(result==1){check(deadline,stop);return;}if(result!=0)protocol();std::this_thread::sleep_for(std::chrono::milliseconds(2));}
+    }catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
+    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
+    catch(...){impl_->poisoned=true;throw AgentWorkerProtocolError("Worker shared-memory IPC send failed");}
 }
 AgentWorkerMessage AgentWorkerChannel::receive(Deadline deadline,std::stop_token stop){
-    std::lock_guard lock(impl_->reader);if(impl_->poisoned)protocol();try{check(deadline,stop);return impl_->codec.decode(read_packet(impl_->pipe.value,deadline,stop,AgentWorkerFrameCodec::max_frame_bytes,&impl_->statistics));}catch(...){impl_->poisoned=true;throw;}
+    std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();++impl_->statistics.pending_reads;
+    auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);inbox.waiting=true;
+    struct Waiting {Inbox& inbox;~Waiting(){inbox.waiting=false;}} waiting{inbox};
+    try{for(;;){check(deadline,stop);if(!inbox.frame.empty()){auto frame=std::exchange(inbox.frame,{});return impl_->codec.decode(frame);}if(inbox.closed)protocol();impl_->live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));}}
+    catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
+    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
+    catch(...){impl_->poisoned=true;throw;}
 }
 std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::uintptr_t inherited,Deadline deadline,std::stop_token stop){
-    Handle pipe(reinterpret_cast<HANDLE>(inherited));if(!pipe.value||pipe.value==INVALID_HANDLE_VALUE||GetFileType(pipe.value)!=FILE_TYPE_PIPE)protocol();
-    if(!SetHandleInformation(pipe.value,HANDLE_FLAG_INHERIT,0))throw std::runtime_error("Cannot close worker inheritance");
-    auto bootstrap=read_packet(pipe.value,deadline,stop,8192);
-    struct Wipe {std::string& bytes;~Wipe(){if(!bytes.empty())SecureZeroMemory(bytes.data(),bytes.size());}} wipe{bootstrap};
-    if(bootstrap.size()<=32)protocol();SecretBytes key(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(bootstrap.data()),32));
-    auto config=parse(bootstrap.substr(32));if(!config.is_object()||config.size()!=2||!config.at("parent_pid").is_number_unsigned())protocol();auto scope=read_scope(config.at("scope"));
-    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(std::move(pipe),std::move(scope),std::move(key),AgentWorkerSide::worker)));
-    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",config.at("parent_pid")}}.dump()},deadline,stop);return channel;
+    check(deadline,stop);Handle mapping(reinterpret_cast<HANDLE>(inherited));if(!mapping.value||mapping.value==INVALID_HANDLE_VALUE)protocol();
+    if(!SetHandleInformation(mapping.value,HANDLE_FLAG_INHERIT,0))protocol();MappingView view(mapping.value,FILE_MAP_READ);
+    std::uint32_t size=0;std::memcpy(&size,view.value,sizeof(size));if(size<=32||size>8188)protocol();
+    const auto* bytes=static_cast<const std::uint8_t*>(view.value)+4;SecretBytes key(std::span<const std::uint8_t>(bytes,32));
+    const auto config=parse(std::string(reinterpret_cast<const char*>(bytes+32),size-32));if(!config.is_object()||config.size()!=7||config.at("version")!=1)protocol();
+    const auto parent_pid=config.at("parent_pid").get<DWORD>();Handle parent(OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,parent_pid));
+    if(!parent.value||birth(parent.value)!=config.at("parent_birth").get<std::uint64_t>())protocol();
+    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(read_scope(config.at("scope")),std::move(key),AgentWorkerSide::worker,config.at("worker_route").get<std::string>())));
+    channel->impl_->attach(config.at("parent_port").get<std::uint32_t>(),config.at("parent_route").get<std::string>(),parent.value);
+    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",parent_pid},{"port",ipc_host().port}}.dump()},deadline,stop);return channel;
 }
 struct AgentWorkerProcess::Impl {
     Handle process,job;std::shared_ptr<const BoundProcessExecutable> executable;std::unique_ptr<AgentWorkerChannel> channel;std::uint32_t pid=0;std::uint64_t created=0;bool assigned=false;
@@ -178,12 +225,13 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
     // the directory chain, so no unbound replacement path may be substituted.
     if(ForegroundProcess::executable_identity(executable->path())!=executable->identity())throw ProcessBeforeDispatchError("Worker image binding changed");
     auto state=std::make_unique<Impl>();state->executable=std::move(executable);auto key=new_agent_worker_channel_key();
-    auto pipe_nonce=new_agent_worker_channel_key();const auto name=L"\\\\.\\pipe\\xmind-agent-"+wide(hex(pipe_nonce.view()));pipe_nonce.clear();
-    Handle server(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,65536,65536,0,nullptr));
-    if(server.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot create private worker pipe");
-    SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};Handle child(CreateFileW(name.c_str(),GENERIC_READ|GENERIC_WRITE,0,&security,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,nullptr));if(child.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot open private worker pipe");
-    Handle connected(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!connected.value)throw std::runtime_error("Cannot create worker connection event");OVERLAPPED connection{};connection.hEvent=connected.value;
-    if(!ConnectNamedPipe(server.value,&connection)){const auto error=GetLastError();if(error!=ERROR_PIPE_CONNECTED){if(error==ERROR_IO_PENDING){DWORD ignored=0;CancelIoEx(server.value,&connection);GetOverlappedResult(server.value,&connection,&ignored,TRUE);}throw std::runtime_error("Cannot connect private worker pipe");}}
+    const auto parent_route=new_route(),worker_route=new_route();
+    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(scope,SecretBytes(key.view()),AgentWorkerSide::backend,parent_route)));
+    SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
+    Handle child(CreateFileMappingW(INVALID_HANDLE_VALUE,&security,PAGE_READWRITE,0,8192,nullptr));if(!child.value)throw std::runtime_error("Cannot create private worker bootstrap");
+    {MappingView view(child.value,FILE_MAP_WRITE);std::string bootstrap(reinterpret_cast<const char*>(key.view().data()),key.view().size());
+        bootstrap+=Json{{"version",1},{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()},{"parent_birth",birth(GetCurrentProcess())},{"parent_port",ipc_host().port},{"parent_route",parent_route},{"worker_route",worker_route}}.dump();
+        if(bootstrap.size()>8188)protocol();const auto size=static_cast<std::uint32_t>(bootstrap.size());std::memcpy(view.value,&size,4);std::memcpy(static_cast<char*>(view.value)+4,bootstrap.data(),bootstrap.size());SecureZeroMemory(bootstrap.data(),bootstrap.size());}
     Handle input(CreateFileW(L"NUL",GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));Handle output(CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));if(input.value==INVALID_HANDLE_VALUE||output.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot isolate worker standard handles");
     state->job=Handle(CreateJobObjectW(nullptr,nullptr));if(!state->job.value)throw std::runtime_error("Cannot create worker ownership job");JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;if(!SetInformationJobObject(state->job.value,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))throw std::runtime_error("Cannot restrict worker ownership job");
     Attributes attributes({child.value,input.value,output.value});STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=input.value;startup.StartupInfo.hStdOutput=output.value;startup.StartupInfo.hStdError=output.value;startup.lpAttributeList=attributes.list;
@@ -194,10 +242,9 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
     state->assigned=true;
     if(ResumeThread(thread.value)==static_cast<DWORD>(-1))throw ProcessBeforeDispatchError("Cannot start owned worker");
     child=Handle();input=Handle();output=Handle();
-    std::string bootstrap(reinterpret_cast<const char*>(key.view().data()),key.view().size());bootstrap+=Json{{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()}}.dump();
-    try{write_packet(server.value,bootstrap,deadline,stop);}catch(...){SecureZeroMemory(bootstrap.data(),bootstrap.size());throw;}SecureZeroMemory(bootstrap.data(),bootstrap.size());
-    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(std::move(server),std::move(scope),std::move(key),AgentWorkerSide::backend)));
-    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=3||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
+    key.clear();
+    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=4||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
+    state->channel->impl_->attach(identity.at("port").get<std::uint32_t>(),worker_route,state->process.value);
     return std::unique_ptr<AgentWorkerProcess>(new AgentWorkerProcess(std::move(state)));
 }
 AgentWorkerChannel& AgentWorkerProcess::channel()noexcept{return *impl_->channel;}

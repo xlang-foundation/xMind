@@ -222,7 +222,7 @@ Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release'
 @{schemaVersion=1;sourceRevision=$ciProvenance.xmind;expectedContracts=$ciExpected;contractsSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'contracts.json') -Algorithm SHA256).Hash.ToLowerInvariant();ctestSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'native-ctest.log') -Algorithm SHA256).Hash.ToLowerInvariant();exitCode=0}|ConvertTo-Json -Depth 4|Set-Content (Join-Path $ciEvidence 'native-gate.json')
 $ciBundle=Join-Path $ciRoot 'build/native-distribution'
 if(Test-Path -LiteralPath $ciBundle){throw 'Fresh native distribution directory required; do not mix old and unified binaries.'}
-New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses'),(Join-Path $ciBundle 'worker')|Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ciBundle 'modules'),(Join-Path $ciBundle 'licenses')|Out-Null
 foreach($ciBinary in @('xmind.exe','xlang3_runtime.dll')){
     Copy-Item -LiteralPath (Join-Path $ciNative ('Release/'+$ciBinary)) -Destination $ciBundle
 }
@@ -245,7 +245,6 @@ Get-ChildItem -LiteralPath (Join-Path $ciRelease 'modules') -Recurse -File | Whe
     New-Item -ItemType Directory -Force -Path (Split-Path $ciTarget -Parent)|Out-Null
     Copy-Item -LiteralPath $_.FullName -Destination $ciTarget
 }
-Copy-Item -LiteralPath (Join-Path $ciNative 'Release/worker/agent_worker.py') -Destination (Join-Path $ciBundle 'worker/agent_worker.py')
 Copy-Item -LiteralPath (Join-Path $ciRelease 'xlang3.exe') -Destination $ciBundle
 Copy-Item -LiteralPath (Join-Path $ciEvidence 'provenance.json') -Destination $ciBundle
 foreach($ciLicenseRoot in @(@{path=$ciRoot;label='xmind'},@{path=$ciRuntime;label='xlang3'})){

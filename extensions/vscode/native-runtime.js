@@ -8,8 +8,7 @@ const crypto = require('node:crypto');
 const MANIFEST_NAME = 'native-runtime-manifest.json';
 const REQUIRED_NATIVE = Object.freeze([
   'xmind.exe', 'xlang3_runtime.dll', 'xlang3.exe',
-  'modules/xlang_json.x3pkg.dll', 'modules/xlang_sqlite3.x3pkg.dll',
-  'worker/agent_worker.py'
+  'modules/xlang_json.x3pkg.dll', 'modules/xlang_sqlite3.x3pkg.dll'
 ]);
 const RETIRED_NATIVE = new Set(['xmind_server.exe', 'xmind_cli.exe', 'xmind_admin.exe', 'xmind_schema_worker.exe']);
 const REQUIRED_STDLIB = Object.freeze(['os.py', 'json/__init__.py', 'encodings/__init__.py', 'importlib/__init__.py']);

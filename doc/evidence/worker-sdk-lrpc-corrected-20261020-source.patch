@@ -1,0 +1,665 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 42cde9ea..a8dd1dd6 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -139,7 +139,7 @@ if(WIN32)
+   target_include_directories(agentflow_worker_rpc PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_worker_rpc PUBLIC agentflow_worker_channel PRIVATE Threads::Threads)
+   target_include_directories(agentflow_worker_channel PUBLIC include PRIVATE third_party)
+-  target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt)
++  target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt agentflow_xlang3)
+   add_library(agentflow_process_effects STATIC src/process_executor.cpp)
+   target_include_directories(agentflow_process_effects PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_process_effects PUBLIC agentflow_process agentflow_workspace agentflow_policy PRIVATE agentflow_mcp_wire)
+@@ -321,10 +321,6 @@ if(WIN32)
+   target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
+   add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind>")
+-  add_custom_command(TARGET xmind POST_BUILD
+-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:xmind>/worker"
+-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+-      "${CMAKE_CURRENT_SOURCE_DIR}/worker/agent_worker.py" "$<TARGET_FILE_DIR:xmind>/worker/agent_worker.py")
+ endif()
+ target_link_libraries(xmind_persistence_demo PRIVATE agentflow_core)
+ if(WIN32)
+diff --git a/Native/include/agentflow/agent_worker_channel.hpp b/Native/include/agentflow/agent_worker_channel.hpp
+index e613f373..57f9acb6 100644
+--- a/Native/include/agentflow/agent_worker_channel.hpp
++++ b/Native/include/agentflow/agent_worker_channel.hpp
+@@ -40,20 +40,21 @@ SecretBytes new_agent_worker_channel_key();
+ 
+ // One reader and one writer may run concurrently; callers join them before
+ // destruction. Any I/O/protocol failure poisons the channel; never retry an
+-// effect based on transport failure. Deadlines govern actual overlapped I/O.
++// effect based on transport failure. Native remote objects use xlang3 LRPC;
++// rendezvous waits honor cancellation and the captured deadline.
+ class AgentWorkerChannel {
+ public:
+     using Deadline=std::chrono::steady_clock::time_point;
+     ~AgentWorkerChannel();
+     AgentWorkerChannel(const AgentWorkerChannel&)=delete;
+     AgentWorkerChannel& operator=(const AgentWorkerChannel&)=delete;
+-    // Private child entry only: receives a bootstrap through the inherited
+-    // handle and sends an authenticated ready frame containing its real PID.
++    // Private child entry only: receives bootstrap from an inherited mapping
++    // and calls the parent's SDK remote object with its actual ready identity.
+     static std::unique_ptr<AgentWorkerChannel> accept_inherited(std::uintptr_t,Deadline,std::stop_token={});
+     const AgentWorkerScope& scope()const noexcept;
+     AgentWorkerChannelStatistics statistics()const noexcept;
+     // Owner shutdown only, after readers have joined and writers are excluded.
+-    // Closing this retained handle notifies the peer; it does not kill a PID.
++    // Closing the remote object notifies the peer; it does not kill a PID.
+     void close()noexcept;
+     void send(const AgentWorkerMessage&,Deadline,std::stop_token={});
+     AgentWorkerMessage receive(Deadline,std::stop_token={});
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 3408b00c..7d044b41 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -47,6 +47,7 @@ public:
+     std::future<AgentWorkerFileClaimRecord> record_agent_worker_file_result(AgentWorkerLeaseSpec,AgentFileToolInvocation,bool success,std::string actual_output_json);
+     std::future<AgentWorkerFileClaimRecord> agent_worker_file_claim(std::string root,std::string attempt,std::string call);
+     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_read_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<AgentWorkerToolTurnRecord> commit_agent_worker_workspace_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<Event> agent_worker_tool_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     PersistenceService(std::string database,std::vector<std::string> import_roots,
+         std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 3f0295b6..424a9127 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -215,6 +215,8 @@ public:
+     AgentWorkerFileClaimRecord record_agent_worker_file_result(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,bool success,const std::string& actual_output_json);
+     AgentWorkerFileClaimRecord agent_worker_file_claim(const std::string& root,const std::string& attempt,const std::string& call);
+     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
++    // Backend coding admission only; results come from captured read/file claims.
++    AgentWorkerToolTurnRecord commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
+     Event agent_worker_tool_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned);
+     // Exact durable compare-and-swap; null expected means create only if absent.
+     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
+@@ -262,6 +264,7 @@ public:
+     McpOAuthRefreshRecord publish_mcp_oauth_refresh(const std::string& request_id,const std::string& generation,const SecretBytes& complete_grant);
+     std::size_t recover_interrupted(const BackendLease& owner);
+ private:
++    AgentWorkerToolTurnRecord commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec&,const std::string& attempt,bool allow_files);
+     struct Impl;
+     std::unique_ptr<Impl> impl_;
+ };
+diff --git a/Native/src/agent_worker.cpp b/Native/src/agent_worker.cpp
+index 551598db..5fe77225 100644
+--- a/Native/src/agent_worker.cpp
++++ b/Native/src/agent_worker.cpp
+@@ -19,6 +19,7 @@
+ #include <limits>
+ #include <cstddef>
+ #include <utility>
++#include <optional>
+ #if defined(_WIN32)
+ #define NOMINMAX
+ #include <windows.h>
+@@ -139,6 +140,46 @@ std::string worker_signature(const std::array<unsigned char,32>& secret,std::uin
+        BCryptFinishHash(hash,digest.data(),static_cast<ULONG>(digest.size()),0)<0){close();throw std::runtime_error("Cannot sign xMind worker request");}
+     close();return hex(digest.data(),digest.size());
+ }
++class NativeToolWorker {
++    X::Runtime& runtime_;
++    std::array<unsigned char,32> secret_;
++    std::int64_t sequence_=0;
++    std::mutex invocation_;
++    std::string module_,function_;
++    void authorize(std::int64_t sequence,const std::string& tag,const std::string& message){
++        if(sequence_==std::numeric_limits<std::int64_t>::max()||sequence!=sequence_+1||tag.size()!=64)
++            throw std::invalid_argument("Invalid private worker authentication");
++        const auto expected=worker_signature(secret_,static_cast<std::uint64_t>(sequence),message);
++        unsigned difference=0;for(std::size_t i=0;i<64;++i)difference|=static_cast<unsigned char>(tag[i])^static_cast<unsigned char>(expected[i]);
++        if(difference)throw std::invalid_argument("Invalid private worker authentication");sequence_=sequence;
++    }
++public:
++    NativeToolWorker(X::Runtime& runtime,const std::string& module,const std::string& function,const std::array<unsigned char,32>& secret)
++        :runtime_(runtime),secret_(secret),module_(module),function_(function){
++        X::Module application(runtime_,module_.c_str());
++        if(!application[function_.c_str()].IsValid())throw std::invalid_argument("Trusted worker callable is unavailable");
++    }
++    ~NativeToolWorker(){SecureZeroMemory(secret_.data(),secret_.size());}
++    std::int64_t Handshake(std::int64_t sequence,std::string tag){
++        std::lock_guard lock(invocation_);authorize(sequence,tag,"xMind worker handshake v1");return 1;
++    }
++    std::string Invoke(std::int64_t sequence,std::string tag,std::string input){
++        std::lock_guard lock(invocation_);
++        if(input.size()>256*1024||!Json::parse(input).is_object())throw std::invalid_argument("Invalid private worker arguments");
++        authorize(sequence,tag,input);X::Value arguments,result,output;
++        X::Module json(runtime_,"json"),application(runtime_,module_.c_str());
++        if(!json["loads"].Call(std::vector<X::Value>{X::Value(runtime_,input)},arguments)||
++           !application[function_.c_str()].Call(std::vector<X::Value>{arguments},result)||
++           !json["dumps"].Call(std::vector<X::Value>{result},output)||!output.IsString())
++            throw XlangPythonExecutionError();
++        auto bytes=output.ToString();validate_json_result(bytes);return bytes;
++    }
++    BEGIN_PACKAGE(NativeToolWorker)
++        APISET().AddFunc<2>("handshake",&NativeToolWorker::Handshake);
++        APISET().AddFunc<3>("invoke",&NativeToolWorker::Invoke);
++    END_PACKAGE
++};
++
+ void write_worker_secret(HANDLE pipe,const std::array<unsigned char,32>& secret) {
+     std::size_t offset=0;
+     while(offset<secret.size()){
+@@ -185,8 +226,6 @@ std::shared_ptr<WorkerSession> worker_session(const std::string& key) {
+ void start_worker(WorkerSession& session,const std::filesystem::path& binary,
+     const std::string& modules_root,const std::string& stdlib_root,const std::string& code_root,
+     const std::string& module,const std::string& function) {
+-    const auto script=binary.parent_path()/L"worker"/L"agent_worker.py";
+-    if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
+     for(int attempt=0;attempt<8;++attempt){
+         const auto port=random_port();std::wstring command=quote(binary.wstring())+L" worker";
+         for(const auto& [key,value]:std::vector<std::pair<std::string,std::string>>{{"--agent-port",std::to_string(port)},{"--modules",modules_root},{"--stdlib",stdlib_root},{"--code-root",code_root},{"--module",module},{"--function",function}})command+=L" "+quote(wide(key))+L" "+quote(wide(value));
+@@ -246,14 +285,13 @@ int run_agent_worker(int argc,char** argv) {
+             throw std::runtime_error("xMind worker did not receive its private capability");
+         offset+=count;
+     }
+-    X::Runtime runtime;runtime.AddImportRoot(modules);runtime.AddImportRoot(stdlib);runtime.AddImportRoot(code_root);
+-    const auto script=executable_path().parent_path()/L"worker"/L"agent_worker.py";
+-    if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
+-    runtime.AddImportRoot(path_text(script.parent_path()));
+-    X::Module worker(runtime,"agent_worker");const auto start=worker["start"];X::Value result;
+-    const std::vector<X::Value> args{X::Value(runtime,static_cast<std::int64_t>(port)),X::Value(runtime,module_name),X::Value(runtime,function_name),X::Value(runtime,hex(secret.data(),secret.size()))};
+-    SecureZeroMemory(secret.data(),secret.size());
+-    if(!start.Call(args,result))throw std::runtime_error("Cannot start xMind xlang3 agent worker");
++    // The borrowed C++ service outlives the runtime; it retains no SDK values.
++    std::optional<NativeToolWorker> worker;X::Runtime runtime;
++    runtime.AddImportRoot(modules);runtime.AddImportRoot(stdlib);runtime.AddImportRoot(code_root);
++    worker.emplace(runtime,module_name,function_name,secret);SecureZeroMemory(secret.data(),secret.size());
++    auto service=runtime.RegisterPackage("xmind_agent_worker",*worker);
++    runtime.RegisterRemoteObject("xmind_agent_worker",service);runtime.LrpcListen(port);
++    for(;;)std::this_thread::sleep_for(std::chrono::seconds(1));
+     return 0;
+ }
+ 
+diff --git a/Native/src/agent_worker_channel.cpp b/Native/src/agent_worker_channel.cpp
+index e26caccd..f8a73d24 100644
+--- a/Native/src/agent_worker_channel.cpp
++++ b/Native/src/agent_worker_channel.cpp
+@@ -1,5 +1,10 @@
+ #include "agentflow/agent_worker_channel.hpp"
+ #include "nlohmann/json.hpp"
++#include "xlang3/cpp/runtime.h"
++#include <condition_variable>
++#include <cstring>
++#include <map>
++#include <thread>
+ #define NOMINMAX
+ #include <windows.h>
+ #include <bcrypt.h>
+@@ -78,32 +83,46 @@ std::wstring wide(const std::string& text){
+ std::wstring quote(const std::wstring& text){
+     std::wstring out=L"\"";std::size_t slashes=0;for(wchar_t c:text){if(c==L'\\'){++slashes;continue;}out.append(c==L'\"'?slashes*2+1:slashes,L'\\');slashes=0;out.push_back(c);}out.append(slashes*2,L'\\');out.push_back(L'\"');return out;
+ }
+-// Cancellation retires the actual pending OVERLAPPED before its storage or
+-// event is released. Partial reads/writes never cause a frame retry.
++// Native C++ remote objects use the SDK's shared-memory LRPC transport.
++// A rendezvous accepts one frame only while its owning reader is waiting.
++// Tool execution never runs in an IPC callback, so callbacks stay bounded.
+ struct IoStatistics {std::atomic<std::uint64_t> pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;};
+-void transfer(HANDLE pipe,void* bytes,std::size_t size,bool writing,Clock::time_point deadline,std::stop_token stop,IoStatistics* statistics=nullptr){
+-    std::size_t offset=0;while(offset<size){check(deadline,stop);Handle event(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!event.value)throw std::runtime_error("Cannot create worker I/O event");
+-        OVERLAPPED overlap{};overlap.hEvent=event.value;DWORD done=0;
+-        const auto count=static_cast<DWORD>(std::min<std::size_t>(size-offset,65536));auto* data=static_cast<char*>(bytes)+offset;
+-        const BOOL immediate=writing?WriteFile(pipe,data,count,&done,&overlap):ReadFile(pipe,data,count,&done,&overlap);
+-        if(!immediate){if(GetLastError()!=ERROR_IO_PENDING)throw AgentWorkerProtocolError("Agent worker channel closed");
+-            if(statistics)++(writing?statistics->pending_writes:statistics->pending_reads);
+-            try{for(;;){check(deadline,stop);const auto waited=WaitForSingleObject(event.value,10);if(waited==WAIT_OBJECT_0)break;if(waited!=WAIT_TIMEOUT)throw std::runtime_error("Cannot observe worker I/O");}}
+-            catch(...){if(statistics)++(writing?statistics->cancelled_writes:statistics->cancelled_reads);CancelIoEx(pipe,&overlap);GetOverlappedResult(pipe,&overlap,&done,TRUE);throw;}
+-            if(!GetOverlappedResult(pipe,&overlap,&done,FALSE))throw AgentWorkerProtocolError("Agent worker channel closed");
+-        }
+-        if(!done||done>count)throw AgentWorkerProtocolError("Agent worker channel closed");offset+=done;
++struct Inbox {
++    std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;std::string frame;
++};
++class WorkerRemoteObjects {
++public:
++    std::int64_t Deliver(std::string token,std::string frame){
++        if(frame.empty()||frame.size()>AgentWorkerFrameCodec::max_frame_bytes)protocol();auto inbox=find(token);
++        std::lock_guard lock(inbox->mutex);if(inbox->closed)return -1;if(!inbox->waiting||!inbox->frame.empty())return 0;
++        inbox->frame=std::move(frame);inbox->changed.notify_one();return 1;
+     }
+-}
+-void write_packet(HANDLE pipe,const std::string& bytes,Clock::time_point deadline,std::stop_token stop,IoStatistics* statistics=nullptr){
+-    if(bytes.empty()||bytes.size()>AgentWorkerFrameCodec::max_frame_bytes)protocol();
+-    std::array<unsigned char,4> header{};const auto size=static_cast<std::uint32_t>(bytes.size());for(unsigned i=0;i<4;++i)header[i]=static_cast<unsigned char>(size>>(8*i));
+-    transfer(pipe,header.data(),header.size(),true,deadline,stop,statistics);transfer(pipe,const_cast<char*>(bytes.data()),bytes.size(),true,deadline,stop,statistics);
+-}
+-std::string read_packet(HANDLE pipe,Clock::time_point deadline,std::stop_token stop,std::size_t limit=AgentWorkerFrameCodec::max_frame_bytes,IoStatistics* statistics=nullptr){
+-    std::array<unsigned char,4> header{};transfer(pipe,header.data(),header.size(),false,deadline,stop,statistics);std::uint32_t size=0;for(unsigned i=0;i<4;++i)size|=static_cast<std::uint32_t>(header[i])<<(8*i);
+-    if(!size||size>limit)protocol();std::string bytes(size,'\0');transfer(pipe,bytes.data(),bytes.size(),false,deadline,stop,statistics);return bytes;
+-}
++    std::int64_t Close(std::string token){auto inbox=find(token);std::lock_guard lock(inbox->mutex);inbox->closed=true;inbox->changed.notify_all();return 1;}
++    void add(const std::string& token,std::shared_ptr<Inbox> inbox){std::lock_guard lock(mutex_);if(!inboxes_.emplace(token,inbox).second)protocol();}
++    void remove(const std::string& token){std::lock_guard lock(mutex_);inboxes_.erase(token);}
++    BEGIN_PACKAGE(WorkerRemoteObjects)
++        APISET().AddFunc<2>("deliver",&WorkerRemoteObjects::Deliver);
++        APISET().AddFunc<1>("close",&WorkerRemoteObjects::Close);
++    END_PACKAGE
++private:
++    std::shared_ptr<Inbox> find(const std::string& token){std::lock_guard lock(mutex_);auto found=inboxes_.find(token);if(found==inboxes_.end())protocol();auto inbox=found->second.lock();if(!inbox)protocol();return inbox;}
++    std::mutex mutex_;std::map<std::string,std::weak_ptr<Inbox>> inboxes_;
++};
++struct WorkerIpcHost {
++    WorkerRemoteObjects objects;X::Runtime runtime;std::uint32_t port=0;
++    WorkerIpcHost(){
++        auto package=runtime.RegisterPackage("xmind_worker",objects);runtime.RegisterRemoteObject("xmind_worker",package);
++        for(unsigned attempt=0;attempt<24;++attempt){auto random=new_agent_worker_channel_key();std::uint32_t value=0;std::copy_n(random.view().begin(),sizeof(value),reinterpret_cast<std::uint8_t*>(&value));port=20000+value%40000;
++            try{runtime.LrpcListen(port);return;}catch(const std::exception&){}}
++        throw std::runtime_error("Cannot start xMind shared-memory IPC listener");
++    }
++};
++WorkerIpcHost& ipc_host(){static WorkerIpcHost host;return host;}
++std::string new_route(){auto key=new_agent_worker_channel_key();return hex(key.view());}
++struct MappingView {
++    void* value=nullptr;explicit MappingView(HANDLE handle,DWORD access):value(MapViewOfFile(handle,access,0,0,8192)){if(!value)throw std::runtime_error("Cannot map private worker bootstrap");}
++    ~MappingView(){UnmapViewOfFile(value);}
++};
+ std::uint64_t birth(HANDLE process){FILETIME created{},exit{},kernel{},user{};if(!GetProcessTimes(process,&created,&exit,&kernel,&user))throw std::runtime_error("Cannot identify worker creation");return (static_cast<std::uint64_t>(created.dwHighDateTime)<<32)|created.dwLowDateTime;}
+ std::vector<wchar_t> environment(){
+     std::array<wchar_t,32768> text{};const auto size=GetWindowsDirectoryW(text.data(),static_cast<UINT>(text.size()));if(!size||size>=text.size())throw std::runtime_error("Cannot obtain worker system directory");
+@@ -142,29 +161,57 @@ AgentWorkerMessage AgentWorkerFrameCodec::decode(const std::string& frame){
+ SecretBytes new_agent_worker_channel_key(){std::array<std::uint8_t,32> bytes{};if(BCryptGenRandom(nullptr,bytes.data(),static_cast<ULONG>(bytes.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw std::runtime_error("Cannot create worker capability");SecretBytes key(bytes);SecureZeroMemory(bytes.data(),bytes.size());return key;}
+ 
+ struct AgentWorkerChannel::Impl {
+-    Handle pipe;AgentWorkerScope scope;AgentWorkerFrameCodec codec;std::mutex reader,writer;std::atomic<bool> poisoned=false;IoStatistics statistics;
+-    Impl(Handle handle,AgentWorkerScope binding,SecretBytes key,AgentWorkerSide side):pipe(std::move(handle)),scope(std::move(binding)),codec(scope,std::move(key),side){}
++    AgentWorkerScope scope;AgentWorkerFrameCodec codec;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;IoStatistics statistics;
++    std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0;Handle peer;
++    X::Runtime client;X::Value remote;
++    Impl(AgentWorkerScope binding,SecretBytes key,AgentWorkerSide side,std::string route):scope(std::move(binding)),codec(scope,std::move(key),side),local(std::move(route)){ipc_host().objects.add(local,inbox);}
++    ~Impl(){ipc_host().objects.remove(local);}
++    void attach(std::uint32_t port,std::string route,HANDLE process){
++        if(port<1||port>65535||route.size()!=64)protocol();remote_port=port;remote_route=std::move(route);
++        HANDLE duplicate=nullptr;if(!DuplicateHandle(GetCurrentProcess(),process,GetCurrentProcess(),&duplicate,SYNCHRONIZE,FALSE,0))throw std::runtime_error("Cannot retain IPC peer identity");peer=Handle(duplicate);
++        const auto endpoint="lrpc:"+std::to_string(port);X3LrpcEndpointInfo info{};info.size=sizeof(info);
++        if(x3_runtime_probe_remote(client.get(),endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=GetProcessId(process))protocol();
++        remote=client.ImportRemote("xmind_worker",endpoint.c_str());
++    }
++    void live(){if(peer.value&&WaitForSingleObject(peer.value,0)!=WAIT_TIMEOUT)protocol();}
+ };
+ AgentWorkerChannel::AgentWorkerChannel(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
+-AgentWorkerChannel::~AgentWorkerChannel()=default;
++AgentWorkerChannel::~AgentWorkerChannel(){close();}
+ const AgentWorkerScope& AgentWorkerChannel::scope()const noexcept{return impl_->scope;}
+ AgentWorkerChannelStatistics AgentWorkerChannel::statistics()const noexcept{const auto& s=impl_->statistics;return {s.pending_reads.load(),s.pending_writes.load(),s.cancelled_reads.load(),s.cancelled_writes.load()};}
+-void AgentWorkerChannel::close()noexcept{impl_->poisoned=true;impl_->pipe=Handle();}
++void AgentWorkerChannel::close()noexcept{
++    if(impl_->closed.exchange(true))return;impl_->poisoned=true;
++    {std::lock_guard lock(impl_->inbox->mutex);impl_->inbox->closed=true;impl_->inbox->changed.notify_all();}
++    try{if(impl_->remote_port){impl_->live();impl_->remote["close"](impl_->remote_route);}}catch(...){}
++}
+ void AgentWorkerChannel::send(const AgentWorkerMessage& message,Deadline deadline,std::stop_token stop){
+-    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();try{check(deadline,stop);write_packet(impl_->pipe.value,impl_->codec.encode(message),deadline,stop,&impl_->statistics);}catch(...){impl_->poisoned=true;throw;}
++    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();++impl_->statistics.pending_writes;
++    try{check(deadline,stop);const auto frame=impl_->codec.encode(message);const std::vector<X::Value> arguments{X::Value(impl_->client,impl_->remote_route),X::Value(impl_->client,frame)};
++        for(;;){check(deadline,stop);impl_->live();X::Value reply;if(!impl_->remote["deliver"].Call(arguments,reply)||!reply.IsInt64())protocol();const auto result=reply.ToInt64();if(result==1){check(deadline,stop);return;}if(result!=0)protocol();std::this_thread::sleep_for(std::chrono::milliseconds(2));}
++    }catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
++    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
++    catch(...){impl_->poisoned=true;throw AgentWorkerProtocolError("Worker shared-memory IPC send failed");}
+ }
+ AgentWorkerMessage AgentWorkerChannel::receive(Deadline deadline,std::stop_token stop){
+-    std::lock_guard lock(impl_->reader);if(impl_->poisoned)protocol();try{check(deadline,stop);return impl_->codec.decode(read_packet(impl_->pipe.value,deadline,stop,AgentWorkerFrameCodec::max_frame_bytes,&impl_->statistics));}catch(...){impl_->poisoned=true;throw;}
++    std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();++impl_->statistics.pending_reads;
++    auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);inbox.waiting=true;
++    struct Waiting {Inbox& inbox;~Waiting(){inbox.waiting=false;}} waiting{inbox};
++    try{for(;;){check(deadline,stop);if(!inbox.frame.empty()){auto frame=std::exchange(inbox.frame,{});return impl_->codec.decode(frame);}if(inbox.closed)protocol();impl_->live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));}}
++    catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
++    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
++    catch(...){impl_->poisoned=true;throw;}
+ }
+ std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::uintptr_t inherited,Deadline deadline,std::stop_token stop){
+-    Handle pipe(reinterpret_cast<HANDLE>(inherited));if(!pipe.value||pipe.value==INVALID_HANDLE_VALUE||GetFileType(pipe.value)!=FILE_TYPE_PIPE)protocol();
+-    if(!SetHandleInformation(pipe.value,HANDLE_FLAG_INHERIT,0))throw std::runtime_error("Cannot close worker inheritance");
+-    auto bootstrap=read_packet(pipe.value,deadline,stop,8192);
+-    struct Wipe {std::string& bytes;~Wipe(){if(!bytes.empty())SecureZeroMemory(bytes.data(),bytes.size());}} wipe{bootstrap};
+-    if(bootstrap.size()<=32)protocol();SecretBytes key(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(bootstrap.data()),32));
+-    auto config=parse(bootstrap.substr(32));if(!config.is_object()||config.size()!=2||!config.at("parent_pid").is_number_unsigned())protocol();auto scope=read_scope(config.at("scope"));
+-    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(std::move(pipe),std::move(scope),std::move(key),AgentWorkerSide::worker)));
+-    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",config.at("parent_pid")}}.dump()},deadline,stop);return channel;
++    check(deadline,stop);Handle mapping(reinterpret_cast<HANDLE>(inherited));if(!mapping.value||mapping.value==INVALID_HANDLE_VALUE)protocol();
++    if(!SetHandleInformation(mapping.value,HANDLE_FLAG_INHERIT,0))protocol();MappingView view(mapping.value,FILE_MAP_READ);
++    std::uint32_t size=0;std::memcpy(&size,view.value,sizeof(size));if(size<=32||size>8188)protocol();
++    const auto* bytes=static_cast<const std::uint8_t*>(view.value)+4;SecretBytes key(std::span<const std::uint8_t>(bytes,32));
++    const auto config=parse(std::string(reinterpret_cast<const char*>(bytes+32),size-32));if(!config.is_object()||config.size()!=7||config.at("version")!=1)protocol();
++    const auto parent_pid=config.at("parent_pid").get<DWORD>();Handle parent(OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,parent_pid));
++    if(!parent.value||birth(parent.value)!=config.at("parent_birth").get<std::uint64_t>())protocol();
++    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(read_scope(config.at("scope")),std::move(key),AgentWorkerSide::worker,config.at("worker_route").get<std::string>())));
++    channel->impl_->attach(config.at("parent_port").get<std::uint32_t>(),config.at("parent_route").get<std::string>(),parent.value);
++    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",parent_pid},{"port",ipc_host().port}}.dump()},deadline,stop);return channel;
+ }
+ struct AgentWorkerProcess::Impl {
+     Handle process,job;std::shared_ptr<const BoundProcessExecutable> executable;std::unique_ptr<AgentWorkerChannel> channel;std::uint32_t pid=0;std::uint64_t created=0;bool assigned=false;
+@@ -178,12 +225,13 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
+     // the directory chain, so no unbound replacement path may be substituted.
+     if(ForegroundProcess::executable_identity(executable->path())!=executable->identity())throw ProcessBeforeDispatchError("Worker image binding changed");
+     auto state=std::make_unique<Impl>();state->executable=std::move(executable);auto key=new_agent_worker_channel_key();
+-    auto pipe_nonce=new_agent_worker_channel_key();const auto name=L"\\\\.\\pipe\\xmind-agent-"+wide(hex(pipe_nonce.view()));pipe_nonce.clear();
+-    Handle server(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,65536,65536,0,nullptr));
+-    if(server.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot create private worker pipe");
+-    SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};Handle child(CreateFileW(name.c_str(),GENERIC_READ|GENERIC_WRITE,0,&security,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,nullptr));if(child.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot open private worker pipe");
+-    Handle connected(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!connected.value)throw std::runtime_error("Cannot create worker connection event");OVERLAPPED connection{};connection.hEvent=connected.value;
+-    if(!ConnectNamedPipe(server.value,&connection)){const auto error=GetLastError();if(error!=ERROR_PIPE_CONNECTED){if(error==ERROR_IO_PENDING){DWORD ignored=0;CancelIoEx(server.value,&connection);GetOverlappedResult(server.value,&connection,&ignored,TRUE);}throw std::runtime_error("Cannot connect private worker pipe");}}
++    const auto parent_route=new_route(),worker_route=new_route();
++    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(scope,SecretBytes(key.view()),AgentWorkerSide::backend,parent_route)));
++    SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
++    Handle child(CreateFileMappingW(INVALID_HANDLE_VALUE,&security,PAGE_READWRITE,0,8192,nullptr));if(!child.value)throw std::runtime_error("Cannot create private worker bootstrap");
++    {MappingView view(child.value,FILE_MAP_WRITE);std::string bootstrap(reinterpret_cast<const char*>(key.view().data()),key.view().size());
++        bootstrap+=Json{{"version",1},{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()},{"parent_birth",birth(GetCurrentProcess())},{"parent_port",ipc_host().port},{"parent_route",parent_route},{"worker_route",worker_route}}.dump();
++        if(bootstrap.size()>8188)protocol();const auto size=static_cast<std::uint32_t>(bootstrap.size());std::memcpy(view.value,&size,4);std::memcpy(static_cast<char*>(view.value)+4,bootstrap.data(),bootstrap.size());SecureZeroMemory(bootstrap.data(),bootstrap.size());}
+     Handle input(CreateFileW(L"NUL",GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));Handle output(CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));if(input.value==INVALID_HANDLE_VALUE||output.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot isolate worker standard handles");
+     state->job=Handle(CreateJobObjectW(nullptr,nullptr));if(!state->job.value)throw std::runtime_error("Cannot create worker ownership job");JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;if(!SetInformationJobObject(state->job.value,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))throw std::runtime_error("Cannot restrict worker ownership job");
+     Attributes attributes({child.value,input.value,output.value});STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=input.value;startup.StartupInfo.hStdOutput=output.value;startup.StartupInfo.hStdError=output.value;startup.lpAttributeList=attributes.list;
+@@ -194,10 +242,9 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
+     state->assigned=true;
+     if(ResumeThread(thread.value)==static_cast<DWORD>(-1))throw ProcessBeforeDispatchError("Cannot start owned worker");
+     child=Handle();input=Handle();output=Handle();
+-    std::string bootstrap(reinterpret_cast<const char*>(key.view().data()),key.view().size());bootstrap+=Json{{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()}}.dump();
+-    try{write_packet(server.value,bootstrap,deadline,stop);}catch(...){SecureZeroMemory(bootstrap.data(),bootstrap.size());throw;}SecureZeroMemory(bootstrap.data(),bootstrap.size());
+-    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(std::move(server),std::move(scope),std::move(key),AgentWorkerSide::backend)));
+-    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=3||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
++    key.clear();
++    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=4||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
++    state->channel->impl_->attach(identity.at("port").get<std::uint32_t>(),worker_route,state->process.value);
+     return std::unique_ptr<AgentWorkerProcess>(new AgentWorkerProcess(std::move(state)));
+ }
+ AgentWorkerChannel& AgentWorkerProcess::channel()noexcept{return *impl_->channel;}
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 5197a1dd..2d9ca2f3 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -225,6 +225,7 @@ std::future<AgentWorkerFileClaimRecord> PersistenceService::claim_agent_worker_f
+ std::future<AgentWorkerFileClaimRecord> PersistenceService::record_agent_worker_file_result(AgentWorkerLeaseSpec lease,AgentFileToolInvocation call,bool success,std::string output){return impl_->submit([lease=std::move(lease),call=std::move(call),success,output=std::move(output)](Repository& r){return r.record_agent_worker_file_result(lease,call,success,output);});}
+ std::future<AgentWorkerFileClaimRecord> PersistenceService::agent_worker_file_claim(std::string root,std::string attempt,std::string call){return impl_->observe([root=std::move(root),attempt=std::move(attempt),call=std::move(call)](Repository& r){return r.agent_worker_file_claim(root,attempt,call);});}
+ std::future<AgentWorkerToolTurnRecord> PersistenceService::commit_agent_worker_read_turn(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker read turn cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker read turn deadline elapsed");return r.commit_agent_worker_read_turn(lease,attempt);});}
++std::future<AgentWorkerToolTurnRecord> PersistenceService::commit_agent_worker_workspace_turn(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker workspace turn cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker workspace turn deadline elapsed");return r.commit_agent_worker_workspace_turn(lease,attempt);});}
+ std::future<Event> PersistenceService::agent_worker_tool_event(AgentWorkerLeaseSpec lease,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),ordinal,returned,deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker tool activity cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker tool activity deadline elapsed");return r.agent_worker_tool_event(lease,attempt,ordinal,returned);});}
+ std::future<ModelCallReservation> PersistenceService::finish_agent_worker_model(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){
+     return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker finish cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker finish deadline elapsed");return r.finish_model_call(lease.root_run_id,lease.owner_run_id,attempt,{},&lease);});
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 19e51e68..1d2d86ba 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3368,13 +3368,29 @@ Event Repository::agent_worker_tool_event(const AgentWorkerLeaseSpec& lease,cons
+     const auto event=impl_->event(lease.owner_run_id,kind,json);changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_tool_event_category),key,Json{{"version",1},{"model",worker_claim_spec_json(authority)},{"ordinal",ordinal},{"returned",returned},{"event_sequence",event.sequence}}.dump()}));tx.commit();return event;
+ }
+ AgentWorkerToolTurnRecord Repository::commit_agent_worker_read_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
++    return commit_agent_worker_tool_turn(lease,attempt,false);
++}
++AgentWorkerToolTurnRecord Repository::commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
++    return commit_agent_worker_tool_turn(lease,attempt,true);
++}
++AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool allow_files){
+     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
+     if(lease.owner_run_id!=lease.root_run_id||root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent")throw Conflict("Worker read turn requires ordinary direct-agent ownership");
+     const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.spec.owner_run_id!=lease.owner_run_id||model.spec.generation!=lease.generation||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read turn has no actual assistant receipt");
+-    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
++    // Check the admitted vocabulary even for an already committed turn. A read
++    // channel must never acknowledge a coding turn through idempotent lookup.
++    for(const auto& call:actual.tool_calls)if(!worker_read_tool(call.name)&&!(allow_files&&is_agent_file_tool(call.name)))throw Conflict("Worker turn contains an unsupported tool");
++    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     std::set<std::string> calls;std::vector<std::string> outputs;
+-    for(const auto& call:actual.tool_calls){if(!worker_read_tool(call.name))throw Conflict("Read-only worker turn contains an unsupported tool");if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");const auto read=read_worker_read(db,lease.root_run_id,attempt,call.id);
++    for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");
++        if(is_agent_file_tool(call.name)){
++            const auto file=read_worker_file(db,lease.root_run_id,attempt,call.id);
++            if(file.state!="returned"||worker_claim_spec_json(file.model)!=worker_claim_spec_json(model.spec)||file.invocation.tool_name!=call.name||file.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker workspace turn has an unfinished or changed actual file result");
++            (void)worker_file_authority(*this,db,lease,file.invocation);
++            outputs.push_back(Json{{"content",file.actual_output_json},{"tool_call_id",call.id}}.dump());continue;
++        }
++        const auto read=read_worker_read(db,lease.root_run_id,attempt,call.id);
+         if(read.state!="returned"||worker_claim_spec_json(read.model)!=worker_claim_spec_json(model.spec)||read.invocation.tool_name!=call.name||read.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker read turn has an unfinished or changed actual result");
+         (void)worker_read_authority(*this,db,lease,read.invocation);outputs.push_back(Json{{"content",read.actual_output_json},{"tool_call_id",call.id}}.dump());
+     }
+diff --git a/Native/src/runtime_generation.cpp b/Native/src/runtime_generation.cpp
+index 26d6b280..dcd51ad9 100644
+--- a/Native/src/runtime_generation.cpp
++++ b/Native/src/runtime_generation.cpp
+@@ -64,7 +64,7 @@ struct Handle {
+     std::string bytes(std::uint64_t limit)const{require(!directory&&size()<=limit);LARGE_INTEGER start{};require(SetFilePointerEx(value,start,nullptr,FILE_BEGIN)!=0);std::string result(static_cast<std::size_t>(size()),'\0');std::size_t offset=0;while(offset<result.size()){DWORD read=0;const auto amount=static_cast<DWORD>(std::min<std::size_t>(1024*1024,result.size()-offset));require(ReadFile(value,result.data()+offset,amount,&read,nullptr)!=0&&read>0&&read<=amount);offset+=read;}stable();return result;}
+ };
+ 
+-const std::array<std::string,6> native_files{"xmind.exe","xlang3_runtime.dll","xlang3.exe","modules/xlang_json.x3pkg.dll","modules/xlang_sqlite3.x3pkg.dll","worker/agent_worker.py"};
++const std::array<std::string,5> native_files{"xmind.exe","xlang3_runtime.dll","xlang3.exe","modules/xlang_json.x3pkg.dll","modules/xlang_sqlite3.x3pkg.dll"};
+ bool relative(const std::string& value){if(value.empty()||value.size()>1024||value.front()=='/'||value.back()=='/'||value.find_first_of("\\:")!=std::string::npos)return false;wide(value);std::size_t from=0;while(from<value.size()){const auto to=value.find('/',from);auto part=value.substr(from,to==std::string::npos?value.size()-from:to-from);if(part.empty()||part=="."||part==".."||part.back()=='.'||part.back()==' ')return false;std::transform(part.begin(),part.end(),part.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});if(part==".git"||part==".config"||part==".agentflow"||part=="__pycache__"||part=="site-packages")return false;if(to==std::string::npos)break;from=to+1;}return true;}
+ struct OrdinalNameLess {bool operator()(const std::wstring& a,const std::wstring& b)const{const auto result=CompareStringOrdinal(a.data(),static_cast<int>(a.size()),b.data(),static_cast<int>(b.size()),TRUE);require(result!=0);return result==CSTR_LESS_THAN;}};
+ std::string folded(std::string value){std::transform(value.begin(),value.end(),value.begin(),[](unsigned char c){return static_cast<char>(std::tolower(c));});return value;}
+diff --git a/Native/tests/agent_worker_channel_contract.cpp b/Native/tests/agent_worker_channel_contract.cpp
+index 32551b81..5342962e 100644
+--- a/Native/tests/agent_worker_channel_contract.cpp
++++ b/Native/tests/agent_worker_channel_contract.cpp
+@@ -46,7 +46,7 @@ int child(int argc,char** argv){
+         else if(request.operation=="test.environment"){
+             std::array<wchar_t,2> value{};Json result={{"pid",GetCurrentProcessId()},{"private_absent",GetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",value.data(),static_cast<DWORD>(value.size()))==0},{"auth_absent",GetEnvironmentVariableW(L"XMIND_AUTH_TOKEN",value.data(),static_cast<DWORD>(value.size()))==0},{"path_absent",GetEnvironmentVariableW(L"PATH",value.data(),static_cast<DWORD>(value.size()))==0}};channel->send({request.operation,result.dump()},Clock::now()+5s);
+         }else if(request.operation=="test.exit"){channel->send({"test.exiting","actual-normal-exit"},Clock::now()+5s);return 0;}
+-        else if(request.operation=="test.crash")ExitProcess(91);
++        else if(request.operation=="test.crash")TerminateProcess(GetCurrentProcess(),91);
+         else if(request.operation=="test.hold"){channel->send({"test.holding","actual-child-held"},Clock::now()+5s);Sleep(INFINITE);}
+         else if(request.operation=="test.descendant"){
+             const auto file=std::filesystem::u8path(executable()).native();auto command=L"\""+file+L"\" channel-fixture-hold";STARTUPINFOW startup{};startup.cb=sizeof(startup);PROCESS_INFORMATION created{};require(CreateProcessW(file.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,nullptr,&startup,&created),"Cannot create actual owned descendant");CloseHandle(created.hThread);CloseHandle(created.hProcess);channel->send({"test.descendant",Json{{"pid",created.dwProcessId}}.dump()},Clock::now()+5s);Sleep(INFINITE);
+@@ -57,15 +57,16 @@ void process_contract(){
+     auto bound=ForegroundProcess::bind_executable(executable());require(!bound->identity().empty()&&bound->identity()==ForegroundProcess::executable_identity(executable()),"Worker must use its exact retained native image");
+     SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",L"synthetic-private-parent-value");
+     auto launch=[&]{return AgentWorkerProcess::launch(bound,scope(),Clock::now()+10s);};
+-    auto worker=launch();require(worker->pid()!=GetCurrentProcessId()&&worker->creation_time()!=0&&worker->executable_identity()==bound->identity()&&worker->alive(),"Ready identity must name the actual distinct child");
++    std::cout<<"SDK IPC phase: initial launch"<<std::endl;auto worker=launch();std::cout<<"SDK IPC phase: environment"<<std::endl;require(worker->pid()!=GetCurrentProcessId()&&worker->creation_time()!=0&&worker->executable_identity()==bound->identity()&&worker->alive(),"Ready identity must name the actual distinct child");
+     worker->channel().send({"test.environment",""},Clock::now()+5s);const auto metadata=Json::parse(worker->channel().receive(Clock::now()+5s).payload);require(metadata.at("pid")==worker->pid()&&metadata.at("private_absent")==true&&metadata.at("auth_absent")==true&&metadata.at("path_absent")==true,"Private worker must not inherit ambient keys or shell environment");
+-    const std::string data(256*1024,'x');for(unsigned i=0;i<3;++i){worker->channel().send({"test.echo",data+std::to_string(i)},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).payload==data+std::to_string(i),"Actual pipe must retain bounded multi-chunk payloads and sequences");}
++    std::cout<<"SDK IPC phase: payloads"<<std::endl;const std::string data(256*1024,'x');for(unsigned i=0;i<3;++i){worker->channel().send({"test.echo",data+std::to_string(i)},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).payload==data+std::to_string(i),"Actual xlang3 remote object must retain bounded payloads and sequences");}
+     worker->channel().send({"test.exit",""},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="test.exiting"&&worker->wait(Clock::now()+5s)==0&&!worker->alive(),"Actual normal child exit must be observed");worker.reset();
+-    worker=launch();worker->channel().send({"test.crash",""},Clock::now()+5s);rejects<AgentWorkerProtocolError>([&]{worker->channel().receive(Clock::now()+5s);});require(worker->wait(Clock::now()+5s)==91,"Crash must retain its actual exit without restart");worker.reset();
+-    worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="test.holding","Held child must acknowledge actual dispatch");rejects<AgentWorkerChannelTimeout>([&]{worker->wait(Clock::now()+30ms);});require(worker->alive(),"Observation timeout must not retire or replace a live child");rejects<AgentWorkerChannelTimeout>([&]{worker->channel().receive(Clock::now()+30ms);});require(worker->alive()&&worker->channel().statistics().cancelled_reads==1,"Read timeout must retire an actual pending I/O, not the owned process");rejects<AgentWorkerProtocolError>([&]{worker->channel().send({"test.echo","no-reuse"},Clock::now()+5s);});worker->terminate();require(!worker->alive(),"Explicit retirement must observe the owned child terminal");worker.reset();
+-    worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);std::stop_source cancel;std::jthread timer([&]{Sleep(100);cancel.request_stop();});rejects<AgentWorkerChannelCancelled>([&]{worker->channel().send({"test.echo",std::string(1024*1024,'b')},Clock::now()+5s,cancel.get_token());});require(worker->alive()&&worker->channel().statistics().cancelled_writes==1,"Blocked write cancellation must retire actual pending I/O without implying worker exit");worker->terminate();worker.reset();
+-    worker=launch();worker->channel().send({"test.descendant",""},Clock::now()+5s);const auto descendant=Json::parse(worker->channel().receive(Clock::now()+5s).payload).at("pid").get<DWORD>();HANDLE observed=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,descendant);require(observed&&WaitForSingleObject(observed,0)==WAIT_TIMEOUT,"Fixture must create an actual live descendant");worker->terminate();require(!worker->alive()&&WaitForSingleObject(observed,1000)==WAIT_OBJECT_0,"Owned job retirement must include its actual descendant");CloseHandle(observed);worker.reset();
+-    worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);HANDLE retained=OpenProcess(SYNCHRONIZE,FALSE,worker->pid());require(retained!=nullptr,"Fixture must retain its exact worker handle");worker.reset();require(WaitForSingleObject(retained,1000)==WAIT_OBJECT_0,"Owner destruction must retire only its created worker");CloseHandle(retained);
++    std::cout<<"SDK IPC phase: multiple workers"<<std::endl;{auto first=launch(),second=launch();require(first->pid()!=second->pid(),"Concurrent workers must have distinct actual identities");first->channel().send({"test.echo","first isolated remote object"},Clock::now()+5s);second->channel().send({"test.echo","second isolated remote object"},Clock::now()+5s);require(first->channel().receive(Clock::now()+5s).payload=="first isolated remote object"&&second->channel().receive(Clock::now()+5s).payload=="second isolated remote object","Multiple worker remote objects must retain their separate routes");for(auto* child:{first.get(),second.get()}){child->channel().send({"test.exit",""},Clock::now()+5s);child->channel().receive(Clock::now()+5s);require(child->wait(Clock::now()+5s)==0,"Each remote worker must drain independently");}}
++    std::cout<<"SDK IPC phase: crash"<<std::endl;worker=launch();try{worker->channel().send({"test.crash",""},Clock::now()+5s);}catch(const AgentWorkerProtocolError&){}rejects<AgentWorkerProtocolError>([&]{worker->channel().receive(Clock::now()+5s);});require(worker->wait(Clock::now()+5s)==91,"Crash must retain its actual exit without restart");worker.reset();
++    std::cout<<"SDK IPC phase: hold 1"<<std::endl;worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="test.holding","Held child must acknowledge actual dispatch");rejects<AgentWorkerChannelTimeout>([&]{worker->wait(Clock::now()+30ms);});require(worker->alive(),"Observation timeout must not retire or replace a live child");rejects<AgentWorkerChannelTimeout>([&]{worker->channel().receive(Clock::now()+30ms);});require(worker->alive()&&worker->channel().statistics().cancelled_reads==1,"Read timeout must cancel its IPC rendezvous while retaining the owned process");rejects<AgentWorkerProtocolError>([&]{worker->channel().send({"test.echo","no-reuse"},Clock::now()+5s);});worker->terminate();require(!worker->alive(),"Explicit retirement must observe the owned child terminal");worker.reset();
++    std::cout<<"SDK IPC phase: hold 2"<<std::endl;worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);std::stop_source cancel;std::jthread timer([&]{Sleep(100);cancel.request_stop();});rejects<AgentWorkerChannelCancelled>([&]{worker->channel().send({"test.echo",std::string(1024*1024,'b')},Clock::now()+5s,cancel.get_token());});require(worker->alive()&&worker->channel().statistics().cancelled_writes==1,"Blocked remote delivery cancellation must retain the live owned worker");worker->terminate();worker.reset();
++    std::cout<<"SDK IPC phase: descendant"<<std::endl;worker=launch();worker->channel().send({"test.descendant",""},Clock::now()+5s);const auto descendant=Json::parse(worker->channel().receive(Clock::now()+5s).payload).at("pid").get<DWORD>();HANDLE observed=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,descendant);require(observed&&WaitForSingleObject(observed,0)==WAIT_TIMEOUT,"Fixture must create an actual live descendant");worker->terminate();require(!worker->alive()&&WaitForSingleObject(observed,1000)==WAIT_OBJECT_0,"Owned job retirement must include its actual descendant");CloseHandle(observed);worker.reset();
++    std::cout<<"SDK IPC phase: hold 3"<<std::endl;worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);HANDLE retained=OpenProcess(SYNCHRONIZE,FALSE,worker->pid());require(retained!=nullptr,"Fixture must retain its exact worker handle");worker.reset();require(WaitForSingleObject(retained,1000)==WAIT_OBJECT_0,"Owner destruction must retire only its created worker");CloseHandle(retained);
+     std::stop_source cancelled;cancelled.request_stop();rejects<AgentWorkerChannelCancelled>([&]{AgentWorkerProcess::launch(bound,scope(),Clock::now()+5s,cancelled.get_token());});SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",nullptr);
+ }
+ }
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index c7067be2..35c6e26f 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -137,6 +137,24 @@ void file_claims(PersistenceService& store,const std::string& path,const std::ve
+     store.finish_operation("file-native-late",OperationState::succeeded,"{}").get();require(store.record_agent_worker_file_result(owner,interrupted,true,R"({"late_actual_receipt":true})").get().success,"Late actual native receipt must remain recordable without reissuing the effect");store.retire_agent_worker(replacement.generation,"cancelled").get();store.transition(owner.owner_run_id,RunState::running,RunState::cancelled).get();
+     std::cout<<"Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.\n";
+ }
++void workspace_turns(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
++    root(store,"workspace-turn-root");const auto owner=store.admit_agent_worker(lease("workspace-turn-root","workspace-turn-generation")).get().spec;
++    const auto deadline=std::chrono::steady_clock::now()+20s;const std::string attempt="workspace-turn-model",args=R"({"path":"fixture.txt"})";
++    ModelCompletion response{"Mixed workspace tools","","tool_calls",R"({"total_tokens":17})",{{"mixed-read","read_file",args},{"mixed-file","create_file",R"({"path":"fixture.txt","content":"fixture"})"}},"[]"};
++    store.reserve_agent_worker_model(owner,attempt,deadline).get();store.start_agent_worker_model(owner,attempt,deadline).get();const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(owner,attempt,deadline).get();
++    AgentWorkspaceInvocation read{1,owner.owner_run_id,attempt,"mixed-read",owner.workspace_id,7,owner.workspace_id,"read_file",args};
++    const std::string read_output=R"({"content":"exact synthetic read","number":1.0000000000000001})",file_output=R"({"error":"synthetic native policy denial"})";
++    store.claim_agent_worker_read(owner,read,deadline).get();store.start_agent_worker_read(owner,read,deadline).get();store.record_agent_worker_read_result(owner,read,true,read_output).get();
++    AgentFileToolInvocation file;file.run_id=owner.owner_run_id;file.attempt_id=attempt;file.call_id="mixed-file";file.workspace_id=owner.workspace_id;file.folder_id=owner.workspace_id;file.workspace_revision=7;file.tool_name="create_file";file.arguments_json=response.tool_calls[1].arguments_json;
++    store.claim_agent_worker_file(owner,file,deadline).get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});require(store.run_history(owner.owner_run_id).get().size()==1,"Incomplete mixed turn must append no history");
++    store.record_agent_worker_file_result(owner,file,false,file_output).get();rejects<Conflict>([&]{store.commit_agent_worker_read_turn(owner,attempt,deadline).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(owner,"mixed-premature",deadline).get();});
++    auto wrong=owner;++wrong.pid;rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(wrong,attempt,deadline).get();});std::stop_source stop;stop.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline,stop.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,std::chrono::steady_clock::now()-1ms).get();});
++    XlangSqlite sql(path,imports);const auto before=store.events(owner.owner_run_id).get().size();sql.execute("CREATE TRIGGER fixture_workspace_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' BEGIN SELECT RAISE(ABORT,'fixture_workspace_turn_abort'); END");
++    bool fault=false;try{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();}catch(const DatabaseError& error){fault=std::string(error.what()).find("fixture_workspace_turn_abort")!=std::string::npos;}sql.execute("DROP TRIGGER fixture_workspace_turn_abort");require(fault&&store.run_history(owner.owner_run_id).get().size()==1&&store.events(owner.owner_run_id).get().size()==before,"Mixed turn failure must roll back every message and event");
++    auto first=store.commit_agent_worker_workspace_turn(owner,attempt,deadline),second=store.commit_agent_worker_workspace_turn(owner,attempt,deadline);const auto receipt=first.get(),duplicate=second.get();const auto history=store.run_history(owner.owner_run_id).get();require(receipt.message_sequences==duplicate.message_sequences&&receipt.messages_binding==duplicate.messages_binding&&history.size()==4&&history[1].json==assistant&&history[2].json==Json{{"content",read_output},{"tool_call_id","mixed-read"}}.dump()&&history[3].json==Json{{"content",file_output},{"tool_call_id","mixed-file"}}.dump(),"Mixed turn must retain exact ordered backend results once");
++    rejects<Conflict>([&]{store.commit_agent_worker_read_turn(owner,attempt,deadline).get();});store.reserve_agent_worker_model(owner,"mixed-next",deadline).get();store.retire_agent_worker(owner.generation,"cancelled").get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});store.transition(owner.owner_run_id,RunState::running,RunState::cancelled).get();
++    std::cout<<"Mixed workspace turns preserve exact ordered read/file results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.\n";
++}
+ void completion_receipts(PersistenceService& store){
+     root(store,"receipt-root");const auto admitted=store.admit_agent_worker(lease("receipt-root","receipt-generation")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+     auto capture=[&](const std::string& attempt,const ModelCompletion& actual){
+@@ -156,7 +174,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);queued_start(store);funding(store);file_claims(store,path,imports);completion_receipts(store);tool_turns(store);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);queued_start(store);funding(store);file_claims(store,path,imports);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index 5bf32e27..20ce7592 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -101,7 +101,7 @@ int child(int argc,char** argv){
+             bool caught=false;try{client.complete(attempt,input,[&](const ModelEvent&){++observed;});}catch(const ProviderHttpError& error){caught=true;require(error.status==400&&error.code==(mode=="overflow"?"context_length_exceeded":"")&&error.type.empty()&&error.param.empty(),"Worker must retain only the registered context rebuild signal and HTTP status");require(std::string(error.what()).find("private-provider-message")==std::string::npos,"Provider error messages must stay outside worker RPC");}
+             require(caught&&observed==0&&self->call("fixture.ping","")=="pong","Pre-output provider failure must leave a usable channel without fabricated stream output");rejects<Conflict>([&]{client.complete(attempt,input,[](const ModelEvent&){});});return Json{{"provider_error",true},{"pid",GetCurrentProcessId()},{"observed_events",observed}}.dump();
+         }
+-        auto sink=[&](const ModelEvent& event){++observed;if(event.kind=="model.text"){text=true;if(mode=="crash")ExitProcess(73);if(mode=="cancel")cancellation.request_stop();}const auto saved=journal.events(id);require(std::any_of(saved.begin(),saved.end(),[&](const Event& e){return e.kind==event.kind&&e.json==event.json;}),"Nested journal RPC must observe the backend-recorded actual model event");require(self->call("fixture.observe_event",encode_agent_model_event(event))=="recorded","Stream callback must complete nested RPC without deadlock");};
++        auto sink=[&](const ModelEvent& event){++observed;if(event.kind=="model.text"){text=true;if(mode=="crash")TerminateProcess(GetCurrentProcess(),73);if(mode=="cancel")cancellation.request_stop();}const auto saved=journal.events(id);require(std::any_of(saved.begin(),saved.end(),[&](const Event& e){return e.kind==event.kind&&e.json==event.json;}),"Nested journal RPC must observe the backend-recorded actual model event");require(self->call("fixture.observe_event",encode_agent_model_event(event))=="recorded","Stream callback must complete nested RPC without deadlock");};
+         if(mode=="cancel"){rejects<TransportCancelled>([&]{client.complete(attempt,input,sink,cancellation.get_token());});require(text&&self->call("fixture.ping","")=="pong","Cancellation must acknowledge the actual stream and keep the RPC session usable");return Json{{"cancelled",true},{"pid",GetCurrentProcessId()},{"observed_events",observed}}.dump();}
+         const auto result=client.complete(attempt,input,sink);require(text&&observed>=2,"Native child must receive actual streamed model events");
+         std::string actual_assistant;
+@@ -189,7 +189,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
+         auto run=std::async(std::launch::async,[&]{return peer.call("fixture.run",Json{{"attempt_id",attempt}}.dump());});struct Unblock {std::promise<void>& value;~Unblock(){try{value.set_value();}catch(...){}}} unblock{release};require(captured_ready.wait_for(5s)==std::future_status::ready,"Backend must capture the actual provider reply before delivery fault");const auto before=store.agent_worker_model_claim(id,attempt).get();require(before.state=="responded"&&!before.actual_assistant_json.empty(),"Actual response and backend assistant must already be durable before the delivery barrier");if(mode=="completion_delivery")require(store.run(id).get().state==RunState::completed&&store.agent_worker_lease(generation).get().retirement_reason=="completed"&&store.run_history(id).get().size()==2,"Completion and lease closure must commit before the reply-delivery fault");worker->terminate();release.set_value();rejects<AgentWorkerRpcClosed>([&]{run.get();});if(mode=="completion_delivery"){const auto count=store.events(id).get().size();const auto terminal=drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);const auto repeated=drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);require(terminal.exit_code==1&&repeated.exit_code==1&&terminal.run.state==RunState::completed&&repeated.run.state==RunState::completed&&store.events(id).get().size()==count,"Lost completion reply and nonzero child exit must preserve canonical completion without another event");std::cout<<"Native completed drain preserved lost completion reply and nonzero exit without terminal rewrite or replay."<<std::endl;}else{peer.stop();require(worker->wait(Clock::now()+5s)==1,"Delivery fault must observe its exact explicitly retired worker");}const auto after=store.agent_worker_model_claim(id,attempt).get();require(after.state=="responded"&&after.actual_response_json==before.actual_response_json&&after.response_binding==before.response_binding&&after.actual_assistant_json==before.actual_assistant_json&&after.assistant_binding==before.assistant_binding,"Worker death after acknowledgement must retain the actual supplied response without replay");
+         if(mode=="completion_delivery")require(store.run_history(id).get().size()==2&&store.run_history(id).get().back().json==after.actual_assistant_json,"Lost completion delivery must not duplicate the actual final assistant");
+     }else if(mode=="crash"){
+-        rejects<AgentWorkerRpcClosed>([&]{peer.call("fixture.run",Json{{"attempt_id",attempt}}.dump());});const auto terminal=drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::failed,"worker_exit",Clock::now()+5s);require(terminal.exit_code==73&&terminal.run.state==RunState::failed&&!worker->alive()&&store.agent_worker_model_claim(id,attempt).get().state=="uncertain","Actual streaming worker death must drain backend dispatch before atomic terminal retirement");std::cout<<"Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained."<<std::endl;
++        rejects<AgentWorkerRpcClosed>([&]{peer.call("fixture.run",Json{{"attempt_id",attempt}}.dump());});const auto terminal=drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::failed,"worker_exit",Clock::now()+5s);std::cout<<"Streaming crash retirement: exit_code="<<terminal.exit_code<<" claim="<<store.agent_worker_model_claim(id,attempt).get().state<<std::endl;require(terminal.exit_code==73&&terminal.run.state==RunState::failed&&!worker->alive()&&store.agent_worker_model_claim(id,attempt).get().state=="uncertain","Actual streaming worker death must drain backend dispatch before atomic terminal retirement");std::cout<<"Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained."<<std::endl;
+     }else if(mode=="runner_error"||mode=="runner_cancel"){
+         const bool cancelled=mode=="runner_cancel";std::stop_source controller_cancel;Json intent;
+         if(cancelled){auto running=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});require(runner_stream_ready.wait_for(5s)==std::future_status::ready,"Controller cancellation must wait for the actual runner's backend model stream");controller_cancel.request_stop();require(peer.call("fixture.cancel","{}")=="stop_requested","Exact child must acknowledge the explicit controller stop");intent=Json::parse(running.get());}
+diff --git a/Native/tests/backend_handoff_contract.mjs b/Native/tests/backend_handoff_contract.mjs
+index 50c3f2fe..d140f83e 100644
+--- a/Native/tests/backend_handoff_contract.mjs
++++ b/Native/tests/backend_handoff_contract.mjs
+@@ -5,7 +5,7 @@
+ import fs from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import cp from 'node:child_process';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {setTimeout as delay} from 'node:timers/promises';
+ const [server,dll,modules,stdlib]=process.argv.slice(2);if(!stdlib)throw Error('Actual xmind executable and allowed SDK sources required');
+ const parent=await fs.realpath(os.tmpdir()),base=await fs.mkdtemp(path.join(parent,'xmind-handoff-')),workspace=path.join(base,'workspace-写-😀'),other=path.join(base,'other-workspace'),database=path.join(base,'state.sqlite'),token='t'.repeat(64),children=new Set();await fs.mkdir(workspace);await fs.mkdir(other);const sha=b=>crypto.createHash('sha256').update(b).digest('hex');let passed=false;
+-async function generation(name,revision){const root=path.join(base,name);await fs.mkdir(root);const content={'xmind.exe':await fs.readFile(server),'xlang3_runtime.dll':await fs.readFile(dll),'xlang3.exe':Buffer.from('unused synthetic integrity fixture'),'worker/agent_worker.py':await fs.readFile(path.join(path.dirname(server),'worker','agent_worker.py')),'licenses/NOTICE.txt':Buffer.from('Synthetic handoff contract; not release provenance.')};for(const name of ['xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll'])content['modules/'+name]=await fs.readFile(path.join(modules,name));for(const name of ['os.py','json/__init__.py','encodings/__init__.py','importlib/__init__.py'])content['stdlib/'+name]=await fs.readFile(path.join(stdlib,...name.split('/')));for(const [name,bytes]of Object.entries(content)){await fs.mkdir(path.dirname(path.join(root,...name.split('/'))),{recursive:true});await fs.writeFile(path.join(root,...name.split('/')),bytes,{flag:'wx'});}const raw=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:revision.repeat(40),sdkRevision:'c'.repeat(40),sourceManifestSha256:'d'.repeat(64),files:Object.fromEntries(Object.entries(content).map(([n,b])=>[n,sha(b)]))}));await fs.writeFile(path.join(root,'native-runtime-manifest.json'),raw);return {root,digest:sha(raw),programName:'xmind.exe'};}
++async function generation(name,revision){const root=path.join(base,name);await fs.mkdir(root);const content={'xmind.exe':await fs.readFile(server),'xlang3_runtime.dll':await fs.readFile(dll),'xlang3.exe':Buffer.from('unused synthetic integrity fixture'),'licenses/NOTICE.txt':Buffer.from('Synthetic handoff contract; not release provenance.')};for(const name of ['xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll'])content['modules/'+name]=await fs.readFile(path.join(modules,name));for(const name of ['os.py','json/__init__.py','encodings/__init__.py','importlib/__init__.py'])content['stdlib/'+name]=await fs.readFile(path.join(stdlib,...name.split('/')));for(const [name,bytes]of Object.entries(content)){await fs.mkdir(path.dirname(path.join(root,...name.split('/'))),{recursive:true});await fs.writeFile(path.join(root,...name.split('/')),bytes,{flag:'wx'});}const raw=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:revision.repeat(40),sdkRevision:'c'.repeat(40),sourceManifestSha256:'d'.repeat(64),files:Object.fromEntries(Object.entries(content).map(([n,b])=>[n,sha(b)]))}));await fs.writeFile(path.join(root,'native-runtime-manifest.json'),raw);return {root,digest:sha(raw),programName:'xmind.exe'};}
+ async function observedExit(closed){let timer;try{return await Promise.race([closed,new Promise((_,no)=>{timer=setTimeout(()=>no(Error('Native process exit observation timed out')),10000);})]);}finally{clearTimeout(timer);}}
+ async function start(gen,{receipt,edits=false,auth=token,ws=workspace,reject=false,digest=gen.digest,errorPattern=/Replacement receipt, target or database binding changed/}={}){
+  const args=['--db',database,'--modules',path.join(gen.root,'modules'),'--stdlib',path.join(gen.root,'stdlib'),'--workspace',ws,'--port','0','--runtime-manifest-sha256',digest];if(receipt)args.push('--owner-receipt',`${receipt.generation}:${receipt.revision}:${receipt.receipt_id}`);if(edits)args.push('--workspace-edits','approved');const env={...process.env,XMIND_AUTH_TOKEN:auth};delete env.XMIND_API_KEY;
+diff --git a/Native/tests/backend_owner_http_contract.mjs b/Native/tests/backend_owner_http_contract.mjs
+index 3d9689f6..5a175393 100644
+--- a/Native/tests/backend_owner_http_contract.mjs
++++ b/Native/tests/backend_owner_http_contract.mjs
+@@ -2,7 +2,7 @@
+ // and unused package members below are synthetic fixtures; no provider runs.
+ import fs from 'node:fs/promises';import path from 'node:path';import os from 'node:os';import cp from 'node:child_process';import crypto from 'node:crypto';import readline from 'node:readline';import assert from 'node:assert/strict';
+ const [program,dll,modules,stdlib]=process.argv.slice(2);if(!stdlib)throw Error('Compiled native boundary and allowed runtime sources required');const parent=await fs.realpath(os.tmpdir()),base=await fs.mkdtemp(path.join(parent,'xmind-owner-http-')),root=path.join(base,'generation'),workspace=path.join(base,'workspace'),secondaryWorkspace=path.join(base,'secondary-workspace');await fs.mkdir(root);await fs.mkdir(workspace);await fs.mkdir(secondaryWorkspace);const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+-const files={};for(const name of ['xmind.exe','xlang3_runtime.dll','xlang3.exe','modules/xlang_json.x3pkg.dll','modules/xlang_sqlite3.x3pkg.dll','worker/agent_worker.py','stdlib/os.py','stdlib/json/__init__.py','stdlib/encodings/__init__.py','stdlib/importlib/__init__.py','licenses/NOTICE.txt']){const content=name==='xmind.exe'?await fs.readFile(program):name==='xlang3_runtime.dll'?await fs.readFile(dll):name.startsWith('modules/')?await fs.readFile(path.join(modules,path.basename(name))):Buffer.from('Synthetic unused integrity fixture member');await fs.mkdir(path.dirname(path.join(root,name)),{recursive:true});await fs.writeFile(path.join(root,name),content);files[name]=sha(content);}const manifest=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),sourceManifestSha256:'c'.repeat(64),files}));await fs.writeFile(path.join(root,'native-runtime-manifest.json'),manifest);const child=cp.spawn(path.join(root,'xmind.exe'),[root,sha(manifest),path.join(base,'state.sqlite'),workspace,modules,stdlib,secondaryWorkspace],{windowsHide:true,stdio:['pipe','pipe','pipe']});const reader=readline.createInterface({input:child.stdout}),iterator=reader[Symbol.asyncIterator](),closed=new Promise((yes,no)=>{child.once('error',no);child.once('close',code=>yes(code));});let stopped=false,stderr='';child.stderr.on('data',b=>stderr+=b);
++const files={};for(const name of ['xmind.exe','xlang3_runtime.dll','xlang3.exe','modules/xlang_json.x3pkg.dll','modules/xlang_sqlite3.x3pkg.dll','stdlib/os.py','stdlib/json/__init__.py','stdlib/encodings/__init__.py','stdlib/importlib/__init__.py','licenses/NOTICE.txt']){const content=name==='xmind.exe'?await fs.readFile(program):name==='xlang3_runtime.dll'?await fs.readFile(dll):name.startsWith('modules/')?await fs.readFile(path.join(modules,path.basename(name))):Buffer.from('Synthetic unused integrity fixture member');await fs.mkdir(path.dirname(path.join(root,name)),{recursive:true});await fs.writeFile(path.join(root,name),content);files[name]=sha(content);}const manifest=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),sourceManifestSha256:'c'.repeat(64),files}));await fs.writeFile(path.join(root,'native-runtime-manifest.json'),manifest);const child=cp.spawn(path.join(root,'xmind.exe'),[root,sha(manifest),path.join(base,'state.sqlite'),workspace,modules,stdlib,secondaryWorkspace],{windowsHide:true,stdio:['pipe','pipe','pipe']});const reader=readline.createInterface({input:child.stdout}),iterator=reader[Symbol.asyncIterator](),closed=new Promise((yes,no)=>{child.once('error',no);child.once('close',code=>yes(code));});let stopped=false,stderr='';child.stderr.on('data',b=>stderr+=b);
+ try{const first=await iterator.next();assert.ok(!first.done,stderr);const startup=JSON.parse(first.value),origin=startup.origin,secondaryFolderId=startup.secondary_folder_id,token='t'.repeat(64);async function request(route,body,headers={}){return fetch(origin+route,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'}),...headers},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(5000)});}const owner=async()=>{const r=await request('/v1/backend/owner');assert.equal(r.status,200);return r.json();};let state=await owner();const ws=await(await request('/v1/workspace')).json();assert.equal(typeof secondaryFolderId,'string');assert.notEqual(secondaryFolderId,ws.workspace_id);const secondaryInit=await request('/v1/vcs/init',{provider:'git',folder_id:secondaryFolderId});assert.equal(secondaryInit.status,204,'A registered secondary folder can initialize its own Git repository: '+await secondaryInit.clone().text());await fs.stat(path.join(secondaryWorkspace,'.git'));await assert.rejects(fs.stat(path.join(workspace,'.git')));await fs.writeFile(path.join(secondaryWorkspace,'secondary fixture.txt'),'secondary workspace content\\n');const secondaryStatus=await request('/v1/vcs/status?folder_id='+encodeURIComponent(secondaryFolderId));assert.equal(secondaryStatus.status,200);assert.deepEqual(await secondaryStatus.json(),[{file:'secondary fixture.txt',additions:1,deletions:0,status:'added'}]);assert.equal((await(await request('/v1/vcs/info?folder_id='+encodeURIComponent(secondaryFolderId))).json()).provider,'git');assert.equal(await(await request('/v1/vcs/base?folder_id='+encodeURIComponent(secondaryFolderId))).json(),null);const secondaryDiff=await request('/v1/vcs/diff?mode=working&folder_id='+encodeURIComponent(secondaryFolderId));assert.equal(secondaryDiff.status,200);assert.match((await secondaryDiff.json())[0].patch,/secondary workspace content/);assert.equal((await request('/v1/vcs/status?folder_id=unregistered-folder')).status,403,'Unregistered folder IDs cannot escape the admitted membership');const binding={expected_workspace_id:ws.workspace_id,expected_workspace_authority_id:ws.authority_id};const expected=s=>({expected_generation:s.generation,expected_revision:s.revision,...binding});const pause=s=>request('/v1/backend/owner/quiesce',expected(s));const resume=s=>request('/v1/backend/owner/resume',{...expected(s),receipt_id:s.receipt_id});assert.equal(state.quiesced,false);assert.equal(state.retirement_supported,false);assert.equal((await request('/v1/backend/owner',{},{Authorization:'Bearer '+ 'x'.repeat(64)})).status,401);assert.equal((await request('/v1/backend/owner?unexpected=1')).status,400);
+  assert.equal((await request('/v1/vcs/init',{}, {Authorization:'Bearer '+ 'x'.repeat(64)})).status,401,'VCS mutation requires backend authorization');assert.equal((await request('/v1/vcs/init',{provider:'mercurial'})).status,501,'Unsupported VCS providers are explicit');assert.equal((await request('/v1/vcs/init',{provider:'unknown'})).status,400,'Unknown VCS providers are rejected');assert.equal((await request('/v1/vcs/init?provider=git',{})).status,400,'VCS initialization rejects unreviewed query parameters');const [gitA,gitB]=await Promise.all([request('/v1/vcs/init',{}),request('/v1/vcs/init',{})]);assert.deepEqual([gitA.status,gitB.status].sort(),[204,409],'Concurrent initialization is serialized and the second request observes repository state');const marker=await fs.stat(path.join(workspace,'.git'));assert.ok(marker.isDirectory());const top=cp.execFileSync('git',['-C',workspace,'rev-parse','--show-toplevel'],{encoding:'utf8'}).trim();assert.equal(path.resolve(top).toLowerCase(),(await fs.realpath(workspace)).toLowerCase(),'Git initialized precisely the selected native workspace');assert.equal((await request('/v1/vcs/init',{})).status,409,'Existing VCS state is not overwritten');
+  const changedFile=path.join(workspace,'status fixture.txt');assert.equal((await request('/v1/vcs/status',undefined,{Authorization:'Bearer '+'x'.repeat(64)})).status,401,'Git status requires backend authorization');assert.equal((await request('/v1/vcs/status?path=..')).status,400,'Git status cannot select a caller-controlled path');assert.deepEqual(await(await request('/v1/vcs/status')).json(),[],'A new clean repository has no changed files');let vcsInfo=await request('/v1/vcs/info');assert.equal(vcsInfo.status,200);let vcsMetadata=await vcsInfo.json();assert.equal(vcsMetadata.provider,'git');assert.ok(typeof vcsMetadata.branch.current==='string'&&vcsMetadata.branch.current.length>0);assert.equal(Object.hasOwn(vcsMetadata.branch,'default'),false,'Unset default branches follow the upstream optional-field contract');assert.deepEqual(await(await request('/v1/vcs/branches')).json(),[],'Unborn repositories have no local branches yet');assert.equal((await request('/v1/vcs/branches?search=..')).status,400,'Branch listing cannot accept caller-selected query options');await fs.writeFile(changedFile,'first line\nsecond line\n');let gitStatus=await request('/v1/vcs/status');assert.equal(gitStatus.status,200);assert.deepEqual(await gitStatus.json(),[{file:'status fixture.txt',additions:2,deletions:0,status:'added'}],'Untracked text lines and spaces in names are reported exactly');cp.execFileSync('git',['-C',workspace,'add','--','status fixture.txt']);cp.execFileSync('git',['-C',workspace,'-c','user.name=xMind Fixture','-c','user.email=xmind-fixture@example.invalid','commit','-m','status fixture'],{stdio:'ignore'});vcsInfo=await(await request('/v1/vcs/info')).json();assert.equal(vcsInfo.provider,'git');const localBranches=await(await request('/v1/vcs/branches')).json();assert.equal(vcsInfo.branch.current,localBranches[0]);assert.equal(localBranches.length,1,'Local branch listing reflects actual Git refs');await fs.writeFile(changedFile,'first line\nchanged line\n');gitStatus=await request('/v1/vcs/status');assert.deepEqual(await gitStatus.json(),[{file:'status fixture.txt',additions:1,deletions:1,status:'modified'}],'Tracked diff counts reflect actual HEAD-to-worktree changes');
+diff --git a/Native/tests/local_profile_contract.mjs b/Native/tests/local_profile_contract.mjs
+index af9f3972..9042b842 100644
+--- a/Native/tests/local_profile_contract.mjs
++++ b/Native/tests/local_profile_contract.mjs
+@@ -8,7 +8,6 @@ const [program,dll,modules,stdlib]=process.argv.slice(2);assert.ok(stdlib);
+ const parent=await fs.realpath(os.tmpdir()),base=await fs.mkdtemp(path.join(parent,'xmind-local-profile-')),workspace=path.join(base,'workspace 雪'),other=path.join(base,'other'),profiles=path.join(base,'profiles'),bundle=path.join(base,'bundle'),runtime=path.join(base,'runtime'),graphs=path.join(base,'graphs.json'),sha=b=>createHash('sha256').update(b).digest('hex');
+ await fs.mkdir(workspace);await fs.mkdir(other);await fs.mkdir(bundle);await fs.writeFile(path.join(workspace,'note.txt'),'Actual managed native workspace\n');const humanAnswer=path.join(base,'human-answer.json');await fs.writeFile(humanAnswer,JSON.stringify({approved:true}));await fs.writeFile(graphs,JSON.stringify({graphs:[{id:'profile.read',spec:{nodes:[{id:'read',type:'tool',tool:'read_file',arguments:{path:'note.txt'}}]}},{id:'profile.pause',spec:{nodes:[{id:'approval',type:'human',prompt:'Confirm the managed profile upgrade test'}]}}]}));const files={};
+ for(const[name,source]of [['xmind.exe',program],['xlang3_runtime.dll',dll],['xlang3.exe',path.join(path.dirname(modules),'xlang3.exe')],...['xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll'].map(n=>['modules/'+n,path.join(modules,n)])]){const bytes=await fs.readFile(source);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=sha(bytes);}
+-{const name='worker/agent_worker.py',bytes=await fs.readFile(path.join(path.dirname(program),'worker','agent_worker.py'));await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=sha(bytes);}
+ const notice=Buffer.from('Synthetic native profile contract provenance and notice. Not a release package.');await fs.mkdir(path.join(bundle,'licenses'));await fs.writeFile(path.join(bundle,'licenses/NOTICE.txt'),notice);files['licenses/NOTICE.txt']=sha(notice);
+ const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
+ await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:sourceFile,bundleManifestSha256:sha(source),stdlibSource:stdlib,stdlibLicense:await findPythonStdlibLicense(stdlib),out:runtime});
+diff --git a/Native/tests/local_view_contract.mjs b/Native/tests/local_view_contract.mjs
+index 59848406..e6b13831 100644
+--- a/Native/tests/local_view_contract.mjs
++++ b/Native/tests/local_view_contract.mjs
+@@ -12,7 +12,6 @@ const [program,dll,modules,stdlib]=process.argv.slice(2);assert.ok(stdlib);
+ const parent=await fs.realpath(os.tmpdir()),base=await fs.mkdtemp(path.join(parent,'xmind-local-view-')),workspace=path.join(base,'workspace 雪'),workspace2=path.join(base,'second workspace'),workspace3=path.join(base,'new web workspace'),profiles=path.join(base,'profiles'),bundle=path.join(base,'bundle'),runtime=path.join(base,'runtime'),graphs=path.join(base,'graphs.json'),processConfig=path.join(base,'processes.json'),sha=b=>createHash('sha256').update(b).digest('hex');
+ await fs.mkdir(workspace);await fs.mkdir(workspace2);await fs.mkdir(workspace3);await fs.mkdir(bundle);await fs.writeFile(path.join(workspace,'note.txt'),'Actual managed native workspace\n');await fs.writeFile(path.join(workspace2,'note.txt'),'Second native workspace profile\n');await fs.writeFile(path.join(workspace3,'note.txt'),'New browser-registered native workspace\n');await fs.writeFile(graphs,JSON.stringify({graphs:[{id:'profile.read',spec:{nodes:[{id:'read',type:'tool',tool:'read_file',arguments:{path:'note.txt'}}]}},{id:'profile.wait.read',spec:{nodes:[{id:'gate',type:'human',prompt:'Continue the actual native read'},{id:'read',type:'tool',tool:'read_file',depends_on:['gate'],arguments:{path:'note.txt'}}]}},{id:'profile.wait.write',spec:{nodes:[{id:'gate',type:'human',prompt:'Continue to an explicitly approved creation'},{id:'create',type:'tool',tool:'create_file',depends_on:['gate'],arguments:{path:'sidebar-created.txt',content:'Actual sidebar approved bytes 雪\n'}}]}}]}));const files={};
+ for(const[name,source]of [['xmind.exe',program],['xlang3_runtime.dll',dll],['xlang3.exe',path.join(path.dirname(modules),'xlang3.exe')],...['xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll'].map(n=>['modules/'+n,path.join(modules,n)])]){const bytes=await fs.readFile(source);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=sha(bytes);}
+- {const name='worker/agent_worker.py',bytes=await fs.readFile(path.join(path.dirname(program),'worker','agent_worker.py'));await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=sha(bytes);}
+ const notice=Buffer.from('Synthetic native profile contract provenance and notice. Not a release package.');await fs.mkdir(path.join(bundle,'licenses'));await fs.writeFile(path.join(bundle,'licenses/NOTICE.txt'),notice);files['licenses/NOTICE.txt']=sha(notice);
+ const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));const sourceFile=path.join(base,'source-manifest.json');await fs.writeFile(sourceFile,source);
+ cp.execFileSync(process.execPath,[new URL("../../views/browser/build.mjs",import.meta.url).pathname.slice(1),path.join(base,"browser-assets")],{windowsHide:true,stdio:"ignore"});
+diff --git a/Native/tests/local_view_provider_config_contract.mjs b/Native/tests/local_view_provider_config_contract.mjs
+index cd142480..ee42926e 100644
+--- a/Native/tests/local_view_provider_config_contract.mjs
++++ b/Native/tests/local_view_provider_config_contract.mjs
+@@ -51,7 +51,6 @@ try{
+  for(const[name,source]of [['xmind.exe',program],['xlang3_runtime.dll',dll],['xlang3.exe',path.join(path.dirname(modules),'xlang3.exe')],...['xlang_json.x3pkg.dll','xlang_sqlite3.x3pkg.dll'].map(name=>['modules/'+name,path.join(modules,name)])]){
+   const bytes=await fs.readFile(source);await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=createHash('sha256').update(bytes).digest('hex');
+  }
+- {const name='worker/agent_worker.py',bytes=await fs.readFile(path.join(path.dirname(program),'worker','agent_worker.py'));await fs.mkdir(path.dirname(path.join(bundle,name)),{recursive:true});await fs.writeFile(path.join(bundle,name),bytes);files[name]=createHash('sha256').update(bytes).digest('hex');}
+  const notice=Buffer.from('Synthetic local provider configuration contract package.');await fs.mkdir(path.join(bundle,'licenses'));await fs.writeFile(path.join(bundle,'licenses/NOTICE.txt'),notice);
+  files['licenses/NOTICE.txt']=createHash('sha256').update(notice).digest('hex');
+  const source=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),files}));
+diff --git a/Native/tests/runtime_generation_contract.mjs b/Native/tests/runtime_generation_contract.mjs
+index 1bbf690d..260e6a3f 100644
+--- a/Native/tests/runtime_generation_contract.mjs
++++ b/Native/tests/runtime_generation_contract.mjs
+@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';import path from 'node:path';import os from 'n
+ import readline from 'node:readline';
+ const [program,runtimeDll]=process.argv.slice(2);if(!program||!runtimeDll||process.platform!=='win32')throw Error('Windows compiled verifier and allowed SDK DLL required');
+ const parent=await fs.realpath(os.tmpdir()),base=await fs.mkdtemp(path.join(parent,'xmind-generation-contract-'));assert.equal(await fs.realpath(base),base);const sha=b=>crypto.createHash('sha256').update(b).digest('hex');let index=0;const children=new Set();
+-async function fixture(){const root=path.join(base,`generation-${++index}-写-😀`);await fs.mkdir(root);const content={'xmind.exe':await fs.readFile(program),'xlang3_runtime.dll':await fs.readFile(runtimeDll),'xlang3.exe':Buffer.from('inert fixture SDK executable'),'modules/xlang_json.x3pkg.dll':Buffer.from('inert fixture JSON module'),'modules/xlang_sqlite3.x3pkg.dll':Buffer.from('inert fixture SQLite module'),'modules/pydantic_core/_pydantic_core.x3pkg.dll':Buffer.from('inert fixture xlang3 plugin'),'modules/pydantic_core/__init__.py':Buffer.from('# synthetic package initializer\n'),'modules/pydantic_core/core_schema.py':Buffer.from('# synthetic pure plugin facade\n'),'modules/pydantic_core/_schema_gather.py':Buffer.from('# synthetic schema helper\n'),'modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA':Buffer.from('Metadata-Version: 2.1\nName: pydantic-core\nVersion: 2.50.1+xlang3\n'),'worker/agent_worker.py':Buffer.from('# synthetic integrity fixture worker\n'),'stdlib/os.py':Buffer.from('# synthetic integrity fixture\n'),'stdlib/json/__init__.py':Buffer.from('# synthetic integrity fixture\n'),'stdlib/encodings/__init__.py':Buffer.from('# synthetic integrity fixture\n'),'stdlib/importlib/__init__.py':Buffer.from('# synthetic integrity fixture\n'),'licenses/NOTICE.txt':Buffer.from('Synthetic integrity fixture; no package compatibility endorsement.'),'README.txt':Buffer.from('Owned integrity fixture only.'),'provenance.json':Buffer.from('{"syntheticIntegrityFixture":true}')};for(const [name,bytes]of Object.entries(content)){await fs.mkdir(path.dirname(path.join(root,name)),{recursive:true});await fs.writeFile(path.join(root,name),bytes,{flag:'wx'});}const manifest={schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),sourceManifestSha256:'c'.repeat(64),files:Object.fromEntries(Object.entries(content).map(([n,b])=>[n,sha(b)]))};await save(root,manifest);return {root,manifest};}
++async function fixture(){const root=path.join(base,`generation-${++index}-写-😀`);await fs.mkdir(root);const content={'xmind.exe':await fs.readFile(program),'xlang3_runtime.dll':await fs.readFile(runtimeDll),'xlang3.exe':Buffer.from('inert fixture SDK executable'),'modules/xlang_json.x3pkg.dll':Buffer.from('inert fixture JSON module'),'modules/xlang_sqlite3.x3pkg.dll':Buffer.from('inert fixture SQLite module'),'modules/pydantic_core/_pydantic_core.x3pkg.dll':Buffer.from('inert fixture xlang3 plugin'),'modules/pydantic_core/__init__.py':Buffer.from('# synthetic package initializer\n'),'modules/pydantic_core/core_schema.py':Buffer.from('# synthetic pure plugin facade\n'),'modules/pydantic_core/_schema_gather.py':Buffer.from('# synthetic schema helper\n'),'modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA':Buffer.from('Metadata-Version: 2.1\nName: pydantic-core\nVersion: 2.50.1+xlang3\n'),'stdlib/os.py':Buffer.from('# synthetic integrity fixture\n'),'stdlib/json/__init__.py':Buffer.from('# synthetic integrity fixture\n'),'stdlib/encodings/__init__.py':Buffer.from('# synthetic integrity fixture\n'),'stdlib/importlib/__init__.py':Buffer.from('# synthetic integrity fixture\n'),'licenses/NOTICE.txt':Buffer.from('Synthetic integrity fixture; no package compatibility endorsement.'),'README.txt':Buffer.from('Owned integrity fixture only.'),'provenance.json':Buffer.from('{"syntheticIntegrityFixture":true}')};for(const [name,bytes]of Object.entries(content)){await fs.mkdir(path.dirname(path.join(root,name)),{recursive:true});await fs.writeFile(path.join(root,name),bytes,{flag:'wx'});}const manifest={schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:'a'.repeat(40),sdkRevision:'b'.repeat(40),sourceManifestSha256:'c'.repeat(64),files:Object.fromEntries(Object.entries(content).map(([n,b])=>[n,sha(b)]))};await save(root,manifest);return {root,manifest};}
+ async function save(root,manifest){const bytes=Buffer.from(JSON.stringify(manifest));await fs.writeFile(path.join(root,'native-runtime-manifest.json'),bytes);return sha(bytes);}
+ async function run(root,digest,mode='verify',excluded,rootImage=['self','loaded','managed','managedhold'].includes(mode)){const exe=rootImage?path.join(root,'xmind.exe'):program;const args=[root,digest,mode,...(excluded?[excluded]:[])];const child=cp.spawn(exe,args,{windowsHide:true,stdio:['ignore','pipe','pipe']});children.add(child);let stdout='',stderr='';child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);const result=await new Promise((yes,no)=>{const timer=setTimeout(()=>{child.kill();},8000);child.once('error',e=>{clearTimeout(timer);no(e);});child.once('close',code=>{clearTimeout(timer);children.delete(child);yes({code,stdout,stderr});});});return result;}
+ async function accepted(item,self=false,mode=self?'self':'verify'){const digest=sha(await fs.readFile(path.join(item.root,'native-runtime-manifest.json'))),result=await run(item.root,digest,mode);assert.equal(result.code,0,`verifier exit ${result.code}; exe=${['self','loaded','managed','managedhold'].includes(mode)?path.join(item.root,'xmind.exe'):program}; args=${JSON.stringify([item.root,digest,mode])}; stderr=${result.stderr}; stdout=${result.stdout}`);const actual=JSON.parse(result.stdout.trim());assert.equal(actual.verified,true);assert.equal(actual.manifest_sha256,digest);assert.equal(actual.self_verified,self);assert.equal(actual.root,item.root);assert.match(actual.root_identity,/^windows-runtime-file-v1:\d+:\d+$/);}
+diff --git a/Native/worker/agent_worker.py b/Native/worker/agent_worker.py
+deleted file mode 100644
+index 9782c977..00000000
+--- a/Native/worker/agent_worker.py
++++ /dev/null
+@@ -1,57 +0,0 @@
+-# xMind's bounded, private xlang3 tool worker protocol.
+-# The parent process has already bound the trusted module and function from
+-# startup configuration. Tool input and output cross IPC as JSON strings only.
+-import importlib
+-import hashlib
+-import hmac
+-import json
+-import time
+-
+-
+-class AgentWorker:
+-    def __init__(self, module_name, function_name, secret_hex):
+-        self.secret = bytes.fromhex(secret_hex)
+-        if len(self.secret) != 32:
+-            raise ValueError("worker capability must contain 32 bytes")
+-        self.last_sequence = 0
+-        self.module = importlib.import_module(module_name)
+-        self.function = getattr(self.module, function_name)
+-        if not callable(self.function):
+-            raise TypeError("trusted worker binding is not callable")
+-
+-    def _authorize(self, sequence, signature, message):
+-        if type(sequence) is not int or sequence != self.last_sequence + 1:
+-            raise PermissionError("worker request sequence is invalid")
+-        if not isinstance(signature, str) or len(signature) != 64:
+-            raise PermissionError("worker request authentication is invalid")
+-        expected = hmac.new(self.secret, message, hashlib.sha256).hexdigest()
+-        if not hmac.compare_digest(signature, expected):
+-            raise PermissionError("worker request authentication is invalid")
+-        self.last_sequence = sequence
+-
+-    def handshake(self, sequence, signature):
+-        message = str(sequence).encode("ascii") + b"\nxMind worker handshake v1"
+-        self._authorize(sequence, signature, message)
+-        return True
+-
+-    def invoke(self, sequence, signature, arguments_json):
+-        if not isinstance(arguments_json, str) or len(arguments_json.encode("utf-8")) > 262144:
+-            raise ValueError("worker arguments exceed limit")
+-        message = str(sequence).encode("ascii") + b"\n" + arguments_json.encode("utf-8")
+-        self._authorize(sequence, signature, message)
+-        arguments = json.loads(arguments_json)
+-        if not isinstance(arguments, dict):
+-            raise ValueError("worker arguments must be an object")
+-        result = self.function(arguments)
+-        encoded = json.dumps(result, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+-        if len(encoded.encode("utf-8")) > 1048576:
+-            raise ValueError("worker result exceeds limit")
+-        return encoded
+-
+-
+-def start(port, module_name, function_name, secret_hex):
+-    worker = AgentWorker(module_name, function_name, secret_hex)
+-    register_remote_object("xmind_agent_worker", worker)
+-    lrpc_listen(port, False)
+-    while True:
+-        time.sleep(1)

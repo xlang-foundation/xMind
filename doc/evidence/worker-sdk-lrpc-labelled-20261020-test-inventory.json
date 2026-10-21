@@ -1,0 +1,46 @@
+{
+  "backtraceGraph": {
+    "commands": [
+      "add_test"
+    ],
+    "files": [
+      "D:/CantorAI2026/xMind/Native/CMakeLists.txt"
+    ],
+    "nodes": [
+      {
+        "file": 0
+      },
+      {
+        "command": 0,
+        "file": 0,
+        "line": 942,
+        "parent": 0
+      }
+    ]
+  },
+  "kind": "ctestInfo",
+  "tests": [
+    {
+      "backtrace": 1,
+      "command": [
+        "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_channel_contract.exe"
+      ],
+      "config": "Release",
+      "name": "native_agent_worker_channel_contract",
+      "properties": [
+        {
+          "name": "TIMEOUT",
+          "value": 45
+        },
+        {
+          "name": "WORKING_DIRECTORY",
+          "value": "C:/xMindNativeValidation/native-current-source-full/Native"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0
+  }
+}

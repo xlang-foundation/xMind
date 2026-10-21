@@ -19,6 +19,7 @@
 #include <limits>
 #include <cstddef>
 #include <utility>
+#include <optional>
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -139,6 +140,46 @@ std::string worker_signature(const std::array<unsigned char,32>& secret,std::uin
        BCryptFinishHash(hash,digest.data(),static_cast<ULONG>(digest.size()),0)<0){close();throw std::runtime_error("Cannot sign xMind worker request");}
     close();return hex(digest.data(),digest.size());
 }
+class NativeToolWorker {
+    X::Runtime& runtime_;
+    std::array<unsigned char,32> secret_;
+    std::int64_t sequence_=0;
+    std::mutex invocation_;
+    std::string module_,function_;
+    void authorize(std::int64_t sequence,const std::string& tag,const std::string& message){
+        if(sequence_==std::numeric_limits<std::int64_t>::max()||sequence!=sequence_+1||tag.size()!=64)
+            throw std::invalid_argument("Invalid private worker authentication");
+        const auto expected=worker_signature(secret_,static_cast<std::uint64_t>(sequence),message);
+        unsigned difference=0;for(std::size_t i=0;i<64;++i)difference|=static_cast<unsigned char>(tag[i])^static_cast<unsigned char>(expected[i]);
+        if(difference)throw std::invalid_argument("Invalid private worker authentication");sequence_=sequence;
+    }
+public:
+    NativeToolWorker(X::Runtime& runtime,const std::string& module,const std::string& function,const std::array<unsigned char,32>& secret)
+        :runtime_(runtime),secret_(secret),module_(module),function_(function){
+        X::Module application(runtime_,module_.c_str());
+        if(!application[function_.c_str()].IsValid())throw std::invalid_argument("Trusted worker callable is unavailable");
+    }
+    ~NativeToolWorker(){SecureZeroMemory(secret_.data(),secret_.size());}
+    std::int64_t Handshake(std::int64_t sequence,std::string tag){
+        std::lock_guard lock(invocation_);authorize(sequence,tag,"xMind worker handshake v1");return 1;
+    }
+    std::string Invoke(std::int64_t sequence,std::string tag,std::string input){
+        std::lock_guard lock(invocation_);
+        if(input.size()>256*1024||!Json::parse(input).is_object())throw std::invalid_argument("Invalid private worker arguments");
+        authorize(sequence,tag,input);X::Value arguments,result,output;
+        X::Module json(runtime_,"json"),application(runtime_,module_.c_str());
+        if(!json["loads"].Call(std::vector<X::Value>{X::Value(runtime_,input)},arguments)||
+           !application[function_.c_str()].Call(std::vector<X::Value>{arguments},result)||
+           !json["dumps"].Call(std::vector<X::Value>{result},output)||!output.IsString())
+            throw XlangPythonExecutionError();
+        auto bytes=output.ToString();validate_json_result(bytes);return bytes;
+    }
+    BEGIN_PACKAGE(NativeToolWorker)
+        APISET().AddFunc<2>("handshake",&NativeToolWorker::Handshake);
+        APISET().AddFunc<3>("invoke",&NativeToolWorker::Invoke);
+    END_PACKAGE
+};
+
 void write_worker_secret(HANDLE pipe,const std::array<unsigned char,32>& secret) {
     std::size_t offset=0;
     while(offset<secret.size()){
@@ -185,8 +226,6 @@ std::shared_ptr<WorkerSession> worker_session(const std::string& key) {
 void start_worker(WorkerSession& session,const std::filesystem::path& binary,
     const std::string& modules_root,const std::string& stdlib_root,const std::string& code_root,
     const std::string& module,const std::string& function) {
-    const auto script=binary.parent_path()/L"worker"/L"agent_worker.py";
-    if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
     for(int attempt=0;attempt<8;++attempt){
         const auto port=random_port();std::wstring command=quote(binary.wstring())+L" worker";
         for(const auto& [key,value]:std::vector<std::pair<std::string,std::string>>{{"--agent-port",std::to_string(port)},{"--modules",modules_root},{"--stdlib",stdlib_root},{"--code-root",code_root},{"--module",module},{"--function",function}})command+=L" "+quote(wide(key))+L" "+quote(wide(value));
@@ -246,14 +285,13 @@ int run_agent_worker(int argc,char** argv) {
             throw std::runtime_error("xMind worker did not receive its private capability");
         offset+=count;
     }
-    X::Runtime runtime;runtime.AddImportRoot(modules);runtime.AddImportRoot(stdlib);runtime.AddImportRoot(code_root);
-    const auto script=executable_path().parent_path()/L"worker"/L"agent_worker.py";
-    if(!std::filesystem::is_regular_file(script))throw std::runtime_error("The packaged xMind agent worker script is missing");
-    runtime.AddImportRoot(path_text(script.parent_path()));
-    X::Module worker(runtime,"agent_worker");const auto start=worker["start"];X::Value result;
-    const std::vector<X::Value> args{X::Value(runtime,static_cast<std::int64_t>(port)),X::Value(runtime,module_name),X::Value(runtime,function_name),X::Value(runtime,hex(secret.data(),secret.size()))};
-    SecureZeroMemory(secret.data(),secret.size());
-    if(!start.Call(args,result))throw std::runtime_error("Cannot start xMind xlang3 agent worker");
+    // The borrowed C++ service outlives the runtime; it retains no SDK values.
+    std::optional<NativeToolWorker> worker;X::Runtime runtime;
+    runtime.AddImportRoot(modules);runtime.AddImportRoot(stdlib);runtime.AddImportRoot(code_root);
+    worker.emplace(runtime,module_name,function_name,secret);SecureZeroMemory(secret.data(),secret.size());
+    auto service=runtime.RegisterPackage("xmind_agent_worker",*worker);
+    runtime.RegisterRemoteObject("xmind_agent_worker",service);runtime.LrpcListen(port);
+    for(;;)std::this_thread::sleep_for(std::chrono::seconds(1));
     return 0;
 }
 

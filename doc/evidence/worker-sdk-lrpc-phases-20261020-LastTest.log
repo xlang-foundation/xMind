@@ -1,0 +1,24 @@
+Start testing: Oct 20 21:39 Pacific Daylight Time
+----------------------------------------------------------
+84/161 Testing: native_agent_worker_channel_contract
+84/161 Test: native_agent_worker_channel_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_channel_contract.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_channel_contract" start time: Oct 20 21:39 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+SDK IPC phase: initial launch
+SDK IPC phase: environment
+SDK IPC phase: payloads
+SDK IPC phase: multiple workers
+SDK IPC phase: crash
+Agent worker channel deadline elapsed
+<end of output>
+Test time =   5.45 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_channel_contract" end time: Oct 20 21:39 Pacific Daylight Time
+"native_agent_worker_channel_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Oct 20 21:39 Pacific Daylight Time

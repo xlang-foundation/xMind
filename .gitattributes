@@ -198,3 +198,5 @@ doc/evidence/file-worker-native-host-*.log -text whitespace=-blank-at-eol,-blank
 doc/evidence/file-worker-native-host-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/file-worker-rpc-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/file-worker-rpc-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/worker-sdk-lrpc-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/worker-sdk-lrpc-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

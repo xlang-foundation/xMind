@@ -40,20 +40,21 @@ SecretBytes new_agent_worker_channel_key();
 
 // One reader and one writer may run concurrently; callers join them before
 // destruction. Any I/O/protocol failure poisons the channel; never retry an
-// effect based on transport failure. Deadlines govern actual overlapped I/O.
+// effect based on transport failure. Native remote objects use xlang3 LRPC;
+// rendezvous waits honor cancellation and the captured deadline.
 class AgentWorkerChannel {
 public:
     using Deadline=std::chrono::steady_clock::time_point;
     ~AgentWorkerChannel();
     AgentWorkerChannel(const AgentWorkerChannel&)=delete;
     AgentWorkerChannel& operator=(const AgentWorkerChannel&)=delete;
-    // Private child entry only: receives a bootstrap through the inherited
-    // handle and sends an authenticated ready frame containing its real PID.
+    // Private child entry only: receives bootstrap from an inherited mapping
+    // and calls the parent's SDK remote object with its actual ready identity.
     static std::unique_ptr<AgentWorkerChannel> accept_inherited(std::uintptr_t,Deadline,std::stop_token={});
     const AgentWorkerScope& scope()const noexcept;
     AgentWorkerChannelStatistics statistics()const noexcept;
     // Owner shutdown only, after readers have joined and writers are excluded.
-    // Closing this retained handle notifies the peer; it does not kill a PID.
+    // Closing the remote object notifies the peer; it does not kill a PID.
     void close()noexcept;
     void send(const AgentWorkerMessage&,Deadline,std::stop_token={});
     AgentWorkerMessage receive(Deadline,std::stop_token={});

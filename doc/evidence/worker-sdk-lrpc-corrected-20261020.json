@@ -1,0 +1,82 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T05:17:58.303Z",
+    "sourceParent": "a4b79f2ee385568fd894fbaabf8bcbc65a638781",
+    "sourcePatchSha256": "3512fe1b4211491fc428b8f96a310ba58bd1ceb466c502b6116dabd159915767",
+    "clientSourcePatchSha256": "c34b50de0287bfa265f038adac62be682f8bfc02074801675bc7bbe7b4ce1025",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 38228,
+      "launchedAt": "2026-10-21T05:00:35.295Z",
+      "completedAt": "2026-10-21T05:01:56.541Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb"
+    },
+    "test": {
+      "pid": 52960,
+      "launchedAt": "2026-10-21T05:01:59.521Z",
+      "completedAt": "2026-10-21T05:17:55.915Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b2ee31a8c31cdd65800c5f08fed57de8722eb2933803434653e1ea73256e59bd"
+    },
+    "total": 67,
+    "failed": 0,
+    "passed": 67,
+    "seconds": 956.36,
+    "projectFiles": 2704,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "b381f331512bad3519cbdb7754f4b353baf8a2cdda90ae224adceb919237e5bb",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-build.log": "218d3c7037840c9cedfaa5ed1778016e484c5eafe74910103136c7d393c09cbb",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-build-terminal.json": "0c77a8933e4523149e4d57a1366c8c31d475f7d58bf8489746298dc07d90eb3f",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-ctest.log": "b2ee31a8c31cdd65800c5f08fed57de8722eb2933803434653e1ea73256e59bd",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-ctest-terminal.json": "ec550ece9cc4a287f3580b669e6364588a3c9c7ce475234986ad90fb8041f3da",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-LastTest.log": "90a1a4f23fbf0c6143e007eaf7d95bc7be20c42cce3801e92a8dbc05e8951623",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-test-inventory.json": "2e56bf4044d020748be8c12bfce224c031b26c046f607af17da2a1215248c640",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-gate.json": "311db33e708d448389e7477e5e029b043518fd0eefc8e325d3ed0d4c5d866661",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-source.patch": "3512fe1b4211491fc428b8f96a310ba58bd1ceb466c502b6116dabd159915767",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-client-source.patch": "c34b50de0287bfa265f038adac62be682f8bfc02074801675bc7bbe7b4ce1025",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-worker-sdk-lrpc-extension-tests-20261020.log": "e77a8f5210c56142db35278f91495f8d8b09dd5478b7090203101e86dc6d9ec1",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-worker-sdk-lrpc-extension-corrected-20261020.log": "fce2b15203f373c9659efe52445866b08f64aaeb232e6941bd0ad87f7abdf076",
+    "doc/evidence/worker-sdk-lrpc-corrected-20261020-worker-sdk-lrpc-extension-final-20261020.log": "68aba97d6ad8951f245a1d1898f063b4114a7bc8be7a017d67728ca3d41d6b99"
+  },
+  "diagnostics": [
+    "worker-sdk-lrpc-diagnostic-20261020",
+    "worker-sdk-lrpc-labelled-20261020",
+    "worker-sdk-lrpc-phases-20261020",
+    "worker-sdk-lrpc-focused-20261020"
+  ],
+  "verified": [
+    "Native C++ remote objects registered and invoked through xlang3 shared-memory LRPC for agent and tool workers in the unified xmind executable",
+    "Obsolete script wrapper, packaging hook and required-manifest entries removed; 464 extension tests pass with the final client patch; earlier 462/464 packaging count failures are preserved",
+    "Two concurrently owned workers retain distinct process identities and routes",
+    "Custom named-pipe packet, overlapped-I/O and cancellation implementation removed without a fallback",
+    "Private inherited mapping supplies startup capabilities; actual PID/birth/image and signed scoped messages remain verified",
+    "Remote call failure is checked explicitly and never treated as retryable backpressure",
+    "SDK channel checks cover payloads, abrupt death, cancellation, deadlines and owned descendant retirement",
+    "Mixed canonical workspace turns derive exact read/file results from backend claims, roll back atomically, and reject read-only acknowledgement even after commit",
+    "All 67 focused contracts pass with frozen complete source and dependency closures"
+  ],
+  "limitations": [
+    "The abrupt-crash fixture uses TerminateProcess to avoid DLL shutdown in the crashed process; normal exit remains separately tested",
+    "Existing tool workers already use xlang3 IPC; external MCP stdio, terminal and command-output pipes remain required external interfaces",
+    "Mixed workspace turn API remains backend-only; admitted coding AgentRunner and production coding composition remain unfinished",
+    "No new full-suite, installed, hosted, rendered or live-provider acceptance"
+  ],
+  "passed": true
+}

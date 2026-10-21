@@ -1,3 +1,38 @@
+## Native C++ remote objects over xlang3 IPC — 2026-10-20
+
+Agent and tool workers use the SDK's C++ remote objects over shared-memory
+LRPC, running the same unified xmind executable. Two concurrent worker processes
+retain distinct identities and message routes. The custom named-pipe packet
+and overlapped-I/O transport is removed. The tool worker's script-only IPC
+wrapper, build hook and required runtime-manifest entry are also removed;
+trusted application scripts continue to execute through embedded xlang3.
+
+The serial Release build and **67/67 focused contracts pass in 956.36 seconds**,
+including actual worker model/file RPC, tool reuse/cancellation, runtime
+generation, owner handoff and managed profile/view checks. All 2704 project
+inputs, 16 SDK headers, 1870 pure-library files, 76 SDK runtime files, 18598
+Node dependencies and 133 native binaries remain frozen and unchanged across
+validation. **464/464 extension tests pass** for the final client patch.
+[Scope, source patches and raw evidence](evidence/worker-sdk-lrpc-corrected-20261020.json).
+
+Native SDK call failure is checked explicitly before interpreting backpressure;
+an unknown delivery is never retried. Close notification is independent of
+protocol poisoning, and an accepted final frame drains before peer closure.
+Abrupt-crash fixtures use actual process termination and still require the
+exact exit code, drained backend work and retained charged uncertainty. Normal
+exit remains separately covered. The three failed channel diagnostics and
+the initial 60/61 focused gate are preserved in the linked report. Earlier
+462/464 extension runs retained the obsolete synthetic packaging member count;
+the final fixture has 25 members and explicitly verifies the wrapper is absent.
+
+The backend also commits mixed read/file conversation turns from its captured
+model and native claims, atomically and without caller-supplied output. Read-only
+commit rejects file turns even after an existing canonical commit. Coding journal
+RPC admission, file-capable AgentRunner ports and production coding-worker
+composition remain unfinished. These are controlled fixtures, with no new
+full-suite, installed, hosted, rendered or live-provider acceptance. Existing
+installed runtimes and user history/settings remain untouched.
+
 ## Authenticated worker file RPC — 2026-10-20
 
 Actual isolated child processes now invoke the durable backend file host over

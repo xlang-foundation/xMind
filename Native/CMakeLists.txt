@@ -139,7 +139,7 @@ if(WIN32)
   target_include_directories(agentflow_worker_rpc PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_worker_rpc PUBLIC agentflow_worker_channel PRIVATE Threads::Threads)
   target_include_directories(agentflow_worker_channel PUBLIC include PRIVATE third_party)
-  target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt)
+  target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt agentflow_xlang3)
   add_library(agentflow_process_effects STATIC src/process_executor.cpp)
   target_include_directories(agentflow_process_effects PUBLIC include PRIVATE third_party)
   target_link_libraries(agentflow_process_effects PUBLIC agentflow_process agentflow_workspace agentflow_policy PRIVATE agentflow_mcp_wire)
@@ -321,10 +321,6 @@ if(WIN32)
   target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
   add_custom_command(TARGET xmind POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind>")
-  add_custom_command(TARGET xmind POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:xmind>/worker"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/worker/agent_worker.py" "$<TARGET_FILE_DIR:xmind>/worker/agent_worker.py")
 endif()
 target_link_libraries(xmind_persistence_demo PRIVATE agentflow_core)
 if(WIN32)

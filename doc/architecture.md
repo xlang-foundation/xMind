@@ -5,8 +5,10 @@ Runtime + Coding Agent / Harness + AI Model Gateway**. One `xmind` executable
 provides backend and console modes; public authoring uses **Agent + Tool +
 Graph**, YAML/Markdown with optional xlang3 Python or a programming API.
 Planning is optional. Shared backend HTTP/SSE and durable browser/CLI history
-are implemented and have installed live validation. Process-bound agent
-placement and its IPC delivery remain open.
+are implemented and have installed live validation. Internal workers run the
+same xmind executable and expose native C++ remote objects and methods through
+the xlang3 SDK's shared-memory IPC. Read-worker placement and native tool-worker
+delivery are implemented; production coding-worker composition remains open.
 See [the agreed product design and implementation boundaries](runtime-product-design.md).
 
 The installed 0.1.38 checkpoint validates the unified executable with a fresh
@@ -179,6 +181,14 @@ Attachments and tool output are typed parts or artifact references, rather than 
 Graph execution wraps this lifecycle with scheduling, state passing and checkpoints. Human-input nodes pause durably. Tool nodes invoke the same registry; local agent nodes invoke the same engine; remote nodes use the native A2A client. Bounded loops and joins are graph semantics, not a second model loop.
 
 ## xlang3 integration
+
+Internal worker communication uses the SDK's C++ RegisterPackage,
+RegisterRemoteObject, LrpcListen and ImportRemote APIs. Keep one native worker
+implementation without a duplicate named-pipe transport or script-only RPC
+wrapper. Backend-owned permissions, approvals, model credentials and SQLite
+remain authoritative. Private inherited handles bootstrap worker capabilities;
+browser/API and external MCP/A2A/process interfaces retain their required
+protocols. [Current worker scope and qualification](VALIDATION_STATUS.md).
 
 The inspected SDK provides `X::Runtime`, `EvalFile`, `AddImportRoot`, `RegisterPackage`, `X::Value` and the C ABI. Package registration borrows its native service: that service must outlive the runtime and its package values. Value retain/release and borrowed-buffer lifetimes are explicit obligations of the bridge.
 

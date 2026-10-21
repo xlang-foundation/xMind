@@ -1,0 +1,391 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 42cde9ea..7aeaa3a1 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -139,7 +139,7 @@ if(WIN32)
+   target_include_directories(agentflow_worker_rpc PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_worker_rpc PUBLIC agentflow_worker_channel PRIVATE Threads::Threads)
+   target_include_directories(agentflow_worker_channel PUBLIC include PRIVATE third_party)
+-  target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt)
++  target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt agentflow_xlang3)
+   add_library(agentflow_process_effects STATIC src/process_executor.cpp)
+   target_include_directories(agentflow_process_effects PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_process_effects PUBLIC agentflow_process agentflow_workspace agentflow_policy PRIVATE agentflow_mcp_wire)
+diff --git a/Native/include/agentflow/agent_worker_channel.hpp b/Native/include/agentflow/agent_worker_channel.hpp
+index e613f373..57f9acb6 100644
+--- a/Native/include/agentflow/agent_worker_channel.hpp
++++ b/Native/include/agentflow/agent_worker_channel.hpp
+@@ -40,20 +40,21 @@ SecretBytes new_agent_worker_channel_key();
+ 
+ // One reader and one writer may run concurrently; callers join them before
+ // destruction. Any I/O/protocol failure poisons the channel; never retry an
+-// effect based on transport failure. Deadlines govern actual overlapped I/O.
++// effect based on transport failure. Native remote objects use xlang3 LRPC;
++// rendezvous waits honor cancellation and the captured deadline.
+ class AgentWorkerChannel {
+ public:
+     using Deadline=std::chrono::steady_clock::time_point;
+     ~AgentWorkerChannel();
+     AgentWorkerChannel(const AgentWorkerChannel&)=delete;
+     AgentWorkerChannel& operator=(const AgentWorkerChannel&)=delete;
+-    // Private child entry only: receives a bootstrap through the inherited
+-    // handle and sends an authenticated ready frame containing its real PID.
++    // Private child entry only: receives bootstrap from an inherited mapping
++    // and calls the parent's SDK remote object with its actual ready identity.
+     static std::unique_ptr<AgentWorkerChannel> accept_inherited(std::uintptr_t,Deadline,std::stop_token={});
+     const AgentWorkerScope& scope()const noexcept;
+     AgentWorkerChannelStatistics statistics()const noexcept;
+     // Owner shutdown only, after readers have joined and writers are excluded.
+-    // Closing this retained handle notifies the peer; it does not kill a PID.
++    // Closing the remote object notifies the peer; it does not kill a PID.
+     void close()noexcept;
+     void send(const AgentWorkerMessage&,Deadline,std::stop_token={});
+     AgentWorkerMessage receive(Deadline,std::stop_token={});
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 3408b00c..7d044b41 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -47,6 +47,7 @@ public:
+     std::future<AgentWorkerFileClaimRecord> record_agent_worker_file_result(AgentWorkerLeaseSpec,AgentFileToolInvocation,bool success,std::string actual_output_json);
+     std::future<AgentWorkerFileClaimRecord> agent_worker_file_claim(std::string root,std::string attempt,std::string call);
+     std::future<AgentWorkerToolTurnRecord> commit_agent_worker_read_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<AgentWorkerToolTurnRecord> commit_agent_worker_workspace_turn(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<Event> agent_worker_tool_event(AgentWorkerLeaseSpec,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     PersistenceService(std::string database,std::vector<std::string> import_roots,
+         std::size_t max_pending=1024,std::optional<BackendOwnerBootstrap> bootstrap={},
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 3f0295b6..424a9127 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -215,6 +215,8 @@ public:
+     AgentWorkerFileClaimRecord record_agent_worker_file_result(const AgentWorkerLeaseSpec&,const AgentFileToolInvocation&,bool success,const std::string& actual_output_json);
+     AgentWorkerFileClaimRecord agent_worker_file_claim(const std::string& root,const std::string& attempt,const std::string& call);
+     AgentWorkerToolTurnRecord commit_agent_worker_read_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
++    // Backend coding admission only; results come from captured read/file claims.
++    AgentWorkerToolTurnRecord commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec&,const std::string& attempt);
+     Event agent_worker_tool_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned);
+     // Exact durable compare-and-swap; null expected means create only if absent.
+     void compare_information(const std::string& category,const std::string& id,const std::string& json,const std::optional<std::string>& expected);
+@@ -262,6 +264,7 @@ public:
+     McpOAuthRefreshRecord publish_mcp_oauth_refresh(const std::string& request_id,const std::string& generation,const SecretBytes& complete_grant);
+     std::size_t recover_interrupted(const BackendLease& owner);
+ private:
++    AgentWorkerToolTurnRecord commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec&,const std::string& attempt,bool allow_files);
+     struct Impl;
+     std::unique_ptr<Impl> impl_;
+ };
+diff --git a/Native/src/agent_worker_channel.cpp b/Native/src/agent_worker_channel.cpp
+index e26caccd..f8a73d24 100644
+--- a/Native/src/agent_worker_channel.cpp
++++ b/Native/src/agent_worker_channel.cpp
+@@ -1,5 +1,10 @@
+ #include "agentflow/agent_worker_channel.hpp"
+ #include "nlohmann/json.hpp"
++#include "xlang3/cpp/runtime.h"
++#include <condition_variable>
++#include <cstring>
++#include <map>
++#include <thread>
+ #define NOMINMAX
+ #include <windows.h>
+ #include <bcrypt.h>
+@@ -78,32 +83,46 @@ std::wstring wide(const std::string& text){
+ std::wstring quote(const std::wstring& text){
+     std::wstring out=L"\"";std::size_t slashes=0;for(wchar_t c:text){if(c==L'\\'){++slashes;continue;}out.append(c==L'\"'?slashes*2+1:slashes,L'\\');slashes=0;out.push_back(c);}out.append(slashes*2,L'\\');out.push_back(L'\"');return out;
+ }
+-// Cancellation retires the actual pending OVERLAPPED before its storage or
+-// event is released. Partial reads/writes never cause a frame retry.
++// Native C++ remote objects use the SDK's shared-memory LRPC transport.
++// A rendezvous accepts one frame only while its owning reader is waiting.
++// Tool execution never runs in an IPC callback, so callbacks stay bounded.
+ struct IoStatistics {std::atomic<std::uint64_t> pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;};
+-void transfer(HANDLE pipe,void* bytes,std::size_t size,bool writing,Clock::time_point deadline,std::stop_token stop,IoStatistics* statistics=nullptr){
+-    std::size_t offset=0;while(offset<size){check(deadline,stop);Handle event(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!event.value)throw std::runtime_error("Cannot create worker I/O event");
+-        OVERLAPPED overlap{};overlap.hEvent=event.value;DWORD done=0;
+-        const auto count=static_cast<DWORD>(std::min<std::size_t>(size-offset,65536));auto* data=static_cast<char*>(bytes)+offset;
+-        const BOOL immediate=writing?WriteFile(pipe,data,count,&done,&overlap):ReadFile(pipe,data,count,&done,&overlap);
+-        if(!immediate){if(GetLastError()!=ERROR_IO_PENDING)throw AgentWorkerProtocolError("Agent worker channel closed");
+-            if(statistics)++(writing?statistics->pending_writes:statistics->pending_reads);
+-            try{for(;;){check(deadline,stop);const auto waited=WaitForSingleObject(event.value,10);if(waited==WAIT_OBJECT_0)break;if(waited!=WAIT_TIMEOUT)throw std::runtime_error("Cannot observe worker I/O");}}
+-            catch(...){if(statistics)++(writing?statistics->cancelled_writes:statistics->cancelled_reads);CancelIoEx(pipe,&overlap);GetOverlappedResult(pipe,&overlap,&done,TRUE);throw;}
+-            if(!GetOverlappedResult(pipe,&overlap,&done,FALSE))throw AgentWorkerProtocolError("Agent worker channel closed");
+-        }
+-        if(!done||done>count)throw AgentWorkerProtocolError("Agent worker channel closed");offset+=done;
++struct Inbox {
++    std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;std::string frame;
++};
++class WorkerRemoteObjects {
++public:
++    std::int64_t Deliver(std::string token,std::string frame){
++        if(frame.empty()||frame.size()>AgentWorkerFrameCodec::max_frame_bytes)protocol();auto inbox=find(token);
++        std::lock_guard lock(inbox->mutex);if(inbox->closed)return -1;if(!inbox->waiting||!inbox->frame.empty())return 0;
++        inbox->frame=std::move(frame);inbox->changed.notify_one();return 1;
+     }
+-}
+-void write_packet(HANDLE pipe,const std::string& bytes,Clock::time_point deadline,std::stop_token stop,IoStatistics* statistics=nullptr){
+-    if(bytes.empty()||bytes.size()>AgentWorkerFrameCodec::max_frame_bytes)protocol();
+-    std::array<unsigned char,4> header{};const auto size=static_cast<std::uint32_t>(bytes.size());for(unsigned i=0;i<4;++i)header[i]=static_cast<unsigned char>(size>>(8*i));
+-    transfer(pipe,header.data(),header.size(),true,deadline,stop,statistics);transfer(pipe,const_cast<char*>(bytes.data()),bytes.size(),true,deadline,stop,statistics);
+-}
+-std::string read_packet(HANDLE pipe,Clock::time_point deadline,std::stop_token stop,std::size_t limit=AgentWorkerFrameCodec::max_frame_bytes,IoStatistics* statistics=nullptr){
+-    std::array<unsigned char,4> header{};transfer(pipe,header.data(),header.size(),false,deadline,stop,statistics);std::uint32_t size=0;for(unsigned i=0;i<4;++i)size|=static_cast<std::uint32_t>(header[i])<<(8*i);
+-    if(!size||size>limit)protocol();std::string bytes(size,'\0');transfer(pipe,bytes.data(),bytes.size(),false,deadline,stop,statistics);return bytes;
+-}
++    std::int64_t Close(std::string token){auto inbox=find(token);std::lock_guard lock(inbox->mutex);inbox->closed=true;inbox->changed.notify_all();return 1;}
++    void add(const std::string& token,std::shared_ptr<Inbox> inbox){std::lock_guard lock(mutex_);if(!inboxes_.emplace(token,inbox).second)protocol();}
++    void remove(const std::string& token){std::lock_guard lock(mutex_);inboxes_.erase(token);}
++    BEGIN_PACKAGE(WorkerRemoteObjects)
++        APISET().AddFunc<2>("deliver",&WorkerRemoteObjects::Deliver);
++        APISET().AddFunc<1>("close",&WorkerRemoteObjects::Close);
++    END_PACKAGE
++private:
++    std::shared_ptr<Inbox> find(const std::string& token){std::lock_guard lock(mutex_);auto found=inboxes_.find(token);if(found==inboxes_.end())protocol();auto inbox=found->second.lock();if(!inbox)protocol();return inbox;}
++    std::mutex mutex_;std::map<std::string,std::weak_ptr<Inbox>> inboxes_;
++};
++struct WorkerIpcHost {
++    WorkerRemoteObjects objects;X::Runtime runtime;std::uint32_t port=0;
++    WorkerIpcHost(){
++        auto package=runtime.RegisterPackage("xmind_worker",objects);runtime.RegisterRemoteObject("xmind_worker",package);
++        for(unsigned attempt=0;attempt<24;++attempt){auto random=new_agent_worker_channel_key();std::uint32_t value=0;std::copy_n(random.view().begin(),sizeof(value),reinterpret_cast<std::uint8_t*>(&value));port=20000+value%40000;
++            try{runtime.LrpcListen(port);return;}catch(const std::exception&){}}
++        throw std::runtime_error("Cannot start xMind shared-memory IPC listener");
++    }
++};
++WorkerIpcHost& ipc_host(){static WorkerIpcHost host;return host;}
++std::string new_route(){auto key=new_agent_worker_channel_key();return hex(key.view());}
++struct MappingView {
++    void* value=nullptr;explicit MappingView(HANDLE handle,DWORD access):value(MapViewOfFile(handle,access,0,0,8192)){if(!value)throw std::runtime_error("Cannot map private worker bootstrap");}
++    ~MappingView(){UnmapViewOfFile(value);}
++};
+ std::uint64_t birth(HANDLE process){FILETIME created{},exit{},kernel{},user{};if(!GetProcessTimes(process,&created,&exit,&kernel,&user))throw std::runtime_error("Cannot identify worker creation");return (static_cast<std::uint64_t>(created.dwHighDateTime)<<32)|created.dwLowDateTime;}
+ std::vector<wchar_t> environment(){
+     std::array<wchar_t,32768> text{};const auto size=GetWindowsDirectoryW(text.data(),static_cast<UINT>(text.size()));if(!size||size>=text.size())throw std::runtime_error("Cannot obtain worker system directory");
+@@ -142,29 +161,57 @@ AgentWorkerMessage AgentWorkerFrameCodec::decode(const std::string& frame){
+ SecretBytes new_agent_worker_channel_key(){std::array<std::uint8_t,32> bytes{};if(BCryptGenRandom(nullptr,bytes.data(),static_cast<ULONG>(bytes.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw std::runtime_error("Cannot create worker capability");SecretBytes key(bytes);SecureZeroMemory(bytes.data(),bytes.size());return key;}
+ 
+ struct AgentWorkerChannel::Impl {
+-    Handle pipe;AgentWorkerScope scope;AgentWorkerFrameCodec codec;std::mutex reader,writer;std::atomic<bool> poisoned=false;IoStatistics statistics;
+-    Impl(Handle handle,AgentWorkerScope binding,SecretBytes key,AgentWorkerSide side):pipe(std::move(handle)),scope(std::move(binding)),codec(scope,std::move(key),side){}
++    AgentWorkerScope scope;AgentWorkerFrameCodec codec;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;IoStatistics statistics;
++    std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0;Handle peer;
++    X::Runtime client;X::Value remote;
++    Impl(AgentWorkerScope binding,SecretBytes key,AgentWorkerSide side,std::string route):scope(std::move(binding)),codec(scope,std::move(key),side),local(std::move(route)){ipc_host().objects.add(local,inbox);}
++    ~Impl(){ipc_host().objects.remove(local);}
++    void attach(std::uint32_t port,std::string route,HANDLE process){
++        if(port<1||port>65535||route.size()!=64)protocol();remote_port=port;remote_route=std::move(route);
++        HANDLE duplicate=nullptr;if(!DuplicateHandle(GetCurrentProcess(),process,GetCurrentProcess(),&duplicate,SYNCHRONIZE,FALSE,0))throw std::runtime_error("Cannot retain IPC peer identity");peer=Handle(duplicate);
++        const auto endpoint="lrpc:"+std::to_string(port);X3LrpcEndpointInfo info{};info.size=sizeof(info);
++        if(x3_runtime_probe_remote(client.get(),endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=GetProcessId(process))protocol();
++        remote=client.ImportRemote("xmind_worker",endpoint.c_str());
++    }
++    void live(){if(peer.value&&WaitForSingleObject(peer.value,0)!=WAIT_TIMEOUT)protocol();}
+ };
+ AgentWorkerChannel::AgentWorkerChannel(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
+-AgentWorkerChannel::~AgentWorkerChannel()=default;
++AgentWorkerChannel::~AgentWorkerChannel(){close();}
+ const AgentWorkerScope& AgentWorkerChannel::scope()const noexcept{return impl_->scope;}
+ AgentWorkerChannelStatistics AgentWorkerChannel::statistics()const noexcept{const auto& s=impl_->statistics;return {s.pending_reads.load(),s.pending_writes.load(),s.cancelled_reads.load(),s.cancelled_writes.load()};}
+-void AgentWorkerChannel::close()noexcept{impl_->poisoned=true;impl_->pipe=Handle();}
++void AgentWorkerChannel::close()noexcept{
++    if(impl_->closed.exchange(true))return;impl_->poisoned=true;
++    {std::lock_guard lock(impl_->inbox->mutex);impl_->inbox->closed=true;impl_->inbox->changed.notify_all();}
++    try{if(impl_->remote_port){impl_->live();impl_->remote["close"](impl_->remote_route);}}catch(...){}
++}
+ void AgentWorkerChannel::send(const AgentWorkerMessage& message,Deadline deadline,std::stop_token stop){
+-    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();try{check(deadline,stop);write_packet(impl_->pipe.value,impl_->codec.encode(message),deadline,stop,&impl_->statistics);}catch(...){impl_->poisoned=true;throw;}
++    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();++impl_->statistics.pending_writes;
++    try{check(deadline,stop);const auto frame=impl_->codec.encode(message);const std::vector<X::Value> arguments{X::Value(impl_->client,impl_->remote_route),X::Value(impl_->client,frame)};
++        for(;;){check(deadline,stop);impl_->live();X::Value reply;if(!impl_->remote["deliver"].Call(arguments,reply)||!reply.IsInt64())protocol();const auto result=reply.ToInt64();if(result==1){check(deadline,stop);return;}if(result!=0)protocol();std::this_thread::sleep_for(std::chrono::milliseconds(2));}
++    }catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
++    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
++    catch(...){impl_->poisoned=true;throw AgentWorkerProtocolError("Worker shared-memory IPC send failed");}
+ }
+ AgentWorkerMessage AgentWorkerChannel::receive(Deadline deadline,std::stop_token stop){
+-    std::lock_guard lock(impl_->reader);if(impl_->poisoned)protocol();try{check(deadline,stop);return impl_->codec.decode(read_packet(impl_->pipe.value,deadline,stop,AgentWorkerFrameCodec::max_frame_bytes,&impl_->statistics));}catch(...){impl_->poisoned=true;throw;}
++    std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();++impl_->statistics.pending_reads;
++    auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);inbox.waiting=true;
++    struct Waiting {Inbox& inbox;~Waiting(){inbox.waiting=false;}} waiting{inbox};
++    try{for(;;){check(deadline,stop);if(!inbox.frame.empty()){auto frame=std::exchange(inbox.frame,{});return impl_->codec.decode(frame);}if(inbox.closed)protocol();impl_->live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));}}
++    catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
++    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
++    catch(...){impl_->poisoned=true;throw;}
+ }
+ std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::uintptr_t inherited,Deadline deadline,std::stop_token stop){
+-    Handle pipe(reinterpret_cast<HANDLE>(inherited));if(!pipe.value||pipe.value==INVALID_HANDLE_VALUE||GetFileType(pipe.value)!=FILE_TYPE_PIPE)protocol();
+-    if(!SetHandleInformation(pipe.value,HANDLE_FLAG_INHERIT,0))throw std::runtime_error("Cannot close worker inheritance");
+-    auto bootstrap=read_packet(pipe.value,deadline,stop,8192);
+-    struct Wipe {std::string& bytes;~Wipe(){if(!bytes.empty())SecureZeroMemory(bytes.data(),bytes.size());}} wipe{bootstrap};
+-    if(bootstrap.size()<=32)protocol();SecretBytes key(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(bootstrap.data()),32));
+-    auto config=parse(bootstrap.substr(32));if(!config.is_object()||config.size()!=2||!config.at("parent_pid").is_number_unsigned())protocol();auto scope=read_scope(config.at("scope"));
+-    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(std::move(pipe),std::move(scope),std::move(key),AgentWorkerSide::worker)));
+-    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",config.at("parent_pid")}}.dump()},deadline,stop);return channel;
++    check(deadline,stop);Handle mapping(reinterpret_cast<HANDLE>(inherited));if(!mapping.value||mapping.value==INVALID_HANDLE_VALUE)protocol();
++    if(!SetHandleInformation(mapping.value,HANDLE_FLAG_INHERIT,0))protocol();MappingView view(mapping.value,FILE_MAP_READ);
++    std::uint32_t size=0;std::memcpy(&size,view.value,sizeof(size));if(size<=32||size>8188)protocol();
++    const auto* bytes=static_cast<const std::uint8_t*>(view.value)+4;SecretBytes key(std::span<const std::uint8_t>(bytes,32));
++    const auto config=parse(std::string(reinterpret_cast<const char*>(bytes+32),size-32));if(!config.is_object()||config.size()!=7||config.at("version")!=1)protocol();
++    const auto parent_pid=config.at("parent_pid").get<DWORD>();Handle parent(OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,parent_pid));
++    if(!parent.value||birth(parent.value)!=config.at("parent_birth").get<std::uint64_t>())protocol();
++    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(read_scope(config.at("scope")),std::move(key),AgentWorkerSide::worker,config.at("worker_route").get<std::string>())));
++    channel->impl_->attach(config.at("parent_port").get<std::uint32_t>(),config.at("parent_route").get<std::string>(),parent.value);
++    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",parent_pid},{"port",ipc_host().port}}.dump()},deadline,stop);return channel;
+ }
+ struct AgentWorkerProcess::Impl {
+     Handle process,job;std::shared_ptr<const BoundProcessExecutable> executable;std::unique_ptr<AgentWorkerChannel> channel;std::uint32_t pid=0;std::uint64_t created=0;bool assigned=false;
+@@ -178,12 +225,13 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
+     // the directory chain, so no unbound replacement path may be substituted.
+     if(ForegroundProcess::executable_identity(executable->path())!=executable->identity())throw ProcessBeforeDispatchError("Worker image binding changed");
+     auto state=std::make_unique<Impl>();state->executable=std::move(executable);auto key=new_agent_worker_channel_key();
+-    auto pipe_nonce=new_agent_worker_channel_key();const auto name=L"\\\\.\\pipe\\xmind-agent-"+wide(hex(pipe_nonce.view()));pipe_nonce.clear();
+-    Handle server(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,65536,65536,0,nullptr));
+-    if(server.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot create private worker pipe");
+-    SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};Handle child(CreateFileW(name.c_str(),GENERIC_READ|GENERIC_WRITE,0,&security,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,nullptr));if(child.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot open private worker pipe");
+-    Handle connected(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!connected.value)throw std::runtime_error("Cannot create worker connection event");OVERLAPPED connection{};connection.hEvent=connected.value;
+-    if(!ConnectNamedPipe(server.value,&connection)){const auto error=GetLastError();if(error!=ERROR_PIPE_CONNECTED){if(error==ERROR_IO_PENDING){DWORD ignored=0;CancelIoEx(server.value,&connection);GetOverlappedResult(server.value,&connection,&ignored,TRUE);}throw std::runtime_error("Cannot connect private worker pipe");}}
++    const auto parent_route=new_route(),worker_route=new_route();
++    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(scope,SecretBytes(key.view()),AgentWorkerSide::backend,parent_route)));
++    SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
++    Handle child(CreateFileMappingW(INVALID_HANDLE_VALUE,&security,PAGE_READWRITE,0,8192,nullptr));if(!child.value)throw std::runtime_error("Cannot create private worker bootstrap");
++    {MappingView view(child.value,FILE_MAP_WRITE);std::string bootstrap(reinterpret_cast<const char*>(key.view().data()),key.view().size());
++        bootstrap+=Json{{"version",1},{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()},{"parent_birth",birth(GetCurrentProcess())},{"parent_port",ipc_host().port},{"parent_route",parent_route},{"worker_route",worker_route}}.dump();
++        if(bootstrap.size()>8188)protocol();const auto size=static_cast<std::uint32_t>(bootstrap.size());std::memcpy(view.value,&size,4);std::memcpy(static_cast<char*>(view.value)+4,bootstrap.data(),bootstrap.size());SecureZeroMemory(bootstrap.data(),bootstrap.size());}
+     Handle input(CreateFileW(L"NUL",GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));Handle output(CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));if(input.value==INVALID_HANDLE_VALUE||output.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot isolate worker standard handles");
+     state->job=Handle(CreateJobObjectW(nullptr,nullptr));if(!state->job.value)throw std::runtime_error("Cannot create worker ownership job");JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;if(!SetInformationJobObject(state->job.value,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))throw std::runtime_error("Cannot restrict worker ownership job");
+     Attributes attributes({child.value,input.value,output.value});STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=input.value;startup.StartupInfo.hStdOutput=output.value;startup.StartupInfo.hStdError=output.value;startup.lpAttributeList=attributes.list;
+@@ -194,10 +242,9 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
+     state->assigned=true;
+     if(ResumeThread(thread.value)==static_cast<DWORD>(-1))throw ProcessBeforeDispatchError("Cannot start owned worker");
+     child=Handle();input=Handle();output=Handle();
+-    std::string bootstrap(reinterpret_cast<const char*>(key.view().data()),key.view().size());bootstrap+=Json{{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()}}.dump();
+-    try{write_packet(server.value,bootstrap,deadline,stop);}catch(...){SecureZeroMemory(bootstrap.data(),bootstrap.size());throw;}SecureZeroMemory(bootstrap.data(),bootstrap.size());
+-    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(std::move(server),std::move(scope),std::move(key),AgentWorkerSide::backend)));
+-    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=3||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
++    key.clear();
++    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=4||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
++    state->channel->impl_->attach(identity.at("port").get<std::uint32_t>(),worker_route,state->process.value);
+     return std::unique_ptr<AgentWorkerProcess>(new AgentWorkerProcess(std::move(state)));
+ }
+ AgentWorkerChannel& AgentWorkerProcess::channel()noexcept{return *impl_->channel;}
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 5197a1dd..2d9ca2f3 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -225,6 +225,7 @@ std::future<AgentWorkerFileClaimRecord> PersistenceService::claim_agent_worker_f
+ std::future<AgentWorkerFileClaimRecord> PersistenceService::record_agent_worker_file_result(AgentWorkerLeaseSpec lease,AgentFileToolInvocation call,bool success,std::string output){return impl_->submit([lease=std::move(lease),call=std::move(call),success,output=std::move(output)](Repository& r){return r.record_agent_worker_file_result(lease,call,success,output);});}
+ std::future<AgentWorkerFileClaimRecord> PersistenceService::agent_worker_file_claim(std::string root,std::string attempt,std::string call){return impl_->observe([root=std::move(root),attempt=std::move(attempt),call=std::move(call)](Repository& r){return r.agent_worker_file_claim(root,attempt,call);});}
+ std::future<AgentWorkerToolTurnRecord> PersistenceService::commit_agent_worker_read_turn(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker read turn cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker read turn deadline elapsed");return r.commit_agent_worker_read_turn(lease,attempt);});}
++std::future<AgentWorkerToolTurnRecord> PersistenceService::commit_agent_worker_workspace_turn(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker workspace turn cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker workspace turn deadline elapsed");return r.commit_agent_worker_workspace_turn(lease,attempt);});}
+ std::future<Event> PersistenceService::agent_worker_tool_event(AgentWorkerLeaseSpec lease,std::string attempt,std::int64_t ordinal,bool returned,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),ordinal,returned,deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker tool activity cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker tool activity deadline elapsed");return r.agent_worker_tool_event(lease,attempt,ordinal,returned);});}
+ std::future<ModelCallReservation> PersistenceService::finish_agent_worker_model(AgentWorkerLeaseSpec lease,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){
+     return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker finish cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker finish deadline elapsed");return r.finish_model_call(lease.root_run_id,lease.owner_run_id,attempt,{},&lease);});
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 19e51e68..1d2d86ba 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3368,13 +3368,29 @@ Event Repository::agent_worker_tool_event(const AgentWorkerLeaseSpec& lease,cons
+     const auto event=impl_->event(lease.owner_run_id,kind,json);changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_tool_event_category),key,Json{{"version",1},{"model",worker_claim_spec_json(authority)},{"ordinal",ordinal},{"returned",returned},{"event_sequence",event.sequence}}.dump()}));tx.commit();return event;
+ }
+ AgentWorkerToolTurnRecord Repository::commit_agent_worker_read_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
++    return commit_agent_worker_tool_turn(lease,attempt,false);
++}
++AgentWorkerToolTurnRecord Repository::commit_agent_worker_workspace_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt){
++    return commit_agent_worker_tool_turn(lease,attempt,true);
++}
++AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool allow_files){
+     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
+     if(lease.owner_run_id!=lease.root_run_id||root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent")throw Conflict("Worker read turn requires ordinary direct-agent ownership");
+     const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.spec.owner_run_id!=lease.owner_run_id||model.spec.generation!=lease.generation||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read turn has no actual assistant receipt");
+-    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
++    // Check the admitted vocabulary even for an already committed turn. A read
++    // channel must never acknowledge a coding turn through idempotent lookup.
++    for(const auto& call:actual.tool_calls)if(!worker_read_tool(call.name)&&!(allow_files&&is_agent_file_tool(call.name)))throw Conflict("Worker turn contains an unsupported tool");
++    if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     std::set<std::string> calls;std::vector<std::string> outputs;
+-    for(const auto& call:actual.tool_calls){if(!worker_read_tool(call.name))throw Conflict("Read-only worker turn contains an unsupported tool");if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");const auto read=read_worker_read(db,lease.root_run_id,attempt,call.id);
++    for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");
++        if(is_agent_file_tool(call.name)){
++            const auto file=read_worker_file(db,lease.root_run_id,attempt,call.id);
++            if(file.state!="returned"||worker_claim_spec_json(file.model)!=worker_claim_spec_json(model.spec)||file.invocation.tool_name!=call.name||file.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker workspace turn has an unfinished or changed actual file result");
++            (void)worker_file_authority(*this,db,lease,file.invocation);
++            outputs.push_back(Json{{"content",file.actual_output_json},{"tool_call_id",call.id}}.dump());continue;
++        }
++        const auto read=read_worker_read(db,lease.root_run_id,attempt,call.id);
+         if(read.state!="returned"||worker_claim_spec_json(read.model)!=worker_claim_spec_json(model.spec)||read.invocation.tool_name!=call.name||read.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker read turn has an unfinished or changed actual result");
+         (void)worker_read_authority(*this,db,lease,read.invocation);outputs.push_back(Json{{"content",read.actual_output_json},{"tool_call_id",call.id}}.dump());
+     }
+diff --git a/Native/tests/agent_worker_channel_contract.cpp b/Native/tests/agent_worker_channel_contract.cpp
+index 32551b81..5342962e 100644
+--- a/Native/tests/agent_worker_channel_contract.cpp
++++ b/Native/tests/agent_worker_channel_contract.cpp
+@@ -46,7 +46,7 @@ int child(int argc,char** argv){
+         else if(request.operation=="test.environment"){
+             std::array<wchar_t,2> value{};Json result={{"pid",GetCurrentProcessId()},{"private_absent",GetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",value.data(),static_cast<DWORD>(value.size()))==0},{"auth_absent",GetEnvironmentVariableW(L"XMIND_AUTH_TOKEN",value.data(),static_cast<DWORD>(value.size()))==0},{"path_absent",GetEnvironmentVariableW(L"PATH",value.data(),static_cast<DWORD>(value.size()))==0}};channel->send({request.operation,result.dump()},Clock::now()+5s);
+         }else if(request.operation=="test.exit"){channel->send({"test.exiting","actual-normal-exit"},Clock::now()+5s);return 0;}
+-        else if(request.operation=="test.crash")ExitProcess(91);
++        else if(request.operation=="test.crash")TerminateProcess(GetCurrentProcess(),91);
+         else if(request.operation=="test.hold"){channel->send({"test.holding","actual-child-held"},Clock::now()+5s);Sleep(INFINITE);}
+         else if(request.operation=="test.descendant"){
+             const auto file=std::filesystem::u8path(executable()).native();auto command=L"\""+file+L"\" channel-fixture-hold";STARTUPINFOW startup{};startup.cb=sizeof(startup);PROCESS_INFORMATION created{};require(CreateProcessW(file.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,nullptr,&startup,&created),"Cannot create actual owned descendant");CloseHandle(created.hThread);CloseHandle(created.hProcess);channel->send({"test.descendant",Json{{"pid",created.dwProcessId}}.dump()},Clock::now()+5s);Sleep(INFINITE);
+@@ -57,15 +57,16 @@ void process_contract(){
+     auto bound=ForegroundProcess::bind_executable(executable());require(!bound->identity().empty()&&bound->identity()==ForegroundProcess::executable_identity(executable()),"Worker must use its exact retained native image");
+     SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",L"synthetic-private-parent-value");
+     auto launch=[&]{return AgentWorkerProcess::launch(bound,scope(),Clock::now()+10s);};
+-    auto worker=launch();require(worker->pid()!=GetCurrentProcessId()&&worker->creation_time()!=0&&worker->executable_identity()==bound->identity()&&worker->alive(),"Ready identity must name the actual distinct child");
++    std::cout<<"SDK IPC phase: initial launch"<<std::endl;auto worker=launch();std::cout<<"SDK IPC phase: environment"<<std::endl;require(worker->pid()!=GetCurrentProcessId()&&worker->creation_time()!=0&&worker->executable_identity()==bound->identity()&&worker->alive(),"Ready identity must name the actual distinct child");
+     worker->channel().send({"test.environment",""},Clock::now()+5s);const auto metadata=Json::parse(worker->channel().receive(Clock::now()+5s).payload);require(metadata.at("pid")==worker->pid()&&metadata.at("private_absent")==true&&metadata.at("auth_absent")==true&&metadata.at("path_absent")==true,"Private worker must not inherit ambient keys or shell environment");
+-    const std::string data(256*1024,'x');for(unsigned i=0;i<3;++i){worker->channel().send({"test.echo",data+std::to_string(i)},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).payload==data+std::to_string(i),"Actual pipe must retain bounded multi-chunk payloads and sequences");}
++    std::cout<<"SDK IPC phase: payloads"<<std::endl;const std::string data(256*1024,'x');for(unsigned i=0;i<3;++i){worker->channel().send({"test.echo",data+std::to_string(i)},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).payload==data+std::to_string(i),"Actual xlang3 remote object must retain bounded payloads and sequences");}
+     worker->channel().send({"test.exit",""},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="test.exiting"&&worker->wait(Clock::now()+5s)==0&&!worker->alive(),"Actual normal child exit must be observed");worker.reset();
+-    worker=launch();worker->channel().send({"test.crash",""},Clock::now()+5s);rejects<AgentWorkerProtocolError>([&]{worker->channel().receive(Clock::now()+5s);});require(worker->wait(Clock::now()+5s)==91,"Crash must retain its actual exit without restart");worker.reset();
+-    worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="test.holding","Held child must acknowledge actual dispatch");rejects<AgentWorkerChannelTimeout>([&]{worker->wait(Clock::now()+30ms);});require(worker->alive(),"Observation timeout must not retire or replace a live child");rejects<AgentWorkerChannelTimeout>([&]{worker->channel().receive(Clock::now()+30ms);});require(worker->alive()&&worker->channel().statistics().cancelled_reads==1,"Read timeout must retire an actual pending I/O, not the owned process");rejects<AgentWorkerProtocolError>([&]{worker->channel().send({"test.echo","no-reuse"},Clock::now()+5s);});worker->terminate();require(!worker->alive(),"Explicit retirement must observe the owned child terminal");worker.reset();
+-    worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);std::stop_source cancel;std::jthread timer([&]{Sleep(100);cancel.request_stop();});rejects<AgentWorkerChannelCancelled>([&]{worker->channel().send({"test.echo",std::string(1024*1024,'b')},Clock::now()+5s,cancel.get_token());});require(worker->alive()&&worker->channel().statistics().cancelled_writes==1,"Blocked write cancellation must retire actual pending I/O without implying worker exit");worker->terminate();worker.reset();
+-    worker=launch();worker->channel().send({"test.descendant",""},Clock::now()+5s);const auto descendant=Json::parse(worker->channel().receive(Clock::now()+5s).payload).at("pid").get<DWORD>();HANDLE observed=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,descendant);require(observed&&WaitForSingleObject(observed,0)==WAIT_TIMEOUT,"Fixture must create an actual live descendant");worker->terminate();require(!worker->alive()&&WaitForSingleObject(observed,1000)==WAIT_OBJECT_0,"Owned job retirement must include its actual descendant");CloseHandle(observed);worker.reset();
+-    worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);HANDLE retained=OpenProcess(SYNCHRONIZE,FALSE,worker->pid());require(retained!=nullptr,"Fixture must retain its exact worker handle");worker.reset();require(WaitForSingleObject(retained,1000)==WAIT_OBJECT_0,"Owner destruction must retire only its created worker");CloseHandle(retained);
++    std::cout<<"SDK IPC phase: multiple workers"<<std::endl;{auto first=launch(),second=launch();require(first->pid()!=second->pid(),"Concurrent workers must have distinct actual identities");first->channel().send({"test.echo","first isolated remote object"},Clock::now()+5s);second->channel().send({"test.echo","second isolated remote object"},Clock::now()+5s);require(first->channel().receive(Clock::now()+5s).payload=="first isolated remote object"&&second->channel().receive(Clock::now()+5s).payload=="second isolated remote object","Multiple worker remote objects must retain their separate routes");for(auto* child:{first.get(),second.get()}){child->channel().send({"test.exit",""},Clock::now()+5s);child->channel().receive(Clock::now()+5s);require(child->wait(Clock::now()+5s)==0,"Each remote worker must drain independently");}}
++    std::cout<<"SDK IPC phase: crash"<<std::endl;worker=launch();try{worker->channel().send({"test.crash",""},Clock::now()+5s);}catch(const AgentWorkerProtocolError&){}rejects<AgentWorkerProtocolError>([&]{worker->channel().receive(Clock::now()+5s);});require(worker->wait(Clock::now()+5s)==91,"Crash must retain its actual exit without restart");worker.reset();
++    std::cout<<"SDK IPC phase: hold 1"<<std::endl;worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="test.holding","Held child must acknowledge actual dispatch");rejects<AgentWorkerChannelTimeout>([&]{worker->wait(Clock::now()+30ms);});require(worker->alive(),"Observation timeout must not retire or replace a live child");rejects<AgentWorkerChannelTimeout>([&]{worker->channel().receive(Clock::now()+30ms);});require(worker->alive()&&worker->channel().statistics().cancelled_reads==1,"Read timeout must cancel its IPC rendezvous while retaining the owned process");rejects<AgentWorkerProtocolError>([&]{worker->channel().send({"test.echo","no-reuse"},Clock::now()+5s);});worker->terminate();require(!worker->alive(),"Explicit retirement must observe the owned child terminal");worker.reset();
++    std::cout<<"SDK IPC phase: hold 2"<<std::endl;worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);std::stop_source cancel;std::jthread timer([&]{Sleep(100);cancel.request_stop();});rejects<AgentWorkerChannelCancelled>([&]{worker->channel().send({"test.echo",std::string(1024*1024,'b')},Clock::now()+5s,cancel.get_token());});require(worker->alive()&&worker->channel().statistics().cancelled_writes==1,"Blocked remote delivery cancellation must retain the live owned worker");worker->terminate();worker.reset();
++    std::cout<<"SDK IPC phase: descendant"<<std::endl;worker=launch();worker->channel().send({"test.descendant",""},Clock::now()+5s);const auto descendant=Json::parse(worker->channel().receive(Clock::now()+5s).payload).at("pid").get<DWORD>();HANDLE observed=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,descendant);require(observed&&WaitForSingleObject(observed,0)==WAIT_TIMEOUT,"Fixture must create an actual live descendant");worker->terminate();require(!worker->alive()&&WaitForSingleObject(observed,1000)==WAIT_OBJECT_0,"Owned job retirement must include its actual descendant");CloseHandle(observed);worker.reset();
++    std::cout<<"SDK IPC phase: hold 3"<<std::endl;worker=launch();worker->channel().send({"test.hold",""},Clock::now()+5s);worker->channel().receive(Clock::now()+5s);HANDLE retained=OpenProcess(SYNCHRONIZE,FALSE,worker->pid());require(retained!=nullptr,"Fixture must retain its exact worker handle");worker.reset();require(WaitForSingleObject(retained,1000)==WAIT_OBJECT_0,"Owner destruction must retire only its created worker");CloseHandle(retained);
+     std::stop_source cancelled;cancelled.request_stop();rejects<AgentWorkerChannelCancelled>([&]{AgentWorkerProcess::launch(bound,scope(),Clock::now()+5s,cancelled.get_token());});SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",nullptr);
+ }
+ }
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index c7067be2..35c6e26f 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -137,6 +137,24 @@ void file_claims(PersistenceService& store,const std::string& path,const std::ve
+     store.finish_operation("file-native-late",OperationState::succeeded,"{}").get();require(store.record_agent_worker_file_result(owner,interrupted,true,R"({"late_actual_receipt":true})").get().success,"Late actual native receipt must remain recordable without reissuing the effect");store.retire_agent_worker(replacement.generation,"cancelled").get();store.transition(owner.owner_run_id,RunState::running,RunState::cancelled).get();
+     std::cout<<"Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.\n";
+ }
++void workspace_turns(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
++    root(store,"workspace-turn-root");const auto owner=store.admit_agent_worker(lease("workspace-turn-root","workspace-turn-generation")).get().spec;
++    const auto deadline=std::chrono::steady_clock::now()+20s;const std::string attempt="workspace-turn-model",args=R"({"path":"fixture.txt"})";
++    ModelCompletion response{"Mixed workspace tools","","tool_calls",R"({"total_tokens":17})",{{"mixed-read","read_file",args},{"mixed-file","create_file",R"({"path":"fixture.txt","content":"fixture"})"}},"[]"};
++    store.reserve_agent_worker_model(owner,attempt,deadline).get();store.start_agent_worker_model(owner,attempt,deadline).get();const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(owner,attempt,deadline).get();
++    AgentWorkspaceInvocation read{1,owner.owner_run_id,attempt,"mixed-read",owner.workspace_id,7,owner.workspace_id,"read_file",args};
++    const std::string read_output=R"({"content":"exact synthetic read","number":1.0000000000000001})",file_output=R"({"error":"synthetic native policy denial"})";
++    store.claim_agent_worker_read(owner,read,deadline).get();store.start_agent_worker_read(owner,read,deadline).get();store.record_agent_worker_read_result(owner,read,true,read_output).get();
++    AgentFileToolInvocation file;file.run_id=owner.owner_run_id;file.attempt_id=attempt;file.call_id="mixed-file";file.workspace_id=owner.workspace_id;file.folder_id=owner.workspace_id;file.workspace_revision=7;file.tool_name="create_file";file.arguments_json=response.tool_calls[1].arguments_json;
++    store.claim_agent_worker_file(owner,file,deadline).get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});require(store.run_history(owner.owner_run_id).get().size()==1,"Incomplete mixed turn must append no history");
++    store.record_agent_worker_file_result(owner,file,false,file_output).get();rejects<Conflict>([&]{store.commit_agent_worker_read_turn(owner,attempt,deadline).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(owner,"mixed-premature",deadline).get();});
++    auto wrong=owner;++wrong.pid;rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(wrong,attempt,deadline).get();});std::stop_source stop;stop.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline,stop.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,std::chrono::steady_clock::now()-1ms).get();});
++    XlangSqlite sql(path,imports);const auto before=store.events(owner.owner_run_id).get().size();sql.execute("CREATE TRIGGER fixture_workspace_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' BEGIN SELECT RAISE(ABORT,'fixture_workspace_turn_abort'); END");
++    bool fault=false;try{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();}catch(const DatabaseError& error){fault=std::string(error.what()).find("fixture_workspace_turn_abort")!=std::string::npos;}sql.execute("DROP TRIGGER fixture_workspace_turn_abort");require(fault&&store.run_history(owner.owner_run_id).get().size()==1&&store.events(owner.owner_run_id).get().size()==before,"Mixed turn failure must roll back every message and event");
++    auto first=store.commit_agent_worker_workspace_turn(owner,attempt,deadline),second=store.commit_agent_worker_workspace_turn(owner,attempt,deadline);const auto receipt=first.get(),duplicate=second.get();const auto history=store.run_history(owner.owner_run_id).get();require(receipt.message_sequences==duplicate.message_sequences&&receipt.messages_binding==duplicate.messages_binding&&history.size()==4&&history[1].json==assistant&&history[2].json==Json{{"content",read_output},{"tool_call_id","mixed-read"}}.dump()&&history[3].json==Json{{"content",file_output},{"tool_call_id","mixed-file"}}.dump(),"Mixed turn must retain exact ordered backend results once");
++    rejects<Conflict>([&]{store.commit_agent_worker_read_turn(owner,attempt,deadline).get();});store.reserve_agent_worker_model(owner,"mixed-next",deadline).get();store.retire_agent_worker(owner.generation,"cancelled").get();rejects<Conflict>([&]{store.commit_agent_worker_workspace_turn(owner,attempt,deadline).get();});store.transition(owner.owner_run_id,RunState::running,RunState::cancelled).get();
++    std::cout<<"Mixed workspace turns preserve exact ordered read/file results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.\n";
++}
+ void completion_receipts(PersistenceService& store){
+     root(store,"receipt-root");const auto admitted=store.admit_agent_worker(lease("receipt-root","receipt-generation")).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+     auto capture=[&](const std::string& attempt,const ModelCompletion& actual){
+@@ -156,7 +174,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);queued_start(store);funding(store);file_claims(store,path,imports);completion_receipts(store);tool_turns(store);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);queued_start(store);funding(store);file_claims(store,path,imports);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
