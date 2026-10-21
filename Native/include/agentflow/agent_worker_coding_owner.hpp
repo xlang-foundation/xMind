@@ -7,7 +7,7 @@ class AgentWorkerCodingOwner final {
 public:
     AgentWorkerCodingOwner(PersistenceService&,AgentWorkerLeaseSpec,const AgentWorkerScope&,
         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,std::string,
-        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
+        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
     ~AgentWorkerCodingOwner();
     std::string dispatch(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token={});
 private:

@@ -46,6 +46,9 @@ struct AgentRemoteToolOwnerContext {
     WorkspaceTools* primary_workspace=nullptr;
     WorkspaceToolSet* workspace_members=nullptr;
     RepositoryInstructionContext* repository_context=nullptr;
+    // A coding owner replaces guidance contexts on model admission. Resolve
+    // its current context at invocation instead of retaining the prior address.
+    std::function<RepositoryInstructionContext*()> repository_context_for_call;
     std::vector<std::vector<AgentPermissionRule>> permission_layers;
     std::function<bool(const std::string&)> offered_tool;
     std::function<McpToolRegistry*(const std::string&)> mcp_registry;

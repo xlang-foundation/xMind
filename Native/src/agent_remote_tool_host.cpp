@@ -20,7 +20,7 @@ std::string operation_id(){std::random_device random;std::ostringstream value;va
 class LocalRemoteToolHost final:public AgentRemoteToolHost {
 public:
     LocalRemoteToolHost(PersistenceService& store,AgentRunJournal& journal,AgentRemoteToolOwnerContext owner):store_(store),journal_(journal),owner_(std::move(owner)){
-        if(!bounded_id(owner_.run_id,128)||!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||!owner_.mcp_registry||!owner_.a2a_registry||owner_.approval_timeout.count()<=0||owner_.approval_timeout>std::chrono::hours(24))throw std::invalid_argument("Invalid backend remote-tool owner");
+        if(!bounded_id(owner_.run_id,128)||!owner_.primary_workspace||(!owner_.repository_context&&!owner_.repository_context_for_call)||!owner_.offered_tool||!owner_.mcp_registry||!owner_.a2a_registry||owner_.approval_timeout.count()<=0||owner_.approval_timeout>std::chrono::hours(24))throw std::invalid_argument("Invalid backend remote-tool owner");
         workspace_id_=owner_.primary_workspace->identity();
         if(owner_.workspace_members){
             if(owner_.workspace_members->workspace_id()!=workspace_id_||owner_.workspace_members->folders().empty()||owner_.workspace_members->folders().front().root!=owner_.primary_workspace->root_path())throw ToolAccessDenied("Remote-tool membership differs from its owner");
@@ -46,7 +46,9 @@ public:
             if(!calls_.insert({call.attempt_id,call.call_id}).second)throw ToolAccessDenied("Remote-tool call has already entered this owner");
         }
         for(const auto& layer:owner_.permission_layers)if(agent_permission_denies(layer,call.tool_name,"*"))throw AgentPermissionDenied("Selected agent policy denied this remote tool");
-        auto& context=*owner_.repository_context;
+        auto* current_context=owner_.repository_context_for_call?owner_.repository_context_for_call():owner_.repository_context;
+        if(!current_context)throw ToolAccessDenied("Remote tool has no current native repository guidance");
+        auto& context=*current_context;
         if(!context.skills().ready(cancel)||!context.ready(".",cancel))return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
         auto guidance=context.precondition(".");
         if(owner_.before_effect)guidance.before_effect=[authority=owner_.before_effect,call](const std::string& id,std::stop_token stop){authority(call,id,stop);};

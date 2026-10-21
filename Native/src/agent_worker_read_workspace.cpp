@@ -4,6 +4,7 @@
 #include "agentflow/agent_worker_read_rpc.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
+#include "agentflow/agent_worker_remote_rpc.hpp"
 #include "agentflow/process_executor.hpp"
 #include "nlohmann/json.hpp"
 #include <utility>
@@ -41,6 +42,7 @@ public:
     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
+    std::unique_ptr<AgentRemoteToolHost> remote_host()override{return std::make_unique<AgentWorkerRemoteClient>(peer_);}
     bool join_background(const std::string& attempt,std::stop_token cancel)override{
         try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
             if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}

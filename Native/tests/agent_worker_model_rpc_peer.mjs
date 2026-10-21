@@ -1,18 +1,35 @@
-// Independent controlled native provider; ninety intentional requests, no live key.
+// Independent controlled native provider; ninety-four intentional requests, no live key.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0;
 const [executable,modules,stdlib]=process.argv.slice(2);
-const expected={coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+const expected={coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
 const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
 let failure;const aborted=new Set();
 function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
 const usage={prompt_tokens:7,completion_tokens:3,total_tokens:10};
 const server=createServer((request,response)=>{
  let bytes='';request.on('data',b=>bytes+=b);request.on('end',()=>{try{
+  if(request.url==='/factory_mcp'){
+   assert.equal(request.method,'POST');const rpc=JSON.parse(bytes);const reply=result=>{response.writeHead(200,{'content-type':'application/json'});response.end(JSON.stringify({jsonrpc:'2.0',id:rpc.id,result}));};
+   if(rpc.method==='server/discover'){response.writeHead(404);response.end();return;}
+   if(rpc.method==='initialize'){reply({protocolVersion:'2025-11-25',capabilities:{tools:{}},serverInfo:{name:'factory-peer',version:'1'}});return;}
+   if(rpc.method==='notifications/initialized'){response.writeHead(202);response.end();return;}
+   if(rpc.method==='tools/list'){reply({tools:[{name:'write',description:'Write one isolated fixture effect',inputSchema:{type:'object',properties:{text:{type:'string'}},required:['text'],additionalProperties:false}}]});return;}
+   assert.equal(rpc.method,'tools/call');assert.equal(rpc.params.name,'write');assert.deepEqual(rpc.params.arguments,{text:'actual production remote effect'});assert.equal(++peerCalls,1);writeFileSync(join(peerRoot,'actual.txt'),rpc.params.arguments.text);reply({content:[{type:'text',text:'Actual factory peer acknowledged'}]});return;
+  }
   const mode=request.url.slice(1);assert.ok(mode in counts);assert.ok(++counts[mode]<=expected[mode]);assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');assert.ok(!bytes.includes('synthetic-model-rpc-not-live'));
   const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.equal(body.stream,true);assert.equal(body.stream_options.include_usage,true);
+  if(mode==='coding_remote'||mode==='coding_remote_factory'){
+   const phase=counts[mode];assert.equal(body.messages.length,phase===1?2:4);assert.match(body.messages[0].content,/PRODUCTION_REMOTE_GUIDANCE/);const remoteTools=body.tools.filter(t=>t.function.name.startsWith('mcp_'));assert.equal(remoteTools.length,1);const alias=remoteTools[0].function.name;assert.match(alias,/^mcp_/);
+   if(phase===2){assert.equal(body.messages[2].tool_calls[0].function.name,alias);assert.equal(body.messages[3].tool_call_id,'production-remote-call');const result=JSON.parse(body.messages[3].content);assert.equal(result.acknowledged_by_peer,true);if(mode==='coding_remote')assert.equal(result.request_id,'rpc-peer-reply');else assert.equal(peerCalls,1);assert.ok(result.operation_id);}
+   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,phase===1?{role:'assistant',tool_calls:[{index:0,id:'production-remote-call',type:'function',function:{name:alias,arguments:JSON.stringify({text:'actual production remote effect'})}}]}:{role:'assistant',content:'Production remote complete.'},phase===1?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
+  }
   if(mode==='coding_async'||mode==='coding_async_unrecorded'){
    const phase=counts[mode];assert.match(body.messages[0].content,/CODING_ASYNC_GUIDANCE/);assert.deepEqual(body.tools.map(t=>t.function.name),['run_process']);
    if(phase===2){assert.ok(body.messages.find(m=>m.tool_call_id==='async-launch'));assert.equal(body.messages.some(m=>m.role==='system'&&m.content.includes('background_processes_joined_before_final_response')),false);}
@@ -109,5 +126,8 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 try{
  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly ninety requests: two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly ninety-four requests: two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
 }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+
+assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});
+

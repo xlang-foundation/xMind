@@ -1,0 +1,375 @@
+diff --git a/Native/include/agentflow/agent_remote_tool_host.hpp b/Native/include/agentflow/agent_remote_tool_host.hpp
+index 41a85ace..d5d1a75f 100644
+--- a/Native/include/agentflow/agent_remote_tool_host.hpp
++++ b/Native/include/agentflow/agent_remote_tool_host.hpp
+@@ -46,6 +46,9 @@ struct AgentRemoteToolOwnerContext {
+     WorkspaceTools* primary_workspace=nullptr;
+     WorkspaceToolSet* workspace_members=nullptr;
+     RepositoryInstructionContext* repository_context=nullptr;
++    // A coding owner replaces guidance contexts on model admission. Resolve
++    // its current context at invocation instead of retaining the prior address.
++    std::function<RepositoryInstructionContext*()> repository_context_for_call;
+     std::vector<std::vector<AgentPermissionRule>> permission_layers;
+     std::function<bool(const std::string&)> offered_tool;
+     std::function<McpToolRegistry*(const std::string&)> mcp_registry;
+diff --git a/Native/include/agentflow/agent_runner_coding_workspace.hpp b/Native/include/agentflow/agent_runner_coding_workspace.hpp
+index c12353e0..fa514eb4 100644
+--- a/Native/include/agentflow/agent_runner_coding_workspace.hpp
++++ b/Native/include/agentflow/agent_runner_coding_workspace.hpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/agent_runner_read_workspace.hpp"
+ #include "agentflow/agent_file_tool_host.hpp"
+ #include "agentflow/agent_process_tool_host.hpp"
++#include "agentflow/agent_remote_tool_host.hpp"
+ 
+ namespace agentflow {
+ // Explicit additional admission for native file tools. Supplying this object
+@@ -10,6 +11,7 @@ class AgentRunnerCodingWorkspace:public AgentRunnerReadWorkspace {
+ public:
+     virtual std::unique_ptr<AgentFileToolHost> file_host()=0;
+     virtual std::unique_ptr<AgentProcessOwnerHost> process_host(){return {};}
++    virtual std::unique_ptr<AgentRemoteToolHost> remote_host(){return {};}
+     virtual bool join_background(const std::string& attempt,std::stop_token cancel){return false;}
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_coding_context.hpp b/Native/include/agentflow/agent_worker_coding_context.hpp
+index 8ad6ed17..5cfe4c4b 100644
+--- a/Native/include/agentflow/agent_worker_coding_context.hpp
++++ b/Native/include/agentflow/agent_worker_coding_context.hpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/agent_worker_read_context.hpp"
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
++#include "agentflow/agent_worker_remote_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
+ #include <map>
+ 
+@@ -11,12 +12,13 @@ namespace agentflow {
+ class AgentWorkerCodingContext final:public AgentReadToolHost {
+ public:
+     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
+-        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
++        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
+     ModelRequest prepare(std::stop_token={});
+     void admit(const std::string&,const ModelRequest&,std::stop_token={});
+     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+     AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
+     AgentWorkerRpcHandler bind_processes(const AgentWorkerScope&);
++    AgentWorkerRpcHandler bind_remotes(const AgentWorkerScope&);
+     AgentWorkerFileHost& files()noexcept{return *files_;}
+ private:
+     AgentWorkerReadContext reads_;
+@@ -24,6 +26,7 @@ private:
+     std::unique_ptr<AgentWorkerFileHost> files_;
+     std::shared_ptr<AgentProcessToolHost> process_;
+     std::unique_ptr<AgentWorkerProcessHost> processes_;
++    std::unique_ptr<AgentWorkerRemoteHost> remotes_;
+     std::vector<std::string> joined_process_notes_;
+     std::map<std::string,bool> joined_attempts_;
+     bool join_outcome_unrecorded_=false;
+diff --git a/Native/include/agentflow/agent_worker_coding_owner.hpp b/Native/include/agentflow/agent_worker_coding_owner.hpp
+index ee3500af..1759382c 100644
+--- a/Native/include/agentflow/agent_worker_coding_owner.hpp
++++ b/Native/include/agentflow/agent_worker_coding_owner.hpp
+@@ -7,7 +7,7 @@ class AgentWorkerCodingOwner final {
+ public:
+     AgentWorkerCodingOwner(PersistenceService&,AgentWorkerLeaseSpec,const AgentWorkerScope&,
+         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,std::string,
+-        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
++        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
+     ~AgentWorkerCodingOwner();
+     std::string dispatch(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token={});
+ private:
+diff --git a/Native/include/agentflow/agent_worker_supervisor.hpp b/Native/include/agentflow/agent_worker_supervisor.hpp
+index b8e98d89..50b9189b 100644
+--- a/Native/include/agentflow/agent_worker_supervisor.hpp
++++ b/Native/include/agentflow/agent_worker_supervisor.hpp
+@@ -21,7 +21,7 @@ public:
+     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
+     void start_coding(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+-        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
++        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
+     RunState execute();
+     void cancel();
+     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);
+diff --git a/Native/src/agent_remote_tool_host.cpp b/Native/src/agent_remote_tool_host.cpp
+index 4ff0438c..5400fa5e 100644
+--- a/Native/src/agent_remote_tool_host.cpp
++++ b/Native/src/agent_remote_tool_host.cpp
+@@ -20,7 +20,7 @@ std::string operation_id(){std::random_device random;std::ostringstream value;va
+ class LocalRemoteToolHost final:public AgentRemoteToolHost {
+ public:
+     LocalRemoteToolHost(PersistenceService& store,AgentRunJournal& journal,AgentRemoteToolOwnerContext owner):store_(store),journal_(journal),owner_(std::move(owner)){
+-        if(!bounded_id(owner_.run_id,128)||!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||!owner_.mcp_registry||!owner_.a2a_registry||owner_.approval_timeout.count()<=0||owner_.approval_timeout>std::chrono::hours(24))throw std::invalid_argument("Invalid backend remote-tool owner");
++        if(!bounded_id(owner_.run_id,128)||!owner_.primary_workspace||(!owner_.repository_context&&!owner_.repository_context_for_call)||!owner_.offered_tool||!owner_.mcp_registry||!owner_.a2a_registry||owner_.approval_timeout.count()<=0||owner_.approval_timeout>std::chrono::hours(24))throw std::invalid_argument("Invalid backend remote-tool owner");
+         workspace_id_=owner_.primary_workspace->identity();
+         if(owner_.workspace_members){
+             if(owner_.workspace_members->workspace_id()!=workspace_id_||owner_.workspace_members->folders().empty()||owner_.workspace_members->folders().front().root!=owner_.primary_workspace->root_path())throw ToolAccessDenied("Remote-tool membership differs from its owner");
+@@ -46,7 +46,9 @@ public:
+             if(!calls_.insert({call.attempt_id,call.call_id}).second)throw ToolAccessDenied("Remote-tool call has already entered this owner");
+         }
+         for(const auto& layer:owner_.permission_layers)if(agent_permission_denies(layer,call.tool_name,"*"))throw AgentPermissionDenied("Selected agent policy denied this remote tool");
+-        auto& context=*owner_.repository_context;
++        auto* current_context=owner_.repository_context_for_call?owner_.repository_context_for_call():owner_.repository_context;
++        if(!current_context)throw ToolAccessDenied("Remote tool has no current native repository guidance");
++        auto& context=*current_context;
+         if(!context.skills().ready(cancel)||!context.ready(".",cancel))return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
+         auto guidance=context.precondition(".");
+         if(owner_.before_effect)guidance.before_effect=[authority=owner_.before_effect,call](const std::string& id,std::stop_token stop){authority(call,id,stop);};
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index f2f13788..f1f4ec23 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -616,7 +616,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+             if(!settings_.context&&(!settings_.provider_identity||!budget))for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
+         };
+         reload_history();
+-        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
++        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+         if(read_workspace_)request=prepare_workspace_window();
+         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
+         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
+@@ -727,6 +727,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+             file_tool_host=checked_tool_host(tool_hosts_->file(std::move(owner)));
+         }
+         std::unique_ptr<AgentRemoteToolHost> remote_tool_host;
++        if(coding_workspace_)remote_tool_host=coding_workspace_->remote_host();
+         if(workspace_&&repository_context){
+             AgentRemoteToolOwnerContext owner;owner.run_id=id;owner.primary_workspace=workspace_.get();owner.workspace_members=run_workspace_tools.get();
+             owner.repository_context=repository_context.get();owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
+@@ -975,12 +976,12 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                         Json args;try{args=Json::parse(mcp_compact_object(call.arguments_json));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid file-tool arguments");}
+                         if(args.contains("folder_id")){if(!args["folder_id"].is_string())throw std::invalid_argument("Workspace folder ID must be text");invocation.folder_id=args["folder_id"].get<std::string>();}
+                         auto result=file_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);exact_output=result.output_json;success=result.success;
+-                    }else if(mcp_tools.contains(call.name)||(a2a_tools&&call.name.starts_with("a2a_delegate_"))){
++                    }else if((coding_workspace_&&is_agent_remote_tool(call.name))||mcp_tools.contains(call.name)||(a2a_tools&&call.name.starts_with("a2a_delegate_"))){
+                         if(!remote_tool_host)throw ToolAccessDenied("Remote tool is not admitted for this run");
+                         AgentRemoteToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
+                         invocation.workspace_id=read_workspace_?read_workspace_->workspace_id():(run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity());invocation.workspace_revision=read_workspace_?read_workspace_->workspace_revision():(run_workspace_tools?run_workspace_tools->revision():1);
+                         invocation.tool_index=static_cast<std::uint32_t>(index-1);invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;
+-                        auto result=remote_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);success=result.success;
++                        auto result=remote_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);exact_output=result.output_json;success=result.success;
+                     }else if(is_agent_process_tool(call.name)){
+                         if(!process_tool_host)throw ToolAccessDenied("Process tool is not admitted for this run");
+                         AgentProcessToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
+diff --git a/Native/src/agent_worker_coding_context.cpp b/Native/src/agent_worker_coding_context.cpp
+index a9a25304..e318d339 100644
+--- a/Native/src/agent_worker_coding_context.cpp
++++ b/Native/src/agent_worker_coding_context.cpp
+@@ -10,13 +10,13 @@ namespace agentflow {
+ namespace {
+ AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy){
+     std::set<std::string> names;
+-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name))||!names.insert(tool.name).second)
++    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name))||!names.insert(tool.name).second)
+         throw std::invalid_argument("Coding workspace contains an unsupported capability");
+     std::erase_if(policy.tools,[](const auto& tool){return !is_agent_read_tool(tool.name);});return policy;
+ }
+ }
+ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,
+-    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
++    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
+     :reads_(store,store,lease,owner,read_policy(policy),cancel),tools_(std::move(policy.tools)){
+     if(owner.deadline!=deadline)throw std::invalid_argument("Coding model and tools require the same captured deadline");
+     AgentFileToolOwnerContext files;files.run_id=owner.run_id;files.primary_workspace=owner.primary_workspace;
+@@ -31,6 +31,11 @@ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,Age
+         AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=true;
+         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
+     }
++    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_remote_tool(tool.name);})){
++        if(!remote_owner||remote_owner->run_id!=owner.run_id||remote_owner->primary_workspace!=owner.primary_workspace||remote_owner->workspace_members!=owner.workspace_members||remote_owner->deadline!=deadline)throw Conflict("Coding remote catalogue lacks its captured native registry owner");
++        auto context=std::move(*remote_owner);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);
++        remotes_=std::make_unique<AgentWorkerRemoteHost>(store,files_->lease(),std::move(context),deadline,cancel);
++    }
+ }
+ ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){auto request=reads_.prepare(cancel);request.tools=tools_;for(const auto& note:joined_process_notes_)request.messages.push_back({MessageRole::system,note});return request;}
+ void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+@@ -91,4 +96,18 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_processes(const AgentWorker
+         catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+     };
+ }
++AgentWorkerRpcHandler AgentWorkerCodingContext::bind_remotes(const AgentWorkerScope& scope){
++    if(!remotes_)return [](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");};
++    auto dispatch=bind_agent_worker_remote_rpc(*remotes_,scope);
++    return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
++        if(method!="remote.invoke")return dispatch(method,payload,std::move(sink),cancel);
++        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);const auto call=AgentRemoteToolInvocation::parse(payload);if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Remote call lacks its actually admitted guidance window");return dispatch(method,payload,std::move(sink),cancel);}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++
+ }
+diff --git a/Native/src/agent_worker_coding_owner.cpp b/Native/src/agent_worker_coding_owner.cpp
+index e4890c84..c0aa3f0a 100644
+--- a/Native/src/agent_worker_coding_owner.cpp
++++ b/Native/src/agent_worker_coding_owner.cpp
+@@ -7,27 +7,28 @@ namespace agentflow {
+ struct AgentWorkerCodingOwner::Impl {
+     AgentWorkerCodingContext context;
+     std::unique_ptr<AgentWorkerModelHost> model;
+-    AgentWorkerRpcHandler model_rpc,read_rpc,file_rpc,process_rpc,journal_rpc;
++    AgentWorkerRpcHandler model_rpc,read_rpc,file_rpc,process_rpc,remote_rpc,journal_rpc;
+     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+         AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
+-        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
+-        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(process_owner)){
++        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
++        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(process_owner),std::move(remote_owner)){
+         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
+         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
+         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
+         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),std::move(model_policy),std::move(gateway),deadline,cancel);
+         model_rpc=bind_agent_worker_model_rpc(*model,scope);read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
+-        file_rpc=context.bind_files(scope);process_rpc=context.bind_processes(scope);journal_rpc=bind_agent_worker_workspace_journal_rpc(store,context.files(),scope,deadline,cancel);
++        file_rpc=context.bind_files(scope);process_rpc=context.bind_processes(scope);remote_rpc=context.bind_remotes(scope);journal_rpc=bind_agent_worker_workspace_journal_rpc(store,context.files(),scope,deadline,cancel);
+     }
+ };
+ AgentWorkerCodingOwner::AgentWorkerCodingOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+     AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::string identity,
+-    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
+-    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner))){}
++    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
++    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner),std::move(remote_owner))){}
+ AgentWorkerCodingOwner::~AgentWorkerCodingOwner()=default;
+ std::string AgentWorkerCodingOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
+     if(method.starts_with("model."))return impl_->model_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("journal."))return impl_->journal_rpc(method,payload,std::move(sink),cancel);
++    if(method.starts_with("remote."))return impl_->remote_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("process."))return impl_->process_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("file."))return impl_->file_rpc(method,payload,std::move(sink),cancel);
+     return impl_->read_rpc(method,payload,std::move(sink),cancel);
+diff --git a/Native/src/agent_worker_read_workspace.cpp b/Native/src/agent_worker_read_workspace.cpp
+index ae9f5561..39867b14 100644
+--- a/Native/src/agent_worker_read_workspace.cpp
++++ b/Native/src/agent_worker_read_workspace.cpp
+@@ -4,6 +4,7 @@
+ #include "agentflow/agent_worker_read_rpc.hpp"
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
++#include "agentflow/agent_worker_remote_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
+ #include "nlohmann/json.hpp"
+ #include <utility>
+@@ -41,6 +42,7 @@ public:
+     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
+     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
+     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
++    std::unique_ptr<AgentRemoteToolHost> remote_host()override{return std::make_unique<AgentWorkerRemoteClient>(peer_);}
+     bool join_background(const std::string& attempt,std::stop_token cancel)override{
+         try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
+             if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}
+diff --git a/Native/src/agent_worker_remote_host.cpp b/Native/src/agent_worker_remote_host.cpp
+index 8b37a644..e62a99de 100644
+--- a/Native/src/agent_worker_remote_host.cpp
++++ b/Native/src/agent_worker_remote_host.cpp
+@@ -9,7 +9,7 @@ namespace agentflow {
+ namespace {AgentRemoteToolResult failure(const char* code){return {false,nlohmann::json{{"error",{{"code",code},{"message","Backend remote tool did not return an acknowledged result; inspect native operation receipts before requesting another command"}}}}.dump()};}}
+ AgentWorkerRemoteHost::AgentWorkerRemoteHost(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentRemoteToolOwnerContext owner,std::chrono::steady_clock::time_point deadline,std::stop_token cancel)
+     :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
+-    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker remote owner differs from captured lease");
++    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||(!owner.repository_context&&!owner.repository_context_for_call)||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker remote owner differs from captured lease");
+     auto offered=owner.offered_tool;owner.offered_tool=[offered=std::move(offered)](const std::string& name){return is_agent_remote_tool(name)&&offered(name);};
+     owner.before_effect=[store=&store_,lease=lease_,deadline=deadline_,cancel=owner_cancel_](const AgentRemoteToolInvocation& call,const std::string& id,std::stop_token token){store->claim_agent_worker_remote_effect(lease,call,id,deadline,cancel,token).get();};
+     native_=make_agent_remote_tool_host(store_,store_,std::move(owner));
+diff --git a/Native/src/agent_worker_supervisor.cpp b/Native/src/agent_worker_supervisor.cpp
+index b8cccd37..7148d89e 100644
+--- a/Native/src/agent_worker_supervisor.cpp
++++ b/Native/src/agent_worker_supervisor.cpp
+@@ -67,12 +67,12 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
+     impl_->ready=true;
+ }
+ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,AgentWorkerReadRequestPolicy policy,ChatProviderConfig config,
+-    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner){
++    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner){
+     std::lock_guard lock(impl_->mutex);
+     if(!impl_->lease_admitted||impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
+     impl_->started=true; // Startup failure is not permission to retry this child.
+     impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
+-        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner));
++        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner));
+     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
+         [owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
+     impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);
+diff --git a/Native/tests/agent_worker_coding_remote_fixture.hpp b/Native/tests/agent_worker_coding_remote_fixture.hpp
+new file mode 100644
+index 00000000..2410eb11
+--- /dev/null
++++ b/Native/tests/agent_worker_coding_remote_fixture.hpp
+@@ -0,0 +1,16 @@
++#include "agentflow/agent_worker_supervisor.hpp"
++namespace worker_coding_remote_fixture {
++using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;using worker_process_fixture::check;
++inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder){
++    const auto directory=folder/"production-coding-remote";check(std::filesystem::create_directory(directory),"Production remote worker needs a fresh workspace");{std::ofstream instructions(directory/"AGENTS.md",std::ios::binary);instructions<<"PRODUCTION_REMOTE_GUIDANCE\n";instructions.close();check(bool(instructions),"Production remote guidance fixture must be written");}WorkspaceTools workspace(directory.string());RepositoryInstructionContext guidance(workspace,workspace.repository_instructions("."));guidance.prepare();const auto deadline=Clock::now()+20s;const std::string id="rpc-production-coding-remote",identity=R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})";
++    worker_remote_rpc_fixture::Peer remote(directory/"actual.txt");McpToolRegistry registry(remote,store,workspace,"production-remote-peer",1,deadline);const auto alias=registry.definitions().at(0).name;
++    store.create_session(id,"Production unified xmind remote model loop").get();store.start_prompt_run(id,id,R"({"content":"Perform the admitted remote tool call and inspect its acknowledgement."})",RootBudgetSpec{"native.direct-agent",1,workspace.identity(),identity,0,0,8,600000}).get();store.append_event(id,"agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}}})}}.dump()).get();
++    AgentWorkerSupervisor supervisor(store,image,{id,id,workspace.identity(),"production-coding-remote-generation",1},identity,deadline);AgentReadToolOwnerContext reads;reads.run_id=id;reads.primary_workspace=&workspace;reads.repository_context=[&](std::size_t i){return i?nullptr:&guidance;};reads.offered_tool=[&](const std::string& name){return name==alias;};reads.deadline=deadline;
++    AgentRemoteToolOwnerContext owner;owner.run_id=id;owner.primary_workspace=&workspace;owner.repository_context=&guidance;owner.offered_tool=reads.offered_tool;owner.mcp_registry=[&](const std::string& name){return name==alias?&registry:nullptr;};owner.a2a_registry=[](const std::string&)->A2aAgentToolRegistry*{return nullptr;};owner.deadline=deadline;
++    AgentWorkerReadRequestPolicy policy;policy.instructions="Production remote coding loop.";policy.include_usage=true;policy.tools=registry.definitions();ChatProviderConfig provider{endpoint+"/coding_remote","worker-rpc-fixture",Capability::supported,Capability::supported};provider.deadline=10s;provider.idle_timeout=10s;
++    supervisor.start_coding(reads,policy,provider,{},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),{}, {},owner);
++    auto running=std::async(std::launch::async,[&]{return supervisor.execute();});std::optional<Operation> pending;const auto until=Clock::now()+5s;while(Clock::now()<until&&!pending){for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval)pending=op;if(!pending&&running.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Production remote worker returned before approval: "+to_string(running.get()));if(!pending)std::this_thread::sleep_for(5ms);}check(pending.has_value()&&remote.sends==0,"Production remote effect must await actual approval");store.decide_operation(pending->id,OperationDecision::allow,"production-remote-controller").get();check(running.get()==RunState::completed,"Production remote worker must complete the actual model loop");const auto terminal=supervisor.drain_completed(Clock::now()+5s);check(terminal.exit_code==0&&!supervisor.alive()&&supervisor.lease().pid!=GetCurrentProcessId(),"Production remote child must physically retire");
++    const auto history=store.run_history(id).get();check(history.size()==4&&Json::parse(history.back().json).at("content")=="Production remote complete."&&remote.sends==1&&worker_process_fixture::read(remote.effect)=="actual production remote effect"&&store.root_budget(id).get().model_calls_reserved==2,"Production remote loop must retain one actual effect, exact canonical continuation and two model windows");const auto events=store.events(id).get();const auto claimed=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.remote.claimed";});check(claimed!=events.end(),"Production remote call requires its durable claim");const auto receipt=store.agent_worker_remote_claim(id,Json::parse(claimed->json).at("attempt_id").get<std::string>(),"production-remote-call").get();check(receipt.success&&receipt.state=="returned"&&receipt.operation_ids==std::vector<std::string>{pending->id}&&Json::parse(history[2].json).at("content")==receipt.actual_output_json,"Canonical remote turn must retain its exact actual native acknowledgement");
++    std::cout<<"Production unified xmind remote AgentRunner loop verified one actual approved peer effect, exact canonical continuation, two model windows and physical child retirement."<<std::endl;
++}
++}
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index 1542de2f..2ac32c09 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -24,6 +24,7 @@
+ #include "agent_worker_process_fixture.hpp"
+ #include "agent_worker_control_rpc_fixture.hpp"
+ #include "agent_worker_remote_rpc_fixture.hpp"
++#include "agent_worker_coding_remote_fixture.hpp"
+ #include "agent_worker_read_runner_fixture.hpp"
+ #include "agent_worker_context_fixture.hpp"
+ #include "agent_worker_supervisor_fixture.hpp"
+@@ -252,6 +253,6 @@ int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-chann
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_post_drain_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-leases' AND json_extract(NEW.payload,'$.spec.generation')='generation-other_error' AND json_extract(NEW.payload,'$.state')='retired' BEGIN SELECT RAISE(ABORT,'fixture_post_drain_abort'); END");}
+-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
++    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
+     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index 867b36e6..c37b2760 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -1,10 +1,10 @@
+-// Independent controlled native provider; ninety intentional requests, no live key.
++// Independent controlled native provider; ninety-two intentional requests, no live key.
+ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+ import {promisify} from 'node:util';
+ const [executable,modules,stdlib]=process.argv.slice(2);
+-const expected={coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
++const expected={coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+ let failure;const aborted=new Set();
+ function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
+@@ -13,6 +13,11 @@ const server=createServer((request,response)=>{
+  let bytes='';request.on('data',b=>bytes+=b);request.on('end',()=>{try{
+   const mode=request.url.slice(1);assert.ok(mode in counts);assert.ok(++counts[mode]<=expected[mode]);assert.equal(request.headers.authorization,'Bearer synthetic-model-rpc-not-live');assert.ok(!bytes.includes('synthetic-model-rpc-not-live'));
+   const body=JSON.parse(bytes);assert.equal(body.model,'worker-rpc-fixture');assert.equal(body.stream,true);assert.equal(body.stream_options.include_usage,true);
++  if(mode==='coding_remote'){
++   const phase=counts[mode];assert.equal(body.messages.length,phase===1?2:4);assert.match(body.messages[0].content,/PRODUCTION_REMOTE_GUIDANCE/);assert.equal(body.tools.length,1);const alias=body.tools[0].function.name;assert.match(alias,/^mcp_/);
++   if(phase===2){assert.equal(body.messages[2].tool_calls[0].function.name,alias);assert.equal(body.messages[3].tool_call_id,'production-remote-call');const result=JSON.parse(body.messages[3].content);assert.equal(result.acknowledged_by_peer,true);assert.equal(result.request_id,'rpc-peer-reply');assert.ok(result.operation_id);}
++   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,phase===1?{role:'assistant',tool_calls:[{index:0,id:'production-remote-call',type:'function',function:{name:alias,arguments:JSON.stringify({text:'actual production remote effect'})}}]}:{role:'assistant',content:'Production remote complete.'},phase===1?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
++  }
+   if(mode==='coding_async'||mode==='coding_async_unrecorded'){
+    const phase=counts[mode];assert.match(body.messages[0].content,/CODING_ASYNC_GUIDANCE/);assert.deepEqual(body.tools.map(t=>t.function.name),['run_process']);
+    if(phase===2){assert.ok(body.messages.find(m=>m.tool_call_id==='async-launch'));assert.equal(body.messages.some(m=>m.role==='system'&&m.content.includes('background_processes_joined_before_final_response')),false);}
+@@ -109,5 +114,5 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly ninety requests: two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
++ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly ninety-two requests: two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

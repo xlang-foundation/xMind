@@ -1,3 +1,28 @@
+## Production coding-worker remote tools and configured MCP factory — 2026-10-21
+
+Normal coding-worker startup now discovers configured native MCP/A2A registries,
+filters discovered tools against the selected allowlist, rejects missing aliases
+and retains peer/observer ownership through physical worker drain. Remote tools
+use the unified xmind child and authenticated xlang3 SDK C++ remote methods.
+
+An independent loopback HTTP MCP peer writes one actual isolated file after
+controller approval through ExecutionPlatform. The actual model consumes the
+exact durable acknowledgement in a second window, then the child physically
+retires. The direct production model-loop test also passes. Current guidance
+is resolved at invocation after admission, fixing an earlier dangling pointer.
+
+The serial Release build and **3/3 focused contracts pass in 29.54 seconds**;
+2730 project inputs, 16 SDK headers, 1870 pure-library files, 76 runtime files,
+18598 Node dependencies and 133 native binaries retain frozen file sets/hashes.
+The independent model peer observes exactly 94 requests. Earlier failed builds
+and tests, including heap corruption, remain preserved.
+[Scope, patches and raw evidence](evidence/process-worker-production-remote-factory-admission-20261021.json).
+
+Configured A2A factory execution and dynamic catalogue refresh remain unverified
+or unfinished. Remaining capabilities/default placement, full regression,
+installation and fresh rendered/live-provider acceptance remain open. Existing
+owners and completed tasks remain preserved.
+
 ## Durable remote host and authenticated worker RPC — 2026-10-21
 
 Canonical mixed worker turns now derive remote activity and exact history from

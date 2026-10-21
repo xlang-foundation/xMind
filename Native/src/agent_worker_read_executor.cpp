@@ -1,5 +1,8 @@
 #include "agentflow/agent_worker_read_executor.hpp"
 #include "agentflow/agent_worker_supervisor.hpp"
+#include "agentflow/agent_backend_runtime.hpp"
+#include "agentflow/mcp_tool_registry.hpp"
+#include "agentflow/a2a_tool_registry.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/patch_tool.hpp"
@@ -19,6 +22,33 @@ namespace {
 using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;
 std::string generation(){std::random_device random;std::ostringstream text;text<<std::hex<<std::setfill('0');for(unsigned i=0;i<4;++i)text<<std::setw(8)<<random();return text.str();}
 bool bounded(const std::string& text,std::size_t size){return !text.empty()&&text.size()<=size&&text.find('\0')==std::string::npos;}
+// Per-run native peer lifetime. No endpoint, credential or registry handle is
+// carried in worker admission or remote invocation values.
+class RemoteRunTools {
+    PersistenceService& store_;
+    std::shared_ptr<AgentBackendRuntime> runtime_;
+    std::vector<std::shared_ptr<AgentMcpPeer>> peers_;
+    std::map<std::string,McpToolRegistry*> mcp_;
+    std::unique_ptr<A2aAgentToolRegistry> a2a_;
+    std::vector<ModelToolDefinition> definitions_;
+public:
+    RemoteRunTools(PersistenceService& store,const AgentSettings& settings,const std::string& run,WorkspaceToolSet& members,Clock::time_point deadline,std::stop_token cancel):store_(store),runtime_(make_persistence_agent_backend_runtime(store)){
+        auto& primary=members.folder_tools(0);
+        for(const auto& server:settings.mcp_servers){if(!server.enabled)continue;
+            store_.append_event(run,"mcp.connecting",Json{{"server_id",server.id},{"config_revision",server.revision}}.dump()).get();
+            auto peer=runtime_->connect_mcp(server,deadline,cancel);peer->discover(primary,members.folders());
+            const auto definitions=peer->definitions();for(const auto& definition:definitions){if(definitions_.size()>=64||!mcp_.emplace(definition.name,peer->owner_registry()).second)throw std::invalid_argument("Worker remote catalogue exceeds limits or collides");definitions_.push_back(definition);}
+            store_.append_event(run,"mcp.discovered",Json{{"server_id",server.id},{"config_revision",server.revision},{"tool_count",definitions.size()},{"protocol_version",peer->protocol_version()}}.dump()).get();
+            peers_.push_back(std::move(peer));
+        }
+        if(settings.a2a_enabled){const auto remaining=std::chrono::ceil<std::chrono::milliseconds>(deadline-Clock::now());if(remaining.count()<=0)throw AgentWorkerAuthorityExpired("Worker deadline elapsed before A2A discovery");a2a_=runtime_->discover_a2a(primary,std::min(remaining,5000ms),cancel);for(const auto& id:a2a_->unavailable_agent_ids())store_.append_event(run,"a2a.discovery_failed",Json{{"agent_id",id},{"reason","peer_unavailable_or_invalid"}}.dump()).get();for(const auto& definition:a2a_->definitions()){if(definitions_.size()>=64||mcp_.contains(definition.name))throw std::invalid_argument("Worker remote catalogue exceeds limits or collides");definitions_.push_back(definition);}}
+    }
+    ~RemoteRunTools(){for(const auto& peer:peers_)peer->stop_observer();}
+    void observe(const std::string& run){for(const auto& peer:peers_)if(!peer->start_observer(run))store_.append_event(run,"mcp.subscription.unavailable",R"({"reason":"listener_unavailable"})").get();}
+    const std::vector<ModelToolDefinition>& definitions()const noexcept{return definitions_;}
+    McpToolRegistry* mcp(const std::string& alias)const{const auto found=mcp_.find(alias);return found==mcp_.end()?nullptr:found->second;}
+    A2aAgentToolRegistry* a2a(const std::string& alias)const{if(!a2a_)return nullptr;const auto definitions=a2a_->definitions();return std::any_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==alias;})?a2a_.get():nullptr;}
+};
 class WorkspaceExecutor final:public AgentRootExecutor {
     PersistenceService& store_;
     AgentSettings settings_;
@@ -36,13 +66,14 @@ class WorkspaceExecutor final:public AgentRootExecutor {
         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
+            if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
             if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
         return result;
     }
 public:
     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding)
         :store_(store),settings_(std::move(settings)),coding_(coding),image_(std::move(image)){
-        if(!image_||!settings_.workspace||(!coding_&&settings_.approved_edits)||settings_.a2a_enabled||!settings_.mcp_servers.empty()||(!coding_&&!settings_.process_profiles.empty())||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
+        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
@@ -90,6 +121,17 @@ public:
         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
+        std::unique_ptr<RemoteRunTools> remote_tools;
+        if(coding_&&(settings_.a2a_enabled||!settings_.mcp_servers.empty())){
+            remote_tools=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);
+            const auto allowed=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+            for(const auto& definition:remote_tools->definitions()){
+                if(allowed&&std::find(allowed->begin(),allowed->end(),definition.name)==allowed->end())continue;
+                if(policy.tools.size()>=64||std::any_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))throw std::invalid_argument("Worker tool catalogue exceeds limits or collides");
+                policy.tools.push_back(definition);
+            }
+            if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+        }
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
         auto provider=settings_.provider;provider.model=model(request);
         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
@@ -100,6 +142,12 @@ public:
         owner.repository_context=[&](std::size_t index){return index<contexts.size()?contexts[index].get():nullptr;};
         owner.offered_tool=[catalogue=policy.tools](const std::string& name){return std::any_of(catalogue.begin(),catalogue.end(),[&](const auto& tool){return tool.name==name;});};
         owner.inherited_permission_layers=settings_.inherited_permission_rule_layers;owner.inherited_permission_layers.push_back(settings_.permission_rules);owner.permission_rules=request.agent_permissions;
+        std::optional<AgentRemoteToolOwnerContext> remote_owner;
+        if(remote_tools){
+            AgentRemoteToolOwnerContext context;context.run_id=request.run_id;context.primary_workspace=owner.primary_workspace;context.workspace_members=&members;context.repository_context=contexts.front().get();context.offered_tool=owner.offered_tool;context.deadline=deadline;context.approval_timeout=owner.approval_timeout;
+            context.mcp_registry=[&](const std::string& name){return remote_tools->mcp(name);};context.a2a_registry=[&](const std::string& name){return remote_tools->a2a(name);};
+            remote_owner=std::move(context);remote_tools->observe(request.run_id);
+        }
         auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{request.run_id,request.run_id,membership.workspace_id,generation(),membership.revision},budget.spec.provider_identity_json,deadline);
         // An observation failure cannot release the physical slot. Retain this
         // same supervisor, including uncertain launch before a returned handle;
@@ -107,7 +155,7 @@ public:
         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
                 catch(...){std::this_thread::sleep_for(1s);}}};
         std::exception_ptr failure;
-        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
         catch(...){failure=std::current_exception();}
         try{
             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}

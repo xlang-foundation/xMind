@@ -67,12 +67,12 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
     impl_->ready=true;
 }
 void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,AgentWorkerReadRequestPolicy policy,ChatProviderConfig config,
-    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner){
+    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner){
     std::lock_guard lock(impl_->mutex);
     if(!impl_->lease_admitted||impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
     impl_->started=true; // Startup failure is not permission to retry this child.
     impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
-        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner));
+        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner));
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
         [owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
     impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);

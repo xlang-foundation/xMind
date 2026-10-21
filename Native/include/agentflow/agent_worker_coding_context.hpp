@@ -2,6 +2,7 @@
 #include "agentflow/agent_worker_read_context.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
+#include "agentflow/agent_worker_remote_rpc.hpp"
 #include "agentflow/process_executor.hpp"
 #include <map>
 
@@ -11,12 +12,13 @@ namespace agentflow {
 class AgentWorkerCodingContext final:public AgentReadToolHost {
 public:
     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
-        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
+        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
     ModelRequest prepare(std::stop_token={});
     void admit(const std::string&,const ModelRequest&,std::stop_token={});
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
     AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
     AgentWorkerRpcHandler bind_processes(const AgentWorkerScope&);
+    AgentWorkerRpcHandler bind_remotes(const AgentWorkerScope&);
     AgentWorkerFileHost& files()noexcept{return *files_;}
 private:
     AgentWorkerReadContext reads_;
@@ -24,6 +26,7 @@ private:
     std::unique_ptr<AgentWorkerFileHost> files_;
     std::shared_ptr<AgentProcessToolHost> process_;
     std::unique_ptr<AgentWorkerProcessHost> processes_;
+    std::unique_ptr<AgentWorkerRemoteHost> remotes_;
     std::vector<std::string> joined_process_notes_;
     std::map<std::string,bool> joined_attempts_;
     bool join_outcome_unrecorded_=false;
