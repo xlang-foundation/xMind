@@ -10,8 +10,8 @@ struct AgentWorkerCodingOwner::Impl {
     AgentWorkerRpcHandler model_rpc,read_rpc,file_rpc,process_rpc,journal_rpc;
     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
         AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
-        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::vector<ProcessProfile> profiles)
-        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(profiles)){
+        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
+        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(process_owner)){
         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
@@ -22,8 +22,8 @@ struct AgentWorkerCodingOwner::Impl {
 };
 AgentWorkerCodingOwner::AgentWorkerCodingOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
     AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::string identity,
-    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::vector<ProcessProfile> profiles)
-    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(profiles))){}
+    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
+    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner))){}
 AgentWorkerCodingOwner::~AgentWorkerCodingOwner()=default;
 std::string AgentWorkerCodingOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
     if(method.starts_with("model."))return impl_->model_rpc(method,payload,std::move(sink),cancel);

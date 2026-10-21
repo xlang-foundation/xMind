@@ -1,0 +1,462 @@
+diff --git a/Native/apps/server_main.cpp b/Native/apps/server_main.cpp
+index 0bb3e76f..e37c3657 100644
+--- a/Native/apps/server_main.cpp
++++ b/Native/apps/server_main.cpp
+@@ -309,7 +309,7 @@ int run_server(int argc,char** argv) {
+         std::unique_ptr<agentflow::EditRecoveryReader> recovery;
+         agentflow::AgentRootExecutorFactory root_executor_factory;
+         if(process_worker){const auto image_path=(std::filesystem::u8path(loaded_runtime_root())/"xmind.exe").u8string();auto image=agentflow::ForegroundProcess::bind_executable(std::string(reinterpret_cast<const char*>(image_path.data()),image_path.size()));root_executor_factory=[image=std::move(image),process_code](agentflow::PersistenceService& store,const agentflow::AgentSettings& settings){return process_code?agentflow::make_agent_worker_coding_executor(store,settings,image):agentflow::make_agent_worker_read_executor(store,settings,image);};}
+-        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){if(process_worker){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())settings.tool_allowlist->push_back("run_process");}}};
++        const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){if(process_worker){settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}}};
+ #endif
+         if(options.contains("--model")) {
+ #if defined(_WIN32)
+diff --git a/Native/include/agentflow/agent_process_tool_host.hpp b/Native/include/agentflow/agent_process_tool_host.hpp
+index d8c6de61..cc255a4d 100644
+--- a/Native/include/agentflow/agent_process_tool_host.hpp
++++ b/Native/include/agentflow/agent_process_tool_host.hpp
+@@ -47,6 +47,7 @@ struct AgentProcessToolOwnerContext {
+     std::chrono::steady_clock::time_point deadline;
+     std::chrono::milliseconds approval_timeout{600000};
+     bool allow_background=true;
++    std::stop_token background_cancel;
+     // Backend-only authority for run_process, checked after approval at the
+     // actual dispatch boundary. The executor supplies its claimed operation ID.
+     std::function<void(const AgentProcessToolInvocation&,const std::string&,std::stop_token)> before_effect;
+diff --git a/Native/include/agentflow/agent_worker_coding_context.hpp b/Native/include/agentflow/agent_worker_coding_context.hpp
+index d84ebecc..199b2867 100644
+--- a/Native/include/agentflow/agent_worker_coding_context.hpp
++++ b/Native/include/agentflow/agent_worker_coding_context.hpp
+@@ -10,7 +10,7 @@ namespace agentflow {
+ class AgentWorkerCodingContext final:public AgentReadToolHost {
+ public:
+     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
+-        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::vector<ProcessProfile> profiles={});
++        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
+     ModelRequest prepare(std::stop_token={});
+     void admit(const std::string&,const ModelRequest&,std::stop_token={});
+     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+@@ -21,7 +21,7 @@ private:
+     AgentWorkerReadContext reads_;
+     std::vector<ModelToolDefinition> tools_;
+     std::unique_ptr<AgentWorkerFileHost> files_;
+-    std::unique_ptr<ProcessExecutor> process_;
++    std::shared_ptr<AgentProcessToolHost> process_;
+     std::unique_ptr<AgentWorkerProcessHost> processes_;
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_coding_owner.hpp b/Native/include/agentflow/agent_worker_coding_owner.hpp
+index de027c49..ee3500af 100644
+--- a/Native/include/agentflow/agent_worker_coding_owner.hpp
++++ b/Native/include/agentflow/agent_worker_coding_owner.hpp
+@@ -7,7 +7,7 @@ class AgentWorkerCodingOwner final {
+ public:
+     AgentWorkerCodingOwner(PersistenceService&,AgentWorkerLeaseSpec,const AgentWorkerScope&,
+         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,std::string,
+-        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::vector<ProcessProfile> profiles={});
++        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
+     ~AgentWorkerCodingOwner();
+     std::string dispatch(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token={});
+ private:
+diff --git a/Native/include/agentflow/agent_worker_supervisor.hpp b/Native/include/agentflow/agent_worker_supervisor.hpp
+index 0efbc613..b8e98d89 100644
+--- a/Native/include/agentflow/agent_worker_supervisor.hpp
++++ b/Native/include/agentflow/agent_worker_supervisor.hpp
+@@ -21,7 +21,7 @@ public:
+     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
+     void start_coding(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+-        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::vector<ProcessProfile> profiles={});
++        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
+     RunState execute();
+     void cancel();
+     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);
+diff --git a/Native/include/agentflow/process_executor.hpp b/Native/include/agentflow/process_executor.hpp
+index 4a64d1f5..d0659035 100644
+--- a/Native/include/agentflow/process_executor.hpp
++++ b/Native/include/agentflow/process_executor.hpp
+@@ -39,6 +39,9 @@ struct AgentProcessInvocation {
+     std::string arguments_json;
+     std::int64_t expires_unix_ms=0;
+     bool allow_background=false;
++    // Backend-owned lifetime token, never part of tool/RPC JSON. A worker's
++    // request token ends after acknowledgement; its service owner can outlive it.
++    std::stop_token background_cancel;
+ };
+ // Backend-owned process-tool capability consumed by AgentRunner. Workspace
+ // handles and instruction verifiers remain native backend capabilities; this
+@@ -72,7 +75,7 @@ public:
+     std::string invoke(const AgentProcessInvocation& invocation,std::stop_token cancel={},
+         InstructionPrecondition guidance={}) override;
+     std::string invoke(const std::string& operation_id,const std::string& run_id,
+-        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false);
++        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false,std::stop_token background_cancel={});
+     std::string wait(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={}) override;
+     ModelToolDefinition stop_definition() const override;
+     std::string stop(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={}) override;
+@@ -83,7 +86,7 @@ private:
+     std::string invoke_scoped(const std::string& operation_id,const std::string& run_id,
+         const std::string& arguments_json,std::int64_t expires_unix_ms,WorkspaceTools& workspace,
+         const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,
+-        bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background);
++        bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background,std::stop_token background_cancel={});
+     std::string execute_claimed(const std::string& operation_id,const std::string& run_id,const std::string& profile_id,
+         ProcessConfiguration launch,std::stop_token cancel,bool persistent=false,
+         std::shared_ptr<std::atomic_bool> intentional_stop={},
+diff --git a/Native/src/agent_process_tool_host.cpp b/Native/src/agent_process_tool_host.cpp
+index d2956aa7..6df689a4 100644
+--- a/Native/src/agent_process_tool_host.cpp
++++ b/Native/src/agent_process_tool_host.cpp
+@@ -54,7 +54,7 @@ public:
+         if(!ready)return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
+         if(call.tool_name=="run_process"){
+             if(owner_.before_effect)guidance.before_effect=[check=owner_.before_effect,call](const std::string& operation,std::stop_token token){check(call,operation,token);};
+-            AgentProcessInvocation invocation;invocation.operation_id=operation_id();invocation.run_id=owner_.run_id;invocation.workspace_id=workspace_id_;invocation.workspace_revision=revision_;invocation.folder_id=call.folder_id;invocation.arguments_json=call.arguments_json;invocation.allow_background=owner_.allow_background;
++            AgentProcessInvocation invocation;invocation.operation_id=operation_id();invocation.run_id=owner_.run_id;invocation.workspace_id=workspace_id_;invocation.workspace_revision=revision_;invocation.folder_id=call.folder_id;invocation.arguments_json=call.arguments_json;invocation.allow_background=owner_.allow_background;invocation.background_cancel=owner_.background_cancel;
+             invocation.expires_unix_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
+             return {true,owner_.process->invoke(invocation,cancel,std::move(guidance))};
+         }
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 3d5bfaf9..874e46de 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -616,7 +616,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+             if(!settings_.context&&(!settings_.provider_identity||!budget))for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
+         };
+         reload_history();
+-        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||tool.name=="run_process"));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
++        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+         if(read_workspace_)request=prepare_workspace_window();
+         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
+         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
+diff --git a/Native/src/agent_worker_coding_context.cpp b/Native/src/agent_worker_coding_context.cpp
+index c64293ae..b8e1648f 100644
+--- a/Native/src/agent_worker_coding_context.cpp
++++ b/Native/src/agent_worker_coding_context.cpp
+@@ -9,13 +9,13 @@ namespace agentflow {
+ namespace {
+ AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy){
+     std::set<std::string> names;
+-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&tool.name!="run_process")||!names.insert(tool.name).second)
++    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name))||!names.insert(tool.name).second)
+         throw std::invalid_argument("Coding workspace contains an unsupported capability");
+     std::erase_if(policy.tools,[](const auto& tool){return !is_agent_read_tool(tool.name);});return policy;
+ }
+ }
+ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,
+-    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::vector<ProcessProfile> profiles)
++    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
+     :reads_(store,store,lease,owner,read_policy(policy),cancel),tools_(std::move(policy.tools)){
+     if(owner.deadline!=deadline)throw std::invalid_argument("Coding model and tools require the same captured deadline");
+     AgentFileToolOwnerContext files;files.run_id=owner.run_id;files.primary_workspace=owner.primary_workspace;
+@@ -24,10 +24,10 @@ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,Age
+     files.repository_context=[this](std::size_t index){return index<reads_.contexts_.size()?reads_.contexts_[index].get():nullptr;};
+     for(const auto& tool:tools_)if(is_agent_file_tool(tool.name)){if(!owner.offered_tool(tool.name))throw Conflict("Coding file catalogue differs from its captured owner");files.allowed_tools.push_back(tool.name);}
+     files_=std::make_unique<AgentWorkerFileHost>(store,std::move(lease),std::move(files),deadline,cancel);
+-    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return tool.name=="run_process";})){
+-        if(profiles.empty()||!owner.offered_tool("run_process"))throw Conflict("Coding command catalogue lacks its native profile owner");
+-        process_=std::make_unique<ProcessExecutor>(store,*owner.primary_workspace,owner.primary_workspace->root_path(),std::move(profiles));
+-        AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=false;
++    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_process_tool(tool.name);})){
++        if(!process_owner)throw Conflict("Coding command catalogue lacks its native profile owner");
++        process_=std::move(process_owner);
++        AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=true;
+         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
+     }
+ }
+diff --git a/Native/src/agent_worker_coding_owner.cpp b/Native/src/agent_worker_coding_owner.cpp
+index 55a5d184..e4890c84 100644
+--- a/Native/src/agent_worker_coding_owner.cpp
++++ b/Native/src/agent_worker_coding_owner.cpp
+@@ -10,8 +10,8 @@ struct AgentWorkerCodingOwner::Impl {
+     AgentWorkerRpcHandler model_rpc,read_rpc,file_rpc,process_rpc,journal_rpc;
+     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+         AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
+-        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::vector<ProcessProfile> profiles)
+-        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(profiles)){
++        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
++        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(process_owner)){
+         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
+         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
+         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
+@@ -22,8 +22,8 @@ struct AgentWorkerCodingOwner::Impl {
+ };
+ AgentWorkerCodingOwner::AgentWorkerCodingOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+     AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::string identity,
+-    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::vector<ProcessProfile> profiles)
+-    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(profiles))){}
++    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
++    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner))){}
+ AgentWorkerCodingOwner::~AgentWorkerCodingOwner()=default;
+ std::string AgentWorkerCodingOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
+     if(method.starts_with("model."))return impl_->model_rpc(method,payload,std::move(sink),cancel);
+diff --git a/Native/src/agent_worker_process_host.cpp b/Native/src/agent_worker_process_host.cpp
+index 8c61d9a7..43bbb9a3 100644
+--- a/Native/src/agent_worker_process_host.cpp
++++ b/Native/src/agent_worker_process_host.cpp
+@@ -7,10 +7,11 @@ namespace agentflow {
+ namespace {AgentProcessToolResult failure(const char* code){return {false,nlohmann::json{{"error",{{"code",code},{"message","Backend process did not return an acknowledged command result; inspect native operation receipts before requesting another command"}}}}.dump()};}}
+ AgentWorkerProcessHost::AgentWorkerProcessHost(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentProcessToolOwnerContext owner,std::chrono::steady_clock::time_point deadline,std::stop_token cancel)
+     :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
+-    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||!owner.offered_tool||owner.before_effect||owner.allow_background||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker process owner differs from captured foreground lease");
++    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker process owner differs from captured lease");
+     const auto count=owner.workspace_members?owner.workspace_members->folders().size():1;for(std::size_t i=0;i<count;++i)if(!owner.repository_context(i))throw std::invalid_argument("Worker process requires native guidance");
+     auto offered=owner.offered_tool;owner.offered_tool=[offered=std::move(offered)](const std::string& name){return is_agent_process_tool(name)&&offered(name);};
+-    owner.before_effect=[this](const AgentProcessToolInvocation& call,const std::string& id,std::stop_token token){store_.claim_agent_worker_process_effect(lease_,call,id,deadline_,owner_cancel_,token).get();};
++    owner.background_cancel=owner_cancel_;
++    owner.before_effect=[store=&store_,lease=lease_,deadline=deadline_,cancel=owner_cancel_](const AgentProcessToolInvocation& call,const std::string& id,std::stop_token token){store->claim_agent_worker_process_effect(lease,call,id,deadline,cancel,token).get();};
+     native_=make_agent_process_tool_host(store_,std::move(owner));
+ }
+ AgentProcessToolResult AgentWorkerProcessHost::invoke(const AgentProcessToolInvocation& call,std::stop_token caller){
+@@ -22,7 +23,20 @@ AgentProcessToolResult AgentWorkerProcessHost::invoke(const AgentProcessToolInvo
+     store_.claim_agent_worker_process(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();store_.start_agent_worker_process(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
+     const auto save=[&](const AgentProcessToolResult& result){try{store_.record_agent_worker_process_result(lease_,call,result.success,result.output_json).get();}catch(...){throw ProcessOutcomeUnrecorded("Worker process result could not be recorded; retain native ownership without replay");}};
+     AgentProcessToolResult result;std::exception_ptr interrupted;
+-    try{result=native_->invoke(call,stop.get_token());}
++    try{
++        if(call.tool_name=="run_process"){const auto args=nlohmann::json::parse(call.arguments_json);if(args.value("background",false)&&!args.value("persistent",false))throw std::invalid_argument("Worker background execution requires an explicit persistent service");}
++        result=native_->invoke(call,stop.get_token());
++        const auto output=nlohmann::json::parse(result.output_json);
++        if(call.tool_name=="run_process"&&result.success&&output.value("background",false)){
++            const auto id=output.at("operation_id").get<std::string>();
++            for(;;){const auto saved=store_.agent_worker_process_claim(lease_.root_run_id,call.attempt_id,call.call_id).get();const auto operation=store_.operation(id).get();
++                if(operation.state==OperationState::uncertain)throw ProcessEffectUncertain("Worker background service has an uncertain native outcome");
++                if(saved.operation_ids==std::vector<std::string>{id})break;
++                if(operation.state==OperationState::failed){result=failure("process_not_dispatched");break;}
++                if(stop.stop_requested()||std::chrono::steady_clock::now()>=deadline_)throw ProcessOutcomeUnrecorded("Background acknowledgement has no durable dispatch binding; retain ownership without replay");std::this_thread::sleep_for(std::chrono::milliseconds(2));
++            }
++        }
++    }
+     catch(const ProcessOutcomeUnrecorded&){throw;}
+     catch(const ProcessEffectUncertain&){throw;}
+     catch(const ProcessBeforeDispatchError&){result=failure("process_not_dispatched");}
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index e388dc39..37abc721 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -26,17 +26,17 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+     std::shared_ptr<const BoundProcessExecutable> image_;
+     std::unique_ptr<AgentRunner> validator_;
+     std::unique_ptr<WorkspaceTools> primary_;
+-    std::unique_ptr<ProcessExecutor> process_catalogue_;
++    std::shared_ptr<ProcessExecutor> process_catalogue_;
+     std::shared_ptr<AgentModelGateway> gateway_;
+     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
+     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
+         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)selected->push_back("run_process");}
++        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);}
+         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
+         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
+-        if(process_catalogue_)definitions.push_back(process_catalogue_->definition());
++        if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
+         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
+-            if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(name=="run_process"&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
++            if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+         return result;
+     }
+ public:
+@@ -48,7 +48,7 @@ public:
+         settings_.workspace_membership_snapshot={};
+         validator_=std::make_unique<AgentRunner>(store_,settings_);
+         primary_=std::make_unique<WorkspaceTools>(*settings_.workspace);
+-        if(coding_&&!settings_.process_profiles.empty())process_catalogue_=std::make_unique<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);
++        if(coding_&&!settings_.process_profiles.empty())process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);
+         gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
+     }
+     void validate(const AgentRootExecutionRequest& request)const override{
+@@ -89,7 +89,7 @@ public:
+         if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n"+settings_.instruction_policy.instructions;
+         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
+         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
+-        if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||definition.name=="run_process")policy.tools.push_back(definition);
++        if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
+         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+         auto provider=settings_.provider;provider.model=model(request);
+         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
+@@ -107,7 +107,7 @@ public:
+         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
+                 catch(...){std::this_thread::sleep_for(1s);}}};
+         std::exception_ptr failure;
+-        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,settings_.process_profiles);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
++        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+         catch(...){failure=std::current_exception();}
+         try{
+             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}
+diff --git a/Native/src/agent_worker_supervisor.cpp b/Native/src/agent_worker_supervisor.cpp
+index 601bca11..b8cccd37 100644
+--- a/Native/src/agent_worker_supervisor.cpp
++++ b/Native/src/agent_worker_supervisor.cpp
+@@ -67,12 +67,12 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
+     impl_->ready=true;
+ }
+ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,AgentWorkerReadRequestPolicy policy,ChatProviderConfig config,
+-    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::vector<ProcessProfile> profiles){
++    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner){
+     std::lock_guard lock(impl_->mutex);
+     if(!impl_->lease_admitted||impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
+     impl_->started=true; // Startup failure is not permission to retry this child.
+     impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
+-        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(profiles));
++        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner));
+     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
+         [owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
+     impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);
+diff --git a/Native/src/process_executor.cpp b/Native/src/process_executor.cpp
+index 604e44dd..658a644f 100644
+--- a/Native/src/process_executor.cpp
++++ b/Native/src/process_executor.cpp
+@@ -251,8 +251,8 @@ std::string ProcessExecutor::execute_claimed(const std::string& id,const std::st
+     catch(const std::invalid_argument&){throw;}
+     catch(...){throw ProcessOutcomeUnrecorded("Claimed process outcome could not be encoded or preserved; recovery is required");}
+ }
+-std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
+-    return invoke_scoped(id,run,source,expiry,workspace_,root_,workspace_.identity(),workspace_.identity(),1,true,cancel,std::move(guidance),allow_background);
++std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background,std::stop_token background_cancel) {
++    return invoke_scoped(id,run,source,expiry,workspace_,root_,workspace_.identity(),workspace_.identity(),1,true,cancel,std::move(guidance),allow_background,background_cancel);
+ }
+ std::string ProcessExecutor::invoke(const AgentProcessInvocation& request,std::stop_token cancel,InstructionPrecondition guidance){
+     const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+@@ -268,14 +268,14 @@ std::string ProcessExecutor::invoke(const AgentProcessInvocation& request,std::s
+         if(selected.identity()!=binding.folder_id||selected.root_path()!=binding.root)
+             throw ToolAccessDenied("Process folder identity differs from the durable workspace membership");
+         return invoke_scoped(request.operation_id,request.run_id,request.arguments_json,request.expires_unix_ms,selected,
+-            binding.root,tools.workspace_id(),binding.folder_id,tools.revision(),selected_index==0,cancel,std::move(guidance),request.allow_background);
++            binding.root,tools.workspace_id(),binding.folder_id,tools.revision(),selected_index==0,cancel,std::move(guidance),request.allow_background,request.background_cancel);
+     }
+     if(request.workspace_id!=workspace_.identity()||request.workspace_revision!=1||request.folder_id!=workspace_.identity())
+         throw ToolAccessDenied("Process invocation does not match the admitted primary workspace");
+     return invoke_scoped(request.operation_id,request.run_id,request.arguments_json,request.expires_unix_ms,workspace_,root_,
+-        request.workspace_id,request.folder_id,request.workspace_revision,true,cancel,std::move(guidance),request.allow_background);
++        request.workspace_id,request.folder_id,request.workspace_revision,true,cancel,std::move(guidance),request.allow_background,request.background_cancel);
+ }
+-std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,WorkspaceTools& workspace,const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
++std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,WorkspaceTools& workspace,const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background,std::stop_token background_cancel) {
+     if(source.size()>65536)throw std::invalid_argument("Process arguments exceed limits");
+     if(workspace_id.empty()||folder_id.empty()||workspace_revision<1||workspace.identity()!=folder_id||workspace.root_path()!=root)throw ToolAccessDenied("Process folder binding is invalid");
+     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process argument JSON");}
+@@ -349,7 +349,7 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
+         try {
+             workers_.reserve(workers_.size()+1);
+             auto* const self=this;const auto profile=found->id;auto owned_launch=std::move(launch);
+-            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=cancel,persistent,before_effect=std::move(guidance.before_effect)](std::stop_token shutdown)mutable{
++            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=background_cancel.stop_possible()?background_cancel:cancel,persistent,before_effect=std::move(guidance.before_effect)](std::stop_token shutdown)mutable{
+                 std::stop_source stop;std::stop_callback stop_shutdown(shutdown,[&]{stop.request_stop();});std::stop_callback stop_owner(owner_cancel,[&]{stop.request_stop();});
+                 try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token(),persistent,intentional_stop,std::move(before_effect));}
+                 catch(...){try{const auto current=self->store_.operation(id).get();if(current.state==OperationState::executing)self->store_.finish_operation(id,OperationState::uncertain,R"({"reason":"background_process_worker_failed"})").get();}catch(...) {}}
+@@ -369,7 +369,7 @@ std::string ProcessExecutor::wait(const std::string& run,const std::string& sour
+     const auto id=args["job_id"].get<std::string>();const auto deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(timeout);
+     for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process wait was cancelled");const auto op=store_.operation(id).get();if(op.spec.tool!="run_process")throw ToolAccessDenied("Background process identity is invalid");
+         Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}if(!binding.value("background",false))throw std::invalid_argument("Operation is not a background process job");
+-        if(op.spec.run_id!=run&&(!binding.value("persistent",false)||store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||binding.value("target_workspace_id",std::string{})!=workspace_.identity()))throw ToolAccessDenied("Background process belongs to another session or workspace");
++        if(op.spec.run_id!=run&&(!binding.value("persistent",false)||store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||op.spec.workspace!=workspace_.identity()||binding.value("workspace_id",std::string{})!=workspace_.identity()))throw ToolAccessDenied("Background process belongs to another session or workspace");
+         if(op.state!=OperationState::executing){Json result={{"job_id",id},{"operation_id",id},{"state",to_string(op.state)}};if(op.state==OperationState::succeeded||op.state==OperationState::failed||op.state==OperationState::uncertain){try{result["result"]=Json::parse(op.result_json);}catch(...){throw DatabaseError("Saved process result is invalid");}}return result.dump();}
+         if(std::chrono::steady_clock::now()>=deadline){Json result={{"job_id",id},{"operation_id",id},{"state","running"}};try{for(const auto* channel:{"stdout","stderr"}){const auto page=store_.read_process_output(id,channel,0,4096).get();if(!page.bytes.empty())result[channel]=captured(page.bytes,page.total_bytes);}}catch(const NotFound&){}return result.dump();}std::this_thread::sleep_for(std::chrono::milliseconds(50));
+     }
+@@ -384,7 +384,7 @@ std::string ProcessExecutor::stop(const std::string& run,const std::string& sour
+     if(!args.is_object()||args.size()!=1||!args.contains("job_id")||!args["job_id"].is_string()||args["job_id"].get_ref<const std::string&>().empty()||args["job_id"].get_ref<const std::string&>().size()>128)throw std::invalid_argument("Invalid persistent process job ID");
+     const auto id=args["job_id"].get<std::string>();const auto op=store_.operation(id).get();Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}
+     if(op.spec.tool!="run_process"||!binding.value("background",false)||!binding.value("persistent",false))throw ToolAccessDenied("Process is not a persistent service");
+-    if(store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||binding.value("target_workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Persistent process belongs to another session or workspace");
++    if(store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||op.spec.workspace!=workspace_.identity()||binding.value("workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Persistent process belongs to another session or workspace");
+     if(op.state!=OperationState::executing)return Json{{"job_id",id},{"state",to_string(op.state)},{"already_stopped",true}}.dump();
+     bool found=false;{
+         std::lock_guard lock(workers_mutex_);for(auto& worker:workers_)if(worker.id==id&&!worker.done->load(std::memory_order_acquire)){worker.intentional_stop->store(true,std::memory_order_release);worker.thread.request_stop();found=true;break;}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 54aac2ee..623b3340 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3504,11 +3504,11 @@ AgentWorkerProcessClaimRecord Repository::claim_agent_worker_process_effect(cons
+     const auto op=operation(id);const auto plan=Json::parse(object_json(op.spec.arguments_json)),args=Json::parse(object_json(call.arguments_json,4*1024*1024));
+     if(op.spec.workspace!=lease.workspace_id||op.spec.tool!="run_process")throw Conflict("Worker process has no matching native job");
+     if(call.tool_name=="run_process"){
+-        if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||plan.at("folder_id")!=call.folder_id||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision||plan.at("profile_id")!=args.at("profile")||plan.value("background",false)||args.value("background",false))throw Conflict("Worker process operation differs from its admitted foreground scope");
++        if(op.state!=OperationState::executing||op.spec.run_id!=lease.owner_run_id||plan.at("folder_id")!=call.folder_id||plan.at("workspace_id")!=lease.workspace_id||plan.at("workspace_revision")!=lease.workspace_revision||plan.at("profile_id")!=args.at("profile")||plan.value("background",false)!=args.value("background",false)||plan.value("persistent",false)!=args.value("persistent",false)||(args.value("background",false)&&!args.value("persistent",false)))throw Conflict("Worker process operation differs from its admitted scope");
+         const auto& actual_args=plan.at("arguments");const auto& requested_args=args.at("arguments");if(!actual_args.is_array()||!requested_args.is_array()||actual_args.size()<requested_args.size()||!std::equal(requested_args.rbegin(),requested_args.rend(),actual_args.rbegin()))throw Conflict("Worker process arguments differ from the admitted provider call");
+     }else{
+         if(args.at("job_id")!=id||call.folder_id!=lease.workspace_id||!plan.value("background",false))throw Conflict("Worker control differs from its captured job");
+-        const bool same_run=op.spec.run_id==lease.owner_run_id;const bool shared_service=plan.value("persistent",false)&&run(op.spec.run_id).session_id==run(lease.owner_run_id).session_id&&plan.at("target_workspace_id")==lease.workspace_id;
++        const bool same_run=op.spec.run_id==lease.owner_run_id;const bool shared_service=plan.value("persistent",false)&&run(op.spec.run_id).session_id==run(lease.owner_run_id).session_id&&plan.at("workspace_id")==lease.workspace_id;
+         if((call.tool_name=="wait_process"&&!same_run&&!shared_service)||(call.tool_name=="stop_process"&&!shared_service))throw Conflict("Worker control cannot acquire another job owner");
+     }
+     const auto binding=Json{{"version",1},{"model",worker_claim_spec_json(model)},{"invocation_binding",context_digest(call.serialize())},{"operation_id",id},{"operation_spec_binding",worker_operation_binding(op)}};
+@@ -3519,7 +3519,7 @@ AgentWorkerProcessClaimRecord Repository::record_agent_worker_process_result(con
+     (void)object_json(output);auto& db=impl_->database;Transaction tx(db);auto record=read_worker_process(db,lease.root_run_id,call.attempt_id,call.call_id);
+     if(read_worker_lease(db,lease.generation).spec!=lease||record.model.generation!=lease.generation||record.model.owner_run_id!=lease.owner_run_id||record.invocation.serialize()!=call.serialize()||(success&&(record.operation_ids.empty()||record.state=="awaiting_dispatch")))throw Conflict("Worker process result differs from its captured dispatch");
+     if(record.state=="returned"){if(record.success!=success||record.actual_output_json!=output)throw Conflict("Acknowledged worker process result changed");tx.commit();return record;}
+-    for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_process_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(call.tool_name=="run_process"&&((op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded))))throw Conflict("Worker process result has an unresolved or inconsistent native effect");}
++    for(const auto& id:record.operation_ids){const auto op=operation(id);const auto binding=worker_process_effect_binding(db,record,id);if(binding.at("operation_spec_binding")!=worker_operation_binding(op)||(call.tool_name=="run_process"&&(!(Json::parse(op.spec.arguments_json).value("background",false)&&Json::parse(op.spec.arguments_json).value("persistent",false))?((op.state!=OperationState::succeeded&&op.state!=OperationState::failed)||(success&&op.state!=OperationState::succeeded)):(op.state!=OperationState::executing&&op.state!=OperationState::succeeded&&op.state!=OperationState::failed))))throw Conflict("Worker process result has an unresolved or inconsistent native effect");}
+     record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_process_json(record).dump(),std::string(worker_process_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.process.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
+ }
+ AgentWorkerProcessClaimRecord Repository::agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_process(impl_->database,root,attempt,call);}
+diff --git a/Native/tests/agent_worker_coding_server_contract.mjs b/Native/tests/agent_worker_coding_server_contract.mjs
+index 1947f3a1..ad3cd2ff 100644
+--- a/Native/tests/agent_worker_coding_server_contract.mjs
++++ b/Native/tests/agent_worker_coding_server_contract.mjs
+@@ -12,7 +12,7 @@ await mkdir(workspace);await writeFile(join(workspace,'input.txt'),marker);await
+ let requests=0,failure,child,stdout='',stderr='';
+ const provider=createServer((request,response)=>{let input='';request.on('data',b=>input+=b);request.on('end',()=>{try{
+  assert.equal(request.headers.authorization,'Bearer '+key);assert(!input.includes(key));const body=JSON.parse(input);assert.equal(body.model,'coding-server-fixture');assert.equal(body.stream,true);assert.match(body.messages[0].content,/CODING_SERVER_GUIDANCE/);assert.ok(++requests<=2);
+- assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['read_file','list_files','search_files','find_files','glob_files','edit_file','create_file','apply_patch','restore_operation','run_process'].sort());
++ assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['read_file','list_files','search_files','find_files','glob_files','edit_file','create_file','apply_patch','restore_operation','run_process','wait_process','stop_process'].sort());
+  if(requests===2){assert.equal(body.messages.length,6);assert.equal(body.messages[3].tool_call_id,'server-read');assert.equal(JSON.parse(body.messages[3].content).content,marker);assert.equal(body.messages[4].tool_call_id,'server-create');assert.ok(JSON.parse(body.messages[4].content).operation_id);assert.equal(body.messages[5].tool_call_id,'server-process');assert.equal(JSON.parse(body.messages[5].content).exit_code,0);}
+  const delta=requests===1?{role:'assistant',tool_calls:[{index:0,id:'server-read',type:'function',function:{name:'read_file',arguments:JSON.stringify({path:'input.txt'})}},{index:1,id:'server-create',type:'function',function:{name:'create_file',arguments:JSON.stringify({path:'created.txt',content:marker})}},{index:2,id:'server-process',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'xlang3',arguments:['-B','-c',"from pathlib import Path; Path('command.txt').write_bytes(Path('created.txt').read_bytes())"],workdir:'.',timeout_ms:10000})}}]}:{role:'assistant',content:'Server coding complete.'};
+  response.writeHead(200,{'content-type':'text/event-stream'});response.end('data: '+JSON.stringify({id:'coding-server-response',model:body.model,choices:[{index:0,delta,finish_reason:requests===1?'tool_calls':'stop'}],usage:{prompt_tokens:7,completion_tokens:3,total_tokens:10}})+'\n\ndata: [DONE]\n\n');
+diff --git a/Native/tests/agent_worker_process_control_fixture.hpp b/Native/tests/agent_worker_process_control_fixture.hpp
+index f283ffdf..0cb1618a 100644
+--- a/Native/tests/agent_worker_process_control_fixture.hpp
++++ b/Native/tests/agent_worker_process_control_fixture.hpp
+@@ -5,8 +5,9 @@ void durable_process_control_contract(const std::vector<std::string>& imports,co
+         PersistenceService store(database,imports);store.create_session("session","Actual durable service control").get();store.start_prompt_run("run","session",R"({"content":"Actual service with captured wait and stop calls"})",RootBudgetSpec{"native.direct-agent",1,workspace.identity(),provider,0,0,8,600000}).get();store.transition("run",RunState::queued,RunState::running).get();store.append_event("run","agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}}})}}.dump()).get();
+         const auto deadline=std::chrono::steady_clock::now()+30s;const auto lease=store.admit_agent_worker({"service-control-generation","run","run",workspace.identity(),1,12345,"134000000000000000","synthetic-service-controller",provider}).get().spec;
+         ProcessProfile profile{"xlang3",executable,1,{},35s};profile.xlang3_library=imports.at(1);ProcessExecutor executor(store,workspace,workspace.root_path(),{profile});AgentProcessToolOwnerContext owner;owner.run_id="run";owner.process=&executor;owner.primary_workspace=&workspace;owner.repository_context=[&](std::size_t i){return i==0?&guidance:nullptr;};owner.offered_tool=is_agent_process_tool;owner.deadline=deadline;owner.allow_background=true;
+-        auto local=make_agent_process_tool_host(store,owner);AgentProcessToolInvocation seed;seed.run_id="run";seed.attempt_id="trusted-seed";seed.call_id="actual-service-seed";seed.workspace_id=workspace.identity();seed.folder_id=workspace.identity();seed.workspace_revision=1;seed.tool_name="run_process";seed.arguments_json=Json{{"profile","xlang3"},{"arguments",Json::array({"-B","-c","import time; from pathlib import Path; Path('service-ready.txt').write_text('ready'); time.sleep(25)"})},{"workdir","."},{"background",true},{"persistent",true},{"timeout_ms",30000}}.dump();
++        std::stop_source lifetime;owner.background_cancel=lifetime.get_token();auto local=make_agent_process_tool_host(store,owner);AgentProcessToolInvocation seed;seed.run_id="run";seed.attempt_id="trusted-seed";seed.call_id="actual-service-seed";seed.workspace_id=workspace.identity();seed.folder_id=workspace.identity();seed.workspace_revision=1;seed.tool_name="run_process";seed.arguments_json=Json{{"profile","xlang3"},{"arguments",Json::array({"-B","-c","import time; from pathlib import Path; Path('service-ready.txt').write_text('ready'); time.sleep(25)"})},{"workdir","."},{"background",true},{"persistent",true},{"timeout_ms",30000}}.dump();
+         Task service(*local,seed);const auto proposal=pending(store,&service);job=proposal.id;store.decide_operation(job,OperationDecision::allow,"fixture-controller").get();need(service.result.get().success,"Trusted service seed must return actual background ownership");const auto ready_until=std::chrono::steady_clock::now()+5s;while(!std::filesystem::exists(root/"service-ready.txt")&&std::chrono::steady_clock::now()<ready_until)std::this_thread::sleep_for(5ms);need(std::filesystem::exists(root/"service-ready.txt")&&store.operation(job).get().state==OperationState::executing,"Actual xlang3 service must enter before control admission");
++        service.stop.request_stop();std::this_thread::sleep_for(50ms);need(store.operation(job).get().state==OperationState::executing,"Completed request cancellation must not cancel a service with its distinct backend lifetime token");
+         std::vector<AgentProcessToolInvocation> calls;for(const auto* name:{"wait_process","stop_process"}){auto call=seed;call.attempt_id="control-model";call.call_id=name;call.tool_name=name;Json args={{"job_id",job}};if(call.tool_name=="wait_process")args["timeout_ms"]=1;call.arguments_json=args.dump();calls.push_back(call);}
+         ModelCompletion response{"","","tool_calls","{}",{},"[]"};for(const auto& call:calls)response.tool_calls.push_back({call.call_id,call.tool_name,call.arguments_json});store.reserve_agent_worker_model(lease,"control-model",deadline).get();store.start_agent_worker_model(lease,"control-model",deadline).get();AgentWorkerModelClaimSpec model{lease.generation,"run","run","control-model",context_digest("synthetic actual service controls")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-process-fixture",23,5)).get();store.finish_agent_worker_model(lease,"control-model",deadline).get();
+         owner.allow_background=false;AgentWorkerProcessHost host(store,lease,owner,deadline);const auto observed=host.invoke(calls[0]);need(observed.success&&Json::parse(observed.output_json).at("state")=="running"&&store.operation(job).get().state==OperationState::executing,"Durable wait must acknowledge a real running observation without claiming exit");const auto stopped=host.invoke(calls[1]);need(stopped.success&&Json::parse(stopped.output_json).at("state")=="succeeded"&&store.operation(job).get().state==OperationState::succeeded&&Json::parse(store.operation(job).get().result_json).at("service_stopped")==true,"Durable stop must await actual service retirement and native terminal receipt");
+diff --git a/Native/tests/agent_worker_process_host_fixture.hpp b/Native/tests/agent_worker_process_host_fixture.hpp
+index ea025402..40fa3246 100644
+--- a/Native/tests/agent_worker_process_host_fixture.hpp
++++ b/Native/tests/agent_worker_process_host_fixture.hpp
+@@ -1,7 +1,8 @@
+ // Actual native command and approval; model and worker identities are synthetic.
+ void durable_process_host_contract(const std::vector<std::string>& imports,const std::string& executable){
+-    for(const std::string mode:{"approved","denied","policy","cancel","unrecorded","retired"}){
++    for(const std::string mode:{"approved","denied","policy","cancel","unrecorded","retired","background","background_unrecorded"}){
+         std::cout<<"Durable process host case "<<mode<<std::endl;
++        const bool background=mode.starts_with("background"),unrecorded=mode=="unrecorded"||mode=="background_unrecorded",approved=mode=="approved"||mode=="background";
+         Directory directory;const auto primary=directory.path/"primary",extra=directory.path/"attached";std::filesystem::create_directory(primary);std::filesystem::create_directory(extra);
+         WorkspaceTools workspace(primary.string()),attached(extra.string());WorkspaceToolSet members(workspace.identity(),7,{{workspace.identity(),workspace.root_path()},{attached.identity(),attached.root_path()}});
+         RepositoryInstructionContext guidance(workspace,workspace.repository_instructions(".")),extra_guidance(attached,attached.repository_instructions("."));guidance.prepare();extra_guidance.prepare();
+@@ -11,20 +12,22 @@ void durable_process_host_contract(const std::vector<std::string>& imports,const
+             store.append_event("run","agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",7},{"primary_folder_id",workspace.identity()},{"folders",Json::array({{{"folder_id",workspace.identity()},{"root",workspace.root_path()}},{{"folder_id",attached.identity()},{"root",attached.root_path()}}})}}.dump()).get();
+             const auto deadline=std::chrono::steady_clock::now()+20s;const auto lease=store.admit_agent_worker({"process-host-generation","run","run",workspace.identity(),7,12345,"134000000000000000","synthetic-process-host-identity",provider}).get().spec;
+             AgentProcessToolInvocation call;call.run_id="run";call.attempt_id="process-model";call.call_id="actual-command";call.workspace_id=workspace.identity();call.folder_id=attached.identity();call.workspace_revision=7;call.tool_name="run_process";call.arguments_json=Json{{"profile","xlang3"},{"arguments",Json::array({"-B","-c","import sys; assert sys.implementation.name == 'xlang3'; from pathlib import Path; Path('durable-marker.txt').write_bytes(b'durable command\\n'); print('durable-process-ok')"})},{"folder_id",attached.identity()},{"workdir","."},{"timeout_ms",10000}}.dump();
++            if(background){auto args=Json::parse(call.arguments_json);args["background"]=true;args["persistent"]=true;args["timeout_ms"]=30000;args["arguments"]=Json::array({"-B","-c","import time; from pathlib import Path; Path('durable-marker.txt').write_bytes(b'durable command\\n'); time.sleep(25)"});call.arguments_json=args.dump();}
+             ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{{call.call_id,call.tool_name,call.arguments_json}},"[]"};store.reserve_agent_worker_model(lease,call.attempt_id,deadline).get();store.start_agent_worker_model(lease,call.attempt_id,deadline).get();AgentWorkerModelClaimSpec model{lease.generation,"run","run",call.attempt_id,context_digest("synthetic captured process model input")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-process-fixture",23,5)).get();store.finish_agent_worker_model(lease,call.attempt_id,deadline).get();
+-            ProcessProfile profile{"xlang3",executable,1,{},10s};profile.xlang3_library=imports.at(1);ProcessExecutor executor(store,workspace,workspace.root_path(),{profile});AgentProcessToolOwnerContext owner;owner.run_id="run";owner.process=&executor;owner.primary_workspace=&workspace;owner.workspace_members=&members;owner.repository_context=[&](std::size_t i){return i==0?&guidance:i==1?&extra_guidance:nullptr;};owner.offered_tool=is_agent_process_tool;owner.deadline=deadline;owner.allow_background=false;if(mode=="policy")owner.permission_layers={{{"run_process","*","deny"}}};
+-            AgentWorkerProcessHost host(store,lease,owner,deadline);std::unique_ptr<XlangSqlite> fault;if(mode=="unrecorded"){fault=std::make_unique<XlangSqlite>(database,imports);fault->execute("CREATE TRIGGER fixture_process_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-process-claims' AND json_extract(NEW.payload,'$.state')='returned' BEGIN SELECT RAISE(ABORT,'fixture_process_result_abort'); END");}
++            ProcessProfile profile{"xlang3",executable,1,{},35s};profile.xlang3_library=imports.at(1);ProcessExecutor executor(store,workspace,workspace.root_path(),{profile});AgentProcessToolOwnerContext owner;owner.run_id="run";owner.process=&executor;owner.primary_workspace=&workspace;owner.workspace_members=&members;owner.repository_context=[&](std::size_t i){return i==0?&guidance:i==1?&extra_guidance:nullptr;};owner.offered_tool=is_agent_process_tool;owner.deadline=deadline;owner.allow_background=background;if(mode=="policy")owner.permission_layers={{{"run_process","*","deny"}}};
++            AgentWorkerProcessHost host(store,lease,owner,deadline);std::unique_ptr<XlangSqlite> fault;if(unrecorded){fault=std::make_unique<XlangSqlite>(database,imports);fault->execute("CREATE TRIGGER fixture_process_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-process-claims' AND json_extract(NEW.payload,'$.state')='returned' BEGIN SELECT RAISE(ABORT,'fixture_process_result_abort'); END");}
+             if(mode=="policy"){const auto result=host.invoke(call);need(!result.success&&Json::parse(result.output_json)["error"]["code"]=="agent_permission_denied"&&store.operations("run").get().empty(),"Inherited denial must precede any command proposal");}
+             else {Task task(host,call);const auto proposal=pending(store,&task);operation=proposal.id;const auto waiting=store.agent_worker_process_claim("run",call.attempt_id,call.call_id).get();need(waiting.state=="executing"&&waiting.operation_ids.empty()&&!std::filesystem::exists(extra/"durable-marker.txt"),"Process invocation must be durable while actual approval is pending");
+                 if(mode=="cancel")task.stop.request_stop();else {if(mode=="retired")store.retire_agent_worker(lease.generation,"worker_exit").get();store.decide_operation(proposal.id,mode=="denied"?OperationDecision::deny:OperationDecision::allow,"fixture-controller").get();}
+-                if(mode=="cancel")rejects<ToolCancelled>([&]{task.result.get();});else if(mode=="unrecorded")rejects<ProcessOutcomeUnrecorded>([&]{task.result.get();});else if(mode=="retired")rejects<Conflict>([&]{task.result.get();});else {const auto result=task.result.get();need(result.success==(mode=="approved"),"Actual command result must reflect controller decision");if(result.success)need(Json::parse(result.output_json).at("exit_code")==0,"Durable command must retain actual zero exit");}
++                if(mode=="cancel")rejects<ToolCancelled>([&]{task.result.get();});else if(unrecorded)rejects<ProcessOutcomeUnrecorded>([&]{task.result.get();});else if(mode=="retired")rejects<Conflict>([&]{task.result.get();});else {const auto result=task.result.get();need(result.success==approved,"Actual command result must reflect controller decision");if(result.success&&!background)need(Json::parse(result.output_json).at("exit_code")==0,"Durable command must retain actual zero exit");}
+             }
+-            if(fault)fault->execute("DROP TRIGGER fixture_process_result_abort");const auto saved=store.agent_worker_process_claim("run",call.attempt_id,call.call_id).get();const bool effect=mode=="approved"||mode=="unrecorded";
++            if(background){const auto until=std::chrono::steady_clock::now()+5s;while(!std::filesystem::exists(extra/"durable-marker.txt")&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(5ms);const auto started=store.agent_worker_process_claim("run",call.attempt_id,call.call_id).get();need(started.operation_ids==std::vector<std::string>{operation}&&store.operation(operation).get().state==OperationState::executing,"Background result must retain its native dispatch binding before acknowledgement");const auto stopped=Json::parse(executor.stop("run",Json{{"job_id",operation}}.dump()));need(stopped.at("state")=="succeeded","Fixture cleanup must observe actual intentional service retirement");}
++            if(fault)fault->execute("DROP TRIGGER fixture_process_result_abort");const auto saved=store.agent_worker_process_claim("run",call.attempt_id,call.call_id).get();const bool effect=approved||unrecorded;
+             need(std::filesystem::exists(extra/"durable-marker.txt")==effect&&!std::filesystem::exists(primary/"durable-marker.txt"),"Only an approved command may mutate its admitted attached folder");if(effect)need(read(extra/"durable-marker.txt")=="durable command\n"&&saved.operation_ids==std::vector<std::string>{operation}&&store.operation(operation).get().state==OperationState::succeeded,"Actual native effect and operation must remain bound exactly once");
+-            if(mode=="unrecorded")need(saved.state=="executing"&&saved.actual_output_json.empty(),"Unrecorded command result must not fabricate an acknowledgement");else need(saved.state=="returned"&&saved.success==(mode=="approved"),"Known command outcomes must be recorded before delivery");
++            if(unrecorded)need(saved.state=="executing"&&saved.actual_output_json.empty(),"Unrecorded command result must not fabricate an acknowledgement");else need(saved.state=="returned"&&saved.success==approved,"Known command outcomes must be recorded before delivery");
+             AgentWorkerProcessHost rebuilt(store,lease,owner,deadline);rejects<Conflict>([&]{rebuilt.invoke(call);});if(mode!="retired")store.retire_agent_worker(lease.generation,"worker_exit").get();store.transition("run",RunState::running,RunState::cancelled).get();
+         }
+-        {PersistenceService reopened(database,imports);const auto saved=reopened.agent_worker_process_claim("run","process-model","actual-command").get();need(saved.state==(mode=="unrecorded"?"uncertain":"returned"),"SQLite reopen must retain acknowledged and uncertain command ownership");}
++        {PersistenceService reopened(database,imports);const auto saved=reopened.agent_worker_process_claim("run","process-model","actual-command").get();need(saved.state==(unrecorded?"uncertain":"returned"),"SQLite reopen must retain acknowledged and uncertain command ownership");}
+         std::cout<<"Durable native process host "<<mode<<" verified actual approval, command scope, durable receipt and reconstruction replay rejection. Synthetic model and worker identity; no process RPC."<<std::endl;
+     }
+ }

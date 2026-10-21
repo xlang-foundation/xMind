@@ -7,10 +7,11 @@ namespace agentflow {
 namespace {AgentProcessToolResult failure(const char* code){return {false,nlohmann::json{{"error",{{"code",code},{"message","Backend process did not return an acknowledged command result; inspect native operation receipts before requesting another command"}}}}.dump()};}}
 AgentWorkerProcessHost::AgentWorkerProcessHost(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentProcessToolOwnerContext owner,std::chrono::steady_clock::time_point deadline,std::stop_token cancel)
     :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
-    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||!owner.offered_tool||owner.before_effect||owner.allow_background||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker process owner differs from captured foreground lease");
+    if(owner.run_id!=lease_.owner_run_id||!owner.primary_workspace||owner.primary_workspace->identity()!=lease_.workspace_id||!owner.repository_context||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_||(owner.workspace_members?owner.workspace_members->revision():1)!=lease_.workspace_revision)throw std::invalid_argument("Worker process owner differs from captured lease");
     const auto count=owner.workspace_members?owner.workspace_members->folders().size():1;for(std::size_t i=0;i<count;++i)if(!owner.repository_context(i))throw std::invalid_argument("Worker process requires native guidance");
     auto offered=owner.offered_tool;owner.offered_tool=[offered=std::move(offered)](const std::string& name){return is_agent_process_tool(name)&&offered(name);};
-    owner.before_effect=[this](const AgentProcessToolInvocation& call,const std::string& id,std::stop_token token){store_.claim_agent_worker_process_effect(lease_,call,id,deadline_,owner_cancel_,token).get();};
+    owner.background_cancel=owner_cancel_;
+    owner.before_effect=[store=&store_,lease=lease_,deadline=deadline_,cancel=owner_cancel_](const AgentProcessToolInvocation& call,const std::string& id,std::stop_token token){store->claim_agent_worker_process_effect(lease,call,id,deadline,cancel,token).get();};
     native_=make_agent_process_tool_host(store_,std::move(owner));
 }
 AgentProcessToolResult AgentWorkerProcessHost::invoke(const AgentProcessToolInvocation& call,std::stop_token caller){
@@ -22,7 +23,20 @@ AgentProcessToolResult AgentWorkerProcessHost::invoke(const AgentProcessToolInvo
     store_.claim_agent_worker_process(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();store_.start_agent_worker_process(lease_,call,deadline_,owner_cancel_,stop.get_token()).get();
     const auto save=[&](const AgentProcessToolResult& result){try{store_.record_agent_worker_process_result(lease_,call,result.success,result.output_json).get();}catch(...){throw ProcessOutcomeUnrecorded("Worker process result could not be recorded; retain native ownership without replay");}};
     AgentProcessToolResult result;std::exception_ptr interrupted;
-    try{result=native_->invoke(call,stop.get_token());}
+    try{
+        if(call.tool_name=="run_process"){const auto args=nlohmann::json::parse(call.arguments_json);if(args.value("background",false)&&!args.value("persistent",false))throw std::invalid_argument("Worker background execution requires an explicit persistent service");}
+        result=native_->invoke(call,stop.get_token());
+        const auto output=nlohmann::json::parse(result.output_json);
+        if(call.tool_name=="run_process"&&result.success&&output.value("background",false)){
+            const auto id=output.at("operation_id").get<std::string>();
+            for(;;){const auto saved=store_.agent_worker_process_claim(lease_.root_run_id,call.attempt_id,call.call_id).get();const auto operation=store_.operation(id).get();
+                if(operation.state==OperationState::uncertain)throw ProcessEffectUncertain("Worker background service has an uncertain native outcome");
+                if(saved.operation_ids==std::vector<std::string>{id})break;
+                if(operation.state==OperationState::failed){result=failure("process_not_dispatched");break;}
+                if(stop.stop_requested()||std::chrono::steady_clock::now()>=deadline_)throw ProcessOutcomeUnrecorded("Background acknowledgement has no durable dispatch binding; retain ownership without replay");std::this_thread::sleep_for(std::chrono::milliseconds(2));
+            }
+        }
+    }
     catch(const ProcessOutcomeUnrecorded&){throw;}
     catch(const ProcessEffectUncertain&){throw;}
     catch(const ProcessBeforeDispatchError&){result=failure("process_not_dispatched");}

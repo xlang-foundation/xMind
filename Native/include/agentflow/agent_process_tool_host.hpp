@@ -47,6 +47,7 @@ struct AgentProcessToolOwnerContext {
     std::chrono::steady_clock::time_point deadline;
     std::chrono::milliseconds approval_timeout{600000};
     bool allow_background=true;
+    std::stop_token background_cancel;
     // Backend-only authority for run_process, checked after approval at the
     // actual dispatch boundary. The executor supplies its claimed operation ID.
     std::function<void(const AgentProcessToolInvocation&,const std::string&,std::stop_token)> before_effect;

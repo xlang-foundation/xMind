@@ -1,3 +1,28 @@
+## Shared persistent services across coding workers — 2026-10-21
+
+Production unified xmind workers now share the native process owner for their
+captured settings generation. One actual child starts an approved persistent
+xlang3 service and observes startup, then physically retires while that service
+remains executing. A second actual child in the same session stops the original
+job. One launch approval, one factory construction, three exact durable tool
+receipts and five independent synthetic provider windows verify no relaunch.
+
+Attached-folder services retain explicit membership, directory identity,
+approval and bounded timeout checks. Background acknowledgement waits for the
+durable native dispatch binding. An unrecorded result remains uncertain and
+cannot be replayed. Production coding catalogues expose run, wait and stop.
+
+The serial Release build and **62/62 selected native contracts pass in 199.96
+seconds**, with 2722 project inputs, 16 SDK headers, 1870 pure-library files,
+76 runtime files, 18598 Node dependencies and 133 native binaries unchanged.
+Both initial diagnostic failures and corrected runs remain preserved.
+[Scope, patches and raw evidence](evidence/process-worker-service-focused-20261021.json).
+
+Nonpersistent asynchronous worker jobs, other capabilities and managed/default
+placement integration remain unfinished. This adds no full-suite, installation,
+hosted, rendered or live-provider acceptance. Existing owners and completed
+tasks remain preserved.
+
 ## Durable process observation and stop RPC — 2026-10-21
 
 Wait and stop now have exact durable call ownership against an existing native

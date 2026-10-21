@@ -251,8 +251,8 @@ std::string ProcessExecutor::execute_claimed(const std::string& id,const std::st
     catch(const std::invalid_argument&){throw;}
     catch(...){throw ProcessOutcomeUnrecorded("Claimed process outcome could not be encoded or preserved; recovery is required");}
 }
-std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
-    return invoke_scoped(id,run,source,expiry,workspace_,root_,workspace_.identity(),workspace_.identity(),1,true,cancel,std::move(guidance),allow_background);
+std::string ProcessExecutor::invoke(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background,std::stop_token background_cancel) {
+    return invoke_scoped(id,run,source,expiry,workspace_,root_,workspace_.identity(),workspace_.identity(),1,true,cancel,std::move(guidance),allow_background,background_cancel);
 }
 std::string ProcessExecutor::invoke(const AgentProcessInvocation& request,std::stop_token cancel,InstructionPrecondition guidance){
     const auto now=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -268,14 +268,14 @@ std::string ProcessExecutor::invoke(const AgentProcessInvocation& request,std::s
         if(selected.identity()!=binding.folder_id||selected.root_path()!=binding.root)
             throw ToolAccessDenied("Process folder identity differs from the durable workspace membership");
         return invoke_scoped(request.operation_id,request.run_id,request.arguments_json,request.expires_unix_ms,selected,
-            binding.root,tools.workspace_id(),binding.folder_id,tools.revision(),selected_index==0,cancel,std::move(guidance),request.allow_background);
+            binding.root,tools.workspace_id(),binding.folder_id,tools.revision(),selected_index==0,cancel,std::move(guidance),request.allow_background,request.background_cancel);
     }
     if(request.workspace_id!=workspace_.identity()||request.workspace_revision!=1||request.folder_id!=workspace_.identity())
         throw ToolAccessDenied("Process invocation does not match the admitted primary workspace");
     return invoke_scoped(request.operation_id,request.run_id,request.arguments_json,request.expires_unix_ms,workspace_,root_,
-        request.workspace_id,request.folder_id,request.workspace_revision,true,cancel,std::move(guidance),request.allow_background);
+        request.workspace_id,request.folder_id,request.workspace_revision,true,cancel,std::move(guidance),request.allow_background,request.background_cancel);
 }
-std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,WorkspaceTools& workspace,const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background) {
+std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::string& run,const std::string& source,std::int64_t expiry,WorkspaceTools& workspace,const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background,std::stop_token background_cancel) {
     if(source.size()>65536)throw std::invalid_argument("Process arguments exceed limits");
     if(workspace_id.empty()||folder_id.empty()||workspace_revision<1||workspace.identity()!=folder_id||workspace.root_path()!=root)throw ToolAccessDenied("Process folder binding is invalid");
     Json args;try{args=Json::parse(mcp_compact_object(source));}catch(const McpProtocolError&){throw std::invalid_argument("Invalid process argument JSON");}
@@ -289,7 +289,15 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     if(args.contains("background")&&!args["background"].is_boolean())throw std::invalid_argument("Invalid process background mode");
     const bool background=args.value("background",false),persistent=args.value("persistent",false);if(background&&!allow_background)throw std::invalid_argument("Background process execution requires an agent owner");
     if(persistent&&!background)throw std::invalid_argument("Persistent services require background=true");
-    if(persistent){const auto owner=store_.run(run).get();if(owner.graph_root||!owner.parent_id.empty())throw ToolAccessDenied("Persistent services can only be started by an ordinary session agent");if(!primary_folder)throw ToolAccessDenied("Persistent services must use the primary workspace folder");if(found->max_timeout<std::chrono::seconds(30))throw std::invalid_argument("Persistent services require a trusted process profile with at least a 30-second timeout");if(args.contains("timeout_ms")&&(!args["timeout_ms"].is_number_integer()||args["timeout_ms"]<30000))throw std::invalid_argument("Persistent service timeout must be at least 30 seconds; use the session terminal for shorter commands");}
+    if(persistent){
+        const auto owner=store_.run(run).get();
+        if(owner.graph_root||!owner.parent_id.empty())throw ToolAccessDenied("Persistent services can only be started by an ordinary session agent");
+        // Attached folders have the same explicit membership, directory identity
+        // and approval checks as foreground commands. The service belongs to
+        // the admitting workspace; its target folder remains in the receipt.
+        if(found->max_timeout<std::chrono::seconds(30))throw std::invalid_argument("Persistent services require a trusted process profile with at least a 30-second timeout");
+        if(args.contains("timeout_ms")&&(!args["timeout_ms"].is_number_integer()||args["timeout_ms"]<30000))throw std::invalid_argument("Persistent service timeout must be at least 30 seconds; use the session terminal for shorter commands");
+    }
     ProcessConfiguration launch;launch.executable=found->executable;launch.arguments=found->prefix_arguments;launch.timeout=found->max_timeout;launch.output_limit=65536;
     validate_process_module_paths(found->powershell_module_paths,true);
     if(!found->powershell_module_paths.empty()){
@@ -349,7 +357,7 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
         try {
             workers_.reserve(workers_.size()+1);
             auto* const self=this;const auto profile=found->id;auto owned_launch=std::move(launch);
-            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=cancel,persistent,before_effect=std::move(guidance.before_effect)](std::stop_token shutdown)mutable{
+            std::jthread worker([self,id,run,profile,launch=std::move(owned_launch),done,intentional_stop,owner_cancel=background_cancel.stop_possible()?background_cancel:cancel,persistent,before_effect=std::move(guidance.before_effect)](std::stop_token shutdown)mutable{
                 std::stop_source stop;std::stop_callback stop_shutdown(shutdown,[&]{stop.request_stop();});std::stop_callback stop_owner(owner_cancel,[&]{stop.request_stop();});
                 try{(void)self->execute_claimed(id,run,profile,std::move(launch),stop.get_token(),persistent,intentional_stop,std::move(before_effect));}
                 catch(...){try{const auto current=self->store_.operation(id).get();if(current.state==OperationState::executing)self->store_.finish_operation(id,OperationState::uncertain,R"({"reason":"background_process_worker_failed"})").get();}catch(...) {}}
@@ -369,7 +377,7 @@ std::string ProcessExecutor::wait(const std::string& run,const std::string& sour
     const auto id=args["job_id"].get<std::string>();const auto deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(timeout);
     for(;;){if(cancel.stop_requested())throw ToolCancelled("Background process wait was cancelled");const auto op=store_.operation(id).get();if(op.spec.tool!="run_process")throw ToolAccessDenied("Background process identity is invalid");
         Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}if(!binding.value("background",false))throw std::invalid_argument("Operation is not a background process job");
-        if(op.spec.run_id!=run&&(!binding.value("persistent",false)||store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||binding.value("target_workspace_id",std::string{})!=workspace_.identity()))throw ToolAccessDenied("Background process belongs to another session or workspace");
+        if(op.spec.run_id!=run&&(!binding.value("persistent",false)||store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||op.spec.workspace!=workspace_.identity()||binding.value("workspace_id",std::string{})!=workspace_.identity()))throw ToolAccessDenied("Background process belongs to another session or workspace");
         if(op.state!=OperationState::executing){Json result={{"job_id",id},{"operation_id",id},{"state",to_string(op.state)}};if(op.state==OperationState::succeeded||op.state==OperationState::failed||op.state==OperationState::uncertain){try{result["result"]=Json::parse(op.result_json);}catch(...){throw DatabaseError("Saved process result is invalid");}}return result.dump();}
         if(std::chrono::steady_clock::now()>=deadline){Json result={{"job_id",id},{"operation_id",id},{"state","running"}};try{for(const auto* channel:{"stdout","stderr"}){const auto page=store_.read_process_output(id,channel,0,4096).get();if(!page.bytes.empty())result[channel]=captured(page.bytes,page.total_bytes);}}catch(const NotFound&){}return result.dump();}std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
@@ -384,7 +392,7 @@ std::string ProcessExecutor::stop(const std::string& run,const std::string& sour
     if(!args.is_object()||args.size()!=1||!args.contains("job_id")||!args["job_id"].is_string()||args["job_id"].get_ref<const std::string&>().empty()||args["job_id"].get_ref<const std::string&>().size()>128)throw std::invalid_argument("Invalid persistent process job ID");
     const auto id=args["job_id"].get<std::string>();const auto op=store_.operation(id).get();Json binding;try{binding=Json::parse(op.spec.arguments_json);}catch(...){throw DatabaseError("Saved process binding is invalid");}
     if(op.spec.tool!="run_process"||!binding.value("background",false)||!binding.value("persistent",false))throw ToolAccessDenied("Process is not a persistent service");
-    if(store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||binding.value("target_workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Persistent process belongs to another session or workspace");
+    if(store_.run(op.spec.run_id).get().session_id!=store_.run(run).get().session_id||op.spec.workspace!=workspace_.identity()||binding.value("workspace_id",std::string{})!=workspace_.identity())throw ToolAccessDenied("Persistent process belongs to another session or workspace");
     if(op.state!=OperationState::executing)return Json{{"job_id",id},{"state",to_string(op.state)},{"already_stopped",true}}.dump();
     bool found=false;{
         std::lock_guard lock(workers_mutex_);for(auto& worker:workers_)if(worker.id==id&&!worker.done->load(std::memory_order_acquire)){worker.intentional_stop->store(true,std::memory_order_release);worker.thread.request_stop();found=true;break;}

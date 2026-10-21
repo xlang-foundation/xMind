@@ -9,13 +9,13 @@ namespace agentflow {
 namespace {
 AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy){
     std::set<std::string> names;
-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&tool.name!="run_process")||!names.insert(tool.name).second)
+    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name))||!names.insert(tool.name).second)
         throw std::invalid_argument("Coding workspace contains an unsupported capability");
     std::erase_if(policy.tools,[](const auto& tool){return !is_agent_read_tool(tool.name);});return policy;
 }
 }
 AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,
-    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::vector<ProcessProfile> profiles)
+    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner)
     :reads_(store,store,lease,owner,read_policy(policy),cancel),tools_(std::move(policy.tools)){
     if(owner.deadline!=deadline)throw std::invalid_argument("Coding model and tools require the same captured deadline");
     AgentFileToolOwnerContext files;files.run_id=owner.run_id;files.primary_workspace=owner.primary_workspace;
@@ -24,10 +24,10 @@ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,Age
     files.repository_context=[this](std::size_t index){return index<reads_.contexts_.size()?reads_.contexts_[index].get():nullptr;};
     for(const auto& tool:tools_)if(is_agent_file_tool(tool.name)){if(!owner.offered_tool(tool.name))throw Conflict("Coding file catalogue differs from its captured owner");files.allowed_tools.push_back(tool.name);}
     files_=std::make_unique<AgentWorkerFileHost>(store,std::move(lease),std::move(files),deadline,cancel);
-    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return tool.name=="run_process";})){
-        if(profiles.empty()||!owner.offered_tool("run_process"))throw Conflict("Coding command catalogue lacks its native profile owner");
-        process_=std::make_unique<ProcessExecutor>(store,*owner.primary_workspace,owner.primary_workspace->root_path(),std::move(profiles));
-        AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=false;
+    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_process_tool(tool.name);})){
+        if(!process_owner)throw Conflict("Coding command catalogue lacks its native profile owner");
+        process_=std::move(process_owner);
+        AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=true;
         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
     }
 }

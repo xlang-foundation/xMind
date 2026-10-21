@@ -10,7 +10,7 @@ namespace agentflow {
 class AgentWorkerCodingContext final:public AgentReadToolHost {
 public:
     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
-        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::vector<ProcessProfile> profiles={});
+        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
     ModelRequest prepare(std::stop_token={});
     void admit(const std::string&,const ModelRequest&,std::stop_token={});
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
@@ -21,7 +21,7 @@ private:
     AgentWorkerReadContext reads_;
     std::vector<ModelToolDefinition> tools_;
     std::unique_ptr<AgentWorkerFileHost> files_;
-    std::unique_ptr<ProcessExecutor> process_;
+    std::shared_ptr<AgentProcessToolHost> process_;
     std::unique_ptr<AgentWorkerProcessHost> processes_;
 };
 }

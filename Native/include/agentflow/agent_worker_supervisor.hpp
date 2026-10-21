@@ -21,7 +21,7 @@ public:
     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
     void start_coding(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
-        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::vector<ProcessProfile> profiles={});
+        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={});
     RunState execute();
     void cancel();
     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);

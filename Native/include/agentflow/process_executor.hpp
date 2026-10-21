@@ -39,6 +39,9 @@ struct AgentProcessInvocation {
     std::string arguments_json;
     std::int64_t expires_unix_ms=0;
     bool allow_background=false;
+    // Backend-owned lifetime token, never part of tool/RPC JSON. A worker's
+    // request token ends after acknowledgement; its service owner can outlive it.
+    std::stop_token background_cancel;
 };
 // Backend-owned process-tool capability consumed by AgentRunner. Workspace
 // handles and instruction verifiers remain native backend capabilities; this
@@ -72,7 +75,7 @@ public:
     std::string invoke(const AgentProcessInvocation& invocation,std::stop_token cancel={},
         InstructionPrecondition guidance={}) override;
     std::string invoke(const std::string& operation_id,const std::string& run_id,
-        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false);
+        const std::string& arguments_json,std::int64_t expires_unix_ms,std::stop_token cancel={},InstructionPrecondition guidance={},bool allow_background=false,std::stop_token background_cancel={});
     std::string wait(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={}) override;
     ModelToolDefinition stop_definition() const override;
     std::string stop(const std::string& run_id,const std::string& arguments_json,std::stop_token cancel={}) override;
@@ -83,7 +86,7 @@ private:
     std::string invoke_scoped(const std::string& operation_id,const std::string& run_id,
         const std::string& arguments_json,std::int64_t expires_unix_ms,WorkspaceTools& workspace,
         const std::string& root,std::string workspace_id,std::string folder_id,std::int64_t workspace_revision,
-        bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background);
+        bool primary_folder,std::stop_token cancel,InstructionPrecondition guidance,bool allow_background,std::stop_token background_cancel={});
     std::string execute_claimed(const std::string& operation_id,const std::string& run_id,const std::string& profile_id,
         ProcessConfiguration launch,std::stop_token cancel,bool persistent=false,
         std::shared_ptr<std::atomic_bool> intentional_stop={},
