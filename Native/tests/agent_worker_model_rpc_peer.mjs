@@ -58,6 +58,8 @@ const server=createServer((request,response)=>{
   if(mode.startsWith('coding_skills')){
    const phase=counts[mode],manual=mode==='coding_skills_manual',denied=mode==='coding_skills_denied';assert.match(body.messages[0].content,/WORKER_SKILL_ROOT_GUIDANCE/);const restored=manual||phase===5;
    if(restored||phase>=3&&!denied)assert.match(body.messages[0].content,/SKILL_BODY_GUIDANCE/);else assert.equal(body.messages[0].content.includes('SKILL_BODY_GUIDANCE'),false);
+   if(phase===5){assert.ok(body.messages.some(m=>m.role==='assistant'&&m.content==='Skill result inspected.'));assert.ok(body.messages.some(m=>m.tool_call_id==='skill-companion'&&JSON.parse(m.content).content==='actual skill companion\n'));assert.ok(body.messages.some(m=>m.role==='user'&&m.content.includes('Discover, load and inspect the workspace skill.')));assert.ok(body.messages.at(-1).content.includes('Use the saved skill without loading again.'));}
+   if(phase===1)assert.equal(body.messages.some(m=>m.role==='assistant'&&m.content==='Skill result inspected.'),false);
    if(manual)assert.ok(!body.tools||body.tools.length===0);else assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['list_skills','load_skill','read_file','read_repository_instructions'].sort());
    if(phase===2)assert.match(body.messages[0].content,/SKILL_DIRECTORY_GUIDANCE/);if(phase===3){const loaded=body.messages.find(m=>m.tool_call_id==='skill-load');assert.ok(loaded);const result=JSON.parse(loaded.content);if(denied)assert.equal(result.error.code,'agent_permission_denied');else {assert.equal(result.activation,'requested_for_next_model_request');assert.equal(result.effect_permission,false);}}
    if(phase===4){const read=body.messages.find(m=>m.tool_call_id==='skill-companion');assert.ok(read);assert.equal(JSON.parse(read.content).content,'actual skill companion\n');}
@@ -174,4 +176,3 @@ try{
 }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 
 assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');assert.equal(a2aCalls,1);assert.equal(readFileSync(join(peerRoot,'a2a-actual.txt'),'utf8'),'actual production remote effect');assert.equal(refreshCalls,1);assert.equal(refreshSubscriptions,2);assert.equal(refreshClosed,2);assert.equal(readFileSync(join(peerRoot,'refresh-actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});
-

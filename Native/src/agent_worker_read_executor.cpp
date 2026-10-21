@@ -9,6 +9,7 @@
 #include "agentflow/patch_tool.hpp"
 #include "agentflow/restore_executor.hpp"
 #include "agentflow/repository_instruction_context.hpp"
+#include "agentflow/agent_authority.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -89,8 +90,8 @@ public:
             language_catalogue_=settings_.language_server_registry?settings_.language_server_registry:std::make_shared<LanguageServerToolRegistry>(*primary_,settings_.language_servers);
             settings_.language_server_registry=language_catalogue_;settings_.language_servers=language_catalogue_->profiles();
         }
+        if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
         validator_=std::make_unique<AgentRunner>(store_,settings_);
-        if(coding_&&!settings_.process_profiles.empty())process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);
         gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
     }
     void validate(const AgentRootExecutionRequest& request)const override{
@@ -144,6 +145,12 @@ public:
                 policy.tools.push_back(definition);
             }
             if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+        }
+        if(settings_.provider_identity){
+            policy.history_owner=ProviderHistoryOwner{request.run_id,request.run_id,ModelCallRole::parent,
+                {ContextScopeKind::session,admitted.session_id},budget.spec.provider_identity_json,
+                context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
+            policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
         }
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
         auto provider=settings_.provider;provider.model=model(request);

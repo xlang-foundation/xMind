@@ -53,7 +53,7 @@ ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){
 }
 void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
     if(encode_agent_model_request(prepare(cancel))!=encode_agent_model_request(request))throw Conflict("Coding request changed backend history, guidance or catalogue");
-    auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
+    auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel,&request);
 }
 AgentReadToolResult AgentWorkerCodingContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){return reads_.invoke(call,cancel);}
 AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScope& scope){

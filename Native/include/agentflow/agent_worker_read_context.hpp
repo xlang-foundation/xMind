@@ -1,5 +1,7 @@
 #pragma once
 #include "agentflow/agent_worker_read_host.hpp"
+#include "agentflow/context_records.hpp"
+#include "agentflow/model_provider.hpp"
 #include <mutex>
 
 namespace agentflow {
@@ -12,6 +14,9 @@ struct AgentWorkerReadRequestPolicy {
     bool include_usage=false;
     std::optional<std::int64_t> max_output_tokens;
     std::string instruction_suffix;
+    // Backend-only canonical session history owner and captured provider route.
+    std::optional<ProviderHistoryOwner> history_owner;
+    std::optional<ChatProviderConfig> history_provider;
 };
 // Backend-owned ordinary read context. Preparing a request works on copies of
 // real native guidance state. Only admission of a claimed, exact model request
@@ -22,7 +27,7 @@ public:
         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,std::stop_token owner_cancel={});
     ~AgentWorkerReadContext();
     ModelRequest prepare(std::stop_token={});
-    void admit(const std::string& attempt,const ModelRequest&,std::stop_token={});
+    void admit(const std::string& attempt,const ModelRequest&,std::stop_token={},const ModelRequest* full_window=nullptr);
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
 private:

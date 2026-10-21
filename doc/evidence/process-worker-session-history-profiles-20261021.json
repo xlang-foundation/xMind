@@ -1,0 +1,222 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T12:31:02.154Z",
+    "sourceParent": "7eca20200bd99c36d81982a3213b7c5e9bf7f1b5",
+    "sourcePatchSha256": "d107901a246e7231f667255d3b3f151163e6da8fc550d304ff052651893a9106",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 53928,
+      "launchedAt": "2026-10-21T12:29:25.805Z",
+      "completedAt": "2026-10-21T12:30:04.705Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cdf1309600a1b18b86a0e8602e2397ef1333583d56b5c63ff4f3d45dc7fc847f"
+    },
+    "test": {
+      "pid": 39596,
+      "launchedAt": "2026-10-21T12:30:07.680Z",
+      "completedAt": "2026-10-21T12:30:59.266Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2f1d09640263b1d1d1356a23cf8e39ac75d2224e09072b3944594d99b0df1dad"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 51.52,
+    "projectFiles": 2740,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "8ae6951fcd8f342a1b8ccc330a62a4cec00c9bb8b1ff472a0b89ddde900aaa50",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "runs": [
+    {
+      "name": "process-worker-session-history-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T12:25:21.343Z",
+        "sourceParent": "7eca20200bd99c36d81982a3213b7c5e9bf7f1b5",
+        "sourcePatchSha256": "75c901738fd5eb73bd0b685e72c04a8f642b2b50777cd62e4965a959d620a97b",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 63236,
+          "launchedAt": "2026-10-21T12:23:15.323Z",
+          "completedAt": "2026-10-21T12:24:30.313Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "aff633ebf13348e36f459319d232b87c1961cff5a6317dfe476c0fdb412ec102"
+        },
+        "test": {
+          "pid": 15316,
+          "launchedAt": "2026-10-21T12:24:33.398Z",
+          "completedAt": "2026-10-21T12:25:18.402Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "69a5c57ae454b5dfb313558af6cb8ba45a1c50872df58e79769bc429485c69dd"
+        },
+        "total": 5,
+        "failed": 1,
+        "passed": 4,
+        "seconds": 44.95,
+        "projectFiles": 2740,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "143bf2ba610e5faf4e44af7e37fbdff0654db1909136cfc095463505092715c0",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      }
+    },
+    {
+      "name": "process-worker-session-history-authority-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T12:28:49.441Z",
+        "sourceParent": "7eca20200bd99c36d81982a3213b7c5e9bf7f1b5",
+        "sourcePatchSha256": "700a3a24bafac058b2e077896d89989127fec954c883128ed20e187b1db8845f",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 11988,
+          "launchedAt": "2026-10-21T12:26:36.206Z",
+          "completedAt": "2026-10-21T12:27:50.512Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "aff633ebf13348e36f459319d232b87c1961cff5a6317dfe476c0fdb412ec102"
+        },
+        "test": {
+          "pid": 68424,
+          "launchedAt": "2026-10-21T12:27:53.523Z",
+          "completedAt": "2026-10-21T12:28:46.593Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "3fedd4050b859592f72955fc475f3a4a1ee4a924f576ef02db23e1777610a1db"
+        },
+        "total": 5,
+        "failed": 1,
+        "passed": 4,
+        "seconds": 53.02,
+        "projectFiles": 2740,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "a386df4b94f00309424f4b7b0982d104c844b630fd0eda530ff592ab49d77011",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      }
+    },
+    {
+      "name": "process-worker-session-history-profiles-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T12:31:02.154Z",
+        "sourceParent": "7eca20200bd99c36d81982a3213b7c5e9bf7f1b5",
+        "sourcePatchSha256": "d107901a246e7231f667255d3b3f151163e6da8fc550d304ff052651893a9106",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 53928,
+          "launchedAt": "2026-10-21T12:29:25.805Z",
+          "completedAt": "2026-10-21T12:30:04.705Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "cdf1309600a1b18b86a0e8602e2397ef1333583d56b5c63ff4f3d45dc7fc847f"
+        },
+        "test": {
+          "pid": 39596,
+          "launchedAt": "2026-10-21T12:30:07.680Z",
+          "completedAt": "2026-10-21T12:30:59.266Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "2f1d09640263b1d1d1356a23cf8e39ac75d2224e09072b3944594d99b0df1dad"
+        },
+        "total": 5,
+        "failed": 0,
+        "passed": 5,
+        "seconds": 51.52,
+        "projectFiles": 2740,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "8ae6951fcd8f342a1b8ccc330a62a4cec00c9bb8b1ff472a0b89ddde900aaa50",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      }
+    }
+  ],
+  "files": {
+    "doc/evidence/process-worker-session-history-20261021-build.log": "aff633ebf13348e36f459319d232b87c1961cff5a6317dfe476c0fdb412ec102",
+    "doc/evidence/process-worker-session-history-20261021-build-terminal.json": "fe43a44756d9c56ae8a1de417ac9752aab8eed66a9e77cbf12705f1c221f19dd",
+    "doc/evidence/process-worker-session-history-20261021-ctest.log": "69a5c57ae454b5dfb313558af6cb8ba45a1c50872df58e79769bc429485c69dd",
+    "doc/evidence/process-worker-session-history-20261021-ctest-terminal.json": "21844f5255a305c938e023895d0aee03ec95e3a727bebe1e58c31ecdf2dcc775",
+    "doc/evidence/process-worker-session-history-20261021-LastTest.log": "30a0fbc9565d0a56cadb14d933014fdea6ee5bb879da0f1c29c8efd68377e0b6",
+    "doc/evidence/process-worker-session-history-20261021-test-inventory.json": "5ff87425e285b1464dd246c6a89040c268129d8b0ef84c78615ea2197e6916a9",
+    "doc/evidence/process-worker-session-history-20261021-gate.json": "845b39c4e8096f113173dc68e27ceb30b2eeef7e580ae827faa5aaac657e6fc1",
+    "doc/evidence/process-worker-session-history-20261021-source.patch": "75c901738fd5eb73bd0b685e72c04a8f642b2b50777cd62e4965a959d620a97b",
+    "doc/evidence/process-worker-session-history-authority-20261021-build.log": "aff633ebf13348e36f459319d232b87c1961cff5a6317dfe476c0fdb412ec102",
+    "doc/evidence/process-worker-session-history-authority-20261021-build-terminal.json": "75e92f3fc991bcfec796304049bb66068b33699501f9f8b2349945a31b6f2013",
+    "doc/evidence/process-worker-session-history-authority-20261021-ctest.log": "3fedd4050b859592f72955fc475f3a4a1ee4a924f576ef02db23e1777610a1db",
+    "doc/evidence/process-worker-session-history-authority-20261021-ctest-terminal.json": "67f0dd083218e114c18789d78d6a103b3030aeb3c6c83d1dcf11d624fea0f870",
+    "doc/evidence/process-worker-session-history-authority-20261021-LastTest.log": "a21b4bcc6dafc10b41ee7941a5e6862814ba02c91d9ed8d5aa187d6bfe64fc6f",
+    "doc/evidence/process-worker-session-history-authority-20261021-test-inventory.json": "5ff87425e285b1464dd246c6a89040c268129d8b0ef84c78615ea2197e6916a9",
+    "doc/evidence/process-worker-session-history-authority-20261021-gate.json": "c691d904b94122b98350c424739b611d8bc77844403b1064ba12dcd6c511ac41",
+    "doc/evidence/process-worker-session-history-authority-20261021-source.patch": "700a3a24bafac058b2e077896d89989127fec954c883128ed20e187b1db8845f",
+    "doc/evidence/process-worker-session-history-profiles-20261021-build.log": "cdf1309600a1b18b86a0e8602e2397ef1333583d56b5c63ff4f3d45dc7fc847f",
+    "doc/evidence/process-worker-session-history-profiles-20261021-build-terminal.json": "48e9d2a3b28b6c609d6979ea7f8307c53f03f9388002ef27d8f12fbad987c39f",
+    "doc/evidence/process-worker-session-history-profiles-20261021-ctest.log": "2f1d09640263b1d1d1356a23cf8e39ac75d2224e09072b3944594d99b0df1dad",
+    "doc/evidence/process-worker-session-history-profiles-20261021-ctest-terminal.json": "b48b4ba95a0357152ae13f6676a2847bf1f0e6e153afa6a6899875bc22b8474b",
+    "doc/evidence/process-worker-session-history-profiles-20261021-LastTest.log": "86eefcc43a3a417da22eaae7979b2b46ee7ae832f69fd83be25ef471e82e7f70",
+    "doc/evidence/process-worker-session-history-profiles-20261021-test-inventory.json": "5ff87425e285b1464dd246c6a89040c268129d8b0ef84c78615ea2197e6916a9",
+    "doc/evidence/process-worker-session-history-profiles-20261021-gate.json": "21d07a93ebf6103ec65b89689cf1b6833d4c152e409d53415716ef70d16a00d1",
+    "doc/evidence/process-worker-session-history-profiles-20261021-source.patch": "d107901a246e7231f667255d3b3f151163e6da8fc550d304ff052651893a9106",
+    "doc/evidence/process-worker-session-history-profiles-20261021-binaries-before-test.json": "5f95dd55e2c34cc6f41df37fbd490a4a626ad7f4e21b40343a698eac7111c6c7"
+  },
+  "verified": [
+    "Configured production worker model windows load canonical provider session history through backend persistence instead of only current-run history",
+    "Backend captures exact history owner, route and authority; child cannot select another session or provider",
+    "Changed opaque provider items use the shared checked projection path; replay receipt publication occurs only after actual model claim and binds the full coding window",
+    "Actual follow-up worker HTTP request contains prior prompt, exact companion result and final answer, then the new prompt without replaying prior tools",
+    "Independent peer observes exactly 135 requests; five focused contracts pass with frozen source, SDK, libraries, dependencies and 133 binary sets",
+    "Worker factory uses native process executor captured profiles including resolved executable identities"
+  ],
+  "failuresPreserved": [
+    "Initial language fixture omitted trusted revision and executable identity; fixture now supplies explicit pinned backend metadata",
+    "Second run reached command admission and found factory settings retained unresolved process profiles; now uses actual native executor snapshot"
+  ],
+  "limitations": [
+    "Provider-history bridge contract covers provider projection; this worker fixture uses chat-completions and does not establish actual worker cross-provider opaque-item acceptance",
+    "No full/broader regression, updated installation, rendered or live-provider acceptance for this change",
+    "Context counting/compaction, delegation/planning and graph/default placement integration remain unfinished"
+  ],
+  "passed": true
+}

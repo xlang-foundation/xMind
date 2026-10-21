@@ -1,3 +1,22 @@
+## Canonical worker session history — 2026-10-21
+
+Configured production workers now receive canonical provider session history
+through the backend, retaining earlier prompts, exact tool results and final
+answers across fresh workers. The follow-up HTTP fixture verifies these bytes
+and the new prompt without replaying previous tools. Provider item projection
+uses the shared native checked path; replay receipts publish after the actual
+model claim and bind the full coding window. Native process profile identities
+come from the captured executor snapshot.
+
+**5/5 focused contracts pass in 51.52 seconds**, with 135 controlled HTTP model
+requests and all 2740 project inputs, SDK/libraries/dependencies and 133 native
+binary file sets/hashes frozen. Both earlier admission failures remain saved.
+[Scope, patches and raw evidence](evidence/process-worker-session-history-profiles-20261021.json).
+
+Worker cross-provider opaque-item behavior, context counting/compaction,
+delegation/planning, graph/default placement and final product acceptance
+remain open. No broader/full suite or installation is claimed for this change.
+
 ## Worker skills selected regression — 2026-10-21
 
 **65/65 selected native contracts pass in 224.55 seconds** on committed

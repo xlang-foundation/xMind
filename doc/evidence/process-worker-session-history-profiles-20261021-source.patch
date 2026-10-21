@@ -1,0 +1,152 @@
+diff --git a/Native/include/agentflow/agent_worker_read_context.hpp b/Native/include/agentflow/agent_worker_read_context.hpp
+index be5510bf..342368d3 100644
+--- a/Native/include/agentflow/agent_worker_read_context.hpp
++++ b/Native/include/agentflow/agent_worker_read_context.hpp
+@@ -1,5 +1,7 @@
+ #pragma once
+ #include "agentflow/agent_worker_read_host.hpp"
++#include "agentflow/context_records.hpp"
++#include "agentflow/model_provider.hpp"
+ #include <mutex>
+ 
+ namespace agentflow {
+@@ -12,6 +14,9 @@ struct AgentWorkerReadRequestPolicy {
+     bool include_usage=false;
+     std::optional<std::int64_t> max_output_tokens;
+     std::string instruction_suffix;
++    // Backend-only canonical session history owner and captured provider route.
++    std::optional<ProviderHistoryOwner> history_owner;
++    std::optional<ChatProviderConfig> history_provider;
+ };
+ // Backend-owned ordinary read context. Preparing a request works on copies of
+ // real native guidance state. Only admission of a claimed, exact model request
+@@ -22,7 +27,7 @@ public:
+         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,std::stop_token owner_cancel={});
+     ~AgentWorkerReadContext();
+     ModelRequest prepare(std::stop_token={});
+-    void admit(const std::string& attempt,const ModelRequest&,std::stop_token={});
++    void admit(const std::string& attempt,const ModelRequest&,std::stop_token={},const ModelRequest* full_window=nullptr);
+     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
+ private:
+diff --git a/Native/src/agent_worker_coding_context.cpp b/Native/src/agent_worker_coding_context.cpp
+index e81ea37c..7489b654 100644
+--- a/Native/src/agent_worker_coding_context.cpp
++++ b/Native/src/agent_worker_coding_context.cpp
+@@ -53,7 +53,7 @@ ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){
+ }
+ void AgentWorkerCodingContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+     if(encode_agent_model_request(prepare(cancel))!=encode_agent_model_request(request))throw Conflict("Coding request changed backend history, guidance or catalogue");
+-    auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel);
++    auto read_request=request;read_request.messages.resize(read_request.messages.size()-joined_process_notes_.size());read_request.tools=reads_.policy_.tools;reads_.admit(attempt,read_request,cancel,&request);
+ }
+ AgentReadToolResult AgentWorkerCodingContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){return reads_.invoke(call,cancel);}
+ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_files(const AgentWorkerScope& scope){
+diff --git a/Native/src/agent_worker_read_context.cpp b/Native/src/agent_worker_read_context.cpp
+index c064d28f..5a93abb4 100644
+--- a/Native/src/agent_worker_read_context.cpp
++++ b/Native/src/agent_worker_read_context.cpp
+@@ -8,10 +8,12 @@
+ 
+ namespace agentflow {
+ using Json=nlohmann::json;
+-struct AgentWorkerReadContext::Preview {ModelRequest request;std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;};
++struct AgentWorkerReadContext::Preview {ModelRequest request;std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;std::optional<ProviderHistoryReplaySpec> replay;};
+ AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,PersistenceService& store,AgentWorkerLeaseSpec lease,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,std::stop_token cancel)
+     :store_(store),lease_(std::move(lease)),owner_(std::move(owner)),policy_(std::move(policy)),owner_cancel_(cancel){
+     if(!owner_.primary_workspace||!owner_.repository_context||!owner_.offered_tool||policy_.instructions.size()>65536||policy_.instructions.find('\0')!=std::string::npos||policy_.instruction_suffix.size()>65536||policy_.instruction_suffix.find('\0')!=std::string::npos||policy_.tools.size()>64)throw std::invalid_argument("Invalid backend worker read context");
++    if(bool(policy_.history_owner)!=bool(policy_.history_provider))throw std::invalid_argument("Worker session history requires its captured provider route");
++    if(policy_.history_owner&&(policy_.history_owner->root_run_id!=lease_.root_run_id||policy_.history_owner->owner_run_id!=lease_.owner_run_id||policy_.history_owner->role!=ModelCallRole::parent||policy_.history_owner->scope.kind!=ContextScopeKind::session||policy_.history_owner->provider_identity_json!=lease_.provider_identity_json))throw Conflict("Worker history differs from captured model ownership");
+     std::set<std::string> names;for(const auto& tool:policy_.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name))||!owner_.offered_tool(tool.name)||!names.insert(tool.name).second)throw std::invalid_argument("Read context catalogue differs from its captured owner");
+     const auto count=owner_.workspace_members?owner_.workspace_members->folders().size():1;
+     for(std::size_t index=0;index<count;++index){auto* context=owner_.repository_context(index);if(!context)throw std::invalid_argument("Worker read context requires actual native guidance");contexts_.push_back(std::make_unique<RepositoryInstructionContext>(*context));}
+@@ -29,14 +31,20 @@ AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token
+     for(std::size_t index=0;index<contexts_.size();++index){auto copy=std::make_unique<RepositoryInstructionContext>(*contexts_[index]);if(!index)copy->skills().restore(selected,cancel);if(index)instructions+="\n\nRepository guidance for registered workspace folder "+owner_.workspace_members->folders().at(index).folder_id+" (paths relative to this folder):\n";instructions+=copy->prepare(cancel);result.contexts.push_back(std::move(copy));}
+     instructions+=policy_.instruction_suffix;
+     if(instructions.size()>65536)throw ToolFileError("Combined backend worker instructions exceed limits");if(!instructions.empty())result.request.messages.push_back({MessageRole::system,std::move(instructions)});
+-    const auto history=std::get<std::vector<Message>>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::history,lease_.owner_run_id}).get());for(const auto& message:history)result.request.messages.push_back(model_message_from_history(message));
+-    result.request.tools=policy_.tools;result.request.include_usage=policy_.include_usage;result.request.max_output_tokens=policy_.max_output_tokens;check(cancel);return result;
++    result.request.tools=policy_.tools;result.request.include_usage=policy_.include_usage;result.request.max_output_tokens=policy_.max_output_tokens;
++    if(policy_.history_owner){
++        const auto history=store_.provider_history(*policy_.history_owner).get();std::vector<std::size_t> projected;
++        for(const auto& payload:history.groups)for(const auto& original:payload.source.originals){auto decoded=model_message_from_history(original);if(payload.reproject_provider_items&&decoded.role==MessageRole::assistant&&decoded.provider_items_json!="[]")projected.push_back(result.request.messages.size());result.request.messages.push_back(std::move(decoded));}
++        if(!projected.empty()){result.request=reproject_checked_provider_history(*policy_.history_provider,result.request,projected);result.replay=ProviderHistoryReplaySpec{*policy_.history_owner,{},history.source_binding,context_digest(serialize_provider_history_projection(*policy_.history_provider,result.request))};}
++    }else{const auto history=std::get<std::vector<Message>>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::history,lease_.owner_run_id}).get());for(const auto& message:history)result.request.messages.push_back(model_message_from_history(message));}
++    check(cancel);return result;
+ }
+ ModelRequest AgentWorkerReadContext::prepare(std::stop_token cancel){std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");return preview(cancel).request;}
+-void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
++void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel,const ModelRequest* full_window){
+     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");auto candidate=preview(cancel);
+     if(encode_agent_model_request(candidate.request)!=encode_agent_model_request(request))throw Conflict("Worker model request changed backend instructions or history");
+     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="dispatching")throw Conflict("Worker guidance has no captured live model dispatch");
++    if(candidate.replay){if(full_window)candidate.replay->projection_binding=context_digest(serialize_provider_history_projection(*policy_.history_provider,*full_window));store_.record_provider_history_replay(*candidate.replay).get();}
+     Json metadata=Json::array();for(std::size_t index=0;index<candidate.contexts.size();++index)metadata.push_back({{"folder_id",owner_.workspace_members?owner_.workspace_members->folders().at(index).folder_id:lease_.workspace_id},{"guidance",Json::parse(candidate.contexts[index]->metadata())}});
+     store_.append_event(lease_.owner_run_id,"agent.repository_scope",Json{{"snapshot","worker_before_model_dispatch"},{"attempt_id",attempt},{"contexts",std::move(metadata)}}.dump()).get();check(cancel);contexts_=std::move(candidate.contexts);admitted_attempt_=attempt;
+ }
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index c590ca32..9ddbeb20 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -9,6 +9,7 @@
+ #include "agentflow/patch_tool.hpp"
+ #include "agentflow/restore_executor.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
++#include "agentflow/agent_authority.hpp"
+ #include "nlohmann/json.hpp"
+ #include <algorithm>
+ #include <filesystem>
+@@ -89,8 +90,8 @@ public:
+             language_catalogue_=settings_.language_server_registry?settings_.language_server_registry:std::make_shared<LanguageServerToolRegistry>(*primary_,settings_.language_servers);
+             settings_.language_server_registry=language_catalogue_;settings_.language_servers=language_catalogue_->profiles();
+         }
++        if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
+         validator_=std::make_unique<AgentRunner>(store_,settings_);
+-        if(coding_&&!settings_.process_profiles.empty())process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);
+         gateway_=make_persistence_agent_model_gateway(store_,settings_.credential);
+     }
+     void validate(const AgentRootExecutionRequest& request)const override{
+@@ -145,6 +146,12 @@ public:
+             }
+             if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+         }
++        if(settings_.provider_identity){
++            policy.history_owner=ProviderHistoryOwner{request.run_id,request.run_id,ModelCallRole::parent,
++                {ContextScopeKind::session,admitted.session_id},budget.spec.provider_identity_json,
++                context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
++            policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
++        }
+         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+         auto provider=settings_.provider;provider.model=model(request);
+         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
+diff --git a/Native/tests/agent_worker_coding_language_fixture.hpp b/Native/tests/agent_worker_coding_language_fixture.hpp
+index cec604d6..f7ec760d 100644
+--- a/Native/tests/agent_worker_coding_language_fixture.hpp
++++ b/Native/tests/agent_worker_coding_language_fixture.hpp
+@@ -5,7 +5,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     const auto* node=std::getenv("XMIND_WORKER_LSP_NODE");const auto* peer=std::getenv("XMIND_WORKER_LSP_PEER");check(node&&peer,"Language fixture requires owned Node peer paths");
+     for(const std::string mode:{"coding_language","coding_language_denied","coding_language_attached"}){
+         const bool denied=mode=="coding_language_denied",attached=mode=="coding_language_attached";const auto directory=folder/mode,extra=folder/(mode+"-extra");check(std::filesystem::create_directory(directory),"Language worker workspace must be fresh");write(directory/"AGENTS.md","WORKER_LANGUAGE_GUIDANCE\n");write(directory/"check.ts","export const greeting: string = 42;\n");if(attached){check(std::filesystem::create_directory(extra),"Attached language folder must be fresh");write(extra/"check.ts","export const greeting: string = 42;\n");write(directory/"check.ts","export const greeting: string = 'primary decoy';\n");}
+-        LanguageServerProfile profile;profile.id="worker-language-peer";profile.executable=node;profile.arguments={peer,"push"};profile.language_id="typescript";profile.extensions={".ts"};profile.request_timeout=3s;
++        LanguageServerProfile profile;profile.id="worker-language-peer";profile.executable=node;profile.executable_id=ForegroundProcess::executable_identity(node);profile.revision=1;profile.arguments={peer,"push"};profile.language_id="typescript";profile.extensions={".ts"};profile.request_timeout=3s;
+         AgentSettings settings;settings.provider={endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.run_timeout=20s;settings.language_servers={profile};settings.credential=CredentialReference{"worker","rpc-model","provider:chat"};settings.provider_identity=ProviderExecutionIdentity{"worker-profile","controlled-route","openai",7};
+         std::string extra_id;if(attached){WorkspaceTools primary(directory.string()),secondary(extra.string());extra_id=secondary.identity();const WorkspaceMembershipSnapshot captured{primary.identity(),23,{{primary.identity(),primary.root_path()},{secondary.identity(),secondary.root_path()}}};settings.workspace_membership_snapshot=[captured]{return captured;};}
+         if(denied)settings.permission_rules={{"language_server","**","deny"}};
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index d803feb5..686a5367 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -58,6 +58,8 @@ const server=createServer((request,response)=>{
+   if(mode.startsWith('coding_skills')){
+    const phase=counts[mode],manual=mode==='coding_skills_manual',denied=mode==='coding_skills_denied';assert.match(body.messages[0].content,/WORKER_SKILL_ROOT_GUIDANCE/);const restored=manual||phase===5;
+    if(restored||phase>=3&&!denied)assert.match(body.messages[0].content,/SKILL_BODY_GUIDANCE/);else assert.equal(body.messages[0].content.includes('SKILL_BODY_GUIDANCE'),false);
++   if(phase===5){assert.ok(body.messages.some(m=>m.role==='assistant'&&m.content==='Skill result inspected.'));assert.ok(body.messages.some(m=>m.tool_call_id==='skill-companion'&&JSON.parse(m.content).content==='actual skill companion\n'));assert.ok(body.messages.some(m=>m.role==='user'&&m.content.includes('Discover, load and inspect the workspace skill.')));assert.ok(body.messages.at(-1).content.includes('Use the saved skill without loading again.'));}
++   if(phase===1)assert.equal(body.messages.some(m=>m.role==='assistant'&&m.content==='Skill result inspected.'),false);
+    if(manual)assert.ok(!body.tools||body.tools.length===0);else assert.deepEqual(body.tools.map(t=>t.function.name).sort(),['list_skills','load_skill','read_file','read_repository_instructions'].sort());
+    if(phase===2)assert.match(body.messages[0].content,/SKILL_DIRECTORY_GUIDANCE/);if(phase===3){const loaded=body.messages.find(m=>m.tool_call_id==='skill-load');assert.ok(loaded);const result=JSON.parse(loaded.content);if(denied)assert.equal(result.error.code,'agent_permission_denied');else {assert.equal(result.activation,'requested_for_next_model_request');assert.equal(result.effect_permission,false);}}
+    if(phase===4){const read=body.messages.find(m=>m.tool_call_id==='skill-companion');assert.ok(read);assert.equal(JSON.parse(read.content).content,'actual skill companion\n');}
+@@ -174,4 +176,3 @@ try{
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+ 
+ assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');assert.equal(a2aCalls,1);assert.equal(readFileSync(join(peerRoot,'a2a-actual.txt'),'utf8'),'actual production remote effect');assert.equal(refreshCalls,1);assert.equal(refreshSubscriptions,2);assert.equal(refreshClosed,2);assert.equal(readFileSync(join(peerRoot,'refresh-actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});
+-
