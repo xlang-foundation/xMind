@@ -220,6 +220,7 @@ public:
     AgentWorkerProcessClaimRecord record_agent_worker_process_result(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,bool success,const std::string& actual_output_json);
     AgentWorkerProcessClaimRecord agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call);
     AgentWorkerRemoteClaimRecord claim_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
+    void admit_agent_worker_callable_catalogue(const AgentWorkerLeaseSpec&,const std::vector<ModelToolDefinition>&);
     AgentWorkerCallableClaimRecord claim_agent_worker_callable(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&);
     AgentWorkerRemoteClaimRecord start_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
     AgentWorkerCallableClaimRecord start_agent_worker_callable(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&);

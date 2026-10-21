@@ -8,40 +8,44 @@
 
 namespace agentflow {
 namespace {
-AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy){
-    std::set<std::string> names;
-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name))||!names.insert(tool.name).second)
-        throw std::invalid_argument("Coding workspace contains an unsupported capability");
-    std::erase_if(policy.tools,[](const auto& tool){return !is_agent_read_tool(tool.name);});return policy;
+AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy,const std::optional<AgentCallableToolOwnerContext>& callables){
+    std::set<std::string> names,callable_names;if(callables)for(const auto& binding:callables->bindings)if(!callable_names.insert(binding.definition.name).second)throw std::invalid_argument("Duplicate worker callable binding");
+    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name)&&!callable_names.contains(tool.name))||!names.insert(tool.name).second)throw std::invalid_argument("Coding workspace contains an unsupported capability");
+    std::erase_if(policy.tools,[&](const auto& tool){return callable_names.contains(tool.name)||!is_agent_read_tool(tool.name);});return policy;
 }
 }
 AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,
-    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
-    :reads_(store,store,lease,owner,read_policy(policy),cancel),tools_(std::move(policy.tools)){
+    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner,std::optional<AgentCallableToolOwnerContext> callable_owner)
+    :reads_(store,store,lease,owner,read_policy(policy,callable_owner),cancel),tools_(std::move(policy.tools)){
     if(owner.deadline!=deadline)throw std::invalid_argument("Coding model and tools require the same captured deadline");
+    if(callable_owner)for(const auto& binding:callable_owner->bindings)callable_names_.insert(binding.definition.name);
     AgentFileToolOwnerContext files;files.run_id=owner.run_id;files.primary_workspace=owner.primary_workspace;
     files.workspace_members=owner.workspace_members;files.approval_timeout=owner.approval_timeout;
     files.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())files.permission_layers.push_back(owner.permission_rules);
     files.repository_context=[this](std::size_t index){return index<reads_.contexts_.size()?reads_.contexts_[index].get():nullptr;};
-    for(const auto& tool:tools_)if(is_agent_file_tool(tool.name)){if(!owner.offered_tool(tool.name))throw Conflict("Coding file catalogue differs from its captured owner");files.allowed_tools.push_back(tool.name);}
+    for(const auto& tool:tools_)if(is_agent_file_tool(tool.name)&&!callable_names_.contains(tool.name)){if(!owner.offered_tool(tool.name))throw Conflict("Coding file catalogue differs from its captured owner");files.allowed_tools.push_back(tool.name);}
     files_=std::make_unique<AgentWorkerFileHost>(store,std::move(lease),std::move(files),deadline,cancel);
-    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_process_tool(tool.name);})){
+    if(std::any_of(tools_.begin(),tools_.end(),[this](const auto& tool){return !callable_names_.contains(tool.name)&&is_agent_process_tool(tool.name);})){
         if(!process_owner)throw Conflict("Coding command catalogue lacks its native profile owner");
         process_=std::move(process_owner);
         AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=true;
         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
     }
-    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_remote_tool(tool.name);})){
+    if(std::any_of(tools_.begin(),tools_.end(),[this](const auto& tool){return !callable_names_.contains(tool.name)&&is_agent_remote_tool(tool.name);})){
         if(!remote_owner||remote_owner->run_id!=owner.run_id||remote_owner->primary_workspace!=owner.primary_workspace||remote_owner->workspace_members!=owner.workspace_members||remote_owner->deadline!=deadline)throw Conflict("Coding remote catalogue lacks its captured native registry owner");
         auto context=std::move(*remote_owner);refresh_catalogue_=std::move(context.refresh_catalogue);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=[this](const std::string& name){return std::any_of(tools_.begin(),tools_.end(),[&](const auto& tool){return tool.name==name;});};context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);
         remotes_=std::make_unique<AgentWorkerRemoteHost>(store,files_->lease(),std::move(context),deadline,cancel);
+    }
+    if(callable_owner&&!callable_owner->bindings.empty()){
+        if(callable_owner->run_id!=owner.run_id||callable_owner->workspace_id!=files_->lease().workspace_id||callable_owner->workspace_revision!=files_->lease().workspace_revision||callable_owner->deadline!=deadline)throw Conflict("Callable owner differs from captured coding workspace");
+        auto context=std::move(*callable_owner);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=[this](const std::string& name){return callable_names_.contains(name)&&std::any_of(tools_.begin(),tools_.end(),[&](const auto& tool){return tool.name==name;});};context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);callables_=std::make_unique<AgentWorkerCallableHost>(store,files_->lease(),std::move(context),deadline,cancel);
     }
 }
 ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){
     {std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);
     if(remote_catalogue_invalidated_){
         if(!refresh_catalogue_)throw Conflict("Invalidated worker remote catalogue has no native discovery owner");
-        auto definitions=refresh_catalogue_(cancel);auto next=tools_;std::erase_if(next,[](const auto& tool){return is_agent_remote_tool(tool.name);});
+        auto definitions=refresh_catalogue_(cancel);auto next=tools_;std::erase_if(next,[this](const auto& tool){return !callable_names_.contains(tool.name)&&is_agent_remote_tool(tool.name);});
         for(auto& tool:definitions){if(!is_agent_remote_tool(tool.name)||next.size()>=64||std::any_of(next.begin(),next.end(),[&](const auto& existing){return existing.name==tool.name;}))throw Conflict("Invalid refreshed worker remote catalogue");next.push_back(std::move(tool));}
         tools_=std::move(next);remote_catalogue_invalidated_=false;
     }}
@@ -116,6 +120,14 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_remotes(const AgentWorkerSc
         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
         catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
         catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+    };
+}
+
+AgentWorkerRpcHandler AgentWorkerCodingContext::bind_callables(const AgentWorkerScope& scope){
+    if(!callables_)return [](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{if(method=="callable.catalogue"&&payload=="{}")return "[]";throw AgentWorkerRpcRemoteError("unsupported");};
+    auto dispatch=bind_agent_worker_callable_rpc(*callables_,scope);return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
+        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);if(method=="callable.invoke"&&AgentCallableInvocation::parse(payload).attempt_id!=reads_.admitted_attempt_)throw Conflict("Callable lacks its actually admitted guidance window");return dispatch(method,payload,std::move(sink),cancel);}
+        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
     };
 }
 

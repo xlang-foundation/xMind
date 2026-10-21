@@ -616,7 +616,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             if(!settings_.context&&(!settings_.provider_identity||!budget))for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
         };
         reload_history();
-        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+        std::set<std::string> worker_callables;if(coding_workspace_)for(const auto& name:coding_workspace_->callable_tool_names())if(!worker_callables.insert(name).second)throw Conflict("Duplicate backend worker callable alias");
+        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
         if(read_workspace_)request=prepare_workspace_window();
         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
@@ -770,6 +771,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         }
         std::string planning_continuation;
         std::unique_ptr<AgentCallableToolHost> callable_tool_host;
+        if(coding_workspace_&&!worker_callables.empty())callable_tool_host=checked_tool_host(coding_workspace_->callable_host());
         if(!xlang_tools.empty()){
             AgentCallableToolOwnerContext owner;owner.run_id=id;owner.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():(workspace_?workspace_->identity():"workspace:none");
             owner.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;owner.repository_context=repository_context.get();owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
@@ -968,7 +970,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 journal_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
                 Json output;bool success=false;std::optional<std::string> exact_output;
                 try {
-                    if(is_agent_file_tool(call.name)){
+                    if(worker_callables.contains(call.name)){
+                        if(!callable_tool_host||!read_workspace_)throw ToolAccessDenied("Callable worker owner is unavailable");AgentCallableInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;invocation.workspace_id=read_workspace_->workspace_id();invocation.workspace_revision=read_workspace_->workspace_revision();invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;invocation.tool_index=static_cast<std::uint32_t>(index-1);const auto result=callable_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);exact_output=result.output_json;success=result.success;
+                    }else if(is_agent_file_tool(call.name)){
                         if(!file_tool_host)throw ToolAccessDenied("File tool is not admitted for this run");
                         AgentFileToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
                         invocation.workspace_id=read_workspace_?read_workspace_->workspace_id():(run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity());invocation.workspace_revision=read_workspace_?read_workspace_->workspace_revision():(run_workspace_tools?run_workspace_tools->revision():1);

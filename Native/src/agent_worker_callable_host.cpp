@@ -10,7 +10,8 @@ AgentWorkerCallableHost::AgentWorkerCallableHost(PersistenceService& store,Agent
     :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
     if(owner.run_id!=lease_.owner_run_id||owner.workspace_id!=lease_.workspace_id||owner.workspace_revision!=lease_.workspace_revision||(!owner.repository_context&&!owner.repository_context_for_call)||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_)throw std::invalid_argument("Worker callable owner differs from captured lease");
     owner.before_effect=[store=&store_,lease=lease_,deadline=deadline_,cancel=owner_cancel_](const AgentCallableInvocation& call,const std::string& id,std::stop_token token){store->claim_agent_worker_callable_effect(lease,call,id,deadline,cancel,token).get();};
-    native_=make_agent_callable_tool_host(store_,std::move(owner));
+    std::vector<ModelToolDefinition> definitions;for(const auto& binding:owner.bindings){definitions.push_back(binding.definition);names_.push_back(binding.definition.name);}
+    native_=make_agent_callable_tool_host(store_,std::move(owner));store_.admit_agent_worker_callable_catalogue(lease_,std::move(definitions)).get();
 }
 AgentCallableToolResult AgentWorkerCallableHost::invoke(const AgentCallableInvocation& call,std::stop_token caller){
     std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker callable dispatch is already active");

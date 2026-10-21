@@ -1,0 +1,597 @@
+diff --git a/Native/include/agentflow/agent_runner_coding_workspace.hpp b/Native/include/agentflow/agent_runner_coding_workspace.hpp
+index fa514eb4..ec35fefe 100644
+--- a/Native/include/agentflow/agent_runner_coding_workspace.hpp
++++ b/Native/include/agentflow/agent_runner_coding_workspace.hpp
+@@ -3,6 +3,7 @@
+ #include "agentflow/agent_file_tool_host.hpp"
+ #include "agentflow/agent_process_tool_host.hpp"
+ #include "agentflow/agent_remote_tool_host.hpp"
++#include "agentflow/agent_callable_tool_host.hpp"
+ 
+ namespace agentflow {
+ // Explicit additional admission for native file tools. Supplying this object
+@@ -12,6 +13,8 @@ public:
+     virtual std::unique_ptr<AgentFileToolHost> file_host()=0;
+     virtual std::unique_ptr<AgentProcessOwnerHost> process_host(){return {};}
+     virtual std::unique_ptr<AgentRemoteToolHost> remote_host(){return {};}
++    virtual std::unique_ptr<AgentCallableToolHost> callable_host(){return {};}
++    virtual std::vector<std::string> callable_tool_names(){return {};}
+     virtual bool join_background(const std::string& attempt,std::stop_token cancel){return false;}
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_callable_host.hpp b/Native/include/agentflow/agent_worker_callable_host.hpp
+index 32070eed..d4c92028 100644
+--- a/Native/include/agentflow/agent_worker_callable_host.hpp
++++ b/Native/include/agentflow/agent_worker_callable_host.hpp
+@@ -10,10 +10,12 @@ public:
+     AgentWorkerCallableHost(PersistenceService&,AgentWorkerLeaseSpec,AgentCallableToolOwnerContext,
+         std::chrono::steady_clock::time_point,std::stop_token owner_cancel={});
+     AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
++    const std::vector<std::string>& tool_names()const noexcept{return names_;}
+     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
+ private:
+     PersistenceService& store_;AgentWorkerLeaseSpec lease_;
+     std::chrono::steady_clock::time_point deadline_;std::stop_token owner_cancel_;
++    std::vector<std::string> names_;
+     std::unique_ptr<AgentCallableToolHost> native_;std::mutex invocation_;
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_coding_context.hpp b/Native/include/agentflow/agent_worker_coding_context.hpp
+index be10989e..6b5a63ea 100644
+--- a/Native/include/agentflow/agent_worker_coding_context.hpp
++++ b/Native/include/agentflow/agent_worker_coding_context.hpp
+@@ -3,8 +3,10 @@
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
+ #include "agentflow/agent_worker_remote_rpc.hpp"
++#include "agentflow/agent_worker_callable_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
+ #include <map>
++#include <set>
+ 
+ namespace agentflow {
+ // Backend-only composition. File operations share the guidance window actually
+@@ -12,12 +14,13 @@ namespace agentflow {
+ class AgentWorkerCodingContext final:public AgentReadToolHost {
+ public:
+     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
+-        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
++        AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
+     ModelRequest prepare(std::stop_token={});
+     void admit(const std::string&,const ModelRequest&,std::stop_token={});
+     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+     AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
+     AgentWorkerRpcHandler bind_processes(const AgentWorkerScope&);
++    AgentWorkerRpcHandler bind_callables(const AgentWorkerScope&);
+     AgentWorkerRpcHandler bind_remotes(const AgentWorkerScope&);
+     AgentWorkerFileHost& files()noexcept{return *files_;}
+ private:
+@@ -27,6 +30,8 @@ private:
+     std::shared_ptr<AgentProcessToolHost> process_;
+     std::unique_ptr<AgentWorkerProcessHost> processes_;
+     std::unique_ptr<AgentWorkerRemoteHost> remotes_;
++    std::unique_ptr<AgentWorkerCallableHost> callables_;
++    std::set<std::string> callable_names_;
+     std::function<std::vector<ModelToolDefinition>(std::stop_token)> refresh_catalogue_;
+     bool remote_catalogue_invalidated_=false;
+     std::vector<std::string> joined_process_notes_;
+diff --git a/Native/include/agentflow/agent_worker_coding_owner.hpp b/Native/include/agentflow/agent_worker_coding_owner.hpp
+index 1759382c..263d0763 100644
+--- a/Native/include/agentflow/agent_worker_coding_owner.hpp
++++ b/Native/include/agentflow/agent_worker_coding_owner.hpp
+@@ -7,7 +7,7 @@ class AgentWorkerCodingOwner final {
+ public:
+     AgentWorkerCodingOwner(PersistenceService&,AgentWorkerLeaseSpec,const AgentWorkerScope&,
+         AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,std::string,
+-        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
++        std::shared_ptr<AgentModelGateway>,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
+     ~AgentWorkerCodingOwner();
+     std::string dispatch(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token={});
+ private:
+diff --git a/Native/include/agentflow/agent_worker_supervisor.hpp b/Native/include/agentflow/agent_worker_supervisor.hpp
+index 50b9189b..724e2acb 100644
+--- a/Native/include/agentflow/agent_worker_supervisor.hpp
++++ b/Native/include/agentflow/agent_worker_supervisor.hpp
+@@ -21,7 +21,7 @@ public:
+     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
+     void start_coding(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
+-        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={});
++        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
+     RunState execute();
+     void cancel();
+     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index fec36257..0bcc6904 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -52,6 +52,7 @@ public:
+     std::future<AgentWorkerProcessClaimRecord> record_agent_worker_process_result(AgentWorkerLeaseSpec,AgentProcessToolInvocation,bool success,std::string actual_output_json);
+     std::future<AgentWorkerProcessClaimRecord> agent_worker_process_claim(std::string root,std::string attempt,std::string call);
+     std::future<AgentWorkerRemoteClaimRecord> claim_agent_worker_remote(AgentWorkerLeaseSpec,AgentRemoteToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<void> admit_agent_worker_callable_catalogue(AgentWorkerLeaseSpec,std::vector<ModelToolDefinition>);
+     std::future<AgentWorkerCallableClaimRecord> claim_agent_worker_callable(AgentWorkerLeaseSpec,AgentCallableInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<AgentWorkerRemoteClaimRecord> start_agent_worker_remote(AgentWorkerLeaseSpec,AgentRemoteToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<AgentWorkerCallableClaimRecord> start_agent_worker_callable(AgentWorkerLeaseSpec,AgentCallableInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 472e9d5c..559fe692 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -220,6 +220,7 @@ public:
+     AgentWorkerProcessClaimRecord record_agent_worker_process_result(const AgentWorkerLeaseSpec&,const AgentProcessToolInvocation&,bool success,const std::string& actual_output_json);
+     AgentWorkerProcessClaimRecord agent_worker_process_claim(const std::string& root,const std::string& attempt,const std::string& call);
+     AgentWorkerRemoteClaimRecord claim_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
++    void admit_agent_worker_callable_catalogue(const AgentWorkerLeaseSpec&,const std::vector<ModelToolDefinition>&);
+     AgentWorkerCallableClaimRecord claim_agent_worker_callable(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&);
+     AgentWorkerRemoteClaimRecord start_agent_worker_remote(const AgentWorkerLeaseSpec&,const AgentRemoteToolInvocation&);
+     AgentWorkerCallableClaimRecord start_agent_worker_callable(const AgentWorkerLeaseSpec&,const AgentCallableInvocation&);
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 826400bb..dfcf240b 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -616,7 +616,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+             if(!settings_.context&&(!settings_.provider_identity||!budget))for(const auto& stored:journal_.run_history(id).get())request.messages.push_back(message(stored));
+         };
+         reload_history();
+-        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
++        std::set<std::string> worker_callables;if(coding_workspace_)for(const auto& name:coding_workspace_->callable_tool_names())if(!worker_callables.insert(name).second)throw Conflict("Duplicate backend worker callable alias");
++        const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if(window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
+         if(read_workspace_)request=prepare_workspace_window();
+         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
+         if(settings_.approved_edits) request.tools.push_back(EditExecutor::definition());
+@@ -770,6 +771,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+         }
+         std::string planning_continuation;
+         std::unique_ptr<AgentCallableToolHost> callable_tool_host;
++        if(coding_workspace_&&!worker_callables.empty())callable_tool_host=checked_tool_host(coding_workspace_->callable_host());
+         if(!xlang_tools.empty()){
+             AgentCallableToolOwnerContext owner;owner.run_id=id;owner.workspace_id=run_workspace_tools?run_workspace_tools->workspace_id():(workspace_?workspace_->identity():"workspace:none");
+             owner.workspace_revision=run_workspace_tools?run_workspace_tools->revision():1;owner.repository_context=repository_context.get();owner.deadline=run_deadline;owner.approval_timeout=settings_.run_timeout;
+@@ -968,7 +970,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                 journal_.append_event(id,"tool.started",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"arguments",Json::parse(call.arguments_json)}}.dump()).get();
+                 Json output;bool success=false;std::optional<std::string> exact_output;
+                 try {
+-                    if(is_agent_file_tool(call.name)){
++                    if(worker_callables.contains(call.name)){
++                        if(!callable_tool_host||!read_workspace_)throw ToolAccessDenied("Callable worker owner is unavailable");AgentCallableInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;invocation.workspace_id=read_workspace_->workspace_id();invocation.workspace_revision=read_workspace_->workspace_revision();invocation.tool_name=call.name;invocation.arguments_json=call.arguments_json;invocation.tool_index=static_cast<std::uint32_t>(index-1);const auto result=callable_tool_host->invoke(invocation,token);output=Json::parse(result.output_json);exact_output=result.output_json;success=result.success;
++                    }else if(is_agent_file_tool(call.name)){
+                         if(!file_tool_host)throw ToolAccessDenied("File tool is not admitted for this run");
+                         AgentFileToolInvocation invocation;invocation.run_id=id;invocation.attempt_id=reservation?reservation->attempt_id:std::to_string(turn);invocation.call_id=call.id;
+                         invocation.workspace_id=read_workspace_?read_workspace_->workspace_id():(run_workspace_tools?run_workspace_tools->workspace_id():workspace_->identity());invocation.workspace_revision=read_workspace_?read_workspace_->workspace_revision():(run_workspace_tools?run_workspace_tools->revision():1);
+diff --git a/Native/src/agent_worker_callable_host.cpp b/Native/src/agent_worker_callable_host.cpp
+index 748c48c4..1dc3f039 100644
+--- a/Native/src/agent_worker_callable_host.cpp
++++ b/Native/src/agent_worker_callable_host.cpp
+@@ -10,7 +10,8 @@ AgentWorkerCallableHost::AgentWorkerCallableHost(PersistenceService& store,Agent
+     :store_(store),lease_(std::move(lease)),deadline_(deadline),owner_cancel_(cancel){
+     if(owner.run_id!=lease_.owner_run_id||owner.workspace_id!=lease_.workspace_id||owner.workspace_revision!=lease_.workspace_revision||(!owner.repository_context&&!owner.repository_context_for_call)||!owner.offered_tool||owner.before_effect||owner.deadline!=deadline_)throw std::invalid_argument("Worker callable owner differs from captured lease");
+     owner.before_effect=[store=&store_,lease=lease_,deadline=deadline_,cancel=owner_cancel_](const AgentCallableInvocation& call,const std::string& id,std::stop_token token){store->claim_agent_worker_callable_effect(lease,call,id,deadline,cancel,token).get();};
+-    native_=make_agent_callable_tool_host(store_,std::move(owner));
++    std::vector<ModelToolDefinition> definitions;for(const auto& binding:owner.bindings){definitions.push_back(binding.definition);names_.push_back(binding.definition.name);}
++    native_=make_agent_callable_tool_host(store_,std::move(owner));store_.admit_agent_worker_callable_catalogue(lease_,std::move(definitions)).get();
+ }
+ AgentCallableToolResult AgentWorkerCallableHost::invoke(const AgentCallableInvocation& call,std::stop_token caller){
+     std::unique_lock lock(invocation_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker callable dispatch is already active");
+diff --git a/Native/src/agent_worker_callable_rpc.cpp b/Native/src/agent_worker_callable_rpc.cpp
+index 1d329d71..cbab3e89 100644
+--- a/Native/src/agent_worker_callable_rpc.cpp
++++ b/Native/src/agent_worker_callable_rpc.cpp
+@@ -7,6 +7,7 @@ AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& ho
+     const auto& lease=host.lease();
+     if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
+     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method=="callable.catalogue"){if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");return Json(host.tool_names()).dump();}
+         if(method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+         try{const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+         catch(const AgentWorkerCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+diff --git a/Native/src/agent_worker_coding_context.cpp b/Native/src/agent_worker_coding_context.cpp
+index e2986c0f..3f8ce46b 100644
+--- a/Native/src/agent_worker_coding_context.cpp
++++ b/Native/src/agent_worker_coding_context.cpp
+@@ -8,40 +8,44 @@
+ 
+ namespace agentflow {
+ namespace {
+-AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy){
+-    std::set<std::string> names;
+-    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name))||!names.insert(tool.name).second)
+-        throw std::invalid_argument("Coding workspace contains an unsupported capability");
+-    std::erase_if(policy.tools,[](const auto& tool){return !is_agent_read_tool(tool.name);});return policy;
++AgentWorkerReadRequestPolicy read_policy(AgentWorkerReadRequestPolicy policy,const std::optional<AgentCallableToolOwnerContext>& callables){
++    std::set<std::string> names,callable_names;if(callables)for(const auto& binding:callables->bindings)if(!callable_names.insert(binding.definition.name).second)throw std::invalid_argument("Duplicate worker callable binding");
++    for(const auto& tool:policy.tools)if((!is_agent_read_tool(tool.name)&&!is_agent_file_tool(tool.name)&&!is_agent_process_tool(tool.name)&&!is_agent_remote_tool(tool.name)&&!callable_names.contains(tool.name))||!names.insert(tool.name).second)throw std::invalid_argument("Coding workspace contains an unsupported capability");
++    std::erase_if(policy.tools,[&](const auto& tool){return callable_names.contains(tool.name)||!is_agent_read_tool(tool.name);});return policy;
+ }
+ }
+ AgentWorkerCodingContext::AgentWorkerCodingContext(PersistenceService& store,AgentWorkerLeaseSpec lease,
+-    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
+-    :reads_(store,store,lease,owner,read_policy(policy),cancel),tools_(std::move(policy.tools)){
++    AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner,std::optional<AgentCallableToolOwnerContext> callable_owner)
++    :reads_(store,store,lease,owner,read_policy(policy,callable_owner),cancel),tools_(std::move(policy.tools)){
+     if(owner.deadline!=deadline)throw std::invalid_argument("Coding model and tools require the same captured deadline");
++    if(callable_owner)for(const auto& binding:callable_owner->bindings)callable_names_.insert(binding.definition.name);
+     AgentFileToolOwnerContext files;files.run_id=owner.run_id;files.primary_workspace=owner.primary_workspace;
+     files.workspace_members=owner.workspace_members;files.approval_timeout=owner.approval_timeout;
+     files.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())files.permission_layers.push_back(owner.permission_rules);
+     files.repository_context=[this](std::size_t index){return index<reads_.contexts_.size()?reads_.contexts_[index].get():nullptr;};
+-    for(const auto& tool:tools_)if(is_agent_file_tool(tool.name)){if(!owner.offered_tool(tool.name))throw Conflict("Coding file catalogue differs from its captured owner");files.allowed_tools.push_back(tool.name);}
++    for(const auto& tool:tools_)if(is_agent_file_tool(tool.name)&&!callable_names_.contains(tool.name)){if(!owner.offered_tool(tool.name))throw Conflict("Coding file catalogue differs from its captured owner");files.allowed_tools.push_back(tool.name);}
+     files_=std::make_unique<AgentWorkerFileHost>(store,std::move(lease),std::move(files),deadline,cancel);
+-    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_process_tool(tool.name);})){
++    if(std::any_of(tools_.begin(),tools_.end(),[this](const auto& tool){return !callable_names_.contains(tool.name)&&is_agent_process_tool(tool.name);})){
+         if(!process_owner)throw Conflict("Coding command catalogue lacks its native profile owner");
+         process_=std::move(process_owner);
+         AgentProcessToolOwnerContext context;context.run_id=owner.run_id;context.process=process_.get();context.primary_workspace=owner.primary_workspace;context.workspace_members=owner.workspace_members;context.repository_context=[this](std::size_t i){return i<reads_.contexts_.size()?reads_.contexts_[i].get():nullptr;};context.offered_tool=owner.offered_tool;context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);context.deadline=deadline;context.approval_timeout=owner.approval_timeout;context.allow_background=true;
+         processes_=std::make_unique<AgentWorkerProcessHost>(store,files_->lease(),std::move(context),deadline,cancel);
+     }
+-    if(std::any_of(tools_.begin(),tools_.end(),[](const auto& tool){return is_agent_remote_tool(tool.name);})){
++    if(std::any_of(tools_.begin(),tools_.end(),[this](const auto& tool){return !callable_names_.contains(tool.name)&&is_agent_remote_tool(tool.name);})){
+         if(!remote_owner||remote_owner->run_id!=owner.run_id||remote_owner->primary_workspace!=owner.primary_workspace||remote_owner->workspace_members!=owner.workspace_members||remote_owner->deadline!=deadline)throw Conflict("Coding remote catalogue lacks its captured native registry owner");
+         auto context=std::move(*remote_owner);refresh_catalogue_=std::move(context.refresh_catalogue);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=[this](const std::string& name){return std::any_of(tools_.begin(),tools_.end(),[&](const auto& tool){return tool.name==name;});};context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);
+         remotes_=std::make_unique<AgentWorkerRemoteHost>(store,files_->lease(),std::move(context),deadline,cancel);
+     }
++    if(callable_owner&&!callable_owner->bindings.empty()){
++        if(callable_owner->run_id!=owner.run_id||callable_owner->workspace_id!=files_->lease().workspace_id||callable_owner->workspace_revision!=files_->lease().workspace_revision||callable_owner->deadline!=deadline)throw Conflict("Callable owner differs from captured coding workspace");
++        auto context=std::move(*callable_owner);context.repository_context=nullptr;context.repository_context_for_call=[this]{return reads_.contexts_.front().get();};context.offered_tool=[this](const std::string& name){return callable_names_.contains(name)&&std::any_of(tools_.begin(),tools_.end(),[&](const auto& tool){return tool.name==name;});};context.permission_layers=owner.inherited_permission_layers;if(!owner.permission_rules.empty())context.permission_layers.push_back(owner.permission_rules);callables_=std::make_unique<AgentWorkerCallableHost>(store,files_->lease(),std::move(context),deadline,cancel);
++    }
+ }
+ ModelRequest AgentWorkerCodingContext::prepare(std::stop_token cancel){
+     {std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);
+     if(remote_catalogue_invalidated_){
+         if(!refresh_catalogue_)throw Conflict("Invalidated worker remote catalogue has no native discovery owner");
+-        auto definitions=refresh_catalogue_(cancel);auto next=tools_;std::erase_if(next,[](const auto& tool){return is_agent_remote_tool(tool.name);});
++        auto definitions=refresh_catalogue_(cancel);auto next=tools_;std::erase_if(next,[this](const auto& tool){return !callable_names_.contains(tool.name)&&is_agent_remote_tool(tool.name);});
+         for(auto& tool:definitions){if(!is_agent_remote_tool(tool.name)||next.size()>=64||std::any_of(next.begin(),next.end(),[&](const auto& existing){return existing.name==tool.name;}))throw Conflict("Invalid refreshed worker remote catalogue");next.push_back(std::move(tool));}
+         tools_=std::move(next);remote_catalogue_invalidated_=false;
+     }}
+@@ -119,4 +123,12 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_remotes(const AgentWorkerSc
+     };
+ }
+ 
++AgentWorkerRpcHandler AgentWorkerCodingContext::bind_callables(const AgentWorkerScope& scope){
++    if(!callables_)return [](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{if(method=="callable.catalogue"&&payload=="{}")return "[]";throw AgentWorkerRpcRemoteError("unsupported");};
++    auto dispatch=bind_agent_worker_callable_rpc(*callables_,scope);return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
++        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);if(method=="callable.invoke"&&AgentCallableInvocation::parse(payload).attempt_id!=reads_.admitted_attempt_)throw Conflict("Callable lacks its actually admitted guidance window");return dispatch(method,payload,std::move(sink),cancel);}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++
+ }
+diff --git a/Native/src/agent_worker_coding_owner.cpp b/Native/src/agent_worker_coding_owner.cpp
+index c0aa3f0a..ca3f12a6 100644
+--- a/Native/src/agent_worker_coding_owner.cpp
++++ b/Native/src/agent_worker_coding_owner.cpp
+@@ -7,27 +7,28 @@ namespace agentflow {
+ struct AgentWorkerCodingOwner::Impl {
+     AgentWorkerCodingContext context;
+     std::unique_ptr<AgentWorkerModelHost> model;
+-    AgentWorkerRpcHandler model_rpc,read_rpc,file_rpc,process_rpc,remote_rpc,journal_rpc;
++    AgentWorkerRpcHandler model_rpc,read_rpc,file_rpc,process_rpc,remote_rpc,callable_rpc,journal_rpc;
+     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+         AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
+-        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
+-        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(process_owner),std::move(remote_owner)){
++        std::string identity,std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner,std::optional<AgentCallableToolOwnerContext> callable_owner)
++        :context(store,lease,std::move(owner),policy,deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner)){
+         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
+         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
+         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
+         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),std::move(model_policy),std::move(gateway),deadline,cancel);
+         model_rpc=bind_agent_worker_model_rpc(*model,scope);read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
+-        file_rpc=context.bind_files(scope);process_rpc=context.bind_processes(scope);remote_rpc=context.bind_remotes(scope);journal_rpc=bind_agent_worker_workspace_journal_rpc(store,context.files(),scope,deadline,cancel);
++        file_rpc=context.bind_files(scope);process_rpc=context.bind_processes(scope);remote_rpc=context.bind_remotes(scope);callable_rpc=context.bind_callables(scope);journal_rpc=bind_agent_worker_workspace_journal_rpc(store,context.files(),scope,deadline,cancel);
+     }
+ };
+ AgentWorkerCodingOwner::AgentWorkerCodingOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
+     AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::string identity,
+-    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner)
+-    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner),std::move(remote_owner))){}
++    std::shared_ptr<AgentModelGateway> gateway,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner,std::optional<AgentCallableToolOwnerContext> callable_owner)
++    :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner))){}
+ AgentWorkerCodingOwner::~AgentWorkerCodingOwner()=default;
+ std::string AgentWorkerCodingOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
+     if(method.starts_with("model."))return impl_->model_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("journal."))return impl_->journal_rpc(method,payload,std::move(sink),cancel);
++    if(method.starts_with("callable."))return impl_->callable_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("remote."))return impl_->remote_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("process."))return impl_->process_rpc(method,payload,std::move(sink),cancel);
+     if(method.starts_with("file."))return impl_->file_rpc(method,payload,std::move(sink),cancel);
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index f13cc3db..bf54ab24 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -60,15 +60,18 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+     std::shared_ptr<LanguageServerToolRegistry> language_catalogue_;
+     std::unique_ptr<AgentRunner> validator_;
+     std::shared_ptr<AgentModelGateway> gateway_;
++    bool callable_tool(const std::string& name)const{return std::any_of(settings_.xlang_python_tools.begin(),settings_.xlang_python_tools.end(),[&](const auto& tool){return tool.definition.name==name;});}
+     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
+     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
+         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");}
++        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
+         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
+         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
+         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
+         if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
++        for(const auto& tool:settings_.xlang_python_tools){if(std::any_of(definitions.begin(),definitions.end(),[&](const auto& existing){return existing.name==tool.definition.name;}))throw std::invalid_argument("Callable alias collides with a configured native tool");definitions.push_back(tool.definition);}
+         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
++            if(coding_&&callable_tool(name)&&found!=definitions.end()){result.push_back(*found);continue;}
+             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
+             if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+         return result;
+@@ -76,7 +79,7 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+ public:
+     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding)
+         :store_(store),settings_(std::move(settings)),coding_(coding),image_(std::move(image)){
+-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
++        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||settings_.context||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
+         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
+         // AgentService owns the single admission-time membership capture.
+         settings_.workspace_membership_snapshot={};
+@@ -129,6 +132,7 @@ public:
+         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
+         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
+         for(const auto& definition:selected_tools)if(definition.name=="language_server")policy.tools.push_back(definition);
++        if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
+         std::unique_ptr<RemoteRunTools> remote_tools;
+         if(coding_&&(settings_.a2a_enabled||!settings_.mcp_servers.empty())){
+             remote_tools=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);
+@@ -138,7 +142,7 @@ public:
+                 if(policy.tools.size()>=64||std::any_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))throw std::invalid_argument("Worker tool catalogue exceeds limits or collides");
+                 policy.tools.push_back(definition);
+             }
+-            if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
++            if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+         }
+         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+         auto provider=settings_.provider;provider.model=model(request);
+@@ -159,11 +163,17 @@ public:
+                 if(stop.stop_requested()||cancel.stop_requested())throw ToolCancelled("Worker remote discovery cancelled");
+                 auto next=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);std::vector<ModelToolDefinition> definitions;const auto allowed=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+                 for(const auto& tool:next->definitions())if(!allowed||std::find(allowed->begin(),allowed->end(),tool.name)!=allowed->end())definitions.push_back(tool);
+-                if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&std::none_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;}))throw Conflict("Selected remote tool disappeared during discovery");
++                if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;}))throw Conflict("Selected remote tool disappeared during discovery");
+                 if(stop.stop_requested()||cancel.stop_requested())throw ToolCancelled("Worker remote discovery cancelled");next->observe(request.run_id);remote_tools=std::move(next);return definitions;
+             };
+             remote_owner=std::move(context);remote_tools->observe(request.run_id);
+         }
++        std::optional<AgentCallableToolOwnerContext> callable_owner;
++        if(coding_&&!settings_.xlang_python_tools.empty()){
++            AgentCallableToolOwnerContext context;context.run_id=request.run_id;context.workspace_id=membership.workspace_id;context.workspace_revision=membership.revision;context.repository_context=contexts.front().get();context.offered_tool=owner.offered_tool;context.deadline=deadline;context.approval_timeout=owner.approval_timeout;
++            for(const auto& tool:settings_.xlang_python_tools)if(owner.offered_tool(tool.definition.name))context.bindings.push_back({tool.definition,[binding=&tool](const std::string& arguments,std::stop_token stop){return binding->execution==XlangPythonExecution::worker?binding->callable.invoke_json_worker(arguments,stop):binding->callable.invoke_json(arguments,stop);}});
++            if(!context.bindings.empty())callable_owner=std::move(context);
++        }
+         auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{request.run_id,request.run_id,membership.workspace_id,generation(),membership.revision},budget.spec.provider_identity_json,deadline);
+         // An observation failure cannot release the physical slot. Retain this
+         // same supervisor, including uncertain launch before a returned handle;
+@@ -171,7 +181,7 @@ public:
+         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
+                 catch(...){std::this_thread::sleep_for(1s);}}};
+         std::exception_ptr failure;
+-        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
++        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+         catch(...){failure=std::current_exception();}
+         try{
+             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}
+diff --git a/Native/src/agent_worker_read_workspace.cpp b/Native/src/agent_worker_read_workspace.cpp
+index 39867b14..02051fc2 100644
+--- a/Native/src/agent_worker_read_workspace.cpp
++++ b/Native/src/agent_worker_read_workspace.cpp
+@@ -5,9 +5,11 @@
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
+ #include "agentflow/agent_worker_remote_rpc.hpp"
++#include "agentflow/agent_worker_callable_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
+ #include "nlohmann/json.hpp"
+ #include <utility>
++#include <algorithm>
+ 
+ namespace agentflow {
+ namespace {
+@@ -43,6 +45,8 @@ public:
+     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
+     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
+     std::unique_ptr<AgentRemoteToolHost> remote_host()override{return std::make_unique<AgentWorkerRemoteClient>(peer_);}
++    std::unique_ptr<AgentCallableToolHost> callable_host()override{return std::make_unique<AgentWorkerCallableClient>(peer_);}
++    std::vector<std::string> callable_tool_names()override{const auto result=nlohmann::json::parse(peer_.call("callable.catalogue","{}"));if(!result.is_array()||result.size()>64)throw ModelProtocolError("Invalid worker callable catalogue");std::vector<std::string> names;for(const auto& entry:result){if(!entry.is_string())throw ModelProtocolError("Invalid worker callable alias");const auto name=entry.get<std::string>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||std::find(names.begin(),names.end(),name)!=names.end())throw ModelProtocolError("Invalid worker callable alias");names.push_back(name);}return names;}
+     bool join_background(const std::string& attempt,std::stop_token cancel)override{
+         try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
+             if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}
+diff --git a/Native/src/agent_worker_supervisor.cpp b/Native/src/agent_worker_supervisor.cpp
+index 7148d89e..e8975fe4 100644
+--- a/Native/src/agent_worker_supervisor.cpp
++++ b/Native/src/agent_worker_supervisor.cpp
+@@ -67,12 +67,12 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
+     impl_->ready=true;
+ }
+ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,AgentWorkerReadRequestPolicy policy,ChatProviderConfig config,
+-    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner){
++    std::string identity,std::shared_ptr<AgentModelGateway> gateway,std::stop_token cancel,std::shared_ptr<AgentProcessToolHost> process_owner,std::optional<AgentRemoteToolOwnerContext> remote_owner,std::optional<AgentCallableToolOwnerContext> callable_owner){
+     std::lock_guard lock(impl_->mutex);
+     if(!impl_->lease_admitted||impl_->started||impl_->draining)throw Conflict("Worker supervisor cannot restart");
+     impl_->started=true; // Startup failure is not permission to retry this child.
+     impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
+-        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner));
++        std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner));
+     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
+         [owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){return owner->dispatch(method,payload,std::move(sink),stop);},impl_->deadline);
+     impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index afe45039..4460432b 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -230,6 +230,7 @@ std::future<AgentWorkerProcessClaimRecord> PersistenceService::claim_agent_worke
+ std::future<AgentWorkerProcessClaimRecord> PersistenceService::record_agent_worker_process_result(AgentWorkerLeaseSpec lease,AgentProcessToolInvocation call,bool success,std::string output){return impl_->submit([lease=std::move(lease),call=std::move(call),success,output=std::move(output)](Repository& r){return r.record_agent_worker_process_result(lease,call,success,output);});}
+ std::future<AgentWorkerProcessClaimRecord> PersistenceService::agent_worker_process_claim(std::string root,std::string attempt,std::string call){return impl_->observe([root=std::move(root),attempt=std::move(attempt),call=std::move(call)](Repository& r){return r.agent_worker_process_claim(root,attempt,call);});}
+ std::future<AgentWorkerRemoteClaimRecord> PersistenceService::claim_agent_worker_remote(AgentWorkerLeaseSpec lease,AgentRemoteToolInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker remote call cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker remote call deadline elapsed");return r.claim_agent_worker_remote(lease,call);});}
++std::future<void> PersistenceService::admit_agent_worker_callable_catalogue(AgentWorkerLeaseSpec lease,std::vector<ModelToolDefinition> tools){return impl_->submit([lease=std::move(lease),tools=std::move(tools)](Repository& r){r.admit_agent_worker_callable_catalogue(lease,tools);});}
+ std::future<AgentWorkerCallableClaimRecord> PersistenceService::claim_agent_worker_callable(AgentWorkerLeaseSpec lease,AgentCallableInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker callable call cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker callable call deadline elapsed");return r.claim_agent_worker_callable(lease,call);});}
+ std::future<AgentWorkerRemoteClaimRecord> PersistenceService::start_agent_worker_remote(AgentWorkerLeaseSpec lease,AgentRemoteToolInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker remote dispatch cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker remote dispatch deadline elapsed");return r.start_agent_worker_remote(lease,call);});}
+ std::future<AgentWorkerCallableClaimRecord> PersistenceService::start_agent_worker_callable(AgentWorkerLeaseSpec lease,AgentCallableInvocation call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker callable dispatch cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker callable dispatch deadline elapsed");return r.start_agent_worker_callable(lease,call);});}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 260e7418..b0b911b3 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3332,8 +3332,11 @@ AgentWorkerModelClaimSpec worker_remote_authority(Repository& repository,XlangSq
+     if(matches!=1)throw Conflict("Worker remote provider call identity is absent or ambiguous");
+     (void)object_json(call.arguments_json,4*1024*1024);if(call.tool_index>=actual.tool_calls.size()||actual.tool_calls[call.tool_index].id!=call.call_id)throw Conflict("Worker remote call index differs from its actual model ordinal");return model.spec;
+ }
++bool worker_callable_tool(XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& name){
++    const auto rows=db.execute("SELECT payload FROM information WHERE category='native-agent-worker-callable-catalogues' AND id=?",{lease.generation}).rows;if(rows.empty())return false;const auto value=Json::parse(text(rows[0][0]));if(value.at("version")!=1||value.at("lease")!=worker_spec_json(lease)||!value.at("tools").is_array())throw DatabaseError("Stored callable catalogue differs from captured lease");for(const auto& tool:value.at("tools"))if(tool.at("name")==name)return true;return false;
++}
+ AgentWorkerModelClaimSpec worker_callable_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentCallableInvocation& call){
+-    (void)call.serialize();worker_current_scope(repository,db,lease);
++    (void)call.serialize();worker_current_scope(repository,db,lease);if(!worker_callable_tool(db,lease,call.tool_name))throw Conflict("Callable is absent from its backend-admitted catalogue");
+     if(lease.owner_run_id!=lease.root_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent"||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker callable differs from its ordinary workspace owner");
+     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
+     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker callable has no actual model receipt");
+@@ -3471,13 +3474,12 @@ AgentWorkerModelClaimRecord Repository::record_agent_worker_model_response(const
+     changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_claim_json(record).dump(),std::string(worker_claim_category),worker_claim_key(spec.root_run_id,spec.attempt_id)}));
+     impl_->event(spec.owner_run_id,"worker.model.responded",Json{{"generation",spec.generation},{"attempt_id",spec.attempt_id},{"response_binding",record.response_binding}}.dump());tx.commit();return record;
+ }
+-namespace {bool worker_callable_tool(const std::string& name){return !worker_read_tool(name)&&!is_agent_file_tool(name)&&!is_agent_process_tool(name)&&!is_agent_remote_tool(name);}}
+ Event Repository::agent_worker_tool_event(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned){return agent_worker_tool_event_impl(lease,attempt,ordinal,returned,false);}
+ Event Repository::agent_worker_workspace_tool_event(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned){return agent_worker_tool_event_impl(lease,attempt,ordinal,returned,true);}
+ Event Repository::agent_worker_tool_event_impl(const AgentWorkerLeaseSpec& lease,const std::string& attempt,std::int64_t ordinal,bool returned,bool allow_files){
+     if(ordinal<0||ordinal>=64)throw std::invalid_argument("Invalid worker tool activity ordinal");auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.state!="responded"||model.actual_assistant_json.empty()||model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id)throw Conflict("Worker activity lacks its actual captured model response");const auto actual=decode_agent_model_completion(model.actual_response_json);
+-    if(static_cast<std::size_t>(ordinal)>=actual.tool_calls.size())throw Conflict("Worker tool activity has no actual provider call");const auto& tool=actual.tool_calls[static_cast<std::size_t>(ordinal)];const bool file=is_agent_file_tool(tool.name),process=is_agent_process_tool(tool.name),remote=is_agent_remote_tool(tool.name),callable=worker_callable_tool(tool.name);if((file||process||remote||callable)&&!allow_files)throw Conflict("Read-only worker activity cannot acknowledge file tools");const auto args=Json::parse(object_json(tool.arguments_json,(file||process||remote)?4*1024*1024:2*1024*1024));
+-    AgentWorkspaceInvocation call{1,lease.owner_run_id,attempt,tool.id,lease.workspace_id,lease.workspace_revision,args.value("folder_id",lease.workspace_id),tool.name,tool.arguments_json};
++    if(static_cast<std::size_t>(ordinal)>=actual.tool_calls.size())throw Conflict("Worker tool activity has no actual provider call");const auto& tool=actual.tool_calls[static_cast<std::size_t>(ordinal)];const bool callable=worker_callable_tool(db,lease,tool.name),file=!callable&&is_agent_file_tool(tool.name),process=!callable&&is_agent_process_tool(tool.name),remote=!callable&&is_agent_remote_tool(tool.name);if((file||process||remote||callable)&&!allow_files)throw Conflict("Read-only worker activity cannot acknowledge file tools");const auto args=Json::parse(object_json(tool.arguments_json,(file||process||remote)?4*1024*1024:2*1024*1024));
++    AgentWorkspaceInvocation call{1,lease.owner_run_id,attempt,tool.id,lease.workspace_id,lease.workspace_revision,callable?lease.workspace_id:args.value("folder_id",lease.workspace_id),tool.name,tool.arguments_json};
+     AgentFileToolInvocation file_call;file_call.run_id=call.run_id;file_call.attempt_id=call.attempt_id;file_call.call_id=call.call_id;file_call.workspace_id=call.workspace_id;file_call.workspace_revision=call.workspace_revision;file_call.folder_id=call.folder_id;file_call.tool_name=call.tool_name;file_call.arguments_json=call.arguments_json;
+     AgentProcessToolInvocation process_call;process_call.run_id=call.run_id;process_call.attempt_id=call.attempt_id;process_call.call_id=call.call_id;process_call.workspace_id=call.workspace_id;process_call.workspace_revision=call.workspace_revision;process_call.folder_id=call.folder_id;process_call.tool_name=call.tool_name;process_call.arguments_json=call.arguments_json;
+     AgentRemoteToolInvocation remote_call;remote_call.run_id=call.run_id;remote_call.attempt_id=call.attempt_id;remote_call.call_id=call.call_id;remote_call.workspace_id=call.workspace_id;remote_call.workspace_revision=call.workspace_revision;remote_call.tool_name=call.tool_name;remote_call.arguments_json=call.arguments_json;remote_call.tool_index=static_cast<std::uint32_t>(ordinal);
+@@ -3504,11 +3506,11 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
+     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
+     // Check the admitted vocabulary even for an already committed turn. A read
+     // channel must never acknowledge a coding turn through idempotent lookup.
+-    for(const auto& call:actual.tool_calls)if(!worker_read_tool(call.name)&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)||worker_callable_tool(call.name))))throw Conflict("Worker turn contains an unsupported tool");
++    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
+     if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     std::set<std::string> calls;std::vector<std::string> outputs;
+     for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");
+-        if(worker_callable_tool(call.name)){
++        if(worker_callable_tool(db,lease,call.name)){
+             const auto callable=read_worker_callable(db,lease.root_run_id,attempt,call.id);
+             if(callable.state!="returned"||worker_claim_spec_json(callable.model)!=worker_claim_spec_json(model.spec)||callable.invocation.tool_name!=call.name||callable.invocation.arguments_json!=call.arguments_json)throw Conflict("Worker workspace turn has an unfinished or changed actual callable result");
+             (void)worker_callable_authority(*this,db,lease,callable.invocation);outputs.push_back(Json{{"content",callable.actual_output_json},{"tool_call_id",call.id}}.dump());continue;
+@@ -3660,6 +3662,11 @@ AgentWorkerRemoteClaimRecord Repository::record_agent_worker_remote_result(const
+     record.state="returned";record.success=success;record.actual_output_json=output;record.output_binding=context_digest(output);changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_remote_json(record).dump(),std::string(worker_remote_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id)}));impl_->event(lease.owner_run_id,"worker.remote.returned",Json{{"generation",lease.generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"success",success},{"output_binding",record.output_binding}}.dump());tx.commit();return record;
+ }
+ AgentWorkerRemoteClaimRecord Repository::agent_worker_remote_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_remote(impl_->database,root,attempt,call);}
++void Repository::admit_agent_worker_callable_catalogue(const AgentWorkerLeaseSpec& lease,const std::vector<ModelToolDefinition>& tools){
++    if(tools.empty()||tools.size()>64)throw std::invalid_argument("Invalid callable catalogue size");auto ordered=tools;std::sort(ordered.begin(),ordered.end(),[](const auto& a,const auto& b){return a.name<b.name;});Json definitions=Json::array();std::string previous;for(const auto& tool:ordered){if(tool.name.empty()||tool.name.size()>128||tool.name.find('\0')!=std::string::npos||tool.name==previous||tool.description.size()>65536||tool.input_schema_json.size()>65536)throw std::invalid_argument("Invalid callable catalogue entry");(void)object_json(tool.input_schema_json,65536);previous=tool.name;definitions.push_back({{"name",tool.name},{"description",tool.description},{"input_schema_json",tool.input_schema_json}});}
++    auto& db=impl_->database;Transaction tx(db);if(read_worker_lease(db,lease.generation).spec!=lease)throw Conflict("Callable catalogue differs from actual lease");const auto value=Json{{"version",1},{"lease",worker_spec_json(lease)},{"tools",definitions}}.dump();const auto rows=db.execute("SELECT payload FROM information WHERE category='native-agent-worker-callable-catalogues' AND id=?",{lease.generation}).rows;if(!rows.empty()){if(text(rows[0][0])!=value)throw Conflict("Callable catalogue cannot change after admission");tx.commit();return;}
++    worker_current_scope(*this,db,lease,true);if(lease.root_run_id!=lease.owner_run_id||root_budget(lease.root_run_id).spec.policy_id!="native.direct-agent")throw Conflict("Callable catalogue requires ordinary root ownership");changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES('native-agent-worker-callable-catalogues',?,?)",{lease.generation,value}));impl_->event(lease.owner_run_id,"worker.callable.catalogue",Json{{"generation",lease.generation},{"tool_count",tools.size()}}.dump());tx.commit();
++}
+ AgentWorkerCallableClaimRecord Repository::claim_agent_worker_callable(const AgentWorkerLeaseSpec& lease,const AgentCallableInvocation& call){
+     auto& db=impl_->database;Transaction tx(db);const auto model=worker_callable_authority(*this,db,lease,call);AgentWorkerCallableClaimRecord record{model,call,"awaiting_dispatch"};
+     const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_callable_category),worker_tool_call_key(lease.root_run_id,call.attempt_id,call.call_id),worker_callable_json(record).dump()});if(inserted.affected_rows!=1)throw Conflict("Worker callable call was already claimed; no replay is authorized");
+diff --git a/Native/tests/agent_worker_coding_callable_fixture.hpp b/Native/tests/agent_worker_coding_callable_fixture.hpp
+new file mode 100644
+index 00000000..b143c4a7
+--- /dev/null
++++ b/Native/tests/agent_worker_coding_callable_fixture.hpp
+@@ -0,0 +1,19 @@
++namespace worker_coding_callable_fixture {
++using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;using worker_coding_fixture::check;using worker_coding_fixture::write;
++inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder,const std::vector<std::string>& imports){
++    for(const std::string mode:{"coding_callable","coding_callable_array","coding_callable_denied","coding_callable_policy","coding_callable_cancel","coding_callable_unrecorded","coding_callable_alias","coding_callable_worker","coding_callable_default"}){
++        const bool array=mode=="coding_callable_array",denied=mode=="coding_callable_denied",policy=mode=="coding_callable_policy",cancelled=mode=="coding_callable_cancel",unrecorded=mode=="coding_callable_unrecorded",alias_mode=mode=="coding_callable_alias",worker=mode=="coding_callable_worker",defaults=mode=="coding_callable_default";const std::string alias=alias_mode?"language_server":"trusted_probe";const auto directory=folder/mode,effect=directory/"actual.txt";check(std::filesystem::create_directory(directory),"Callable worker workspace must be fresh");write(directory/"AGENTS.md","WORKER_CALLABLE_GUIDANCE\n");write(directory/"worker_callable_fixture.py","import os\ndef invoke(arguments):\n    with open("+Json(effect.string()).dump()+", 'a', encoding='utf-8') as output:\n        output.write('once')\n    return "+(array?"[arguments['text'].upper(), os.getpid()]":"{'text': arguments['text'].upper(), 'pid': os.getpid()}")+"\n");
++        AgentSettings settings;settings.provider={endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.run_timeout=20s;settings.credential=CredentialReference{"worker","rpc-model","provider:chat"};settings.provider_identity=ProviderExecutionIdentity{"worker-profile","controlled-route","openai",7};settings.permission_rules={{alias,"*",policy?"deny":"ask"}};settings.xlang_python_tools.push_back({{alias,"Trusted worker callable fixture",R"({"type":"object","properties":{"text":{"type":"string"}},"required":["text"],"additionalProperties":false})"},XlangPythonCallable(imports[0],imports[1],directory.string(),"worker_callable_fixture","invoke",image->path()),worker?XlangPythonExecution::worker:XlangPythonExecution::in_process});
++        AgentDefinitionStore(store).apply("agents:\n  - id: callable.worker\n    mode: primary\n    placement: process\n    model_id: worker-rpc-fixture\n    instructions: Execute the registered callable once.\n"+(defaults?std::string{}:"    tools: ["+alias+"]\n"));const std::string id="rpc-"+mode,session=id+"-session";store.create_session(session,"Production callable worker").get();std::unique_ptr<XlangSqlite> fault;if(unrecorded){fault=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);fault->execute("CREATE TRIGGER fixture_callable_factory_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-callable-claims' AND json_extract(NEW.payload,'$.state')='returned' AND json_extract(NEW.payload,'$.model.owner_run_id')='rpc-coding_callable_unrecorded' BEGIN SELECT RAISE(ABORT,'fixture_callable_factory_abort'); END");}
++        unsigned factories=0;ExecutionPlatform service(store,settings,1,2,[&](PersistenceService& actual,const AgentSettings& captured){++factories;return make_agent_worker_coding_executor(actual,captured,image);});service.select_session_agent(session,service.agent_definitions().front(),0);service.submit(id,session,"Call the admitted trusted tool.");std::optional<Operation> pending;const auto until=Clock::now()+15s;
++        while(Clock::now()<until&&!service.idle()){
++            if(!pending)for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval){pending=op;check(!std::filesystem::exists(effect),"Trusted callable must wait for actual approval");if(cancelled)service.cancel(id);else store.decide_operation(op.id,denied?OperationDecision::deny:OperationDecision::allow,"callable-worker-controller").get();}
++            std::this_thread::sleep_for(5ms);
++        }
++        check(service.idle()&&service.healthy()&&factories==1&&pending.has_value()!=policy,"Callable worker must physically drain with expected approval ownership");const auto history=store.run_history(id).get();const auto events=store.events(id).get();const auto admission=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.lease.admitted";});check(admission!=events.end(),"Callable factory must launch an actual product child");const auto lease=store.agent_worker_lease(Json::parse(admission->json).at("generation").get<std::string>()).get();check(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Callable product worker must physically retire");const auto claimed=std::find_if(events.begin(),events.end(),[](const auto& e){return e.kind=="worker.callable.claimed";});check(claimed!=events.end(),"Actual worker must use the durable callable claim");const auto receipt=store.agent_worker_callable_claim(id,Json::parse(claimed->json).at("attempt_id").get<std::string>(),"callable-call").get();const bool effected=!denied&&!policy&&!cancelled;check(std::filesystem::exists(effect)==effected,"Only an approved live callable may write its effect");if(effected)check(worker_coding_fixture::bytes(effect)=="once","Actual xlang3 callable effect must occur once");
++        if(cancelled||unrecorded){check(store.run(id).get().state==(cancelled?RunState::cancelled:RunState::failed)&&history.size()==1&&store.root_budget(id).get().model_calls_reserved==1,"Interrupted callable must not invent completion or continuation");if(unrecorded)check(receipt.state=="uncertain"&&receipt.actual_output_json.empty()&&receipt.operation_ids==std::vector<std::string>{pending->id}&&store.operation(pending->id).get().state==OperationState::succeeded,"Lost callable acknowledgement must retain actual native effect without replay");else check(receipt.state=="returned"&&!receipt.success&&receipt.operation_ids.empty(),"Cancelled pending callable must retain known no-effect result");}
++        else {check(store.run(id).get().state==RunState::completed&&history.size()==4&&store.root_budget(id).get().model_calls_reserved==2&&Json::parse(history.back().json).at("content")=="Callable result inspected."&&Json::parse(history[2].json).at("content")==receipt.actual_output_json,"Actual callable acknowledgement must enter exact canonical continuation");check(receipt.state=="returned"&&receipt.success==effected,"Callable outcome must retain actual permission decision");if(effected){const auto value=Json::parse(receipt.actual_output_json);const auto pid=array?value[1].get<unsigned long>():value.at("pid").get<unsigned long>();check(worker?pid!=GetCurrentProcessId()&&pid!=lease.spec.pid:pid==GetCurrentProcessId(),"Callable execution must remain in its configured backend or separate unified xmind worker");check(receipt.operation_ids==std::vector<std::string>{pending->id},"Callable receipt must bind its actual approved operation");}}
++        if(fault)fault->execute("DROP TRIGGER fixture_callable_factory_abort");std::cout<<"Production callable worker "<<mode<<" verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement."<<std::endl;
++    }
++}
++}
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index e40f98f2..f0d82617 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -207,6 +207,8 @@ void callable_claims(PersistenceService& store,const std::string& path,const std
+     // Synthetic callable/model/proposal identities test durable ownership, not
+     // actual callable peer dispatch. The native effect host has separate tests.
+     root(store,"callable-root");const auto owner=store.admit_agent_worker(lease("callable-root","callable-generation")).get().spec;
++    store.admit_agent_worker_callable_catalogue(owner,{{"trusted_fixture","Captured callable",R"({"type":"object"})"}}).get();
++    rejects<Conflict>([&]{store.admit_agent_worker_callable_catalogue(owner,{{"trusted_fixture","Changed callable",R"({"type":"object"})"}}).get();});
+     const auto deadline=std::chrono::steady_clock::now()+30s;
+     const std::string attempt="callable-model",args=R"({"profile":"fixture","arguments":[],"workdir":"."})";
+     ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{{(std::string(253,'p')+"\xe9\x9b\xaa"),"trusted_fixture",args},{"callable-two","trusted_fixture",args},{"callable-denied","trusted_fixture",args},{"callable-interrupted","trusted_fixture",args},{"callable-awaiting","trusted_fixture",args}},"[]"};
+@@ -248,6 +250,7 @@ void process_controls(PersistenceService& store){
+ }
+ void workspace_turns(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
+     root(store,"workspace-turn-root");const auto owner=store.admit_agent_worker(lease("workspace-turn-root","workspace-turn-generation")).get().spec;
++    store.admit_agent_worker_callable_catalogue(owner,{{"trusted_fixture","Captured callable",R"({"type":"object"})"}}).get();
+     const auto deadline=std::chrono::steady_clock::now()+20s;const std::string attempt="workspace-turn-model",args=R"({"path":"fixture.txt"})";
+     ModelCompletion response{"Mixed workspace tools","","tool_calls",R"({"total_tokens":17})",{{"mixed-read","read_file",args},{"mixed-file","create_file",R"({"path":"fixture.txt","content":"fixture"})"},{"mixed-process","run_process",R"({"profile":"fixture","arguments":[],"workdir":"."})"},{"mixed-remote","mcp_fixture",R"({"text":"exact remote input"})"},{"mixed-callable","trusted_fixture",R"({"text":"exact callable input"})"}},"[]"};
+     store.reserve_agent_worker_model(owner,attempt,deadline).get();store.start_agent_worker_model(owner,attempt,deadline).get();const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(owner,attempt,deadline).get();
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index 130fae02..3a3a3240 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -33,6 +33,7 @@
+ #include "agent_worker_profile_factory_fixture.hpp"
+ #include "agent_worker_coding_fixture.hpp"
+ #include "agent_worker_coding_language_fixture.hpp"
++#include "agent_worker_coding_callable_fixture.hpp"
+ #include "agent_worker_coding_process_fixture.hpp"
+ #include "agent_worker_coding_service_fixture.hpp"
+ #include "agentflow/agent_worker_runner.hpp"
+@@ -254,6 +255,6 @@ int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-chann
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_completion_abort BEFORE INSERT ON events WHEN NEW.run_id='rpc-completion_rollback' AND NEW.kind='worker.lease.retired' AND json_extract(NEW.payload,'$.reason')='completed' BEGIN SELECT RAISE(ABORT,'fixture_worker_completion_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_worker_read_turn_abort BEFORE INSERT ON information WHEN NEW.category='native-agent-worker-tool-turns' AND json_extract(NEW.payload,'$.model.root_run_id')='rpc-read_turn_rollback' BEGIN SELECT RAISE(ABORT,'fixture_worker_read_turn_abort'); END");}
+     {XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("CREATE TRIGGER fixture_post_drain_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-leases' AND json_extract(NEW.payload,'$.spec.generation')='generation-other_error' AND json_extract(NEW.payload,'$.state')='retired' BEGIN SELECT RAISE(ABORT,'fixture_post_drain_abort'); END");}
+-    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_language_fixture::parent(store,product,argv[3],folder);worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);worker_coding_remote_fixture::parent(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder);worker_coding_remote_fixture::factory(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder,false,true);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
++    PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});const std::string secret="synthetic-model-rpc-not-live";store.put_credential("worker","rpc-model","provider:chat","Controlled RPC peer",SecretBytes(std::span<const std::uint8_t>(reinterpret_cast<const std::uint8_t*>(secret.data()),secret.size())),0).get();root(store,"rpc-foreign",R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})");for(const auto* mode:{"normal","cancel","crash","delivery","overflow","other_error","completion","completion_delivery","completion_rollback","completion_hold","runner","runner_error","runner_cancel"})model_case(store,image,argv[3],mode,[&]{XlangSqlite fault((folder/"state.sqlite").string(),{argv[1],argv[2]});fault.execute("DROP TRIGGER fixture_post_drain_abort");});for(const auto* mode:{"read","read_delivery","read_denied","read_cancel","read_turn_delivery","read_turn_rollback"})worker_read_fixture::parent(store,image,argv[3],folder,mode);for(const auto* mode:{"file_create","file_denied","file_cancel","file_delivery","file_unrecorded"})worker_file_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});worker_context_fixture::parent(store,image,argv[3],folder);worker_context_fixture::parent(store,image,argv[3],folder,"runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"runner_read_cancel");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read");worker_context_fixture::parent(store,image,argv[3],folder,"native_runner_read_cancel");const auto product=ForegroundProcess::bind_executable((std::filesystem::u8path(executable()).parent_path()/"xmind.exe").string());worker_service_fixture::parent(store,product,argv[3],folder);worker_factory_fixture::parent(store,product,argv[3],folder);worker_profile_factory_fixture::parent(store,product,argv[3],folder);worker_supervisor_fixture::parent(store,product,argv[3],folder);worker_context_fixture::parent(store,product,argv[3],folder,"product_no_tools");worker_context_fixture::parent(store,product,argv[3],folder,"product_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_cancel");worker_context_fixture::parent(store,product,argv[3],folder,"product_read_error");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read");worker_context_fixture::parent(store,product,argv[3],folder,"product_profile_read_cancel");for(const auto* mode:{"product_admission_cancel","product_admission_timeout","product_journal_cancel","product_journal_timeout"})worker_context_fixture::parent(store,product,argv[3],folder,mode);worker_coding_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_language_fixture::parent(store,product,argv[3],folder);worker_coding_callable_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_process_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::parent(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]});worker_coding_service_fixture::asynchronous(store,product,argv[3],folder,{argv[1],argv[2]},true);worker_control_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_remote_rpc_fixture::parent(image,folder,{argv[1],argv[2]});worker_coding_remote_fixture::parent(store,product,argv[3],folder);worker_coding_remote_fixture::parent(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder);worker_coding_remote_fixture::factory(store,product,argv[3],folder,true);worker_coding_remote_fixture::factory(store,product,argv[3],folder,false,true);for(const auto* mode:{"process_create","process_denied","process_cancel","process_delivery","process_unrecorded"})worker_process_fixture::parent(store,image,argv[3],folder,mode,{argv[1],argv[2]});{auto invalid=AgentWorkerProcess::launch(product,{"bad-boot","bad-boot","workspace:none","bad-boot",1},Clock::now()+5s);invalid->channel().send({"worker.boot",R"({"version":2})"},Clock::now()+5s);require(invalid->wait(Clock::now()+5s)!=0,"Actual product worker must reject an unsupported bootstrap without execution");std::cout<<"Product worker rejected unsupported bootstrap before execution."<<std::endl;}drain_timeout(store,image);store.close();}
+     std::filesystem::remove_all(folder);std::cout<<"Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\n";return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index 0fb04566..07dfc8f8 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -1,4 +1,4 @@
+-// Independent controlled native provider; one hundred eight intentional requests, no live key.
++// Independent controlled native provider; one hundred twenty-four intentional requests, no live key.
+ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+@@ -9,7 +9,7 @@ import {join} from 'node:path';
+ import {fileURLToPath} from 'node:url';
+ const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0,a2aCalls=0,refreshCalls=0,refreshSubscriptions=0,refreshClosed=0,catalogueChanged=false;const refreshListeners=new Set();
+ const [executable,modules,stdlib]=process.argv.slice(2);
+-const expected={coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
++const expected={coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+ let failure;const aborted=new Set();
+ function chunk(response,mode,delta,finish=null,usage){response.write('data: '+JSON.stringify({id:`rpc-${mode}`,object:'chat.completion.chunk',model:'worker-rpc-fixture',choices:[{index:0,delta,finish_reason:finish}],...(usage?{usage}:{})})+'\n\n');}
+@@ -55,6 +55,11 @@ const server=createServer((request,response)=>{
+    if(phase===2){assert.equal(body.messages[2].tool_calls[0].function.name,alias);assert.equal(body.messages[3].tool_call_id,'production-remote-call');const result=JSON.parse(body.messages[3].content);assert.equal(result.acknowledged_by_peer,true);if(mode==='coding_remote')assert.equal(result.request_id,'rpc-peer-reply');else if(mode==='coding_a2a_factory'){assert.equal(a2aCalls,1);assert.equal(result.task_id,'factory-task');}else assert.equal(peerCalls,1);assert.ok(result.operation_id);}
+    response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,phase===1?{role:'assistant',tool_calls:[{index:0,id:'production-remote-call',type:'function',function:{name:alias,arguments:JSON.stringify(mode==='coding_a2a_factory'?{task:'actual production remote effect'}:{text:'actual production remote effect'})}}]}:{role:'assistant',content:'Production remote complete.'},phase===1?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
+   }
++  if(mode.startsWith('coding_callable')){
++   const phase=counts[mode],alias=mode==='coding_callable_alias'?'language_server':'trusted_probe';assert.match(body.messages[0].content,/WORKER_CALLABLE_GUIDANCE/);assert.equal(body.messages.length,phase===1?2:4);assert.equal(body.tools.filter(t=>t.function.name===alias).length,1);if(mode!=='coding_callable_default')assert.deepEqual(body.tools.map(t=>t.function.name),[alias]);else assert.ok(body.tools.some(t=>t.function.name==='read_file'));
++   if(phase===2){assert.equal(body.messages[3].tool_call_id,'callable-call');const value=JSON.parse(body.messages[3].content);if(mode==='coding_callable_policy')assert.equal(value.error.code,'agent_permission_denied');else if(mode==='coding_callable_denied')assert.equal(value.error.code,'permission_denied');else if(mode==='coding_callable_array'){assert.equal(value[0],'ACTUAL CALLABLE EFFECT');assert.ok(value[1]>0);}else {assert.equal(value.text,'ACTUAL CALLABLE EFFECT');assert.ok(value.pid>0);}}
++   response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,phase===1?{role:'assistant',tool_calls:[{index:0,id:'callable-call',type:'function',function:{name:alias,arguments:JSON.stringify({text:'actual callable effect'})}}]}:{role:'assistant',content:'Callable result inspected.'},phase===1?'tool_calls':'stop',usage);response.end('data: [DONE]\n\n');return;
++  }
+   if(mode.startsWith('coding_language')){
+    const phase=counts[mode];assert.match(body.messages[0].content,/WORKER_LANGUAGE_GUIDANCE/);assert.equal(body.messages.length,phase===1?2:4);assert.deepEqual(body.tools.map(t=>t.function.name),['language_server']);let args={server_id:'worker-language-peer',method:'diagnostics',path:'check.ts'};if(mode==='coding_language_attached'){args.folder_id=body.messages[0].content.match(/- folder_id=(\S+) name=.* \(attached\)/)?.[1];assert.ok(args.folder_id);}
+    if(phase===2){const result=JSON.parse(body.messages[3].content);if(mode==='coding_language_denied')assert.equal(result.error.code,'agent_permission_denied');else {assert.equal(result.result.items.length,1);assert.equal(result.result.items[0].code,2322);}}
+@@ -156,7 +161,7 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const result=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(failure)throw failure;throw error;});
+  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));
+- process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred eight requests: six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
++ process.stdout.write(result.stdout);process.stdout.write('Independent peer observed exactly one hundred twenty-four requests: sixteen actual callable worker windows, six actual worker language windows, three HTTP subscription refresh windows, three changed-catalogue windows, two configured A2A factory windows, two configured HTTP MCP factory windows and two production remote coding windows, two failed join-receipt windows, three asynchronous join windows, five cross-root production service windows, two unified xmind coding command windows, five actual child process RPC windows, eight production coding-worker windows, five actual child file RPC windows, eleven production factory windows and one explicit thread window, one AgentService-owned supervised window, one production-supervised streaming cancellation window, one production-supervised completion window, one actual product no-tools window, five profiled worker windows, one held completed child, six product entry windows, five native worker assembly windows, two read AgentRunner approval-cancellation windows, one actual AgentRunner cancellation and one provider failure, three actual read AgentRunner windows, three direct context windows, read twice for canonical continuation, every other captured mode once; no changed/rejected/revoked request reached HTTP.\n');
+ }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+ 
+ assert.equal(peerCalls,1);assert.equal(readFileSync(join(peerRoot,'actual.txt'),'utf8'),'actual production remote effect');assert.equal(a2aCalls,1);assert.equal(readFileSync(join(peerRoot,'a2a-actual.txt'),'utf8'),'actual production remote effect');assert.equal(refreshCalls,1);assert.equal(refreshSubscriptions,2);assert.equal(refreshClosed,2);assert.equal(readFileSync(join(peerRoot,'refresh-actual.txt'),'utf8'),'actual production remote effect');rmSync(peerRoot,{recursive:true});

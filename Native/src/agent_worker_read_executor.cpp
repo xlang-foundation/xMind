@@ -60,15 +60,18 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     std::shared_ptr<LanguageServerToolRegistry> language_catalogue_;
     std::unique_ptr<AgentRunner> validator_;
     std::shared_ptr<AgentModelGateway> gateway_;
+    bool callable_tool(const std::string& name)const{return std::any_of(settings_.xlang_python_tools.begin(),settings_.xlang_python_tools.end(),[&](const auto& tool){return tool.definition.name==name;});}
     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");}
+        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
         auto definitions=primary_->definitions();if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
         if(process_catalogue_){definitions.push_back(process_catalogue_->definition());definitions.push_back(process_catalogue_->wait_definition());definitions.push_back(process_catalogue_->stop_definition());}
         if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
+        for(const auto& tool:settings_.xlang_python_tools){if(std::any_of(definitions.begin(),definitions.end(),[&](const auto& existing){return existing.name==tool.definition.name;}))throw std::invalid_argument("Callable alias collides with a configured native tool");definitions.push_back(tool.definition);}
         for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
+            if(coding_&&callable_tool(name)&&found!=definitions.end()){result.push_back(*found);continue;}
             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
             if((!is_agent_read_tool(name)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
         return result;
@@ -76,7 +79,7 @@ class WorkspaceExecutor final:public AgentRootExecutor {
 public:
     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding)
         :store_(store),settings_(std::move(settings)),coding_(coding),image_(std::move(image)){
-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||settings_.context||!settings_.xlang_python_tools.empty())throw std::invalid_argument("Unsupported worker read settings");
+        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||settings_.delegation||settings_.planning||settings_.context||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
@@ -129,6 +132,7 @@ public:
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
         for(const auto& definition:selected_tools)if(definition.name=="language_server")policy.tools.push_back(definition);
+        if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
         std::unique_ptr<RemoteRunTools> remote_tools;
         if(coding_&&(settings_.a2a_enabled||!settings_.mcp_servers.empty())){
             remote_tools=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);
@@ -138,7 +142,7 @@ public:
                 if(policy.tools.size()>=64||std::any_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))throw std::invalid_argument("Worker tool catalogue exceeds limits or collides");
                 policy.tools.push_back(definition);
             }
-            if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+            if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
         }
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
         auto provider=settings_.provider;provider.model=model(request);
@@ -159,10 +163,16 @@ public:
                 if(stop.stop_requested()||cancel.stop_requested())throw ToolCancelled("Worker remote discovery cancelled");
                 auto next=std::make_unique<RemoteRunTools>(store_,settings_,request.run_id,members,deadline,cancel);std::vector<ModelToolDefinition> definitions;const auto allowed=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
                 for(const auto& tool:next->definitions())if(!allowed||std::find(allowed->begin(),allowed->end(),tool.name)!=allowed->end())definitions.push_back(tool);
-                if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&std::none_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;}))throw Conflict("Selected remote tool disappeared during discovery");
+                if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;}))throw Conflict("Selected remote tool disappeared during discovery");
                 if(stop.stop_requested()||cancel.stop_requested())throw ToolCancelled("Worker remote discovery cancelled");next->observe(request.run_id);remote_tools=std::move(next);return definitions;
             };
             remote_owner=std::move(context);remote_tools->observe(request.run_id);
+        }
+        std::optional<AgentCallableToolOwnerContext> callable_owner;
+        if(coding_&&!settings_.xlang_python_tools.empty()){
+            AgentCallableToolOwnerContext context;context.run_id=request.run_id;context.workspace_id=membership.workspace_id;context.workspace_revision=membership.revision;context.repository_context=contexts.front().get();context.offered_tool=owner.offered_tool;context.deadline=deadline;context.approval_timeout=owner.approval_timeout;
+            for(const auto& tool:settings_.xlang_python_tools)if(owner.offered_tool(tool.definition.name))context.bindings.push_back({tool.definition,[binding=&tool](const std::string& arguments,std::stop_token stop){return binding->execution==XlangPythonExecution::worker?binding->callable.invoke_json_worker(arguments,stop):binding->callable.invoke_json(arguments,stop);}});
+            if(!context.bindings.empty())callable_owner=std::move(context);
         }
         auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{request.run_id,request.run_id,membership.workspace_id,generation(),membership.revision},budget.spec.provider_identity_json,deadline);
         // An observation failure cannot release the physical slot. Retain this
@@ -171,7 +181,7 @@ public:
         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
                 catch(...){std::this_thread::sleep_for(1s);}}};
         std::exception_ptr failure;
-        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
         catch(...){failure=std::current_exception();}
         try{
             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}

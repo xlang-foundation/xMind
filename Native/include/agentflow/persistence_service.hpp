@@ -52,6 +52,7 @@ public:
     std::future<AgentWorkerProcessClaimRecord> record_agent_worker_process_result(AgentWorkerLeaseSpec,AgentProcessToolInvocation,bool success,std::string actual_output_json);
     std::future<AgentWorkerProcessClaimRecord> agent_worker_process_claim(std::string root,std::string attempt,std::string call);
     std::future<AgentWorkerRemoteClaimRecord> claim_agent_worker_remote(AgentWorkerLeaseSpec,AgentRemoteToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<void> admit_agent_worker_callable_catalogue(AgentWorkerLeaseSpec,std::vector<ModelToolDefinition>);
     std::future<AgentWorkerCallableClaimRecord> claim_agent_worker_callable(AgentWorkerLeaseSpec,AgentCallableInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerRemoteClaimRecord> start_agent_worker_remote(AgentWorkerLeaseSpec,AgentRemoteToolInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerCallableClaimRecord> start_agent_worker_callable(AgentWorkerLeaseSpec,AgentCallableInvocation,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});

@@ -5,9 +5,11 @@
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/agent_worker_process_rpc.hpp"
 #include "agentflow/agent_worker_remote_rpc.hpp"
+#include "agentflow/agent_worker_callable_rpc.hpp"
 #include "agentflow/process_executor.hpp"
 #include "nlohmann/json.hpp"
 #include <utility>
+#include <algorithm>
 
 namespace agentflow {
 namespace {
@@ -43,6 +45,8 @@ public:
     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
     std::unique_ptr<AgentRemoteToolHost> remote_host()override{return std::make_unique<AgentWorkerRemoteClient>(peer_);}
+    std::unique_ptr<AgentCallableToolHost> callable_host()override{return std::make_unique<AgentWorkerCallableClient>(peer_);}
+    std::vector<std::string> callable_tool_names()override{const auto result=nlohmann::json::parse(peer_.call("callable.catalogue","{}"));if(!result.is_array()||result.size()>64)throw ModelProtocolError("Invalid worker callable catalogue");std::vector<std::string> names;for(const auto& entry:result){if(!entry.is_string())throw ModelProtocolError("Invalid worker callable alias");const auto name=entry.get<std::string>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||std::find(names.begin(),names.end(),name)!=names.end())throw ModelProtocolError("Invalid worker callable alias");names.push_back(name);}return names;}
     bool join_background(const std::string& attempt,std::stop_token cancel)override{
         try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
             if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}

@@ -207,6 +207,8 @@ void callable_claims(PersistenceService& store,const std::string& path,const std
     // Synthetic callable/model/proposal identities test durable ownership, not
     // actual callable peer dispatch. The native effect host has separate tests.
     root(store,"callable-root");const auto owner=store.admit_agent_worker(lease("callable-root","callable-generation")).get().spec;
+    store.admit_agent_worker_callable_catalogue(owner,{{"trusted_fixture","Captured callable",R"({"type":"object"})"}}).get();
+    rejects<Conflict>([&]{store.admit_agent_worker_callable_catalogue(owner,{{"trusted_fixture","Changed callable",R"({"type":"object"})"}}).get();});
     const auto deadline=std::chrono::steady_clock::now()+30s;
     const std::string attempt="callable-model",args=R"({"profile":"fixture","arguments":[],"workdir":"."})";
     ModelCompletion response{"","","tool_calls",R"({"total_tokens":17})",{{(std::string(253,'p')+"\xe9\x9b\xaa"),"trusted_fixture",args},{"callable-two","trusted_fixture",args},{"callable-denied","trusted_fixture",args},{"callable-interrupted","trusted_fixture",args},{"callable-awaiting","trusted_fixture",args}},"[]"};
@@ -248,6 +250,7 @@ void process_controls(PersistenceService& store){
 }
 void workspace_turns(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
     root(store,"workspace-turn-root");const auto owner=store.admit_agent_worker(lease("workspace-turn-root","workspace-turn-generation")).get().spec;
+    store.admit_agent_worker_callable_catalogue(owner,{{"trusted_fixture","Captured callable",R"({"type":"object"})"}}).get();
     const auto deadline=std::chrono::steady_clock::now()+20s;const std::string attempt="workspace-turn-model",args=R"({"path":"fixture.txt"})";
     ModelCompletion response{"Mixed workspace tools","","tool_calls",R"({"total_tokens":17})",{{"mixed-read","read_file",args},{"mixed-file","create_file",R"({"path":"fixture.txt","content":"fixture"})"},{"mixed-process","run_process",R"({"profile":"fixture","arguments":[],"workdir":"."})"},{"mixed-remote","mcp_fixture",R"({"text":"exact remote input"})"},{"mixed-callable","trusted_fixture",R"({"text":"exact callable input"})"}},"[]"};
     store.reserve_agent_worker_model(owner,attempt,deadline).get();store.start_agent_worker_model(owner,attempt,deadline).get();const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(owner,attempt,deadline).get();

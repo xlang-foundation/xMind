@@ -7,6 +7,7 @@ AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& ho
     const auto& lease=host.lease();
     if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+        if(method=="callable.catalogue"){if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");return Json(host.tool_names()).dump();}
         if(method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
         try{const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
         catch(const AgentWorkerCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}

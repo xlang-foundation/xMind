@@ -1,3 +1,31 @@
+## Production callable workers over xlang3 IPC — 2026-10-21
+
+The normal coding factory now captures trusted callable bindings and definitions
+for the shared AgentRunner worker. Modules/functions, code roots and runtime
+objects stay in the backend. A private immutable catalogue binds each callable
+tool kind to its actual lease; model claims, activity and canonical history use
+that admission instead of name guesses. The same SDK C++ remote-method path
+carries callable metadata and invocations. Native-name aliases such as
+language_server reach their registered callable without acquiring LSP authority.
+
+Nine actual unified xmind factory cases cover approvals, arrays, denial/policy,
+cancellation, unrecorded acknowledgement, aliases, worker execution and default
+tools. Actual xlang3 effects occur once only when approved. Exact output and
+native operation IDs match durable/canonical receipts; interruption withholds
+completion/continuation. Separate callable execution uses the same bound xmind
+image and returns a distinct PID; ordinary execution remains backend-owned.
+AgentRunner children physically retire before service idle.
+
+**4/4 focused contracts pass in 48.72 seconds**, with 2739 project inputs and
+all SDK/library/dependency/133-binary file sets/hashes frozen. The independent
+HTTP model peer observes exactly 124 requests. The original helper-signature
+build failure remains preserved.
+[Scope, patches and raw evidence](evidence/process-worker-production-callable-catalogue-20261021.json).
+
+No new broader/full regression, installation, hosted, rendered or live-provider
+acceptance is claimed. Worker context, guidance/skill controls, delegation/
+planning, graph/default placement and final product acceptance remain open.
+
 ## Durable native callable host and canonical worker turns — 2026-10-21
 
 Canonical mixed read/file/process/remote/callable activity and history now
