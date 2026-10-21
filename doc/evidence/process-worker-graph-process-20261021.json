@@ -1,0 +1,71 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:52:07.933Z",
+    "sourceParent": "4653a88c471b5cb30a605969f98a834f2ab42c5c",
+    "sourcePatchSha256": "f43280c32902248ce2043b9e2b9b5936c3b25cb277d5bb6058801224035403d2",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 57204,
+      "launchedAt": "2026-10-21T17:49:28.662Z",
+      "completedAt": "2026-10-21T17:50:38.835Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "65cbc207fc06edf798ce5779c52f54bc37b34a2c674b9ad381593ac2d678d196"
+    },
+    "test": {
+      "pid": 70040,
+      "launchedAt": "2026-10-21T17:50:41.836Z",
+      "completedAt": "2026-10-21T17:52:05.035Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "17bc848bcb04a0f0a9509688db45990118860fcb9423a499cbee9afda6c79af7"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 83.15,
+    "projectFiles": 2753,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "4e9d46f14d7e88aa72d602344f473610b35bfea0ff0375055006a1d767fae7d4",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-process-20261021-build.log": "65cbc207fc06edf798ce5779c52f54bc37b34a2c674b9ad381593ac2d678d196",
+    "doc/evidence/process-worker-graph-process-20261021-build-terminal.json": "e6407b36e8755fb4bf48350c2996a06a70d1c4954808bc7e9d3606a023cc10a9",
+    "doc/evidence/process-worker-graph-process-20261021-ctest.log": "17bc848bcb04a0f0a9509688db45990118860fcb9423a499cbee9afda6c79af7",
+    "doc/evidence/process-worker-graph-process-20261021-ctest-terminal.json": "ee0eb0e1c74bd8d7cf69c13c9496f8cef2c42b0763cedf45b4dc9898bedc4f4e",
+    "doc/evidence/process-worker-graph-process-20261021-LastTest.log": "63380861caae04b4f94cc69a4a7518349e85d6f73b8b2538fe12846806ac5dec",
+    "doc/evidence/process-worker-graph-process-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-process-20261021-gate.json": "c1221dd5533dfdbac8fee69f9bc3a9f4adc9184655a265952ea3c8e07b017816",
+    "doc/evidence/process-worker-graph-process-20261021-source.patch": "f43280c32902248ce2043b9e2b9b5936c3b25cb277d5bb6058801224035403d2",
+    "doc/evidence/process-worker-graph-process-20261021-binaries-before-test.json": "317c0b794a55bb537645143c3ba498c9e7d13f0647110a3cd7aab243692d67bf"
+  },
+  "verified": [
+    "Two actual xmind coding workers run per case under GraphService with distinct captured models and original shared root budget; file and process allow/deny cases verified",
+    "Approved create_file and run_process operations require controller approvals before effects; exact file bytes, native operations and canonical worker receipts verified; commands assert xlang3 runtime identity",
+    "Inherited root denial overrides node allowance for both file and process tools: no effects, approvals or native operations",
+    "Each of four cases verifies four counted model charges, exact worker lease retirement and drain before graph join",
+    "Read-only graph journal rejects caller-supplied coding mode; delegated leaves remain excluded",
+    "Nine focused contracts pass in 83.15 seconds; complete frozen input and 133-binary sets unchanged"
+  ],
+  "limitations": [
+    "Synthetic native model gateway; no new live-provider acceptance",
+    "Graph remote/callable authority shares admission checks but these graph cases only exercise create_file and run_process",
+    "Server/default wiring, graph no-context, planning and parent compaction/overflow remain unfinished",
+    "Earlier intermittent access violation remains unresolved",
+    "Full current regression and updated installed/rendered acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}
