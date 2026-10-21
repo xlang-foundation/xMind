@@ -1,3 +1,18 @@
+## Worker context broader regression — 2026-10-21
+
+**65/65 selected native contracts pass in 235.23 seconds** on committed
+a8ffb0d1, including all actual-worker context/compaction/overflow/failure cases
+and the selected graph, delegation, planning, provider, MCP/A2A, coding, skills,
+permissions and persistence contracts. The independent worker peer observes
+exactly 185 requests. All 2744 project inputs, SDK/libraries/runtime/dependencies
+and 133 native binary file sets/hashes remain frozen.
+[Complete inventory and raw evidence](evidence/process-worker-context-regression-20261021.json).
+
+This selected regression does not replace the full 162-test native suite or
+updated installed/rendered/live-provider acceptance. Worker delegation/planning,
+graph/default placement and further rebuild/unrecorded-outcome controls remain
+unfinished.
+
 ## Worker compaction failure and cancellation — 2026-10-21
 
 Actual unified xmind workers now verify compaction failure and cancellation

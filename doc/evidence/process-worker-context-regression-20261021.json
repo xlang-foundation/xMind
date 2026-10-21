@@ -1,0 +1,68 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T13:40:56.068Z",
+    "sourceParent": "a8ffb0d16458156d8b03ca3ae6d775a97abc8275",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 62144,
+      "launchedAt": "2026-10-21T13:28:07.627Z",
+      "completedAt": "2026-10-21T13:36:52.841Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9bd1bccf41f985d76df5c00ee23e99e07c20c52eb7ad8d91c62a56c36068c69d"
+    },
+    "test": {
+      "pid": 35452,
+      "launchedAt": "2026-10-21T13:36:57.902Z",
+      "completedAt": "2026-10-21T13:40:53.191Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "21a0b6c80731958670341922a56b6613ca6c06619472a5214694586fb504806a"
+    },
+    "total": 65,
+    "failed": 0,
+    "passed": 65,
+    "seconds": 235.23,
+    "projectFiles": 2744,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e66cb6dfa85498632329e4449b732c002aad877896bbaa78c7bca9212f4cc928",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-context-regression-20261021-build.log": "9bd1bccf41f985d76df5c00ee23e99e07c20c52eb7ad8d91c62a56c36068c69d",
+    "doc/evidence/process-worker-context-regression-20261021-build-terminal.json": "e948f3c69597a9080b71d32aa14132c9ba1529bebe7df06a2502077c9703067b",
+    "doc/evidence/process-worker-context-regression-20261021-ctest.log": "21a0b6c80731958670341922a56b6613ca6c06619472a5214694586fb504806a",
+    "doc/evidence/process-worker-context-regression-20261021-ctest-terminal.json": "61503199ccae2c59c365383d6fd18aa98b004764bc9dbe109b338400de10304d",
+    "doc/evidence/process-worker-context-regression-20261021-LastTest.log": "4005d8add7181fd73fe231d2919202921ccefc2790ca4d040ff0eedd684f50db",
+    "doc/evidence/process-worker-context-regression-20261021-test-inventory.json": "04fc93f5a2e4171944b8f1c115bff16b031df43de2950e4c8847f68fc85674ea",
+    "doc/evidence/process-worker-context-regression-20261021-gate.json": "94c4a3bde5c66dfcd54fcb2ee665f437d09acc6c175f3237c4ae2b14bc776abb",
+    "doc/evidence/process-worker-context-regression-20261021-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-context-regression-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-context-regression-20261021-binaries-before-test.json": "0d796c1e19452e688693de10ed81c52e6e5db99a1039662e9d3b98d9bc2b94d9"
+  },
+  "verified": [
+    "Complete selected 65-contract regression passes on committed a8ffb0d1 with no source changes",
+    "Actual worker contract includes counted/compacted context, successful one-shot overflow rebuild, repeated overflow termination, count/inference/compaction failure and cancellation; independent HTTP peer observes exactly 185 requests",
+    "All selected graph/nested context/dynamic planning/delegation, providers/history, MCP/A2A, coding/process/permissions, skills, worker lifecycle, persistence, backend owner and encrypted credential contracts pass",
+    "All 2744 project inputs, SDK headers, pure libraries, runtime, Node dependencies and 133 native binary file sets/hashes remain frozen"
+  ],
+  "limitations": [
+    "65 selected tests are not the complete 162-test native inventory",
+    "No updated installation, rendered client or live-provider acceptance",
+    "Further rebuild/unrecorded-outcome controls, worker delegation/planning and graph/default placement integration remain unfinished"
+  ],
+  "passed": true
+}
