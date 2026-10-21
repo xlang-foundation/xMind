@@ -1,3 +1,24 @@
+## Graph IPC MCP and A2A HTTP remote methods — 2026-10-21
+
+The existing standalone remote fixture now covers eight cases: MCP and completed
+non-streaming A2A tasks, each counted/uncounted and approved/inherited-denied.
+Sixteen actual xmind SDK IPC workers preserve four shared model charges per
+graph. Allowed calls await actual controller approval and produce exact HTTP
+peer effects; inherited denial makes no operation/effect despite node allow.
+A2A canonical results preserve explicit version1.0 and the exact peer task ID.
+Durable remote receipts match canonical history; worker retirement precedes join.
+
+The focused gate passes **11/11 in101.62s**. Earlier attempts exposed a missing
+test include, a stale graph revision, and retired registration-ID reuse. The
+fixture now uses returned graph revisions and fresh per-case registrations;
+backend guards are unchanged. All original build/test logs and patches remain
+[with the final gate](evidence/process-worker-graph-a2a-registration-20261021.json).
+
+No production or installed runtime change occurred. This is not full165 local
+acceptance, graph streaming/pause/recovery or live-provider acceptance. IPC
+default/planning, combined parent compaction/overflow, editor rendering and the
+prior intermittent native crash diagnosis remain unfinished.
+
 ## Graph IPC calls to actual HTTP MCP methods — 2026-10-21
 
 Four counted/uncounted approval/denial graph cases pass across eight actual

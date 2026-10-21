@@ -1,0 +1,107 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T20:11:25.930Z",
+    "sourceParent": "83693f609b4c71e8d04d1e657b7baad96452c15b",
+    "sourcePatchSha256": "6ec549e6bc36833fbf06305688283d5eed2c22889e35fe4639cc81ddcdaae08e",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 1212,
+      "launchedAt": "2026-10-21T20:09:00.138Z",
+      "completedAt": "2026-10-21T20:09:38.353Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d6e8385509d5bafb072f747b8cf73aaf58d403cfa8e5ae51ea3327d054796b9d"
+    },
+    "test": {
+      "pid": 2496,
+      "launchedAt": "2026-10-21T20:09:41.398Z",
+      "completedAt": "2026-10-21T20:11:23.064Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "71870ba0a28f7f67369ea9a863419b20e2d7780871f9b3d20fcbfd92515e68c5"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 101.62,
+    "projectFiles": 2755,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 134,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "d27f36d8bcb286f4583c57bd4ffe6e26759b311d2aff8af3fb4e0ed6f3c583b0",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-a2a-20261021-build.log": "e8618c6f884853d20b83911187423e546c5fda6cd2607f19564ad184040a0555",
+    "doc/evidence/process-worker-graph-a2a-20261021-build-terminal.json": "c951a65831173719056f3532935afc6da87713e84cbb4f337530617ee1a3347c",
+    "doc/evidence/process-worker-graph-a2a-20261021-source.patch": "faca6e904308a2e0f1a3315f83a3852b5f75997ca1476100fee512fecb38c581",
+    "doc/evidence/process-worker-graph-a2a-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-build.log": "d6e8385509d5bafb072f747b8cf73aaf58d403cfa8e5ae51ea3327d054796b9d",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-build-terminal.json": "a4a44f0dca6da37b64b89a665393fe2413514b3f307db746b4f5351b00f42817",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-ctest.log": "dc3df353615bf181490e3abcd0dfcae3757a7e37b009e3f088948822c271e75a",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-ctest-terminal.json": "275b1aff0db0023510cbca8d6bf36ed6466daea9f23a02f8b5325faa4a593a0e",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-LastTest.log": "d39421c42b4db6c41f74f5430440777664a13177f32a64463799d1d6711812fc",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-test-inventory.json": "b58c178e8078a0da6c4408737323f9e62f207c30cc382a0dc81085012be5b176",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-gate.json": "1621a219da6e71c0f789a964c5908546cdd0658a218aad45ea2a1dfe2c459c4e",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-source.patch": "c5856e0b632e2f4b6937b290628286f3cbf61a58e1266c6ffb90882158616009",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-graph-a2a-includes-20261021-binaries-before-test.json": "bc9e08c603f79f42198f8003092c71b45e89fa622f4bef9148d4b0f37f33ee73",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-build.log": "d6e8385509d5bafb072f747b8cf73aaf58d403cfa8e5ae51ea3327d054796b9d",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-build-terminal.json": "0ade1e741868ee45f2f874c7def3fe806caaceca4958965a9740d313e54f6443",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-ctest.log": "7a79fb73a763d20df62a2f7ed9990980233382c406cc6ad7a93c835fcf751cd6",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-ctest-terminal.json": "445c922c97f31e6ae1e0bf317d0c16e54424dc05465c82322a584955796b01fd",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-LastTest.log": "b9d94e1b9c44c8a8f5dec48d5f8cdaa4dcf80f7965a11b4a8da7c9494efb2d47",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-test-inventory.json": "b58c178e8078a0da6c4408737323f9e62f207c30cc382a0dc81085012be5b176",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-gate.json": "54d5548f8f98a7b0f6c0c47312c74cfcb13e0eda018245403061569cef094aa5",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-source.patch": "6be0409f064332e4c043133c05767a49531f21c6f000260db7687354e53ed366",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-graph-a2a-revision-20261021-binaries-before-test.json": "d4e87e167f61171d58d48a52feebe22af23b45c87db9f2979fb9646dc09ac68a",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-build.log": "d6e8385509d5bafb072f747b8cf73aaf58d403cfa8e5ae51ea3327d054796b9d",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-build-terminal.json": "00b2ed947ef17dc777f6bd4e9e56f0ff664eb4f96ad098353564daa4a28c6551",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-ctest.log": "71870ba0a28f7f67369ea9a863419b20e2d7780871f9b3d20fcbfd92515e68c5",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-ctest-terminal.json": "1b4404ad8bb2ae5a301e41b5f81f63082742c3bf66f16c79f01a61a852dabbd0",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-LastTest.log": "635e6367de9f5a6368927cc4a47b4b83669f32d89e8dab43e50f1a3b14f9aed8",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-test-inventory.json": "b58c178e8078a0da6c4408737323f9e62f207c30cc382a0dc81085012be5b176",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-gate.json": "86f7e2f1aba3bb89f3cee41d99c7c2f63acb598fe4f8eba739dd244a6670c16c",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-source.patch": "6ec549e6bc36833fbf06305688283d5eed2c22889e35fe4639cc81ddcdaae08e",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-graph-a2a-registration-20261021-binaries-before-test.json": "bb80a57e6221bab45534cd999535390e89a11fad81b83061bf564b1aa0f7c9fa"
+  },
+  "verified": [
+    "Eight graph cases: MCP and non-streaming A2A, each counted/uncounted and controller-approved/inherited-denied. Sixteen actual SDK IPC xmind graph workers.",
+    "Each case independently discovers its remote method inside both graph owners. Approved cases perform two actual HTTP effects with exact bytes; denied cases perform zero effects and no native operation despite node allow.",
+    "A2A preserves explicit version1.0, one literal user task and exact peer-returned task identity in canonical continuation. Four shared model charges per graph; exact durable remote acknowledgement and distinct worker retirement before join.",
+    "Final11 focused native regressions pass with complete frozen2755 project/16 SDK/1870 library/76 runtime/18598 dependency/134 binary file sets and hashes."
+  ],
+  "failuresRetained": [
+    {
+      "gate": "process-worker-graph-a2a-20261021",
+      "reason": "Compile failed because standalone test omitted direct A2A tool registry include; corrected test include."
+    },
+    {
+      "gate": "process-worker-graph-a2a-includes-20261021",
+      "reason": "All four MCP cases passed; first A2A graph submission used stale revision1 after remote alias changed. Backend correctly rejected before A2A task; fixture now uses backend-returned catalog entry revision."
+    },
+    {
+      "gate": "process-worker-graph-a2a-revision-20261021",
+      "reason": "First A2A approved case passed; next fixture reused retired registration identity. Backend correctly rejected retired identity. Each subsequent independent case now has a fresh registration ID."
+    }
+  ],
+  "limitations": [
+    "Focused11 pass is not complete165-test local acceptance (hosted166). No hosted result claimed.",
+    "Controlled model gateway and local actual HTTP peers; no live-provider inference here.",
+    "A2A graph coverage here is completed non-streaming tasks; graph streaming/pause/recovery combinations are not established by this fixture.",
+    "IPC default/planning, combined parent compaction/overflow, editor rendering and earlier intermittent native crash diagnosis remain unfinished.",
+    "No production C++ changes in this checkpoint and no installation change. Candidate runtime remains fd93f0f9/d27f36d8; installed60 remains3123/5100131c."
+  ]
+}
