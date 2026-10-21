@@ -1,0 +1,82 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start 23: native_dynamic_plan_contract
+ 1/14 Test #23: native_dynamic_plan_contract ................   Passed    0.17 sec
+      Start 24: native_agent_authority_contract
+ 2/14 Test #24: native_agent_authority_contract .............   Passed    0.10 sec
+      Start 25: native_dynamic_plan_repository_contract
+ 3/14 Test #25: native_dynamic_plan_repository_contract .....   Passed    3.92 sec
+      Start 27: native_xmind_ipc_lifetime_contract
+ 4/14 Test #27: native_xmind_ipc_lifetime_contract ..........***Failed    0.21 sec
+owner-bound child classes must be registered on a package instance; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-api-lifetime-360318254
+
+      Start 28: native_xmind_ipc_api_contract
+ 5/14 Test #28: native_xmind_ipc_api_contract ...............***Failed    0.31 sec
+Retained root API fixture: C:\Users\shaw9\AppData\Local\Temp\xmind-root-api-3A4T1Q; backend output: ; owner-bound child classes must be registered on a package instance
+
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Backend exited during startup
+
+1 !== null
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/xmind_ipc_api_contract.mjs:17:165 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: null,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+      Start 31: native_context_engine_contract
+ 6/14 Test #31: native_context_engine_contract ..............   Passed    5.72 sec
+      Start 35: native_planning_http_contract
+ 7/14 Test #35: native_planning_http_contract ...............   Passed    1.02 sec
+      Start 38: native_dynamic_plan_engine_contract
+ 8/14 Test #38: native_dynamic_plan_engine_contract .........   Passed    6.72 sec
+      Start 39: native_dynamic_plan_mcp_contract
+ 9/14 Test #39: native_dynamic_plan_mcp_contract ............   Passed   11.80 sec
+      Start 83: native_agent_worker_planning_rpc_contract
+10/14 Test #83: native_agent_worker_planning_rpc_contract ...   Passed    0.22 sec
+      Start 84: native_agent_worker_model_rpc_contract
+11/14 Test #84: native_agent_worker_model_rpc_contract ......   Passed   53.55 sec
+      Start 88: native_agent_worker_server_contract
+12/14 Test #88: native_agent_worker_server_contract .........***Failed    0.34 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Server exited: owner-bound child classes must be registered on a package instance
+
+
+1 !== null
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs:13:170 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: null,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+      Start 90: native_agent_worker_ledger_contract
+13/14 Test #90: native_agent_worker_ledger_contract .........   Passed    1.96 sec
+      Start 94: native_agent_runner_contract
+14/14 Test #94: native_agent_runner_contract ................   Passed    9.74 sec
+
+79% tests passed, 3 tests failed out of 14
+
+Total Test time (real) =  95.81 sec
+
+The following tests FAILED:
+	 27 - native_xmind_ipc_lifetime_contract (Failed)
+	 28 - native_xmind_ipc_api_contract (Failed)
+	 88 - native_agent_worker_server_contract (Failed)
+Errors while running CTest

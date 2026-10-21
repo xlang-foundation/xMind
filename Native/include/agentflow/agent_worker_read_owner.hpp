@@ -3,6 +3,7 @@
 #include "agentflow/agent_worker_model_rpc.hpp"
 
 namespace agentflow {
+struct NativeWorkerModelAccess;
 // Backend-side lifetime owner for one captured ordinary worker. Retain this
 // object, the workspace and persistence until the peer has drained and joined.
 // Provider configuration and policy are copied once; the child cannot replace
@@ -14,6 +15,7 @@ public:
         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,
         AgentWorkerChannel::Deadline,std::stop_token owner_cancel={});
     ~AgentWorkerReadOwner();
+    NativeWorkerModelAccess native_model_access()const;
     AgentWorkerReadOwner(const AgentWorkerReadOwner&)=delete;
     AgentWorkerReadOwner& operator=(const AgentWorkerReadOwner&)=delete;
     std::string dispatch(const std::string& method,const std::string& payload,

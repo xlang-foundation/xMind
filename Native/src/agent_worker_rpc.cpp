@@ -29,6 +29,7 @@ struct AgentWorkerRpcPeer::Impl {
     struct Pending {std::deque<std::string> events;bool done=false,local_failure=false;std::string result,code;};
     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
     struct Flight {std::shared_ptr<Incoming> owner;std::jthread thread;};
+    std::shared_ptr<NativeWorkerModelClient> native_model;
     AgentWorkerChannel& channel;AgentWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
     std::mutex state,writer,request_order;std::condition_variable changed;bool closed=false,started=false;
     std::uint64_t outgoing=1,incoming=1;std::size_t queued=0;
@@ -81,6 +82,8 @@ struct AgentWorkerRpcPeer::Impl {
 };
 AgentWorkerRpcPeer::AgentWorkerRpcPeer(AgentWorkerChannel& channel,AgentWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
 AgentWorkerRpcPeer::~AgentWorkerRpcPeer(){impl_->stop();}
+void AgentWorkerRpcPeer::bind_native_model(std::shared_ptr<NativeWorkerModelClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_model||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native model binding requires fresh worker");impl_->native_model=std::move(client);}
+std::shared_ptr<NativeWorkerModelClient> AgentWorkerRpcPeer::native_model()const{std::lock_guard lock(impl_->state);return impl_->native_model;}
 void AgentWorkerRpcPeer::start(){impl_->start();}
 std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){return impl_->call(method,payload,std::move(sink),cancel);}
 bool AgentWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}

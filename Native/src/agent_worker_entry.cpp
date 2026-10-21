@@ -2,6 +2,9 @@
 #include "agentflow/agent_worker_runner.hpp"
 #include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/http_stream_transport.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
+#include "agentflow/mcp_wire.hpp"
+#include "nlohmann/json.hpp"
 #include <atomic>
 #include <charconv>
 #include <string_view>
@@ -18,9 +21,12 @@ int run_agent_channel_worker(int argc,char** argv){
     const auto bootstrap_deadline=Clock::now()+std::chrono::seconds(10);
     auto channel=AgentWorkerChannel::accept_inherited(handle,bootstrap_deadline);
     const auto boot=channel->receive(bootstrap_deadline);
-    const bool coding=boot.payload=="{\"version\":1,\"workspace\":\"coding\"}";
-    if(boot.operation!="worker.boot"||(!coding&&boot.payload!="{\"version\":1}"))
-        throw AgentWorkerProtocolError("Invalid worker execution bootstrap");
+    if(boot.operation!="worker.boot"||boot.payload.size()>1024)throw AgentWorkerProtocolError("Invalid worker execution bootstrap");
+    const auto config=nlohmann::json::parse(mcp_compact_object(boot.payload));
+    if(config.size()!=3||!config.at("version").is_number_integer()||config.at("version")!=1||!config.at("workspace").is_string()||(config.at("workspace")!="read"&&config.at("workspace")!="coding"))throw AgentWorkerProtocolError("Invalid worker execution bootstrap");
+    const bool coding=config.at("workspace")=="coding";const auto& model=config.at("model");
+    if(!model.is_object()||model.size()!=3||!model.at("endpoint").is_string()||!model.at("ticket").is_string()||!model.at("pid").is_number_unsigned()||model.at("pid").get<std::uint64_t>()>UINT32_MAX)throw AgentWorkerProtocolError("Invalid worker native model bootstrap");
+    NativeWorkerModelAccess access{model.at("endpoint").get<std::string>(),model.at("ticket").get<std::string>(),model.at("pid").get<std::uint32_t>()};
     // This is only a transport ceiling. Every backend operation still checks
     // the captured original deadline, current lease and owner cancellation.
     const auto transport_deadline=Clock::now()+std::chrono::hours(1);
@@ -41,6 +47,8 @@ int run_agent_channel_worker(int argc,char** argv){
         catch(const AgentWorkerRpcCancelled&){return "{\"version\":1,\"outcome\":\"cancelled\"}";}
         catch(...){return "{\"version\":1,\"outcome\":\"failed\"}";}
     },transport_deadline);
+    const auto& scope=peer.scope();
+    peer.bind_native_model(std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
     self=&peer;peer.start();peer.wait_closed();peer.stop();return 0;
 }
 }

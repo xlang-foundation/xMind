@@ -214,3 +214,4 @@ doc/evidence/coding60-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-
 doc/evidence/coding60-cli-ipc-*.txt -text
 doc/evidence/process-xmind-root-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/process-xmind-root-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/process-xmind-root-native-model-*-owned-timeout-worker-before-retirement.json -text whitespace=cr-at-eol

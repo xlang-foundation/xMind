@@ -1,3 +1,33 @@
+## Native worker model service calls — 2026-10-21
+
+Production process-read/process-code xmind workers now bind a private ticket to
+xmind.Workers().Open(ticket).Model() through the native xlang3 SDK. Admission,
+Prepare, Rebuild and Complete return native operation objects; Status, binary
+event/result reads and Cancel keep long work off the SDK listener. Requests use
+bounded native binary pages. The backend retains model credentials, context,
+lease authorization, durable claims and budgets. Production owners refuse the
+old model packet methods; the legacy controlled RPC adapter remains for its
+fault fixtures while journal/tools/control still await migration.
+
+The focused gate passes 18/18 in 126.30 seconds, including actual distinct xmind
+server/coding/graph/delegated workers, refusal of wrong owner/ticket and old
+model packet calls, canonical history, cancellation and exact physical drain.
+The independent model peer accounts for all 219 expected requests. Its legacy
+and production cases now run in separate fresh fixture processes under the
+same peer; each retains its 60-second limit and the overall CTest limit remains
+75 seconds. Three preceding single-process runs exceeded 60 seconds; original
+logs and the identity-bound retirement of leftover callable fixture workers are
+retained, along with the missing-ticket fixture failure and blocked-link build.
+
+Source parent 138553be; native a9ed3f072eeb457fded593081c8301aa3a65099b6fa36298bc0c6bdc698105cd;
+SDK 1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3.
+The gate freezes 2771 project files, 16 SDK headers, 1870 pure library files,
+76 runtime files, 18598 dependency files and all 136 native binaries/file sets.
+This is focused synthetic evidence, not a full suite, new installation or live
+provider acceptance. Large-page/lifetime boundary contracts, the remaining IPC
+services, native planning workers and final product acceptance remain open.
+See [checkpoint evidence](evidence/process-xmind-root-native-model-production-checkpoint-20261021.json).
+
 ## Process-wide root registration and scoped service lifetimes — 2026-10-21
 
 The root API now lives in **agentflow_ipc_api**, independent of HTTP.

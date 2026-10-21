@@ -2,11 +2,16 @@
 #include "agentflow/agent_worker_control.hpp"
 #include "agentflow/agent_worker_coding_owner.hpp"
 #include "agentflow/persistence_service.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
+#include "nlohmann/json.hpp"
 #include <mutex>
 #include <atomic>
 #include <set>
 
 namespace agentflow {
+namespace {
+std::string worker_boot(const NativeWorkerModelAccess& access,bool coding){return nlohmann::json{{"version",1},{"workspace",coding?"coding":"read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();}
+}
 struct AgentWorkerSupervisor::Impl {
     PersistenceService& store;
     AgentWorkerChannel::Deadline deadline;
@@ -64,7 +69,7 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel);
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
         [state=impl_.get(),owner=impl_->owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
-    impl_->worker->channel().send({"worker.boot","{\"version\":1}"},impl_->deadline,cancel);
+    impl_->worker->channel().send({"worker.boot",worker_boot(impl_->owner->native_model_access(),false)},impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
 }
@@ -77,7 +82,7 @@ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,Agent
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner));
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
         [state=impl_.get(),owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
-    impl_->worker->channel().send({"worker.boot","{\"version\":1,\"workspace\":\"coding\"}"},impl_->deadline,cancel);
+    impl_->worker->channel().send({"worker.boot",worker_boot(impl_->coding_owner->native_model_access(),true)},impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
 }

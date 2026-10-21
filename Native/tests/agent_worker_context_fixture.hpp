@@ -1,3 +1,4 @@
+#include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/agent_worker_read_context.hpp"
 #include "agentflow/agent_worker_read_owner.hpp"
 #include "agentflow/agent_worker_control.hpp"
@@ -66,7 +67,18 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         if((mode.starts_with("product_admission_")&&method=="journal.run")||(mode.starts_with("product_journal_")&&method=="journal.history"))throw AgentWorkerRpcRemoteError(mode.ends_with("_cancel")?"cancelled":"timeout");
         return backend_owner.dispatch(method,payload,std::move(sink),cancel);
     },deadline);
-    worker->channel().send({product_entry?"worker.boot":"fixture.boot",product_entry?"{\"version\":1}":mode},deadline);peer.start();
+    std::string startup=mode;
+    if(product_entry){
+        const auto access=backend_owner.native_model_access();
+        if(no_tools){
+        rejects<Conflict>([&]{NativeWorkerModelClient wrong(access,id,"foreign-owner",lease.workspace_id,generation,1);});
+        auto wrong_ticket=access;wrong_ticket.ticket[0]=wrong_ticket.ticket[0]=='a'?'b':'a';
+        rejects<AgentWorkerModelOutcomeUnrecorded>([&]{NativeWorkerModelClient wrong(wrong_ticket,id,id,lease.workspace_id,generation,1);});
+        rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("model.admission","{}",{},{});});
+        }
+        startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
+    }
+    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);peer.start();
     const auto execute_method=product_entry?"worker.execute":"fixture.run";
     const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call(execute_method,"{}");};
     if(!runner){

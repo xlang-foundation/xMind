@@ -1,0 +1,7 @@
+{
+  "ProcessId": 34076,
+  "ParentProcessId": 2492,
+  "CreationDate": "2026-10-21T15:22:31.485219-07:00",
+  "ExecutablePath": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+  "CommandLine": "\"C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe\" worker \"--agent-port\" \"43471\" \"--modules\" \"C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules\" \"--stdlib\" \"C:/Python/Python314/Lib\" \"--code-root\" \"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-model-rpc-3668264159-1053010128\\coding_callable_worker\" \"--module\" \"worker_callable_fixture\" \"--function\" \"invoke\""
+}

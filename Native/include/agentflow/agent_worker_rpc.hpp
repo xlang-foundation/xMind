@@ -3,6 +3,7 @@
 #include <functional>
 
 namespace agentflow {
+class NativeWorkerModelClient;
 struct AgentWorkerRpcClosed:std::runtime_error {using std::runtime_error::runtime_error;};
 struct AgentWorkerRpcCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
 struct AgentWorkerRpcTimeout:std::runtime_error {using std::runtime_error::runtime_error;};
@@ -30,6 +31,8 @@ public:
     // Start only after handler dependencies (including nested-call adapters)
     // are fully constructed. Start once; a closed session cannot restart.
     void start();
+    void bind_native_model(std::shared_ptr<NativeWorkerModelClient>);
+    std::shared_ptr<NativeWorkerModelClient> native_model()const;
     std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={});
     bool alive()const;
     void wait_closed();
