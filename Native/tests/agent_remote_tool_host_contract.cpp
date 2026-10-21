@@ -46,6 +46,16 @@ struct Task {
 Operation pending(PersistenceService& store,std::size_t previous){const auto deadline=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<deadline){const auto operations=store.operations("run").get();if(operations.size()>previous)for(const auto& op:operations)if(op.state==OperationState::awaiting_approval)return op;std::this_thread::sleep_for(5ms);}throw std::runtime_error("Remote approval proposal deadline");}
 }
 int main(int argc,char** argv){if(argc!=3)return 2;try{
+    {AgentRemoteToolInvocation call;call.run_id="run";call.attempt_id="model";call.call_id="unicode-\xe4\xb8\xad";call.workspace_id="workspace";call.workspace_revision=7;call.tool_name="mcp_fixture_record";call.tool_index=63;call.arguments_json=R"({"text":"literal \\n bytes"})";
+        const auto wire=call.serialize();need(AgentRemoteToolInvocation::parse(wire).serialize()==wire,"Remote invocation must retain exact owned bytes");
+        for(const auto* field:{"endpoint","credential","operation_id","permission","registry"}){auto forged=Json::parse(wire);forged[field]="worker-selected";rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(forged.dump());});}
+        for(const Json index:{Json(-1),Json(64),Json(1.5),Json("0"),Json(18446744073709551615ULL)}){auto invalid=Json::parse(wire);invalid["tool_index"]=index;rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(invalid.dump());});}
+        for(const Json revision:{Json(0),Json(9007199254740992LL),Json(1.5)}){auto invalid=Json::parse(wire);invalid["workspace_revision"]=revision;rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(invalid.dump());});}
+        rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse("{\"run_id\":\"first\","+wire.substr(1));});
+        auto missing=Json::parse(wire);missing.erase("tool_name");rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(missing.dump());});
+        auto version=Json::parse(wire);version["protocol_version"]=2;rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(version.dump());});
+        std::cout<<"Remote invocation codec retained literal Unicode bytes and rejected worker-selected authority, duplicate fields and invalid numeric bounds."<<std::endl;
+    }
     Directory directory;const auto root=directory.path/"workspace";std::filesystem::create_directory(root);write(root/"AGENTS.md","Initial fixture guidance.\n");
     WorkspaceTools workspace(root.string());const auto identity=workspace.identity();WorkspaceToolSet members(identity,7,{{identity,workspace.root_path()}});
     RepositoryInstructionContext guidance(workspace,workspace.repository_instructions("."));guidance.prepare();

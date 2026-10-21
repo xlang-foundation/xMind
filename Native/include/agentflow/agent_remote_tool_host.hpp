@@ -6,6 +6,7 @@
 #include <memory>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace agentflow {
@@ -24,7 +25,10 @@ struct AgentRemoteToolInvocation {
     std::string run_id,attempt_id,call_id,workspace_id,tool_name,arguments_json;
     std::int64_t workspace_revision=0;
     std::uint32_t tool_index=0;
+    std::string serialize()const;
+    static AgentRemoteToolInvocation parse(std::string_view);
 };
+void validate_agent_remote_tool_invocation(const AgentRemoteToolInvocation&);
 struct AgentRemoteToolResult {bool success=false;std::string output_json;};
 class AgentRemoteToolHost {
 public:

@@ -1,0 +1,66 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T08:54:47.482Z",
+    "sourceParent": "76fe01fd1b43468f4c41ccfc886f1825a0c62bb4",
+    "sourcePatchSha256": "1cafb6b86e84bb84139c3f2f6bcd88f12ef646b5757bba000c9cdcfc476aa5a9",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 52136,
+      "launchedAt": "2026-10-21T08:52:36.468Z",
+      "completedAt": "2026-10-21T08:54:40.373Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "89cccfdb13eb05c7257a58a02d9812a0dc2360522f0db173fab9cca8363e120a"
+    },
+    "test": {
+      "pid": 67820,
+      "launchedAt": "2026-10-21T08:54:43.903Z",
+      "completedAt": "2026-10-21T08:54:44.607Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a74327a4d13bba675ac60d5d36bc03601c78aab5d385f74d15e6de3a1337f6bd"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.65,
+    "projectFiles": 2722,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9b7e4b56be2c889eacb70c4628a460aeff21d2ad0549b2d1ca7b36e1a54cc2cf",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-build.log": "89cccfdb13eb05c7257a58a02d9812a0dc2360522f0db173fab9cca8363e120a",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-build-terminal.json": "7b4a6b8fac13de59a51535f42853e7cbd47a107558bad66815e0733c89ae8000",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-ctest.log": "a74327a4d13bba675ac60d5d36bc03601c78aab5d385f74d15e6de3a1337f6bd",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-ctest-terminal.json": "bd859ba2852a0c38d48b0ec64ae672906ce708b7de03da4206496b3eda6fc9af",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-LastTest.log": "54ffc6bd76eb8c70275454e0d7f173544f6730794f188e9833edb460342fdddb",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-test-inventory.json": "8fe0c2f1e98120964a7fd79101df6403ba58a054898c70693c72f443e54e703f",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-gate.json": "ccfedd9a351a0a718d4fe8cb349050e27cb13e4cab513e2e9253143b1767a51b",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-source.patch": "1cafb6b86e84bb84139c3f2f6bcd88f12ef646b5757bba000c9cdcfc476aa5a9",
+    "doc/evidence/process-worker-remote-codec-diagnostic-20261021-binaries-before-test.json": "aa6bd168df57685530f6553e17da863255fee15927a5ffc543209f0e7ca28385"
+  },
+  "verified": [
+    "Strict nine-field remote invocation codec retains exact owned Unicode and argument bytes",
+    "Forged endpoint, credential, operation, permission and registry fields reject; duplicate and missing fields reject",
+    "Version, workspace revision and tool index bounds reject before native owner dispatch",
+    "Existing native host uses shared validator; real approval, repository guidance and lifetime replay checks still pass"
+  ],
+  "limitations": [
+    "Only agentflow_agent_remote_tool_host_contract was built and its one contract run",
+    "xmind.exe was not rebuilt; its listed hash is the unchanged prior full-suite binary",
+    "No authenticated remote-tool worker RPC, durable remote-call ledger, production MCP/A2A worker integration, full-suite, installation, hosted, rendered or live-provider acceptance is added"
+  ],
+  "passed": true
+}

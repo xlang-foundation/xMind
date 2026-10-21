@@ -1,3 +1,20 @@
+## Strict remote-tool invocation values — 2026-10-21
+
+The native MCP/A2A owner now shares a strict nine-field invocation validator
+with a bounded codec. Exact Unicode and argument strings round-trip. Unknown
+authority fields, duplicate/missing fields, unsupported versions and invalid
+revision/index values reject. Peer endpoints, credentials, registry handles,
+approvals and native operation IDs remain backend-owned.
+
+The targeted native remote-tool host build and **1/1 contract pass** in 0.65
+seconds, retaining actual approval/guidance/replay checks and unchanged frozen
+input sets. This target does not rebuild xmind.exe.
+[Scope, patch and raw evidence](evidence/process-worker-remote-codec-diagnostic-20261021.json).
+
+Durable worker remote-call ownership and authenticated MCP/A2A tool RPC remain
+unfinished. This adds no full-suite, installation, rendered or live-provider
+acceptance; the preceding full-native checkpoint remains separately scoped.
+
 ## Worker asynchronous jobs joined before final response — 2026-10-21
 
 Production coding workers can launch nonpersistent background jobs through the
