@@ -1,3 +1,17 @@
+## Remote catalogue refresh regression — 2026-10-21
+
+The committed subscription-refresh implementation passes **62/62 selected
+native contracts in 209.14 seconds** after a complete serial Release build.
+Actual unified xmind model/IPC and configured MCP/A2A factories pass, including
+HTTP subscription invalidation, no stale dispatch, rediscovery, exact canonical
+continuation and physical child retirement. Source, SDK, pure libraries,
+dependencies and 133 binary file sets/hashes remain unchanged.
+[Scope, patches and raw evidence](evidence/process-worker-refresh-focused-20261021.json).
+
+This is a selected regression, not a full 162-test result. Worker language tools,
+trusted callables, context, delegation/planning and default placement remain
+open, followed by installation and fresh rendered/live-provider acceptance.
+
 ## Production HTTP subscription-driven worker refresh — 2026-10-21
 
 An actual configured modern HTTP MCP subscription now drives the full refresh
