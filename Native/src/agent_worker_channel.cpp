@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_channel.hpp"
+#include "agentflow/xmind_ipc_runtime.hpp"
 #include "nlohmann/json.hpp"
 #include "xlang3/cpp/runtime.h"
 #include <condition_variable>
@@ -109,12 +110,11 @@ private:
     std::mutex mutex_;std::map<std::string,std::weak_ptr<Inbox>> inboxes_;
 };
 struct WorkerIpcHost {
-    WorkerRemoteObjects objects;X::Runtime runtime;std::uint32_t port=0;
+    std::shared_ptr<WorkerRemoteObjects> owner=std::make_shared<WorkerRemoteObjects>();WorkerRemoteObjects& objects=*owner;X::Runtime& runtime=xmind_ipc_runtime();std::uint32_t port=0;
     WorkerIpcHost(){
+        retain_xmind_ipc_service(owner);
         auto package=runtime.RegisterPackage("xmind_worker",objects);runtime.RegisterRemoteObject("xmind_worker",package);
-        for(unsigned attempt=0;attempt<24;++attempt){auto random=new_agent_worker_channel_key();std::uint32_t value=0;std::copy_n(random.view().begin(),sizeof(value),reinterpret_cast<std::uint8_t*>(&value));port=20000+value%40000;
-            try{runtime.LrpcListen(port);return;}catch(const std::exception&){}}
-        throw std::runtime_error("Cannot start xMind shared-memory IPC listener");
+        port=xmind_ipc_port();
     }
 };
 WorkerIpcHost& ipc_host(){static WorkerIpcHost host;return host;}

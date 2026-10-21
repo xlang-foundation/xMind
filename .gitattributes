@@ -212,3 +212,5 @@ doc/evidence/worker-managed-client-*.log -text whitespace=-blank-at-eol,-blank-a
 doc/evidence/coding60-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 
 doc/evidence/coding60-cli-ipc-*.txt -text
+doc/evidence/process-xmind-root-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+doc/evidence/process-xmind-root-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

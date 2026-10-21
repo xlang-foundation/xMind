@@ -1,0 +1,32 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 87: native_agent_worker_server_contract
+1/1 Test #87: native_agent_worker_server_contract ...***Failed   15.44 sec
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: {"graph_root":false,"id":"e565f279c1839198c5803d8d3a0dbdc2","node_id":"","parent_id":"","session_id":"5d01dcdb5e1a9cfb02391fd5aa0cd562","state":"queued"}
++ actual - expected
+
++ 'queued'
+- 'completed'
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs:15:225 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'queued',
+  expected: 'completed',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  15.46 sec
+
+The following tests FAILED:
+	 87 - native_agent_worker_server_contract (Failed)
+Errors while running CTest

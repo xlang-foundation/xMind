@@ -1,4 +1,7 @@
 #include "agentflow/http_server.hpp"
+#if defined(_WIN32)
+#include "agentflow/xmind_ipc_api.hpp"
+#endif
 #include "agentflow/agent_instructions.hpp"
 #include <charconv>
 #include <cstdlib>
@@ -417,6 +420,10 @@ int run_server(int argc,char** argv) {
         auto mcp_resources=std::make_unique<agentflow::NativeMcpResourceCatalog>(persistence,mcp_settings);
         std::unique_ptr<agentflow::PtySessions> terminals;
         if(executor&&options.contains("--workspace"))terminals=std::make_unique<agentflow::PtySessions>(executor->execution_workspace().root,system_command_shell());
+#endif
+#if defined(_WIN32)
+        agentflow::XMindIpcServer ipc_api(persistence,executor.get(),auth,owner_control.get());
+        std::cout<<"xMind API listening on "<<ipc_api.endpoint()<<std::endl;
 #endif
         agentflow::HttpServer server(persistence,auth,executor.get()
 #if defined(_WIN32)

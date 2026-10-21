@@ -22,6 +22,7 @@ namespace {
 void help(){
     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
         "Usage:\n"
+        "  xmind ipc --endpoint lrpc:PORT host | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID\n"
         "  xmind serve --db FILE --modules DIR --stdlib DIR [--agent-execution thread|process-read|process-code] [server options]\n"
         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [--mcp-config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
@@ -100,6 +101,7 @@ int dispatch(int argc,char** argv){
         else if(mode=="schema-worker")entry=run_schema_worker;
 #if defined(_WIN32)
         else if(mode=="admin")entry=run_admin;
+        else if(mode=="ipc")entry=agentflow::run_xmind_ipc_client;
         else if(mode=="view")entry=run_local_view;
         else if(mode=="worker")entry=agentflow::run_agent_worker;
         else if(mode=="agent-channel-worker")entry=agentflow::run_agent_channel_worker;

@@ -10,6 +10,7 @@ int cli_main(int argc,char** argv,const std::string& workspace={},
 int run_schema_worker(int argc,char** argv);
 #if defined(_WIN32)
 int run_admin(int argc,char** argv);
+namespace agentflow {int run_xmind_ipc_client(int argc,char** argv);}
 #endif
 
 #if defined(_WIN32)

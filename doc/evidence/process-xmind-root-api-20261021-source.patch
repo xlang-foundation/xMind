@@ -1,0 +1,428 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index f7289200..4f8b49b5 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -267,7 +267,8 @@ if(MSVC)
+   target_compile_options(agentflow_http PRIVATE /bigobj)
+ endif()
+ if(WIN32)
+-  target_link_libraries(agentflow_http PRIVATE agentflow_connection_profiles)
++  target_sources(agentflow_http PRIVATE src/xmind_ipc_api.cpp)
++  target_link_libraries(agentflow_http PRIVATE agentflow_connection_profiles agentflow_xlang3)
+   add_library(agentflow_runtime_generation STATIC src/runtime_generation.cpp)
+   target_include_directories(agentflow_runtime_generation PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_runtime_generation PRIVATE agentflow_core)
+@@ -317,7 +318,7 @@ target_compile_definitions(xmind PRIVATE XMIND_UNIFIED_EXECUTABLE)
+ target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_party)
+ target_link_libraries(xmind PRIVATE agentflow_secrets agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
+ if(WIN32)
+-  target_sources(xmind PRIVATE apps/admin_main.cpp apps/local_view_main.cpp)
++  target_sources(xmind PRIVATE apps/admin_main.cpp apps/local_view_main.cpp apps/ipc_main.cpp)
+   target_link_libraries(xmind PRIVATE agentflow_worker_runner)
+   target_link_libraries(xmind PRIVATE agentflow_local_profile agentflow_runtime agentflow_process_configuration agentflow_language_server_configuration agentflow_mcp_configuration agentflow_mcp_client_factory agentflow_mcp_effects agentflow_mcp_resource_catalog agentflow_graph agentflow_owner_process agentflow_backend_owner_control agentflow_legacy_owner_process agentflow_xlang_python agentflow_xlang_worker bcrypt ws2_32 crypt32 shell32 ole32)
+   target_link_libraries(xmind_server PRIVATE agentflow_local_profile)
+@@ -516,6 +517,10 @@ if(BUILD_TESTING)
+     target_link_libraries(agentflow_context_control_contract PRIVATE agentflow_agent agentflow_http)
+     add_custom_command(TARGET agentflow_context_control_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_context_control_contract>")
++    add_test(NAME native_xmind_ipc_api_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
++      "${CMAKE_CURRENT_SOURCE_DIR}/tests/xmind_ipc_api_contract.mjs" "$<TARGET_FILE:xmind>"
++      "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
++    set_tests_properties(native_xmind_ipc_api_contract PROPERTIES TIMEOUT 60)
+     add_test(NAME native_context_control_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+       "${CMAKE_CURRENT_SOURCE_DIR}/tests/context_control_peer.mjs" "$<TARGET_FILE:agentflow_context_control_contract>"
+       "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+diff --git a/Native/apps/ipc_main.cpp b/Native/apps/ipc_main.cpp
+new file mode 100644
+index 00000000..74df1d26
+--- /dev/null
++++ b/Native/apps/ipc_main.cpp
+@@ -0,0 +1,31 @@
++#include "xlang3/xlang3.h"
++#include "nlohmann/json.hpp"
++#include <cstdlib>
++#include <iostream>
++#include <stdexcept>
++#include <string>
++#include <vector>
++namespace agentflow {
++int run_xmind_ipc_client(int argc,char** argv){
++    try{
++        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
++        const std::string endpoint=argv[2];if(!endpoint.starts_with("lrpc:"))throw std::invalid_argument("xMind IPC requires an xlang3 LRPC endpoint");
++        X::Runtime runtime;auto root=runtime.ImportRemote("xmind",endpoint.c_str());
++        auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;if(!method.Call(args,result))throw std::runtime_error("xMind IPC call failed: "+runtime.LastError());return result;};
++        auto text=[&](const char* value){return X::Value(runtime,std::string(value));};
++        const std::string command=argv[3];nlohmann::json output;
++        if(command=="host"&&argc==4){auto host=call(root["Host"],{});output={{"api_version",call(host["ApiVersion"],{}).ToInt64()},{"transport",call(host["Transport"],{}).ToString()}};}
++        else{
++            const auto* token=std::getenv("XMIND_AUTH_TOKEN");if(!token)throw std::invalid_argument("Set XMIND_AUTH_TOKEN for authenticated xMind IPC services");
++            if(command!="session"&&command!="run")throw std::invalid_argument("Unknown xMind IPC service");auto service=call(root[command=="session"?"Sessions":"Runs"],{text(token)});X::Value result;
++            if(command=="session"&&argc==7&&std::string(argv[4])=="create")result=call(service["Create"],{text(argv[5]),text(argv[6])});
++            else if(argc==6&&std::string(argv[4])=="open")result=call(service["Open"],{text(argv[5])});
++            else if(command=="run"&&argc==8&&std::string(argv[4])=="start")result=call(service["Start"],{text(argv[5]),text(argv[6]),text(argv[7])});
++            else if(command=="run"&&argc==6&&std::string(argv[4])=="cancel"){call(service["Cancel"],{text(argv[5])});output={{"cancel_requested",true}};}
++            else throw std::invalid_argument("Invalid xMind IPC service method or arguments");
++            if(result.IsValid()){if(command=="session")output={{"id",result["id"].ToString()},{"title",result["title"].ToString()},{"parent_id",result["parent_id"].ToString()}};else output={{"id",result["id"].ToString()},{"session_id",result["session_id"].ToString()},{"state",result["state"].ToString()},{"parent_id",result["parent_id"].ToString()},{"node_id",result["node_id"].ToString()}};}
++        }
++        std::cout<<output.dump()<<std::endl;return 0;
++    }catch(const std::exception& error){std::cerr<<error.what()<<std::endl;return 1;}
++}
++}
+diff --git a/Native/apps/server_main.cpp b/Native/apps/server_main.cpp
+index 74003ba2..5b2d5f2d 100644
+--- a/Native/apps/server_main.cpp
++++ b/Native/apps/server_main.cpp
+@@ -1,4 +1,7 @@
+ #include "agentflow/http_server.hpp"
++#if defined(_WIN32)
++#include "agentflow/xmind_ipc_api.hpp"
++#endif
+ #include "agentflow/agent_instructions.hpp"
+ #include <charconv>
+ #include <cstdlib>
+@@ -417,6 +420,10 @@ int run_server(int argc,char** argv) {
+         auto mcp_resources=std::make_unique<agentflow::NativeMcpResourceCatalog>(persistence,mcp_settings);
+         std::unique_ptr<agentflow::PtySessions> terminals;
+         if(executor&&options.contains("--workspace"))terminals=std::make_unique<agentflow::PtySessions>(executor->execution_workspace().root,system_command_shell());
++#endif
++#if defined(_WIN32)
++        agentflow::XMindIpcServer ipc_api(persistence,executor.get(),auth,owner_control.get());
++        std::cout<<"xMind API listening on "<<ipc_api.endpoint()<<std::endl;
+ #endif
+         agentflow::HttpServer server(persistence,auth,executor.get()
+ #if defined(_WIN32)
+diff --git a/Native/apps/xmind_main.cpp b/Native/apps/xmind_main.cpp
+index d02fed9f..6ae69e26 100644
+--- a/Native/apps/xmind_main.cpp
++++ b/Native/apps/xmind_main.cpp
+@@ -22,6 +22,7 @@ namespace {
+ void help(){
+     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
+         "Usage:\n"
++        "  xmind ipc --endpoint lrpc:PORT host | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID\n"
+         "  xmind serve --db FILE --modules DIR --stdlib DIR [--agent-execution thread|process-read|process-code] [server options]\n"
+         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [--mcp-config FILE] [COMMAND ARGS...]\n"
+         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
+@@ -100,6 +101,7 @@ int dispatch(int argc,char** argv){
+         else if(mode=="schema-worker")entry=run_schema_worker;
+ #if defined(_WIN32)
+         else if(mode=="admin")entry=run_admin;
++        else if(mode=="ipc")entry=agentflow::run_xmind_ipc_client;
+         else if(mode=="view")entry=run_local_view;
+         else if(mode=="worker")entry=agentflow::run_agent_worker;
+         else if(mode=="agent-channel-worker")entry=agentflow::run_agent_channel_worker;
+diff --git a/Native/include/agentflow/agent_worker_records.hpp b/Native/include/agentflow/agent_worker_records.hpp
+index 01368b64..92bcc07b 100644
+--- a/Native/include/agentflow/agent_worker_records.hpp
++++ b/Native/include/agentflow/agent_worker_records.hpp
+@@ -39,6 +39,11 @@ struct AgentWorkerModelClaimRecord {
+     std::string state,actual_response_json,response_binding;
+     std::string actual_assistant_json,assistant_binding;
+ };
++// Backend admission for one planning request. Native plan acceptance is separate.
++struct AgentWorkerPlanningClaimRecord {
++    AgentWorkerModelClaimSpec model;
++    std::string call_id,tool_name,arguments_json,backend_identity,segment_id,state;
++};
+ struct AgentWorkerReadClaimRecord {
+     AgentWorkerModelClaimSpec model;
+     AgentWorkspaceInvocation invocation;
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 816097f9..05a8a71f 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -34,6 +34,8 @@ public:
+     // Terminal observations remain recordable after the execution token/deadline stops.
+     // The supervisor must drain physical work before calling; never expose as generic RPC.
+     std::future<Run> terminate_agent_worker(AgentWorkerLeaseSpec,RunState outcome,std::string reason);
++    std::future<AgentWorkerPlanningClaimRecord> claim_agent_worker_planning(AgentWorkerLeaseSpec,std::string attempt,std::string call,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<AgentWorkerPlanningClaimRecord> agent_worker_planning_claim(std::string root,std::string attempt);
+     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
+     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec,AgentWorkerModelFailure=AgentWorkerModelFailure::unknown);
+     std::future<AgentWorkerModelClaimRecord> agent_worker_model_claim(std::string root,std::string attempt);
+diff --git a/Native/include/agentflow/program_entries.hpp b/Native/include/agentflow/program_entries.hpp
+index 2b65c2a9..f43b56b8 100644
+--- a/Native/include/agentflow/program_entries.hpp
++++ b/Native/include/agentflow/program_entries.hpp
+@@ -10,6 +10,7 @@ int cli_main(int argc,char** argv,const std::string& workspace={},
+ int run_schema_worker(int argc,char** argv);
+ #if defined(_WIN32)
+ int run_admin(int argc,char** argv);
++namespace agentflow {int run_xmind_ipc_client(int argc,char** argv);}
+ #endif
+ 
+ #if defined(_WIN32)
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 8d405e6a..6c85f056 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -202,6 +202,8 @@ public:
+     AgentWorkerLeaseRecord retire_agent_worker(const std::string& generation,const std::string& reason);
+     // Backend supervisor only, after physical work has drained. No execution authority.
+     Run terminate_agent_worker(const AgentWorkerLeaseSpec&,RunState outcome,const std::string& reason);
++    AgentWorkerPlanningClaimRecord claim_agent_worker_planning(const AgentWorkerLeaseSpec&,const std::string& attempt,const std::string& call);
++    AgentWorkerPlanningClaimRecord agent_worker_planning_claim(const std::string& root,const std::string& attempt);
+     AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
+     AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&,AgentWorkerModelFailure=AgentWorkerModelFailure::unknown);
+     AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);
+diff --git a/Native/include/agentflow/xmind_ipc_api.hpp b/Native/include/agentflow/xmind_ipc_api.hpp
+new file mode 100644
+index 00000000..08d7a13d
+--- /dev/null
++++ b/Native/include/agentflow/xmind_ipc_api.hpp
+@@ -0,0 +1,21 @@
++#pragma once
++#include <memory>
++#include <string>
++namespace agentflow {
++class PersistenceService;
++class RunExecutor;
++class BackendOwnerControl;
++// Owns the xlang3 root export and listener. Construct after backend services;
++// destroy before those services. No transport-specific state belongs in them.
++class XMindIpcServer final {
++public:
++    XMindIpcServer(PersistenceService&,RunExecutor*,const std::string& local_auth_token,BackendOwnerControl* owner=nullptr);
++    ~XMindIpcServer();
++    XMindIpcServer(const XMindIpcServer&)=delete;
++    XMindIpcServer& operator=(const XMindIpcServer&)=delete;
++    const std::string& endpoint()const noexcept;
++private:
++    struct Impl;
++    std::unique_ptr<Impl> impl_;
++};
++}
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 4ff82465..9a11ec99 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -214,6 +214,8 @@ std::future<ModelCallReservation> PersistenceService::start_agent_worker_model(A
+ }
+ std::future<AgentWorkerLeaseRecord> PersistenceService::retire_agent_worker(std::string generation,std::string reason){return impl_->submit([generation=std::move(generation),reason=std::move(reason)](Repository& r){return r.retire_agent_worker(generation,reason);});}
+ std::future<Run> PersistenceService::terminate_agent_worker(AgentWorkerLeaseSpec lease,RunState outcome,std::string reason){return impl_->submit([lease=std::move(lease),outcome,reason=std::move(reason)](Repository& r){return r.terminate_agent_worker(lease,outcome,reason);});}
++std::future<AgentWorkerPlanningClaimRecord> PersistenceService::claim_agent_worker_planning(AgentWorkerLeaseSpec lease,std::string attempt,std::string call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker planning cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker planning deadline elapsed");return r.claim_agent_worker_planning(lease,attempt,call);});}
++std::future<AgentWorkerPlanningClaimRecord> PersistenceService::agent_worker_planning_claim(std::string root,std::string attempt){return impl_->submit([root=std::move(root),attempt=std::move(attempt)](Repository& r){return r.agent_worker_planning_claim(root,attempt);});}
+ std::future<AgentWorkerModelClaimRecord> PersistenceService::claim_agent_worker_model(AgentWorkerModelClaimSpec spec){return impl_->submit([spec=std::move(spec)](Repository& r){return r.claim_agent_worker_model(spec);});}
+ std::future<AgentWorkerModelClaimRecord> PersistenceService::agent_worker_model_claim(std::string root,std::string attempt){return impl_->observe([root=std::move(root),attempt=std::move(attempt)](Repository& r){return r.agent_worker_model_claim(root,attempt);});}
+ std::future<AgentWorkerModelClaimRecord> PersistenceService::interrupt_agent_worker_model(AgentWorkerModelClaimSpec spec,AgentWorkerModelFailure failure){return impl_->submit([spec=std::move(spec),failure](Repository& r){return r.interrupt_agent_worker_model(spec,failure);});}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 813d7585..3941d075 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3182,6 +3182,14 @@ AgentWorkerModelClaimRecord read_worker_claim(XlangSqlite& db,const std::string&
+         else if(!record.actual_response_json.empty()||!record.response_binding.empty())throw DatabaseError("Unacknowledged worker dispatch has a response");return record;
+     }catch(const Json::exception&){throw DatabaseError("Invalid stored worker dispatch");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker dispatch");}
+ }
++constexpr std::string_view worker_planning_category="native-agent-worker-planning-claims";
++Json worker_planning_json(const AgentWorkerPlanningClaimRecord& record){return {{"version",1},{"model",worker_claim_spec_json(record.model)},{"call_id",record.call_id},{"tool_name",record.tool_name},{"arguments_json",record.arguments_json},{"backend_identity",record.backend_identity},{"segment_id",record.segment_id},{"state",record.state}};}
++AgentWorkerPlanningClaimRecord read_worker_planning(XlangSqlite& db,const std::string& root,const std::string& attempt){
++    const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_planning_category),worker_claim_key(root,attempt)}).rows;if(rows.empty())throw NotFound("Worker planning admission not found");
++    try{const auto value=Json::parse(text(rows[0][0]));const auto& m=value.at("model");AgentWorkerPlanningClaimRecord record{{m.at("generation").get<std::string>(),m.at("root_run_id").get<std::string>(),m.at("owner_run_id").get<std::string>(),m.at("attempt_id").get<std::string>(),m.at("request_binding").get<std::string>()},value.at("call_id").get<std::string>(),value.at("tool_name").get<std::string>(),value.at("arguments_json").get<std::string>(),value.at("backend_identity").get<std::string>(),value.at("segment_id").get<std::string>(),value.at("state").get<std::string>()};
++        if(record.model.root_run_id!=root||record.model.attempt_id!=attempt||(record.state!="entered"&&record.state!="uncertain")||(record.tool_name!="plan_tasks"&&record.tool_name!="revise_plan"&&record.tool_name!="inspect_plan")||worker_planning_json(record)!=value)throw DatabaseError("Invalid stored worker planning admission");bounded_identity(record.call_id,256);worker_digest(record.backend_identity);bounded_identity(record.segment_id);(void)object_json(record.arguments_json,4*1024*1024);return record;
++    }catch(const Json::exception&){throw DatabaseError("Invalid stored worker planning admission");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored worker planning admission");}
++}
+ std::string worker_tool_call_key(const std::string& root,const std::string& attempt,const std::string& call){bounded_identity(root);bounded_identity(attempt);identifier(call);if(call.size()>256)throw std::invalid_argument("Provider tool call identity exceeds limits");return context_digest(Json::array({root,attempt,call}).dump());}
+ Json worker_read_json(const AgentWorkerReadClaimRecord& record){return {{"version",1},{"model",worker_claim_spec_json(record.model)},{"invocation",record.invocation.serialize()},{"state",record.state},{"dispatched",record.dispatched},{"success",record.success},{"actual_output_json",record.actual_output_json},{"output_binding",record.output_binding}};}
+ AgentWorkerReadClaimRecord read_worker_read(XlangSqlite& db,const std::string& root,const std::string& attempt,const std::string& call){
+@@ -3482,6 +3490,25 @@ Event Repository::agent_worker_model_event(const AgentWorkerLeaseSpec& lease,con
+     if(receipt!=Json{{"version",1},{"spec",worker_claim_spec_json(claim.spec)},{"ordinal",ordinal},{"event_sequence",sequence}})throw DatabaseError("Stored model event binding differs");const auto rows=db.execute("SELECT run_id,kind,payload FROM events WHERE seq=?",{sequence}).rows;
+     if(rows.size()!=1||text(rows[0][0])!=lease.owner_run_id||text(rows[0][1])!=kind||text(rows[0][2])!=json)throw Conflict("Worker event differs from actual backend observation");Event result{sequence,lease.owner_run_id,kind,json};tx.commit();return result;
+ }
++AgentWorkerPlanningClaimRecord Repository::claim_agent_worker_planning(const AgentWorkerLeaseSpec& lease,const std::string& attempt,const std::string& call){
++    bounded_identity(attempt);bounded_identity(call,256);auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
++    const auto root=run(lease.root_run_id);const auto budget=root_budget(root.id);
++    if(lease.owner_run_id!=root.id||root.graph_root||!root.parent_id.empty()||lease.workspace_id=="workspace:none"||budget.spec.policy_id!="native.dynamic-plan"||budget.spec.policy_revision!=1)throw Conflict("Worker planning requires its captured dynamic root");
++    const auto caps=dynamic_capabilities(root.id);const auto segment=dynamic_budget_segment(root.id);
++    if(!caps.catalogue_finalized||caps.workspace_identity!=lease.workspace_id||Json::parse(caps.provider_identity_json)!=Json::parse(lease.provider_identity_json)||segment.state!="open")throw Conflict("Worker planning lacks finalized native capabilities and an active segment");
++    const auto model=read_worker_claim(db,root.id,attempt);
++    if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker planning lacks its actual captured model receipt");
++    const auto reservation=db.execute("SELECT state,purpose,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{root.id,lease.owner_run_id,attempt}).rows;
++    const auto latest=db.execute("SELECT json_extract(payload,'$.attempt_id') FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? ORDER BY seq DESC LIMIT 1",{lease.owner_run_id,root.id}).rows;
++    if(reservation.size()!=1||text(reservation[0][0])!="finished"||text(reservation[0][1])!="inference"||text(reservation[0][2])!=model.actual_assistant_json||latest.size()!=1||text(latest[0][0])!=attempt)throw Conflict("Worker planning requires its latest fully retired inference");
++    const auto actual=decode_agent_model_completion(model.actual_response_json);
++    if(actual.finish_reason!="tool_calls"||actual.tool_calls.size()!=1||actual.tool_calls.front().id!=call)throw Conflict("Worker planning requires one exact provider planning call");const auto& tool=actual.tool_calls.front();
++    if(tool.name!="plan_tasks"&&tool.name!="revise_plan"&&tool.name!="inspect_plan")throw Conflict("Worker planning call is not a native planning tool");(void)object_json(tool.arguments_json,4*1024*1024);
++    AgentWorkerPlanningClaimRecord record{model.spec,tool.id,tool.name,tool.arguments_json,caps.backend_identity,segment.id,"entered"};
++    const auto inserted=db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO NOTHING",{std::string(worker_planning_category),worker_claim_key(root.id,attempt),worker_planning_json(record).dump()});if(inserted.affected_rows!=1)throw Conflict("Worker planning was already entered; no replay is authorized");
++    impl_->event(lease.owner_run_id,"worker.planning.entered",Json{{"generation",lease.generation},{"attempt_id",attempt},{"call_id",call},{"segment_id",segment.id}}.dump());tx.commit();return record;
++}
++AgentWorkerPlanningClaimRecord Repository::agent_worker_planning_claim(const std::string& root,const std::string& attempt){return read_worker_planning(impl_->database,root,attempt);}
+ AgentWorkerModelClaimRecord Repository::agent_worker_model_claim(const std::string& root,const std::string& attempt){return read_worker_claim(impl_->database,root,attempt);}
+ AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
+     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,spec.generation);
+@@ -3762,6 +3789,8 @@ AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& genera
+     const std::set<std::string> reasons{"completed","cancelled","worker_exit","backend_recovery","dispatch_error"};if(!reasons.contains(reason))throw std::invalid_argument("Invalid worker retirement reason");auto& db=database;auto lease=read_worker_lease(db,generation);
+     if(lease.state=="retired"){if(lease.retirement_reason!=reason)throw Conflict("Worker retirement observation changed");return lease;}
+     if(lease.revision>=9007199254740991)throw std::overflow_error("Worker lease revision exhausted");std::int64_t uncertain=0;
++    const auto planning=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_planning_category),generation}).rows;
++    for(const auto& row:planning){const auto saved=Json::parse(text(row[0]));const auto attempt=saved.at("model").at("attempt_id").get<std::string>();auto record=read_worker_planning(db,lease.spec.root_run_id,attempt);if(record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_planning_json(record).dump(),std::string(worker_planning_category),worker_claim_key(lease.spec.root_run_id,attempt)}));event(lease.spec.owner_run_id,"worker.planning.uncertain",Json{{"generation",generation},{"attempt_id",attempt},{"call_id",record.call_id}}.dump());}
+     const auto files=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_file_category),generation}).rows;
+     for(const auto& row:files){const auto saved=Json::parse(text(row[0]));const auto call=AgentFileToolInvocation::parse(saved.at("invocation").get<std::string>());auto record=read_worker_file(db,lease.spec.root_run_id,call.attempt_id,call.call_id);if(record.state=="returned"||record.state=="uncertain")continue;record.state="uncertain";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_file_json(record).dump(),std::string(worker_file_category),worker_tool_call_key(lease.spec.root_run_id,call.attempt_id,call.call_id)}));event(lease.spec.owner_run_id,"worker.file.uncertain",Json{{"generation",generation},{"attempt_id",call.attempt_id},{"call_id",call.call_id},{"operation_ids",record.operation_ids}}.dump());}
+     const auto processes=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_process_category),generation}).rows;
+diff --git a/Native/src/xmind_ipc_api.cpp b/Native/src/xmind_ipc_api.cpp
+new file mode 100644
+index 00000000..29e0ff02
+--- /dev/null
++++ b/Native/src/xmind_ipc_api.cpp
+@@ -0,0 +1,92 @@
++#include "agentflow/xmind_ipc_api.hpp"
++#include "agentflow/persistence_service.hpp"
++#include "agentflow/run_executor.hpp"
++#include "agentflow/http_server.hpp"
++#include "agentflow/backend_owner_control.hpp"
++#include <optional>
++#include "xlang3/xlang3.h"
++#include <random>
++#include <stdexcept>
++#include <string_view>
++namespace agentflow {
++namespace {
++struct ApiContext {
++    PersistenceService& store;
++    RunExecutor* executor;
++    std::string token;
++    BackendOwnerControl* owner=nullptr;
++    std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
++    void authorize(const std::string& supplied)const {
++        // The existing local owner token grants integration access, never
++        // arbitrary SQL, credentials or a worker's private execution authority.
++        if(supplied.size()!=token.size())throw std::runtime_error("unauthorized");
++        unsigned different=0;for(std::size_t i=0;i<token.size();++i)different|=static_cast<unsigned char>(token[i])^static_cast<unsigned char>(supplied[i]);
++        if(different)throw std::runtime_error("unauthorized");
++    }
++};
++template<class F>auto api_call(F action)->decltype(action()){
++    try{return action();}catch(const NotFound&){throw std::runtime_error("not_found");}catch(const Conflict&){throw std::runtime_error("conflict");}catch(const BackendQuiesced&){throw std::runtime_error("backend_quiesced");}catch(const RunBusy&){throw std::runtime_error("busy");}catch(const RunUnavailable&){throw std::runtime_error("unavailable");}catch(const std::invalid_argument&){throw std::runtime_error("invalid_arguments");}catch(...){throw std::runtime_error("internal_error");}
++}
++void set(X::Value& value,const char* name,const X::Value& field){if(!value.Set(name,field))throw std::runtime_error("Cannot construct xMind API record");}
++X::Value session_value(X3PackageHost* host,const Session& session){auto value=X::Value::Dict(host);set(value,"id",X::Value::String(host,session.id));set(value,"title",X::Value::String(host,session.title));set(value,"parent_id",X::Value::String(host,session.parent_id));return value;}
++X::Value run_value(X3PackageHost* host,const Run& run){auto value=X::Value::Dict(host);set(value,"id",X::Value::String(host,run.id));set(value,"session_id",X::Value::String(host,run.session_id));set(value,"state",X::Value::String(host,to_string(run.state)));set(value,"parent_id",X::Value::String(host,run.parent_id));set(value,"node_id",X::Value::String(host,run.node_id));set(value,"graph_root",X::Value(run.graph_root));return value;}
++struct RootApi;
++struct HostApi {
++    explicit HostApi(RootApi*){}
++    std::int64_t ApiVersion()const{return 1;}
++    std::string Transport()const{return "xlang3-lrpc";}
++    BEGIN_PACKAGE(HostApi)
++        APISET().AddFunc<0>("ApiVersion",&HostApi::ApiVersion);
++        APISET().AddFunc<0>("Transport",&HostApi::Transport);
++    END_PACKAGE
++};
++struct SessionsApi {
++    ApiContext& context;
++    SessionsApi(RootApi*,std::string token);
++    X::Value Open(std::string id){return api_call([&]{return session_value(Host(),context.store.session(std::move(id)).get());});}
++    X::Value Create(std::string id,std::string title){return api_call([&]{auto admission=context.admit();return session_value(Host(),context.store.create_session(std::move(id),std::move(title)).get());});}
++    BEGIN_PACKAGE(SessionsApi)
++        APISET().AddFunc<1>("Open",&SessionsApi::Open);
++        APISET().AddFunc<2>("Create",&SessionsApi::Create);
++    END_PACKAGE
++};
++struct RunsApi {
++    ApiContext& context;
++    RunsApi(RootApi*,std::string token);
++    X::Value Open(std::string id){return api_call([&]{return run_value(Host(),context.store.run(std::move(id)).get());});}
++    X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{auto admission=context.admit();if(!context.executor)throw RunUnavailable("Run execution unavailable");return run_value(Host(),context.executor->submit(std::move(id),std::move(session),std::move(prompt)));});}
++    void Cancel(std::string id){api_call([&]{auto admission=context.admit();if(!context.executor)throw RunUnavailable("Run execution unavailable");context.executor->cancel(id);});}
++    BEGIN_PACKAGE(RunsApi)
++        APISET().AddFunc<1>("Open",&RunsApi::Open);
++        APISET().AddFunc<3>("Start",&RunsApi::Start);
++        APISET().AddFunc<1>("Cancel",&RunsApi::Cancel);
++    END_PACKAGE
++};
++struct RootApi {
++    ApiContext context;
++    BEGIN_PACKAGE(RootApi)
++        APISET().AddClass<0,HostApi,RootApi>("Host");
++        APISET().AddClass<1,SessionsApi,RootApi>("Sessions");
++        APISET().AddClass<1,RunsApi,RootApi>("Runs");
++    END_PACKAGE
++};
++SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->context){context.authorize(token);}
++RunsApi::RunsApi(RootApi* root,std::string token):context(root->context){context.authorize(token);}
++}
++struct XMindIpcServer::Impl {
++    RootApi root;
++    X::Runtime runtime;
++    std::string endpoint;
++    Impl(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):root{{store,executor,token,owner}}{
++        validate_local_auth_token(token);
++        auto package=runtime.RegisterPackage("xmind",root);
++        runtime.RegisterRemoteObject("xmind",package);
++        std::random_device random;std::string last_error;
++        for(unsigned attempt=0;attempt<24;++attempt){const auto port=20000+random()%40000;try{runtime.LrpcListen(port);endpoint="lrpc:"+std::to_string(port);return;}catch(const std::exception& error){last_error=error.what();}}
++        throw std::runtime_error("Cannot start xMind API listener: "+last_error);
++    }
++};
++XMindIpcServer::XMindIpcServer(PersistenceService& store,RunExecutor* executor,const std::string& token,BackendOwnerControl* owner):impl_(std::make_unique<Impl>(store,executor,token,owner)){}
++XMindIpcServer::~XMindIpcServer()=default;
++const std::string& XMindIpcServer::endpoint()const noexcept{return impl_->endpoint;}
++}
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 846bba36..901b8087 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -67,6 +67,20 @@ void delegated_workers(PersistenceService& store){
+     std::cout<<"Delegated worker ledger verified queued admission, named provider binding, shared funding, four-turn cap, read-only authority, canonical child history, sibling-independent completion and cancellation without refund; synthetic process identities, no child runner dispatch."<<std::endl;
+ }
+ 
++
++void planning_admission(PersistenceService& store){
++    const auto deadline=std::chrono::steady_clock::now()+20s;const std::string authority(64,'a'),child_authority(64,'b');
++    auto seed=[&](const std::string& label,bool finalize=true){const auto id="planning-"+label;store.create_session(id,"Synthetic planning admission ledger").get();RootBudgetSpec budget{"native.dynamic-plan",1,"worker-fixture-workspace",provider,4,1,16,600000};DynamicPlanCapabilities caps;caps.backend_identity=authority;caps.workspace_identity=budget.workspace_identity;caps.provider_identity_json=Json::parse(provider).dump();caps.tool_catalog_json="{}";caps.presets={{"workspace.inspect",1,true,{},4,{}}};store.start_prompt_run(id,id,R"({"content":"Synthetic planning admission"})",budget,caps).get();store.transition(id,RunState::queued,RunState::running).get();store.append_event(id,"agent.workspace_membership",R"({"workspace_id":"worker-fixture-workspace","revision":7})").get();store.open_dynamic_budget_segment({id,"segment-"+label,authority,store.root_budget(id).get().revision}).get();if(finalize)store.finalize_dynamic_capabilities(id,authority,R"({"tools":[{"name":"read_file"}]})",{{"workspace.inspect",1,true,{"read_file"},4,child_authority}}).get();return store.admit_agent_worker(lease(id,"generation-"+label)).get().spec;};
++    auto response=[&](const AgentWorkerLeaseSpec& owner,const std::string& attempt,const std::vector<ModelToolCall>& calls,bool finish=true,bool assistant=true){start(store,owner.root_run_id,attempt);const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();ModelCompletion actual{"","","tool_calls","{}",calls,"[]"};const auto canonical=format_agent_model_assistant(actual,"worker-fixture-model",7,{});store.record_agent_worker_model_response(model,encode_agent_model_completion(actual),assistant?canonical:std::string{}).get();if(finish)store.finish_model_call(owner.root_run_id,owner.owner_run_id,attempt,canonical).get();};
++    auto owner=seed("once");response(owner,"planning-model",{{"provider-planning-call","plan_tasks",R"({"tasks":[]})"}});auto one=store.claim_agent_worker_planning(owner,"planning-model","provider-planning-call",deadline),two=store.claim_agent_worker_planning(owner,"planning-model","provider-planning-call",deadline);unsigned accepted=0,rejected=0;for(auto* f:{&one,&two})try{const auto r=f->get();require(r.state=="entered"&&r.call_id=="provider-planning-call"&&r.tool_name=="plan_tasks"&&r.arguments_json==R"({"tasks":[]})"&&r.backend_identity==authority&&r.segment_id=="segment-once"&&r.model.generation==owner.generation,"Planning admission must derive exact call and native identity from stored receipt");++accepted;}catch(const Conflict&){++rejected;}require(accepted==1&&rejected==1,"Concurrent planning claims must admit only once");
++    store.retire_agent_worker(owner.generation,"worker_exit").get();require(store.agent_worker_planning_claim(owner.root_run_id,"planning-model").get().state=="uncertain","Retirement retains unresolved planning entry without replay");auto replacement=owner;replacement.generation="replacement-planning";store.admit_agent_worker(replacement).get();rejects<Conflict>([&]{store.claim_agent_worker_planning(replacement,"planning-model","provider-planning-call",deadline).get();});rejects<Conflict>([&]{store.claim_agent_worker_planning(owner,"planning-model","provider-planning-call",deadline).get();});store.retire_agent_worker(replacement.generation,"cancelled").get();
++    for(const auto* label:{"unfinished","no-assistant","multiple","ordinary-tool","wrong-call","cancelled","expired","stale-attempt"}){auto captured=seed(label);const std::string kind=label;std::vector<ModelToolCall> calls{{"provider-call",kind=="ordinary-tool"?"read_file":"inspect_plan","{}"}};if(kind=="multiple")calls.push_back({"other-call","inspect_plan","{}"});response(captured,"model-"+kind,calls,kind!="unfinished",kind!="no-assistant");if(kind=="stale-attempt")store.reserve_model_call(captured.root_run_id,captured.owner_run_id,"later-attempt",ModelCallRole::parent).get();if(kind=="cancelled"){std::stop_source stopped;stopped.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.claim_agent_worker_planning(captured,"model-"+kind,"provider-call",deadline,{},stopped.get_token()).get();});}else if(kind=="expired")rejects<AgentWorkerAuthorityExpired>([&]{store.claim_agent_worker_planning(captured,"model-"+kind,"provider-call",std::chrono::steady_clock::now()-1ms).get();});else rejects<Conflict>([&]{store.claim_agent_worker_planning(captured,"model-"+kind,kind=="wrong-call"?"foreign-call":"provider-call",deadline).get();});rejects<NotFound>([&]{store.agent_worker_planning_claim(captured.root_run_id,"model-"+kind).get();});store.retire_agent_worker(captured.generation,"cancelled").get();}
++    auto provisional=seed("provisional",false);rejects<Conflict>([&]{store.claim_agent_worker_planning(provisional,"absent-attempt","absent-call",deadline).get();});store.retire_agent_worker(provisional.generation,"cancelled").get();root(store,"ordinary-planning-root");auto ordinary=store.admit_agent_worker(lease("ordinary-planning-root","ordinary-planning-generation")).get().spec;response(ordinary,"ordinary-model",{{"ordinary-call","inspect_plan","{}"}});rejects<Conflict>([&]{store.claim_agent_worker_planning(ordinary,"ordinary-model","ordinary-call",deadline).get();});store.retire_agent_worker(ordinary.generation,"cancelled").get();
++    for(const auto* tool:{"inspect_plan","revise_plan"}){auto captured=seed(tool);response(captured,std::string("model-")+tool,{{"provider-call",tool,"{}"}});require(store.claim_agent_worker_planning(captured,std::string("model-")+tool,"provider-call",deadline).get().tool_name==tool,"Native planning vocabulary must admit exact stored tool name");store.retire_agent_worker(captured.generation,"worker_exit").get();}
++    rejects<std::invalid_argument>([&]{store.put_information("native-agent-worker-planning-claims","forged","{}").get();});rejects<std::invalid_argument>([&]{store.compare_information("native-agent-worker-planning-claims","forged","{}",{}).get();});
++    std::cout<<"Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed."<<std::endl;
++}
++
+ void queued_start(PersistenceService& store){
+     const std::string id="queued-worker-root";store.create_session(id,"Queued worker fixture").get();store.start_prompt_run(id,id,R"({"content":"Queued ordinary worker"})",RootBudgetSpec{"native.direct-agent",1,"workspace:none",provider,0,0,8,600000}).get();
+     const auto captured=store.admit_agent_worker({"queued-generation",id,id,"workspace:none",1,12345,"134000000000000000","synthetic-queued-image",provider}).get().spec;const auto deadline=std::chrono::steady_clock::now()+10s;
+@@ -333,7 +347,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);planning_admission(store);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});
+diff --git a/Native/tests/xmind_ipc_api_contract.mjs b/Native/tests/xmind_ipc_api_contract.mjs
+new file mode 100644
+index 00000000..e6a942e5
+--- /dev/null
++++ b/Native/tests/xmind_ipc_api_contract.mjs
+@@ -0,0 +1,28 @@
++import assert from 'node:assert/strict';
++import {spawn,execFile} from 'node:child_process';
++import {promisify} from 'node:util';
++import {mkdtemp,rm} from 'node:fs/promises';
++import {tmpdir} from 'node:os';
++import {join} from 'node:path';
++import {randomBytes} from 'node:crypto';
++const [binary,modules,stdlib]=process.argv.slice(2);assert(binary&&modules&&stdlib);
++const root=await mkdtemp(join(tmpdir(),'xmind-root-api-')),token=randomBytes(32).toString('hex');
++const env={...process.env,XMIND_AUTH_TOKEN:token};let stdout='',stderr='',endpoint,passed=false;
++const backend=spawn(binary,['serve','--db',join(root,'state.sqlite'),'--modules',modules,'--stdlib',stdlib,'--port','0'],{env,windowsHide:true,stdio:['ignore','pipe','pipe']});
++const exited=new Promise(resolve=>backend.once('exit',(code,signal)=>resolve({code,signal})));
++backend.stdout.on('data',b=>{stdout+=b;endpoint=stdout.match(/xMind API listening on (lrpc:\d+)/)?.[1];});backend.stderr.on('data',b=>stderr+=b);
++const run=promisify(execFile);const clients=[];
++async function client(args,auth=token){const child=run(binary,['ipc','--endpoint',endpoint,...args],{env:{...env,XMIND_AUTH_TOKEN:auth},windowsHide:true,timeout:10000,maxBuffer:1024*1024});clients.push(child.child.pid);const result=await child;return JSON.parse(result.stdout);}
++try{
++    const deadline=Date.now()+15000;while(!endpoint||!stdout.includes('xMind Server listening on')){assert(Date.now()<deadline,'Root API startup timed out');assert.equal(backend.exitCode,null,'Backend exited during startup');await new Promise(resolve=>setTimeout(resolve,25));}
++    assert.deepEqual(await client(['host']),{api_version:1,transport:'xlang3-lrpc'});
++    assert.deepEqual(await client(['session','create','integration-session','Native API 雪']),{id:'integration-session',title:'Native API 雪',parent_id:''});
++    const opened=await Promise.all([client(['session','open','integration-session']),client(['session','open','integration-session'])]);assert(opened.every(s=>s.title==='Native API 雪'));
++    await assert.rejects(client(['session','create','integration-session','duplicate']));
++    await assert.rejects(client(['session','create','unauthorized-session','must not exist'],'0'.repeat(64)));
++    await assert.rejects(client(['session','open','unauthorized-session']));
++    await assert.rejects(client(['run','open','absent-run']));
++    assert.equal((await client(['session','open','integration-session'])).title,'Native API 雪');
++    assert(clients.every(pid=>pid&&pid!==backend.pid));assert(!stdout.includes(token)&&!stderr.includes(token));
++    passed=true;console.log(JSON.stringify({backendPid:backend.pid,clientPids:clients,apiVersion:1,transport:'xlang3-lrpc',actualUnifiedExecutable:true,verified:['Root registered at backend startup','Native Host/Sessions/Runs subobjects','Distinct xmind.exe clients call SDK methods directly','Exact UTF-8 persisted session survives independent clients','Duplicate create and wrong authentication rejected','No unauthorized session created','Unknown run rejected'],limitations:['No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate','No live provider or rendering acceptance'],passed}));
++}finally{backend.kill();await exited;if(passed)await rm(root,{recursive:true,force:true});else console.error('Retained root API fixture: '+root+'; backend output: '+stdout+'; '+stderr);}

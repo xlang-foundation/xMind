@@ -39,6 +39,11 @@ struct AgentWorkerModelClaimRecord {
     std::string state,actual_response_json,response_binding;
     std::string actual_assistant_json,assistant_binding;
 };
+// Backend admission for one planning request. Native plan acceptance is separate.
+struct AgentWorkerPlanningClaimRecord {
+    AgentWorkerModelClaimSpec model;
+    std::string call_id,tool_name,arguments_json,backend_identity,segment_id,state;
+};
 struct AgentWorkerReadClaimRecord {
     AgentWorkerModelClaimSpec model;
     AgentWorkspaceInvocation invocation;

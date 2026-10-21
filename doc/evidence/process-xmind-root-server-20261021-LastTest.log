@@ -1,0 +1,38 @@
+Start testing: Oct 21 14:35 Pacific Daylight Time
+----------------------------------------------------------
+87/167 Testing: native_agent_worker_server_contract
+87/167 Test: native_agent_worker_server_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/xmind.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_server_contract" start time: Oct 21 14:35 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: {"graph_root":false,"id":"e565f279c1839198c5803d8d3a0dbdc2","node_id":"","parent_id":"","session_id":"5d01dcdb5e1a9cfb02391fd5aa0cd562","state":"queued"}
++ actual - expected
+
++ 'queued'
+- 'completed'
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs:15:225 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'queued',
+  expected: 'completed',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =  15.44 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_server_contract" end time: Oct 21 14:35 Pacific Daylight Time
+"native_agent_worker_server_contract" time elapsed: 00:00:15
+----------------------------------------------------------
+
+End testing: Oct 21 14:35 Pacific Daylight Time

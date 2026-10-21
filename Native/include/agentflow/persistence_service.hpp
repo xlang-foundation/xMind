@@ -34,6 +34,8 @@ public:
     // Terminal observations remain recordable after the execution token/deadline stops.
     // The supervisor must drain physical work before calling; never expose as generic RPC.
     std::future<Run> terminate_agent_worker(AgentWorkerLeaseSpec,RunState outcome,std::string reason);
+    std::future<AgentWorkerPlanningClaimRecord> claim_agent_worker_planning(AgentWorkerLeaseSpec,std::string attempt,std::string call,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+    std::future<AgentWorkerPlanningClaimRecord> agent_worker_planning_claim(std::string root,std::string attempt);
     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec,AgentWorkerModelFailure=AgentWorkerModelFailure::unknown);
     std::future<AgentWorkerModelClaimRecord> agent_worker_model_claim(std::string root,std::string attempt);

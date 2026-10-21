@@ -1,3 +1,30 @@
+## Native xlang3 root/service API — 2026-10-21
+
+The agreed Cantor-style API now registers **xmind** at backend startup and exposes
+native **Host**, **Sessions** and **Runs** classes through APISET. A separate
+unified xmind.exe client calls the service methods directly using the SDK; new
+root API calls do not use the custom deliver dispatcher. Session create/open,
+UTF-8 persistence, authentication and duplicate refusal pass across processes.
+Runs.Start/Cancel are registered but successful direct invocation remains untested.
+
+xlang3 permits one listener runtime per process. An initial separate listener
+passed12 focused tests but broke the broader worker-server fixture (queued at
+its original deadline). The final shared process runtime/listener retains native
+exports until SDK drain and closes root service admission before backend teardown.
+Final **13/13 pass in96.54s**, including the unchanged server worker contract
+in1.46s. The earlier admission fixture failure and server failure remain retained.
+[All four gates, scopes and raw evidence](evidence/process-xmind-root-shared-runtime-20261021.json). Candidatefe3f8c54/SDK1ff,
+2765 project inputs/135 binaries and all SDK/library/runtime/dependency file sets
+and hashes are frozen. Inventory167 local/168 hosted; no complete-suite claim.
+
+Durable planning entry now validates the actual latest model receipt and captured
+root/lease/capabilities/segment, admits once and retains uncertainty at retirement.
+Scheduler/outcome binding and paused handoff remain unfinished. Workers still use
+the old dispatcher: migrate their methods to native service objects, then remove
+that implementation and unused code. Default execution remains thread. No package
+or installation update; installed60, user owners/history/settings and completed
+real tasks remain unchanged. Discuss major design choices before implementation.
+
 ## Planning IPC request and accepted-plan identities — 2026-10-21
 
 Fixed the earlier bridge assumption that a provider tool-call ID equals the
