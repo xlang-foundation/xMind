@@ -1,3 +1,13 @@
+## Graph IPC contract registered in CI — 2026-10-21
+
+The CI expected set now includes the separate graph contract without token
+management. All **163 locally registered contracts** match the CI list after excluding its
+sole hosted-only trusted-OAuth contract, for **164 expected CI contracts**. Two
+older missing nested-graph and CLI-output entries were corrected.
+This is inventory verification, not a full-suite execution. The implementation
+checkpoint passed 10/10 targeted contracts.
+[Inventory receipt](evidence/graph-no-context-ci-inventory-20261021.json).
+
 ## Server graph IPC without token management — 2026-10-21
 
 Explicit server process mode now dispatches graph agents through the xlang3 SDK
