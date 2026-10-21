@@ -116,6 +116,7 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
         }
     }
     };visit(visit,plan,false);
+    if(settings_.graph_execution&&agent_count&&!settings_.context)throw GraphContextUnavailable("Process graph agents require captured graph context");
     if(settings_.context&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
 }
 std::optional<RootBudgetSpec> GraphRunner::execution_budget(const GraphPlan& plan,const std::string& model)const{
@@ -459,7 +460,9 @@ Run GraphRunner::execute_owned(const std::string& id,std::stop_token external,bo
             // Allocate tracking before launching: once a worker exists, no
             // allocation failure may relabel its effects as "not dispatched".
             flights.push_back({child_id,{},slot,true});
-            try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token(),run_workspace_tools]() mutable {return prepared.definition.kind==GraphNodeKind::agent?agents_->execute(child_id,token,selected,budget,prepared.definition.instructions,prepared.definition.tools,false,prepared.definition.permissions):tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget),run_workspace_tools);});}
+            try{const auto selected=prepared.definition.model_id.empty()?model:prepared.definition.model_id;flights.back().result=std::async(std::launch::async,[this,child_id,prepared=std::move(prepared),selected,deadline,budget,token=stop.get_token(),run_workspace_tools]() mutable {if(prepared.definition.kind!=GraphNodeKind::agent)return tool(child_id,std::move(prepared),token,deadline,static_cast<bool>(budget),run_workspace_tools);
+                if(settings_.graph_execution){auto node=settings_;node.delegation.reset();node.planning.reset();node.max_turns=std::min(node.max_turns,max_registered_graph_agent_turns);if(!selected.empty())node.provider.model=selected;return settings_.graph_execution(node,child_id,budget,prepared.definition.instructions,prepared.definition.tools,prepared.definition.permissions,token);}
+                return agents_->execute(child_id,token,selected,budget,prepared.definition.instructions,prepared.definition.tools,false,prepared.definition.permissions);});}
             catch(...){if(slot)budget->release_leaf();scope->release();flights.pop_back();store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"graph_worker_launch_failed"})").get();store_.settle_graph_child(child_id).get();stop.request_stop();}continue;
         }
         if(flights.empty() && decisions.waiting_human.empty())throw DatabaseError("Graph has no runnable or waiting work");

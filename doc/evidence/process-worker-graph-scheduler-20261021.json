@@ -1,0 +1,72 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T17:23:15.247Z",
+    "sourceParent": "aea0d657e48860fd0ae4e6b0434b272102e56526",
+    "sourcePatchSha256": "b7d9b314b9f103dca5e46a55f0dddd3333a2328a59edff655e167940d434285d",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 54452,
+      "launchedAt": "2026-10-21T17:17:03.127Z",
+      "completedAt": "2026-10-21T17:21:51.029Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "bac2627383d9567276f3d1397f98dc1a2ca7690190c198f7044ab3a8b571b932"
+    },
+    "test": {
+      "pid": 58432,
+      "launchedAt": "2026-10-21T17:21:54.100Z",
+      "completedAt": "2026-10-21T17:23:12.412Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b61c3909f18e23c24106cd9f7df3992545efbe5b12080ac82ed04b3628e081b7"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 78.23,
+    "projectFiles": 2752,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "81e19c3951c8fb8c81f1ee98d2e8f7f99c2a40fae1ac11a58cb749b57035279b",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-scheduler-20261021-build.log": "bac2627383d9567276f3d1397f98dc1a2ca7690190c198f7044ab3a8b571b932",
+    "doc/evidence/process-worker-graph-scheduler-20261021-build-terminal.json": "914094a404ecc74cb030c390de8a280bfaa546f294b47abbdb7efcd8715ee2e9",
+    "doc/evidence/process-worker-graph-scheduler-20261021-ctest.log": "b61c3909f18e23c24106cd9f7df3992545efbe5b12080ac82ed04b3628e081b7",
+    "doc/evidence/process-worker-graph-scheduler-20261021-ctest-terminal.json": "67c9d589b3aea7152cc21e753305dcd788bb870695c54e83022ecf6cca6405d0",
+    "doc/evidence/process-worker-graph-scheduler-20261021-LastTest.log": "e49ea8f0c6df953bd5ea54648257f3ad521600a0d488b72e112e7fa4d4cae608",
+    "doc/evidence/process-worker-graph-scheduler-20261021-test-inventory.json": "5f323d1f19282da77b2dfe501bd3eafe7016145e75d9076f45c4b23ecafa24ff",
+    "doc/evidence/process-worker-graph-scheduler-20261021-gate.json": "386b69d71be741ce7a14e3dae938326a564578e0390e6773d13dfb7f8fc5dda6",
+    "doc/evidence/process-worker-graph-scheduler-20261021-source.patch": "b7d9b314b9f103dca5e46a55f0dddd3333a2328a59edff655e167940d434285d",
+    "doc/evidence/process-worker-graph-scheduler-20261021-binaries-before-test.json": "54f1b07d21ddceaf8ff6a5da9d7aa528535315a5f26fdfde13644a130b8af758"
+  },
+  "verified": [
+    "GraphRunner production scheduler can invoke a trusted backend AgentGraphExecution callback with its immutable admitted node settings, instructions/tools/permissions and original shared RootExecutionBudget",
+    "Native graph factory captures the bound xmind image and backend gateway, checks captured node authority, original open segment, model/turn limit and root membership before launching",
+    "Actual GraphService registers/adopts two graph agents, schedules two distinct xmind processes concurrently through SDK IPC and retains pinned per-node models/instructions/read-only tools",
+    "Four actual model/count callbacks, four typed completed leaf groups, canonical child file-read histories and four shared charges survive; each child lease admitted/retired once",
+    "GraphService owns the checkpoint-derived final graph join and closes its original measured segment only after both exact worker factories drain and return",
+    "Read proxy construction now rejects injected backend graph/delegation callbacks",
+    "Nine focused contracts pass in 78.23 seconds with complete frozen 2752 project inputs, SDK/library/runtime/dependency and 133-binary sets; prior 219-request HTTP and 84-forgery IPC scopes pass"
+  ],
+  "limitations": [
+    "Configured production GraphService callback path is verified, but server/default wiring to this factory is still unfinished",
+    "Current graph process factory requires workspace/counting context and read-compatible native capabilities; graph coding/no-context and nested/failure/cancellation cases remain unfinished",
+    "Graph model/count responses are synthetic native gateway callbacks, not live-provider or new graph HTTP acceptance",
+    "Earlier worker access violation remains unresolved; passing focused tests do not establish a fix",
+    "Full current native regression, planning/default placement, parent compaction/overflow and updated installed/rendered/live-provider acceptance remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

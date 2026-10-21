@@ -1,3 +1,19 @@
+## Production graph scheduler to xmind IPC workers — 2026-10-21
+
+GraphRunner now has a trusted backend graph-agent dispatch port. Its native factory
+validates captured graph authority, model/turn limit, membership and original open
+segment before launching xmind. An actual GraphService fixture schedules two
+distinct concurrent workers with pinned node models/instructions/read-only tools,
+four model/count callbacks and typed leaf groups, exact canonical read histories
+and four shared charges. GraphService produces its checkpoint-derived join and
+closes the measured segment after both exact worker factories drain and return.
+**9/9 focused contracts pass in 78.23 seconds**, with existing 219-request HTTP
+and 84-forgery IPC scopes. [Scope and raw receipts](evidence/process-worker-graph-scheduler-20261021.json).
+
+Server/default wiring, graph coding/no-context/nested/failure/cancellation cases,
+planning, full current regression and installed/rendered/live-provider acceptance
+remain unfinished. The earlier worker access violation remains unresolved.
+
 ## Actual graph-agent xmind IPC runners — 2026-10-21
 
 Two distinct actual xmind graph-agent processes now execute concurrently through

@@ -55,7 +55,7 @@ public:
 class WorkspaceExecutor final:public AgentRootExecutor {
     PersistenceService& store_;
     AgentSettings settings_;
-    bool coding_=false,delegated_=false;
+    bool coding_=false,delegated_=false,graph_=false;
     std::shared_ptr<NativeChildExecutor> children_;
     std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<const BoundProcessExecutable> image_;
@@ -83,9 +83,9 @@ class WorkspaceExecutor final:public AgentRootExecutor {
         return result;
     }
 public:
-    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={})
-        :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),image_(std::move(image)){
-        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||(delegated_&&settings_.delegation)||settings_.planning||(!coding_&&!delegated_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
+    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={},bool graph=false)
+        :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),graph_(graph),image_(std::move(image)){
+        if(!image_||!settings_.workspace||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_)&&settings_.delegation)||settings_.planning||(!coding_&&!delegated_&&!graph_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
@@ -113,12 +113,12 @@ public:
         std::set<std::string> ids;std::size_t root_bytes=0;for(const auto& folder:membership.folders){if(!bounded(folder.folder_id,256)||!bounded(folder.root,32760)||folder.root.size()>262144-root_bytes||!ids.insert(folder.folder_id).second)throw std::invalid_argument("Invalid captured worker folder");root_bytes+=folder.root.size();}
         if(!validator_->execution_budget(selected))throw std::invalid_argument("Worker requires an ordinary execution budget");
     }
-    Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{if(delegated_)throw Conflict("Delegated executor requires its original shared budget");return execute_owned(request,{},cancel);}
+    Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{if(delegated_||graph_)throw Conflict("Child executor requires its original shared budget");return execute_owned(request,{},cancel);}
     Run execute_owned(const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared,std::stop_token cancel){
-        if(delegated_!=bool(shared))throw Conflict("Worker executor budget kind differs from captured admission");
+        if((delegated_||graph_)!=bool(shared))throw Conflict("Worker executor budget kind differs from captured admission");
         const auto deadline=shared?shared->deadline():Clock::now()+settings_.run_timeout;validate(request);
         const auto admitted=store_.run(request.run_id).get();
-        if(admitted.graph_root||admitted.state!=RunState::queued||(delegated_?admitted.parent_id!=shared->root_id():!admitted.parent_id.empty()))throw Conflict("Worker execution requires its fresh queued owner");
+        if(admitted.graph_root||admitted.state!=RunState::queued||(graph_?admitted.parent_id.empty():delegated_?admitted.parent_id!=shared->root_id():!admitted.parent_id.empty()))throw Conflict("Worker execution requires its fresh queued owner");
         if(delegated_){const auto child=store_.child_admission(request.run_id).get();if(child.kind!=ChildAdmissionKind::delegated_leaf||child.root_run_id!=shared->root_id()||child.preset_id!="workspace.inspect"||child.preset_revision!=1||settings_.max_turns>4)throw Conflict("Worker differs from bounded delegated admission");shared->check(cancel);}
         const auto history=store_.run_history(request.run_id).get();
         if(history.empty()||history.front().role!="user")throw Conflict("Worker root has no admitted prompt");
@@ -126,9 +126,10 @@ public:
         if(prompt.contains("agent_profile")&&prompt["agent_profile"].is_object()&&prompt["agent_profile"].contains("placement")&&prompt["agent_profile"]["placement"]!=request.placement)throw Conflict("Worker placement differs from its admitted prompt");
         const auto root=shared?shared->root_id():request.run_id;
         const auto budget=store_.root_budget(root).get();const auto expected=*validator_->execution_budget(model(request));
-        auto provider_identity=Json::parse(budget.spec.provider_identity_json);if(delegated_)provider_identity["model_id"]=model(request);
+        auto provider_identity=Json::parse(budget.spec.provider_identity_json);if(delegated_||graph_)provider_identity["model_id"]=model(request);
         if(delegated_&&provider_identity!=Json::parse(provider_context_json(settings_,model(request)).empty()?expected.provider_identity_json:provider_context_json(settings_,model(request))))throw Conflict("Delegated worker provider differs from frozen settings");
-        if(!delegated_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0))throw Conflict("Worker root differs from immutable admission or was already executed");
+        if(!delegated_&&!graph_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0))throw Conflict("Worker root differs from immutable admission or was already executed");
+        if(graph_){const auto child=store_.child_admission(request.run_id).get();const auto captured=store_.graph_context_owner(root).get();const auto node=std::find_if(captured.authority.agents.begin(),captured.authority.agents.end(),[&](const auto& item){return item.node_id==child.graph_node_path;});if(child.kind!=ChildAdmissionKind::graph_agent||child.root_run_id!=root||budget.spec.policy_id!="native.graph-context"||!settings_.context||!captured.segment||captured.segment->state!="open"||!shared->segment_open()||shared->segment_id()!=captured.segment->id||node==captured.authority.agents.end()||node->model_id!=model(request)||node->turn_limit!=static_cast<std::int64_t>(settings_.max_turns)||node->backend_identity!=context_authority_identity(settings_,model(request),primary_->identity(),agent_authority_credentials(store_,settings_)))throw Conflict("Graph worker differs from captured scheduler authority");provider_identity=Json::parse(node->provider_identity_json);shared->check(cancel);}
         if(cancel.stop_requested())return store_.transition(request.run_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
         const auto& membership=*request.workspace;WorkspaceToolSet members(membership.workspace_id,membership.revision,membership.folders);
         std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;Json folders=Json::array();
@@ -161,8 +162,8 @@ public:
             if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
         }
         if(settings_.provider_identity){
-            policy.history_owner=ProviderHistoryOwner{root,request.run_id,delegated_?ModelCallRole::leaf:ModelCallRole::parent,
-                {delegated_?ContextScopeKind::execution:ContextScopeKind::session,delegated_?request.run_id:admitted.session_id},provider_identity.dump(),
+            policy.history_owner=ProviderHistoryOwner{root,request.run_id,(delegated_||graph_)?ModelCallRole::leaf:ModelCallRole::parent,
+                {(delegated_||graph_)?ContextScopeKind::execution:ContextScopeKind::session,(delegated_||graph_)?request.run_id:admitted.session_id},provider_identity.dump(),
                 context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
             policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
         }
@@ -186,7 +187,7 @@ public:
         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
         for(const auto& event:store_.events(request.run_id).get())if(event.kind=="agent.workspace_membership")throw Conflict("Worker root already has an execution membership receipt");
         auto captured_membership=Json{{"workspace_id",membership.workspace_id},{"revision",membership.revision},{"primary_folder_id",membership.folders.front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump();
-        if(delegated_){bool found=false;for(const auto& event:store_.events(root).get())if(event.kind=="agent.workspace_membership"){captured_membership=event.json;found=true;break;}if(!found)throw Conflict("Delegated worker requires the parent membership snapshot");}
+        if(delegated_||graph_){bool found=false;for(const auto& event:store_.events(root).get())if(event.kind=="agent.workspace_membership"){captured_membership=event.json;found=true;break;}if(!found)throw Conflict("Delegated worker requires the parent membership snapshot");}
         store_.append_event(request.run_id,"agent.workspace_membership",captured_membership).get();
         if(settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
         AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;owner.approval_timeout=settings_.run_timeout;
@@ -239,6 +240,15 @@ public:
         }catch(...){const auto original=std::current_exception();physical();std::rethrow_exception(original);}
     }
 };
+}
+AgentGraphExecution make_agent_worker_graph_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){
+    if(!image)throw std::invalid_argument("Graph execution requires a bound xmind image");
+    return [&store,image=std::move(image),gateway=std::move(gateway)](const AgentSettings& frozen,const std::string& id,std::shared_ptr<RootExecutionBudget> budget,std::string instructions,std::optional<std::vector<std::string>> tools,std::vector<AgentPermissionRule> permissions,std::stop_token cancel){
+        if(!budget||!frozen.workspace||!frozen.context)throw Conflict("Graph process requires captured workspace and context");auto settings=frozen;settings.graph_execution={};settings.delegated_execution={};
+        if(!tools)tools=settings.tool_allowlist;if(!tools)tools=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions","list_skills","load_skill"};
+        auto membership=std::make_shared<WorkspaceMembershipSnapshot>();bool found=false;for(const auto& event:store.events(budget->root_id()).get())if(event.kind=="agent.workspace_membership"){const auto value=Json::parse(event.json);membership->workspace_id=value.at("workspace_id");membership->revision=value.at("revision");for(const auto& folder:value.at("folders"))membership->folders.push_back({folder.at("folder_id").get<std::string>(),folder.at("root").get<std::string>()});found=true;break;}if(!found)throw Conflict("Graph process lacks captured root membership");
+        WorkspaceExecutor executor(store,std::move(settings),image,false,false,gateway,true);AgentRootExecutionRequest request;request.run_id=id;request.model_id=frozen.provider.model;request.agent_instructions=std::move(instructions);request.agent_tools=std::move(tools);request.agent_permissions=std::move(permissions);request.workspace=std::move(membership);request.placement="process";return executor.execute_owned(request,std::move(budget),cancel);
+    };
 }
 AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){
     if(!image)throw std::invalid_argument("Delegated execution requires a bound xmind image");

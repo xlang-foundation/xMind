@@ -35,6 +35,7 @@ struct AgentDelegationPolicy {
 };
 struct AgentSettings;
 using AgentDelegatedExecution=std::function<Run(const AgentSettings&,const std::string&,std::shared_ptr<RootExecutionBudget>,std::vector<AgentPermissionRule>,std::stop_token)>;
+using AgentGraphExecution=std::function<Run(const AgentSettings&,const std::string&,std::shared_ptr<RootExecutionBudget>,std::string,std::optional<std::vector<std::string>>,std::vector<AgentPermissionRule>,std::stop_token)>;
 struct AgentSettings {
     ChatProviderConfig provider;
     std::optional<std::string> workspace;
@@ -64,6 +65,8 @@ struct AgentSettings {
     std::optional<AgentDelegationPolicy> delegation;
     // Trusted backend dispatch port. Never serialized or supplied by a client.
     AgentDelegatedExecution delegated_execution;
+    // Backend graph scheduler dispatch. No view or worker supplies this owner.
+    AgentGraphExecution graph_execution;
     // Native ordinary-root planning policy; graph nodes and depth-one children
     // must explicitly clear it rather than acquiring another root allowance.
     std::optional<DynamicPlanningPolicy> planning;

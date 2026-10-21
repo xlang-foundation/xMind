@@ -4,6 +4,7 @@
 #include "agentflow/agent_worker_channel.hpp"
 
 namespace agentflow {
+AgentGraphExecution make_agent_worker_graph_executor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
 AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
 // Trusted backend factory. Captures settings and executable once; no client
 // supplies credentials, executable paths or per-dispatch replacement policy.
