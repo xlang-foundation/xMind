@@ -1,0 +1,71 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T14:58:31.638Z",
+    "sourceParent": "afce57d59d5dc5d73eb01e1d339e62784fdbb23e",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 18496,
+      "launchedAt": "2026-10-21T14:54:09.204Z",
+      "completedAt": "2026-10-21T14:54:35.923Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "fe8b9e3e69e04466db80f2cc0440ecd22fea6ed186eb55d4b2e836b3e4d150ec"
+    },
+    "test": {
+      "pid": 18188,
+      "launchedAt": "2026-10-21T14:54:38.979Z",
+      "completedAt": "2026-10-21T14:58:28.728Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f12d6d5c7cb56b4442ff4f8c66e35daedb689b5b44eaf6de76a64e01d4ec9738"
+    },
+    "total": 65,
+    "failed": 0,
+    "passed": 65,
+    "seconds": 229.7,
+    "projectFiles": 2747,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "dc2cf6ea46f10012af8791fedb42cafe8b887de49ec76a90397c7d0140864299",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-build.log": "fe8b9e3e69e04466db80f2cc0440ecd22fea6ed186eb55d4b2e836b3e4d150ec",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-build-terminal.json": "88b442a41c14e406ce1d77395191b90e4059ae42436f46f0b1af54d1da947673",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-ctest.log": "f12d6d5c7cb56b4442ff4f8c66e35daedb689b5b44eaf6de76a64e01d4ec9738",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-ctest-terminal.json": "796a70a96152bf0542706e12766be6c95ab85fc83759be88a262ad09008c8687",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-LastTest.log": "1bb4866d7d6e7ab06d7d0a3ee9f4bb6ea8ff64b9a5edf6f3139a185437705ce4",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-test-inventory.json": "04fc93f5a2e4171944b8f1c115bff16b031df43de2950e4c8847f68fc85674ea",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-gate.json": "21d48796d58b277f49dd5c6c756b636c346d93b18507c734e5a702897ca4c56a",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-delegated-primary-regression-20261021-binaries-before-test.json": "84ed1cba55f3f2f2378a8cfb8239cdf9d2ea779ac603311c83204e9643b7ee16"
+  },
+  "verified": [
+    "Complete selected 65-contract regression on committed afce57d59d5dc5d73eb01e1d339e62784fdbb23e with empty source/client patches",
+    "Actual scheduled ordinary and counted-context product children retain native queue/admission order, concurrent SDK IPC execution, pinned named model/instructions, canonical file reads/results, shared charges and physical drain before join",
+    "Actual worker contract also retains all previous context/compaction/overflow/failure/cancellation, provider/MCP/A2A/coding/skill/process and lifecycle checks; independent HTTP peer observes exactly 185 requests",
+    "Actual direct server Responses delegation verifies two distinct completed IPC child leases, exact inherited primary workspace receipts, six per-owner calls, whole opaque continuation and SQLite reopen without replay",
+    "Selected graph/nested context/dynamic planning/delegation, history, permissions, persistence, owner and credential contracts pass within their existing execution scopes",
+    "Complete project/SDK/library/runtime/dependency/native binary file sets and hashes remain frozen"
+  ],
+  "limitations": [
+    "65 selected contracts are not the complete 162-test native inventory",
+    "Scheduled child fixtures use synthetic native model/count responses; profiled named-model, permission-denial and additional child context/failure cases remain to verify",
+    "Parent worker orchestration, planning and graph/default placement still require integration",
+    "Updated installation, rendered browser/VS Code/CLI and live-provider acceptance remain open"
+  ],
+  "passed": true
+}

@@ -1,3 +1,18 @@
+## Delegated scheduler broader regression — 2026-10-21
+
+**65/65 selected native contracts pass in 229.70 seconds** on committed
+afce57d5. This includes actual scheduled ordinary and counted-context xmind
+children, all previous worker context/tool/lifecycle fixtures and selected graph,
+planning, provider, permission, history and persistence contracts within their
+existing execution scopes. The independent HTTP peer observes 185 requests.
+All 2747 project inputs and SDK/library/runtime/dependency/133-binary file
+sets/hashes remain frozen; source and client patches are empty.
+[Complete scope and raw evidence](evidence/process-worker-delegated-primary-regression-20261021.json).
+
+Parent worker orchestration, planning and graph/default placement remain open,
+along with further child context/failure/permission/profiled cases, the complete
+native suite and updated installed/rendered/live-provider client acceptance.
+
 ## Direct server delegated IPC membership — 2026-10-21
 
 The broader gate found 64/65 passing: actual Responses server delegation waited
