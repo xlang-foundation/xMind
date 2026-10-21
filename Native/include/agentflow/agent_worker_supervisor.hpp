@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_worker_read_owner.hpp"
 #include "agentflow/agent_worker_retirement.hpp"
+#include "agentflow/process_executor.hpp"
 
 namespace agentflow {
 // Backend lifetime owner for one actual product child. No restart or task replay.
@@ -20,7 +21,7 @@ public:
     void start(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
         std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
     void start_coding(AgentReadToolOwnerContext,AgentWorkerReadRequestPolicy,ChatProviderConfig,
-        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={});
+        std::string assistant_provider_context_json,std::shared_ptr<AgentModelGateway>,std::stop_token={},std::vector<ProcessProfile> profiles={});
     RunState execute();
     void cancel();
     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);

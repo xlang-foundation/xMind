@@ -3,6 +3,7 @@
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/agent_worker_read_rpc.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
+#include "agentflow/agent_worker_process_rpc.hpp"
 #include <utility>
 
 namespace agentflow {
@@ -37,6 +38,7 @@ public:
     ModelRequest prepare_request(std::stop_token cancel)override{return read_->prepare_request(cancel);}
     std::unique_ptr<AgentReadToolHost> read_host()override{return read_->read_host();}
     std::unique_ptr<AgentFileToolHost> file_host()override{return std::make_unique<AgentWorkerFileClient>(peer_);}
+    std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
 };
 }
 std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}

@@ -1,3 +1,30 @@
+## Unified production coding command workers — 2026-10-21
+
+The production coding factory now runs the actual AgentRunner in a unified xmind
+child with backend-owned process profiles. Read, file and foreground command
+RPC share the admitted native guidance and inherited permission policy. The
+child receives process capability through an explicit coding port, retaining
+exact workspace scope and output without acquiring executable or approval authority.
+
+The actual production test reads a file, creates another after approval and runs
+an approved xlang3 command against those created bytes. It commits one exact
+mixed three-tool turn and a second actual model response, then physically retires
+the child. The authenticated public process-code server also accepts configured
+process profiles and verifies two controller approvals, two operations and six
+canonical messages. Read-only worker ports reject command acknowledgements.
+
+The serial Release build and **62/62 focused contracts pass in 193.69 seconds**.
+All 2719 project inputs, 16 SDK headers, 1870 pure-library files, 76 runtime files,
+18598 Node dependencies and 133 native binaries remain unchanged. The independent
+synthetic provider observes exactly 80 intended requests. Earlier fixture failures
+(missing agent instruction text and process prefix_arguments) are retained.
+[Scope, patches and raw evidence](evidence/coding-command-worker-focused-20261020.json).
+
+Foreground command execution is qualified here. Wait/stop/background continuation,
+other runtime capabilities and managed/default placement integration remain open.
+This adds no full-suite, installed, hosted, rendered or live-provider acceptance.
+Existing installations, owners, history and settings remain preserved.
+
 ## Authenticated process worker RPC — 2026-10-20
 
 The process client and endpoint use the existing authenticated worker channel
