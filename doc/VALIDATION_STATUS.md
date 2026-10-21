@@ -1,3 +1,17 @@
+## Managed and graph IPC complete native regression — 2026-10-21
+
+**163/163 native contracts pass in 1236.87 seconds** on committed
+3123b5c5. Actual parent/child xmind IPC cases cover success, rejection,
+cancellation, mixed provider outcomes, unrecorded result stop and counted Responses
+context. The worker HTTP peer observes 219 controlled requests. Existing provider,
+tool, graph/planning, CLI/HTTP, owner and persistence scopes also pass.
+All 2753 project inputs and SDK/library/runtime/dependency/133-binary file
+sets/hashes remain frozen; Native/client patches are empty.
+[Full inventory and raw evidence](evidence/process-worker-managed-full-20261021.json).
+
+Default process execution, worker planning, unresolved crash diagnosis, combined parent compaction/overflow,
+and updated installed/rendered/live-provider client acceptance remain unfinished.
+
 ## Managed-profile IPC execution mode — 2026-10-21
 
 The native CLI now saves `--agent-execution process-code` in protected profile

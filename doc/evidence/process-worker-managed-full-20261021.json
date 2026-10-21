@@ -1,0 +1,70 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T19:04:34.441Z",
+    "sourceParent": "3123b5c540f91c7f9fc46cfafadbb41970967d21",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": false,
+    "build": {
+      "pid": 44384,
+      "launchedAt": "2026-10-21T18:35:17.638Z",
+      "completedAt": "2026-10-21T18:43:48.863Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dfd1c05e384abbe4e85993e4eeeaeb19685746a5f6682db9ee2cc2b3f6362173"
+    },
+    "test": {
+      "pid": 60028,
+      "launchedAt": "2026-10-21T18:43:54.763Z",
+      "completedAt": "2026-10-21T19:04:31.665Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1f9eddba5801f6de5dd7280333b1ef11960bc77c7a94bc17565aebf2a2a82ad9"
+    },
+    "total": 163,
+    "failed": 0,
+    "passed": 163,
+    "seconds": 1236.87,
+    "projectFiles": 2753,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "5100131c663f0e3e8c491cd465be285e8bcd22eed28c5e73ed104ad41719de6e",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-managed-full-20261021-build.log": "dfd1c05e384abbe4e85993e4eeeaeb19685746a5f6682db9ee2cc2b3f6362173",
+    "doc/evidence/process-worker-managed-full-20261021-build-terminal.json": "83d848b7d7c4484921ffcfa1cf7b23b68ebb9e96364b5ed52916837d0240ecff",
+    "doc/evidence/process-worker-managed-full-20261021-ctest.log": "1f9eddba5801f6de5dd7280333b1ef11960bc77c7a94bc17565aebf2a2a82ad9",
+    "doc/evidence/process-worker-managed-full-20261021-ctest-terminal.json": "82e710e10cac66a72fc8e3d20d90a38b15a7f8de2ef3aee9c456f5dfa01db047",
+    "doc/evidence/process-worker-managed-full-20261021-LastTest.log": "c896bc781d48289feb59e32ba49afff3f4076e606534de90a40b8e597c21380e",
+    "doc/evidence/process-worker-managed-full-20261021-test-inventory.json": "aea65eba30ddec888b3209bf9da6ff1602c215155e518a70d095b5a05292ebd0",
+    "doc/evidence/process-worker-managed-full-20261021-gate.json": "41e5bc983e26f2c892a94e48cd3ac2a12d772ca94bdb66bcb725aa8dcbdfba09",
+    "doc/evidence/process-worker-managed-full-20261021-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-managed-full-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-managed-full-20261021-binaries-before-test.json": "af7fe0e0fd175241cf64c2cc63b2f72d444d12dd3f3f63376cd018afed6fa59d"
+  },
+  "verified": [
+    "Complete actual 163-test native inventory passes on committed 3123b5c540f91c7f9fc46cfafadbb41970967d21 with empty Native/client patches",
+    "Actual parent and child xmind SDK IPC orchestration covers successful reads/join/final continuation, permission denial, exhausted funding, cancellation, mixed provider outcomes and unrecorded-result service stop",
+    "Actual counted parent/child Responses path retains six inference/count windows, two parent and four leaf typed groups; independent worker peer observes 219 controlled HTTP requests",
+    "Graph IPC includes counted/uncounted file and process allow/deny cases, nested graph ownership and cancellation; model-only server and protected managed execution mode are included. Existing context/compaction/overflow, tool/coding/MCP/A2A/provider, permission, graph/planning, CLI/HTTP, owner, persistence and credential contracts pass within their actual scopes",
+    "Complete project/SDK/library/runtime/dependency and 133-native-binary file sets and hashes remain frozen"
+  ],
+  "limitations": [
+    "Controlled regression output is not live-provider acceptance",
+    "Graph agents support IPC with and without token management; default execution and process planning remain unfinished",
+    "Earlier intermittent worker access violation remains unresolved; a passing full suite alone does not prove its cause fixed. Parent compaction/overflow combined with delegation requires further verification",
+    "Updated installation, rendered browser/VS Code/CLI and live-provider acceptance remain open"
+  ],
+  "passed": true
+}
