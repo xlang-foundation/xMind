@@ -1,0 +1,586 @@
+CMake is re-running because C:/xMindNativeValidation/native-current-source-full/Native/CMakeFiles/generate.stamp is out-of-date.
+  the file 'D:/CantorAI2026/xMind/Native/CMakeLists.txt'
+  is newer than 'C:/xMindNativeValidation/native-current-source-full/Native/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+-- Configuring done (0.7s)
+-- Generating done (15.2s)
+-- Build files have been written to: C:/xMindNativeValidation/native-current-source-full
+
+  Checking File Globs
+  agentflow_mcp_wire.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire.lib
+  agentflow_json_schema.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema.lib
+  agentflow_models.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_models.lib
+  agentflow_secrets.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secrets.lib
+  agentflow_core.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_core.lib
+  agentflow_provider_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_transport.lib
+  agentflow_a2a.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a.lib
+  absl_log_severity.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_log_severity.lib
+  absl_raw_logging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_raw_logging_internal.lib
+  absl_spinlock_wait.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_spinlock_wait.lib
+  absl_base.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base.lib
+  absl_base_cpu_detect.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_base_cpu_detect.lib
+  absl_city.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_city.lib
+  absl_civil_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_civil_time.lib
+  absl_crc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_internal.lib
+  absl_hardening.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_hardening.lib
+  absl_int128.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\numeric\Release\absl_int128.lib
+  absl_source_location.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\types\Release\absl_source_location.lib
+  absl_throw_delegate.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_throw_delegate.lib
+  absl_strings_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings_internal.lib
+  absl_strings.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_strings.lib
+  absl_str_format_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_str_format_internal.lib
+  absl_crc32c.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc32c.lib
+  absl_crc_cord_state.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\crc\Release\absl_crc_cord_state.lib
+  absl_debugging_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_debugging_internal.lib
+  absl_hash.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\hash\Release\absl_hash.lib
+  absl_cord_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord_internal.lib
+  absl_exponential_biased.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\profiling\Release\absl_exponential_biased.lib
+  absl_cordz_functions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_functions.lib
+  absl_utf8_for_code_point.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_utf8_for_code_point.lib
+  absl_decode_rust_punycode.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_decode_rust_punycode.lib
+  absl_demangle_rust.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_rust.lib
+  absl_demangle_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_demangle_internal.lib
+  absl_malloc_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_malloc_internal.lib
+  absl_graphcycles_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_graphcycles_internal.lib
+  absl_time_zone.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time_zone.lib
+  absl_time.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\time\Release\absl_time.lib
+  absl_kernel_timeout_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_kernel_timeout_internal.lib
+  absl_stacktrace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_stacktrace.lib
+  absl_symbolize.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_symbolize.lib
+  absl_tracing_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_tracing_internal.lib
+  absl_synchronization.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\synchronization\Release\absl_synchronization.lib
+  absl_cordz_handle.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_handle.lib
+  absl_cordz_info.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cordz_info.lib
+  absl_cord.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\strings\Release\absl_cord.lib
+  absl_examine_stack.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_examine_stack.lib
+  absl_flags_commandlineflag_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag_internal.lib
+  absl_flags_commandlineflag.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_commandlineflag.lib
+  absl_flags_program_name.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_program_name.lib
+  absl_flags_config.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_config.lib
+  absl_flags_marshalling.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_marshalling.lib
+  absl_flags_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_internal.lib
+  absl_flags_private_handle_accessor.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_private_handle_accessor.lib
+  absl_hashtablez_sampler.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_hashtablez_sampler.lib
+  absl_raw_hash_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\container\Release\absl_raw_hash_set.lib
+  absl_flags_reflection.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\flags\Release\absl_flags_reflection.lib
+  absl_leak_check.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\debugging\Release\absl_leak_check.lib
+  absl_log_internal_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_proto.lib
+  absl_log_entry.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_entry.lib
+  absl_log_internal_fnmatch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_fnmatch.lib
+  absl_vlog_config_internal.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_vlog_config_internal.lib
+  absl_log_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_globals.lib
+  absl_log_internal_globals.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_globals.lib
+  absl_log_internal_format.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_format.lib
+  absl_log_sink.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_sink.lib
+  absl_log_internal_log_sink_set.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_log_sink_set.lib
+  absl_log_internal_nullguard.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_nullguard.lib
+  absl_log_internal_structured_proto.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_structured_proto.lib
+  absl_strerror.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\base\Release\absl_strerror.lib
+  absl_log_internal_message.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_message.lib
+  absl_log_internal_check_op.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_check_op.lib
+  absl_log_internal_conditions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\abseil-cpp\absl\log\Release\absl_log_internal_conditions.lib
+  Scanning sources for module dependencies...
+  yaml-cpp.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\yaml-cpp\Release\yaml-cpp.lib
+  agentflow_authoring.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_authoring.lib
+  agentflow_agent_definitions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_definitions.lib
+  agentflow_chat_provider.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider.lib
+  agentflow_file_patch.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch.lib
+  agentflow_policy.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_policy.lib
+  re2.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\third_party\re2\Release\re2.lib
+  agentflow_workspace.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace.lib
+  agentflow_edits.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edits.lib
+  agentflow_mcp_stdio.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio.lib
+  agentflow_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process.lib
+  agentflow_language_server.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server.lib
+  agentflow_language_server_tools.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_tools.lib
+  agentflow_mcp_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration.lib
+  agentflow_mcp_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http.lib
+  agentflow_mcp_client_factory.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_factory.lib
+  xmind_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_schema_worker.exe
+  agentflow_schema_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker.lib
+  agentflow_mcp_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effects.lib
+  agentflow_mcp_run_observer.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_run_observer.lib
+  agentflow_permission_grants.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants.lib
+  agentflow_process_effects.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_effects.lib
+  agentflow_xlang_python.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python.lib
+  agentflow_xlang_worker.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_worker.lib
+  agentflow_agent.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent.lib
+  agentflow_runtime_generation.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation.lib
+  agentflow_backend_owner_control.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_control.lib
+  agentflow_connection_profiles.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles.lib
+  agentflow_mcp_oauth_service.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service.lib
+  agentflow_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process.lib
+  agentflow_vcs.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_vcs.lib
+  agentflow_view_sessions.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_view_sessions.lib
+  agentflow_http.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http.lib
+  agentflow_a2a_agent_registry_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_agent_registry_contract.exe
+  agentflow_a2a_client_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_client_contract.exe
+  agentflow_a2a_client_sdk_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_a2a_client_sdk_contract.exe
+  agentflow_agent_authority_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_authority_contract.exe
+  agentflow_agent_file_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_file_tool_host_contract.exe
+  agentflow_agent_process_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_process_tool_host_contract.exe
+  agentflow_agent_read_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_read_tool_host_contract.exe
+  agentflow_worker_channel.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_channel.lib
+  agentflow_worker_rpc.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_rpc.lib
+  agentflow_worker_model_rpc.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_model_rpc.lib
+  agentflow_agent_remote_tool_host_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_remote_tool_host_contract.exe
+  agentflow_graph.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph.lib
+  agentflow_graph_execution.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_execution.lib
+  agentflow_runtime.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime.lib
+  agentflow_console_transport.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_console_transport.lib
+  agentflow_instruction_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration.lib
+  agentflow_language_server_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration.lib
+  agentflow_legacy_owner_process.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_process.lib
+  agentflow_local_profile.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_local_profile.lib
+  agentflow_mcp_resource_catalog.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_resource_catalog.lib
+  agentflow_process_configuration.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration.lib
+  agentflow_worker_journal_rpc.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_journal_rpc.lib
+  agentflow_worker_runner.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_worker_runner.lib
+  xmind.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind.exe
+  agentflow_agent_runner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_runner_contract.exe
+  agentflow_agent_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_service_contract.exe
+  agentflow_agent_worker_channel_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_worker_channel_contract.exe
+  Building Custom Rule D:/CantorAI2026/xMind/Native/CMakeLists.txt
+  agent_worker_graph_remote_contract.cpp
+D:\CantorAI2026\xMind\Native\tests\agent_worker_crash_fixture.hpp(9,215): error C2039: 'uintptr_t': is not a member of 'std' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_graph_remote_contract.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\cstdio(29,1):
+      see declaration of 'std'
+  
+D:\CantorAI2026\xMind\Native\tests\agent_worker_crash_fixture.hpp(9,257): error C2039: 'uintptr_t': is not a member of 'std' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_graph_remote_contract.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\cstdio(29,1):
+      see declaration of 'std'
+  
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(18,38): error C2653: 'nlohmann': is not a class or namespace name [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(18,48): error C2061: syntax error: identifier 'json' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,285): error C2187: syntax error: 'Json' was unexpected here [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,296): error C2760: syntax error: ')' was unexpected here; expected ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,296): error C3878: syntax error: unexpected token ')' following 'expression-statement' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,323): error C2760: syntax error: '{' was unexpected here; expected ')' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,324): error C3878: syntax error: unexpected token '{' following 'expression' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,334): error C2760: syntax error: ',' was unexpected here; expected ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,334): error C3878: syntax error: unexpected token ',' following 'expression-statement' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,340): error C2760: syntax error: '}' was unexpected here; expected ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,341): error C3878: syntax error: unexpected token ',' following 'statement' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,360): error C2760: syntax error: '}' was unexpected here; expected ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,361): error C3878: syntax error: unexpected token ',' following 'statement' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,378): error C2760: syntax error: '}' was unexpected here; expected ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,380): error C3878: syntax error: unexpected token '.' following 'try-block' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,406): error C2760: syntax error: ')' was unexpected here; expected ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,406): error C3878: syntax error: unexpected token ')' following 'expression-statement' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,409): error C2059: syntax error: ';' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,413): error C2065: 'method': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,440): error C2065: 'response': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,471): error C2065: 'method': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,513): error C2065: 'Json': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,577): error C2653: 'Json': is not a class or namespace name [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,583): error C3861: 'object': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,507): error C3861: 'reply': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,668): error C2065: 'method': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,705): error C2065: 'response': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,736): error C2065: 'method': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,764): error C2065: 'Json': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,778): error C2653: 'Json': is not a class or namespace name [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,949): error C2653: 'Json': is not a class or namespace name [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,955): error C3861: 'array': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,784): error C3861: 'array': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,758): error C3861: 'reply': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1025): error C2065: 'method': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1047): error C2065: 'rpc': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1132): error C2065: 'rpc': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1127): error C2737: 'args': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1171): error C3536: 'args': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1268): error C2187: syntax error: 'template' was unexpected here [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1294): error C2059: syntax error: ')' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1302): error C3536: 'node': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1402): error C2676: binary '/': 'const std::filesystem::path' does not define this operator or a conversion to a type acceptable to the predefined operator [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392): error C2665: 'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream': no overloaded function could convert all the argument types [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(211,5):
+      could be 'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(FILE *)'
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+          'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(FILE *)': cannot convert argument 1 from 'int' to 'FILE *'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(200,5):
+      or       'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const std::wstring &,std::ios_base::openmode,int)'
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+          'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const std::wstring &,std::ios_base::openmode,int)': cannot convert argument 1 from 'int' to 'const std::wstring &'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              Reason: cannot convert from 'int' to 'const std::wstring'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string': no overloaded function could convert all the argument types
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(818,5):
+                  could be 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *const )'
+          with
+          [
+              _Elem=wchar_t
+          ]
+                      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                      'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *const )': cannot convert argument 1 from 'int' to 'const _Elem *const '
+          with
+          [
+              _Elem=wchar_t
+          ]
+                          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                          Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1390,5):
+                  or       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(std::initializer_list<_Elem>,const _Alloc &)'
+          with
+          [
+              _Elem=wchar_t,
+              _Alloc=std::allocator<wchar_t>
+          ]
+                      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                      'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(std::initializer_list<_Elem>,const _Alloc &)': cannot convert argument 1 from 'int' to 'std::initializer_list<_Elem>'
+          with
+          [
+              _Elem=wchar_t,
+              _Alloc=std::allocator<wchar_t>
+          ]
+          and
+          [
+              _Elem=wchar_t
+          ]
+                          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                          Conversion requires a second user-defined-conversion operator or constructor
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1207,5):
+                  or       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Ty &,const unsigned __int64,const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<wchar_t>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(848,5):
+                  or       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(_Iter,_Iter,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<wchar_t>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(842,5):
+                  or       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const unsigned __int64,const _Elem,const _Alloc &)'
+          with
+          [
+              _Elem=wchar_t,
+              _Alloc=std::allocator<wchar_t>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(825,5):
+                  or       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *const ,const _Alloc &)'
+          with
+          [
+              _Elem=wchar_t,
+              _Alloc=std::allocator<wchar_t>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(812,5):
+                  or       'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *const ,const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Elem=wchar_t,
+              _Alloc=std::allocator<wchar_t>
+          ]
+                  D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                  while trying to match the argument list '(int)'
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(191,5):
+      or       'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const wchar_t *,std::ios_base::openmode,int)'
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+          'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const wchar_t *,std::ios_base::openmode,int)': cannot convert argument 1 from 'int' to 'const wchar_t *'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(187,5):
+      or       'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const std::string &,std::ios_base::openmode,int)'
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+          'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const std::string &,std::ios_base::openmode,int)': cannot convert argument 1 from 'int' to 'const std::string &'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              Reason: cannot convert from 'int' to 'const std::string'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string': no overloaded function could convert all the argument types
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(818,5):
+                  could be 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const )'
+          with
+          [
+              _Elem=char
+          ]
+                      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                      'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const )': cannot convert argument 1 from 'int' to 'const _Elem *const '
+          with
+          [
+              _Elem=char
+          ]
+                          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                          Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1390,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(std::initializer_list<_Elem>,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                      'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(std::initializer_list<_Elem>,const _Alloc &)': cannot convert argument 1 from 'int' to 'std::initializer_list<_Elem>'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+          and
+          [
+              _Elem=char
+          ]
+                          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                          Conversion requires a second user-defined-conversion operator or constructor
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1207,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Ty &,const unsigned __int64,const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(848,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(_Iter,_Iter,const _Alloc &)'
+          with
+          [
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(842,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const unsigned __int64,const _Elem,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(825,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const ,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                  C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(812,5):
+                  or       'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *const ,const unsigned __int64,const _Alloc &)'
+          with
+          [
+              _Elem=char,
+              _Alloc=std::allocator<char>
+          ]
+                  D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+                  while trying to match the argument list '(int)'
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(179,5):
+      or       'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const char *,std::ios_base::openmode,int)'
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+          'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const char *,std::ios_base::openmode,int)': cannot convert argument 1 from 'int' to 'const char *'
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1433):
+              Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(206,5):
+      or       'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const _Ty &,std::ios_base::openmode,int)'
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+          'std::basic_ofstream<char,std::char_traits<char>>::basic_ofstream(const _Ty &,std::ios_base::openmode,int)': could not deduce template argument for '__formal'
+              C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\fstream(58,26):
+              'std::enable_if_t<false,int>' : Failed to specialize alias template
+      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1392):
+      while trying to match the argument list '(int)'
+  
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1540): error C2065: 'Json': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1556): error C2653: 'Json': is not a class or namespace name [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1562): error C3861: 'array': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1534): error C3861: 'reply': identifier not found [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1634): error C2059: syntax error: 'catch' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1644): error C2143: syntax error: missing ';' before '{' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1644): error C2447: '{': missing function header (old-style formal list?) [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1679): error C2059: syntax error: ')' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1697): error C2065: 'server_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1692): error C2737: 'port': const object must be initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1735): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1741): error C3536: 'port': cannot be used before it is initialized [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1740): error C2440: 'initializing': cannot convert from 'initializer list' to 'int' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1740):
+      The initializer contains too many elements
+  
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1779): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1828): error C2110: '+': cannot add two pointers [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1836): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1856): error C3482: 'this' can only be used as a lambda capture within a non-static member function [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1862): error C2065: 'server_': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1842): error C2440: 'initializing': cannot convert from 'std::thread' to 'int' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+      D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1842):
+      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+  
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(22,1893): error C2059: syntax error: '}' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(23,12): error C2143: syntax error: missing ';' before '{' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(23,12): error C2447: '{': missing function header (old-style formal list?) [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(25,28): error C2504: 'AgentModelGateway': base class undefined [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(28,21): error C3646: 'complete': unknown override specifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(28,29): error C2059: syntax error: '(' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(28,93): error C2653: 'ChatCompletionStream': is not a class or namespace name [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(28,149): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(33,25): error C3646: 'count_context': unknown override specifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(33,38): error C2059: syntax error: '(' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(33,109): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(34,31): error C3646: 'compact_context': unknown override specifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(34,46): error C2059: syntax error: '(' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(34,117): error C2334: unexpected token(s) preceding '{'; skipping apparent function body [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(35,48): error C2064: term does not evaluate to a function taking 2 arguments [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,13): error C2182: 'parent': this use of 'void' is not valid [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,20): error C2065: 'PersistenceService': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,40): error C2065: 'store': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,46): error C2059: syntax error: 'const' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,74): error C2065: 'BoundProcessExecutable': undeclared identifier [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,68): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,74): error C2146: syntax error: missing '>' before identifier 'BoundProcessExecutable' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,198): error C2143: syntax error: missing ';' before '{' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(37,198): error C2447: '{': missing function header (old-style formal list?) [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(50,1): error C2059: syntax error: '}' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(50,1): error C2143: syntax error: missing ';' before '}' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(52,31): error C2143: syntax error: missing ';' before '{' [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+D:\CantorAI2026\xMind\Native\tests\agent_worker_graph_remote_contract.cpp(52,31): error C2447: '{': missing function header (old-style formal list?) [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_graph_remote_contract.vcxproj]
+  agentflow_agent_worker_ledger_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_worker_ledger_contract.exe
+  agent_worker_model_rpc_contract.cpp
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18): warning C4244: '=': conversion from 'const wchar_t' to 'char', possible loss of data [C:\xMindNativeValidation\native-current-source-full\Native\agentflow_agent_worker_model_rpc_contract.vcxproj]
+  (compiling source file 'D:/CantorAI2026/xMind/Native/tests/agent_worker_model_rpc_contract.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xutility(5094,18):
+      the template instantiation context (the oldest one first) is
+          D:\CantorAI2026\xMind\Native\tests\agent_worker_model_rpc_contract.cpp(172,133):
+          see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              D:\CantorAI2026\xMind\Native\tests\agent_worker_model_rpc_contract.cpp(172,97):
+              see the first reference to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' in '`anonymous-namespace'::drain_timeout'
+          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(862,17):
+          see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)' being compiled
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ]
+          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\xstring(1018,18):
+          see reference to function template instantiation '_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)' being compiled
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  
+  agentflow_agent_worker_model_rpc_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_agent_worker_model_rpc_contract.exe
+  agentflow_anthropic_agent_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_agent_contract.exe
+  agentflow_anthropic_history_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_history_contract.exe
+  agentflow_anthropic_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_provider_contract.exe
+  agentflow_anthropic_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_request_contract.exe
+  agentflow_anthropic_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_anthropic_stream_contract.exe
+  agentflow_approved_edit_http_fixture.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_approved_edit_http_fixture.exe
+  agentflow_backend_owner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_contract.exe
+  agentflow_backend_owner_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_backend_owner_http_contract.exe
+  agentflow_chat_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_chat_provider_contract.exe
+  agentflow_cli_plan_review_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_cli_plan_review_contract.exe
+  agentflow_command_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_command_context_contract.exe
+  agentflow_connection_profiles_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles_contract.exe
+  agentflow_connection_profiles_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_connection_profiles_http_contract.exe
+  agentflow_conpty_cli_harness.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_conpty_cli_harness.exe
+  agentflow_context_control_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_control_contract.exe
+  agentflow_context_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_engine_contract.exe
+  agentflow_context_graph_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_graph_engine_contract.exe
+  agentflow_context_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_repository_contract.exe
+  agentflow_context_selection_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_context_selection_contract.exe
+  agentflow_create_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_create_executor_contract.exe
+  agentflow_credential_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_credential_repository_contract.exe
+  agentflow_deepseek_profile_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_deepseek_profile_runtime_contract.exe
+  agentflow_deepseek_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_deepseek_provider_contract.exe
+  agentflow_dynamic_plan_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_contract.exe
+  xmind_cli.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_cli.exe
+  agentflow_dynamic_plan_engine_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_engine_contract.exe
+  agentflow_dynamic_plan_mcp_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_mcp_contract.exe
+  agentflow_dynamic_plan_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_dynamic_plan_repository_contract.exe
+  agentflow_edit_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_edit_executor_contract.exe
+  agentflow_file_patch_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_file_patch_contract.exe
+  agentflow_gemini_agent_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_agent_contract.exe
+  agentflow_gemini_catalogue_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_catalogue_contract.exe
+  agentflow_gemini_history_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_history_contract.exe
+  agentflow_gemini_profile_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_profile_runtime_contract.exe
+  agentflow_gemini_provider_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_provider_contract.exe
+  agentflow_gemini_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_request_contract.exe
+  agentflow_gemini_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_gemini_stream_contract.exe
+  agentflow_graph_checkpoint_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_checkpoint_contract.exe
+  agentflow_graph_children_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_children_contract.exe
+  agentflow_graph_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_contract.exe
+  agentflow_graph_mcp_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_mcp_contract.exe
+  agentflow_graph_runner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_graph_runner_contract.exe
+  agentflow_http_stream_transport_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_http_stream_transport_contract.exe
+  agentflow_incoming_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_incoming_repository_contract.exe
+  agentflow_instruction_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_instruction_configuration_contract.exe
+  agentflow_json_schema_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_json_schema_contract.exe
+  agentflow_language_server_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_configuration_contract.exe
+  agentflow_language_server_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_contract.exe
+  agentflow_language_server_diagnostics_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_language_server_diagnostics_contract.exe
+  agentflow_legacy_owner_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_legacy_owner_contract.exe
+  agentflow_mcp_client_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_client_contract.exe
+  agentflow_mcp_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_configuration_contract.exe
+  agentflow_mcp_effect_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_effect_contract.exe
+  agentflow_mcp_handshake_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_handshake_contract.exe
+  agentflow_mcp_http_fallback_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http_fallback_contract.exe
+  agentflow_mcp_http_readonly_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_http_readonly_contract.exe
+  agentflow_mcp_input_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_input_contract.exe
+  agentflow_mcp_oauth_callback_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_callback_contract.exe
+  agentflow_mcp_oauth_credentials_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_credentials_contract.exe
+  agentflow_mcp_oauth_refresh_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_refresh_contract.exe
+  agentflow_mcp_oauth_refresh_storage_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_refresh_storage_contract.exe
+  agentflow_mcp_oauth_renewal_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_renewal_contract.exe
+  agentflow_mcp_oauth_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_service_contract.exe
+  agentflow_mcp_oauth_trusted_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_oauth_trusted_contract.exe
+  agentflow_mcp_resource_route_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_resource_route_contract.exe
+  agentflow_mcp_stdio_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_stdio_contract.exe
+  agentflow_mcp_wire_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_mcp_wire_contract.exe
+  agentflow_model_request_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_model_request_contract.exe
+  agentflow_model_stream_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_model_stream_contract.exe
+  agentflow_multifolder_language_server_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_multifolder_language_server_contract.exe
+  agentflow_native_child_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_native_child_executor_contract.exe
+  agentflow_native_delegation_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_native_delegation_contract.exe
+  agentflow_operation_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_operation_repository_contract.exe
+  agentflow_owner_process_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_owner_process_contract.exe
+  agentflow_patch_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_executor_contract.exe
+  agentflow_patch_file_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_file_executor_contract.exe
+  agentflow_patch_tool_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_patch_tool_contract.exe
+  agentflow_permission_grants_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_grants_contract.exe
+  agentflow_permission_waiter_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_permission_waiter_contract.exe
+  agentflow_persistence_service_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_persistence_service_contract.exe
+  agentflow_planning_http_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_planning_http_contract.exe
+  agentflow_process_configuration_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_configuration_contract.exe
+  agentflow_process_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_contract.exe
+  agentflow_process_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_process_executor_contract.exe
+  agentflow_profile_record_publication_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_profile_record_publication_contract.exe
+  agentflow_provider_history_bridge_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_history_bridge_contract.exe
+  agentflow_provider_model_policy_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_model_policy_runtime_contract.exe
+  agentflow_provider_profile_cli_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profile_cli_contract.exe
+  agentflow_provider_profile_lsp_responsiveness_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profile_lsp_responsiveness_contract.exe
+  agentflow_provider_profile_runtime_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profile_runtime_contract.exe
+  agentflow_provider_profiles_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_profiles_contract.exe
+  agentflow_provider_setup_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_setup_contract.exe
+  agentflow_provider_yaml_config_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_provider_yaml_config_contract.exe
+  agentflow_pty_sessions_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_pty_sessions_contract.exe
+  agentflow_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_repository_contract.exe
+  agentflow_responses_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_responses_context_contract.exe
+  agentflow_responses_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_responses_contract.exe
+  agentflow_restore_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_restore_executor_contract.exe
+  agentflow_root_work_executor_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_root_work_executor_contract.exe
+  agentflow_runtime_generation_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_runtime_generation_contract.exe
+  agentflow_schema_budget_fixture.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_budget_fixture.exe
+  agentflow_schema_worker_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_schema_worker_contract.exe
+  agentflow_secret_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_secret_contract.exe
+  agentflow_skill_context_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_skill_context_contract.exe
+  agentflow_skill_state_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_skill_state_contract.exe
+  agentflow_task_list_repository_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_task_list_repository_contract.exe
+  agentflow_terminal_key_input_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_terminal_key_input_contract.exe
+  agentflow_workspace_registry_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace_registry_contract.exe
+  agentflow_workspace_tools_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_workspace_tools_contract.exe
+  agentflow_xlang_authoring_program_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_authoring_program_contract.exe
+  agentflow_xlang_python_config_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python_config_contract.exe
+  agentflow_xlang_python_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_python_contract.exe
+  agentflow_xlang_sqlite_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_sqlite_contract.exe
+  agentflow_xlang_worker_contract.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\agentflow_xlang_worker_contract.exe
+  xmind_admin.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_admin.exe
+  xmind_persistence_demo.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_persistence_demo.exe
+  xmind_server.vcxproj -> C:\xMindNativeValidation\native-current-source-full\Native\Release\xmind_server.exe

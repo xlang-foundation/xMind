@@ -916,6 +916,11 @@ if(BUILD_TESTING)
     add_dependencies(agentflow_agent_worker_model_rpc_contract xmind)
     add_custom_command(TARGET agentflow_agent_worker_model_rpc_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_model_rpc_contract>")
+    add_executable(agentflow_agent_worker_graph_remote_contract tests/agent_worker_graph_remote_contract.cpp)
+    target_include_directories(agentflow_agent_worker_graph_remote_contract PRIVATE third_party third_party/cpp-httplib)
+    target_compile_definitions(agentflow_agent_worker_graph_remote_contract PRIVATE WIN32_LEAN_AND_MEAN)
+    target_link_libraries(agentflow_agent_worker_graph_remote_contract PRIVATE agentflow_worker_runner agentflow_runtime)
+    add_dependencies(agentflow_agent_worker_graph_remote_contract xmind)
     if(AGENTFLOW_NODE_EXECUTABLE)
       add_test(NAME native_agent_worker_model_rpc_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_model_rpc_peer.mjs" "$<TARGET_FILE:agentflow_agent_worker_model_rpc_contract>"
@@ -927,6 +932,9 @@ if(BUILD_TESTING)
       add_test(NAME native_agent_worker_graph_callable_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_model_rpc_contract>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "graph-callable")
       set_tests_properties(native_agent_worker_graph_callable_contract PROPERTIES TIMEOUT 60)
+      add_test(NAME native_agent_worker_graph_remote_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_graph_remote_contract>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_agent_worker_graph_remote_contract PROPERTIES TIMEOUT 60)
       add_test(NAME native_agent_worker_server_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_server_contract.mjs" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")

@@ -1,0 +1,84 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 6f40ec9c..4b8938b1 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -916,6 +916,11 @@ if(BUILD_TESTING)
+     add_dependencies(agentflow_agent_worker_model_rpc_contract xmind)
+     add_custom_command(TARGET agentflow_agent_worker_model_rpc_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_model_rpc_contract>")
++    add_executable(agentflow_agent_worker_graph_remote_contract tests/agent_worker_graph_remote_contract.cpp)
++    target_include_directories(agentflow_agent_worker_graph_remote_contract PRIVATE third_party third_party/cpp-httplib)
++    target_compile_definitions(agentflow_agent_worker_graph_remote_contract PRIVATE WIN32_LEAN_AND_MEAN)
++    target_link_libraries(agentflow_agent_worker_graph_remote_contract PRIVATE agentflow_worker_runner agentflow_runtime)
++    add_dependencies(agentflow_agent_worker_graph_remote_contract xmind)
+     if(AGENTFLOW_NODE_EXECUTABLE)
+       add_test(NAME native_agent_worker_model_rpc_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_model_rpc_peer.mjs" "$<TARGET_FILE:agentflow_agent_worker_model_rpc_contract>"
+@@ -927,6 +932,9 @@ if(BUILD_TESTING)
+       add_test(NAME native_agent_worker_graph_callable_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_model_rpc_contract>"
+         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "graph-callable")
+       set_tests_properties(native_agent_worker_graph_callable_contract PROPERTIES TIMEOUT 60)
++      add_test(NAME native_agent_worker_graph_remote_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_graph_remote_contract>"
++        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
++      set_tests_properties(native_agent_worker_graph_remote_contract PROPERTIES TIMEOUT 60)
+       add_test(NAME native_agent_worker_server_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
+         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_server_contract.mjs" "$<TARGET_FILE:xmind>"
+         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+diff --git a/Native/tests/agent_worker_graph_remote_contract.cpp b/Native/tests/agent_worker_graph_remote_contract.cpp
+new file mode 100644
+index 00000000..df82a829
+--- /dev/null
++++ b/Native/tests/agent_worker_graph_remote_contract.cpp
+@@ -0,0 +1,52 @@
++#define NOMINMAX
++#include <windows.h>
++#include "agent_worker_crash_fixture.hpp"
++#include <iostream>
++#include <random>
++#include <atomic>
++#include <set>
++#include <thread>
++#include "agentflow/agent_model_values.hpp"
++#include "agentflow/graph_service.hpp"
++#include "agentflow/agent_worker_read_executor.hpp"
++#include <fstream>
++#include "agentflow/agent_backend_runtime.hpp"
++#include "httplib.h"
++#include <map>
++#include <mutex>
++namespace worker_graph_remote_fixture {
++using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;inline void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
++inline void write(const std::filesystem::path& file,const std::string& text){std::ofstream output(file,std::ios::binary);output<<text;check(bool(output),"Graph remote fixture write failed");}
++class Peer {
++    httplib::Server server_;std::thread owner_;public:std::string endpoint;std::atomic<unsigned> effects{0},discoveries{0};std::atomic<bool> valid{true};
++    Peer(const std::filesystem::path& directory,const std::string& marker){server_.Post("/mcp",[this,directory,marker](const auto& request,auto& response){try{const auto rpc=Json::parse(request.body);const auto method=rpc.at("method").template get<std::string>();const auto reply=[&](Json result){response.set_content(Json{{"jsonrpc","2.0"},{"id",rpc.at("id")},{"result",result}}.dump(),"application/json");};if(method=="server/discover"){response.status=404;return;}if(method=="initialize"){++discoveries;reply(Json{{"protocolVersion","2025-11-25"},{"capabilities",{{"tools",Json::object()}}},{"serverInfo",{{"name","graph-http-peer"},{"version","1"}}}});return;}if(method=="notifications/initialized"){response.status=202;return;}if(method=="tools/list"){reply(Json{{"tools",Json::array({{{"name","write"},{"description","Write one graph method effect"},{"inputSchema",{{"type","object"},{"properties",{{"node",{{"type","string"}}}}},{"required",Json::array({"node"})},{"additionalProperties",false}}}}})}});return;}check(method=="tools/call"&&rpc.at("params").at("name")=="write","Unexpected graph HTTP method");const auto args=rpc.at("params").at("arguments");check(args.size()==1,"Graph peer only accepts captured node argument");const auto node=args.at("node").template get<std::string>();check(node=="remote-one"||node=="remote-two","Unexpected graph peer node");{std::ofstream output(directory/(node+".txt"),std::ios::binary|std::ios::app);output<<marker;check(bool(output),"Actual HTTP method must write effect");}++effects;reply(Json{{"content",Json::array({{{"type","text"},{"text","Graph peer acknowledged "+node}}})}});}catch(...){valid=false;response.status=500;}});const auto port=server_.bind_to_any_port("127.0.0.1");check(port>0,"Graph HTTP peer bind failed");endpoint="http://127.0.0.1:"+std::to_string(port)+"/mcp";owner_=std::thread([this]{server_.listen_after_bind();});}
++    ~Peer(){server_.stop();if(owner_.joinable())owner_.join();}
++};
++class Gateway final:public AgentModelGateway {
++    std::mutex mutex_;std::map<std::string,unsigned> phases_;std::atomic<unsigned> entered_{0};bool denied_,counted_;std::string alias_;public:
++    std::atomic<unsigned> counts{0};Gateway(bool denied,bool counted,std::string alias):denied_(denied),counted_(counted),alias_(std::move(alias)){}
++    ModelCompletion complete(const ChatProviderConfig& provider,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token stop)override{
++        check(provider.model=="remote-one"||provider.model=="remote-two","Remote graph must preserve selected models");check(request.tools.size()==1&&request.tools.front().name==alias_,"Remote graph cannot widen its admitted catalogue");unsigned phase;{std::lock_guard lock(mutex_);phase=++phases_[provider.model];}
++        if(phase==1){++entered_;const auto until=Clock::now()+5s;while(entered_!=2&&!stop.stop_requested()&&Clock::now()<until)std::this_thread::sleep_for(1ms);check(entered_==2&&!stop.stop_requested(),"Both actual graph workers must dispatch concurrently");return {"","","tool_calls",R"({"total_tokens":11})",{{"call-"+provider.model,alias_,Json{{"node",provider.model}}.dump()}},"[]"};}
++        check(phase==2&&request.messages.back().role==MessageRole::tool,"Remote graph continuation needs actual tool acknowledgement");const auto result=Json::parse(request.messages.back().content);if(denied_)check(result.at("error").at("code")=="agent_permission_denied","Inherited graph denial must survive selected allow");else check(result.at("acknowledged_by_peer")==true&&result.contains("operation_id"),"Registered remote must execute in its native backend owner");return {"Graph remote inspected "+provider.model,"","stop",R"({"total_tokens":13})",{},"[]"};
++    }
++    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{++counts;return parse_responses_input_tokens_response(R"({"object":"response.input_tokens","input_tokens":20})");}
++    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::logic_error("Unexpected graph remote compaction");}
++    void verify(){std::lock_guard lock(mutex_);check(entered_==2&&counts==(counted_?4:0)&&phases_.size()==2&&phases_["remote-one"]==2&&phases_["remote-two"]==2,"Remote graph requires four exact model dispatches");}
++};
++inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::filesystem::path& folder,[[maybe_unused]] const std::vector<std::string>& imports){
++    for(const bool counted:{false,true})for(const bool denied:{false,true}){
++        const std::string mode=std::string("graph-remote-")+(counted?"counted-":"uncounted-")+(denied?"denied":"approved"),root="rpc-"+mode,session=root+"-session";const auto directory=folder/mode;check(std::filesystem::create_directory(directory),"Remote graph workspace must be fresh");const auto marker="actual-remote-"+std::to_string(std::random_device{}());write(directory/"AGENTS.md","Native graph remote guidance\n");
++        Peer peer(directory,marker);WorkspaceTools workspace(directory.string());WorkspaceToolSet members(workspace.identity(),1,{{workspace.identity(),directory.string()}});McpServerSetting config;config.id="graph-http-peer";config.revision=1;config.transport="http";config.endpoint=peer.endpoint;auto runtime=make_persistence_agent_backend_runtime(store);auto discovered=runtime->connect_mcp(config,Clock::now()+10s,{});discovered->discover(workspace,members.folders());check(discovered->definitions().size()==1,"Graph remote preflight must discover one registered method");const auto alias=discovered->definitions().front().name;discovered->stop_observer();
++        AgentSettings settings;settings.provider={"https://synthetic.invalid/graph-remote/responses","remote-one",Capability::supported,Capability::supported,Capability::supported};settings.provider.wire=ProviderWire::responses;settings.workspace=directory.string();settings.approved_edits=true;settings.a2a_enabled=false;settings.max_turns=4;settings.max_output_tokens=64;settings.run_timeout=20s;settings.selectable_models={"remote-two"};settings.tool_allowlist=std::vector<std::string>{alias};settings.permission_rules={{alias,"**",denied?"deny":"ask"}};settings.mcp_servers={config};auto gateway=std::make_shared<Gateway>(denied,counted,alias);settings.graph_execution=make_agent_worker_graph_executor(store,image,gateway);
++        if(counted){ContextRuntimePolicy context;context.buffer_tokens=20;for(const auto* model:{"remote-one","remote-two"}){const auto identity=Json{{"wire","responses"},{"model_id",model}}.dump();auto provider=settings.provider;provider.model=model;VerifiedContextCapacity capacity;capacity.provider_identity_json=identity;capacity.wire="responses";capacity.model_id=model;capacity.route_identity=context_route_identity(provider,identity);capacity.source_binding=context_digest("Graph remote capacity");capacity.revision=1;capacity.verified=true;capacity.input_tokens=4096;capacity.output_tokens=256;capacity.context_tokens=8192;capacity.default_output_tokens=64;context.model_capacities.emplace(model,capacity);}settings.context=context;}
++        Json nodes=Json::array();for(const auto* model:{"remote-one","remote-two"})nodes.push_back({{"id",model},{"type","agent"},{"model_id",model},{"prompt","Invoke the registered method once"},{"tools",Json::array({alias})},{"permissions",Json::array({{{"action",alias},{"resource","**"},{"effect","allow"}}})}});GraphCatalogStore(store).apply(Json{{"graphs",Json::array({{{"id","remote.worker.graph"},{"spec",{{"nodes",nodes}}}}})}}.dump());store.create_session(session,"Actual graph remote workers").get();GraphService service(store,settings,1,8,2,std::make_shared<RootAdmissionPool>(8,1,true));service.submit_graph(root,session,"remote.worker.graph",1,"Invoke both registered methods after approval");std::set<std::string> approved;const auto until=Clock::now()+15s;
++        while(Clock::now()<until&&!service.idle()){for(const auto& child:store.children(root).get())for(const auto& op:store.operations(child.id).get())if(op.state==OperationState::awaiting_approval){check(!denied&&approved.insert(op.id).second,"Each remote needs one actual controller approval");check(!std::filesystem::exists(directory/(child.node_id+".txt")),"Remote cannot effect before approval");store.decide_operation(op.id,OperationDecision::allow,"graph-remote-controller").get();}std::this_thread::sleep_for(5ms);}
++        check(service.idle()&&service.healthy()&&store.run(root).get().state==RunState::completed&&approved.size()==(denied?0:2),"Graph remote must complete after exact permissions and drain");gateway->verify();const auto children=store.children(root).get();check(children.size()==2&&store.root_budget(root).get().model_calls_reserved==4,"Graph remote shares four root charges");std::set<std::uint32_t> pids;
++        for(const auto& child:children){const auto history=store.run_history(child.id).get();check(child.state==RunState::completed&&history.size()==4,"Remote graph keeps canonical continuation");const auto file=directory/(child.node_id+".txt");check(std::filesystem::exists(file)==!denied,"Inherited denial prevents remote effects");if(!denied){std::ifstream input(file,std::ios::binary);check(std::string(std::istreambuf_iterator<char>(input),{})==marker,"Approved remote effect occurs exactly once");}const auto ops=store.operations(child.id).get();check(denied?ops.empty():ops.size()==1&&ops[0].state==OperationState::succeeded,"Remote graph binds exact native operation");unsigned admissions=0,retirements=0,claims=0;for(const auto& e:store.events(child.id).get()){if(e.kind=="worker.lease.admitted"){const auto lease=store.agent_worker_lease(Json::parse(e.json).at("generation").get<std::string>()).get();check(lease.state=="retired"&&lease.retirement_reason=="completed"&&lease.spec.root_run_id==root&&lease.spec.pid!=GetCurrentProcessId(),"Actual xmind graph worker must retire before join");pids.insert(lease.spec.pid);++admissions;}if(e.kind=="worker.lease.retired")++retirements;if(e.kind=="worker.remote.claimed"){const auto data=Json::parse(e.json);const auto receipt=store.agent_worker_remote_claim(root,data.at("attempt_id").get<std::string>(),data.at("call_id").get<std::string>()).get();check(receipt.state=="returned"&&receipt.success==!denied&&receipt.operation_ids.size()==(denied?0:1),"Graph remote claim retains exact native permission result");check(Json::parse(history.at(2).json).at("content")==receipt.actual_output_json,"Graph remote canonical output equals durable acknowledgement");++claims;}}check(admissions==1&&retirements==1&&claims==1,"Graph remote cannot restart or replay");}
++        const auto captured=store.graph_context_owner(root).get();check(pids.size()==2&&captured.authority.token_context==counted&&captured.segment->state=="closed","Remote graph closes captured segment after two distinct worker retirements");check(peer.valid&&peer.effects==(denied?0:2)&&peer.discoveries==3,"Each graph worker independently discovers; only approved effects reach HTTP peer exactly once");service.close();std::cout<<"Production graph remote "<<mode<<" verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges."<<std::endl;
++    }
++}
++}
++
++int main(int argc,char** argv){worker_crash_fixture::install();try{if(argc!=3)return 2;wchar_t image[MAX_PATH];const auto length=GetModuleFileNameW(nullptr,image,MAX_PATH);if(!length||length>=MAX_PATH)throw std::runtime_error("Cannot locate graph contract image");const auto product=agentflow::ForegroundProcess::bind_executable((std::filesystem::path(image).parent_path()/"xmind.exe").string());const auto folder=std::filesystem::temp_directory_path()/("xmind-graph-remote-"+std::to_string(std::random_device{}())+"-"+std::to_string(std::random_device{}()));if(!std::filesystem::create_directory(folder))throw std::runtime_error("Graph remote workspace collision");{agentflow::PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});worker_graph_remote_fixture::parent(store,product,folder,{argv[1],argv[2]});store.close();}std::filesystem::remove_all(folder);return 0;}catch(const std::exception& e){std::cerr<<e.what()<<std::endl;return 1;}}

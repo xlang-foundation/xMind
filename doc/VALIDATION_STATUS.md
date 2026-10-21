@@ -1,3 +1,23 @@
+## Graph IPC calls to actual HTTP MCP methods — 2026-10-21
+
+Four counted/uncounted approval/denial graph cases pass across eight actual
+xmind SDK IPC workers. Each graph independently discovers the registered method
+inside both worker owners. Approved cases make exactly two actual HTTP peer
+effects with exact bytes; inherited denial wins over node allow and makes none.
+Each case retains four shared model charges, exact durable remote acknowledgements
+in canonical history and worker retirement before join.
+
+The focused gate passes **11/11 in95.24s** with frozen2755 project inputs and134
+native binaries. The first build hit MSVC object-section limits; the HTTP fixture
+now has its own executable. The next build exposed missing direct includes, which
+were added. Both failed build logs and patches are retained.
+[Final gate and original build evidence](evidence/process-worker-graph-remote-includes-20261021.json).
+
+Local inventory is165 (hosted166), but no full-suite claim is made. Runtime C++
+remains fd93f0f9/d27f36d8 and is not installed. Graph A2A, IPC default/planning,
+combined parent compaction/overflow, editor rendering and prior crash diagnosis
+remain unfinished.
+
 ## Captured graph IPC callable ownership — 2026-10-21
 
 Registered callables now use the existing exact coding-owner authority guard.

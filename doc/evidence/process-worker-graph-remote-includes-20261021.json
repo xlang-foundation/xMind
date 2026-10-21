@@ -1,0 +1,87 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T20:01:46.544Z",
+    "sourceParent": "fd93f0f9cb8ba04f418aaaf76f552334cf7bf08d",
+    "sourcePatchSha256": "fc8f0e245c2a9f6afce0b925e30ecddd3bf84a7a86ba8f228761fd37542f939f",
+    "clientSourcePatchSha256": "2ee1cb5ad53bb56a589857cec90856f56fc97dae9a435faa5e0378f2f4929067",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 68280,
+      "launchedAt": "2026-10-21T19:59:28.072Z",
+      "completedAt": "2026-10-21T20:00:05.047Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d6e8385509d5bafb072f747b8cf73aaf58d403cfa8e5ae51ea3327d054796b9d"
+    },
+    "test": {
+      "pid": 69824,
+      "launchedAt": "2026-10-21T20:00:08.406Z",
+      "completedAt": "2026-10-21T20:01:43.699Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "531a25a757389dc38ed1770591baaf6846dc51322d80a0b8f7ed93d20269a9a2"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 95.24,
+    "projectFiles": 2755,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 134,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "d27f36d8bcb286f4583c57bd4ffe6e26759b311d2aff8af3fb4e0ed6f3c583b0",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-remote-20261021-build.log": "8470edbd4c6512dd0613190bc79940131d144719cafddf44add127b8a223ca84",
+    "doc/evidence/process-worker-graph-remote-20261021-build-terminal.json": "36a9bc4ab08b0e9452f019615c6117f560b35ed293dd97dfc5d8f9fba9959b75",
+    "doc/evidence/process-worker-graph-remote-20261021-source.patch": "92d506642cabf8277c5c13b23d0d933b766270db68193e09bb4cccca94ea29ea",
+    "doc/evidence/process-worker-graph-remote-20261021-client-source.patch": "2ee1cb5ad53bb56a589857cec90856f56fc97dae9a435faa5e0378f2f4929067",
+    "doc/evidence/process-worker-graph-remote-separate-20261021-build.log": "ee7e5d7443dc0e8225e707da36238bf6a530e26e8bc6b91ec43c9410dcc213e2",
+    "doc/evidence/process-worker-graph-remote-separate-20261021-build-terminal.json": "13e76f03a51cc6cca961b081ee5195d33657e479f1627ac1256ead7b28aa207c",
+    "doc/evidence/process-worker-graph-remote-separate-20261021-source.patch": "0dd3cce646ed1e0d7c3915956f45b1923aa9231b2dafeb3b4399f819ecb31d7b",
+    "doc/evidence/process-worker-graph-remote-separate-20261021-client-source.patch": "2ee1cb5ad53bb56a589857cec90856f56fc97dae9a435faa5e0378f2f4929067",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-build.log": "d6e8385509d5bafb072f747b8cf73aaf58d403cfa8e5ae51ea3327d054796b9d",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-build-terminal.json": "d2563146b528053355275cf95c9c253213fa4d05fdfc991d679165ceb182bb0c",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-ctest.log": "531a25a757389dc38ed1770591baaf6846dc51322d80a0b8f7ed93d20269a9a2",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-ctest-terminal.json": "27b303d605851287ecf0fd6ad13741c12a784d675c7494ab92054fba70848333",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-LastTest.log": "956f4a2d9bc3eef17f02dc3267a23b1239b27acfd53825b7a803e54430e0de48",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-test-inventory.json": "b58c178e8078a0da6c4408737323f9e62f207c30cc382a0dc81085012be5b176",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-gate.json": "2ee6dfc02482dadc4237ce70fdb28d581c961bccc772c4764a0446c7611f9f3a",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-source.patch": "fc8f0e245c2a9f6afce0b925e30ecddd3bf84a7a86ba8f228761fd37542f939f",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-client-source.patch": "2ee1cb5ad53bb56a589857cec90856f56fc97dae9a435faa5e0378f2f4929067",
+    "doc/evidence/process-worker-graph-remote-includes-20261021-binaries-before-test.json": "f9481938f5b34b1959a797f7edcb921798912fe7a33b6faf76682abb48147399"
+  },
+  "verified": [
+    "Four graph MCP cases: counted/uncounted and actual controller-approved/inherited-denied despite node allow; eight actual SDK IPC xmind graph workers.",
+    "Each case performs three actual HTTP MCP discoveries: preflight and independently inside each of two graph owners. Approved cases perform exactly two HTTP method effects with exact fixture bytes; denied cases perform zero effects.",
+    "Four shared model charges per case, canonical remote outputs equal durable native receipts, one actual approval/operation per allowed child, no operation on policy denial, and distinct worker retirement before graph join.",
+    "Standalone HTTP fixture executable avoids enlarging the existing worker RPC translation unit. Final11-test focused inventory includes previous graph callable and worker/server/context regressions.",
+    "Frozen complete2755 project/16 SDK/1870 library/76 runtime/18598 dependency/134 native binary file sets and hashes remain unchanged."
+  ],
+  "buildFailuresRetained": [
+    {
+      "name": "process-worker-graph-remote-20261021",
+      "reason": "MSVC C1128 object section limit while adding HTTP peer to monolithic worker test; fixture extracted into standalone executable."
+    },
+    {
+      "name": "process-worker-graph-remote-separate-20261021",
+      "reason": "Standalone fixture required explicit cstdint, JSON and native process includes previously supplied by the monolithic test; added direct includes."
+    }
+  ],
+  "limitations": [
+    "Focused11 pass is not full165-test local acceptance (hosted166 includes trusted OAuth).",
+    "Controlled synthetic model gateway; actual HTTP peer and actual SDK IPC workers. No live-provider request.",
+    "Graph A2A, IPC default/planning, combined parent compaction/overflow, updated editor rendering and prior native access violation remain unfinished.",
+    "Runtime C++ is unchanged from fd93f0f9; native d27f36d8 is not installed. Installed60 remains native3123/5100131c."
+  ]
+}
