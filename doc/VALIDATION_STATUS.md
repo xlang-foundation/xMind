@@ -1,3 +1,21 @@
+## Captured graph IPC callable ownership — 2026-10-21
+
+Registered callables now use the existing exact coding-owner authority guard.
+Previously graph catalogue admission succeeded but callable invocation still
+required an ordinary root, so both actual graph workers failed before dispatch.
+The retained first gate is9/10; after the authority fix the focused gate is
+**10/10 in89.81s**. Four new graph cases cover counted/uncounted, approved/denied
+execution across eight actual xmind IPC workers. Each approved method writes
+once through embedded xlang3 after controller approval; inherited denial wins
+over node allow with no effect. Canonical outputs equal durable callable receipts
+and worker retirement precedes graph join.
+[Both original gates, patches and raw receipts](evidence/process-worker-graph-callable-authority-20261021.json).
+
+Candidate native d27f36d8/SDK1ff is not packaged or installed. Complete local
+inventory is now164 (hosted165), but only the named10 focused tests ran here.
+Default IPC/planning, graph remote calls, combined parent compaction/overflow,
+editor rendering and prior intermittent crash diagnosis remain unfinished.
+
 ## Installed60 fresh rendered browser coding through IPC — 2026-10-21
 
 A fresh hidden-browser task completes through installed60 actual xmind SDK IPC

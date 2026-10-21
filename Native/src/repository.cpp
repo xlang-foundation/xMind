@@ -3352,7 +3352,7 @@ bool worker_callable_tool(XlangSqlite& db,const AgentWorkerLeaseSpec& lease,cons
 }
 AgentWorkerModelClaimSpec worker_callable_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const AgentCallableInvocation& call){
     (void)call.serialize();worker_current_scope(repository,db,lease);if(!worker_callable_tool(db,lease,call.tool_name))throw Conflict("Callable is absent from its backend-admitted catalogue");
-    if(lease.owner_run_id!=lease.root_run_id||!ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id)||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker callable differs from its ordinary workspace owner");
+    if(!worker_effect_owner(repository,lease)||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker callable differs from its captured coding workspace owner");
     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker callable has no actual model receipt");
     const auto reservation=db.execute("SELECT state,COALESCE(actual_assistant_json,'') FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND attempt_id=?",{lease.root_run_id,lease.owner_run_id,call.attempt_id}).rows;

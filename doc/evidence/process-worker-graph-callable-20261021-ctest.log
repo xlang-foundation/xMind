@@ -1,0 +1,31 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+      Start 18: native_provider_history_bridge_contract
+ 1/10 Test #18: native_provider_history_bridge_contract .........   Passed    0.03 sec
+      Start 26: native_context_repository_contract
+ 2/10 Test #26: native_context_repository_contract ..............   Passed    4.34 sec
+      Start 29: native_context_engine_contract
+ 3/10 Test #29: native_context_engine_contract ..................   Passed    5.73 sec
+      Start 81: native_agent_worker_model_rpc_contract
+ 4/10 Test #81: native_agent_worker_model_rpc_contract ..........   Passed   57.58 sec
+      Start 82: native_agent_worker_graph_no_context_contract
+ 5/10 Test #82: native_agent_worker_graph_no_context_contract ...   Passed    4.97 sec
+      Start 83: native_agent_worker_graph_callable_contract
+ 6/10 Test #83: native_agent_worker_graph_callable_contract .....***Failed    0.99 sec
+Graph callable must complete after exact permissions and drain
+
+      Start 84: native_agent_worker_server_contract
+ 7/10 Test #84: native_agent_worker_server_contract .............   Passed    1.61 sec
+      Start 85: native_agent_worker_coding_server_contract
+ 8/10 Test #85: native_agent_worker_coding_server_contract ......   Passed    1.08 sec
+      Start 86: native_agent_worker_ledger_contract
+ 9/10 Test #86: native_agent_worker_ledger_contract .............   Passed    1.73 sec
+      Start 90: native_agent_runner_contract
+10/10 Test #90: native_agent_runner_contract ....................   Passed    9.79 sec
+
+90% tests passed, 1 tests failed out of 10
+
+Total Test time (real) =  87.87 sec
+
+The following tests FAILED:
+	 83 - native_agent_worker_graph_callable_contract (Failed)
+Errors while running CTest
