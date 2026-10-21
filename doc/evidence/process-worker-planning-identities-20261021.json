@@ -1,0 +1,66 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T21:05:03.868Z",
+    "sourceParent": "1720a3830eaef8938be8c910e8adc8ae9008ff03",
+    "sourcePatchSha256": "9b4dc5ada5fa33cd90df41f81114e6364d2421469e0e962b3c088303d7f45777",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 4560,
+      "launchedAt": "2026-10-21T21:02:42.874Z",
+      "completedAt": "2026-10-21T21:03:23.563Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b89f4cf3b6b7608e08c7b6a20dba0e39c856b55ad7223561ad085118c0207644"
+    },
+    "test": {
+      "pid": 23536,
+      "launchedAt": "2026-10-21T21:03:26.730Z",
+      "completedAt": "2026-10-21T21:05:01.175Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cc8dea075a9e7f4e035f5783411bab440f199ce7bc24b4e1b80d069d0cc8d966"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 94.4,
+    "projectFiles": 2759,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 135,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "790519bda19ede2ca61a93c97f2a81924250f00fcc8edff7d69eb3aca0906a5d",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-planning-identities-20261021-build.log": "b89f4cf3b6b7608e08c7b6a20dba0e39c856b55ad7223561ad085118c0207644",
+    "doc/evidence/process-worker-planning-identities-20261021-build-terminal.json": "2558c34789e4a194dc8c39432110b8c23cc7e509e23c37e323d01a9830fb42a0",
+    "doc/evidence/process-worker-planning-identities-20261021-ctest.log": "cc8dea075a9e7f4e035f5783411bab440f199ce7bc24b4e1b80d069d0cc8d966",
+    "doc/evidence/process-worker-planning-identities-20261021-ctest-terminal.json": "17c00794c3b1d064f5708f9ace630d615b18fd3b4b53de5e7676c75f7fd82a8c",
+    "doc/evidence/process-worker-planning-identities-20261021-LastTest.log": "153661422de210b9da61078d04493130fe94e2e7245024e9d2cf884df658f196",
+    "doc/evidence/process-worker-planning-identities-20261021-test-inventory.json": "e025dda78f3145411851e1d104b6a2ccc3b86cdb79620fc8bc3b860fd5fdd02d",
+    "doc/evidence/process-worker-planning-identities-20261021-gate.json": "90b51a75c2691f7a402c599baf00f07680ce6bc6310e221d1ea4bc81d3c8a016",
+    "doc/evidence/process-worker-planning-identities-20261021-source.patch": "9b4dc5ada5fa33cd90df41f81114e6364d2421469e0e962b3c088303d7f45777",
+    "doc/evidence/process-worker-planning-identities-20261021-client-source.patch": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "doc/evidence/process-worker-planning-identities-20261021-binaries-before-test.json": "1d6580aa48e65c004f7c9090568b5388f9ce4bd9ca5c131549ba271aedf2a07b"
+  },
+  "change": "Separate provider/request tool-call identity from the native accepted-plan record identity. Invoke acknowledgements echo request_call_id separately; resume additionally binds any returned native call_id to the requested accepted plan.",
+  "verified": [
+    "Actual separate SDK IPC contract child invokes provider-call and receives accepted-native-call, then resumes accepted-native-call with exact paused facts.",
+    "A forged request_call_id acknowledgement fails closed without replay. Existing duplicate, scope, schema, bounded error and uncertain outcome cases pass.",
+    "11/11 focused contracts in94.40s; complete tracked source, SDK, pure libraries, runtime, dependencies and135 native binaries retain identical file sets and hashes around the gate."
+  ],
+  "limitations": [
+    "Controlled backend binding only; no durable planning authorization, production planning worker assembly, dynamic-child IPC placement or paused-owner handoff is established.",
+    "No full suite, package, installation, live provider or rendered UI acceptance for this change. Installed60 remains unchanged."
+  ]
+}

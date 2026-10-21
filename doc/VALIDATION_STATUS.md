@@ -1,3 +1,18 @@
+## Planning IPC request and accepted-plan identities — 2026-10-21
+
+Fixed the earlier bridge assumption that a provider tool-call ID equals the
+native accepted-plan record ID. Invoke now binds a separate request_call_id echo
+and preserves the returned native call_id. Resume checks the accepted native ID.
+The actual contract child uses distinct provider/native IDs, resumes the accepted
+ID and rejects a forged request acknowledgement without replay.
+
+**11/11 focused contracts pass in94.40s** with all2759 project/16 SDK/1870 library/
+76 runtime/18598 dependency/135 native binary file sets and hashes frozen.
+[Gate and raw evidence](evidence/process-worker-planning-identities-20261021.json). Candidate790519bd/SDK1ff remains
+uninstalled. This corrects the returned-call binding claim in the prior checkpoint;
+durable authorization, production worker planning, dynamic children and paused
+owner handoff remain unfinished. No full-suite or product planning claim.
+
 ## Private SDK IPC planning bridge boundary — 2026-10-21
 
 AgentWorkerPlanningClient implements the planning execution interface over the
