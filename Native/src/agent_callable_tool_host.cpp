@@ -37,9 +37,11 @@ public:
         {std::lock_guard lock(mutex_);if(calls_.size()>=128*64||!calls_.emplace(call.attempt_id,call.call_id).second)throw ToolAccessDenied("Callable identity is already used or exhausted");}
         bool asks=false;for(const auto& layer:owner_.permission_layers){const auto effect=agent_permission_effect(layer,call.tool_name,"*");if(effect==AgentPermissionEffect::deny)throw AgentPermissionDenied("Selected agent denied this callable");asks=asks||effect==AgentPermissionEffect::ask;}
         JsonSchema schema(found->second.definition.input_schema_json);schema.validate_object(call.arguments_json);const auto arguments=Json::parse(call.arguments_json);
-        const auto ready=[&]{return !owner_.repository_context||owner_.repository_context->ready(".",cancel);};
+        auto* repository_context=owner_.repository_context_for_call?owner_.repository_context_for_call():owner_.repository_context;
+        if(owner_.repository_context_for_call&&!repository_context)throw ToolAccessDenied("Callable owner guidance is unavailable");
+        const auto ready=[&]{return !repository_context||repository_context->ready(".",cancel);};
         if(!ready())return guidance_required();
-        const auto guidance=owner_.repository_context?owner_.repository_context->precondition("."):InstructionPrecondition{};
+        const auto guidance=repository_context?repository_context->precondition("."):InstructionPrecondition{};
         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+std::min(owner_.approval_timeout,std::chrono::milliseconds(std::chrono::hours(1))).count();
         const auto proposal=Json{{"alias",call.tool_name},{"arguments",arguments}}.dump();
         const auto operation=PermissionWaiter(journal_).acquire(operation_id(),{owner_.run_id,owner_.workspace_id,"xlang3_tool",proposal,{}},expiry,cancel,asks?std::string{}:"trusted-xlang3-callable");
@@ -48,6 +50,8 @@ public:
             check();guidance.verify(cancel);
             if(!ready()){deferred=true;output=guidance_required().output_json;}
             else{
+                if(owner_.before_effect)owner_.before_effect(call,operation.id,cancel);
+                check();
                 dispatched=true;output=found->second.invoke(call.arguments_json,cancel);
                 if(output.size()>1024*1024)throw std::runtime_error("Callable result exceeds limits");(void)Json::parse(output);
             }

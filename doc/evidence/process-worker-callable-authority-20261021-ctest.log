@@ -1,0 +1,9 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  88: native_agent_runner_contract
+1/2 Test  #88: native_agent_runner_contract .............   Passed    9.97 sec
+    Start 100: native_agent_remote_tool_host_contract
+2/2 Test #100: native_agent_remote_tool_host_contract ...   Passed    2.65 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  12.64 sec

@@ -1,0 +1,67 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T11:06:34.411Z",
+    "sourceParent": "17aaf18c1a21dd707a6c47e8d63a99a6b6eb50cf",
+    "sourcePatchSha256": "348270e00d0a47ec394129d748c5102a37d39ffa071049737fdf5299c1f1f973",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 58768,
+      "launchedAt": "2026-10-21T11:02:33.043Z",
+      "completedAt": "2026-10-21T11:06:15.566Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "75ba31fe8303f9c6353db64976082932e09b2b8ffbc54e1a715d2437d80912ea"
+    },
+    "test": {
+      "pid": 3048,
+      "launchedAt": "2026-10-21T11:06:18.800Z",
+      "completedAt": "2026-10-21T11:06:31.504Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2ff8178565cca003d73317fe7a4deff08378d3edf8d0d7bf7b45e44a7d8b3351"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 12.64,
+    "projectFiles": 2732,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "bda03affe39f56297501a5cbb2f27df7f4504a9a2c8bf27bb3f0ccc681fc86a9",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-callable-authority-20261021-build.log": "75ba31fe8303f9c6353db64976082932e09b2b8ffbc54e1a715d2437d80912ea",
+    "doc/evidence/process-worker-callable-authority-20261021-build-terminal.json": "d13f702da5175d17fb1d484d8d20974d17677bb82fe3337e7fd7f97d40d079d9",
+    "doc/evidence/process-worker-callable-authority-20261021-ctest.log": "2ff8178565cca003d73317fe7a4deff08378d3edf8d0d7bf7b45e44a7d8b3351",
+    "doc/evidence/process-worker-callable-authority-20261021-ctest-terminal.json": "46ef702b000e352d1efdf7fa3a7909a7cd68c67068443a5ab85c5aaa3f72318a",
+    "doc/evidence/process-worker-callable-authority-20261021-LastTest.log": "dfd82fb256e2013569f47140d0d0f88ddaf1f8a1a1ba21186f605770d0f26358",
+    "doc/evidence/process-worker-callable-authority-20261021-test-inventory.json": "453c8883278d4d4114b1ad86d4dbdb5a12261bda0c01f6af9b7ea28fa436e251",
+    "doc/evidence/process-worker-callable-authority-20261021-gate.json": "34ba0c2113bf287f3047af3aee7cc97db0efe300e6b57921fd15e0ea79d9c360",
+    "doc/evidence/process-worker-callable-authority-20261021-source.patch": "348270e00d0a47ec394129d748c5102a37d39ffa071049737fdf5299c1f1f973",
+    "doc/evidence/process-worker-callable-authority-20261021-binaries-before-test.json": "7dad478314b79e8706e83dd39687b61545768ecdf500bcc9a50fc9681bfd3c11"
+  },
+  "verified": [
+    "Native callable owner supports backend-only live authority callback after actual approval and before marking dispatch",
+    "Callback sees exact invocation, approved native operation and unperformed effect; rejection retains known failed operation",
+    "Actual embedded xlang3 callable writes one marker and returns its actual result when authority allows; revoked case creates no marker",
+    "Guidance resolves from a current backend-owned context after host construction, avoiding retention of a replaced context pointer",
+    "Existing AgentRunner callable approval/denial/uncertainty contracts remain passing; frozen project/SDK/library/dependency/binary file sets unchanged"
+  ],
+  "limitations": [
+    "This is the native callable authority prerequisite, not worker callable IPC or a durable worker callable claim",
+    "No new broader/full regression, installation, hosted, rendered or live-provider acceptance",
+    "Remaining worker capabilities and product acceptance remain unfinished"
+  ],
+  "passed": true
+}

@@ -1,0 +1,77 @@
+diff --git a/Native/include/agentflow/agent_callable_tool_host.hpp b/Native/include/agentflow/agent_callable_tool_host.hpp
+index 286143d3..33a585d2 100644
+--- a/Native/include/agentflow/agent_callable_tool_host.hpp
++++ b/Native/include/agentflow/agent_callable_tool_host.hpp
+@@ -38,9 +38,13 @@ struct AgentCallableToolOwnerContext {
+     std::vector<AgentCallableBinding> bindings;
+     std::function<bool(const std::string&)> offered_tool;
+     RepositoryInstructionContext* repository_context=nullptr;
++    std::function<RepositoryInstructionContext*()> repository_context_for_call;
+     std::vector<std::vector<AgentPermissionRule>> permission_layers;
+     std::chrono::steady_clock::time_point deadline;
+     std::chrono::milliseconds approval_timeout{600000};
++    // Backend-only live authority, after approval and immediately before the
++    // callable may produce an effect. Invocation values cannot supply it.
++    std::function<void(const AgentCallableInvocation&,const std::string&,std::stop_token)> before_effect;
+ };
+ // Local owned dispatch, not an authenticated worker RPC or an OS sandbox.
+ std::unique_ptr<AgentCallableToolHost> make_agent_callable_tool_host(
+diff --git a/Native/src/agent_callable_tool_host.cpp b/Native/src/agent_callable_tool_host.cpp
+index 1d84cfda..36536fde 100644
+--- a/Native/src/agent_callable_tool_host.cpp
++++ b/Native/src/agent_callable_tool_host.cpp
+@@ -37,9 +37,11 @@ public:
+         {std::lock_guard lock(mutex_);if(calls_.size()>=128*64||!calls_.emplace(call.attempt_id,call.call_id).second)throw ToolAccessDenied("Callable identity is already used or exhausted");}
+         bool asks=false;for(const auto& layer:owner_.permission_layers){const auto effect=agent_permission_effect(layer,call.tool_name,"*");if(effect==AgentPermissionEffect::deny)throw AgentPermissionDenied("Selected agent denied this callable");asks=asks||effect==AgentPermissionEffect::ask;}
+         JsonSchema schema(found->second.definition.input_schema_json);schema.validate_object(call.arguments_json);const auto arguments=Json::parse(call.arguments_json);
+-        const auto ready=[&]{return !owner_.repository_context||owner_.repository_context->ready(".",cancel);};
++        auto* repository_context=owner_.repository_context_for_call?owner_.repository_context_for_call():owner_.repository_context;
++        if(owner_.repository_context_for_call&&!repository_context)throw ToolAccessDenied("Callable owner guidance is unavailable");
++        const auto ready=[&]{return !repository_context||repository_context->ready(".",cancel);};
+         if(!ready())return guidance_required();
+-        const auto guidance=owner_.repository_context?owner_.repository_context->precondition("."):InstructionPrecondition{};
++        const auto guidance=repository_context?repository_context->precondition("."):InstructionPrecondition{};
+         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+std::min(owner_.approval_timeout,std::chrono::milliseconds(std::chrono::hours(1))).count();
+         const auto proposal=Json{{"alias",call.tool_name},{"arguments",arguments}}.dump();
+         const auto operation=PermissionWaiter(journal_).acquire(operation_id(),{owner_.run_id,owner_.workspace_id,"xlang3_tool",proposal,{}},expiry,cancel,asks?std::string{}:"trusted-xlang3-callable");
+@@ -48,6 +50,8 @@ public:
+             check();guidance.verify(cancel);
+             if(!ready()){deferred=true;output=guidance_required().output_json;}
+             else{
++                if(owner_.before_effect)owner_.before_effect(call,operation.id,cancel);
++                check();
+                 dispatched=true;output=found->second.invoke(call.arguments_json,cancel);
+                 if(output.size()>1024*1024)throw std::runtime_error("Callable result exceeds limits");(void)Json::parse(output);
+             }
+diff --git a/Native/tests/agent_callable_authority_fixture.hpp b/Native/tests/agent_callable_authority_fixture.hpp
+new file mode 100644
+index 00000000..baea4b57
+--- /dev/null
++++ b/Native/tests/agent_callable_authority_fixture.hpp
+@@ -0,0 +1,11 @@
++#include "agentflow/agent_callable_tool_host.hpp"
++#include "agentflow/xlang_python.hpp"
++inline void callable_authority_contract(const std::vector<std::string>& roots){
++    for(const bool revoked:{false,true}){
++        Directory directory;write(directory.path/"AGENTS.md","CALLABLE_AUTHORITY_GUIDANCE\n");write(directory.path/"authority_probe.py","def invoke(arguments):\n    with open(arguments['marker'], 'a', encoding='utf-8') as output:\n        output.write('once')\n    return {'text': arguments['text'].upper()}\n");WorkspaceTools workspace(directory.path.string());auto context=std::make_unique<RepositoryInstructionContext>(workspace,workspace.repository_instructions("."));context->prepare();PersistenceService store((directory.path/"state.sqlite").string(),roots);store.create_session("session","Actual callable pre-effect authority").get();store.start_prompt_run("run","session",R"({"content":"Call one trusted xlang3 fixture"})").get();store.transition("run",RunState::queued,RunState::running).get();
++        auto callable=std::make_shared<XlangPythonCallable>(roots[0],roots[1],directory.path.string(),"authority_probe","invoke");const auto marker=directory.path/"effect.txt";const auto args=Json{{"marker",marker.string()},{"text","guarded"}}.dump();std::atomic<int> checks{0},resolutions{0};AgentCallableToolOwnerContext owner;owner.run_id="run";owner.workspace_id=workspace.identity();owner.offered_tool=[](const std::string& name){return name=="trusted_probe";};owner.repository_context_for_call=[&]{++resolutions;return context.get();};owner.permission_layers={{{"trusted_probe","*","ask"}}};owner.deadline=std::chrono::steady_clock::now()+10s;owner.bindings.push_back({{"trusted_probe","Actual xlang3 fixture callable",R"({"type":"object","properties":{"marker":{"type":"string"},"text":{"type":"string"}},"required":["marker","text"],"additionalProperties":false})"},[callable](const std::string& value,std::stop_token stop){return callable->invoke_json(value,stop);}});
++        owner.before_effect=[&](const AgentCallableInvocation& actual,const std::string& operation,std::stop_token stop){need(!stop.stop_requested()&&actual.run_id=="run"&&actual.tool_name=="trusted_probe"&&actual.arguments_json==args&&store.operation(operation).get().state==OperationState::executing&&!std::filesystem::exists(marker),"Callable authority must see exact approved operation before the actual effect");++checks;if(revoked)throw ToolAccessDenied("Fixture authority retired after approval");};auto host=make_agent_callable_tool_host(store,owner);context=std::make_unique<RepositoryInstructionContext>(workspace,workspace.repository_instructions("."));context->prepare();
++        AgentCallableInvocation call;call.run_id="run";call.attempt_id="synthetic-authority-turn";call.call_id="callable-authority";call.workspace_id=workspace.identity();call.tool_name="trusted_probe";call.arguments_json=args;std::stop_source stop;auto task=std::async(std::launch::async,[&]{return host->invoke(call,stop.get_token());});try{const auto proposal=pending(store,0);need(checks==0&&!std::filesystem::exists(marker),"Callable authority and effect must wait for actual approval");store.decide_operation(proposal.id,OperationDecision::allow,"callable-authority-controller").get();if(revoked){rejects<ToolAccessDenied>([&]{(void)task.get();});need(store.operation(proposal.id).get().state==OperationState::failed&&!std::filesystem::exists(marker),"Retired callable authority must retain known failure without dispatch");}else {const auto result=task.get();need(result.success&&Json::parse(result.output_json).at("text")=="GUARDED"&&read(marker)=="once"&&store.operation(proposal.id).get().state==OperationState::succeeded,"Allowed authority must retain one actual xlang3 effect and result");}need(checks==1&&resolutions==1,"Callable must resolve current guidance and check pre-effect authority once");}catch(...){stop.request_stop();if(task.valid())try{(void)task.get();}catch(...){}throw;}
++        std::cout<<"Native callable pre-effect authority "<<(revoked?"revoked":"allowed")<<" verified actual approval, current guidance and xlang3 effect boundary."<<std::endl;
++    }
++}
+diff --git a/Native/tests/agent_remote_tool_host_contract.cpp b/Native/tests/agent_remote_tool_host_contract.cpp
+index ce95bba1..243d87d0 100644
+--- a/Native/tests/agent_remote_tool_host_contract.cpp
++++ b/Native/tests/agent_remote_tool_host_contract.cpp
+@@ -46,8 +46,9 @@ struct Task {
+ Operation pending(PersistenceService& store,std::size_t previous){const auto deadline=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<deadline){const auto operations=store.operations("run").get();if(operations.size()>previous)for(const auto& op:operations)if(op.state==OperationState::awaiting_approval)return op;std::this_thread::sleep_for(5ms);}throw std::runtime_error("Remote approval proposal deadline");}
+ }
+ #include "agent_worker_remote_host_fixture.hpp"
++#include "agent_callable_authority_fixture.hpp"
+ int main(int argc,char** argv){if(argc!=3)return 2;try{
+-    durable_remote_host_contract({argv[1],argv[2]});
++    durable_remote_host_contract({argv[1],argv[2]});callable_authority_contract({argv[1],argv[2]});
+     {AgentRemoteToolInvocation call;call.run_id="run";call.attempt_id="model";call.call_id="unicode-\xe4\xb8\xad";call.workspace_id="workspace";call.workspace_revision=7;call.tool_name="mcp_fixture_record";call.tool_index=63;call.arguments_json=R"({"text":"literal \\n bytes"})";
+         const auto wire=call.serialize();need(AgentRemoteToolInvocation::parse(wire).serialize()==wire,"Remote invocation must retain exact owned bytes");
+         for(const auto* field:{"endpoint","credential","operation_id","permission","registry"}){auto forged=Json::parse(wire);forged[field]="worker-selected";rejects<std::invalid_argument>([&]{AgentRemoteToolInvocation::parse(forged.dump());});}

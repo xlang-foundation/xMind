@@ -1,3 +1,21 @@
+## Trusted callable pre-effect authority — 2026-10-21
+
+The native callable owner now accepts backend-only live authority after approval
+and immediately before actual dispatch. It resolves the current repository
+guidance context at invocation instead of retaining a replaced address.
+
+Actual embedded xlang3 fixture code writes one marker when allowed; rejection
+after actual controller approval produces no write and retains a known failed
+operation. Callback input matches the exact approved native operation and call.
+**2/2 focused contracts pass in 12.64 seconds**, including the existing ordinary
+AgentRunner callable approval/denial/uncertainty behavior. All 2732 project
+inputs, SDK/library/dependency and 133-binary file sets/hashes remain frozen.
+[Scope, patches and raw evidence](evidence/process-worker-callable-authority-20261021.json).
+
+This is an authority prerequisite, not worker callable IPC or durable worker
+callable ownership. Broader/full regression, remaining worker capabilities,
+installation and fresh rendered/live-provider acceptance remain open.
+
 ## Native language queries in coding workers — 2026-10-21
 
 Configured language servers now enter the worker factory catalogue and native

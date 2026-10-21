@@ -38,9 +38,13 @@ struct AgentCallableToolOwnerContext {
     std::vector<AgentCallableBinding> bindings;
     std::function<bool(const std::string&)> offered_tool;
     RepositoryInstructionContext* repository_context=nullptr;
+    std::function<RepositoryInstructionContext*()> repository_context_for_call;
     std::vector<std::vector<AgentPermissionRule>> permission_layers;
     std::chrono::steady_clock::time_point deadline;
     std::chrono::milliseconds approval_timeout{600000};
+    // Backend-only live authority, after approval and immediately before the
+    // callable may produce an effect. Invocation values cannot supply it.
+    std::function<void(const AgentCallableInvocation&,const std::string&,std::stop_token)> before_effect;
 };
 // Local owned dispatch, not an authenticated worker RPC or an OS sandbox.
 std::unique_ptr<AgentCallableToolHost> make_agent_callable_tool_host(
