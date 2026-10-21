@@ -1,0 +1,125 @@
+{
+  "recordedAt": "2026-10-21T00:12:00.995Z",
+  "gate": {
+    "recordedAt": "2026-10-21T00:11:39.546Z",
+    "sourceParent": "797ce6a9790f2d8e9271e033cd8397b9ee7cb3bd",
+    "sourcePatchSha256": "0e6267bc525984a608d54095802f9a30dfbab660b8027c03ebe690c663f8eae5",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 20132,
+      "launchedAt": "2026-10-21T00:06:20.174Z",
+      "completedAt": "2026-10-21T00:08:01.854Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c0c619cf94b7700df16d4fa21638306deb8f6aa212c75b34ab4a1b3edbf9c0a0"
+    },
+    "test": {
+      "pid": 38004,
+      "launchedAt": "2026-10-21T00:08:05.807Z",
+      "completedAt": "2026-10-21T00:11:35.133Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "236a2b8f51d6083c6be9fc280ca4bee36faeff72311d21b367708a7d48beb3bc"
+    },
+    "total": 54,
+    "failed": 0,
+    "passed": 54,
+    "seconds": 209.25,
+    "projectFiles": 2693,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e855b7f8fbdfc63c7dde37b0da16a557dcd754b45a1ed61588b559087778f2ef",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-build.log": "c0c619cf94b7700df16d4fa21638306deb8f6aa212c75b34ab4a1b3edbf9c0a0",
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-build-terminal.json": "f046d552cfcf5f322bac123ceba1d790b6c0b795c5b86d9681b7a8cdf6b5bdc9",
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-ctest.log": "236a2b8f51d6083c6be9fc280ca4bee36faeff72311d21b367708a7d48beb3bc",
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-ctest-terminal.json": "25f23d4a6e47447bc0dc484932d15d45f6881a4eba2b7a6bc9ba894b6ad4162d",
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-LastTest.log": "8ae5b075fa669455fdc634d2f425ad7050f5c1f043389d18506d76878924f23e",
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-test-inventory.json": "0483b5a05260ef34efb3238c03faeb13683e417796bc25e3eeff9ec865e03a07",
+    "doc/evidence/agent-service-worker-dispatch-corrected-20261020-gate.json": "4ec34da51c37a85e4371024424e474c8a01af7243045c8690634081ba3817365"
+  },
+  "fixtureSha256": "f034df205e8c2382a825b6f364cebda57a4195e8be103d0c0951ba626f469b5a",
+  "scope": "AgentService backend root dispatch port with controlled native supervisor executor and actual registered named-agent admission",
+  "verified": [
+    "Optional trusted backend executor receives copied root ID, selected model, named-agent instructions, tool allowlist and ordered permissions",
+    "New ordinary, queued and incoming admission validates configured executor before durable root creation; execution validates again",
+    "Existing AgentService admission/scheduling/cancellation remains in the service; returned terminal identity/state must match backend durable facts",
+    "Controlled service fixture rejects an unsupported named-agent tool policy before any run or child/model dispatch",
+    "Supported explicit no-tools named agent executes through actual product supervisor child, sends captured base/profile/repository instructions, and persists canonical history plus one charge",
+    "Service becomes healthy/idle only after executor physically drains its child; independent peer verifies 48 intentional requests",
+    "Existing native AgentService contract is included alongside the 53 prior focused contracts"
+  ],
+  "limitations": [
+    "Product server/ExecutionPlatform factory selection and a user-facing agent placement configuration are not wired yet",
+    "New service-worker fixture uses a controlled backend executor factory with static no-tools settings; general settings, multi-folder, coding effects and profile routing need production factory integration",
+    "Shared RootWorkExecutor placement, queued cancellation, shutdown and exceptional service-worker paths require direct qualification",
+    "GraphService process placement remains open",
+    "No full-native-suite, installation, hosted, live-provider or rendered-client acceptance claim"
+  ],
+  "passed": true,
+  "failedAttempt": {
+    "gate": {
+      "recordedAt": "2026-10-21T00:04:25.048Z",
+      "sourceParent": "797ce6a9790f2d8e9271e033cd8397b9ee7cb3bd",
+      "sourcePatchSha256": "86b2095ea186da32af00ec4eff7229dc81087d4f62b9766e7c53ad545c56090c",
+      "uncommittedSource": true,
+      "build": {
+        "pid": 60548,
+        "launchedAt": "2026-10-20T23:54:10.680Z",
+        "completedAt": "2026-10-21T00:00:38.667Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "42aa2f13b98365387113ec6108347a76897a67f9035eeeae1d413bb4ad19796d"
+      },
+      "test": {
+        "pid": 26076,
+        "launchedAt": "2026-10-21T00:00:43.371Z",
+        "completedAt": "2026-10-21T00:04:20.885Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "d38bdf52f8b308c332f24a3b133dafc09219ba107c27b8f97c2ab72fae936f5c"
+      },
+      "total": 54,
+      "failed": 1,
+      "passed": 53,
+      "seconds": 217.45,
+      "projectFiles": 2693,
+      "sdkSourceFiles": 16,
+      "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 76,
+      "nativeBinaries": 133,
+      "nodeDependencyFiles": 18598,
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "nativeSha256": "e855b7f8fbdfc63c7dde37b0da16a557dcd754b45a1ed61588b559087778f2ef",
+      "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic fixtures only; no live model key used",
+      "installed": false,
+      "cpythonExecuted": false,
+      "scopePassed": false
+    },
+    "diagnosis": "The controlled backend executor factory omitted the captured workspace-membership receipt required before native lease admission. The correction records its configured static workspace snapshot after checking the root budget, without changing production admission checks or native executable bytes.",
+    "files": {
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-build.log": "42aa2f13b98365387113ec6108347a76897a67f9035eeeae1d413bb4ad19796d",
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-build-terminal.json": "d624a3dc4fa720e6d469375e3cf63d313dfd370de18537f920a9dbb51d973ef3",
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-ctest.log": "d38bdf52f8b308c332f24a3b133dafc09219ba107c27b8f97c2ab72fae936f5c",
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-ctest-terminal.json": "fc079592286f9cdfe75514ad3aa3a958c5e617182448cd78d604c13528344bc4",
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-LastTest.log": "567712936ad2f464f196613659842e05559c75570f17d0a78ec624bd4743bd19",
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-test-inventory.json": "0483b5a05260ef34efb3238c03faeb13683e417796bc25e3eeff9ec865e03a07",
+      "doc/evidence/agent-service-worker-dispatch-focused-20261020-gate.json": "d5ead3841249d40f97d4a9106be069a932e67c55d7197eedf19b43b9d0f4a475"
+    }
+  }
+}

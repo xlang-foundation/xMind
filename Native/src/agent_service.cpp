@@ -63,6 +63,9 @@ struct AgentService::Impl {
     std::shared_ptr<DelegationExecutor> delegation;
     std::shared_ptr<DynamicPlanExecutor> planning;
     AgentRunner runner;
+    std::shared_ptr<AgentRootExecutor> root_executor;
+    AgentRootExecutionRequest execution_request(const std::shared_ptr<Job>& job)const{return {job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions};}
+    void validate_execution(const std::shared_ptr<Job>& job)const{if(root_executor)root_executor->validate(execution_request(job));}
     mutable std::mutex mutex;
     std::mutex close_mutex;
     std::condition_variable changed;
@@ -93,15 +96,15 @@ struct AgentService::Impl {
         return persistence.replace_session_agent(session,*configured,selected.revision).get().selected;
     }
 
-    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget)
-        :Impl(store,ordinary_settings(std::move(settings)),count,capacity,std::move(budget),Prepared{}){}
-    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,Prepared)
+    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,std::shared_ptr<AgentRootExecutor> execution)
+        :Impl(store,ordinary_settings(std::move(settings)),count,capacity,std::move(budget),std::move(execution),Prepared{}){}
+    Impl(PersistenceService& store,AgentSettings settings,std::size_t count,std::size_t capacity,std::shared_ptr<RootAdmissionPool> budget,std::shared_ptr<AgentRootExecutor> execution,Prepared)
         :persistence(store),root_admission(budget?std::move(budget):std::make_shared<RootAdmissionPool>(capacity+count)),work_pool(root_admission->executor()),provider_context(provider_context_json(settings)),planning_enabled(settings.planning.has_value()),
          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
          children(settings.delegation||settings.planning?std::make_shared<NativeChildExecutor>():nullptr),
          delegation(settings.delegation?std::make_shared<DelegationExecutor>(store,children):nullptr),
          planning(settings.planning?std::make_shared<DynamicPlanExecutor>(store,children):nullptr),
-         runner(store,std::move(settings),delegation,planning),limit(capacity),owned_limit(capacity+count){
+         runner(store,std::move(settings),delegation,planning),root_executor(std::move(execution)),limit(capacity),owned_limit(capacity+count){
         if(count==0||count>16||capacity==0||capacity>4096)throw std::invalid_argument("Invalid agent worker capacity");
         // Recovery already interrupts every non-clean owner. Adopt only ordinary
         // typed closed human pauses. Stale authority retains inspection/cancel.
@@ -223,7 +226,11 @@ struct AgentService::Impl {
                 // enter the runner with their stopped token for durable retirement.
                 if(!work_pool&&!dispatch)throw DatabaseError("Agent root lost its shared dispatch ticket");
                 auto execution=work_pool?std::unique_ptr<RootAdmissionPool::Execution>{}:root_admission->acquire_execution(*dispatch,job->stop.get_token());
-                const auto observed=runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);std::unique_lock lock(mutex);
+                validate_execution(job);
+                const auto observed=root_executor?root_executor->execute(execution_request(job),job->stop.get_token()):runner.execute(job->id,job->stop.get_token(),job->model,{},job->agent_instructions,job->agent_tools,false,job->agent_permissions);
+                if(root_executor){const auto actual=persistence.run(job->id).get();
+                    if(observed.id!=actual.id||observed.session_id!=actual.session_id||(terminal(observed.state)&&observed.state!=actual.state))throw DatabaseError("Agent root executor returned without matching durable facts");}
+                std::unique_lock lock(mutex);
                 if(terminal(observed.state)){remove_ticket(job);active.erase(job->id);changed.notify_all();return;}
                 if(observed.state!=RunState::paused)throw DatabaseError("Agent worker returned without actual retirement or a human pause");
                 // Re-read under the input owner lock: a final answer may have
@@ -401,8 +408,8 @@ struct AgentService::Impl {
     }
 };
 AgentService::AgentService(PersistenceService& store,AgentSettings settings,std::size_t workers,std::size_t capacity,
-    std::shared_ptr<RootAdmissionPool> root_admission)
-    :impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity,std::move(root_admission))){}
+    std::shared_ptr<RootAdmissionPool> root_admission,std::shared_ptr<AgentRootExecutor> root_executor)
+    :impl_(std::make_unique<Impl>(store,std::move(settings),workers,capacity,std::move(root_admission),std::move(root_executor))){}
 AgentService::~AgentService()=default;
 Run AgentService::submit(std::string id,std::string session,std::string prompt){return submit_model(std::move(id),std::move(session),std::move(prompt),{});}
 std::vector<std::string> AgentService::models()const{return impl_->runner.models();}
@@ -477,7 +484,7 @@ Run AgentService::submit_with_attachments(std::string id,std::string session,std
     std::optional<AgentDefinition> profile=impl_->profile_for_new_run(session);
     if(profile){job->agent_instructions=profile->instructions;job->agent_tools=profile->tools;job->agent_permissions=profile->permissions;if(model.empty()&&!profile->model_id.empty())model=profile->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
-    job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    job->model=std::move(model);impl_->validate_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,profile,{},std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
@@ -489,7 +496,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
     std::optional<AgentDefinition> agent=impl_->profile_for_new_run(session);
     if(agent){job->agent_instructions=agent->instructions;job->agent_tools=agent->tools;job->agent_permissions=agent->permissions;if(model.empty()&&!agent->model_id.empty())model=agent->model_id;}
     if(!model.empty()&&!impl_->runner.provider_bound_model_overrides()){const auto configured=impl_->runner.models();if(std::find(configured.begin(),configured.end(),model)==configured.end())throw std::invalid_argument("Model is not configured on this backend");}
-    job->model=std::move(model);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    job->model=std::move(model);impl_->validate_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     Run result;try{result=impl_->runner.start(id,std::move(session),std::move(prompt),job->model,agent,inbox_id,std::move(files),workspace?workspace->revision:0);}
     catch(...){impl_->remove_ticket(job);impl_->active.erase(id);throw;}
@@ -498,7 +505,7 @@ Run AgentService::submit_queued(std::string id,std::string session,std::string p
 Run AgentService::submit_message(std::string id,std::string context,std::string message,std::string content,std::string identity){
     if(content.empty()||content.size()>65536||content.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid incoming message content");
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.incoming_message(message,context,identity,content).get())return *replay;
-    impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;impl_->reserve_root(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
+    impl_->require_admission();auto job=std::make_shared<Impl::Job>();job->id=id;impl_->reserve_root(job);impl_->validate_execution(job);if(!impl_->active.emplace(id,job).second)throw Conflict("Run already exists");
     try{impl_->reserve_wake(job);}catch(...){impl_->active.erase(id);throw;}
     auto prompt=Json{{"content",content},{"a2a_message_id",message}};if(!impl_->provider_context.empty())prompt["provider_context"]=Json::parse(impl_->provider_context);
     Run result;try{result=impl_->persistence.start_incoming_message(id,context,message,prompt.dump(),identity,impl_->runner.execution_budget(),impl_->runner.execution_capabilities()).get();}

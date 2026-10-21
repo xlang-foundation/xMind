@@ -2,13 +2,14 @@
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/run_executor.hpp"
 #include "agentflow/root_admission_pool.hpp"
+#include "agentflow/agent_root_executor.hpp"
 
 namespace agentflow {
 class AgentService final : public RunExecutor {
 public:
     AgentService(PersistenceService& persistence,AgentSettings settings,
         std::size_t workers=2,std::size_t max_pending=128,
-        std::shared_ptr<RootAdmissionPool> root_admission={});
+        std::shared_ptr<RootAdmissionPool> root_admission={},std::shared_ptr<AgentRootExecutor> root_executor={});
     ~AgentService();
     AgentService(const AgentService&)=delete;
     AgentService& operator=(const AgentService&)=delete;

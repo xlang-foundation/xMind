@@ -1,3 +1,36 @@
+## AgentService backend worker dispatch port — 2026-10-20
+
+AgentService now accepts an optional trusted backend root executor. The service
+retains admission, queueing and cancellation ownership; the executor receives the
+captured root/model, selected-agent instructions, explicit tool list and ordered
+permissions. New ordinary, queued and incoming admission validates the configured
+executor before durable root creation, and dispatch validates again. Returned
+terminal identity/state must match actual persisted facts. The port contract
+requires retaining physical ownership through actual child drain; it is not a
+client/plugin callback. The default runner path remains available.
+
+A controlled backend factory now proves actual AgentService-to-supervisor dispatch:
+an unsupported registered agent tool policy rejects before any run, child or model;
+a supported explicit no-tools agent sends captured base/profile/repository guidance
+through a distinct product child, persists two canonical messages and one model
+charge, and physically drains before the service becomes idle. The independent
+peer verifies exactly 48 intentional requests. Existing native AgentService and
+the preceding 53 focused contracts are included in the final 54-contract gate.
+
+The first gate fails 53/54 because the controlled factory omitted the workspace
+membership receipt required before lease admission. Its raw evidence is retained.
+The corrected factory checks the configured static workspace against root budget
+and records that snapshot before launch; production admission checks and executable
+bytes are unchanged between runs. Final serial Release build and all 54 contracts
+pass in 209.25 seconds with all frozen inputs/file sets and binaries unchanged.
+
+Product server/ExecutionPlatform factory selection, user-facing placement settings,
+general settings/multi-folder/effect support, shared physical-pool service placement,
+queued cancellation/shutdown/fault qualification and GraphService placement remain
+open. Installed59 and user state are untouched. No full-suite, hosted, live-provider
+or rendered-client acceptance is claimed. See
+[passing and failed evidence](evidence/agent-service-worker-dispatch-corrected-20261020.json).
+
 ## Native supervisor concurrent cancellation — 2026-10-20
 
 An actual product child executes a held provider stream through the native

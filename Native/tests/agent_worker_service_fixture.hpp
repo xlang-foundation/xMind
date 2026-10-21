@@ -1,0 +1,61 @@
+#include "agentflow/agent_service.hpp"
+#include "agentflow/agent_definitions.hpp"
+namespace worker_service_fixture {
+using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;
+using worker_read_fixture::check;using worker_read_fixture::rejects;using worker_read_fixture::write;
+// Controlled backend factory for this service integration fixture. The product
+// dispatch port remains separate from general settings/placement configuration.
+class Executor final:public AgentRootExecutor {
+public:
+    Executor(PersistenceService& value,std::shared_ptr<const BoundProcessExecutable> bound,WorkspaceTools& files,
+        RepositoryInstructionContext& instructions,std::string endpoint,Clock::time_point until)
+        :store(value),image(std::move(bound)),workspace(files),guidance(instructions),endpoint(std::move(endpoint)),deadline(until){}
+    void validate(const AgentRootExecutionRequest& request)const override{
+        if(request.model_id!="worker-rpc-fixture"||request.agent_instructions!="Captured service agent."||!request.agent_tools||!request.agent_tools->empty()||!request.agent_permissions.empty())throw std::invalid_argument("Unsupported controlled worker service admission");
+    }
+    Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{
+        validate(request);++executions;
+        const auto budget=store.root_budget(request.run_id).get();
+        if(budget.spec.workspace_identity!=workspace.identity())throw ToolAccessDenied("Controlled service worker workspace differs from root admission");
+        const auto identity=budget.spec.provider_identity_json;
+        store.append_event(request.run_id,"agent.workspace_membership",Json{{"workspace_id",workspace.identity()},{"revision",1},{"primary_folder_id",workspace.identity()},{"folders",Json::array({Json{{"folder_id",workspace.identity()},{"root",workspace.root_path()}}})},{"snapshot","run_admission"}}.dump()).get();
+        AgentWorkerSupervisor supervisor(store,image,{request.run_id,request.run_id,workspace.identity(),"generation-"+request.run_id,1},identity,deadline);
+        child_pid=supervisor.lease().pid;
+        const auto settle=[&](RunState intent){
+            for(;;){try{if(store.run(request.run_id).get().state==RunState::completed)return supervisor.drain_completed(Clock::now()+5s).run;
+                    return supervisor.drain_terminal(intent==RunState::cancelled?RunState::cancelled:RunState::failed,intent==RunState::cancelled?"cancelled":"dispatch_error",Clock::now()+5s).run;}
+                catch(...){if(!supervisor.alive())throw;std::this_thread::sleep_for(5ms);}}
+        };
+        try{
+            AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&workspace;owner.repository_context=[&](std::size_t index){return index?nullptr:&guidance;};owner.offered_tool=[](const std::string&){return false;};owner.deadline=deadline;owner.permission_rules=request.agent_permissions;
+            AgentWorkerReadRequestPolicy policy;policy.instructions="Service captured base.\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;policy.include_usage=true;
+            ChatProviderConfig config{endpoint+"/product_service","worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
+            supervisor.start(owner,policy,config,{},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),cancel);
+            const auto intent=supervisor.execute();const auto result=settle(intent);drained=!supervisor.alive();return result;
+        }catch(...){const auto failure=std::current_exception();(void)settle(cancel.stop_requested()?RunState::cancelled:RunState::failed);std::rethrow_exception(failure);}
+    }
+    std::atomic<unsigned> executions=0;std::atomic<bool> drained=false;std::atomic<std::uint32_t> child_pid=0;
+private:
+    PersistenceService& store;std::shared_ptr<const BoundProcessExecutable> image;WorkspaceTools& workspace;RepositoryInstructionContext& guidance;std::string endpoint;Clock::time_point deadline;
+};
+inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder){
+    const auto directory=folder/"product_service";check(std::filesystem::create_directory(directory),"Service worker needs a fresh workspace");write(directory/"AGENTS.md","SERVICE_WORKER_GUIDANCE\n");
+    WorkspaceTools workspace(directory.string());RepositoryInstructionContext guidance(workspace,workspace.repository_instructions("."));
+    AgentSettings settings;settings.provider={endpoint+"/product_service","worker-rpc-fixture",Capability::supported,Capability::supported};settings.workspace=directory.string();settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{};settings.instructions="Service captured base.";settings.run_timeout=20s;
+    const auto executor=std::make_shared<Executor>(store,image,workspace,guidance,endpoint,Clock::now()+20s);
+    const auto catalog=AgentDefinitionStore(store).apply("agents:\n  - id: service.worker.good\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: []\n  - id: service.worker.unsupported\n    model_id: worker-rpc-fixture\n    instructions: Captured service agent.\n    tools: [read_file]\n");
+    const std::string session="rpc-service-supervised-session",id="rpc-product_service";store.create_session(session,"Actual service-owned native worker").get();
+    AgentService service(store,settings,1,2,{},executor);const auto metadata=service.agent_definitions();
+    const auto bad=std::find_if(metadata.begin(),metadata.end(),[](const auto& item){return item.id=="service.worker.unsupported";});
+    const auto good=std::find_if(metadata.begin(),metadata.end(),[](const auto& item){return item.id=="service.worker.good";});check(bad!=metadata.end()&&good!=metadata.end(),"Service fixture must expose actual registered profiles");
+    service.select_session_agent(session,*bad,0);
+    rejects<std::invalid_argument>([&]{service.submit("rpc-service-rejected",session,"must not dispatch");});
+    check(store.runs(session).get().empty()&&executor->executions==0&&service.healthy()&&service.idle(),"Worker validation must reject unsupported admission before any durable root or execution");
+    service.select_session_agent(session,*good,1);
+    service.submit(id,session,"Native child model RPC product_service.");
+    const auto until=Clock::now()+10s;while(Clock::now()<until&&(!service.idle()||store.run(id).get().state!=RunState::completed))std::this_thread::sleep_for(5ms);
+    check(service.idle()&&service.healthy()&&executor->executions==1&&executor->drained&&executor->child_pid!=GetCurrentProcessId(),"AgentService must retain execution until its exact supervised child is physically drained");
+    const auto history=store.run_history(id).get();check(history.size()==2&&Json::parse(history.back().json).at("content")=="Service worker complete."&&store.root_budget(id).get().model_calls_reserved==1,"Service-owned child must preserve actual canonical history and one model charge");service.close();
+    std::cout<<"AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle."<<std::endl;
+}
+}
