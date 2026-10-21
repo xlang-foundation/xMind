@@ -1,0 +1,168 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T12:46:23.465Z",
+    "sourceParent": "d9a278e2dd5d1bf5196211934940fb2c75f6081f",
+    "sourcePatchSha256": "3607fdb05a0bc0acdcc95886dd93c60d2b48208b8a4951c86cd4ab11be6a86fb",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 67852,
+      "launchedAt": "2026-10-21T12:44:44.444Z",
+      "completedAt": "2026-10-21T12:45:25.810Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "64924aed21126ff2d33f154a542b181699fc5b082b978db3e18ab9efa65e64d8"
+    },
+    "test": {
+      "pid": 13976,
+      "launchedAt": "2026-10-21T12:45:28.813Z",
+      "completedAt": "2026-10-21T12:46:20.514Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c05e3297bb946b361eceef369b242cde84afd89c944c6472ead81caa9b07c800"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 51.63,
+    "projectFiles": 2740,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "e036dcb823b1547c4458e5f309b628122d510aa0d8fcdf1fddfc37b962b46fdc",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "runs": [
+    {
+      "name": "process-worker-context-preparation-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T12:43:55.392Z",
+        "sourceParent": "d9a278e2dd5d1bf5196211934940fb2c75f6081f",
+        "sourcePatchSha256": "45c2fe8d1bfe4df97906285c1bb3c6ef6453f35c3c467f9fb2bb0d702652ada3",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 68856,
+          "launchedAt": "2026-10-21T12:34:22.015Z",
+          "completedAt": "2026-10-21T12:43:28.327Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "2501bde407f728c984190ea188a7b5a49927282ba1c4ad8732ed70d2f2908b00"
+        },
+        "test": {
+          "pid": 56640,
+          "launchedAt": "2026-10-21T12:43:31.362Z",
+          "completedAt": "2026-10-21T12:43:52.527Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "394b04d61032f20e4be3507264453463191b3350fb6e16eeb997743a0a429576"
+        },
+        "total": 5,
+        "failed": 1,
+        "passed": 4,
+        "seconds": 21.11,
+        "projectFiles": 2740,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "5b5d48fafc4c69f588a4104c046f2b7ac64983f35278773ac6bdf9f454a4fc11",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      }
+    },
+    {
+      "name": "process-worker-context-admission-20261021",
+      "gate": {
+        "recordedAt": "2026-10-21T12:46:23.465Z",
+        "sourceParent": "d9a278e2dd5d1bf5196211934940fb2c75f6081f",
+        "sourcePatchSha256": "3607fdb05a0bc0acdcc95886dd93c60d2b48208b8a4951c86cd4ab11be6a86fb",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 67852,
+          "launchedAt": "2026-10-21T12:44:44.444Z",
+          "completedAt": "2026-10-21T12:45:25.810Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "64924aed21126ff2d33f154a542b181699fc5b082b978db3e18ab9efa65e64d8"
+        },
+        "test": {
+          "pid": 13976,
+          "launchedAt": "2026-10-21T12:45:28.813Z",
+          "completedAt": "2026-10-21T12:46:20.514Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "c05e3297bb946b361eceef369b242cde84afd89c944c6472ead81caa9b07c800"
+        },
+        "total": 5,
+        "failed": 0,
+        "passed": 5,
+        "seconds": 51.63,
+        "projectFiles": 2740,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 133,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "e036dcb823b1547c4458e5f309b628122d510aa0d8fcdf1fddfc37b962b46fdc",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      }
+    }
+  ],
+  "files": {
+    "doc/evidence/process-worker-context-preparation-20261021-build.log": "2501bde407f728c984190ea188a7b5a49927282ba1c4ad8732ed70d2f2908b00",
+    "doc/evidence/process-worker-context-preparation-20261021-build-terminal.json": "5541c88ddcd57b4bca3eab35abae7405c8abc93037087ad580937d98d4b827db",
+    "doc/evidence/process-worker-context-preparation-20261021-ctest.log": "394b04d61032f20e4be3507264453463191b3350fb6e16eeb997743a0a429576",
+    "doc/evidence/process-worker-context-preparation-20261021-ctest-terminal.json": "e95251225b5186e66fce61a58b6a2759365d741605aadc62608a5182c4c2043f",
+    "doc/evidence/process-worker-context-preparation-20261021-LastTest.log": "ddbbcd15a147b499122aa8114504922a879a0253a1a5a9fc53759b7b3e0af449",
+    "doc/evidence/process-worker-context-preparation-20261021-test-inventory.json": "5ff87425e285b1464dd246c6a89040c268129d8b0ef84c78615ea2197e6916a9",
+    "doc/evidence/process-worker-context-preparation-20261021-gate.json": "f421d6a5695daa7efdec79a767acc7ac23b8d30061023374858a61812ffb9721",
+    "doc/evidence/process-worker-context-preparation-20261021-source.patch": "45c2fe8d1bfe4df97906285c1bb3c6ef6453f35c3c467f9fb2bb0d702652ada3",
+    "doc/evidence/process-worker-context-admission-20261021-build.log": "64924aed21126ff2d33f154a542b181699fc5b082b978db3e18ab9efa65e64d8",
+    "doc/evidence/process-worker-context-admission-20261021-build-terminal.json": "3fbf158f0399857890aa277eb253872315f84f31ec1c5085d93099097a9c3678",
+    "doc/evidence/process-worker-context-admission-20261021-ctest.log": "c05e3297bb946b361eceef369b242cde84afd89c944c6472ead81caa9b07c800",
+    "doc/evidence/process-worker-context-admission-20261021-ctest-terminal.json": "6e772e49d569be1859b32c00d4cc851f529c227a1483cf6f96207d03bacae351",
+    "doc/evidence/process-worker-context-admission-20261021-LastTest.log": "a2d90e67a936b1fc7160d22ca8d098bdf79149d42033cb842ec5c9f541c43cb5",
+    "doc/evidence/process-worker-context-admission-20261021-test-inventory.json": "5ff87425e285b1464dd246c6a89040c268129d8b0ef84c78615ea2197e6916a9",
+    "doc/evidence/process-worker-context-admission-20261021-gate.json": "f5eb5cad4f35b6199bea1931566e8f80d39f48b97c7084889b2280ca280be643",
+    "doc/evidence/process-worker-context-admission-20261021-source.patch": "3607fdb05a0bc0acdcc95886dd93c60d2b48208b8a4951c86cd4ab11be6a86fb",
+    "doc/evidence/process-worker-context-admission-20261021-binaries-before-test.json": "ee19f3c11c2c2dfe02d82ca5d57f7ba2e053e4048d27b4318c3eb818f12bc7e8"
+  },
+  "verified": [
+    "Backend model-window validation uses one native repository transaction to check current exact lease and committed actual tool turns",
+    "Admission invokes this check before publishing delivered guidance; deadline and cancellation are checked on the persistence owner",
+    "Ledger rejects premature validation without new events, foreign PID, cancellation, expired deadline and retired lease; committed actual turns permit validation",
+    "Existing actual worker preview between two withheld scoped reads remains valid and does not mark nested instructions delivered",
+    "Five focused contracts pass with exactly 135 controlled model HTTP requests and frozen complete source/dependency/binary file sets"
+  ],
+  "failuresPreserved": [
+    "Initial placement at every preview blocked an intentional between-read preview; moved check to admission and retained the existing actual-worker fixture unchanged"
+  ],
+  "limitations": [
+    "This is a prerequisite boundary, not worker context counting/compaction integration",
+    "Full/broader regression, updated installation, rendered and live-provider acceptance remain open",
+    "Worker context owner, delegation/planning and graph/default placement remain unfinished"
+  ],
+  "passed": true
+}

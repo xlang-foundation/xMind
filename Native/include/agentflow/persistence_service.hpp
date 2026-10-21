@@ -19,6 +19,7 @@ public:
     // journal or a generic RPC method selected by the child.
     std::future<AgentWorkerLeaseRecord> admit_agent_worker(AgentWorkerLeaseSpec);
     std::future<AgentWorkerLeaseRecord> agent_worker_lease(std::string generation);
+    std::future<void> validate_agent_worker_model_window(AgentWorkerLeaseSpec,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerJournalValue> read_agent_worker_journal(AgentWorkerLeaseSpec,AgentWorkerJournalRead);
     std::future<Run> start_agent_worker_run(AgentWorkerLeaseSpec,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<Event> record_agent_worker_model_event(AgentWorkerModelClaimSpec,std::string kind,std::string json);

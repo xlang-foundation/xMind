@@ -3401,6 +3401,9 @@ AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec
     changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{std::string(worker_current_category),spec.owner_run_id,Json{{"generation",spec.generation}}.dump()}));impl_->event(spec.owner_run_id,"worker.lease.admitted",Json{{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"pid",spec.pid}}.dump());tx.commit();return record;
 }
 AgentWorkerLeaseRecord Repository::agent_worker_lease(const std::string& generation){return read_worker_lease(impl_->database,generation);}
+void Repository::validate_agent_worker_model_window(const AgentWorkerLeaseSpec& lease){
+    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);worker_require_tool_turns(db,lease);tx.commit();
+}
 AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerLeaseSpec& expected,const AgentWorkerJournalRead& query){
     if(query.target.empty()||query.target.size()>256||query.after<0||(query.kind!=AgentWorkerJournalReadKind::events&&query.after!=0))throw std::invalid_argument("Invalid worker journal read");
     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,expected,true);

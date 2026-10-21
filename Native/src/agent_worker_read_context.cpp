@@ -41,7 +41,7 @@ AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token 
 }
 ModelRequest AgentWorkerReadContext::prepare(std::stop_token cancel){std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");return preview(cancel).request;}
 void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel,const ModelRequest* full_window){
-    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");auto candidate=preview(cancel);
+    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");store_.validate_agent_worker_model_window(lease_,owner_.deadline,owner_cancel_,cancel).get();auto candidate=preview(cancel);
     if(encode_agent_model_request(candidate.request)!=encode_agent_model_request(request))throw Conflict("Worker model request changed backend instructions or history");
     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="dispatching")throw Conflict("Worker guidance has no captured live model dispatch");
     if(candidate.replay){if(full_window)candidate.replay->projection_binding=context_digest(serialize_provider_history_projection(*policy_.history_provider,*full_window));store_.record_provider_history_replay(*candidate.replay).get();}

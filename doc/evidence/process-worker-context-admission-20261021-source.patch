@@ -1,0 +1,87 @@
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 0bcc6904..816097f9 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -19,6 +19,7 @@ public:
+     // journal or a generic RPC method selected by the child.
+     std::future<AgentWorkerLeaseRecord> admit_agent_worker(AgentWorkerLeaseSpec);
+     std::future<AgentWorkerLeaseRecord> agent_worker_lease(std::string generation);
++    std::future<void> validate_agent_worker_model_window(AgentWorkerLeaseSpec,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<AgentWorkerJournalValue> read_agent_worker_journal(AgentWorkerLeaseSpec,AgentWorkerJournalRead);
+     std::future<Run> start_agent_worker_run(AgentWorkerLeaseSpec,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<Event> record_agent_worker_model_event(AgentWorkerModelClaimSpec,std::string kind,std::string json);
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 559fe692..8d405e6a 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -195,6 +195,7 @@ public:
+     // worker journal port. Each mutation validates and commits atomically.
+     AgentWorkerLeaseRecord admit_agent_worker(const AgentWorkerLeaseSpec&);
+     AgentWorkerLeaseRecord agent_worker_lease(const std::string& generation);
++    void validate_agent_worker_model_window(const AgentWorkerLeaseSpec&);
+     AgentWorkerJournalValue read_agent_worker_journal(const AgentWorkerLeaseSpec&,const AgentWorkerJournalRead&);
+     Event record_agent_worker_model_event(const AgentWorkerModelClaimSpec&,const std::string& kind,const std::string& json);
+     Event agent_worker_model_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json);
+diff --git a/Native/src/agent_worker_read_context.cpp b/Native/src/agent_worker_read_context.cpp
+index 5a93abb4..b615a3cb 100644
+--- a/Native/src/agent_worker_read_context.cpp
++++ b/Native/src/agent_worker_read_context.cpp
+@@ -41,7 +41,7 @@ AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token
+ }
+ ModelRequest AgentWorkerReadContext::prepare(std::stop_token cancel){std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");return preview(cancel).request;}
+ void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel,const ModelRequest* full_window){
+-    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");auto candidate=preview(cancel);
++    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");store_.validate_agent_worker_model_window(lease_,owner_.deadline,owner_cancel_,cancel).get();auto candidate=preview(cancel);
+     if(encode_agent_model_request(candidate.request)!=encode_agent_model_request(request))throw Conflict("Worker model request changed backend instructions or history");
+     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="dispatching")throw Conflict("Worker guidance has no captured live model dispatch");
+     if(candidate.replay){if(full_window)candidate.replay->projection_binding=context_digest(serialize_provider_history_projection(*policy_.history_provider,*full_window));store_.record_provider_history_replay(*candidate.replay).get();}
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 4460432b..4ff82465 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -199,6 +199,9 @@ std::future<RootBudgetRecord> PersistenceService::root_budget(std::string id){re
+ 
+ std::future<AgentWorkerLeaseRecord> PersistenceService::admit_agent_worker(AgentWorkerLeaseSpec spec){return impl_->submit([spec=std::move(spec)](Repository& r){return r.admit_agent_worker(spec);});}
+ std::future<AgentWorkerLeaseRecord> PersistenceService::agent_worker_lease(std::string generation){return impl_->observe([generation=std::move(generation)](Repository& r){return r.agent_worker_lease(generation);});}
++std::future<void> PersistenceService::validate_agent_worker_model_window(AgentWorkerLeaseSpec lease,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){
++    return impl_->submit([lease=std::move(lease),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker model window cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker model window deadline elapsed");r.validate_agent_worker_model_window(lease);});
++}
+ std::future<AgentWorkerJournalValue> PersistenceService::read_agent_worker_journal(AgentWorkerLeaseSpec lease,AgentWorkerJournalRead read){return impl_->observe([lease=std::move(lease),read=std::move(read)](Repository& r){return r.read_agent_worker_journal(lease,read);});}
+ std::future<Run> PersistenceService::start_agent_worker_run(AgentWorkerLeaseSpec lease,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker startup cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker startup deadline elapsed");return r.transition(lease.owner_run_id,RunState::queued,RunState::running,"{}",&lease);});}
+ std::future<Event> PersistenceService::record_agent_worker_model_event(AgentWorkerModelClaimSpec spec,std::string kind,std::string json){return impl_->submit([spec=std::move(spec),kind=std::move(kind),json=std::move(json)](Repository& r){return r.record_agent_worker_model_event(spec,kind,json);});}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 06e7bb88..a67b1c79 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3401,6 +3401,9 @@ AgentWorkerLeaseRecord Repository::admit_agent_worker(const AgentWorkerLeaseSpec
+     changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{std::string(worker_current_category),spec.owner_run_id,Json{{"generation",spec.generation}}.dump()}));impl_->event(spec.owner_run_id,"worker.lease.admitted",Json{{"generation",spec.generation},{"root_run_id",spec.root_run_id},{"pid",spec.pid}}.dump());tx.commit();return record;
+ }
+ AgentWorkerLeaseRecord Repository::agent_worker_lease(const std::string& generation){return read_worker_lease(impl_->database,generation);}
++void Repository::validate_agent_worker_model_window(const AgentWorkerLeaseSpec& lease){
++    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);worker_require_tool_turns(db,lease);tx.commit();
++}
+ AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerLeaseSpec& expected,const AgentWorkerJournalRead& query){
+     if(query.target.empty()||query.target.size()>256||query.after<0||(query.kind!=AgentWorkerJournalReadKind::events&&query.after!=0))throw std::invalid_argument("Invalid worker journal read");
+     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,expected,true);
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index f0d82617..e411409e 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -89,6 +89,7 @@ void tool_turns(PersistenceService& store){
+     store.reserve_agent_worker_model(admitted,"turn-next",deadline).get();store.reserve_agent_worker_model(admitted,"prestarted-next",deadline).get();store.start_agent_worker_model(admitted,"prestarted-next",deadline).get();
+     store.reserve_agent_worker_model(admitted,"turn-model",deadline).get();store.start_agent_worker_model(admitted,"turn-model",deadline).get();const auto model=claim(admitted,"turn-model");store.claim_agent_worker_model(model).get();
+     const std::string args=R"({"path":"actual.txt"})",one=R"({"content":"first exact result","number":1.0000000000000001})",two=R"({"error":"native pre-dispatch rejection"})";ModelCompletion response{"Actual tool assistant","","tool_calls",R"({"total_tokens":17})",{{"turn-one","read_file",args},{"turn-two","read_file",args}},"[]"};const auto assistant=format_agent_model_assistant(response,"worker-fixture-model",23,5);store.record_agent_worker_model_response(model,encode_agent_model_completion(response),assistant).get();store.finish_agent_worker_model(admitted,"turn-model",deadline).get();
++    const auto window_events=store.events(admitted.owner_run_id).get().size();rejects<Conflict>([&]{store.validate_agent_worker_model_window(admitted,deadline).get();});require(store.events(admitted.owner_run_id).get().size()==window_events,"Premature model preview cannot mutate history or fund maintenance");
+     rejects<NotFound>([&]{store.commit_agent_worker_read_turn(admitted,"turn-model",deadline).get();});rejects<Conflict>([&]{store.reserve_agent_worker_model(admitted,"blocked-next",deadline).get();});rejects<Conflict>([&]{store.start_agent_worker_model(admitted,"turn-next",deadline).get();});rejects<Conflict>([&]{store.claim_agent_worker_model(claim(admitted,"prestarted-next")).get();});
+     rejects<Conflict>([&]{store.agent_worker_tool_event(admitted,"turn-model",0,true,deadline).get();});rejects<std::invalid_argument>([&]{store.agent_worker_tool_event(admitted,"turn-model",64,false,deadline).get();});
+     auto changed_activity=admitted;++changed_activity.pid;rejects<Conflict>([&]{store.agent_worker_tool_event(changed_activity,"turn-model",0,false,deadline).get();});std::stop_source activity_stop;activity_stop.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.agent_worker_tool_event(admitted,"turn-model",0,false,deadline,activity_stop.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.agent_worker_tool_event(admitted,"turn-model",0,false,std::chrono::steady_clock::now()-1ms).get();});
+@@ -100,7 +101,8 @@ void tool_turns(PersistenceService& store){
+     auto first=store.commit_agent_worker_read_turn(admitted,"turn-model",deadline),second=store.commit_agent_worker_read_turn(admitted,"turn-model",deadline);const auto receipt=first.get(),duplicate=second.get();const auto history=store.run_history("turn-root").get();require(receipt.message_sequences==duplicate.message_sequences&&receipt.messages_binding==duplicate.messages_binding&&history.size()==4&&history[1].json==assistant&&history[2].json==Json{{"content",one},{"tool_call_id","turn-one"}}.dump()&&history[3].json==Json{{"content",two},{"tool_call_id","turn-two"}}.dump(),"Concurrent commits must append one actual assistant and every exact native result once");
+     Json messages=Json::array();std::vector<std::int64_t> sequences;for(std::size_t index=1;index<history.size();++index){const auto& message=history[index];sequences.push_back(message.sequence);messages.push_back({{"sequence",message.sequence},{"role",message.role},{"json",message.json}});}require(sequences==receipt.message_sequences&&context_digest(messages.dump())==receipt.messages_binding,"Compact receipt must bind the actual persisted native messages");
+     const auto events=store.events("turn-root").get();require(std::count_if(events.begin(),events.end(),[](const Event& event){return event.kind=="conversation.tool_turn";})==1&&std::count_if(events.begin(),events.end(),[](const Event& event){return event.kind=="worker.tool_turn.committed";})==1,"Idempotent tool turn acknowledgement must not append events");
+-    store.start_agent_worker_model(admitted,"turn-next",deadline).get();store.claim_agent_worker_model(claim(admitted,"prestarted-next")).get();store.reserve_agent_worker_model(admitted,"fresh-next",deadline).get();require(store.root_budget("turn-root").get().model_calls_reserved==4,"Only committed native tool turns may release continuation funding/start/dispatch");store.retire_agent_worker(admitted.generation,"cancelled").get();rejects<Conflict>([&]{store.commit_agent_worker_read_turn(admitted,"turn-model",deadline).get();});
++    store.validate_agent_worker_model_window(admitted,deadline).get();auto foreign_window=admitted;++foreign_window.pid;rejects<Conflict>([&]{store.validate_agent_worker_model_window(foreign_window,deadline).get();});std::stop_source cancelled_window;cancelled_window.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.validate_agent_worker_model_window(admitted,deadline,cancelled_window.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.validate_agent_worker_model_window(admitted,std::chrono::steady_clock::now()-1ms).get();});
++    store.start_agent_worker_model(admitted,"turn-next",deadline).get();store.claim_agent_worker_model(claim(admitted,"prestarted-next")).get();store.reserve_agent_worker_model(admitted,"fresh-next",deadline).get();require(store.root_budget("turn-root").get().model_calls_reserved==4,"Only committed native tool turns may release continuation funding/start/dispatch");store.retire_agent_worker(admitted.generation,"cancelled").get();rejects<Conflict>([&]{store.validate_agent_worker_model_window(admitted,deadline).get();});rejects<Conflict>([&]{store.commit_agent_worker_read_turn(admitted,"turn-model",deadline).get();});
+ }
+ void file_claims(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
+     // Synthetic process/model/proposal identities test durable ownership, not

@@ -195,6 +195,7 @@ public:
     // worker journal port. Each mutation validates and commits atomically.
     AgentWorkerLeaseRecord admit_agent_worker(const AgentWorkerLeaseSpec&);
     AgentWorkerLeaseRecord agent_worker_lease(const std::string& generation);
+    void validate_agent_worker_model_window(const AgentWorkerLeaseSpec&);
     AgentWorkerJournalValue read_agent_worker_journal(const AgentWorkerLeaseSpec&,const AgentWorkerJournalRead&);
     Event record_agent_worker_model_event(const AgentWorkerModelClaimSpec&,const std::string& kind,const std::string& json);
     Event agent_worker_model_event(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,const std::string& kind,const std::string& json);

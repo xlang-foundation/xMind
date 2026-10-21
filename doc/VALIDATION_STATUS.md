@@ -1,3 +1,20 @@
+## Worker model-window admission boundary — 2026-10-21
+
+Backend model-window validation checks the current exact lease and committed
+actual tool turns in one repository transaction. Guidance admission uses this
+check before delivery. Ledger tests reject premature windows without new
+events, foreign process identity, cancellation, expiry and retired leases.
+
+**5/5 focused contracts pass in 51.63 seconds**, with exactly 135 controlled
+HTTP requests and all source/dependency/133-binary file sets/hashes frozen.
+The initial overly broad preview check failed an intentional between-read
+preview; the check now runs at admission, and the original fixture passes
+unchanged. [Both runs and raw evidence](evidence/process-worker-context-admission-20261021.json).
+
+This establishes a prerequisite boundary only. Worker context counting and
+compaction, delegation/planning, graph/default placement and installed product
+acceptance remain unfinished. No broader/full suite is claimed for this change.
+
 ## Canonical worker session history — 2026-10-21
 
 Configured production workers now receive canonical provider session history
