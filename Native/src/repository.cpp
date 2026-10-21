@@ -24,6 +24,7 @@ bool ordinary_worker_policy(const std::string& policy){return policy=="native.di
 Json worker_provider_identity(Repository&,const std::string&,const std::string&);
 bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
+bool worker_uncounted_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_effect_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
 void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
@@ -1807,9 +1808,9 @@ void graph_context_path(const std::string& path){
     for(;;){const auto end=path.find('/',start),size=end==std::string::npos?path.size()-start:end-start;const auto component=path.substr(start,size);if(size<1||size>64||++parts>4||component.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid graph context node path");if(end==std::string::npos)break;start=end+1;}
 }
 Json graph_context_json(const GraphContextSpec& s){
-    context_hash(s.backend_identity);if(s.agents.size()>8)throw std::invalid_argument("Registered graph context exceeds eight agent nodes");Json agents=Json::array();std::set<std::string> ids;for(const auto& a:s.agents){graph_context_path(a.node_id);context_hash(a.backend_identity);if(!ids.insert(a.node_id).second||a.turn_limit<1||a.turn_limit>16)throw std::invalid_argument("Registered graph agent authority or turn limit differs");auto policy=RootBudgetSpec{"native.graph-context",1,"workspace:validation",a.provider_identity_json,8,2,32,600000};const auto identity=budget_provider_identity(policy);if(identity.at("model_id")!=a.model_id)throw std::invalid_argument("Registered graph model differs from captured provider");agents.push_back({{"node_id",a.node_id},{"model_id",a.model_id},{"provider_identity_json",identity.dump()},{"backend_identity",a.backend_identity},{"turn_limit",a.turn_limit}});}return {{"backend_identity",s.backend_identity},{"agents",agents}};
+    context_hash(s.backend_identity);if(s.agents.size()>8)throw std::invalid_argument("Registered graph context exceeds eight agent nodes");Json agents=Json::array();std::set<std::string> ids;for(const auto& a:s.agents){graph_context_path(a.node_id);context_hash(a.backend_identity);if(!ids.insert(a.node_id).second||a.turn_limit<1||a.turn_limit>16)throw std::invalid_argument("Registered graph agent authority or turn limit differs");auto policy=RootBudgetSpec{"native.graph-context",1,"workspace:validation",a.provider_identity_json,8,2,32,600000};const auto identity=budget_provider_identity(policy);if(identity.at("model_id")!=a.model_id)throw std::invalid_argument("Registered graph model differs from captured provider");agents.push_back({{"node_id",a.node_id},{"model_id",a.model_id},{"provider_identity_json",identity.dump()},{"backend_identity",a.backend_identity},{"turn_limit",a.turn_limit}});}Json result={{"backend_identity",s.backend_identity},{"agents",agents}};if(!s.token_context)result["token_context"]=false;return result;
 }
-GraphContextSpec decode_graph_context(const std::string& raw){const auto j=Json::parse(object_json(raw,65536));GraphContextSpec s;s.backend_identity=j.at("backend_identity").get<std::string>();for(const auto& a:j.at("agents"))s.agents.push_back({a.at("node_id"),a.at("model_id"),a.at("provider_identity_json"),a.at("backend_identity"),a.at("turn_limit")});if(graph_context_json(s)!=j)throw DatabaseError("Captured graph context authority shape differs");return s;}
+GraphContextSpec decode_graph_context(const std::string& raw){const auto j=Json::parse(object_json(raw,65536));GraphContextSpec s;s.token_context=j.value("token_context",true);s.backend_identity=j.at("backend_identity").get<std::string>();for(const auto& a:j.at("agents"))s.agents.push_back({a.at("node_id"),a.at("model_id"),a.at("provider_identity_json"),a.at("backend_identity"),a.at("turn_limit")});if(graph_context_json(s)!=j)throw DatabaseError("Captured graph context authority shape differs");return s;}
 const GraphContextAgent& graph_context_agent(const GraphContextSpec& s,const std::string& node){const auto a=std::find_if(s.agents.begin(),s.agents.end(),[&](const auto& v){return v.node_id==node;});if(a==s.agents.end())throw ContextBindingChanged("Graph agent has no exact captured context authority");return *a;}
 void graph_context_drained(XlangSqlite& db,const std::string& root,bool safe_effects,const char* controller_states=nullptr){
     const std::string tree="WITH RECURSIVE tree(id,depth) AS (SELECT ?,0 UNION ALL SELECT r.id,t.depth+1 FROM runs r JOIN tree t ON r.parent_run_id=t.id WHERE t.depth<4) ";
@@ -2183,7 +2184,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
     bounded_identity(attempt);const auto role_name=std::string(call_role(role));auto& db=impl_->database;Transaction transaction(db);
     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||role!=(owner==root?ModelCallRole::parent:ModelCallRole::leaf))throw Conflict("Worker funding owner differs from captured admission");}
     const auto budget=root_budget(root);const auto parent=run(root),actor=run(owner);
-    if(worker&&!((owner==root&&(budget.spec.policy_id=="native.direct-agent"||budget.spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)))throw Conflict("Worker reserve requires ordinary direct-agent admission");
+    if(worker&&!((owner==root&&(budget.spec.policy_id=="native.direct-agent"||budget.spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)||worker_uncounted_graph_owner(*this,*worker)))throw Conflict("Worker reserve requires ordinary direct-agent admission");
     if(worker)worker_require_tool_turns(db,*worker);
     if(parent.state!=RunState::running || actor.state!=RunState::running)throw Conflict("Model attempt requires its running execution owners");
     if(role==ModelCallRole::parent){if(owner!=root||parent.graph_root)throw Conflict("Parent model attempt owner differs");}
@@ -2207,7 +2208,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
 ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker){
     auto& db=impl_->database;Transaction transaction(db);(void)root_budget(root);const auto parent=run(root),actor=run(owner);
     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||worker_attempt_generation(db,root,owner,attempt)!=std::optional<std::string>{worker->generation})throw Conflict("Worker cannot start an attempt funded by another authority");}
-    if(worker&&!((owner==root&&(root_budget(root).spec.policy_id=="native.direct-agent"||root_budget(root).spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)))throw Conflict("Worker start requires ordinary direct-agent admission");
+    if(worker&&!((owner==root&&(root_budget(root).spec.policy_id=="native.direct-agent"||root_budget(root).spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)||worker_uncounted_graph_owner(*this,*worker)))throw Conflict("Worker start requires ordinary direct-agent admission");
     if(worker)worker_require_tool_turns(db,*worker);
     if(parent.state!=RunState::running||actor.state!=RunState::running)throw Conflict("Model attempt owners are not running");
     const auto rows=db.execute("SELECT role,state,purpose,inference_step_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
@@ -3381,6 +3382,7 @@ bool worker_graph_owner(Repository& repository,const AgentWorkerLeaseSpec& lease
     const auto capture=repository.graph_context_owner(root.id);if(!capture.segment||capture.segment->state!="open")return false;
     return std::any_of(capture.authority.agents.begin(),capture.authority.agents.end(),[&](const auto& node){return node.node_id==admission.graph_node_path&&Json::parse(node.provider_identity_json)==Json::parse(lease.provider_identity_json);});
 }
+bool worker_uncounted_graph_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){return worker_graph_owner(repository,lease)&&!repository.graph_context_owner(lease.root_run_id).authority.token_context;}
 bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
     if(lease.owner_run_id==lease.root_run_id)return false;
     const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);

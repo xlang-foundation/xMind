@@ -14,6 +14,8 @@ struct GraphContextAgent {
 struct GraphContextSpec {
     std::string backend_identity;
     std::vector<GraphContextAgent> agents;
+    // Captured backend policy; false keeps execution ownership without token management.
+    bool token_context=true;
 };
 struct GraphContextOwnerRecord {
     std::string root_run_id;

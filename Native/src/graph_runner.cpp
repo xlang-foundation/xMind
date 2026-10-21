@@ -40,7 +40,7 @@ bool same_budget(const RootBudgetSpec& left,const RootBudgetSpec& right){
         left.max_model_calls==right.max_model_calls&&left.wall_limit_ms==right.wall_limit_ms;
 }
 bool same_context(const GraphContextSpec& left,const GraphContextSpec& right){
-    if(left.backend_identity!=right.backend_identity||left.agents.size()!=right.agents.size())return false;
+    if(left.backend_identity!=right.backend_identity||left.token_context!=right.token_context||left.agents.size()!=right.agents.size())return false;
     for(std::size_t i=0;i<left.agents.size();++i){const auto& a=left.agents[i];const auto& b=right.agents[i];
         if(a.node_id!=b.node_id||a.model_id!=b.model_id||a.provider_identity_json!=b.provider_identity_json||a.backend_identity!=b.backend_identity||a.turn_limit!=b.turn_limit)return false;
     }return true;
@@ -116,11 +116,10 @@ void GraphRunner::validate(const GraphPlan& plan,const std::string& model) const
         }
     }
     };visit(visit,plan,false);
-    if(settings_.graph_execution&&agent_count&&!settings_.context)throw GraphContextUnavailable("Process graph agents require captured graph context");
-    if(settings_.context&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
+    if((settings_.context||settings_.graph_execution)&&agent_count>8)throw GraphContextUnavailable("Context graph agent admission exceeds its shared child limit");
 }
 std::optional<RootBudgetSpec> GraphRunner::execution_budget(const GraphPlan& plan,const std::string& model)const{
-    validate(plan,model);if(!settings_.context||graph_agent_paths(plan).empty())return {};
+    validate(plan,model);if((!settings_.context&&!settings_.graph_execution)||graph_agent_paths(plan).empty())return {};
     return RootBudgetSpec{"native.graph-context",1,workspace_?workspace_->identity():"workspace:none",public_identity(settings_,model),8,
         static_cast<std::int64_t>(std::min<std::size_t>(limit_,2)),32,settings_.run_timeout.count()};
 }
@@ -129,14 +128,14 @@ std::optional<GraphContextSpec> GraphRunner::execution_context(const GraphPlan& 
     auto child=settings_;child.delegation.reset();child.planning.reset();
     child.max_turns=std::min(child.max_turns,max_registered_graph_agent_turns);
     const auto credentials=agent_authority_credentials(store_,child);const auto workspace=workspace_?workspace_->identity():"workspace:none";
-    GraphContextSpec result;auto bindings=Json::array();
+    GraphContextSpec result;result.token_context=settings_.context.has_value();auto bindings=Json::array();
     for(const auto& node:graph_agent_paths(plan)){
         const auto selected=node.model_id.empty()?(model.empty()?settings_.provider.model:model):node.model_id;
         GraphContextAgent captured{node.node_path,selected,public_identity(child,selected),context_authority_identity(child,selected,workspace,credentials),static_cast<std::int64_t>(child.max_turns)};
         bindings.push_back({{"node",captured.node_id},{"model",captured.model_id},{"provider",captured.provider_identity_json},{"authority",captured.backend_identity},{"turn_limit",captured.turn_limit}});
         result.agents.push_back(std::move(captured));
     }
-    result.backend_identity=context_digest("native.graph.context.v1:"+plan.json()+":"+bindings.dump());return result;
+    result.backend_identity=context_digest(std::string(result.token_context?"native.graph.context.v1:":"native.graph.process.v1:")+plan.json()+":"+bindings.dump());return result;
 }
 std::optional<WorkspaceMembershipSnapshot> GraphRunner::workspace_membership_admission()const{
     if(!workspace_)return {};

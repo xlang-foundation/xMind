@@ -312,6 +312,7 @@ int run_server(int argc,char** argv) {
         const auto configure_execution_mode=[&](agentflow::AgentSettings& settings){
             settings.delegated_execution=agentflow::make_agent_worker_delegated_executor(persistence,worker_image);
             if(!process_worker)return;
+            settings.graph_execution=agentflow::make_agent_worker_graph_executor(persistence,worker_image);
             settings.a2a_enabled=false;settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};
             if(process_code){for(const auto* tool:{"edit_file","create_file","apply_patch","restore_operation"})settings.tool_allowlist->push_back(tool);settings.process_profiles=process_profiles;if(!process_profiles.empty())for(const auto* tool:{"run_process","wait_process","stop_process"})settings.tool_allowlist->push_back(tool);}
             settings.tool_allowlist->push_back("delegate_tasks");

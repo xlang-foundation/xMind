@@ -921,6 +921,9 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_model_rpc_peer.mjs" "$<TARGET_FILE:agentflow_agent_worker_model_rpc_contract>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_worker_model_rpc_contract PROPERTIES TIMEOUT 75)
+      add_test(NAME native_agent_worker_graph_no_context_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_model_rpc_contract>"
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "graph-no-context")
+      set_tests_properties(native_agent_worker_graph_no_context_contract PROPERTIES TIMEOUT 60)
       add_test(NAME native_agent_worker_server_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_server_contract.mjs" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")

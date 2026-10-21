@@ -1,0 +1,72 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-21T18:06:46.036Z",
+    "sourceParent": "43e4f4d3269e1706fcee82697d4dbca798d7f245",
+    "sourcePatchSha256": "ce5976aa46540dfd45a5f14e3d4a86eed93b3b0d92f9bdcec70c2406208de55b",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 17156,
+      "launchedAt": "2026-10-21T17:54:48.358Z",
+      "completedAt": "2026-10-21T18:05:09.625Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "334dd98f95d8fd8d16b70638307c9638e9b40c4ff7c082b5cf75292a01e83da3"
+    },
+    "test": {
+      "pid": 68536,
+      "launchedAt": "2026-10-21T18:05:13.234Z",
+      "completedAt": "2026-10-21T18:06:43.044Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0b40a19612ce940a9b6435e609703bb303b8196f2921f0fe70e242f2c66c24fc"
+    },
+    "total": 10,
+    "failed": 0,
+    "passed": 10,
+    "seconds": 89.76,
+    "projectFiles": 2753,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 133,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "ebbcf50d309be53020a8d351c5d1ff2d2f4c641571b9129bbdd235fb3ccce627",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": {
+    "doc/evidence/process-worker-graph-no-context-20261021-build.log": "334dd98f95d8fd8d16b70638307c9638e9b40c4ff7c082b5cf75292a01e83da3",
+    "doc/evidence/process-worker-graph-no-context-20261021-build-terminal.json": "a0ea01b0c2cae5412e8fda0899f978bcf644765c47cd74acaf78b407768dba27",
+    "doc/evidence/process-worker-graph-no-context-20261021-ctest.log": "0b40a19612ce940a9b6435e609703bb303b8196f2921f0fe70e242f2c66c24fc",
+    "doc/evidence/process-worker-graph-no-context-20261021-ctest-terminal.json": "236f16c6e08f3fa01580d2291251a717c6f7f54a8d813b640f0d950d3ffcffa8",
+    "doc/evidence/process-worker-graph-no-context-20261021-LastTest.log": "744c984702f2fd4000edf1921830680e609fb871c275accd1bf938b3a7a76a88",
+    "doc/evidence/process-worker-graph-no-context-20261021-test-inventory.json": "3de968ea14524407e995ec4661da007203440d39922c8e5eb29b707cdcb6d41b",
+    "doc/evidence/process-worker-graph-no-context-20261021-gate.json": "beea97edbea5612a242eb743869d147b1ab2f2053f594debcc59933809f70970",
+    "doc/evidence/process-worker-graph-no-context-20261021-source.patch": "ce5976aa46540dfd45a5f14e3d4a86eed93b3b0d92f9bdcec70c2406208de55b",
+    "doc/evidence/process-worker-graph-no-context-20261021-binaries-before-test.json": "994621a134f5f87d39a56f78b88f4d0687c327f15f031cba03051290a82ed286"
+  },
+  "verified": [
+    "Graph process execution captures token-management mode separately from immutable node models/authority and the original shared execution clock",
+    "Only exact active graph worker leases with durably disabled token management can reserve/start untyped model calls; counted graph rejection remains covered",
+    "New dedicated contract verifies two actual xmind graph workers per file/process allow/deny case with zero token counts and no fabricated typed inference groups",
+    "Four shared model charges, exact bytes, controller approvals, inherited denial and canonical process receipts remain verified in each case",
+    "Explicit server process mode now binds graph_execution; authenticated graph API test verifies an actual distinct xmind worker, native read bytes and lease retirement without context configuration",
+    "Ten focused contracts pass in 89.76 seconds with complete source/dependency/runtime and 133-binary sets unchanged"
+  ],
+  "limitations": [
+    "Controlled model gateways/HTTP peers only; no new live-provider or rendered acceptance",
+    "Default server execution is still thread; workspace-free roots, dynamic planning and full process default integration remain open",
+    "Graph remote/callable combinations and additional failure/pause acceptance remain unfinished",
+    "Earlier intermittent access violation remains unresolved",
+    "CI inventory registration is the next separate script-only change; this gate captures its previous source",
+    "Full current native/client regression and updated installation remain open"
+  ],
+  "focusedGatePassed": true,
+  "fullRegressionAccepted": false
+}

@@ -1,3 +1,20 @@
+## Server graph IPC without token management — 2026-10-21
+
+Explicit server process mode now dispatches graph agents through the xlang3 SDK
+executor. Graphs without token management retain captured node models/authority,
+shared model-call charges and the original active clock. Only exact active leases
+with that durably captured mode can use untyped funding; counted graph rejection
+remains covered. A dedicated contract verifies file/process approval and inherited
+denial with actual worker processes and zero token counts. Authenticated server
+graph submission verifies a distinct xmind worker and canonical native read bytes.
+**10/10 focused contracts pass in 89.76 seconds** with frozen inputs unchanged.
+[Scope and raw receipts](evidence/process-worker-graph-no-context-20261021.json).
+
+Default execution remains thread. Workspace-free roots, planning, remaining graph
+tool/failure/pause combinations, full current regression and updated installed/
+rendered/live-provider acceptance remain open. The earlier intermittent access
+violation remains unresolved. CI inventory registration follows separately.
+
 ## Graph commands through xlang3 SDK IPC — 2026-10-21
 
 Two actual xmind coding workers now execute under GraphService with captured
