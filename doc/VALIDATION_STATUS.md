@@ -1,3 +1,46 @@
+## DynamicPlanExecutor selects supervised production children — 2026-10-21
+
+DynamicPlanExecutor now accepts a backend-only DynamicAgentExecution port and
+uses it for freshly admitted or resumed agent work. Configured dispatch returns
+directly through that port; its failure cannot fall through to local AgentRunner
+construction. Deterministic tool work retains its backend path. Existing thread
+placement remains the default when no process port is configured. The process
+factory explicitly refuses resume and counted context pending their assembly.
+
+The accepted-parent test now uses actual make_agent_worker_planning_callbacks
+and DynamicPlanExecutor acceptance, frontier admission, scheduling, child
+settlement and report. It no longer injects synthetic child settlement on that
+path. The selected factory launches built xmind.exe through AgentWorkerSupervisor
+for a native SDK file read, canonical child completion and exact physical drain.
+Then the backend commits the signed report and funds the counted parent
+continuation; the distinct fixture parent worker completes through SDK journal.
+Both model gateways remain synthetic; the parent executable is the fixture.
+
+Verified one scheduler dispatch, unchanged signed child settings (including
+planning configuration), rejection of changed instructions before dispatch,
+two child/two parent model turns, four shared charges, canonical child/root
+history, one settled child, exact production image/PID/birth, completed lease
+and physical exit before join. The dynamic factory validates original settings
+directly; it no longer constructs a local AgentRunner solely for metadata.
+Only preset-admitted leaf tools are exposed; nested child planning remains
+unassembled. The now-unused manual actual-child settlement branch was removed
+from the fixture; synthetic branches remain for their ledger fault cases.
+
+Focused ledger 1/1 passed in 4.13 seconds. Final focused 20/20 passed in
+127.96 seconds (ledger 3.72; broad worker 57.48), same source patch and native
+binary. Patch 47f2cf65962192af13293ac733fd6d19dd9b022327227f1865f4352810e830ee;
+native 1b16c5fb3d035246af319af865ec6bbdaa2570491af848eac2328634476ed79d. Frozen 2786
+project files, 16 SDK includes, 1870 pure libraries, 76 runtime files,
+18598 Node dependencies and 138 native binaries retain exact sets/hashes.
+Evidence: doc/evidence/process-xmind-root-native-dynamic-scheduler-qualified-20261021-gate.json.
+Diagnostic capture enabled for 20 run; no dump. Earlier heap/SDK faults unresolved.
+
+Main WorkspaceExecutor planning admission is still closed. Counted/coding/
+nested child coverage, overflow/retry, human handoff, main factory selection,
+legacy cleanup, full native suite, broad stability and installed CLI/browser/
+extension acceptance remain open. No install, SDK change, CPython, live provider
+execution or replay of completed user tasks.
+
 ## Production xmind dynamic-child supervisor factory — 2026-10-21
 
 make_agent_worker_dynamic_executor now captures a bound executable/backend

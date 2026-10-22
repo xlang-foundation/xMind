@@ -238,7 +238,7 @@ AgentSettings dynamic_child_settings(const AgentSettings& parent,const DynamicPr
     // binding checks remain the only effect authority.
     return child;
 }
-DynamicPlanExecutor::DynamicPlanExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children):store_(store),children_(std::move(children)){
+DynamicPlanExecutor::DynamicPlanExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children,DynamicAgentExecution agent_execution):store_(store),children_(std::move(children)),agent_execution_(std::move(agent_execution)){
     if(!children_)throw std::invalid_argument("Dynamic planning requires the shared native child pool");
 }
 bool DynamicPlanExecutor::healthy()const{return children_->healthy();}
@@ -335,6 +335,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                         bool available=false;try{available=agent_authority_identity(settings,settings.provider.model,caps.workspace_identity,agent_authority_credentials(store_,settings))==policy.backend_identity;}
                         catch(const Conflict&){}catch(const NotFound&){}
                         if(!available)return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_preset_unavailable_after_resume"})").get();
+                        if(agent_execution_)return agent_execution_(settings,child_id,budget,true,stop);
                         std::unique_ptr<AgentRunner> runner;
                         try{auto nested_planning=settings.planning?std::make_shared<DynamicPlanExecutor>(store_,children_):std::shared_ptr<DynamicPlanExecutor>{};runner=std::make_unique<AgentRunner>(store_,settings,std::shared_ptr<DelegationExecutor>{},std::move(nested_planning),true);}
                         catch(const ProcessBeforeDispatchError&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
@@ -403,6 +404,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                         catch(const NotFound&){available=false;}
                         if(!available)return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_preset_unavailable"})").get();
                         if(auto retired=retire_before_launch())return *retired;
+                        if(agent_execution_)return agent_execution_(settings,child_id,budget,false,stop);
                         std::unique_ptr<AgentRunner> runner;
                         try{auto nested_planning=settings.planning?std::make_shared<DynamicPlanExecutor>(store_,children_):std::shared_ptr<DynamicPlanExecutor>{};runner=std::make_unique<AgentRunner>(store_,settings,std::shared_ptr<DelegationExecutor>{},std::move(nested_planning),true);}
                         catch(const ProcessBeforeDispatchError&){return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}

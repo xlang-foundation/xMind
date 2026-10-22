@@ -32,11 +32,19 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+DynamicPlanExecutor now selects an optional backend process dispatch port for
+fresh/resumed agent work, with no local fallback after configured dispatch
+fails. Real planning callbacks/acceptance/scheduler launch actual xmind.exe,
+settle after physical drain and prepare the signed parent continuation in the
+accepted-parent contract. Default thread placement retains local execution.
+Main factory selection/admission remain closed; counted and nested child work,
+resume/human handoff and full product/client verification remain open.
+
 The production dynamic-child factory now reuses WorkspaceExecutor and the
 existing supervisor with signed preflight/completion checks. Actual built
 xmind.exe child read/completion/drain is verified under the controlled parent
-callback. It currently refuses counted/planning-capable child settings without
-mutation or fallback. DynamicPlanExecutor selection and wider child-policy
+callback. It currently refuses counted context/resume while retaining original planning
+configuration for authority; nested planning services are not yet exposed. Wider child-policy
 assembly remain open; main process planning admission is still closed.
 
 Dynamic child journal serialization, native adapter admission and shared runner
@@ -44,14 +52,14 @@ now work in actual distinct fixture processes. The controlled backend callback
 launches the child, verifies an SDK file read and canonical completion, and
 waits for physical exit before settlement/parent continuation. Public child
 lineage omits backend identity; remote children use backend-owned catalogues.
-Production DynamicPlanExecutor selection and counted/coding/nested
+Main factory selection and counted/coding/nested
 child coverage remain open. The local-preset filter is gated to local runners.
 
 Repository now admits dynamic child worker leases against exact signed node,
 claim/preset revisions, provider/workspace and open root segment. Typed model
 funding/start/final completion and private-identity redaction are ledger-tested
-with synthetic child process identity. Production scheduler selection remains required; the supervisor factory now
-executes actual xmind.exe children in the controlled accepted-parent contract.
+with synthetic child process identity. Production main factory selection remains required; the actual scheduler and
+supervisor execute xmind.exe children in the accepted-parent contract.
 
 A distinct worker shared-loop test now verifies accepted-plan continuation
 funding and final completion: two parent model turns, one synthetic child

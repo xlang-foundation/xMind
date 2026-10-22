@@ -86,7 +86,7 @@ class WorkspaceExecutor final:public AgentRootExecutor {
 public:
     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={},bool graph=false,bool dynamic=false)
         :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),graph_(graph),dynamic_(dynamic),image_(std::move(image)){
-        if(!image_||(!settings_.workspace&&(coding_||delegated_||graph_||dynamic_||settings_.delegation||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch))||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_||dynamic_)&&settings_.delegation)||settings_.planning||(dynamic_&&settings_.context)||(!coding_&&settings_.workspace&&!delegated_&&!graph_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
+        if(!image_||(!settings_.workspace&&(coding_||delegated_||graph_||dynamic_||settings_.delegation||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch))||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_||dynamic_)&&settings_.delegation)||(settings_.planning&&!dynamic_)||(dynamic_&&settings_.context)||(!coding_&&settings_.workspace&&!delegated_&&!graph_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
         // AgentService owns the single admission-time membership capture.
         settings_.workspace_membership_snapshot={};
@@ -97,14 +97,14 @@ public:
         }
         if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
         if(!delegated_&&settings_.delegation){if(!settings_.delegated_execution)settings_.delegated_execution=make_agent_worker_delegated_executor(store_,image_);children_=std::make_shared<NativeChildExecutor>();delegation_=std::make_shared<DelegationExecutor>(store_,children_);}
-        validator_=std::make_unique<AgentRunner>(store_,settings_,delegation_);
+        if(!dynamic_)validator_=std::make_unique<AgentRunner>(store_,settings_,delegation_);
         gateway_=gateway?std::move(gateway):make_persistence_agent_model_gateway(store_,settings_.credential);
     }
     std::shared_ptr<NativeChildExecutor> shared_children()const override{return children_;}
     std::shared_ptr<DelegationExecutor> shared_delegation()const override{return delegation_;}
     void validate(const AgentRootExecutionRequest& request)const override{
         if(!request.placement.empty()&&request.placement!="process")throw std::invalid_argument("Only process placement can enter a process worker executor");
-        const auto selected=model(request);const auto models=validator_->models();
+        const auto selected=model(request);const auto models=dynamic_?std::vector<std::string>{settings_.provider.model}:validator_->models();
         if(!bounded(selected,256)||(!settings_.provider_identity&&std::find(models.begin(),models.end(),selected)==models.end()))throw std::invalid_argument("Worker model is not configured");
         if(request.agent_instructions.size()>32768||request.agent_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid worker agent instructions");
         validate_agent_permission_rules(request.agent_permissions);(void)tools(request);
@@ -113,7 +113,7 @@ public:
         const auto& membership=*request.workspace;
         if(membership.workspace_id!=primary_->identity()||membership.revision<1||membership.revision>9007199254740991LL||membership.folders.empty()||membership.folders.size()>256||membership.folders.front().root!=primary_->root_path()||membership.folders.front().folder_id!=membership.workspace_id)throw std::invalid_argument("Worker workspace differs from its backend owner");
         std::set<std::string> ids;std::size_t root_bytes=0;for(const auto& folder:membership.folders){if(!bounded(folder.folder_id,256)||!bounded(folder.root,32760)||folder.root.size()>262144-root_bytes||!ids.insert(folder.folder_id).second)throw std::invalid_argument("Invalid captured worker folder");root_bytes+=folder.root.size();}
-        if(!validator_->execution_budget(selected))throw std::invalid_argument("Worker requires an ordinary execution budget");
+        if(!dynamic_&&!validator_->execution_budget(selected))throw std::invalid_argument("Worker requires an ordinary execution budget");
     }
     Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{if(delegated_||graph_)throw Conflict("Child executor requires its original shared budget");return execute_owned(request,{},cancel);}
     Run execute_owned(const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared,std::stop_token cancel){
@@ -127,7 +127,7 @@ public:
         const auto prompt=Json::parse(history.front().json);
         if(prompt.contains("agent_profile")&&prompt["agent_profile"].is_object()&&prompt["agent_profile"].contains("placement")&&prompt["agent_profile"]["placement"]!=request.placement)throw Conflict("Worker placement differs from its admitted prompt");
         const auto root=shared?shared->root_id():request.run_id;
-        const auto budget=store_.root_budget(root).get();const auto expected=*validator_->execution_budget(model(request));
+        const auto budget=store_.root_budget(root).get();const auto expected=dynamic_?RootBudgetSpec{}:*validator_->execution_budget(model(request));
         auto provider_identity=Json::parse(budget.spec.provider_identity_json);if(delegated_||graph_||dynamic_)provider_identity["model_id"]=model(request);
         if(delegated_&&provider_identity!=Json::parse(provider_context_json(settings_,model(request)).empty()?expected.provider_identity_json:provider_context_json(settings_,model(request))))throw Conflict("Delegated worker provider differs from frozen settings");
         if(!delegated_&&!graph_&&!dynamic_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0))throw Conflict("Worker root differs from immutable admission or was already executed");
@@ -255,8 +255,8 @@ public:
 }
 DynamicAgentExecution make_agent_worker_dynamic_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){
     if(!image)throw std::invalid_argument("Dynamic execution requires a bound xmind image");
-    return [&store,image=std::move(image),gateway=std::move(gateway)](const AgentSettings& frozen,const std::string& id,std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel){
-        if(!budget||!frozen.workspace||frozen.planning||frozen.context)throw Conflict("Dynamic process requires its supported captured child policy");const auto child=store.child_admission(id).get();if(child.kind!=ChildAdmissionKind::dynamic_agent||child.root_run_id!=budget->root_id())throw Conflict("Dynamic process lacks its exact child claim");const auto plan=store.dynamic_plan(child.plan_id).get();const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});if(preset==plan.capabilities.presets.end()||frozen.max_turns!=static_cast<std::size_t>(preset->turn_limit)||agent_authority_identity(frozen,frozen.provider.model,plan.capabilities.workspace_identity,agent_authority_credentials(store,frozen))!=child.backend_identity)throw Conflict("Dynamic process settings differ from signed preset");
+    return [&store,image=std::move(image),gateway=std::move(gateway)](const AgentSettings& frozen,const std::string& id,std::shared_ptr<RootExecutionBudget> budget,bool resume,std::stop_token cancel){
+        if(resume||!budget||!frozen.workspace||frozen.context)throw Conflict("Dynamic process requires its supported captured child policy");const auto child=store.child_admission(id).get();if(child.kind!=ChildAdmissionKind::dynamic_agent||child.root_run_id!=budget->root_id())throw Conflict("Dynamic process lacks its exact child claim");const auto plan=store.dynamic_plan(child.plan_id).get();const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});if(preset==plan.capabilities.presets.end()||frozen.max_turns!=static_cast<std::size_t>(preset->turn_limit)||agent_authority_identity(frozen,frozen.provider.model,plan.capabilities.workspace_identity,agent_authority_credentials(store,frozen))!=child.backend_identity)throw Conflict("Dynamic process settings differ from signed preset");
         auto membership=std::make_shared<WorkspaceMembershipSnapshot>();bool found=false;for(const auto& event:store.events(budget->root_id()).get())if(event.kind=="agent.workspace_membership"){const auto value=Json::parse(event.json);membership->workspace_id=value.at("workspace_id");membership->revision=value.at("revision");for(const auto& folder:value.at("folders"))membership->folders.push_back({folder.at("folder_id").get<std::string>(),folder.at("root").get<std::string>()});found=true;break;}if(!found)throw Conflict("Dynamic process lacks captured root membership");
         WorkspaceExecutor executor(store,frozen,image,!preset->readonly,false,gateway,false,true);AgentRootExecutionRequest request;request.run_id=id;request.model_id=frozen.provider.model;request.agent_tools=preset->tools;request.workspace=std::move(membership);request.placement="process";return executor.execute_owned(request,std::move(budget),cancel);
     };

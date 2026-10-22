@@ -15,7 +15,7 @@ struct DynamicExecutionResult {
     bool paused=false;
 };
 // Backend-only child dispatch; return only after exact physical drain.
-using DynamicAgentExecution=std::function<Run(const AgentSettings&,const std::string&,std::shared_ptr<RootExecutionBudget>,std::stop_token)>;
+using DynamicAgentExecution=std::function<Run(const AgentSettings&,const std::string&,std::shared_ptr<RootExecutionBudget>,bool,std::stop_token)>;
 using DynamicInstructionPrecondition = std::function<InstructionPrecondition(const std::string&,std::stop_token)>;
 // Trusted execution port used by the agent loop. The local implementation owns
 // durable plan scheduling; a worker adapter must resolve the same backend owner.

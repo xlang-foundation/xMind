@@ -15,7 +15,7 @@ AgentSettings dynamic_child_settings(const AgentSettings& parent,
 // ordinary root's shared budget. Provider continuation belongs to AgentRunner.
 class DynamicPlanExecutor final:public DynamicPlanExecution {
 public:
-    DynamicPlanExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children);
+    DynamicPlanExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children,DynamicAgentExecution agent_execution={});
     DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
         const std::string& actual_assistant_json,const std::string& originating_model_attempt,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
@@ -30,5 +30,6 @@ private:
         std::stop_token cancel,DynamicInstructionPrecondition guidance);
     PersistenceService& store_;
     std::shared_ptr<NativeChildExecutor> children_;
+    DynamicAgentExecution agent_execution_;
 };
 }
