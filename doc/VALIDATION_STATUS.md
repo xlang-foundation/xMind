@@ -1,3 +1,41 @@
+## Production planning human-pause drain — 2026-10-22
+
+AgentWorkerSupervisor now drains a verified paused root separately from terminal
+failure. Typed persistence preflight requires exact lease/current generation,
+provider/workspace membership, the closed admitted segment, durable human wait,
+finalized capabilities and no unresolved model/tool/planning dispatch. Native
+control/channel close and exact process wait precede atomic paused retirement.
+The transaction repeats the durable preconditions and independently observes
+PID/birth exit. The generic retirement API refuses the paused reason. Accepted
+planning calls and root history remain intact; no run.failed is written.
+Repeated observation retains the same process and lease on timeout/write failure.
+
+SDK execution status and the production entry point now preserve paused intent.
+It is not authority to retire: durable preflight is still required. Backend worker
+context preparation/rebuild pins the root snapshot on the same shared planning
+budget, allowing ContextManager's signed pause pin to survive a human wait.
+
+Two new actual-production root cases (plain/counted) read once, accept a human
+node, pause after two model calls without agent child dispatch, reject foreign
+PID/segment and retirement while alive, drain, and preserve the accepted call.
+Injected SQL failure after physical exit rolls back lease retirement while root,
+history and active lease remain intact; retry observes the same exited process,
+then commits once. Existing six production read/coding/denial parent/child cases
+remain in the same ledger. Gateways are synthetic; no user task is replayed.
+
+Initial ledger failed because paused intent mapped to failed. With that fixed,
+plain handoff passed and counted pause exposed the missing backend context pin.
+Both failures and the intermediate passing context gate are preserved. Final
+rollback ledger passes 1/1 in 10.35 seconds; separate SDK execution/planning
+contracts pass 2/2 in 0.62 seconds. Final patch
+0e0cca6d6a17c51255cbae8968496f4ff01cb2b59ca8a30fc34f108562c571f2;
+xmind.exe b5de5864d8027fa0f5b0006d8f0225a0957e8b926f62faaaaaddf04aba460c0d.
+Both final gates freeze all sets/hashes: 2787 project/16 SDK/1870 libraries/30
+SDK runtime/18598 dependencies; 102 ledger-gate binaries and 104 SDK-gate binaries.
+Inventory172. These focused gates are not a full-suite pass. No paid model calls,
+CPython, installation, or user-profile changes. Main planning admission, adoption
+under a new lease/segment, resume, nested planning and overflow remain open.
+Evidence: process-xmind-root-pause-drain-*-20261022-* under doc/evidence.
 ## Production planning-root coding through SDK IPC — 2026-10-22
 
 The existing six real-production parent/child scheduler cases now use the coding

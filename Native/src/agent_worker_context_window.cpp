@@ -61,7 +61,7 @@ ModelRequest AgentWorkerContextWindow::prepare_window(std::optional<std::string>
     raw_=preview_(cancel);auto trusted=raw_;
     std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});
     trusted.canonical_window.reset();
-    prepared_=manager_.prepare(owner_,trusted,*budget_,nullptr,cancel);handed_out_=false;rejected_=false;rebuild_used_=false;check(cancel);return prepared_->request;
+    prepared_=manager_.prepare(owner_,trusted,*budget_,nullptr,cancel);if(lease_.root_run_id==lease_.owner_run_id&&store_.root_budget(lease_.root_run_id).get().spec.policy_id=="native.dynamic-plan")budget_->pin_context(prepared_->snapshot);handed_out_=false;rejected_=false;rebuild_used_=false;check(cancel);return prepared_->request;
 }
 void AgentWorkerContextWindow::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
@@ -78,7 +78,7 @@ ModelRequest AgentWorkerContextWindow::rebuild(const std::string& attempt,const 
     if(!prepared_||!rejected_||rebuild_used_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Context rebuild differs from its one actual rejection");
     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="rejected")throw Conflict("Context rebuild lacks its backend rejection receipt");
     rebuild_used_=true;auto trusted=raw_;std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});trusted.canonical_window.reset();
-    auto rebuilt=manager_.rebuild(owner_,trusted,*prepared_,*budget_,nullptr,cancel);prepared_=std::move(rebuilt);rejected_=false;handed_out_=false;check(cancel);return prepared_->request;
+    auto rebuilt=manager_.rebuild(owner_,trusted,*prepared_,*budget_,nullptr,cancel);prepared_=std::move(rebuilt);if(lease_.root_run_id==lease_.owner_run_id&&store_.root_budget(lease_.root_run_id).get().spec.policy_id=="native.dynamic-plan")budget_->pin_context(prepared_->snapshot);rejected_=false;handed_out_=false;check(cancel);return prepared_->request;
 }
 ModelCallReservation AgentWorkerContextWindow::reserve(const std::string&,std::stop_token cancel){
     std::lock_guard lock(mutex_);check(cancel);if(!prepared_||handed_out_)throw Conflict("Worker context reservation is not available");

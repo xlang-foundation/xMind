@@ -106,6 +106,14 @@ AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_terminal(RunState ou
     impl_->worker->channel().close();const auto exit=impl_->worker->wait(deadline);
     return {impl_->store.terminate_agent_worker(impl_->lease,outcome,reason).get(),exit};
 }
+AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_paused(const std::string& segment,AgentWorkerChannel::Deadline deadline){
+    std::lock_guard lock(impl_->mutex);
+    if(impl_->callers||!impl_->lease_admitted||!impl_->control)throw Conflict("Paused worker drain requires joined callers and native control");
+    (void)impl_->store.paused_agent_worker(impl_->lease,segment).get();
+    impl_->draining=true;impl_->control->close();impl_->worker->channel().close();
+    const auto exit=impl_->worker->wait(deadline);
+    return {impl_->store.retire_paused_agent_worker(impl_->lease,segment).get(),exit};
+}
 const AgentWorkerLeaseSpec& AgentWorkerSupervisor::lease()const noexcept{return impl_->lease;}
 bool AgentWorkerSupervisor::outcome_unrecorded()const noexcept{return (impl_->owner&&impl_->owner->outcome_unrecorded())||(impl_->coding_owner&&impl_->coding_owner->outcome_unrecorded());}
 bool AgentWorkerSupervisor::alive()const{return impl_->worker&&impl_->worker->alive();}

@@ -3883,7 +3883,7 @@ AgentWorkerCallableClaimRecord Repository::record_agent_worker_callable_result(c
 }
 AgentWorkerCallableClaimRecord Repository::agent_worker_callable_claim(const std::string& root,const std::string& attempt,const std::string& call){return read_worker_callable(impl_->database,root,attempt,call);}
 AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& generation,const std::string& reason){
-    const std::set<std::string> reasons{"completed","cancelled","worker_exit","backend_recovery","dispatch_error"};if(!reasons.contains(reason))throw std::invalid_argument("Invalid worker retirement reason");auto& db=database;auto lease=read_worker_lease(db,generation);
+    const std::set<std::string> reasons{"completed","cancelled","worker_exit","backend_recovery","dispatch_error","paused"};if(!reasons.contains(reason))throw std::invalid_argument("Invalid worker retirement reason");auto& db=database;auto lease=read_worker_lease(db,generation);
     if(lease.state=="retired"){if(lease.retirement_reason!=reason)throw Conflict("Worker retirement observation changed");return lease;}
     if(lease.revision>=9007199254740991)throw std::overflow_error("Worker lease revision exhausted");std::int64_t uncertain=0;
     const auto planning=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=?",{std::string(worker_planning_category),generation}).rows;
@@ -3903,7 +3903,33 @@ AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& genera
     lease.state="retired";lease.retirement_reason=reason;++lease.revision;changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_lease_json(lease).dump(),std::string(worker_lease_category),generation}));event(lease.spec.owner_run_id,"worker.lease.retired",Json{{"generation",generation},{"reason",reason},{"uncertain_model_dispatches",uncertain}}.dump());return lease;
 }
 
-AgentWorkerLeaseRecord Repository::retire_agent_worker(const std::string& generation,const std::string& reason){Transaction tx(impl_->database);auto record=impl_->retire_worker(generation,reason);tx.commit();return record;}
+AgentWorkerLeaseRecord Repository::retire_agent_worker(const std::string& generation,const std::string& reason){if(reason=="paused")throw Conflict("Paused retirement requires its exact durable handoff");Transaction tx(impl_->database);auto record=impl_->retire_worker(generation,reason);tx.commit();return record;}
+Run Repository::paused_agent_worker(const AgentWorkerLeaseSpec& expected,const std::string& segment_id){
+    auto& db=impl_->database;const auto lease=read_worker_lease(db,expected.generation);
+    if(lease.spec!=expected||(lease.state!="active"&&!(lease.state=="retired"&&lease.retirement_reason=="paused"))||expected.root_run_id!=expected.owner_run_id)throw Conflict("Paused handoff requires its exact root worker lease");
+    const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
+    if(current.size()!=1||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Paused worker generation changed");
+    const auto root=run(expected.root_run_id);const auto caps=dynamic_capabilities(root.id);const auto segment=dynamic_budget_segment(root.id);
+    if(root.state!=RunState::paused||root.graph_root||!root.parent_id.empty()||root_budget(root.id).spec.policy_id!="native.dynamic-plan"||!caps.catalogue_finalized||caps.workspace_identity!=expected.workspace_id||Json::parse(caps.provider_identity_json)!=Json::parse(expected.provider_identity_json)||segment.id!=segment_id||segment.state!="closed")throw Conflict("Worker has no exact closed planning pause");
+    (void)dynamic_owner_pause(root.id);
+    const auto pause=db.execute("SELECT segment_id,state FROM dynamic_owner_pauses WHERE root_run_id=?",{root.id}).rows;
+    if(pause.size()!=1||text(pause[0][0])!=segment_id||text(pause[0][1])!="paused"||!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started') LIMIT 1",{root.id}).rows.empty())throw Conflict("Paused worker lost its durable segment binding or owns model transport");
+    const auto admitted=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{root.id,expected.generation}).rows;
+    const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{root.id}).rows;
+    if(admitted.size()!=1||integer(admitted[0][0])<segment.opened_event_seq||membership.size()!=1||Json::parse(text(membership[0][0])).at("workspace_id")!=expected.workspace_id||Json::parse(text(membership[0][0])).at("revision")!=expected.workspace_revision)throw Conflict("Paused worker lost its captured membership or segment epoch");
+    for(const auto* category:{worker_read_category,worker_file_category,worker_process_category,worker_remote_category,worker_callable_category})if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(category),expected.generation}).rows.empty())throw Conflict("Paused worker has unresolved tool dispatch");
+    if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.spec.generation')=? AND json_extract(payload,'$.state')!='responded' LIMIT 1",{std::string(worker_claim_category),expected.generation}).rows.empty()||!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=? AND json_extract(payload,'$.state') NOT IN ('accepted','rejected','inspected') LIMIT 1",{std::string(worker_planning_category),expected.generation}).rows.empty())throw Conflict("Paused worker has unresolved model or planning dispatch");
+    return root;
+}
+Run Repository::retire_paused_agent_worker(const AgentWorkerLeaseSpec& lease,const std::string& segment){
+    Transaction tx(impl_->database);const auto root=paused_agent_worker(lease,segment);
+#if defined(_WIN32)
+    if(!observe_owner_exit(lease.pid,lease.creation_time,0).exited)throw Conflict("Paused worker process is still alive");
+#else
+    throw Conflict("Paused worker retirement requires Windows process identity");
+#endif
+    impl_->retire_worker(lease.generation,"paused");tx.commit();return root;
+}
 
 Run Repository::terminate_agent_worker(const AgentWorkerLeaseSpec& lease,RunState outcome,const std::string& reason){
     const std::set<std::string> failures{"deadline","provider_failure","worker_exit","dispatch_error"};

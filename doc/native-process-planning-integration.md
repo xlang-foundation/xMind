@@ -258,6 +258,13 @@ lost result never authorizes replay of an uncertain effect.
 
 ### Main-path composition audit, 2026-10-22
 
+Paused-root preflight, exact physical drain and atomic paused lease retirement
+are now implemented and verified in production processes (plain/counted, SQL
+rollback and repeated observation). SDK status preserves paused intent; backend
+context windows pin the root snapshot on the shared budget. The table below
+retains the target contract; new-generation adoption and main admission are
+still unimplemented. Exact receipts are in VALIDATION_STATUS.md.
+
 The next admission change must compose the following existing owners rather
 than merely remove the constructor's planning refusal:
 

@@ -1,0 +1,34 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 94: native_agent_worker_ledger_contract
+1/1 Test #94: native_agent_worker_ledger_contract ...***Failed    7.95 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:53537
+Human frontier must pause the original production root without child dispatch; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-13221964-3409963488
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:53537',
+  stdout: '',
+  stderr: 'Human frontier must pause the original production root without child dispatch; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-13221964-3409963488\r\n'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   7.96 sec
+
+The following tests FAILED:
+	 94 - native_agent_worker_ledger_contract (Failed)
+Errors while running CTest

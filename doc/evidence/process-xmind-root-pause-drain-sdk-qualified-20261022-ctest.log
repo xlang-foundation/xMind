@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 27: native_agent_worker_native_execution_contract
+1/2 Test #27: native_agent_worker_native_execution_contract ...   Passed    0.38 sec
+    Start 87: native_agent_worker_native_planning_contract
+2/2 Test #87: native_agent_worker_native_planning_contract ....   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.62 sec

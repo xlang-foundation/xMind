@@ -25,6 +25,7 @@ public:
     RunState execute();
     void cancel();
     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);
+    AgentWorkerTerminalObservation drain_paused(const std::string& segment,AgentWorkerChannel::Deadline);
     AgentWorkerTerminalObservation drain_terminal(RunState,const std::string& reason,AgentWorkerChannel::Deadline);
     const AgentWorkerLeaseSpec& lease()const noexcept;
     bool alive()const;

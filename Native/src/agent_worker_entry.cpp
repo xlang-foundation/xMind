@@ -35,7 +35,7 @@ int run_agent_channel_worker(int argc,char** argv){
     const auto scope=channel->scope();
     NativeWorkerContext context(scope,std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
     NativeExecutionBinding execution(scope,[&](std::stop_token stop){
-        try{const auto result=coding?execute_agent_worker_coding_root(context,stop):execute_agent_worker_read_root(context,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
+        try{const auto result=coding?execute_agent_worker_coding_root(context,stop):execute_agent_worker_read_root(context,stop);return result.run.state==RunState::completed?RunState::completed:result.run.state==RunState::paused?RunState::paused:RunState::failed;}
         catch(const AgentTerminalHandoff& intent){return intent.outcome()==RunState::cancelled?RunState::cancelled:RunState::failed;}
         catch(const TransportCancelled&){return RunState::cancelled;}
         catch(const AgentWorkerRpcCancelled&){return RunState::cancelled;}

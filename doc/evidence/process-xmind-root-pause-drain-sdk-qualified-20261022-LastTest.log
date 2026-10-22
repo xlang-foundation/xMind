@@ -1,0 +1,37 @@
+Start testing: Oct 22 02:49 Pacific Daylight Time
+----------------------------------------------------------
+27/172 Testing: native_agent_worker_native_execution_contract
+27/172 Test: native_agent_worker_native_execution_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_native_execution_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_native_execution_contract" start time: Oct 22 02:49 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"child_pre_registration_ms":21.1943,"client_bind_ms":6.1545,"close_and_exit_ms":24.7996,"execute_ms":0.5245,"launch_ms":64.1462,"mode":"complete","negative_identity_probes_ms":20.6759,"publish_ms":0.708,"root_registration_ms":0.2135,"status_and_duplicate_probes_ms":22.9579,"status_call_ms_max":0.1186,"status_call_ms_p50":0.0754,"status_call_ms_p95":0.1,"total_ms":139.9666}
+{"child_pre_registration_ms":17.2722,"client_bind_ms":6.2785,"close_and_exit_ms":23.9405,"execute_ms":15.678,"launch_ms":47.7196,"mode":"cancel","negative_identity_probes_ms":19.8152,"publish_ms":0.5915,"root_registration_ms":0.2029,"status_and_duplicate_probes_ms":22.7486,"status_call_ms_max":0.1867,"status_call_ms_p50":0.0753,"status_call_ms_p95":0.1074,"total_ms":136.7719}
+Native xmind execution subobject verified: exact process/scope, wrong-ticket refusal, one dispatch, concurrent cancel, terminal intent before physical close, retained-object refusal and joined retirement.
+<end of output>
+Test time =   0.38 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_native_execution_contract" end time: Oct 22 02:49 Pacific Daylight Time
+"native_agent_worker_native_execution_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+87/172 Testing: native_agent_worker_native_planning_contract
+87/172 Test: native_agent_worker_native_planning_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_native_planning_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_native_planning_contract" start time: Oct 22 02:49 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native planning SDK contract passed: distinct child, exact scope/PID/ticket, invoke/resume/health, paused result, duplicate refusal, bounded rejection, invalid/unrecorded results, cancellation and retired-object refusal. Controlled callbacks only; production scheduler integration remains open.
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_native_planning_contract" end time: Oct 22 02:49 Pacific Daylight Time
+"native_agent_worker_native_planning_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 22 02:49 Pacific Daylight Time
