@@ -32,13 +32,20 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+Scheduled actual xmind coding children now verify create_file approval and
+inherited denial, both counted/uncounted. One approval precedes exact bytes and
+a succeeded operation; denial creates no approval, operation or file. Canonical
+tool turns, four shared charges and physical drain-before-settlement pass.
+This covers child file creation, not full coding/client acceptance or root
+ordinary-tool authority; those and other effects/lifecycle paths remain open.
+
 Counted dynamic process children now receive the original shared backend
 budget through a private child-context policy field. Root/deadline/segment and
 signed child admission are checked; the SDK child receives only prepared
 windows and inference IDs. Actual scheduler/xmind runs verify two completed
 leaf inference links, three execution groups and unchanged four shared charges.
 Both counted and uncounted variants pass. This fixture does not count tokens
-or compact; coding effects, nested planning and resume remain open.
+or compact; further coding effects, nested planning and resume remain open.
 
 DynamicPlanExecutor now selects an optional backend process dispatch port for
 fresh/resumed agent work, with no local fallback after configured dispatch
@@ -60,7 +67,7 @@ now work in actual distinct fixture processes. The controlled backend callback
 launches the child, verifies an SDK file read and canonical completion, and
 waits for physical exit before settlement/parent continuation. Public child
 lineage omits backend identity; remote children use backend-owned catalogues.
-Main factory selection and coding/nested
+Main factory selection and further coding/nested
 child coverage remain open. The local-preset filter is gated to local runners.
 
 Repository now admits dynamic child worker leases against exact signed node,

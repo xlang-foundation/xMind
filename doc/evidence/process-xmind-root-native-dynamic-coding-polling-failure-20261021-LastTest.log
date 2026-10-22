@@ -1,0 +1,40 @@
+Start testing: Oct 21 23:42 Pacific Daylight Time
+----------------------------------------------------------
+91/169 Testing: native_agent_worker_ledger_contract
+91/169 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_ledger_contract" start time: Oct 21 23:42 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:56870
+Run is not a graph root; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-1556607020-3318584783
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:56870',
+  stdout: '',
+  stderr: 'Run is not a graph root; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-1556607020-3318584783\r\n'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =   1.67 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_ledger_contract" end time: Oct 21 23:42 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 21 23:42 Pacific Daylight Time

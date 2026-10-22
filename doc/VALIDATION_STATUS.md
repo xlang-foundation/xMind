@@ -1,3 +1,38 @@
+## Scheduled dynamic child file creation respects approval and denial — 2026-10-21
+
+The real scheduler/production-xmind fixture now exercises six variants: read,
+approved create_file and inherited-denied create_file, each counted/uncounted.
+Coding presets and backend authority are sealed from the actual frozen settings.
+Each actual xmind coding child runs existing SDK model/journal/file services and
+physically drains before settlement and signed parent continuation.
+
+Approved creation stays absent before one exact child-operation approval, writes
+exact fixture bytes once and retains one succeeded operation. Inherited denial
+retains the canonical agent_permission_denied tool result, requests no approval,
+creates no operation and leaves the target absent. Both modes retain two child/
+two parent model turns, four shared charges and four messages per run. Counted
+children retain two completed inference links and three execution groups.
+Model gateways remain synthetic and the parent is the fixture process; no live
+provider/coding-UI behavior is claimed. No production code changed.
+
+Initial focused ledger failed 0/1 in 1.69 seconds because the fixture polled the
+graph-only children API on a dynamic root. Using owned_children fixed the
+fixture without changing product authorization, assertions or deadlines. Raw
+failure retained. Corrected ledger 1/1 passed in 8.71 seconds; final focused
+20/20 passed in 130.40 seconds (ledger 8.42; broad worker 56.80).
+Patch b76a4d74523e05147cae2a5a0014a51262de75821aa273ae3e759f4e5edce4f6; native
+0ad164baff729c5bc5beb9bf70e6d2030f28d3e03de3ebdb2fa88a7e3aa96e31. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact sets and hashes. Evidence:
+doc/evidence/process-xmind-root-native-dynamic-coding-qualified-20261021-gate.json.
+Diagnostic capture enabled; no dump. Earlier intermittent heap/SDK faults open.
+
+Main planning admission remains closed. Root ordinary tool authority, additional
+coding effects/processes, nested planning, resume/human handoff, overflow/retry,
+main factory selection, legacy cleanup, full suite, broad stability and installed
+CLI/browser/extension acceptance remain open. No install, SDK change, CPython,
+live provider request or replay of completed user tasks.
+
 ## Counted dynamic process children share the backend active budget — 2026-10-21
 
 The dynamic process factory now constructs counted child context with the
