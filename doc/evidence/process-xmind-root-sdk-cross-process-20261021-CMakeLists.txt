@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.24)
+project(xmind_sdk_instance_stress LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(instance_stress main.cpp)
+target_include_directories(instance_stress PRIVATE "C:/xMindNativeValidation/xlang3-unicode-library-path/sdk" "D:/CantorAI2026/xMind/Native/tests")
+target_link_libraries(instance_stress PRIVATE "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.lib" dbghelp)
+add_custom_command(TARGET instance_stress POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/xlang3_runtime.dll" $<TARGET_FILE_DIR:instance_stress>)

@@ -1,0 +1,13 @@
+{
+  "recordedAt": "2026-10-22T01:39:19.125Z",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "sources": {
+    "main.cpp": "b7432a8cd719b240531c9d933584a991221224afad0a39b268b18b0cd4cec434",
+    "CMakeLists.txt": "08272640e0ffe6031fbb67c52f50cac5c2ccad1aa36109bc4b6315f992ad094d",
+    "run.mjs": "f7e8dc3e8f7b001554c212b75c9657862d8c6af68751ed3aa0eb1b85a198f295"
+  },
+  "image": "be660da696a931750d9e230b3a04cf88237badb8519313e551787444a6ce964e",
+  "runtime": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "clients": 8,
+  "iterationsPerClient": 1000
+}

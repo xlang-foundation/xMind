@@ -1,0 +1,416 @@
+
+************* Path validation summary **************
+Response                         Time (ms)     Location
+OK                                             C:/xMindNativeValidation/xlang3-unicode-library-build/Release
+OK                                             C:/xMindNativeValidation/native-current-source-full/Native/Release
+No .natvis files found at C:\WINDOWS\SYSTEM32\Visualizers.
+No .natvis files found at C:\Users\shaw9\AppData\Local\Dbg\Visualizers.
+
+Microsoft (R) Windows Debugger Version 10.0.26100.1 AMD64
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+
+Loading Dump File [C:\xMindNativeValidation\sdk-native-instance-stress-20261021\dumps\fixture-50000-659072703-slow.dmp]
+User Mini Dump File: Only registers, stack and portions of memory are available
+
+
+************* Path validation summary **************
+Response                         Time (ms)     Location
+OK                                             C:/xMindNativeValidation/xlang3-unicode-library-build/Release
+OK                                             C:/xMindNativeValidation/native-current-source-full/Native/Release
+Symbol search path is: C:/xMindNativeValidation/xlang3-unicode-library-build/Release;C:/xMindNativeValidation/native-current-source-full/Native/Release
+Executable search path is: 
+Windows 10 Version 26200 MP (20 procs) Free x64
+Product: WinNt, suite: SingleUserTS
+Edition build lab: 26100.1.amd64fre.ge_release.240331-1435
+Debug session time: Wed Oct 21 18:36:32.000 2026 (UTC - 7:00)
+System Uptime: 7 days 15:04:32.770
+Process Uptime: 0 days 0:00:51.000
+................................
+Unable to add extension DLL: ntsdexts
+Unable to add extension DLL: uext
+Unable to add extension DLL: exts
+
++------------------------------------------------------------------------+
+| This target supports Hardware-enforced Stack Protection. A HW based    |
+| "Shadow Stack" may be available to assist in debugging and analysis.   |
+| See aka.ms/userhsp for more info.                                      |
+|                                                                        |
+| dps @ssp                                                               |
+|                                                                        |
++------------------------------------------------------------------------+
+
+For analysis of this file, run !analyze -v
+Minidump doesn't have an exception context
+Unable to get exception context, HRESULT 0x80004002
+rax=0000000000000004 rbx=00000000000001f4 rcx=00000000000001f4
+rdx=0000000000000000 rsi=00000000ffffffff rdi=0000000000000000
+rip=00007ff8caea1dd4 rsp=00000007c02ff298 rbp=0000000000000000
+ r8=0000000000000000  r9=0000000000000000 r10=00000000000001f4
+r11=00000000000001f4 r12=0000000000000000 r13=00000007c02ff4f8
+r14=0000000000000000 r15=0000000000000000
+iopl=0         nv up ei pl zr na po nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00000246
+ntdll!NtWaitForSingleObject+0x14:
+00007ff8`caea1dd4 c3              ret
+Child-SP          RetAddr               Call Site
+00000007`c02ff298 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+00000007`c02ff2a0 00007ff8`b23b7b41     KERNELBASE!WaitForSingleObjectEx+0xaf
+*** WARNING: Unable to verify checksum for instance_stress.exe
+00000007`c02ff340 00007ff7`07ae91f9     msvcp140!Thrd_join+0x21
+00000007`c02ff370 00007ff7`07ae9e6d     instance_stress+0x91f9
+00000007`c02ff3b0 00007ff7`07aeadaf     instance_stress+0x9e6d
+00000007`c02ff8c0 00007ff8`c934dda7     instance_stress+0xadaf
+00000007`c02ff900 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c02ff930 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+.  0  Id: c350.2804 Suspend: 0 Teb: 00000007`c00e2000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c02ff298 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+00000007`c02ff2a0 00007ff8`b23b7b41     KERNELBASE!WaitForSingleObjectEx+0xaf
+00000007`c02ff340 00007ff7`07ae91f9     msvcp140!Thrd_join+0x21
+00000007`c02ff370 00007ff7`07ae9e6d     instance_stress+0x91f9
+00000007`c02ff3b0 00007ff7`07aeadaf     instance_stress+0x9e6d
+00000007`c02ff8c0 00007ff8`c934dda7     instance_stress+0xadaf
+00000007`c02ff900 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c02ff930 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   1  Id: c350.11820 Suspend: 0 Teb: 00000007`c00e4000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c03ffb88 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+00000007`c03ffb90 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+00000007`c03ffef0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c03fff20 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   2  Id: c350.535c Suspend: 0 Teb: 00000007`c00e6000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c04ffb88 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+00000007`c04ffb90 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+00000007`c04ffef0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c04fff20 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   3  Id: c350.dd5c Suspend: 0 Teb: 00000007`c00e8000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c05ffb08 00007ff8`cad64d0e     ntdll!NtWaitForWorkViaWorkerFactory+0x14
+00000007`c05ffb10 00007ff8`c934dda7     ntdll!TpCallbackMayRunLong+0x1a0e
+00000007`c05ffe70 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c05ffea0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   4  Id: c350.1a70 Suspend: 0 Teb: 00000007`c00ea000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c06dde98 00007ff8`cad60cad     ntdll!NtGetContextThread+0x14
+00000007`c06ddea0 00007ff8`c828160e     ntdll!RtlVirtualUnwind2+0x271d
+00000007`c06de3d0 00000000`00000000     KERNELBASE!RegQueryValueExW+0x1e9e
+
+   5  Id: c350.c7c Suspend: 0 Teb: 00000007`c00ee000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c08fc508 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+*** WARNING: Unable to verify checksum for xlang3_runtime.dll
+00000007`c08fc510 00007fff`b6f5500a     KERNELBASE!WaitForSingleObjectEx+0xaf
+00000007`c08fc5b0 00007fff`b6f5160d     xlang3_runtime!xlang3::ipc::SharedMemoryServerThreads::start_workers_locked+0x12a
+00000007`c08fc5e0 00007fff`b6c29dd1     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request_platform+0xf0d
+00000007`c08fc940 00007fff`b6c24095     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request+0x181
+00000007`c08fca90 00007fff`b6d529e6     xlang3_runtime!xlang3::register_ipc_builtins+0xb35
+00000007`c08fcbf0 00007fff`b6c555d1     xlang3_runtime!xlang3::object_get_attr+0x65b6
+00000007`c08ff050 00007fff`b6f89c94     xlang3_runtime!xlang3::attribute_get+0x241
+00000007`c08ff120 00007ff7`07ae64dc     xlang3_runtime!x3_get_attr+0x544
+00000007`c08ff250 00007ff7`07ae38be     instance_stress+0x64dc
+00000007`c08ff720 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c08ff750 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c08ff780 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c08ff7b0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   6  Id: c350.d614 Suspend: 0 Teb: 00000007`c00f0000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c09ff958 00007ff8`cadaca73     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c09ff960 00007ff8`c82fe158     ntdll!RtlWaitOnAddress+0x213
+00000007`c09ff9d0 00007ff7`07ae6a1f     KERNELBASE!WaitOnAddress+0x38
+00000007`c09ffa10 00007ff7`07ae38be     instance_stress+0x6a1f
+00000007`c09ffee0 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c09fff10 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c09fff40 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c09fff70 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   7  Id: c350.9964 Suspend: 0 Teb: 00000007`c00f2000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c0aff488 00007ff8`cadaca73     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c0aff490 00007ff8`c82fe158     ntdll!RtlWaitOnAddress+0x213
+00000007`c0aff500 00007ff7`07ae6a1f     KERNELBASE!WaitOnAddress+0x38
+00000007`c0aff540 00007ff7`07ae38be     instance_stress+0x6a1f
+00000007`c0affa10 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c0affa40 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c0affa70 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c0affaa0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   8  Id: c350.26ec Suspend: 0 Teb: 00000007`c00f4000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c0bfc598 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+00000007`c0bfc5a0 00007fff`b6f5500a     KERNELBASE!WaitForSingleObjectEx+0xaf
+00000007`c0bfc640 00007fff`b6f5160d     xlang3_runtime!xlang3::ipc::SharedMemoryServerThreads::start_workers_locked+0x12a
+00000007`c0bfc670 00007fff`b6c29dd1     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request_platform+0xf0d
+00000007`c0bfc9d0 00007fff`b6c24095     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request+0x181
+00000007`c0bfcb20 00007fff`b6d529e6     xlang3_runtime!xlang3::register_ipc_builtins+0xb35
+00000007`c0bfcc80 00007fff`b6c555d1     xlang3_runtime!xlang3::object_get_attr+0x65b6
+00000007`c0bff0e0 00007fff`b6f89c94     xlang3_runtime!xlang3::attribute_get+0x241
+00000007`c0bff1b0 00007ff7`07ae64dc     xlang3_runtime!x3_get_attr+0x544
+00000007`c0bff2e0 00007ff7`07ae38be     instance_stress+0x64dc
+00000007`c0bff7b0 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c0bff7e0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c0bff810 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c0bff840 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+   9  Id: c350.4948 Suspend: 0 Teb: 00000007`c00f6000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c0cff838 00007ff8`cadaca73     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c0cff840 00007ff8`c82fe158     ntdll!RtlWaitOnAddress+0x213
+00000007`c0cff8b0 00007ff7`07ae6a1f     KERNELBASE!WaitOnAddress+0x38
+00000007`c0cff8f0 00007ff7`07ae38be     instance_stress+0x6a1f
+00000007`c0cffdc0 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c0cffdf0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c0cffe20 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c0cffe50 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  10  Id: c350.1c64 Suspend: 0 Teb: 00000007`c00f8000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c0dfc808 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+00000007`c0dfc810 00007fff`b6f5500a     KERNELBASE!WaitForSingleObjectEx+0xaf
+00000007`c0dfc8b0 00007fff`b6f5160d     xlang3_runtime!xlang3::ipc::SharedMemoryServerThreads::start_workers_locked+0x12a
+00000007`c0dfc8e0 00007fff`b6c29dd1     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request_platform+0xf0d
+00000007`c0dfcc40 00007fff`b6c24095     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request+0x181
+00000007`c0dfcd90 00007fff`b6d529e6     xlang3_runtime!xlang3::register_ipc_builtins+0xb35
+00000007`c0dfcef0 00007fff`b6c555d1     xlang3_runtime!xlang3::object_get_attr+0x65b6
+00000007`c0dff350 00007fff`b6f89c94     xlang3_runtime!xlang3::attribute_get+0x241
+00000007`c0dff420 00007ff7`07ae64dc     xlang3_runtime!x3_get_attr+0x544
+00000007`c0dff550 00007ff7`07ae38be     instance_stress+0x64dc
+00000007`c0dffa20 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c0dffa50 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c0dffa80 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c0dffab0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  11  Id: c350.791c Suspend: 0 Teb: 00000007`c00fa000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c0efcc78 00007ff8`cad99cfb     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c0efcc80 00007ff8`cad84d1d     ntdll!RtlSleepConditionVariableSRW+0x71b
+00000007`c0efcd00 00007ff8`b23b7da2     ntdll!RtlAcquireSRWLockExclusive+0x4d
+00000007`c0efcd30 00007fff`b6c29061     msvcp140!Mtx_lock+0x52
+00000007`c0efcd60 00007fff`b6f50bf5     xlang3_runtime!std::_Func_class<bool,std::basic_string<char,std::char_traits<char>,std::allocator<char> > const & __ptr64>::operator()+0x111
+00000007`c0efcdc0 00007fff`b6c29dd1     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request_platform+0x4f5
+00000007`c0efd120 00007fff`b6c24095     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request+0x181
+00000007`c0efd270 00007fff`b6d529e6     xlang3_runtime!xlang3::register_ipc_builtins+0xb35
+00000007`c0efd3d0 00007fff`b6c555d1     xlang3_runtime!xlang3::object_get_attr+0x65b6
+00000007`c0eff830 00007fff`b6f89c94     xlang3_runtime!xlang3::attribute_get+0x241
+00000007`c0eff900 00007ff7`07ae64dc     xlang3_runtime!x3_get_attr+0x544
+00000007`c0effa30 00007ff7`07ae38be     instance_stress+0x64dc
+00000007`c0efff00 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c0efff30 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c0efff60 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c0efff90 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  12  Id: c350.106ac Suspend: 0 Teb: 00000007`c00fc000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c0ffcf38 00007ff8`cad99cfb     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c0ffcf40 00007ff8`cad84d1d     ntdll!RtlSleepConditionVariableSRW+0x71b
+00000007`c0ffcfc0 00007ff8`b23b7da2     ntdll!RtlAcquireSRWLockExclusive+0x4d
+00000007`c0ffcff0 00007fff`b6c29e69     msvcp140!Mtx_lock+0x52
+00000007`c0ffd020 00007fff`b6c24095     xlang3_runtime!xlang3::ipc::lrpc_shared_memory_request+0x219
+00000007`c0ffd170 00007fff`b6d529e6     xlang3_runtime!xlang3::register_ipc_builtins+0xb35
+00000007`c0ffd2d0 00007fff`b6c555d1     xlang3_runtime!xlang3::object_get_attr+0x65b6
+00000007`c0fff730 00007fff`b6f89c94     xlang3_runtime!xlang3::attribute_get+0x241
+00000007`c0fff800 00007ff7`07ae64dc     xlang3_runtime!x3_get_attr+0x544
+00000007`c0fff930 00007ff7`07ae38be     instance_stress+0x64dc
+00000007`c0fffe00 00007ff8`c7f5cd30     instance_stress+0x38be
+00000007`c0fffe30 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c0fffe60 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c0fffe90 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  13  Id: c350.58b8 Suspend: 0 Teb: 00000007`c00fe000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c10ff758 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c10ff760 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+00000007`c10ff800 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+00000007`c10ff840 00007fff`b6f4d71f     msvcp140!Cnd_wait+0x2a
+00000007`c10ff870 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+00000007`c10ff910 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c10ff940 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c10ff970 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c10ff9a0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  14  Id: c350.ee34 Suspend: 0 Teb: 00000007`c0100000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c11ff838 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c11ff840 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+00000007`c11ff8e0 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+00000007`c11ff920 00007fff`b6f4d71f     msvcp140!Cnd_wait+0x2a
+00000007`c11ff950 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+00000007`c11ff9f0 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c11ffa20 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c11ffa50 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c11ffa80 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  15  Id: c350.a11c Suspend: 0 Teb: 00000007`c0102000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c12ff2b8 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+00000007`c12ff2c0 00007fff`b6f536dc     KERNELBASE!WaitForSingleObjectEx+0xaf
+00000007`c12ff360 00007fff`b6f4de3b     xlang3_runtime!std::deque<std::function<void __cdecl(void)>,std::allocator<std::function<void __cdecl(void)> > >::pop_back+0x39c
+00000007`c12ff660 00007fff`b6f4d870     xlang3_runtime!std::vector<std::thread,std::allocator<std::thread> >::_Change_array+0x40b
+00000007`c12ff6b0 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x1d0
+00000007`c12ff750 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c12ff780 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c12ff7b0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c12ff7e0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  16  Id: c350.f6c8 Suspend: 0 Teb: 00000007`c0104000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c13ff3c8 00007ff8`cad99cfb     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c13ff3d0 00007ff8`cad84d1d     ntdll!RtlSleepConditionVariableSRW+0x71b
+00000007`c13ff450 00007ff8`b23b7da2     ntdll!RtlAcquireSRWLockExclusive+0x4d
+00000007`c13ff480 00007fff`b6c1d6ee     msvcp140!Mtx_lock+0x52
+00000007`c13ff4b0 00007fff`b6f5368f     xlang3_runtime!std::function<bool __cdecl(xlang3::serialize::XLangStream & __ptr64,xlang3::serialize::XLangStream & __ptr64,std::basic_string<char,std::char_traits<char>,std::allocator<char> > & __ptr64)>::operator=+0x22e
+00000007`c13ff520 00007fff`b6f4de3b     xlang3_runtime!std::deque<std::function<void __cdecl(void)>,std::allocator<std::function<void __cdecl(void)> > >::pop_back+0x34f
+00000007`c13ff820 00007fff`b6f4d870     xlang3_runtime!std::vector<std::thread,std::allocator<std::thread> >::_Change_array+0x40b
+00000007`c13ff870 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x1d0
+00000007`c13ff910 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c13ff940 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c13ff970 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c13ff9a0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  17  Id: c350.4b8c Suspend: 0 Teb: 00000007`c0106000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c14ff908 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c14ff910 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+00000007`c14ff9b0 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+00000007`c14ff9f0 00007fff`b6f4d71f     msvcp140!Cnd_wait+0x2a
+00000007`c14ffa20 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+00000007`c14ffac0 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c14ffaf0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c14ffb20 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c14ffb50 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  18  Id: c350.c4c Suspend: 0 Teb: 00000007`c0108000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c15fef98 00007ff8`c823be9f     ntdll!NtWaitForSingleObject+0x14
+00000007`c15fefa0 00007fff`b6f4dcc7     KERNELBASE!WaitForSingleObjectEx+0xaf
+00000007`c15ff040 00007fff`b6c28433     xlang3_runtime!std::vector<std::thread,std::allocator<std::thread> >::_Change_array+0x297
+00000007`c15ff0b0 00007fff`b6c2f2d8     xlang3_runtime!xlang3::ipc::SharedMemoryBlockStream::NewBlock+0xd3
+00000007`c15ff140 00007fff`b6c2e70c     xlang3_runtime!xlang3::serialize::XLangStream::append+0x48
+00000007`c15ff1b0 00007fff`b6c2d7cb     xlang3_runtime!std::vector<xlang3::serialize::IpcWireValue,std::allocator<xlang3::serialize::IpcWireValue> >::reserve+0x1ac
+00000007`c15ff210 00007fff`b6c2d370     xlang3_runtime!xlang3::serialize::XLangStream::MarshalToBytesImpl+0x3fb
+00000007`c15ff2f0 00007fff`b6c2744e     xlang3_runtime!xlang3::serialize::XLangStream::MarshalToBytes+0x30
+00000007`c15ff340 00007fff`b6c25193     xlang3_runtime!std::unique_lock<std::recursive_mutex>::unlock+0xf5e
+00000007`c15ff3b0 00007fff`b6c1d73c     xlang3_runtime!xlang3::register_ipc_builtins+0x1c33
+00000007`c15ff6e0 00007fff`b6f5368f     xlang3_runtime!std::function<bool __cdecl(xlang3::serialize::XLangStream & __ptr64,xlang3::serialize::XLangStream & __ptr64,std::basic_string<char,std::char_traits<char>,std::allocator<char> > & __ptr64)>::operator=+0x27c
+00000007`c15ff750 00007fff`b6f4de3b     xlang3_runtime!std::deque<std::function<void __cdecl(void)>,std::allocator<std::function<void __cdecl(void)> > >::pop_back+0x34f
+00000007`c15ffa50 00007fff`b6f4d870     xlang3_runtime!std::vector<std::thread,std::allocator<std::thread> >::_Change_array+0x40b
+00000007`c15ffaa0 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x1d0
+00000007`c15ffb40 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c15ffb70 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c15ffba0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c15ffbd0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  19  Id: c350.9664 Suspend: 0 Teb: 00000007`c010a000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c16ff9c8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c16ff9d0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+00000007`c16ffa70 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+00000007`c16ffab0 00007fff`b6f4d71f     msvcp140!Cnd_wait+0x2a
+00000007`c16ffae0 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+00000007`c16ffb80 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c16ffbb0 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c16ffbe0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c16ffc10 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+
+  20  Id: c350.486c Suspend: 0 Teb: 00000007`c010c000 Unfrozen
+Child-SP          RetAddr               Call Site
+00000007`c17ff8a8 00007ff8`cad997be     ntdll!ZwWaitForAlertByThreadId+0x14
+00000007`c17ff8b0 00007ff8`c8242a58     ntdll!RtlSleepConditionVariableSRW+0x1de
+00000007`c17ff950 00007ff8`b23b76ea     KERNELBASE!SleepConditionVariableSRW+0x38
+00000007`c17ff990 00007fff`b6f4d71f     msvcp140!Cnd_wait+0x2a
+00000007`c17ff9c0 00007fff`b6f4b64e     xlang3_runtime!<lambda_2600bb0416ecb9b04799d4db4c941999>::operator()+0x7f
+00000007`c17ffa60 00007ff8`c7f5cd30     xlang3_runtime!std::thread::_Invoke<std::tuple<<lambda_2600bb0416ecb9b04799d4db4c941999> >,0>+0xe
+00000007`c17ffa90 00007ff8`c934dda7     ucrtbase!wcsrchr+0x150
+00000007`c17ffac0 00007ff8`cadbee4c     kernel32!BaseThreadInitThunk+0x17
+00000007`c17ffaf0 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+start             end                 module name
+00007ff7`07ae0000 00007ff7`07af8000   instance_stress C (no symbols)           
+00007ff8`7a5c0000 00007ff8`7a5d6000   MSVCP140_ATOMIC_WAIT   (deferred)             
+00007ff8`9c2c0000 00007ff8`9c2fb000   dbgcore    (deferred)             
+00007ff8`b2040000 00007ff8`b204c000   VCRUNTIME140_1   (deferred)             
+00007ff8`b23a0000 00007ff8`b243d000   msvcp140   (export symbols)       msvcp140.dll
+00007ff8`b2bf0000 00007ff8`b2c1c000   VCRUNTIME140   (deferred)             
+00007ff8`bf560000 00007ff8`bf56b000   version    (deferred)             
+00007ff8`c4850000 00007ff8`c48ef000   apphelp    (deferred)             
+00007ff8`c5390000 00007ff8`c55dc000   dbghelp    (deferred)             
+00007ff8`c6b90000 00007ff8`c6bab000   kernel_appcore   (deferred)             
+00007ff8`c7f30000 00007ff8`c807c000   ucrtbase   (export symbols)       ucrtbase.dll
+00007ff8`c8220000 00007ff8`c8621000   KERNELBASE   (export symbols)       KERNELBASE.dll
+00007ff8`c86f0000 00007ff8`c879c000   bcryptPrimitives   (deferred)             
+00007ff8`c8840000 00007ff8`c88e3000   msvcp_win   (deferred)             
+00007ff8`c88f0000 00007ff8`c8a1a000   gdi32full   (deferred)             
+00007ff8`c8a20000 00007ff8`c8a47000   win32u     (deferred)             
+00007ff8`c8a50000 00007ff8`c8b0c000   advapi32   (deferred)             
+00007ff8`c8d00000 00007ff8`c8e18000   rpcrt4     (deferred)             
+00007ff8`c8f80000 00007ff8`c930b000   combase    (deferred)             
+00007ff8`c9310000 00007ff8`c9318000   psapi      (deferred)             
+00007ff8`c9320000 00007ff8`c93eb000   kernel32   (export symbols)       kernel32.dll
+00007ff8`c98a0000 00007ff8`c98d1000   imm32      (deferred)             
+00007ff8`c9900000 00007ff8`c9908000   normaliz   (deferred)             
+00007ff8`c9910000 00007ff8`c9ae7000   user32     (deferred)             
+00007ff8`c9af0000 00007ff8`c9bc9000   oleaut32   (deferred)             
+00007ff8`c9c20000 00007ff8`c9cc9000   msvcrt     (deferred)             
+00007ff8`c9e70000 00007ff8`c9ef1000   ws2_32     (deferred)             
+00007ff8`ca0c0000 00007ff8`ca168000   sechost    (deferred)             
+00007ff8`ca2c0000 00007ff8`caa5c000   shell32    (deferred)             
+00007ff8`cacd0000 00007ff8`cacfb000   gdi32      (deferred)             
+00007ff8`cad40000 00007ff8`cafa8000   ntdll      (export symbols)       ntdll.dll
+00007fff`b6760000 00007fff`b7a97000   xlang3_runtime C (export symbols)       xlang3_runtime.dll
+xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x230:
+00007fff`b68569b0 488b33          mov     rsi,qword ptr [rbx]
+00007fff`b68569b3 eb03            jmp     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x238 (00007fff`b68569b8)
+00007fff`b68569b5 488bf3          mov     rsi,rbx
+00007fff`b68569b8 4c8ba42488000000 mov     r12,qword ptr [rsp+88h]
+00007fff`b68569c0 488b5608        mov     rdx,qword ptr [rsi+8]
+00007fff`b68569c4 49ff4510        inc     qword ptr [r13+10h]
+00007fff`b68569c8 488937          mov     qword ptr [rdi],rsi
+00007fff`b68569cb 48895708        mov     qword ptr [rdi+8],rdx
+00007fff`b68569cf 48893a          mov     qword ptr [rdx],rdi
+00007fff`b68569d2 48897e08        mov     qword ptr [rsi+8],rdi
+00007fff`b68569d6 498b4d18        mov     rcx,qword ptr [r13+18h]
+00007fff`b68569da 498b4530        mov     rax,qword ptr [r13+30h]
+00007fff`b68569de 4823c5          and     rax,rbp
+00007fff`b68569e1 4803c0          add     rax,rax
+00007fff`b68569e4 4c8b04c1        mov     r8,qword ptr [rcx+rax*8]
+00007fff`b68569e8 4d3b4508        cmp     r8,qword ptr [r13+8]
+00007fff`b68569ec 7506            jne     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x274 (00007fff`b68569f4)
+00007fff`b68569ee 48893cc1        mov     qword ptr [rcx+rax*8],rdi
+00007fff`b68569f2 eb12            jmp     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x286 (00007fff`b6856a06)
+00007fff`b68569f4 4c3bc6          cmp     r8,rsi
+00007fff`b68569f7 7506            jne     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x27f (00007fff`b68569ff)
+00007fff`b68569f9 48893cc1        mov     qword ptr [rcx+rax*8],rdi
+00007fff`b68569fd eb0c            jmp     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x28b (00007fff`b6856a0b)
+00007fff`b68569ff 483954c108      cmp     qword ptr [rcx+rax*8+8],rdx
+00007fff`b6856a04 7505            jne     xlang3_runtime!std::_Hash<std::_Umap_traits<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,xlang3::Value,std::_Uhash_compare<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,xlang3::Value> >,0> >::_Try_emplace<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >+0x28b (00007fff`b6856a0b)
+00007fff`b6856a06 48897cc108      mov     qword ptr [rcx+rax*8+8],rdi
+00007fff`b6856a0b 49893c24        mov     qword ptr [r12],rdi
+00007fff`b6856a0f 41c644240801    mov     byte ptr [r12+8],1
+00007fff`b6856a15 498bc4          mov     rax,r12
+00007fff`b6856a18 4883c438        add     rsp,38h
+00007fff`b6856a1c 415f            pop     r15
+00007fff`b6856a1e 415e            pop     r14
+00007fff`b6856a20 415d            pop     r13
+00007fff`b6856a22 415c            pop     r12
+00007fff`b6856a24 5f              pop     rdi
+00007fff`b6856a25 5e              pop     rsi
+00007fff`b6856a26 5d              pop     rbp
+00007fff`b6856a27 5b              pop     rbx
+00007fff`b6856a28 c3              ret
+00007fff`b6856a29 cc              int     3
+00007fff`b6856a2a cc              int     3
+00007fff`b6856a2b cc              int     3
+00007fff`b6856a2c cc              int     3
+00007fff`b6856a2d cc              int     3
+00007fff`b6856a2e cc              int     3
+00007fff`b6856a2f cc              int     3
+Dump reader status=0x00000000
+xlang3_runtime!std::vector<std::pair<xlang3::Value,xlang3::Value>,std::allocator<std::pair<xlang3::Value,xlang3::Value> > >::_Reallocate<0>:
+00007fff`b6856a30 4053            push    rbx
+00007fff`b6856a32 55              push    rbp

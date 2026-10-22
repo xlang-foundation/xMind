@@ -1,0 +1,9 @@
+{
+  "label": "client-4",
+  "pid": 66668,
+  "startedAt": "2026-10-22T01:39:20.238Z",
+  "completedAt": "2026-10-22T01:39:21.790Z",
+  "exitCode": 0,
+  "signal": null,
+  "logSha256": "932898c6e8a65f102fe775bd26108f5a1cc2c6b0505118150d82192bbf175b93"
+}

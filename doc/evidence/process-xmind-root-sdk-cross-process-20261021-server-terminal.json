@@ -1,0 +1,9 @@
+{
+  "label": "server",
+  "pid": 71440,
+  "startedAt": "2026-10-22T01:39:19.180Z",
+  "completedAt": "2026-10-22T01:39:21.811Z",
+  "exitCode": 0,
+  "signal": null,
+  "logSha256": "e3df1bd9ed4b533307837239d6c6737b175a23a29a7bd21e3ebc2552c4dbb929"
+}

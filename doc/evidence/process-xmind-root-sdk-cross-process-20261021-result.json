@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-10-22T01:39:19.125Z",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "sources": {
+    "main.cpp": "b7432a8cd719b240531c9d933584a991221224afad0a39b268b18b0cd4cec434",
+    "CMakeLists.txt": "08272640e0ffe6031fbb67c52f50cac5c2ccad1aa36109bc4b6315f992ad094d",
+    "run.mjs": "f7e8dc3e8f7b001554c212b75c9657862d8c6af68751ed3aa0eb1b85a198f295"
+  },
+  "image": "be660da696a931750d9e230b3a04cf88237badb8519313e551787444a6ce964e",
+  "runtime": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "clients": [
+    {
+      "label": "client-0",
+      "pid": 72040,
+      "startedAt": "2026-10-22T01:39:20.214Z",
+      "completedAt": "2026-10-22T01:39:21.754Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d3d304e4d962cb932237c57a17346c7165c623e7b04af06d447cbd2e25371a88"
+    },
+    {
+      "label": "client-1",
+      "pid": 54784,
+      "startedAt": "2026-10-22T01:39:20.221Z",
+      "completedAt": "2026-10-22T01:39:21.774Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "61844c996b2a9a65780acdb7e46d606264bee53470b982ef83a656ea1fac97d3"
+    },
+    {
+      "label": "client-2",
+      "pid": 36136,
+      "startedAt": "2026-10-22T01:39:20.227Z",
+      "completedAt": "2026-10-22T01:39:21.794Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2685999ecbdbfb0a9620d85453c9615c2a3633945860f0ce66c3980ca99f1955"
+    },
+    {
+      "label": "client-3",
+      "pid": 43464,
+      "startedAt": "2026-10-22T01:39:20.232Z",
+      "completedAt": "2026-10-22T01:39:21.788Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3d2f99ac5a50fcbdfe78ef24eb6b1190b879ab75d6f0e92d90a2839978707681"
+    },
+    {
+      "label": "client-4",
+      "pid": 66668,
+      "startedAt": "2026-10-22T01:39:20.238Z",
+      "completedAt": "2026-10-22T01:39:21.790Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "932898c6e8a65f102fe775bd26108f5a1cc2c6b0505118150d82192bbf175b93"
+    },
+    {
+      "label": "client-5",
+      "pid": 51224,
+      "startedAt": "2026-10-22T01:39:20.243Z",
+      "completedAt": "2026-10-22T01:39:21.797Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "be4b6f497e5d3734964eafd0e2ea474d280d5f64c0ab9ccbcdff05f23f838f6e"
+    },
+    {
+      "label": "client-6",
+      "pid": 70916,
+      "startedAt": "2026-10-22T01:39:20.248Z",
+      "completedAt": "2026-10-22T01:39:21.789Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e90f443eb5ee97b4d7e59dd26050469c730bc7776b319e9f61c582de35ce00ea"
+    },
+    {
+      "label": "client-7",
+      "pid": 21732,
+      "startedAt": "2026-10-22T01:39:20.253Z",
+      "completedAt": "2026-10-22T01:39:21.796Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e1f50e96303c77075816fa85241235c810be9fa59b39ef291ca424c1cb999d16"
+    }
+  ],
+  "iterationsPerClient": 1000,
+  "completedAt": "2026-10-22T01:39:21.812Z",
+  "endpoint": "lrpc:41440",
+  "server": {
+    "label": "server",
+    "pid": 71440,
+    "startedAt": "2026-10-22T01:39:19.180Z",
+    "completedAt": "2026-10-22T01:39:21.811Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "e3df1bd9ed4b533307837239d6c6737b175a23a29a7bd21e3ebc2552c4dbb929"
+  },
+  "imageUnchanged": true,
+  "runtimeUnchanged": true,
+  "dumps": [],
+  "passed": true
+}

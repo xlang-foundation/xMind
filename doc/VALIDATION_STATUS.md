@@ -1,3 +1,21 @@
+## SDK concurrency diagnostics — 2026-10-21
+
+Standalone same-process loopback probe failed: 3000/8000 iterations, five SDK
+call failures, natural exit 1 after a slow observation dump. No process killed.
+This is a different topology from product workers and does not establish the
+heap-corruption cause. It remains preserved as a failed diagnostic.
+
+Separate-process probe passes eight concurrent clients, each creating/calling
+1000 native objects; all nine processes exit zero. A fresh frozen build/run
+repeats all 8000 iterations with explicit source/SDK/runtime/tool hashes and
+file sets unchanged. Neither run reproduces product heap corruption. SDK
+callback/helper locking observations remain a hypothesis; no speculative SDK
+patch made. Product source and all 138 native binaries remain unchanged.
+
+These diagnostics are not a product/full-suite/installed acceptance gate.
+Actual product heap corruption and planning integration remain unfinished.
+[Probe sources, original logs, closure and limitations](evidence/process-xmind-root-sdk-concurrency-investigation-20261021.json).
+
 ## Worker planning settlement is atomic — 2026-10-21
 
 Native plan acceptance now links a worker claim to its exact native call ID in

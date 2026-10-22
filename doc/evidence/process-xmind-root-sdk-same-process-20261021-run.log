@@ -1,0 +1,7 @@
+Native worker fixture diagnostic dump pid=50000 reason=slow written=1
+SDK call failed
+SDK call failed
+SDK call failed
+SDK call failed
+SDK call failed
+completed=3000 failed=5

@@ -1,0 +1,42 @@
+
+  1>Checking Build System
+  Building Custom Rule C:/xMindNativeValidation/sdk-native-instance-stress-20261021/CMakeLists.txt
+  main.cpp
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10): warning C4996: 'std::atomic_store_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [C:\xMindNativeValidation\sdk-native-instance-stress-20261021\build\instance_stress.vcxproj]
+  (compiling source file '../main.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10):
+      the template instantiation context (the oldest one first) is
+          C:\xMindNativeValidation\xlang3-unicode-library-path\sdk\xlang3\cpp\package.h(49,23):
+          see reference to function template instantiation 'void std::atomic_store<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+  
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3983,17): warning C4996: 'std::atomic_load_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [C:\xMindNativeValidation\sdk-native-instance-stress-20261021\build\instance_stress.vcxproj]
+  (compiling source file '../main.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3983,17):
+      the template instantiation context (the oldest one first) is
+          C:\xMindNativeValidation\sdk-native-instance-stress-20261021\main.cpp(12,66):
+          see reference to function template instantiation 'X::Value X::detail::instance_event<Leaf::__xlang3_package_class>(T &,const char *,const X::detail::EventStorage &,X3PackageHost *)' being compiled
+          with
+          [
+              T=Leaf::__xlang3_package_class
+          ]
+          C:\xMindNativeValidation\xlang3-unicode-library-path\sdk\xlang3\cpp\package.h(59,21):
+          see reference to function template instantiation 'std::shared_ptr<X::detail::InstanceEvents> std::atomic_load<X::detail::InstanceEvents>(const std::shared_ptr<X::detail::InstanceEvents> *)' being compiled
+  
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(4050,17): warning C4996: 'std::atomic_compare_exchange_strong_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [C:\xMindNativeValidation\sdk-native-instance-stress-20261021\build\instance_stress.vcxproj]
+  (compiling source file '../main.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(4050,17):
+      the template instantiation context (the oldest one first) is
+          C:\xMindNativeValidation\xlang3-unicode-library-path\sdk\xlang3\cpp\package.h(62,14):
+          see reference to function template instantiation 'bool std::atomic_compare_exchange_strong<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+  
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(4042,17): warning C4996: 'std::atomic_compare_exchange_weak_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [C:\xMindNativeValidation\sdk-native-instance-stress-20261021\build\instance_stress.vcxproj]
+  (compiling source file '../main.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(4042,17):
+      the template instantiation context (the oldest one first) is
+          C:\xMindNativeValidation\xlang3-unicode-library-path\sdk\xlang3\cpp\package.h(62,14):
+          see reference to function template instantiation 'bool std::atomic_compare_exchange_strong<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+          C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(4050,17):
+          see reference to function template instantiation 'bool std::atomic_compare_exchange_strong_explicit<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>,std::memory_order,std::memory_order)' being compiled
+  
+  instance_stress.vcxproj -> C:\xMindNativeValidation\sdk-native-instance-stress-20261021\build\Release\instance_stress.exe
+  Building Custom Rule C:/xMindNativeValidation/sdk-native-instance-stress-20261021/CMakeLists.txt

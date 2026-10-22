@@ -1,0 +1,25 @@
+{
+  "recordedAt": "2026-10-22T01:35:40.954Z",
+  "sdkSource": "58a8aab9b40a464e38a741129b4804ac36e27a53",
+  "sources": {
+    "main.cpp": "4370c1eeda73ed27a903e6397cd8e295dda8314c9224302949f0317b1c9303e5",
+    "CMakeLists.txt": "08272640e0ffe6031fbb67c52f50cac5c2ccad1aa36109bc4b6315f992ad094d"
+  },
+  "image": "c2e919a8985da7e92e4c2a2bc866f3e5ee3d378a375b302d3fd9268345d00335",
+  "runtime": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "threads": 8,
+  "iterationsPerThread": 1000,
+  "diagnosticEnvironment": {
+    "XMIND_WORKER_FIXTURE_DUMP_DIR": "C:/xMindNativeValidation/sdk-native-instance-stress-20261021/dumps"
+  },
+  "pid": 50000,
+  "completedAt": "2026-10-22T01:37:42.176Z",
+  "exitCode": 1,
+  "signal": null,
+  "logSha256": "cd4df3e777b98d4d161f71d71d05fb2c055b552a14efb985aad0592569307c72",
+  "imageUnchanged": true,
+  "runtimeUnchanged": true,
+  "dumps": [
+    "fixture-50000-659072703-slow.dmp"
+  ]
+}
