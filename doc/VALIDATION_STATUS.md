@@ -1,3 +1,33 @@
+## Production xmind planning parent and children — 2026-10-22
+
+The six scheduler cases now launch the parent through AgentWorkerSupervisor
+using the same production xmind.exe as scheduled children. The seed's synthetic
+lease is retired before the supervisor captures the real parent PID, birth,
+image and generation. Backend planning callbacks and continuation funding then
+use that actual lease. The parent executes through the SDK execution object;
+canonical dynamic completion precedes supervisor physical drain and exit zero.
+The test verifies the parent is no longer alive after drain.
+
+Existing read/approved-create/inherited-denial modes, counted/plain context,
+three parent/two child turns, five charges, canonical messages and typed
+inference assertions remain. Model gateways are synthetic. This replaces the
+fixture-executable parent in those six cases; standalone fault fixtures remain.
+No production implementation or installed runtime changed in this checkpoint.
+
+Frozen ledger 1/1 passed in 11.18 seconds. The same source then passed 20/20 in
+179.78 seconds (ledger 22.26; model worker 58.66; graph callable 13.61; graph
+remote 33.08). These are whole-fixture times, not single-call IPC latency.
+Patch aa01aedfd89d0ce4bdabddd0f67e1756e3224d8d6881c2379a82bc71bc7cb535;
+production native SHA remains
+2cc436e8dab33831c45eb312017d998f883e52cdf0c97f697b82343139ca8f38.
+Both gates freeze exact sets/hashes of 2786 project files, 16 SDK includes,
+1870 pure libraries, 76 SDK runtime files, 18598 Node dependencies and 138 native
+binaries; inventory remains 169 tests. Evidence:
+doc/evidence/process-xmind-root-native-planning-production-root-qualified-20261022-gate.json
+and the earlier focused run. Main WorkspaceExecutor planning admission and
+lifecycle composition remain closed; broader requirements listed below remain
+open. This is not a full-suite or installed-client acceptance result.
+
 ## Plain planning-root SDK model funding — 2026-10-22
 
 Planning roots without context windows now reserve/start/finish models under

@@ -11,8 +11,8 @@ the production process factory and supervisor, using signed child admission and
 the original shared root budget. Configured process dispatch failure has no
 local-runner fallback. Capacity is retained through physical process retirement.
 
-Six scheduler cases use a distinct fixture parent and production xmind.exe
-children with synthetic model gateways. They verify SDK reads, approved
+Six scheduler cases now use production xmind.exe for the supervised parent and
+scheduled children with synthetic model gateways. They verify SDK reads, approved
 create_file and inherited denial, each with counted and uncounted children.
 Each case includes a parent SDK read before planning and retains three parent
 and two child model turns, five shared charges, six parent/four child messages.
@@ -32,6 +32,13 @@ a signed continuation is pending remains refused.
 Frozen focused ledger passed 1/1 in 9.30 seconds. After adding the direct funding
 checks, the broader gate passed 20/20 in 135.65 seconds, ledger 9.23 seconds.
 See VALIDATION_STATUS.md for exact source/binary hashes and retained evidence.
+
+The subsequent production-parent change passes ledger 1/1 in 11.18 seconds and
+20/20 in 179.78 seconds (ledger 22.26). The supervisor captures the actual parent
+lease before constructing planning callbacks, executes through the SDK object
+and physically drains it after canonical completion. Both parent and child are
+production processes; provider replies remain synthetic. Whole-fixture timings
+do not measure individual IPC-call latency.
 
 Main WorkspaceExecutor root planning admission, root effects, nested planning
 services, new-owner human pause/resume, context overflow/compaction and current
