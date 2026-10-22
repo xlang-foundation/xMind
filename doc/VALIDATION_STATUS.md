@@ -1,3 +1,25 @@
+## Complete native workspace-read checkpoint — 2026-10-22
+
+Native source d5b4231e43fff6e365fe04de115d1f56a1feabb2 passes its complete
+172/172 inventory in 1291.00s, with zero failures. The raw Native patch is empty
+(SHA256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855).
+Frozen sets and hashes match before/after: 2787 tracked project inputs, 16 SDK
+headers, 1870 pure-library files, 30 SDK/runtime inputs, 18598 Node dependency
+files and all 137 native binaries. xmind.exe remains
+63b032149e02f7192272b55310615bdd14730f6ed29ac4380b0015a5954fbebe.
+The intervening ce44d583 commit changes only architecture documentation outside
+the compiled closure. Configure/build/CTest terminal receipts and exact verifier
+are archived as process-xmind-root-workspace-read-qualified-full-20261022-*.
+
+This run covers actual native process workers, embedded xlang3/SQLite, managed
+profile lifecycle, backend handoff, providers and controlled protocol peers. Model
+responses are scripted; local-view contracts use the production adapter with a
+VS Code API fixture, not a rendered installed editor. No paid inference, visible
+editor, CPython or installation change was involved. No crash dump was produced;
+the earlier intermittent SDK access violation remains unresolved. Current rendered
+VS Code, managed packaged-client delivery and effective restart-policy binding
+remain open. This full result does not establish overall goal completion.
+
 ## Native inventory and workspace read contracts — 2026-10-22
 
 The complete current 172-test native inventory finished 168/172 in 1369.69s.
@@ -24,7 +46,8 @@ Its original harness failure is retained alongside the corrected evidence.
 
 Evidence: process-xmind-root-workspace-read-{initial-full,focused}-20261022-*
 and process-xmind-root-runtime-owner-probe-{initial,corrected}-20261022-*.
-Current full-suite acceptance and overall delivery remain incomplete.
+That focused result alone did not establish full-suite acceptance. The later
+complete run is recorded separately above; overall delivery remains incomplete.
 
 ## Actual packaged CLI coding — 2026-10-22
 
