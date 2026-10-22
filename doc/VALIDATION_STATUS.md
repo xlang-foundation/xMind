@@ -1,3 +1,27 @@
+## Current policy source full run - 2026-10-22
+
+Source 1c9c015458c8e5c624ad470ae6afb3e8cae22821 completed the full 172-test
+native inventory: 171 passed, 1 failed in 1246.92 seconds. The sole failure was
+native_language_server_rust_analyzer_contract: Rust Analyzer returned null for
+the fixture call-site definition after the existing bounded wait. This is a
+failed full gate; the earlier focused 17 pass and older 172 pass do not qualify it.
+
+Configure/build succeeded. The full gate verified unchanged file sets and hashes
+for 2787 project inputs, 16 SDK inputs, 1870 pure-library inputs, 30 SDK/runtime
+inputs, 18598 Node dependency inputs and 137 native binaries. The Native patch
+was empty, SHA-256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.
+xmind.exe remained 127616b845b8b9ce00633cf1419ca219e3fdfbe6d2e6813f44b9192a3382d0f9.
+Complete terminal logs, inventory, input maps, patch and the exact verifier are
+retained as process-xmind-root-effective-policy-full61-initial-20261022-*.
+
+The isolated 0.1.61 corrected VSIX has 2446 entries and verified runtime, client,
+browser and library bytes (package checkpoint d7d6e4a2), but remains uninstalled
+and not release accepted. Its initial omitted-library archive and initial audit
+failure remain separate. The active trusted Python-tool worker still needs the
+shared-root/SDK-value migration recorded in native-ipc-worker-design.md. The
+intermittent SDK fault, managed CLI/browser shared-history delivery and rendered
+VS Code acceptance remain open. No CPython, paid inference or user-task replay.
+
 ## Effective policy and selected context binding — 2026-10-22
 
 One effective native policy snapshot now binds selected instructions, an exact
