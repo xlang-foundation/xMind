@@ -4,6 +4,7 @@
 #include "agentflow/context_manager.hpp"
 #include "agentflow/model_provider.hpp"
 #include <mutex>
+#include "agentflow/instruction_precondition.hpp"
 
 namespace agentflow {
 class RepositoryInstructionContext;
@@ -38,6 +39,7 @@ public:
     ModelRequest prepare(std::stop_token={});
     void admit(const std::string& attempt,const ModelRequest&,std::stop_token={},const ModelRequest* full_window=nullptr);
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+    InstructionPrecondition planning_guidance(const std::string&,std::stop_token={});
     const AgentWorkerLeaseSpec& lease()const noexcept{return lease_;}
 private:
     friend class AgentWorkerCodingContext;

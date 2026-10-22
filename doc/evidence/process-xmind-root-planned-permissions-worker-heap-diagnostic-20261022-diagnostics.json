@@ -1,0 +1,9 @@
+{
+  "dumpFiles": [],
+  "timingSha256": {
+    "production-31520.json": "a21c01528682e5434028bee0987a3637d0749e0d4986f4e9083ec4177b82f18a",
+    "transport-31520.json": "ebf9f21c321294bf7effd51cd48df701a9d9115759d4036d5974d661dc8a1174"
+  },
+  "exceptionHandling": "Existing opt-in fixture observer; original exit codes and deadlines unchanged",
+  "crashReproduced": false
+}

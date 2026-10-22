@@ -13,7 +13,6 @@
 #include "agentflow/delegation_executor.hpp"
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/agent_worker_planning_owner.hpp"
-#include <mutex>
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -264,8 +263,8 @@ public:
         // no new child, model dispatch or durable terminal write is retried.
         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
                 catch(...){std::this_thread::sleep_for(1s);}}};
-        std::exception_ptr failure;std::shared_ptr<RootExecutionBudget> planning_budget;std::mutex guidance_mutex;
-        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);auto frozen=settings_;frozen.provider.model=provider.model;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto guidance=[&](const std::string& directory,std::stop_token stop){std::lock_guard lock(guidance_mutex);InstructionPrecondition result;if(owner.repository_context){const auto context=owner.repository_context(0);if(context&&context->ready(directory,stop))result=context->precondition(directory);}return result;};auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel,std::move(guidance));policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
+        std::exception_ptr failure;std::shared_ptr<RootExecutionBudget> planning_budget;
+        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);auto frozen=settings_;frozen.provider.model=provider.model;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
             if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
         catch(...){failure=std::current_exception();}
         try{

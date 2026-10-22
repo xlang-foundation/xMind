@@ -65,23 +65,28 @@ struct Owner {
         return execution->resume(lease.owner_run_id,call,settings,capabilities,budget,linked.get_token(),guidance);
     }
 };
+NativePlanningCallbacks callbacks_for(std::shared_ptr<Owner> owner){
+    NativePlanningCallbacks result;const auto& captured=owner->lease;result.scope={captured.root_run_id,captured.owner_run_id,captured.workspace_id,captured.generation,captured.workspace_revision};
+    result.invoke=[owner](const auto& attempt,const auto& call,std::stop_token stop){return owner->invoke(attempt,call,stop);};
+    result.resume=[owner](const auto& call,std::stop_token stop){return owner->resume(call,stop);};
+    result.healthy=[owner]{try{owner->check();return true;}catch(...){return false;}};
+    result.pending=[owner]{owner->check();std::string pending;for(const auto& call:owner->store.dynamic_plan_calls(owner->lease.root_run_id).get()){if(call.owner_run_id!=owner->lease.owner_run_id)continue;if(call.state=="accepted"){if(!pending.empty())throw Conflict("Planning owner has multiple accepted continuations");pending=call.id;}else if(call.state=="report_ready"||(call.state=="turn_committed"&&call.continuation_attempt_id.empty()))throw DynamicPlanUnavailable("Pending planning report requires separate ownership recovery");}return pending;};
+    result.with_owner_guidance=[owner](DynamicInstructionPrecondition guidance){if(!guidance)throw Conflict("Planning guidance binding requires a native owner");auto bound=std::make_shared<Owner>(*owner);bound->guidance=std::move(guidance);return callbacks_for(std::move(bound));};
+    return result;
+}
 }
 NativePlanningCallbacks make_agent_worker_planning_callbacks(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentSettings settings,
     std::shared_ptr<DynamicPlanExecution> execution,std::shared_ptr<RootExecutionBudget> budget,
     AgentWorkerChannel::Deadline deadline,std::stop_token cancel,DynamicInstructionPrecondition guidance){
     auto owner=std::make_shared<Owner>(Owner{store,std::move(lease),std::move(settings),{},std::move(execution),std::move(budget),deadline,cancel,std::move(guidance)});
     owner->capabilities=store.dynamic_capabilities(owner->lease.root_run_id).get();owner->check();
-    NativePlanningCallbacks result;const auto& captured=owner->lease;result.scope={captured.root_run_id,captured.owner_run_id,captured.workspace_id,captured.generation,captured.workspace_revision};
-    result.invoke=[owner](const auto& attempt,const auto& call,std::stop_token stop){return owner->invoke(attempt,call,stop);};
-    result.resume=[owner](const auto& call,std::stop_token stop){return owner->resume(call,stop);};
-    result.healthy=[owner]{try{owner->check();return true;}catch(...){return false;}};
-    result.pending=[owner]{owner->check();std::string pending;for(const auto& call:owner->store.dynamic_plan_calls(owner->lease.root_run_id).get()){if(call.owner_run_id!=owner->lease.owner_run_id)continue;if(call.state=="accepted"){if(!pending.empty())throw Conflict("Planning owner has multiple accepted continuations");pending=call.id;}else if(call.state=="report_ready"||(call.state=="turn_committed"&&call.continuation_attempt_id.empty()))throw DynamicPlanUnavailable("Pending planning report requires separate ownership recovery");}return pending;};
-    return result;
+    return callbacks_for(std::move(owner));
 }
 NativePlanningCallbacks bind_agent_worker_planning_context(NativePlanningCallbacks callbacks,
-    PersistenceService& store,AgentWorkerLeaseSpec lease,AgentWorkerContextWindow* window){
+    PersistenceService& store,AgentWorkerLeaseSpec lease,AgentWorkerContextWindow* window,DynamicInstructionPrecondition guidance){
     const AgentWorkerScope expected{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision};
     if(callbacks.scope!=expected||!callbacks.invoke||!callbacks.resume||!callbacks.healthy)throw Conflict("Planning callbacks differ from the context owner");
+    if(callbacks.with_owner_guidance&&guidance){callbacks=callbacks.with_owner_guidance(std::move(guidance));if(callbacks.scope!=expected||!callbacks.invoke||!callbacks.resume||!callbacks.healthy)throw Conflict("Bound planning guidance changed its owner scope");}
     auto complete=[&store,lease=std::move(lease),window](DynamicExecutionResult result,std::stop_token stop){
         if(!result.paused&&!result.call_id.empty()){
             store.commit_dynamic_tool_turn(lease.owner_run_id,result.call_id).get();

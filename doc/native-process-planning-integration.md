@@ -5,7 +5,18 @@ checkpoint below supersedes historical implementation notes in this document.
 Main process planning is composed for explicit backend planning policies. Managed
 process-profile defaults and installed-client acceptance remain open.
 
-## Current application integration checkpoint
+## Current planned-tool permission checkpoint
+
+Deterministic reads now use the ordinary native read permission/approval owner.
+Planning callbacks copy their binding onto the context actually admitted to the
+model, and reads recheck captured guidance after approval. Actual process-root
+cases cover denied and asked reads, directory enumeration, ordered allow, changed
+guidance, denied auto-approval commands and pre-admission malformed-schema rejection.
+See VALIDATION_STATUS.md for final focused hashes and the separate unresolved
+heap-corruption failure in the broader worker regression. No installed clients or
+managed-profile default policy changed.
+
+## Earlier application integration checkpoint
 
 AgentService and WorkspaceExecutor now share one backend planning scheduler and
 child pool. Explicitly configured read/coding process roots finalize actual tool

@@ -17,5 +17,5 @@ NativePlanningCallbacks make_agent_worker_planning_callbacks(
     std::shared_ptr<DynamicPlanExecution>,std::shared_ptr<RootExecutionBudget>,
     AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},DynamicInstructionPrecondition={});
 NativePlanningCallbacks bind_agent_worker_planning_context(NativePlanningCallbacks,
-    PersistenceService&,AgentWorkerLeaseSpec,AgentWorkerContextWindow*);
+    PersistenceService&,AgentWorkerLeaseSpec,AgentWorkerContextWindow*,DynamicInstructionPrecondition={});
 }

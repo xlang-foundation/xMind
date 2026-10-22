@@ -1,0 +1,479 @@
+{
+  "phase": "production",
+  "pid": 31340,
+  "elapsedMs": 49039.3147,
+  "timing": [
+    {
+      "elapsedMs": 508.27009999999973,
+      "text": "AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle.\r\nAgentService shared physical worker verified: canonical completion held exact live child and one occupied slot; next queued action started only after exact child exit and supervisor drain.\r\nAgentService queued placement verified: catalogue changed process to thread while queued; pinned prompt and job still dispatched one actual process child.\r\nAgentService immutable workspace capture verified: one admission snapshot, queued callback changed to revision eight, actual child retained revision seven and its exact original folder set.\r\n"
+    },
+    {
+      "elapsedMs": 514.7965999999997,
+      "text": "Low-level placement boundary verified: inline process execution, mismatched worker prompt and unknown placement rejected before model/worker dispatch; admitted prompt retained without a model charge.\r\n"
+    },
+    {
+      "elapsedMs": 678.5826999999999,
+      "text": "Production worker factory product_factory verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 925.3707999999997,
+      "text": "Production worker factory product_factory_read verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 1172.6480999999994,
+      "text": "Production worker factory product_factory_denied verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 1434.8125999999993,
+      "text": "Production worker factory product_factory_attached verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 1465.3663999999999,
+      "text": "Explicit thread placement verified: configured worker bypassed, no worker lease, actual native model result retained.\r\n"
+    },
+    {
+      "elapsedMs": 1842.2038999999995,
+      "text": "Busy profile worker cancellation verified: mutation rejected before factory invocation, exact child PID/birth exited before idle, one model charge and uncertain cancelled receipt retained without fabricated completion.\r\n"
+    },
+    {
+      "elapsedMs": 2195.0567,
+      "text": "Provider-profile worker factory verified: inactive candidate retained old owner; selected second profile then restored first; three actual child roots, four prepared executors, distinct encrypted credential references and exact immutable profile provenance.\r\n"
+    },
+    {
+      "elapsedMs": 2343.125799999999,
+      "text": "Native supervisor completion verified: actual xmind child, captured backend policy, one execution, canonical facts, exact physical drain and read-only reobservation.\r\n"
+    },
+    {
+      "elapsedMs": 2415.1283999999987,
+      "text": "Native supervisor startup failure verified: retained child and lease, no restart or model, exact physical exit before durable dispatch_error.\r\n"
+    },
+    {
+      "elapsedMs": 2555.5181000000002,
+      "text": "Native supervisor concurrent cancellation verified: live provider stream, joined-caller drain guard, exact ownership retained, HTTP abort, durable cancelled cause and post-exit retirement.\r\n"
+    },
+    {
+      "elapsedMs": 2641.6976999999997,
+      "text": "Actual delegated xmind PID 29408 birth 134371430613126953 owner actual-delegated-one\r\n"
+    },
+    {
+      "elapsedMs": 2717.4955,
+      "text": "Actual delegated xmind PID 9712 birth 134371430613890648 owner actual-delegated-two\r\n"
+    },
+    {
+      "elapsedMs": 3198.754,
+      "text": "Actual concurrent delegated xmind runners passed SDK IPC journal/model/read calls, named model binding, two canonical native file reads, four shared charges and physical drain before join; synthetic native model gateway, production scheduler placement remains open.\r\n"
+    },
+    {
+      "elapsedMs": 4273.2939,
+      "text": "Actual concurrent graph xmind runners passed scoped SDK IPC model/journal/read, two captured models, four counts and typed leaf groups, canonical reads, four shared charges and exact drain before controller join; synthetic native model/count gateway, production graph scheduler placement remains open.\r\n"
+    },
+    {
+      "elapsedMs": 5322.2841,
+      "text": "Production GraphService scheduled two actual xmind agents through SDK IPC, preserved node models/instructions/tools, four count/inference windows and typed groups, canonical native reads, four shared charges and controller join only after exact process drain; synthetic native gateway.\r\n"
+    },
+    {
+      "elapsedMs": 6512.3064,
+      "text": "Production nested GraphService retained ultimate-root funding, exact left/one and right/two paths, two controller joins and two physically retired xmind agents without controller budgets.\r\nProduction GraphService scheduled two actual xmind agents through SDK IPC, preserved node models/instructions/tools, four count/inference windows and typed groups, canonical native reads, four shared charges and controller join only after exact process drain; synthetic native gateway.\r\n"
+    },
+    {
+      "elapsedMs": 7242.246199999999,
+      "text": "Production nested GraphService cancellation observed both actual xmind model calls before stopping, retired both agents and controllers without joins or retries, retained two charges and interrupted typed groups, and closed the ultimate segment.\r\n"
+    },
+    {
+      "elapsedMs": 8620.4912,
+      "text": "Production graph coding graph-coding-approved verified two actual xmind coding workers, exact controller approvals or inherited denial, canonical native file receipts, exact bytes, four shared charges and drain before join; synthetic native model gateway; token_context=1.\r\n"
+    },
+    {
+      "elapsedMs": 9966.0409,
+      "text": "Production graph coding graph-coding-denied verified two actual xmind coding workers, exact controller approvals or inherited denial, canonical native file receipts, exact bytes, four shared charges and drain before join; synthetic native model gateway; token_context=1.\r\n"
+    },
+    {
+      "elapsedMs": 11507.425899999998,
+      "text": "Production graph coding graph-process-approved verified two actual xmind coding workers, exact controller approvals or inherited denial, canonical native file receipts, exact bytes, four shared charges and drain before join; synthetic native model gateway; token_context=1.\r\n"
+    },
+    {
+      "elapsedMs": 12815.301,
+      "text": "Production graph coding graph-process-denied verified two actual xmind coding workers, exact controller approvals or inherited denial, canonical native file receipts, exact bytes, four shared charges and drain before join; synthetic native model gateway; token_context=1.\r\n"
+    },
+    {
+      "elapsedMs": 13452.801599999999,
+      "text": "Production scheduled delegated xmind workers scheduled-delegation verified bounded queue/admission order, concurrent process dispatch, pinned named instructions/model, read-only catalogue, exact child results, four shared charges and drain-before-join; synthetic model gateway.\r\n"
+    },
+    {
+      "elapsedMs": 14177.207299999998,
+      "text": "Production scheduled delegated xmind workers scheduled-counted-delegation verified bounded queue/admission order, concurrent process dispatch, pinned named instructions/model, read-only catalogue, exact child results, four shared charges and drain-before-join; synthetic model gateway.\r\n"
+    },
+    {
+      "elapsedMs": 15172.231,
+      "text": "Actual parent xmind worker delegated through SDK IPC to two xmind children, committed backend-owned read/join receipts, resumed its final model call, preserved six shared charges and consumed its held continuation; all three exact-image processes physically retired. Controlled HTTP/SSE model responses.\r\n"
+    },
+    {
+      "elapsedMs": 16431.069099999997,
+      "text": "Actual counted parent IPC delegation retained six HTTP inference/count windows, two parent and four leaf typed groups, exact canonical joins and all three drained workers.\r\n"
+    },
+    {
+      "elapsedMs": 16432.598299999998,
+      "text": "Actual parent xmind worker delegated through SDK IPC to two xmind children, committed backend-owned read/join receipts, resumed its final model call, preserved six shared charges and consumed its held continuation; all three exact-image processes physically retired. Controlled HTTP/SSE model responses.\r\n"
+    },
+    {
+      "elapsedMs": 17450.336799999997,
+      "text": "Actual parent IPC unrecorded result stopped the service after three-worker drain, retained completed child facts, five charges and native join, and authorized no replay.\r\n"
+    },
+    {
+      "elapsedMs": 17706.259,
+      "text": "Actual parent IPC parent_delegation_denied rejected before child admission, preserved canonical error and exact charges, and drained its worker.\r\n"
+    },
+    {
+      "elapsedMs": 17924.8085,
+      "text": "Actual parent IPC parent_delegation_budget rejected before child admission, preserved canonical error and exact charges, and drained its worker.\r\n"
+    },
+    {
+      "elapsedMs": 18573.5631,
+      "text": "Actual parent IPC cancellation drained parent and two in-flight children, preserved three charges and unused parent hold, and fabricated no result or retry.\r\n"
+    },
+    {
+      "elapsedMs": 19440.800799999997,
+      "text": "Actual parent IPC child provider failure retained failed/completed sibling outcomes, five charges, no retries and three drained workers.\r\n"
+    },
+    {
+      "elapsedMs": 19518.208,
+      "text": "Native read AgentRunner RPC child_pid=9200 creation_time=134371430782056100\r\n"
+    },
+    {
+      "elapsedMs": 19664.1275,
+      "text": "Product no-tools worker verified: exact xmind child, one backend-owned model window, no offered tools or native read activity, canonical completion and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 19746.8864,
+      "text": "Native read AgentRunner RPC child_pid=13024 creation_time=134371430784328729\r\n"
+    },
+    {
+      "elapsedMs": 20059.4663,
+      "text": "Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.\r\nProduct worker entry verified in exact xmind child: single execution, private bootstrap, canonical completion and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 20140.5242,
+      "text": "Native read AgentRunner RPC child_pid=18288 creation_time=134371430788313407\r\nNative read approval cancellation child_pid=18288 creation_time=134371430788313407\r\n"
+    },
+    {
+      "elapsedMs": 20375.6691,
+      "text": "Product worker approval cancellation verified in exact xmind child before post-exit retirement.\r\nActual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.\r\n"
+    },
+    {
+      "elapsedMs": 20458.7649,
+      "text": "Native read AgentRunner RPC child_pid=21528 creation_time=134371430791500230\r\n"
+    },
+    {
+      "elapsedMs": 20552.0236,
+      "text": "Backend worker failure cause verified: durable fixed provider_failure, no provider text, no repeat rewrite, invalid enum rejected.\r\n"
+    },
+    {
+      "elapsedMs": 20585.7204,
+      "text": "Product worker provider failure verified: fixed intent, live ownership until exact exit, one retained charge and interrupted reservation.\r\n"
+    },
+    {
+      "elapsedMs": 20674.399699999998,
+      "text": "Native read AgentRunner RPC child_pid=1688 creation_time=134371430793601607\r\n"
+    },
+    {
+      "elapsedMs": 20987.3818,
+      "text": "Product profiled read worker verified: exact six-field budget and prompt identity, three canonical assistants, no child profile selection.\r\n"
+    },
+    {
+      "elapsedMs": 20987.956299999998,
+      "text": "Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.\r\nProduct worker entry verified in exact xmind child: single execution, private bootstrap, canonical completion and physical drain.\r\n"
+    },
+    {
+      "elapsedMs": 21058.4777,
+      "text": "Native read AgentRunner RPC child_pid=28888 creation_time=134371430797521453\r\nNative read approval cancellation child_pid=28888 creation_time=134371430797521453\r\n"
+    },
+    {
+      "elapsedMs": 21288.3088,
+      "text": "Product profiled cancellation verified: exact six-field identity retained with prior canonical history and two charges.\r\n"
+    },
+    {
+      "elapsedMs": 21288.488599999997,
+      "text": "Product worker approval cancellation verified in exact xmind child before post-exit retirement.\r\nActual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.\r\n"
+    },
+    {
+      "elapsedMs": 21367.280899999998,
+      "text": "Native read AgentRunner RPC child_pid=5420 creation_time=134371430800606480\r\n"
+    },
+    {
+      "elapsedMs": 21409.448,
+      "text": "Product typed journal denial verified: product_admission_cancel; zero models, history retained, exact post-exit retirement.\r\n"
+    },
+    {
+      "elapsedMs": 21486.9227,
+      "text": "Native read AgentRunner RPC child_pid=6964 creation_time=134371430801787356\r\n"
+    },
+    {
+      "elapsedMs": 21541.3101,
+      "text": "Product typed journal denial verified: product_admission_timeout; zero models, history retained, exact post-exit retirement.\r\n"
+    },
+    {
+      "elapsedMs": 21613.977,
+      "text": "Native read AgentRunner RPC child_pid=27104 creation_time=134371430803099125\r\n"
+    },
+    {
+      "elapsedMs": 21666.963399999997,
+      "text": "Product typed journal denial verified: product_journal_cancel; zero models, history retained, exact post-exit retirement.\r\n"
+    },
+    {
+      "elapsedMs": 21746.646099999998,
+      "text": "Native read AgentRunner RPC child_pid=2104 creation_time=134371430804387141\r\n"
+    },
+    {
+      "elapsedMs": 21798.3331,
+      "text": "Product typed journal denial verified: product_journal_timeout; zero models, history retained, exact post-exit retirement.\r\n"
+    },
+    {
+      "elapsedMs": 22240.9031,
+      "text": "Production coding worker coding_create verified actual AgentRunner, backend guidance and approvals, durable file results, canonical continuation and physical drain without replay.\r\n"
+    },
+    {
+      "elapsedMs": 22577.6453,
+      "text": "Production coding worker coding_denied verified actual AgentRunner, backend guidance and approvals, durable file results, canonical continuation and physical drain without replay.\r\n"
+    },
+    {
+      "elapsedMs": 22840.589,
+      "text": "Production coding worker coding_cancel verified actual AgentRunner, backend guidance and approvals, durable file results, canonical continuation and physical drain without replay.\r\n"
+    },
+    {
+      "elapsedMs": 23244.073999999997,
+      "text": "Production coding worker coding_unrecorded verified actual AgentRunner, backend guidance and approvals, durable file results, canonical continuation and physical drain without replay.\r\n"
+    },
+    {
+      "elapsedMs": 23674.7718,
+      "text": "Production coding worker coding_attached verified actual AgentRunner, backend guidance and approvals, durable file results, canonical continuation and physical drain without replay.\r\n"
+    },
+    {
+      "elapsedMs": 24241.6975,
+      "text": "Production language worker coding_language verified framed Node LSP diagnostics, inherited permissions, exact admitted folders and canonical continuation.\r\n"
+    },
+    {
+      "elapsedMs": 24643.726199999997,
+      "text": "Production language worker coding_language_denied verified framed Node LSP diagnostics, inherited permissions, exact admitted folders and canonical continuation.\r\n"
+    },
+    {
+      "elapsedMs": 25354.2844,
+      "text": "Production language worker coding_language_attached verified framed Node LSP diagnostics, inherited permissions, exact admitted folders and canonical continuation.\r\n"
+    },
+    {
+      "elapsedMs": 25801.687599999997,
+      "text": "Production callable worker coding_callable verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 26256.3526,
+      "text": "Production callable worker coding_callable_array verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 26685.838,
+      "text": "Production callable worker coding_callable_denied verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 26980.910200000002,
+      "text": "Production callable worker coding_callable_policy verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 27213.023400000002,
+      "text": "Production callable worker coding_callable_cancel verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 27616.2049,
+      "text": "Production callable worker coding_callable_unrecorded verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 28016.067999999996,
+      "text": "Production callable worker coding_callable_alias verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 28524.0655,
+      "text": "Production callable worker coding_callable_worker verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 28988.9057,
+      "text": "Production callable worker coding_callable_default verified actual xlang3 IPC, backend catalogue, approvals, exact receipts and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 29909.6292,
+      "text": "Production skill worker coding_skills verified native guidance delivery, exact history, atomic skill selections and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 30357.689000000002,
+      "text": "Production skill worker coding_skills_denied verified native guidance delivery, exact history, atomic skill selections and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 30792.482099999997,
+      "text": "Production skill worker coding_skills_rollback verified native guidance delivery, exact history, atomic skill selections and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 31086.785099999997,
+      "text": "Production skill worker coding_skills_manual verified native guidance delivery, exact history, atomic skill selections and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 31449.943599999995,
+      "text": "Production counted context worker coding_context verified actual count requests, typed reservation handoff, canonical read continuation and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 31914.2424,
+      "text": "Production counted context worker coding_context_compact verified actual count requests, typed reservation handoff, canonical read continuation and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 32423.134799999996,
+      "text": "Production counted context worker coding_context_overflow verified actual count requests, typed reservation handoff, canonical read continuation and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 32968.5493,
+      "text": "Production counted context worker coding_context_overflow_repeat verified actual count requests, typed reservation handoff, canonical read continuation and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 33212.6891,
+      "text": "Production context worker count_failure verified actual transport outcome, unchanged history, retained charges, drained typed ownership and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 33446.7545,
+      "text": "Production context worker count_cancel verified actual transport outcome, unchanged history, retained charges, drained typed ownership and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 33708.7212,
+      "text": "Production context worker inference_failure verified actual transport outcome, unchanged history, retained charges, drained typed ownership and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 33983.7535,
+      "text": "Production context worker inference_cancel verified actual transport outcome, unchanged history, retained charges, drained typed ownership and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 34384.7634,
+      "text": "Production context worker compact_failure verified actual transport outcome, unchanged history, retained charges, drained typed ownership and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 34809.4115,
+      "text": "Production context worker compact_cancel verified actual transport outcome, unchanged history, retained charges, drained typed ownership and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 35547.6475,
+      "text": "Unified xmind coding command worker verified actual read/create/run_process, two controller approvals, exact canonical continuation and physical retirement.\r\n"
+    },
+    {
+      "elapsedMs": 37580.0988,
+      "text": "Production unified xmind workers started, observed and stopped one native service across two physically retired children using one shared owner.\r\n"
+    },
+    {
+      "elapsedMs": 40201.6978,
+      "text": "Production xmind asynchronous job joined before final response; actual terminal observation reached a third model window without command replay.\r\n"
+    },
+    {
+      "elapsedMs": 42723.8568,
+      "text": "Production asynchronous join receipt failure retained actual native success, no fabricated final response and no replay.\r\n"
+    },
+    {
+      "elapsedMs": 43063.691300000006,
+      "text": "Actual SDK IPC journal role codec passed parent/leaf/typed-graph reserve/start/finish and 84 forged receipt rejections; synthetic replies only, no child admission or funding.\r\n"
+    },
+    {
+      "elapsedMs": 43595.3882,
+      "text": "Actual child wait/stop RPC verified xlang3 service readiness, exact running observation, intentional native stop, durable canonical results, duplicate rejection and physical child drain. Synthetic model receipt; no provider request.\r\n"
+    },
+    {
+      "elapsedMs": 43966.2448,
+      "text": "Actual child remote RPC approved verified one approved peer effect, exact durable acknowledgement, replay rejection and physical child retirement. Synthetic model receipt; no provider request.\r\n"
+    },
+    {
+      "elapsedMs": 44355.082500000004,
+      "text": "Actual child remote RPC unrecorded verified one approved peer effect, exact durable acknowledgement, replay rejection and physical child retirement. Synthetic model receipt; no provider request.\r\n"
+    },
+    {
+      "elapsedMs": 44696.0124,
+      "text": "Actual child remote RPC delivery verified one approved peer effect, exact durable acknowledgement, replay rejection and physical child retirement. Synthetic model receipt; no provider request.\r\n"
+    },
+    {
+      "elapsedMs": 45144.8033,
+      "text": "Production unified xmind remote AgentRunner loop verified one actual approved peer effect, exact canonical continuation, two model windows and physical child retirement.\r\n"
+    },
+    {
+      "elapsedMs": 45635.487700000005,
+      "text": "Production worker catalogue refresh verified changed alias, known no-effect invalidation, three model windows and exactly one actual peer effect.\r\n"
+    },
+    {
+      "elapsedMs": 46097.9251,
+      "text": "Production configured MCP factory verified discovery, actual approved HTTP peer call, canonical continuation and physical child retirement.\r\n"
+    },
+    {
+      "elapsedMs": 46580.510800000004,
+      "text": "Production configured A2A factory verified discovery, actual approved HTTP peer call, canonical continuation and physical child retirement.\r\n"
+    },
+    {
+      "elapsedMs": 47338.1584,
+      "text": "Production configured MCP subscription refresh verified discovery, actual approved HTTP peer call, canonical continuation and physical child retirement.\r\n"
+    },
+    {
+      "elapsedMs": 47403.7353,
+      "text": "Actual child process RPC process_create child_pid=31184 creation_time=134371431060904042\r\n"
+    },
+    {
+      "elapsedMs": 47701.2617,
+      "text": "Actual child process RPC process_create verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 47759.9823,
+      "text": "Actual child process RPC process_denied child_pid=10172 creation_time=134371431064537434\r\n"
+    },
+    {
+      "elapsedMs": 47839.7929,
+      "text": "Actual child process RPC process_denied verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 47904.0843,
+      "text": "Actual child process RPC process_cancel child_pid=17936 creation_time=134371431065920650\r\n"
+    },
+    {
+      "elapsedMs": 47980.505000000005,
+      "text": "Actual child process RPC process_cancel verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 48043.087900000006,
+      "text": "Actual child process RPC process_delivery child_pid=28392 creation_time=134371431067319834\r\n"
+    },
+    {
+      "elapsedMs": 48348.687900000004,
+      "text": "Actual child process RPC process_delivery verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 48426.431800000006,
+      "text": "Actual child process RPC process_unrecorded child_pid=26832 creation_time=134371431071041095\r\n"
+    },
+    {
+      "elapsedMs": 48798.4832,
+      "text": "Actual child process RPC process_unrecorded verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 48872.6307,
+      "text": "Product worker rejected unsupported bootstrap before execution.\r\n"
+    },
+    {
+      "elapsedMs": 48968.3266,
+      "text": "Owned drain observation timeout verified: child_pid=4604 creation_time=134371431076258769 stayed live until explicit release; same process retired without restart or model dispatch.\r\n"
+    },
+    {
+      "elapsedMs": 48970.011300000006,
+      "text": "Fixture persistence close begin.\r\n"
+    },
+    {
+      "elapsedMs": 48976.331900000005,
+      "text": "Fixture persistence close returned.\r\n"
+    },
+    {
+      "elapsedMs": 48976.3778,
+      "text": "Fixture workspace removal begin.\r\n"
+    },
+    {
+      "elapsedMs": 49009.4921,
+      "text": "Fixture workspace removal returned.\r\n"
+    },
+    {
+      "elapsedMs": 49023.219900000004,
+      "text": "Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\r\n"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+diff --git a/Native/src/dynamic_plan_executor.cpp b/Native/src/dynamic_plan_executor.cpp
+index e389463a..906b19e6 100644
+--- a/Native/src/dynamic_plan_executor.cpp
++++ b/Native/src/dynamic_plan_executor.cpp
+@@ -1,5 +1,7 @@
+ #include "agentflow/dynamic_plan_executor.hpp"
+ #include "agentflow/agent_authority.hpp"
++#include "agentflow/agent_read_tool_host.hpp"
++#include "agentflow/repository_instruction_context.hpp"
+ #include "agentflow/a2a_agent_registry.hpp"
+ #include "agentflow/a2a_tool_registry.hpp"
+ #include "agentflow/mcp_wire.hpp"
+@@ -78,7 +80,7 @@ Json deterministic_prompt(const DynamicPreparedNode& prepared){
+     return {{"node_type","tool"},{"tool",definition.tool},{"arguments_json",definition.arguments_json},{"dependency_outputs_json",prepared.dependency_outputs_json}};
+ }
+ Run execute_readonly_tool(PersistenceService& store,const std::string& child,const DynamicPreparedNode& prepared,
+-    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel){
++    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel,DynamicInstructionPrecondition parent_guidance){
+     auto phase=RunState::queued;const auto retire=[&](RunState to,const char* reason){return store.transition(child,phase,to,Json{{"reason",reason}}.dump()).get();};
+     if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_tool");
+     if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
+@@ -89,11 +91,33 @@ Run execute_readonly_tool(PersistenceService& store,const std::string& child,con
+         budget->check(cancel);store.transition(child,RunState::queued,RunState::running).get();phase=RunState::running;
+         const auto& definition=prepared.node.definition;
+         store.append_event(child,"tool.started",Json{{"name",definition.tool},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id},{"arguments_json",definition.arguments_json}}.dump()).get();
+-        const auto result=Json::parse(workspace.invoke(definition.tool,definition.arguments_json,cancel));budget->check(cancel);
++        std::string output;
++        if(definition.tool=="read_repository_instructions"){
++            // Guidance discovery has the same whole-tool denial semantics as
++            // the ordinary guidance owner; it grants no reusable read access.
++            for(const auto& layer:settings.inherited_permission_rule_layers)if(agent_permission_denies(layer,definition.tool,"*"))throw AgentPermissionDenied("Inherited policy denied planned guidance");
++            if(agent_permission_denies(settings.permission_rules,definition.tool,"*"))throw AgentPermissionDenied("Selected policy denied planned guidance");
++            output=workspace.invoke(definition.tool,definition.arguments_json,cancel);
++        }else{
++            const auto args=Json::parse(mcp_compact_object(definition.arguments_json));auto directory=args.value("path",std::string{"."});if(definition.tool=="read_file")directory=RepositoryInstructionContext::file_directory(directory);
++            auto precondition=parent_guidance?parent_guidance(directory,cancel):InstructionPrecondition{};
++            if(parent_guidance&&!precondition.verify)throw ToolAccessDenied("Planned read lost its delivered repository guidance");
++            AgentReadToolOwnerContext owner;owner.run_id=child;owner.primary_workspace=&workspace;owner.offered_tool=[name=definition.tool](const auto& tool){return tool==name;};owner.deadline=budget->deadline();owner.approval_timeout=settings.run_timeout;owner.inherited_permission_layers=settings.inherited_permission_rule_layers;owner.permission_rules=settings.permission_rules;
++            // The parent owns delivered guidance. Recheck that captured
++            // precondition at actual dispatch, including after approval waits.
++            owner.repository_context=[](std::size_t)->RepositoryInstructionContext*{return nullptr;};owner.authorize_dispatch=[budget,precondition,cancel](const AgentWorkspaceInvocation&){budget->check(cancel);if(precondition.verify)precondition.verify(cancel);};
++            auto host=make_agent_read_tool_host(store,store,std::move(owner));AgentWorkspaceInvocation invocation;invocation.run_id=child;invocation.attempt_id=prepared.node.backend_node_id;invocation.call_id=child;invocation.workspace_id=workspace.identity();invocation.workspace_revision=1;invocation.folder_id=workspace.identity();invocation.tool_name=definition.tool;invocation.arguments_json=definition.arguments_json;
++            const auto actual=host->invoke(invocation,cancel);if(!actual.success)throw ToolAccessDenied("Planned read did not pass its native preconditions");output=actual.output_json;
++        }
++        const auto result=Json::parse(output);budget->check(cancel);
+         if(result.dump().size()>32768)throw ToolFileError("Dynamic deterministic tool result exceeds its bound");
+         store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
+         return store.complete_run(child,result.dump()).get();
+-    }catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
++    }catch(const AgentPermissionDenied&){return retire(RunState::failed,"agent_permission_denied");}
++     catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
++     catch(const PermissionDenied&){return retire(RunState::failed,"permission_denied");}
++     catch(const PermissionExpired&){return retire(RunState::failed,"permission_expired");}
++     catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
+      catch(const ToolFileError&){return retire(RunState::failed,"dynamic_tool_execution_failed");}
+      catch(const std::invalid_argument&){return retire(RunState::failed,"invalid_dynamic_tool_arguments");}
+      catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}
+@@ -384,7 +408,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
+                     work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance](std::stop_token stop)mutable{
+                         if(prepared.node.definition.kind==DynamicNodeKind::tool){
+                             static const std::set<std::string> readonly={"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"};
+-                            if(readonly.contains(prepared.node.definition.tool))return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop);
++                            if(readonly.contains(prepared.node.definition.tool))return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop,guidance);
+                             if(prepared.node.definition.tool=="run_process"){
+                                 const auto arguments=Json::parse(mcp_compact_object(prepared.node.definition.arguments_json));const auto directory=arguments.value("workdir",std::string{"."});
+                                 auto precondition=guidance?guidance(directory,stop):InstructionPrecondition{};
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 5eca0716..118117c8 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -17,6 +17,7 @@
+ #include "agentflow/agent_authority.hpp"
+ #include "agentflow/agent_runner.hpp"
+ #include "agentflow/agent_service.hpp"
++#include "agentflow/agent_definitions.hpp"
+ #include "agentflow/agent_model_values.hpp"
+ #include "agentflow/agent_worker_read_host.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+@@ -101,6 +102,19 @@ void main_process_planning(PersistenceService& store,const std::string& path){
+         require(service->healthy()&&service->idle()&&store.run(id).get().state==RunState::completed&&gateway->calls==2&&gateway->child_calls==(human?1u:0u)&&store.root_budget(id).get().model_calls_reserved==(human?3:2)&&store.run_history(id).get().size()==4,"Main AgentService must complete via production SDK worker with exact model/history counts");require(store.dynamic_budget_segment(id).get().state=="closed","Main completion must close its actual segment");std::size_t generations=0;for(const auto& event:store.events(id).get())if(event.kind=="worker.lease.admitted"){const auto lease=store.agent_worker_lease(Json::parse(event.json).at("generation")).get();require(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Main service must physically retire actual distinct worker generations");++generations;}require(generations==(human?2u:1u),"Main resume must launch exactly one replacement generation");if(human){const auto children=store.owned_children(id).get();require(children.size()==1&&children.front().run.state==RunState::completed,"Main shared planner must retain its completed scheduled child across service reopen");std::size_t child_generations=0;for(const auto& event:store.events(children.front().run.id).get())if(event.kind=="worker.lease.admitted"){const auto lease=store.agent_worker_lease(Json::parse(event.json).at("generation")).get();require(lease.state=="retired"&&lease.retirement_reason=="completed"&&lease.spec.pid!=GetCurrentProcessId(),"Main scheduled child must be an actual drained SDK process");++child_generations;}require(child_generations==1,"Completed scheduled child must not replay after human input");}service->close();
+     }
+ }
++void main_planned_read_permissions(PersistenceService& store,const std::string& path){
++    wchar_t executable[32768]{};const auto length=GetModuleFileNameW(nullptr,executable,32768);require(length&&length<32768,"Permission fixture image unavailable");const auto image=ForegroundProcess::bind_executable((std::filesystem::path(executable).parent_path()/"xmind.exe").string());const auto directory=std::filesystem::path(path).parent_path();const std::string marker="PLANNED_READ_PRIVATE_BYTES";{std::ofstream output(directory/"planned-read-secret.txt");output<<marker;}
++    for(const std::string mode:{"deny","enumeration","ask-allow","ask-deny","ordered-allow"}){
++        const auto id="main-plan-permission-"+mode;const bool enumeration=mode=="enumeration",asks=mode.starts_with("ask-"),allowed=mode=="ask-allow"||mode=="ordered-allow";const std::string tool=enumeration?"list_files":"read_file";
++        auto settings=dynamic_fixture_child(directory.string());settings.planning=DynamicPlanningPolicy{};auto gateway=std::make_shared<PlanningLoopModel>();const auto arguments=Json{{"path",enumeration?".":"planned-read-secret.txt"}}.dump();gateway->first={"main-planned-read","plan_tasks",Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",Json::array({{{"id","read"},{"type","tool"},{"tool",tool},{"arguments_json",arguments},{"depends_on",Json::array()}}})}}.dump()};
++        std::string rules="      - action: "+tool+"\n        resource: "+(mode=="ordered-allow"?std::string("'**'"):std::string("planned-read-secret.txt"))+"\n        effect: "+(asks?"ask":"deny")+"\n";if(mode=="ordered-allow")rules+="      - action: read_file\n        resource: planned-read-secret.txt\n        effect: allow\n";
++        AgentDefinitionStore(store).apply("agents:\n  - id: planning.permissions\n    mode: primary\n    placement: process\n    model_id: worker-fixture-model\n    instructions: Preserve the selected permission snapshot.\n    permissions:\n"+rules);
++        auto executor=make_agent_worker_read_executor(store,settings,image,gateway);AgentService service(store,settings,1,8,{},executor);store.create_session(id,"Planned selected-agent read permission fixture").get();service.select_session_agent(id,service.agent_definitions().front(),0);service.submit(id,id,"Synthetic deterministic read permission check");
++        const auto until=std::chrono::steady_clock::now()+12s;std::optional<Operation> pending;
++        if(asks){while(std::chrono::steady_clock::now()<until&&service.healthy()&&!service.idle()&&!pending){for(const auto& child:store.owned_children(id).get())for(const auto& operation:store.operations(child.run.id).get())if(operation.state==OperationState::awaiting_approval)pending=operation;if(!pending)std::this_thread::sleep_for(5ms);}require(pending.has_value(),"Planned ask read must wait for controller approval");for(const auto& event:store.tree_events(id,0,256).get())require(event.json.find(marker)==std::string::npos,"Unapproved planned read must reveal no file content");store.decide_operation(pending->id,allowed?OperationDecision::allow:OperationDecision::deny,"planned-read-controller").get();}
++        while(std::chrono::steady_clock::now()<until&&service.healthy()&&!service.idle())std::this_thread::sleep_for(5ms);require(service.healthy()&&service.idle()&&store.run(id).get().state==RunState::completed&&gateway->calls==2&&store.root_budget(id).get().model_calls_reserved==2,"Permission result must settle through the actual planning worker without extra model calls");const auto children=store.owned_children(id).get();require(children.size()==1&&children.front().run.state==(allowed?RunState::completed:RunState::failed),"Planned read must honor selected ordered, deny, enumeration and ask policy");bool exposed=false;for(const auto& event:store.tree_events(id,0,256).get())exposed=exposed||event.json.find(marker)!=std::string::npos;require(exposed==allowed,"Only controller-approved or ordered-allowed planned reads may reveal file content");require(store.operations(children.front().run.id).get().size()==(asks?1u:0u),"Denied planned reads must not create approval operations");service.close();
++    }
++}
+ void delegated_workers(PersistenceService& store){
+     const std::string parent="delegated-worker-root",membership=R"({"workspace_id":"worker-fixture-workspace","revision":7,"snapshot":"synthetic_backend_fixture"})";
+     store.create_session(parent,"Synthetic admitted child IPC ledger").get();store.start_prompt_run(parent,parent,R"({"content":"Bounded child admission"})",RootBudgetSpec{"native.delegation",1,"worker-fixture-workspace",provider,8,2,8,600000}).get();store.transition(parent,RunState::queued,RunState::running).get();store.append_event(parent,"agent.workspace_membership",membership).get();
+@@ -535,7 +549,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);planning_admission(store,path,imports);main_process_planning(store,path);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);planning_admission(store,path,imports);main_process_planning(store,path);main_planned_read_permissions(store,path);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});

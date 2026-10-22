@@ -1,0 +1,36 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 39: native_dynamic_plan_engine_contract
+1/2 Test #39: native_dynamic_plan_engine_contract ...   Passed    6.66 sec
+    Start 94: native_agent_worker_ledger_contract
+2/2 Test #94: native_agent_worker_ledger_contract ...***Failed   16.80 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:49508
+Planned read must honor selected ordered, deny, enumeration and ask policy; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-1523033682-2707999032
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:49508',
+  stdout: 'Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.\r\n',
+  stderr: 'Planned read must honor selected ordered, deny, enumeration and ask policy; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-1523033682-2707999032\r\n'
+}
+
+Node.js v22.19.0
+
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) =  23.47 sec
+
+The following tests FAILED:
+	 94 - native_agent_worker_ledger_contract (Failed)
+Errors while running CTest

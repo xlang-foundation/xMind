@@ -1,5 +1,7 @@
 #include "agentflow/dynamic_plan_executor.hpp"
 #include "agentflow/agent_authority.hpp"
+#include "agentflow/agent_read_tool_host.hpp"
+#include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/a2a_agent_registry.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -40,6 +42,10 @@ std::vector<WorkspaceToolFolder> admitted_workspace_roots(PersistenceService& st
         throw ToolAccessDenied("Saved workspace membership does not match the admitted primary folder");
     WorkspaceToolSet verified(snapshot->workspace_id,snapshot->revision,snapshot->folders);return verified.folders();
 }
+void require_dynamic_tool_permission(const AgentSettings& settings,const std::string& tool){
+    for(const auto& layer:settings.inherited_permission_rule_layers)if(agent_permission_denies(layer,tool,"*"))throw AgentPermissionDenied("Inherited policy denied planned tool");
+    if(agent_permission_denies(settings.permission_rules,tool,"*"))throw AgentPermissionDenied("Selected policy denied planned tool");
+}
 bool terminal(RunState state){return state==RunState::completed||state==RunState::failed||state==RunState::cancelled;}
 bool changed_process_precondition(const AgentSettings& settings){
     for(const auto& profile:settings.process_profiles)try{
@@ -78,7 +84,7 @@ Json deterministic_prompt(const DynamicPreparedNode& prepared){
     return {{"node_type","tool"},{"tool",definition.tool},{"arguments_json",definition.arguments_json},{"dependency_outputs_json",prepared.dependency_outputs_json}};
 }
 Run execute_readonly_tool(PersistenceService& store,const std::string& child,const DynamicPreparedNode& prepared,
-    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel){
+    const AgentSettings& settings,const DynamicPlanCapabilities& caps,const std::shared_ptr<RootExecutionBudget>& budget,std::stop_token cancel,DynamicInstructionPrecondition parent_guidance){
     auto phase=RunState::queued;const auto retire=[&](RunState to,const char* reason){return store.transition(child,phase,to,Json{{"reason",reason}}.dump()).get();};
     if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_tool");
     if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
@@ -89,11 +95,33 @@ Run execute_readonly_tool(PersistenceService& store,const std::string& child,con
         budget->check(cancel);store.transition(child,RunState::queued,RunState::running).get();phase=RunState::running;
         const auto& definition=prepared.node.definition;
         store.append_event(child,"tool.started",Json{{"name",definition.tool},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id},{"arguments_json",definition.arguments_json}}.dump()).get();
-        const auto result=Json::parse(workspace.invoke(definition.tool,definition.arguments_json,cancel));budget->check(cancel);
+        std::string output;
+        if(definition.tool=="read_repository_instructions"){
+            // Guidance discovery has the same whole-tool denial semantics as
+            // the ordinary guidance owner; it grants no reusable read access.
+            require_dynamic_tool_permission(settings,definition.tool);
+            output=workspace.invoke(definition.tool,definition.arguments_json,cancel);
+        }else{
+            const auto args=Json::parse(mcp_compact_object(definition.arguments_json));auto directory=args.value("path",std::string{"."});if(definition.tool=="read_file")directory=RepositoryInstructionContext::file_directory(directory);
+            auto precondition=parent_guidance?parent_guidance(directory,cancel):InstructionPrecondition{};
+            if(parent_guidance&&!precondition.verify)throw ToolAccessDenied("Planned read lost its delivered repository guidance");
+            AgentReadToolOwnerContext owner;owner.run_id=child;owner.primary_workspace=&workspace;owner.offered_tool=[name=definition.tool](const auto& tool){return tool==name;};owner.deadline=budget->deadline();owner.approval_timeout=settings.run_timeout;owner.inherited_permission_layers=settings.inherited_permission_rule_layers;owner.permission_rules=settings.permission_rules;
+            // The parent owns delivered guidance. Recheck that captured
+            // precondition at actual dispatch, including after approval waits.
+            owner.repository_context=[](std::size_t)->RepositoryInstructionContext*{return nullptr;};owner.authorize_dispatch=[budget,precondition,cancel](const AgentWorkspaceInvocation&){budget->check(cancel);if(precondition.verify)precondition.verify(cancel);};
+            auto host=make_agent_read_tool_host(store,store,std::move(owner));AgentWorkspaceInvocation invocation;invocation.run_id=child;invocation.attempt_id=prepared.node.backend_node_id;invocation.call_id=child;invocation.workspace_id=workspace.identity();invocation.workspace_revision=1;invocation.folder_id=workspace.identity();invocation.tool_name=definition.tool;invocation.arguments_json=definition.arguments_json;
+            const auto actual=host->invoke(invocation,cancel);if(!actual.success)throw ToolAccessDenied("Planned read did not pass its native preconditions");output=actual.output_json;
+        }
+        const auto result=Json::parse(output);budget->check(cancel);
         if(result.dump().size()>32768)throw ToolFileError("Dynamic deterministic tool result exceeds its bound");
         store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
         return store.complete_run(child,result.dump()).get();
-    }catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
+    }catch(const AgentPermissionDenied&){return retire(RunState::failed,"agent_permission_denied");}
+     catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
+     catch(const PermissionDenied&){return retire(RunState::failed,"permission_denied");}
+     catch(const PermissionExpired&){return retire(RunState::failed,"permission_expired");}
+     catch(const ToolAccessDenied&){return retire(RunState::failed,"dynamic_workspace_precondition_unavailable");}
+     catch(const ToolGuidanceChanged&){return retire(RunState::failed,"repository_instructions_changed");}
      catch(const ToolFileError&){return retire(RunState::failed,"dynamic_tool_execution_failed");}
      catch(const std::invalid_argument&){return retire(RunState::failed,"invalid_dynamic_tool_arguments");}
      catch(const RootBudgetExhausted&){return retire(RunState::failed,"execution_budget_exhausted");}
@@ -106,6 +134,7 @@ Run execute_mcp_tool(PersistenceService& store,const std::string& child,const Dy
     if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_mcp_tool");
     if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
     try{
+        require_dynamic_tool_permission(settings,prepared.node.definition.tool);
         if(!settings.workspace)throw ToolAccessDenied("Dynamic MCP nodes require the admitted workspace");
         WorkspaceTools workspace(*settings.workspace);
         if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic MCP workspace identity changed");
@@ -133,6 +162,7 @@ Run execute_mcp_tool(PersistenceService& store,const std::string& child,const Dy
         store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
         return store.complete_run(child,result.dump()).get();
     }catch(const McpOutcomeUnrecorded&){throw;}
+     catch(const AgentPermissionDenied&){return retire(RunState::failed,"agent_permission_denied");}
      catch(const McpEffectUncertain&){return retire(RunState::failed,"mcp_effect_uncertain");}
      catch(const McpReadFailed&){return retire(RunState::failed,"mcp_read_failed");}
      catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
@@ -148,6 +178,7 @@ Run execute_process_tool(PersistenceService& store,const std::string& child,cons
     if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_process");
     if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
     try{
+        require_dynamic_tool_permission(settings,prepared.node.definition.tool);
         if(!settings.workspace||settings.process_profiles.empty()||!guidance.verify)throw ToolAccessDenied("Dynamic process effects require the admitted workspace, registered profile and repository instruction precondition");
         WorkspaceTools workspace(*settings.workspace);
         if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic process workspace identity changed");
@@ -167,6 +198,7 @@ Run execute_process_tool(PersistenceService& store,const std::string& child,cons
         store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
         return store.complete_run(child,result.dump()).get();
     }catch(const ProcessOutcomeUnrecorded&){throw;}
+     catch(const AgentPermissionDenied&){return retire(RunState::failed,"agent_permission_denied");}
      catch(const ProcessEffectUncertain&){return retire(RunState::failed,"process_effect_uncertain");}
      catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
      catch(const PermissionDenied&){return retire(RunState::failed,"process_denied");}
@@ -186,6 +218,7 @@ Run execute_a2a_tool(PersistenceService& store,const std::string& child,const Dy
     if(cancel.stop_requested())return retire(RunState::cancelled,"cancelled_before_dynamic_a2a_tool");
     if(std::chrono::steady_clock::now()>=budget->deadline())return retire(RunState::failed,"agent_timeout");
     try{
+        require_dynamic_tool_permission(settings,prepared.node.definition.tool);
         if(!settings.workspace||!settings.a2a_enabled||!guidance.verify)throw ToolAccessDenied("Dynamic A2A effects require the admitted workspace, enabled registration and repository instruction precondition");
         WorkspaceTools workspace(*settings.workspace);
         if(workspace.identity()!=caps.workspace_identity)throw ToolAccessDenied("Dynamic A2A workspace identity changed");
@@ -212,6 +245,7 @@ Run execute_a2a_tool(PersistenceService& store,const std::string& child,const Dy
         budget->check(cancel);store.append_event(child,"tool.completed",Json{{"name",definition.tool},{"data",result},{"source","dynamic_plan"},{"plan_node_id",prepared.node.backend_node_id}}.dump()).get();
         return store.complete_run(child,result.dump()).get();
     }catch(const A2aOutcomeUnrecorded&){throw;}
+     catch(const AgentPermissionDenied&){return retire(RunState::failed,"agent_permission_denied");}
      catch(const A2aEffectUncertain&){return retire(RunState::failed,"a2a_effect_uncertain");}
      catch(const A2aEffectNotDispatched&){return retire(RunState::failed,"a2a_not_dispatched");}
      catch(const PermissionCancelled&){return retire(RunState::cancelled,"cancelled");}
@@ -384,7 +418,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                     work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance](std::stop_token stop)mutable{
                         if(prepared.node.definition.kind==DynamicNodeKind::tool){
                             static const std::set<std::string> readonly={"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"};
-                            if(readonly.contains(prepared.node.definition.tool))return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop);
+                            if(readonly.contains(prepared.node.definition.tool))return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop,guidance);
                             if(prepared.node.definition.tool=="run_process"){
                                 const auto arguments=Json::parse(mcp_compact_object(prepared.node.definition.arguments_json));const auto directory=arguments.value("workdir",std::string{"."});
                                 auto precondition=guidance?guidance(directory,stop):InstructionPrecondition{};

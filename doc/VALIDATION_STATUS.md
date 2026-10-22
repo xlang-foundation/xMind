@@ -1,3 +1,54 @@
+## Planned tool permissions and admitted guidance — 2026-10-22
+
+Deterministic plan reads now use the existing native read owner instead of direct
+WorkspaceTools dispatch. Selected and inherited rules retain ordinary ordered/path
+and directory-enumeration semantics, controller ask decisions and reusable grant
+scope. Planned guidance discovery retains normal whole-tool denial. Whole-tool
+denial is also checked before planned process/MCP/A2A dispatch; the new process
+case proves denial even with an automatically approved registered profile.
+
+Planning callbacks now bind a private copy to the read/coding context actually
+admitted to the model. They no longer consult the original undelivered context in
+WorkspaceExecutor. Owner scope is verified before and after copying; callbacks
+shared by fixture bindings are not mutated. Captured guidance is rechecked at the
+actual read after controller approval. No IPC serializer, client-supplied policy
+or additional remote method was introduced, and the unused source-context callback
+and mutex were removed.
+
+Eight actual AgentService/production-worker cases cover path denial, directory
+enumeration denial, controller allow/deny, last-rule allow, guidance changing while
+approval waits, denied auto-approval process and malformed path schema rejection.
+Denied/unapproved/changed-guidance cases expose no test file bytes. Allowed reads
+retain bytes; ordinary approval operations belong to the model-free plan child.
+Schema-invalid calls create no child or plan and retain the canonical rejection.
+Every root completes with exactly two model charges; earlier main process pause/
+resume and actual scheduled-child cases remain in the same ledger.
+
+The initial test exposed undelivered guidance rather than reaching read approval;
+that failed gate is preserved. A later malformed-input fixture incorrectly expected
+an admitted failed child; actual sealed-schema validation rejected it earlier. The
+fixture now asserts that boundary, and redundant runtime handlers were removed.
+Final local planning-engine/worker-ledger scope passes 2/2 in 25.13s, ledger18.27s.
+Native patch ebcc4b2bc472491812d643c62d524588dc7520fa54f71100d6f8a47a60708041;
+xmind.exe 05271c95557610c0b463b0ef957a6937d24379c1fd5967dbe74edb924b298ec0.
+Frozen sets: 2787 project/16 SDK/1870 libraries/30 runtime/18598 dependencies/
+105 binaries. Inventory172. Synthetic gateways only; no paid inference, CPython,
+installation, user-profile writes, user-task replay or visible windows.
+
+The earlier seven-contract gate on patch2e004ba6 passes six contracts but the
+worker-model production phase terminates with 3221226356 (0xC0000374, Windows heap
+corruption) after graph-process-denied. No Windows crash record/dump was available.
+An unchanged-source diagnostic worker run enabled the existing opt-in dump/timing
+observer without changing deadlines and passed 1/1 in55.29s; it produced timing
+receipts and no dump. This does not fix or explain the intermittent crash, does
+not convert the seven-test failure into a pass, and is not final-source full-suite
+acceptance. Both source versions and original logs are retained.
+Evidence: process-xmind-root-planned-permissions-*-20261022-*.
+
+Narrow/empty catalogues, permission binding across restart, remaining remote and
+orchestration policy cases, managed-profile default planning and installed-client
+qualification remain open. The runtime heap failure also remains unresolved.
+
 ## Main application process planning composition — 2026-10-22
 
 WorkspaceExecutor now accepts explicit root planning policies and shares its

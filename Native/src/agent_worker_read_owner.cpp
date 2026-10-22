@@ -46,7 +46,7 @@ struct AgentWorkerReadOwner::Impl {
         }
         if(policy.planning&&!context_window)hooks.reserve_planning_continuation=[&store,budget=policy.planning->budget](const std::string& call,const std::string& attempt,std::stop_token stop){if(!attempt.empty()&&store.dynamic_plan_call(call).get().continuation_attempt_id!=attempt)throw Conflict("Worker changed the backend-selected continuation attempt");return budget->reserve_worker_continuation(call,stop);};
         if(policy.planning)hooks.complete=[&store,lease,budget=policy.planning->budget,deadline,cancel](const std::string& attempt,std::stop_token stop){budget->check(stop);return store.complete_agent_worker_dynamic_run(lease,attempt,budget->segment_id(),budget->active_elapsed_ms(),deadline,cancel,stop).get();};
-        if(policy.planning)native_planning=std::make_unique<NativePlanningBinding>(bind_agent_worker_planning_context(policy.planning->callbacks,store,lease,context_window.get()));
+        if(policy.planning)native_planning=std::make_unique<NativePlanningBinding>(bind_agent_worker_planning_context(policy.planning->callbacks,store,lease,context_window.get(),[this](const std::string& directory,std::stop_token stop){return context.planning_guidance(directory,stop);}));
         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),
             std::move(model_policy),std::move(gateway),deadline,cancel);
         native_journal=std::make_unique<AgentWorkerJournalHost>(store,lease,deadline,cancel,hooks);

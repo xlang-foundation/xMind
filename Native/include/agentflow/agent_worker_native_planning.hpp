@@ -11,6 +11,8 @@ struct NativePlanningCallbacks {
     std::function<DynamicExecutionResult(const std::string&,std::stop_token)> resume;
     std::function<bool()> healthy;
     std::function<std::string()> pending;
+    // Backend-only copy bound to the context actually admitted to the model.
+    std::function<NativePlanningCallbacks(DynamicInstructionPrecondition)> with_owner_guidance;
 };
 struct NativePlanningAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 struct NativePlanningState;

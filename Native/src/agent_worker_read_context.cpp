@@ -27,6 +27,9 @@ AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,Persiste
     if(!model_only)native_=std::make_unique<AgentWorkerReadHost>(journal,store_,lease_,std::move(read_owner),owner_cancel_);
 }
 AgentWorkerReadContext::~AgentWorkerReadContext()=default;
+InstructionPrecondition AgentWorkerReadContext::planning_guidance(const std::string& directory,std::stop_token stop){
+    std::lock_guard lock(mutex_);check(stop);if(contexts_.empty()||!contexts_.front()->ready(directory,stop))return {};return contexts_.front()->precondition(directory);
+}
 void AgentWorkerReadContext::check(std::stop_token cancel){
     if(cancel.stop_requested()||owner_cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker read context cancelled");if(std::chrono::steady_clock::now()>=owner_.deadline)throw AgentWorkerAuthorityExpired("Worker read context deadline elapsed");
     const auto run=std::get<Run>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get());if(run.state!=RunState::running)throw Conflict("Worker read context requires its running owner");

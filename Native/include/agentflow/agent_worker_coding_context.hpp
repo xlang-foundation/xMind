@@ -17,6 +17,7 @@ class AgentWorkerCodingContext final:public AgentReadToolHost,public AgentFileTo
 public:
     AgentWorkerCodingContext(PersistenceService&,AgentWorkerLeaseSpec,AgentReadToolOwnerContext,
         AgentWorkerReadRequestPolicy,AgentWorkerChannel::Deadline,std::stop_token={},std::shared_ptr<AgentProcessToolHost> process_owner={},std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={});
+    InstructionPrecondition planning_guidance(const std::string& directory,std::stop_token stop={}){return reads_.planning_guidance(directory,stop);}
     ModelRequest prepare(std::stop_token={});
     void admit(const std::string&,const ModelRequest&,std::stop_token={});
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
