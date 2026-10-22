@@ -1,0 +1,72 @@
+diff --git a/Native/include/agentflow/agent_worker_control.hpp b/Native/include/agentflow/agent_worker_control.hpp
+index ac8d5cde..d63ce2bd 100644
+--- a/Native/include/agentflow/agent_worker_control.hpp
++++ b/Native/include/agentflow/agent_worker_control.hpp
+@@ -5,7 +5,6 @@
+ namespace agentflow {
+ // A child reply is an intent only. The backend must separately observe physical
+ // exit and canonical durable facts before retiring ownership or freeing capacity.
+-RunState decode_agent_worker_execution_intent(const std::string&);
+ void connect_agent_worker_execution(AgentWorkerRpcPeer&,AgentWorkerProcess&,AgentWorkerChannel::Deadline,std::stop_token={});
+ RunState request_agent_worker_execution(AgentWorkerRpcPeer&);
+ void request_agent_worker_cancellation(AgentWorkerRpcPeer&);
+diff --git a/Native/src/agent_worker_control.cpp b/Native/src/agent_worker_control.cpp
+index 55d78051..71cf516d 100644
+--- a/Native/src/agent_worker_control.cpp
++++ b/Native/src/agent_worker_control.cpp
+@@ -2,35 +2,9 @@
+ #include "agentflow/agent_worker_native_execution.hpp"
+ #include "agentflow/mcp_wire.hpp"
+ #include "nlohmann/json.hpp"
+-#include <set>
+ 
+ namespace agentflow {
+-namespace {
+ using Json=nlohmann::json;
+-[[noreturn]] void invalid(){throw AgentWorkerProtocolError("Invalid worker control reply");}
+-Json reply(const std::string& bytes){
+-    if(bytes.empty()||bytes.size()>256)invalid();
+-    try{
+-        std::set<std::string> keys;
+-        auto value=Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& item){
+-            if(depth>1)invalid();
+-            if(event==Json::parse_event_t::key&&!keys.insert(item.get<std::string>()).second)invalid();
+-            return true;
+-        });
+-        if(!value.is_object()||value.size()!=2||!value.contains("version")||!value.at("version").is_number_integer()||value.at("version")!=1)invalid();
+-        return value;
+-    }catch(const Json::exception&){invalid();}
+-}
+-}
+-RunState decode_agent_worker_execution_intent(const std::string& bytes){
+-    const auto value=reply(bytes);
+-    if(!value.contains("outcome")||!value.at("outcome").is_string())invalid();
+-    const auto outcome=value.at("outcome").get<std::string>();
+-    if(outcome=="completed")return RunState::completed;
+-    if(outcome=="failed")return RunState::failed;
+-    if(outcome=="cancelled")return RunState::cancelled;
+-    invalid();
+-}
+ void connect_agent_worker_execution(AgentWorkerRpcPeer& peer,AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
+     if(peer.scope()!=worker.channel().scope())throw AgentWorkerProtocolError("Native execution rendezvous scope differs");const auto ready=worker.channel().receive(deadline,stop);if(ready.operation!="worker.execution.ready"||ready.payload.size()>1024)throw AgentWorkerProtocolError("Invalid native execution rendezvous");
+     const auto value=Json::parse(mcp_compact_object(ready.payload));if(value.size()!=4||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("endpoint").is_string()||!value.at("ticket").is_string()||!value.at("pid").is_number_unsigned()||value.at("pid").get<std::uint64_t>()!=worker.pid())throw AgentWorkerProtocolError("Native execution rendezvous identity differs");
+diff --git a/Native/tests/agent_worker_context_fixture.hpp b/Native/tests/agent_worker_context_fixture.hpp
+index 8044b528..77dc4ad1 100644
+--- a/Native/tests/agent_worker_context_fixture.hpp
++++ b/Native/tests/agent_worker_context_fixture.hpp
+@@ -91,14 +91,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+         startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
+     }
+     worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)connect_agent_worker_execution(peer,*worker,deadline);peer.start();
+-    const auto execute_method=product_entry?"worker.execute":"fixture.run";
+-    const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call(execute_method,"{}");};
+-    if(!runner){
+-        for(const auto outcome:{RunState::completed,RunState::failed,RunState::cancelled})check(decode_agent_worker_execution_intent(Json{{"version",1},{"outcome",to_string(outcome)}}.dump())==outcome,"Worker fixed intent must preserve its exact terminal outcome");
+-        for(const auto* bytes:{"", "[]", "{}", R"({"version":1,"outcome":"running"})", R"({"version":1,"outcome":"paused"})", R"({"version":2,"outcome":"completed"})", R"({"version":1.0,"outcome":"completed"})", R"({"version":true,"outcome":"completed"})", R"({"version":1,"outcome":true})", R"({"version":1,"outcome":"completed","reason":"forged"})", R"({"version":1,"outcome":"failed","outcome":"completed"})", R"({"version":1,"outcome":{"state":"completed"}})", R"({"version":1,"stop_requested":true})", R"({"version":1,"outcome":"completed"} trailing)"})rejects<AgentWorkerProtocolError>([&]{decode_agent_worker_execution_intent(bytes);});
+-        rejects<AgentWorkerProtocolError>([&]{decode_agent_worker_execution_intent(std::string(257,' '));});
+-        std::cout<<"Native worker control intent verified: strict bounded versioned terminal replies; no child reason or fabricated durable Run."<<std::endl;
+-    }
++    const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call("fixture.run","{}");};
+     if(product_entry){rejects<Conflict>([&]{drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);});check(worker->alive()&&peer.alive(),"Queued root is not proof of completed drain");rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute",R"({"instructions":"forged"})");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.unknown","{}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.cancel",R"({"run_id":"foreign"})");});check(store.root_budget(id).get().model_calls_reserved==0,"Rejected product controls must not reserve a model");}
+     if(mode.starts_with("product_admission_")||mode.starts_with("product_journal_")){
+         const bool cancelled=mode.ends_with("_cancel");const auto intent=Json::parse(execute_reply());check(intent.size()==2&&intent.at("version")==1&&intent.at("outcome")== (cancelled?"cancelled":"failed"),"Typed journal cancellation/timeout must retain its terminal intent");

@@ -2,35 +2,9 @@
 #include "agentflow/agent_worker_native_execution.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
-#include <set>
 
 namespace agentflow {
-namespace {
 using Json=nlohmann::json;
-[[noreturn]] void invalid(){throw AgentWorkerProtocolError("Invalid worker control reply");}
-Json reply(const std::string& bytes){
-    if(bytes.empty()||bytes.size()>256)invalid();
-    try{
-        std::set<std::string> keys;
-        auto value=Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& item){
-            if(depth>1)invalid();
-            if(event==Json::parse_event_t::key&&!keys.insert(item.get<std::string>()).second)invalid();
-            return true;
-        });
-        if(!value.is_object()||value.size()!=2||!value.contains("version")||!value.at("version").is_number_integer()||value.at("version")!=1)invalid();
-        return value;
-    }catch(const Json::exception&){invalid();}
-}
-}
-RunState decode_agent_worker_execution_intent(const std::string& bytes){
-    const auto value=reply(bytes);
-    if(!value.contains("outcome")||!value.at("outcome").is_string())invalid();
-    const auto outcome=value.at("outcome").get<std::string>();
-    if(outcome=="completed")return RunState::completed;
-    if(outcome=="failed")return RunState::failed;
-    if(outcome=="cancelled")return RunState::cancelled;
-    invalid();
-}
 void connect_agent_worker_execution(AgentWorkerRpcPeer& peer,AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
     if(peer.scope()!=worker.channel().scope())throw AgentWorkerProtocolError("Native execution rendezvous scope differs");const auto ready=worker.channel().receive(deadline,stop);if(ready.operation!="worker.execution.ready"||ready.payload.size()>1024)throw AgentWorkerProtocolError("Invalid native execution rendezvous");
     const auto value=Json::parse(mcp_compact_object(ready.payload));if(value.size()!=4||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("endpoint").is_string()||!value.at("ticket").is_string()||!value.at("pid").is_number_unsigned()||value.at("pid").get<std::uint64_t>()!=worker.pid())throw AgentWorkerProtocolError("Native execution rendezvous identity differs");

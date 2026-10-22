@@ -91,14 +91,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
     }
     worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)connect_agent_worker_execution(peer,*worker,deadline);peer.start();
-    const auto execute_method=product_entry?"worker.execute":"fixture.run";
-    const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call(execute_method,"{}");};
-    if(!runner){
-        for(const auto outcome:{RunState::completed,RunState::failed,RunState::cancelled})check(decode_agent_worker_execution_intent(Json{{"version",1},{"outcome",to_string(outcome)}}.dump())==outcome,"Worker fixed intent must preserve its exact terminal outcome");
-        for(const auto* bytes:{"", "[]", "{}", R"({"version":1,"outcome":"running"})", R"({"version":1,"outcome":"paused"})", R"({"version":2,"outcome":"completed"})", R"({"version":1.0,"outcome":"completed"})", R"({"version":true,"outcome":"completed"})", R"({"version":1,"outcome":true})", R"({"version":1,"outcome":"completed","reason":"forged"})", R"({"version":1,"outcome":"failed","outcome":"completed"})", R"({"version":1,"outcome":{"state":"completed"}})", R"({"version":1,"stop_requested":true})", R"({"version":1,"outcome":"completed"} trailing)"})rejects<AgentWorkerProtocolError>([&]{decode_agent_worker_execution_intent(bytes);});
-        rejects<AgentWorkerProtocolError>([&]{decode_agent_worker_execution_intent(std::string(257,' '));});
-        std::cout<<"Native worker control intent verified: strict bounded versioned terminal replies; no child reason or fabricated durable Run."<<std::endl;
-    }
+    const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call("fixture.run","{}");};
     if(product_entry){rejects<Conflict>([&]{drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);});check(worker->alive()&&peer.alive(),"Queued root is not proof of completed drain");rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute",R"({"instructions":"forged"})");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.unknown","{}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.cancel",R"({"run_id":"foreign"})");});check(store.root_budget(id).get().model_calls_reserved==0,"Rejected product controls must not reserve a model");}
     if(mode.starts_with("product_admission_")||mode.starts_with("product_journal_")){
         const bool cancelled=mode.ends_with("_cancel");const auto intent=Json::parse(execute_reply());check(intent.size()==2&&intent.at("version")==1&&intent.at("outcome")== (cancelled?"cancelled":"failed"),"Typed journal cancellation/timeout must retain its terminal intent");

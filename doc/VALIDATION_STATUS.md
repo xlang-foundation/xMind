@@ -1,3 +1,14 @@
+## Obsolete execution packet decoder removed — 2026-10-21
+
+Deleted the unused execution-intent packet decoder and its retired-format tests.
+Native execution checks retain identity/ticket/scope, duplicate dispatch, terminal
+intent, cancellation and lifetime coverage; old-route refusal tests remain.
+Frozen gate passes 19/19 in 131.92s, native 51c3327a / SDK 1ff2a8e7, with
+2781 project inputs and all 137 native binaries unchanged around testing.
+Full 169-test suite not run; nothing installed. Private bootstrap/liveness and
+peer adapter cleanup, native planning and product acceptance remain open.
+[Exact gate and raw evidence](evidence/process-xmind-root-native-execution-cleanup-checkpoint-20261021.json).
+
 ## Product native execution control — 2026-10-21
 
 Production execution and cancellation now call xmind.Executions().Open(ticket)
