@@ -1,0 +1,133 @@
+diff --git a/Native/include/agentflow/agent_worker_native_model.hpp b/Native/include/agentflow/agent_worker_native_model.hpp
+index 145ff7d5..f443ecb9 100644
+--- a/Native/include/agentflow/agent_worker_native_model.hpp
++++ b/Native/include/agentflow/agent_worker_native_model.hpp
+@@ -9,11 +9,13 @@
+ #include <memory>
+ namespace agentflow {
+ class AgentWorkerJournalHost;
++class NativePlanningBinding;
+ struct NativeWorkerModelState;
+ struct NativeWorkerModelAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
+ class NativeWorkerModelBinding final {
+ public:
+-    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr,AgentWorkerProcessService* processes=nullptr,AgentRemoteToolHost* remotes=nullptr,AgentWorkerCallableService* callables=nullptr);
++    // Captured service hosts, including planning, outlive this binding and callers.
++    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr,AgentWorkerProcessService* processes=nullptr,AgentRemoteToolHost* remotes=nullptr,AgentWorkerCallableService* callables=nullptr,NativePlanningBinding* planning=nullptr);
+     ~NativeWorkerModelBinding();
+     NativeWorkerModelBinding(const NativeWorkerModelBinding&)=delete;
+     NativeWorkerModelBinding& operator=(const NativeWorkerModelBinding&)=delete;
+@@ -144,6 +146,7 @@ struct NativeWorkerApi {
+     X::Value Processes();
+     X::Value Remotes();
+     X::Value Callables();
++    X::Value Planning();
+     X::Value Identity();
+     BEGIN_PACKAGE(NativeWorkerApi)
+         APISET().AddFunc<0>("Identity",&NativeWorkerApi::Identity);
+@@ -154,6 +157,7 @@ struct NativeWorkerApi {
+         APISET().AddFunc<0>("Processes",&NativeWorkerApi::Processes);
+         APISET().AddFunc<0>("Remotes",&NativeWorkerApi::Remotes);
+         APISET().AddFunc<0>("Callables",&NativeWorkerApi::Callables);
++        APISET().AddFunc<0>("Planning",&NativeWorkerApi::Planning);
+     END_PACKAGE
+ };
+ struct NativeWorkersApi {
+diff --git a/Native/include/agentflow/agent_worker_native_planning.hpp b/Native/include/agentflow/agent_worker_native_planning.hpp
+index 086dd501..59f6880b 100644
+--- a/Native/include/agentflow/agent_worker_native_planning.hpp
++++ b/Native/include/agentflow/agent_worker_native_planning.hpp
+@@ -20,6 +20,8 @@ public:
+     NativePlanningBinding(const NativePlanningBinding&)=delete;
+     NativePlanningBinding& operator=(const NativePlanningBinding&)=delete;
+     NativePlanningAccess access()const;
++    AgentWorkerScope scope()const;
++    X::Value object()const;
+     bool outcome_unrecorded()const noexcept;
+ private:std::shared_ptr<NativePlanningState> state_;std::string ticket_;
+ };
+diff --git a/Native/src/agent_worker_native_model.cpp b/Native/src/agent_worker_native_model.cpp
+index 16adbaa8..5b08f421 100644
+--- a/Native/src/agent_worker_native_model.cpp
++++ b/Native/src/agent_worker_native_model.cpp
+@@ -1,4 +1,5 @@
+ #include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/agent_worker_native_planning.hpp"
+ #include "agentflow/xmind_ipc_api.hpp"
+ #include "agentflow/xmind_ipc_runtime.hpp"
+ #include "agentflow/agent_model_values.hpp"
+@@ -41,13 +42,14 @@ struct NativeWorkerModelState {
+     AgentWorkerProcessService* processes=nullptr;
+     AgentRemoteToolHost* remotes=nullptr;
+     AgentWorkerCallableService* callables=nullptr;
++    NativePlanningBinding* planning=nullptr;
+     AgentWorkerLeaseSpec lease;
+     std::atomic<bool> active=true;
+     std::atomic<bool> outcome_unrecorded=false;
+     mutable std::shared_mutex lifetime;
+     std::mutex mutex;
+     std::vector<std::shared_ptr<ModelJob>> jobs;
+-    explicit NativeWorkerModelState(AgentWorkerModelHost& owner,AgentWorkerJournalHost* captured,AgentReadToolHost* captured_reads,AgentFileToolHost* captured_files,AgentWorkerProcessService* captured_processes,AgentRemoteToolHost* captured_remotes,AgentWorkerCallableService* captured_callables):host(&owner),journal(captured),reads(captured_reads),files(captured_files),processes(captured_processes),remotes(captured_remotes),callables(captured_callables),lease(owner.lease()){}
++    explicit NativeWorkerModelState(AgentWorkerModelHost& owner,AgentWorkerJournalHost* captured,AgentReadToolHost* captured_reads,AgentFileToolHost* captured_files,AgentWorkerProcessService* captured_processes,AgentRemoteToolHost* captured_remotes,AgentWorkerCallableService* captured_callables,NativePlanningBinding* captured_planning):host(&owner),journal(captured),reads(captured_reads),files(captured_files),processes(captured_processes),remotes(captured_remotes),callables(captured_callables),planning(captured_planning),lease(owner.lease()){}
+     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw Conflict("Native worker service closed");return lock;}
+     void close();
+ };
+@@ -112,10 +114,10 @@ X::Value journal_result(const std::shared_ptr<NativeWorkerModelState>& state,X3P
+ }
+ X::Value begin_journal(const std::shared_ptr<NativeWorkerModelState>& state,std::function<std::string(AgentWorkerJournalHost&,std::stop_token)> action){if(!state)throw Conflict("Unbound native worker journal");return begin(state,[state,action=std::move(action)](auto&,auto,std::stop_token stop){if(!state->journal)throw Conflict("Worker journal unavailable");return nlohmann::json::parse(action(*state->journal,stop));});}
+ }
+-void NativeWorkerModelState::close(){active=false;std::vector<std::shared_ptr<ModelJob>> pending;{std::lock_guard lock(mutex);pending=jobs;}for(auto& job:pending)job->stop.request_stop();{std::unique_lock lock(lifetime);std::lock_guard data(mutex);pending=jobs;}for(auto& job:pending){job->stop.request_stop();if(job->thread.joinable())job->thread.join();}{std::unique_lock lock(lifetime);host=nullptr;journal=nullptr;reads=nullptr;files=nullptr;processes=nullptr;remotes=nullptr;callables=nullptr;std::lock_guard data(mutex);jobs.clear();}}
+-NativeWorkerModelBinding::NativeWorkerModelBinding(AgentWorkerModelHost& host,AgentWorkerJournalHost* journal,AgentReadToolHost* reads,AgentFileToolHost* files,AgentWorkerProcessService* processes,AgentRemoteToolHost* remotes,AgentWorkerCallableService* callables):state_(std::make_shared<NativeWorkerModelState>(host,journal,reads,files,processes,remotes,callables)),ticket_(new_ticket()){if(journal&&journal->lease()!=host.lease())throw Conflict("Native journal differs from worker model lease");ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
++void NativeWorkerModelState::close(){active=false;std::vector<std::shared_ptr<ModelJob>> pending;{std::lock_guard lock(mutex);pending=jobs;}for(auto& job:pending)job->stop.request_stop();{std::unique_lock lock(lifetime);std::lock_guard data(mutex);pending=jobs;}for(auto& job:pending){job->stop.request_stop();if(job->thread.joinable())job->thread.join();}{std::unique_lock lock(lifetime);host=nullptr;journal=nullptr;reads=nullptr;files=nullptr;processes=nullptr;remotes=nullptr;callables=nullptr;planning=nullptr;std::lock_guard data(mutex);jobs.clear();}}
++NativeWorkerModelBinding::NativeWorkerModelBinding(AgentWorkerModelHost& host,AgentWorkerJournalHost* journal,AgentReadToolHost* reads,AgentFileToolHost* files,AgentWorkerProcessService* processes,AgentRemoteToolHost* remotes,AgentWorkerCallableService* callables,NativePlanningBinding* planning):state_(std::make_shared<NativeWorkerModelState>(host,journal,reads,files,processes,remotes,callables,planning)),ticket_(new_ticket()){if(journal&&journal->lease()!=host.lease())throw Conflict("Native journal differs from worker model lease");if(planning){const auto& lease=host.lease();if(planning->scope()!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Native planning differs from worker lease");}ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
+ NativeWorkerModelBinding::~NativeWorkerModelBinding(){{std::lock_guard lock(registry_mutex);registry.erase(ticket_);}state_->close();}
+-bool NativeWorkerModelBinding::outcome_unrecorded()const noexcept{return state_->outcome_unrecorded.load();}
++bool NativeWorkerModelBinding::outcome_unrecorded()const noexcept{try{auto life=state_->enter();return state_->outcome_unrecorded.load()||(state_->planning&&state_->planning->outcome_unrecorded());}catch(...){return true;}}
+ NativeWorkerModelAccess NativeWorkerModelBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
+ NativeWorkerApi::NativeWorkerApi(NativeWorkersApi*,std::string ticket){std::lock_guard lock(registry_mutex);const auto found=registry.find(ticket);if(found==registry.end()||!(state=found->second.lock()))throw Conflict("Native worker access unavailable");auto life=state->enter();}
+ X::Value NativeWorkersApi::Open(std::string ticket){return objects().__xlang3_package_->CreateInstance("Worker",std::make_shared<NativeWorkerApi>(this,std::move(ticket)));}
+@@ -135,6 +137,7 @@ X::Value NativeWorkerApi::Remotes(){if(!state)throw Conflict("Unbound native wor
+ NativeWorkerRemoteApi::NativeWorkerRemoteApi(NativeWorkerApi* worker):state(worker->state){}
+ X::Value NativeWorkerRemoteApi::Invoke(X::Value invocation){auto input=AgentRemoteToolInvocation::parse(sdk_values::from_value(invocation).dump());return begin(state,[state=state,input=std::move(input)](auto&,auto,std::stop_token stop){if(!state->remotes)throw Conflict("Worker remotes unavailable");const auto result=state->remotes->invoke(input,stop);return nlohmann::json{{"success",result.success},{"output_json",result.output_json}};});}
+ X::Value NativeWorkerApi::Callables(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();if(!state->callables)throw Conflict("Worker callables unavailable");return objects().__xlang3_package_->CreateInstance("Callables",std::make_shared<NativeWorkerCallableApi>(this));}
++X::Value NativeWorkerApi::Planning(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();if(!state->planning)throw Conflict("Worker planning unavailable");return state->planning->object();}
+ NativeWorkerCallableApi::NativeWorkerCallableApi(NativeWorkerApi* worker):state(worker->state){}
+ X::Value NativeWorkerCallableApi::Invoke(X::Value invocation){auto input=AgentCallableInvocation::parse(sdk_values::from_value(invocation).dump());return begin(state,[state=state,input=std::move(input)](auto&,auto,std::stop_token stop){if(!state->callables)throw Conflict("Worker callables unavailable");const auto result=state->callables->invoke(input,stop);return nlohmann::json{{"success",result.success},{"output_json",result.output_json}};});}
+ X::Value NativeWorkerCallableApi::Catalogue(){return begin(state,[state=state](auto&,auto,std::stop_token stop){if(!state->callables)throw Conflict("Worker callables unavailable");return nlohmann::json(state->callables->tool_names(stop));});}
+diff --git a/Native/src/agent_worker_native_planning.cpp b/Native/src/agent_worker_native_planning.cpp
+index 2fafb2ee..708fc8c3 100644
+--- a/Native/src/agent_worker_native_planning.cpp
++++ b/Native/src/agent_worker_native_planning.cpp
+@@ -97,6 +97,8 @@ NativePlanningBinding::~NativePlanningBinding(){
+     {std::unique_lock life(state_->lifetime);state_->callbacks.invoke={};state_->callbacks.resume={};state_->callbacks.healthy={};}
+ }
+ NativePlanningAccess NativePlanningBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
++AgentWorkerScope NativePlanningBinding::scope()const{return state_->callbacks.scope;}
++X::Value NativePlanningBinding::object()const{return NativePlanningApi{}.Open(ticket_);}
+ bool NativePlanningBinding::outcome_unrecorded()const noexcept{return state_->unrecorded.load();}
+ struct NativePlanningClient::Impl {
+     X::Runtime runtime;X::Value service,invoke,resume,health;AgentWorkerScope scope;AgentWorkerChannel::Deadline deadline;mutable std::mutex mutex;
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index f3ae2f0f..db768465 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -81,7 +81,7 @@ void delegated_workers(PersistenceService& store){
+ 
+ 
+ int planning_continuation_child(char** argv){
+-    auto channel=AgentWorkerChannel::accept_inherited(std::stoull(argv[3]),std::chrono::steady_clock::now()+10s);const auto boot=channel->receive(std::chrono::steady_clock::now()+10s);if(boot.operation=="planning.owner.inspect.boot"){const auto input=Json::parse(boot.payload);const auto scope=channel->scope();NativePlanningClient client({input.at("endpoint"),input.at("ticket"),input.at("pid")},scope,std::chrono::steady_clock::now()+10s);AgentSettings forged;forged.instructions="NEVER_USE_WORKER_AUTHORITY";DynamicPlanCapabilities caps;caps.backend_identity="NEVER_USE_WORKER_CAPABILITIES";require(client.healthy(),"Captured backend planning owner unavailable");const auto actual=client.invoke(scope.run_id,{"owner-inspection-call","revise_plan",R"({"forged":"authority"})"},"NEVER_USE_WORKER_ASSISTANT","owner-inspection-attempt",forged,caps,{});require(actual.call_id.empty()&&!actual.paused&&Json::parse(actual.result_json)==Json{{"source","native_dynamic_plan"},{"plan",nullptr}},"SDK owner must derive inspection from actual stored call, not worker arguments");channel->send({"planning.owner.inspect.done",actual.result_json},std::chrono::steady_clock::now()+5s);return 0;} require(boot.operation=="planning.funding.boot","Missing native planning funding bootstrap");const auto input=Json::parse(boot.payload);const auto& scope=channel->scope();NativeWorkerModelClient client({input.at("endpoint"),input.at("ticket"),input.at("pid")},scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision);const auto call=input.at("call").get<std::string>();const auto next=input.at("attempt").get<std::string>();
++    auto channel=AgentWorkerChannel::accept_inherited(std::stoull(argv[3]),std::chrono::steady_clock::now()+10s);const auto boot=channel->receive(std::chrono::steady_clock::now()+10s);if(boot.operation=="planning.owner.inspect.boot"){const auto input=Json::parse(boot.payload);const auto scope=channel->scope();NativePlanningClient client({input.at("endpoint"),input.at("ticket"),input.at("pid")},scope,std::chrono::steady_clock::now()+10s);AgentSettings forged;forged.instructions="NEVER_USE_WORKER_AUTHORITY";DynamicPlanCapabilities caps;caps.backend_identity="NEVER_USE_WORKER_CAPABILITIES";require(client.healthy(),"Captured backend planning owner unavailable");X::Runtime sdk;auto root=sdk.ImportRemote("xmind",input.at("worker_endpoint").get<std::string>().c_str());auto workers=root["Workers"]();auto worker=workers["Open"](input.at("worker_ticket").get<std::string>());auto planning=worker["Planning"]();const auto identity=planning["Identity"]();require(identity["root"].ToString()==scope.root_id&&identity["owner"].ToString()==scope.run_id&&identity["generation"].ToString()==scope.generation&&identity["revision"].ToInt64()==scope.workspace_revision&&planning["Healthy"]().ToInt64()!=0,"Worker Planning subobject must expose the same exact captured service");const auto actual=client.invoke(scope.run_id,{"owner-inspection-call","revise_plan",R"({"forged":"authority"})"},"NEVER_USE_WORKER_ASSISTANT","owner-inspection-attempt",forged,caps,{});require(actual.call_id.empty()&&!actual.paused&&Json::parse(actual.result_json)==Json{{"source","native_dynamic_plan"},{"plan",nullptr}},"SDK owner must derive inspection from actual stored call, not worker arguments");auto duplicate=planning["Invoke"]("owner-inspection-attempt","owner-inspection-call");const auto until=std::chrono::steady_clock::now()+5s;while(!duplicate["Status"]()["done"].ToInt64()&&std::chrono::steady_clock::now()<until)Sleep(1);require(duplicate["Status"]()["done"].ToInt64()!=0&&duplicate["Status"]()["error"].ToString()=="rejected","Top-level and worker Planning objects must share the same at-most-once binding");channel->send({"planning.owner.inspect.done",actual.result_json},std::chrono::steady_clock::now()+5s);return 0;} require(boot.operation=="planning.funding.boot","Missing native planning funding bootstrap");const auto input=Json::parse(boot.payload);const auto& scope=channel->scope();NativeWorkerModelClient client({input.at("endpoint"),input.at("ticket"),input.at("pid")},scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision);const auto call=input.at("call").get<std::string>();const auto next=input.at("attempt").get<std::string>();
+     rejects<Conflict>([&]{client.journal_reserve_model("generic-bypass");});const auto reserved=Json::parse(client.journal_reserve_planning_continuation(call,next));require(reserved.at("attempt_id")==next&&reserved.at("state")=="reserved"&&reserved.at("root_run_id")==scope.root_id,"SDK planning funding returned foreign reservation");require(client.journal_reserve_planning_continuation(call,next)==reserved.dump(),"Repeated SDK funding must preserve exact reservation");rejects<Conflict>([&]{client.journal_reserve_planning_continuation(call,"changed-next");});require(Json::parse(client.journal_start_model(next)).at("state")=="started","SDK must start only its funded planning continuation");
+     channel->send({"planning.funding.started",next},std::chrono::steady_clock::now()+5s);require(channel->receive(std::chrono::steady_clock::now()+5s).operation=="planning.funding.receipt","Backend must record actual continuation response");const auto finished=Json::parse(client.journal_finish_model(next));require(finished.at("state")=="finished"&&Json::parse(finished.at("actual_assistant_json").get<std::string>()).at("content")=="Actual backend continuation receipt","SDK finish must return backend-owned assistant facts");channel->send({"planning.funding.done","native"},std::chrono::steady_clock::now()+5s);return 0;
+ }
+@@ -104,8 +104,8 @@ void planning_admission(PersistenceService& store,const std::string& path,const
+     {
+         class CapturedExecution final:public DynamicPlanExecution {public:unsigned calls=0;std::string assistant;DynamicExecutionResult invoke(const std::string&,const ModelToolCall& call,const std::string& actual,const std::string&,const AgentSettings& settings,const DynamicPlanCapabilities&,std::shared_ptr<RootExecutionBudget>,std::stop_token,DynamicInstructionPrecondition)override{++calls;require(call.name=="plan_tasks"&&settings.instructions=="Captured backend planning instructions","Planning execution must retain captured model/settings facts");assistant=actual;throw DynamicPlanRejected("invalid_plan_arguments");}DynamicExecutionResult resume(const std::string&,const std::string&,const AgentSettings&,const DynamicPlanCapabilities&,std::shared_ptr<RootExecutionBudget>,std::stop_token,DynamicInstructionPrecondition)override{throw std::logic_error("Unexpected owner fixture resume");}bool healthy()const override{return true;}};
+         AgentSettings frozen;frozen.workspace=std::filesystem::path(path).parent_path().string();frozen.provider={"http://127.0.0.1:1/model","worker-fixture-model",Capability::supported,Capability::supported};frozen.planning=DynamicPlanningPolicy{};frozen.a2a_enabled=false;frozen.instructions="Captured backend planning instructions";const auto actual_authority=agent_authority_identity(frozen,frozen.provider.model,"worker-fixture-workspace",agent_authority_credentials(store,frozen));auto captured=seed("owner-inspection",true,actual_authority);response(captured,"owner-inspection-attempt",{{"owner-inspection-call","inspect_plan","{}"}});const auto segment=store.dynamic_budget_segment(captured.root_run_id).get();const auto until=std::chrono::steady_clock::now()+std::chrono::milliseconds(segment.remaining_active_ms);auto budget=std::make_shared<RootExecutionBudget>(store,store.root_budget(captured.root_run_id).get(),until,std::stop_token{},segment,actual_authority);auto execution=std::make_shared<CapturedExecution>();auto callbacks=make_agent_worker_planning_callbacks(store,captured,frozen,execution,budget,until);auto changed=frozen;changed.instructions="Changed backend settings";rejects<DynamicPlanUnavailable>([&]{make_agent_worker_planning_callbacks(store,captured,changed,execution,budget,until);});const auto before=store.root_budget(captured.root_run_id).get();
+-        {NativePlanningBinding binding(callbacks);const auto access=binding.access();wchar_t image[32768]{};const auto length=GetModuleFileNameW(nullptr,image,32768);require(length&&length<32768,"Owner fixture image unavailable");auto worker=AgentWorkerProcess::launch(ForegroundProcess::bind_executable(std::filesystem::path(image).string()),callbacks.scope,deadline);worker->channel().send({"planning.owner.inspect.boot",Json{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}.dump()},deadline);require(worker->channel().receive(deadline).operation=="planning.owner.inspect.done"&&worker->wait(deadline)==0,"Distinct SDK child must inspect through captured backend callbacks");worker->channel().close();}
+-        require(execution->calls==0&&store.agent_worker_planning_claim(captured.root_run_id,"owner-inspection-attempt").get().state=="inspected"&&store.root_budget(captured.root_run_id).get().revision==before.revision,"SDK inspection must commit native facts without executing a worker-selected tool or spending budget");store.retire_agent_worker(captured.generation,"worker_exit").get();require(!callbacks.healthy(),"Captured planning owner must lose authority after lease retirement");
++        X::Runtime observer;X::Value retained_worker,retained_planning;{NativePlanningBinding binding(callbacks);auto gateway=std::make_shared<CountingModel>();AgentWorkerModelHost model_host(store,captured,frozen.provider,{},AgentWorkerModelPolicy{},gateway,until);auto mismatched=callbacks;++mismatched.scope.workspace_revision;{NativePlanningBinding other(mismatched);rejects<Conflict>([&]{NativeWorkerModelBinding wrong(model_host,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,&other);});}NativeWorkerModelBinding worker_binding(model_host,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,&binding);const auto worker_access=worker_binding.access();auto root=observer.ImportRemote("xmind",worker_access.endpoint.c_str());auto workers=root["Workers"]();retained_worker=workers["Open"](worker_access.ticket);retained_planning=retained_worker["Planning"]();{NativeWorkerModelBinding ordinary(model_host);auto no_plan=workers["Open"](ordinary.access().ticket);X::Value ignored;require(!no_plan["Planning"].Call(std::vector<X::Value>{},ignored),"Unbound ordinary worker cannot acquire planning");}const auto access=binding.access();wchar_t image[32768]{};const auto length=GetModuleFileNameW(nullptr,image,32768);require(length&&length<32768,"Owner fixture image unavailable");auto worker=AgentWorkerProcess::launch(ForegroundProcess::bind_executable(std::filesystem::path(image).string()),callbacks.scope,deadline);worker->channel().send({"planning.owner.inspect.boot",Json{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid},{"worker_endpoint",worker_access.endpoint},{"worker_ticket",worker_access.ticket}}.dump()},deadline);require(worker->channel().receive(deadline).operation=="planning.owner.inspect.done"&&worker->wait(deadline)==0,"Distinct SDK child must inspect through captured backend callbacks");worker->channel().close();}
++        X::Value retired_result;require(!retained_worker["Planning"].Call(std::vector<X::Value>{},retired_result)&&!retained_planning["Healthy"].Call(std::vector<X::Value>{},retired_result),"Retained worker/planning objects must refuse after their bindings retire");require(execution->calls==0&&store.agent_worker_planning_claim(captured.root_run_id,"owner-inspection-attempt").get().state=="inspected"&&store.root_budget(captured.root_run_id).get().revision==before.revision,"SDK inspection must commit native facts without executing a worker-selected tool or spending budget");store.retire_agent_worker(captured.generation,"worker_exit").get();require(!callbacks.healthy(),"Captured planning owner must lose authority after lease retirement");
+         auto rejected=seed("owner-rejection",true,actual_authority);response(rejected,"owner-rejection-attempt",{{"owner-rejection-call","plan_tasks",R"({"tasks":[]})"}});const auto rejection_segment=store.dynamic_budget_segment(rejected.root_run_id).get();const auto rejection_until=std::chrono::steady_clock::now()+std::chrono::milliseconds(rejection_segment.remaining_active_ms);auto rejection_budget=std::make_shared<RootExecutionBudget>(store,store.root_budget(rejected.root_run_id).get(),rejection_until,std::stop_token{},rejection_segment,actual_authority);auto reject_callbacks=make_agent_worker_planning_callbacks(store,rejected,frozen,execution,rejection_budget,rejection_until);rejects<DynamicPlanRejected>([&]{reject_callbacks.invoke("owner-rejection-attempt","owner-rejection-call",{});});require(execution->calls==1&&execution->assistant==store.agent_worker_model_claim(rejected.root_run_id,"owner-rejection-attempt").get().actual_assistant_json&&store.agent_worker_planning_claim(rejected.root_run_id,"owner-rejection-attempt").get().state=="rejected","Backend planning callback must pass only canonical assistant and atomically settle bounded rejection");store.retire_agent_worker(rejected.generation,"worker_exit").get();
+     }
+ 

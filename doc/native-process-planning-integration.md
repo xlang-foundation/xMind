@@ -10,6 +10,13 @@ it does not qualify any missing behavior as complete.
 Follow Cantor's registered root and native service objects. The existing
 `xmind.Planning().Open(ticket)` returns a lease-bound planning service with
 `Invoke` and `Resume`; asynchronous operations expose Status, Result and Cancel.
+A worker binding may now expose the same service as
+`xmind.Workers().Open(ticket).Planning()`. Attaching it verifies the complete
+lease scope; ordinary bindings without that service refuse acquisition. Both
+access paths share the same native operation registry. Distinct-process scope,
+duplicate and retired-object checks are verified. Main owner/runner wiring is
+still required.
+
 The worker passes stored model-attempt and tool-call identities. Settings,
 capabilities, context policy, backend identity and budget authority stay in the
 backend. No peer.call planning/execution route or packet fallback is added.

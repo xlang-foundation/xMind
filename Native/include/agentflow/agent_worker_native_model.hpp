@@ -9,11 +9,13 @@
 #include <memory>
 namespace agentflow {
 class AgentWorkerJournalHost;
+class NativePlanningBinding;
 struct NativeWorkerModelState;
 struct NativeWorkerModelAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 class NativeWorkerModelBinding final {
 public:
-    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr,AgentWorkerProcessService* processes=nullptr,AgentRemoteToolHost* remotes=nullptr,AgentWorkerCallableService* callables=nullptr);
+    // Captured service hosts, including planning, outlive this binding and callers.
+    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr,AgentWorkerProcessService* processes=nullptr,AgentRemoteToolHost* remotes=nullptr,AgentWorkerCallableService* callables=nullptr,NativePlanningBinding* planning=nullptr);
     ~NativeWorkerModelBinding();
     NativeWorkerModelBinding(const NativeWorkerModelBinding&)=delete;
     NativeWorkerModelBinding& operator=(const NativeWorkerModelBinding&)=delete;
@@ -144,6 +146,7 @@ struct NativeWorkerApi {
     X::Value Processes();
     X::Value Remotes();
     X::Value Callables();
+    X::Value Planning();
     X::Value Identity();
     BEGIN_PACKAGE(NativeWorkerApi)
         APISET().AddFunc<0>("Identity",&NativeWorkerApi::Identity);
@@ -154,6 +157,7 @@ struct NativeWorkerApi {
         APISET().AddFunc<0>("Processes",&NativeWorkerApi::Processes);
         APISET().AddFunc<0>("Remotes",&NativeWorkerApi::Remotes);
         APISET().AddFunc<0>("Callables",&NativeWorkerApi::Callables);
+        APISET().AddFunc<0>("Planning",&NativeWorkerApi::Planning);
     END_PACKAGE
 };
 struct NativeWorkersApi {

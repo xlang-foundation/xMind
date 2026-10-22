@@ -97,6 +97,8 @@ NativePlanningBinding::~NativePlanningBinding(){
     {std::unique_lock life(state_->lifetime);state_->callbacks.invoke={};state_->callbacks.resume={};state_->callbacks.healthy={};}
 }
 NativePlanningAccess NativePlanningBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
+AgentWorkerScope NativePlanningBinding::scope()const{return state_->callbacks.scope;}
+X::Value NativePlanningBinding::object()const{return NativePlanningApi{}.Open(ticket_);}
 bool NativePlanningBinding::outcome_unrecorded()const noexcept{return state_->unrecorded.load();}
 struct NativePlanningClient::Impl {
     X::Runtime runtime;X::Value service,invoke,resume,health;AgentWorkerScope scope;AgentWorkerChannel::Deadline deadline;mutable std::mutex mutex;

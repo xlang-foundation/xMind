@@ -20,6 +20,8 @@ public:
     NativePlanningBinding(const NativePlanningBinding&)=delete;
     NativePlanningBinding& operator=(const NativePlanningBinding&)=delete;
     NativePlanningAccess access()const;
+    AgentWorkerScope scope()const;
+    X::Value object()const;
     bool outcome_unrecorded()const noexcept;
 private:std::shared_ptr<NativePlanningState> state_;std::string ticket_;
 };

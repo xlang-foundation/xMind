@@ -1,3 +1,33 @@
+## Worker Planning SDK subobject — 2026-10-21
+
+NativeWorkerModelBinding can attach an exact-scope NativePlanningBinding.
+The normal SDK worker object exposes Planning(), returning that service object
+without another ticket/address or serializer. Root Planning.Open and worker
+Planning use the same binding and at-most-once operation registry. Model binding
+outcome uncertainty includes attached planning uncertainty. Captured planning
+hosts must outlive the worker binding and its callers, like other native hosts.
+
+Focused 20/20 passed in 124.29 seconds (ledger 2.52; broad worker 57.31). A
+distinct SDK child opens Workers.Open(ticket).Planning(), verifies captured
+identity/health, and confirms duplicate invocation shares the top-level binding
+after its actual inspection commits. Unbound ordinary workers cannot obtain
+planning, mismatched scope is rejected at binding, and retained worker/planning
+objects refuse after their bindings retire. Existing forged client parameter
+checks remain. Synthetic model/lease facts; real SDK objects/process and SQLite.
+
+Source patch 37ecb473fd3546dcdccd54632e9e98d240134fabf7957974c7a05c1704b3fd51;
+native SHA d00fc01cc873fab46c90576d5339e504c09e6aed260cf1ff8620583b475d755e.
+2786 source inputs, SDK, libraries, dependencies and all 138 binary file sets/
+hashes verified unchanged around the gate. Evidence:
+doc/evidence/process-xmind-root-native-worker-planning-subobject-20261021-gate.json.
+
+Main read/coding owners, supervisor and runner still need to construct/attach
+this planning binding and share the context budget. Root process placement
+remains closed for planning; accepted child scheduling, worker planning journal
+projections, human handoff, counting/overflow/compaction and final client
+verification are incomplete. Full 169 suite not rerun; SDK unchanged, no install,
+real model replay or CPython.
+
 ## Captured backend planning callbacks — 2026-10-21
 
 Added make_agent_worker_planning_callbacks for the existing native Planning

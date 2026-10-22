@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_native_model.hpp"
+#include "agentflow/agent_worker_native_planning.hpp"
 #include "agentflow/xmind_ipc_api.hpp"
 #include "agentflow/xmind_ipc_runtime.hpp"
 #include "agentflow/agent_model_values.hpp"
@@ -41,13 +42,14 @@ struct NativeWorkerModelState {
     AgentWorkerProcessService* processes=nullptr;
     AgentRemoteToolHost* remotes=nullptr;
     AgentWorkerCallableService* callables=nullptr;
+    NativePlanningBinding* planning=nullptr;
     AgentWorkerLeaseSpec lease;
     std::atomic<bool> active=true;
     std::atomic<bool> outcome_unrecorded=false;
     mutable std::shared_mutex lifetime;
     std::mutex mutex;
     std::vector<std::shared_ptr<ModelJob>> jobs;
-    explicit NativeWorkerModelState(AgentWorkerModelHost& owner,AgentWorkerJournalHost* captured,AgentReadToolHost* captured_reads,AgentFileToolHost* captured_files,AgentWorkerProcessService* captured_processes,AgentRemoteToolHost* captured_remotes,AgentWorkerCallableService* captured_callables):host(&owner),journal(captured),reads(captured_reads),files(captured_files),processes(captured_processes),remotes(captured_remotes),callables(captured_callables),lease(owner.lease()){}
+    explicit NativeWorkerModelState(AgentWorkerModelHost& owner,AgentWorkerJournalHost* captured,AgentReadToolHost* captured_reads,AgentFileToolHost* captured_files,AgentWorkerProcessService* captured_processes,AgentRemoteToolHost* captured_remotes,AgentWorkerCallableService* captured_callables,NativePlanningBinding* captured_planning):host(&owner),journal(captured),reads(captured_reads),files(captured_files),processes(captured_processes),remotes(captured_remotes),callables(captured_callables),planning(captured_planning),lease(owner.lease()){}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw Conflict("Native worker service closed");return lock;}
     void close();
 };
@@ -112,10 +114,10 @@ X::Value journal_result(const std::shared_ptr<NativeWorkerModelState>& state,X3P
 }
 X::Value begin_journal(const std::shared_ptr<NativeWorkerModelState>& state,std::function<std::string(AgentWorkerJournalHost&,std::stop_token)> action){if(!state)throw Conflict("Unbound native worker journal");return begin(state,[state,action=std::move(action)](auto&,auto,std::stop_token stop){if(!state->journal)throw Conflict("Worker journal unavailable");return nlohmann::json::parse(action(*state->journal,stop));});}
 }
-void NativeWorkerModelState::close(){active=false;std::vector<std::shared_ptr<ModelJob>> pending;{std::lock_guard lock(mutex);pending=jobs;}for(auto& job:pending)job->stop.request_stop();{std::unique_lock lock(lifetime);std::lock_guard data(mutex);pending=jobs;}for(auto& job:pending){job->stop.request_stop();if(job->thread.joinable())job->thread.join();}{std::unique_lock lock(lifetime);host=nullptr;journal=nullptr;reads=nullptr;files=nullptr;processes=nullptr;remotes=nullptr;callables=nullptr;std::lock_guard data(mutex);jobs.clear();}}
-NativeWorkerModelBinding::NativeWorkerModelBinding(AgentWorkerModelHost& host,AgentWorkerJournalHost* journal,AgentReadToolHost* reads,AgentFileToolHost* files,AgentWorkerProcessService* processes,AgentRemoteToolHost* remotes,AgentWorkerCallableService* callables):state_(std::make_shared<NativeWorkerModelState>(host,journal,reads,files,processes,remotes,callables)),ticket_(new_ticket()){if(journal&&journal->lease()!=host.lease())throw Conflict("Native journal differs from worker model lease");ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
+void NativeWorkerModelState::close(){active=false;std::vector<std::shared_ptr<ModelJob>> pending;{std::lock_guard lock(mutex);pending=jobs;}for(auto& job:pending)job->stop.request_stop();{std::unique_lock lock(lifetime);std::lock_guard data(mutex);pending=jobs;}for(auto& job:pending){job->stop.request_stop();if(job->thread.joinable())job->thread.join();}{std::unique_lock lock(lifetime);host=nullptr;journal=nullptr;reads=nullptr;files=nullptr;processes=nullptr;remotes=nullptr;callables=nullptr;planning=nullptr;std::lock_guard data(mutex);jobs.clear();}}
+NativeWorkerModelBinding::NativeWorkerModelBinding(AgentWorkerModelHost& host,AgentWorkerJournalHost* journal,AgentReadToolHost* reads,AgentFileToolHost* files,AgentWorkerProcessService* processes,AgentRemoteToolHost* remotes,AgentWorkerCallableService* callables,NativePlanningBinding* planning):state_(std::make_shared<NativeWorkerModelState>(host,journal,reads,files,processes,remotes,callables,planning)),ticket_(new_ticket()){if(journal&&journal->lease()!=host.lease())throw Conflict("Native journal differs from worker model lease");if(planning){const auto& lease=host.lease();if(planning->scope()!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Native planning differs from worker lease");}ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
 NativeWorkerModelBinding::~NativeWorkerModelBinding(){{std::lock_guard lock(registry_mutex);registry.erase(ticket_);}state_->close();}
-bool NativeWorkerModelBinding::outcome_unrecorded()const noexcept{return state_->outcome_unrecorded.load();}
+bool NativeWorkerModelBinding::outcome_unrecorded()const noexcept{try{auto life=state_->enter();return state_->outcome_unrecorded.load()||(state_->planning&&state_->planning->outcome_unrecorded());}catch(...){return true;}}
 NativeWorkerModelAccess NativeWorkerModelBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
 NativeWorkerApi::NativeWorkerApi(NativeWorkersApi*,std::string ticket){std::lock_guard lock(registry_mutex);const auto found=registry.find(ticket);if(found==registry.end()||!(state=found->second.lock()))throw Conflict("Native worker access unavailable");auto life=state->enter();}
 X::Value NativeWorkersApi::Open(std::string ticket){return objects().__xlang3_package_->CreateInstance("Worker",std::make_shared<NativeWorkerApi>(this,std::move(ticket)));}
@@ -135,6 +137,7 @@ X::Value NativeWorkerApi::Remotes(){if(!state)throw Conflict("Unbound native wor
 NativeWorkerRemoteApi::NativeWorkerRemoteApi(NativeWorkerApi* worker):state(worker->state){}
 X::Value NativeWorkerRemoteApi::Invoke(X::Value invocation){auto input=AgentRemoteToolInvocation::parse(sdk_values::from_value(invocation).dump());return begin(state,[state=state,input=std::move(input)](auto&,auto,std::stop_token stop){if(!state->remotes)throw Conflict("Worker remotes unavailable");const auto result=state->remotes->invoke(input,stop);return nlohmann::json{{"success",result.success},{"output_json",result.output_json}};});}
 X::Value NativeWorkerApi::Callables(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();if(!state->callables)throw Conflict("Worker callables unavailable");return objects().__xlang3_package_->CreateInstance("Callables",std::make_shared<NativeWorkerCallableApi>(this));}
+X::Value NativeWorkerApi::Planning(){if(!state)throw Conflict("Unbound native worker");auto life=state->enter();if(!state->planning)throw Conflict("Worker planning unavailable");return state->planning->object();}
 NativeWorkerCallableApi::NativeWorkerCallableApi(NativeWorkerApi* worker):state(worker->state){}
 X::Value NativeWorkerCallableApi::Invoke(X::Value invocation){auto input=AgentCallableInvocation::parse(sdk_values::from_value(invocation).dump());return begin(state,[state=state,input=std::move(input)](auto&,auto,std::stop_token stop){if(!state->callables)throw Conflict("Worker callables unavailable");const auto result=state->callables->invoke(input,stop);return nlohmann::json{{"success",result.success},{"output_json",result.output_json}};});}
 X::Value NativeWorkerCallableApi::Catalogue(){return begin(state,[state=state](auto&,auto,std::stop_token stop){if(!state->callables)throw Conflict("Worker callables unavailable");return nlohmann::json(state->callables->tool_names(stop));});}
