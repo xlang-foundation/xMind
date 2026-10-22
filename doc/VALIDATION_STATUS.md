@@ -1,3 +1,40 @@
+## Counted dynamic process children share the backend active budget — 2026-10-21
+
+The dynamic process factory now constructs counted child context with the
+original shared RootExecutionBudget, selected provider identity and child
+context authority. A backend-only context_budget policy field retains that
+budget through read/coding owners. Dynamic child context admission validates
+its exact signed lease, root, deadline and active segment before sharing it.
+The child receives prepared windows/inference IDs through existing SDK methods;
+it never receives or recreates the backend segment clock. Ordinary context
+cannot adopt this budget, and the new field requires a counted child policy.
+
+The real planning callbacks/scheduler/production-xmind test now runs both
+uncounted and counted variants. Each retains exactly four shared model charges,
+two child/two parent model turns, exact child file bytes, physical drain before
+settlement and signed parent continuation. Counted child rows prove two
+completed leaf inference steps and successful attempt links on the ultimate
+root, two model reservations linked to those steps, and three execution-owned
+groups: original objective, canonical tool turn and final assistant. The
+uncounted child has no typed inference links. Automatic compaction is disabled
+and capacity unknown in this fixture; no token-count or compaction request is
+claimed. Model gateways remain synthetic; parent executable is the fixture.
+
+Focused ledger 1/1 passed in 5.05 seconds; focused 20/20 in 127.78 seconds
+(ledger 4.69; broad worker 56.65), same source/native binary. Patch
+79587092b6e1b001b14720b62172e45a6252fc77c786a4ed775e940a61dbd20c; native
+0ad164baff729c5bc5beb9bf70e6d2030f28d3e03de3ebdb2fa88a7e3aa96e31. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact sets and hashes. Evidence:
+doc/evidence/process-xmind-root-native-dynamic-counted-qualified-20261021-gate.json.
+Diagnostic capture enabled for 20 run; no dump. Earlier heap/SDK faults unresolved.
+
+Main planning admission is still closed. Coding effects, nested planning,
+resume/human handoff, overflow/retry adoption, main factory selection, legacy
+cleanup, full native suite, broad stability and installed CLI/browser/extension
+acceptance remain open. No install, SDK change, CPython, live provider request
+or replay of completed user tasks.
+
 ## DynamicPlanExecutor selects supervised production children — 2026-10-21
 
 DynamicPlanExecutor now accepts a backend-only DynamicAgentExecution port and

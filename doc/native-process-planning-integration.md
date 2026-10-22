@@ -32,18 +32,26 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+Counted dynamic process children now receive the original shared backend
+budget through a private child-context policy field. Root/deadline/segment and
+signed child admission are checked; the SDK child receives only prepared
+windows and inference IDs. Actual scheduler/xmind runs verify two completed
+leaf inference links, three execution groups and unchanged four shared charges.
+Both counted and uncounted variants pass. This fixture does not count tokens
+or compact; coding effects, nested planning and resume remain open.
+
 DynamicPlanExecutor now selects an optional backend process dispatch port for
 fresh/resumed agent work, with no local fallback after configured dispatch
 fails. Real planning callbacks/acceptance/scheduler launch actual xmind.exe,
 settle after physical drain and prepare the signed parent continuation in the
 accepted-parent contract. Default thread placement retains local execution.
-Main factory selection/admission remain closed; counted and nested child work,
+Main factory selection/admission remain closed; nested child work,
 resume/human handoff and full product/client verification remain open.
 
 The production dynamic-child factory now reuses WorkspaceExecutor and the
 existing supervisor with signed preflight/completion checks. Actual built
 xmind.exe child read/completion/drain is verified under the controlled parent
-callback. It currently refuses counted context/resume while retaining original planning
+callback. It currently refuses resume while retaining original planning
 configuration for authority; nested planning services are not yet exposed. Wider child-policy
 assembly remain open; main process planning admission is still closed.
 
@@ -52,7 +60,7 @@ now work in actual distinct fixture processes. The controlled backend callback
 launches the child, verifies an SDK file read and canonical completion, and
 waits for physical exit before settlement/parent continuation. Public child
 lineage omits backend identity; remote children use backend-owned catalogues.
-Main factory selection and counted/coding/nested
+Main factory selection and coding/nested
 child coverage remain open. The local-preset filter is gated to local runners.
 
 Repository now admits dynamic child worker leases against exact signed node,

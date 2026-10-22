@@ -22,6 +22,8 @@ struct AgentWorkerReadRequestPolicy {
     std::optional<ChatProviderConfig> history_provider;
     std::optional<AgentWorkerContextPolicy> context;
     std::shared_ptr<AgentWorkerPlanningServices> planning;
+    // Backend-only child context budget; never supplied by the worker.
+    std::shared_ptr<RootExecutionBudget> context_budget;
     // Backend-only orchestration. The worker supplies no assistant or result.
     std::function<AgentReadToolResult(const AgentWorkspaceInvocation&,const std::string&,std::stop_token)> delegation;
 };

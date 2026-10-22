@@ -1,0 +1,12 @@
+{
+  "diagnosticEnvironment": {
+    "XMIND_WORKER_FIXTURE_DUMP_DIR": "C:/xMindNativeValidation/dynamic-child-loop-dumps-20261021",
+    "XMIND_WORKER_FIXTURE_TIMING_DIR": "C:/xMindNativeValidation/dynamic-child-loop-timing-20261021"
+  },
+  "dumpFiles": [
+    "fixture-16876-674810203-slow.dmp",
+    "fixture-23544-675653875-slow.dmp",
+    "fixture-62084-676628093-slow.dmp"
+  ],
+  "note": "Existing diagnostic capture enabled. Earlier intermittent heap/SDK faults remain unresolved."
+}

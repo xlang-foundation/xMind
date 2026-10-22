@@ -9,7 +9,8 @@ namespace {std::shared_ptr<RootExecutionBudget> context_budget(PersistenceServic
     auto record=store.root_budget(lease.root_run_id).get();
     if(record.spec.policy_id=="native.dynamic-plan"){
         const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
-        if(!shared||lease.owner_run_id!=lease.root_run_id||shared->root_id()!=lease.root_run_id||shared->deadline()!=deadline||!shared->segment_open()||segment.state!="open"||shared->segment_id()!=segment.id)throw Conflict("Planning context requires its exact shared active budget");
+        if(!shared||shared->root_id()!=lease.root_run_id||shared->deadline()!=deadline||!shared->segment_open()||segment.state!="open"||shared->segment_id()!=segment.id)throw Conflict("Planning context requires its exact shared active budget");
+        if(lease.owner_run_id!=lease.root_run_id){const auto child=std::get<ChildAdmissionRecord>(store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::child_admission,lease.owner_run_id}).get());if(child.kind!=ChildAdmissionKind::dynamic_agent)throw Conflict("Shared planning child context requires exact signed child admission");}
         return shared;
     }
     if(shared)throw Conflict("Ordinary worker context cannot adopt a planning budget");
@@ -27,7 +28,7 @@ AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,Age
     const bool leaf=lease_.owner_run_id!=lease_.root_run_id;
     if(leaf)(void)store.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
     if(!gateway_||!preview_||!admit_||
-       (leaf?(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.graph-context"):(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.dynamic-plan"))||
+       (leaf?(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.graph-context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.dynamic-plan"):(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.dynamic-plan"))||
        policy_.binding.provider_identity_json!=lease_.provider_identity_json)
         throw Conflict("Worker context differs from captured ordinary context root");
     const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};

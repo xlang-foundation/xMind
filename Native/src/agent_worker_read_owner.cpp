@@ -34,7 +34,7 @@ struct AgentWorkerReadOwner::Impl {
         if(policy.context){
             context_window=std::make_unique<AgentWorkerContextWindow>(store,lease,provider,*policy.context,gateway,
                 [this](std::stop_token stop){return context.prepare(stop);},
-                [this](const std::string& attempt,const ModelRequest& raw,std::stop_token stop){context.admit(attempt,raw,stop);},deadline,cancel,policy.planning?policy.planning->budget:std::shared_ptr<RootExecutionBudget>{});
+                [this](const std::string& attempt,const ModelRequest& raw,std::stop_token stop){context.admit(attempt,raw,stop);},deadline,cancel,policy.planning?policy.planning->budget:policy.context_budget);
             model_policy.request_context=[this](std::stop_token stop){return context_window->prepare(stop);};
             model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context_window->admit(attempt,request,stop);};
             model_policy.reject_context=[this](const std::string& attempt,const ModelRequest& request,std::int64_t elapsed,std::stop_token stop){return context_window->reject(attempt,request,elapsed,stop);};
