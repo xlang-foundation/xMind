@@ -1,9 +1,44 @@
 # Native process planning integration
 
-Status: implementation design, 2026-10-21. The native planning service, signed
-planning claims and plain continuation funding exist. Production process
-planning is not assembled. This document defines the remaining integration;
-it does not qualify any missing behavior as complete.
+Status: implementation and remaining integration, 2026-10-22. The current
+checkpoint below supersedes historical implementation notes in this document.
+Main process planning placement remains closed.
+
+## Current integration checkpoint
+
+The actual DynamicPlanExecutor scheduler now dispatches agent children through
+the production process factory and supervisor, using signed child admission and
+the original shared root budget. Configured process dispatch failure has no
+local-runner fallback. Capacity is retained through physical process retirement.
+
+Six scheduler cases use a distinct fixture parent and production xmind.exe
+children with synthetic model gateways. They verify SDK reads, approved
+create_file and inherited denial, each with counted and uncounted children.
+Each case includes a parent SDK read before planning and retains three parent
+and two child model turns, five shared charges, six parent/four child messages.
+Counted children retain two completed typed leaf inferences and three execution
+conversation groups. The parent consumes its signed continuation and completes
+through the backend-measured dynamic completion operation.
+
+Lease-bound model funding now supports planning roots without context windows.
+The six cases also disable the parent's context window in uncounted modes and
+require three completed typed parent inferences only in counted modes. Direct
+ledger checks cover foreign PID refusal without writes, idempotent reservation,
+refusal of parallel reserved/started attempts, canonical finish and dynamic-only
+final completion. Plain continuation funding requires the captured backend
+lease callback and chooses its attempt in the backend. Generic funding while
+a signed continuation is pending remains refused.
+
+Frozen focused ledger passed 1/1 in 9.30 seconds. After adding the direct funding
+checks, the broader gate passed 20/20 in 135.65 seconds, ledger 9.23 seconds.
+See VALIDATION_STATUS.md for exact source/binary hashes and retained evidence.
+
+Main WorkspaceExecutor root planning admission, root effects, nested planning
+services, new-owner human pause/resume, context overflow/compaction and current
+installed CLI/browser/extension qualification remain open. Dynamic child resume
+is refused. Intermittent SDK/heap faults remain unresolved. Historical evidence
+is retained in VALIDATION_STATUS.md; earlier notes below record design history
+and must not override this checkpoint.
 
 ## Ownership and SDK surface
 

@@ -70,6 +70,10 @@ ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string
     const auto attempt=accepted.continuation_attempt_id.empty()?attempt_id():accepted.continuation_attempt_id;
     return continuation_reserve_?continuation_reserve_(call,attempt,cancel):journal_.reserve_dynamic_continuation(call,attempt).get();
 }
+ModelCallReservation RootExecutionBudget::reserve_worker_continuation(const std::string& call,std::stop_token cancel){
+    if(!continuation_reserve_)throw Conflict("Worker continuation requires its captured lease-bound reservation");
+    return reserve_continuation(call,cancel);
+}
 void RootExecutionBudget::pin_context(const ContextSnapshot& snapshot){
     check();const auto root=journal_.run(root_).get();
     if(policy_!="native.dynamic-plan"||root.graph_root||!root.parent_id.empty()||snapshot.head.scope.kind!=ContextScopeKind::session||snapshot.head.scope.id!=root.session_id)

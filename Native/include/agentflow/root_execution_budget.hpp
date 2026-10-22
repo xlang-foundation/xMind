@@ -34,6 +34,7 @@ public:
     void start(const ModelCallReservation& reservation,std::stop_token cancel={});
     std::string finish(const ModelCallReservation& reservation,const std::string& actual_assistant_json={});
     ModelCallReservation reserve_continuation(const std::string& plan_call,std::stop_token cancel={});
+    ModelCallReservation reserve_worker_continuation(const std::string& plan_call,std::stop_token cancel={});
     void pin_context(const ContextSnapshot& snapshot);
     void adopt_context_pin(const ContextPausePin& pin);
     Run suspend_for_human(const DynamicPlanRecord& plan,const std::string& plan_call);

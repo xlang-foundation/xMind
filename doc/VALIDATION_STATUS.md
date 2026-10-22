@@ -1,3 +1,38 @@
+## Plain planning-root SDK model funding — 2026-10-22
+
+Planning roots without context windows now reserve/start/finish models under
+their captured worker lease and active segment. A second reserved/started
+attempt is refused; repeating the same reserved attempt does not charge twice.
+Foreign process identity refuses without writes. Canonical backend receipts
+remain required, and ordinary completion still refuses dynamic roots.
+
+Read/coding owners install plain planning-continuation funding only through
+the shared budget's captured lease-bound callback. The backend selects the
+attempt; altered hints refuse. The journal accepts an empty hint and a returned
+backend-selected attempt without requiring a typed context step. Generic funding
+while a signed continuation is pending remains refused. Typed dynamic final
+completion still owns segment/root/lease closure.
+
+All six actual scheduler cases now run both parent and child with context in
+counted modes and neither with context in plain modes. Exactly three parent
+and two child completed typed inferences exist only in counted modes. Existing
+SDK read, approved create_file, inherited denial, shared five charges, canonical
+history and physical drain assertions pass. Gateways are synthetic; the parent
+is a fixture process and scheduled children run production xmind.exe.
+
+Initial frozen ledger 1/1 passed in 9.30 seconds. After direct funding/closure
+refusal checks were added, focused 20/20 passed in 135.65 seconds (ledger 9.23;
+broad worker 58.27). Final patch
+6556ebb3ec14589d2e4910a32f699a74e87128d884320604d7d44ab7ab774159;
+native 2cc436e8dab33831c45eb312017d998f883e52cdf0c97f697b82343139ca8f38.
+The final gate freezes exact sets/hashes of 2786 project files, 16 SDK includes,
+1870 pure libraries, 76 SDK runtime files, 18598 Node dependencies and 138 native
+binaries; inventory remains 169 tests. SDK runtime SHA remains 1ff2a8e7.
+Evidence: doc/evidence/process-xmind-root-native-planning-root-plain-qualified-20261022-gate.json
+and the earlier focused run. This is not a full-suite or installed-client pass.
+Main root process planning assembly, root effects, nested planning, new-owner
+pause/resume and overflow/compaction remain open. SDK/heap faults are unresolved.
+
 ## Sealed planning-root SDK reads and active-segment lease checks — 2026-10-22
 
 Planning roots can now claim/commit native read turns only while running under

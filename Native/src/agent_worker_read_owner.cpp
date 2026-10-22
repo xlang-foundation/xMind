@@ -44,6 +44,7 @@ struct AgentWorkerReadOwner::Impl {
             hooks.finish=[this](const std::string& attempt,std::stop_token stop){return context_window->finish(attempt,stop);};
             if(policy.planning)hooks.reserve_planning_continuation=[this](const std::string& call,const std::string& attempt,std::stop_token stop){return context_window->reserve_planning_continuation(call,attempt,stop);};
         }
+        if(policy.planning&&!context_window)hooks.reserve_planning_continuation=[&store,budget=policy.planning->budget](const std::string& call,const std::string& attempt,std::stop_token stop){if(!attempt.empty()&&store.dynamic_plan_call(call).get().continuation_attempt_id!=attempt)throw Conflict("Worker changed the backend-selected continuation attempt");return budget->reserve_worker_continuation(call,stop);};
         if(policy.planning)hooks.complete=[&store,lease,budget=policy.planning->budget,deadline,cancel](const std::string& attempt,std::stop_token stop){budget->check(stop);return store.complete_agent_worker_dynamic_run(lease,attempt,budget->segment_id(),budget->active_elapsed_ms(),deadline,cancel,stop).get();};
         if(policy.planning)native_planning=std::make_unique<NativePlanningBinding>(bind_agent_worker_planning_context(policy.planning->callbacks,store,lease,context_window.get()));
         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),
