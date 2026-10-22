@@ -1,0 +1,249 @@
+diff --git a/Native/include/agentflow/agent_worker_journal_host.hpp b/Native/include/agentflow/agent_worker_journal_host.hpp
+index 72bfd10c..6f95b344 100644
+--- a/Native/include/agentflow/agent_worker_journal_host.hpp
++++ b/Native/include/agentflow/agent_worker_journal_host.hpp
+@@ -28,6 +28,7 @@ public:
+     std::int64_t remaining_ms(std::stop_token={});
+     Run begin_run(std::stop_token={});
+     ModelCallReservation reserve_model(std::string,std::stop_token={});
++    ModelCallReservation reserve_planning_continuation(std::string call,std::string attempt,std::stop_token={});
+     ModelCallReservation start_model(std::string,std::stop_token={});
+     ModelCallReservation finish_model(std::string,std::stop_token={});
+     Event model_event(std::string,std::int64_t,std::string kind,std::string json,std::stop_token={});
+diff --git a/Native/include/agentflow/agent_worker_native_model.hpp b/Native/include/agentflow/agent_worker_native_model.hpp
+index b81754b8..145ff7d5 100644
+--- a/Native/include/agentflow/agent_worker_native_model.hpp
++++ b/Native/include/agentflow/agent_worker_native_model.hpp
+@@ -53,6 +53,7 @@ struct NativeWorkerJournalApi {
+     X::Value ExecutionWindow();
+     X::Value Begin();
+     X::Value ReserveModel(std::string attempt);
++    X::Value ReservePlanningContinuation(std::string call,std::string attempt);
+     X::Value StartModel(std::string attempt);
+     X::Value FinishModel(std::string attempt);
+     X::Value ModelEvent(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
+@@ -72,6 +73,7 @@ struct NativeWorkerJournalApi {
+         APISET().AddFunc<0>("ExecutionWindow",&NativeWorkerJournalApi::ExecutionWindow);
+         APISET().AddFunc<0>("Begin",&NativeWorkerJournalApi::Begin);
+         APISET().AddFunc<1>("ReserveModel",&NativeWorkerJournalApi::ReserveModel);
++        APISET().AddFunc<2>("ReservePlanningContinuation",&NativeWorkerJournalApi::ReservePlanningContinuation);
+         APISET().AddFunc<1>("StartModel",&NativeWorkerJournalApi::StartModel);
+         APISET().AddFunc<1>("FinishModel",&NativeWorkerJournalApi::FinishModel);
+         APISET().AddFunc<4>("ModelEvent",&NativeWorkerJournalApi::ModelEvent);
+@@ -186,6 +188,7 @@ public:
+     std::string journal_execution_window();
+     std::string journal_begin();
+     std::string journal_reserve_model(std::string attempt);
++    std::string journal_reserve_planning_continuation(std::string call,std::string attempt);
+     std::string journal_start_model(std::string attempt);
+     std::string journal_finish_model(std::string attempt);
+     std::string journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
+diff --git a/Native/include/agentflow/persistence_service.hpp b/Native/include/agentflow/persistence_service.hpp
+index 05a8a71f..0956d679 100644
+--- a/Native/include/agentflow/persistence_service.hpp
++++ b/Native/include/agentflow/persistence_service.hpp
+@@ -35,6 +35,7 @@ public:
+     // The supervisor must drain physical work before calling; never expose as generic RPC.
+     std::future<Run> terminate_agent_worker(AgentWorkerLeaseSpec,RunState outcome,std::string reason);
+     std::future<AgentWorkerPlanningClaimRecord> claim_agent_worker_planning(AgentWorkerLeaseSpec,std::string attempt,std::string call,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
++    std::future<ModelCallReservation> reserve_agent_worker_planning_continuation(AgentWorkerLeaseSpec,std::string call,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
+     std::future<AgentWorkerPlanningClaimRecord> agent_worker_planning_claim(std::string root,std::string attempt);
+     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);
+     std::future<AgentWorkerModelClaimRecord> interrupt_agent_worker_model(AgentWorkerModelClaimSpec,AgentWorkerModelFailure=AgentWorkerModelFailure::unknown);
+diff --git a/Native/include/agentflow/repository.hpp b/Native/include/agentflow/repository.hpp
+index 6c85f056..5ec1e7f7 100644
+--- a/Native/include/agentflow/repository.hpp
++++ b/Native/include/agentflow/repository.hpp
+@@ -92,7 +92,7 @@ public:
+     DynamicResumeRecord resume_dynamic_owner(const DynamicResumeSpec& spec);
+     void commit_dynamic_tool_turn(const std::string& root,const std::string& call);
+     void record_rejected_dynamic_tool_turn(const std::string& root,const std::string& origin_attempt_id,const std::string& actual_assistant_json,const std::string& safe_code);
+-    ModelCallReservation reserve_dynamic_continuation(const std::string& call,const std::string& attempt);
++    ModelCallReservation reserve_dynamic_continuation(const std::string& call,const std::string& attempt,const AgentWorkerLeaseSpec* worker=nullptr);
+     Run retire_dynamic_owner(const std::string& root,RunState terminal_state,const std::string& reason_json,const std::string& segment_id={},std::int64_t measured_active_elapsed_ms=0);
+     Run complete_dynamic_owner(const std::string& root,const std::string& assistant_json,const std::string& segment_id,std::int64_t measured_active_elapsed_ms);
+     RootBudgetRecord root_budget(const std::string& id);
+diff --git a/Native/src/agent_worker_journal_host.cpp b/Native/src/agent_worker_journal_host.cpp
+index 64de7c6f..cc29bb30 100644
+--- a/Native/src/agent_worker_journal_host.cpp
++++ b/Native/src/agent_worker_journal_host.cpp
+@@ -19,6 +19,7 @@ bool AgentWorkerJournalHost::coding_workspace_admitted(std::stop_token cancel){(
+ std::int64_t AgentWorkerJournalHost::remaining_ms(std::stop_token cancel){(void)run(lease_.owner_run_id,cancel);const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline_-std::chrono::steady_clock::now()).count();if(remaining<0||remaining>3600000)throw AgentWorkerAuthorityExpired("Worker journal execution window elapsed");return remaining;}
+ Run AgentWorkerJournalHost::begin_run(std::stop_token cancel){check(cancel);return store_.start_agent_worker_run(lease_,deadline_,owner_cancel_,cancel).get();}
+ ModelCallReservation AgentWorkerJournalHost::reserve_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.reserve?hooks_.reserve(id,cancel):store_.reserve_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
++ModelCallReservation AgentWorkerJournalHost::reserve_planning_continuation(std::string call,std::string id,std::stop_token cancel){check(cancel);return store_.reserve_agent_worker_planning_continuation(lease_,attempt(std::move(call)),attempt(std::move(id)),deadline_,owner_cancel_,cancel).get();}
+ ModelCallReservation AgentWorkerJournalHost::start_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.start?hooks_.start(id,cancel):store_.start_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+ ModelCallReservation AgentWorkerJournalHost::finish_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.finish?hooks_.finish(id,cancel):store_.finish_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+ Event AgentWorkerJournalHost::model_event(std::string id,std::int64_t ordinal,std::string kind,std::string json,std::stop_token cancel){check(cancel);auto result=store_.agent_worker_model_event(lease_,attempt(std::move(id)),ordinal,std::move(kind),std::move(json)).get();check(cancel);return result;}
+diff --git a/Native/src/agent_worker_native_model.cpp b/Native/src/agent_worker_native_model.cpp
+index 7976e3fb..16adbaa8 100644
+--- a/Native/src/agent_worker_native_model.cpp
++++ b/Native/src/agent_worker_native_model.cpp
+@@ -155,6 +155,7 @@ X::Value NativeWorkerJournalApi::WorkspaceMode(){return journal_result(state,Hos
+ X::Value NativeWorkerJournalApi::ExecutionWindow(){return journal_result(state,Host(),[](auto& host,std::stop_token stop){return nlohmann::json{{"remaining_ms",host.remaining_ms(stop)}}.dump();});}
+ X::Value NativeWorkerJournalApi::Begin(){return journal_result(state,Host(),[](auto& host,std::stop_token stop){return encode_worker_journal_value(host.begin_run(stop));});}
+ X::Value NativeWorkerJournalApi::ReserveModel(std::string attempt){return begin_journal(state,[attempt](auto& host,std::stop_token stop){return encode_worker_model_reservation(host.reserve_model(attempt,stop));});}
++X::Value NativeWorkerJournalApi::ReservePlanningContinuation(std::string call,std::string attempt){return begin_journal(state,[call,attempt](auto& host,std::stop_token stop){return encode_worker_model_reservation(host.reserve_planning_continuation(call,attempt,stop));});}
+ X::Value NativeWorkerJournalApi::StartModel(std::string attempt){return begin_journal(state,[attempt](auto& host,std::stop_token stop){return encode_worker_model_reservation(host.start_model(attempt,stop));});}
+ X::Value NativeWorkerJournalApi::FinishModel(std::string attempt){return begin_journal(state,[attempt](auto& host,std::stop_token stop){return encode_worker_model_reservation(host.finish_model(attempt,stop));});}
+ X::Value NativeWorkerJournalApi::ModelEvent(std::string attempt,std::int64_t ordinal,std::string kind,std::string json){return journal_result(state,Host(),[attempt,ordinal,kind,json](auto& host,std::stop_token stop){return encode_worker_journal_value(std::vector<Event>{host.model_event(attempt,ordinal,kind,json,stop)});});}
+diff --git a/Native/src/agent_worker_native_model_client.cpp b/Native/src/agent_worker_native_model_client.cpp
+index 8f0c0ecf..1e4d2a0a 100644
+--- a/Native/src/agent_worker_native_model_client.cpp
++++ b/Native/src/agent_worker_native_model_client.cpp
+@@ -92,6 +92,7 @@ std::string NativeWorkerModelClient::journal_workspace_mode(){std::lock_guard lo
+ std::string NativeWorkerModelClient::journal_execution_window(){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("ExecutionWindow",{}));}
+ std::string NativeWorkerModelClient::journal_begin(){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("Begin",{}));}
+ std::string NativeWorkerModelClient::journal_reserve_model(std::string attempt){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("ReserveModel",{impl_->text(attempt)}));}
++std::string NativeWorkerModelClient::journal_reserve_planning_continuation(std::string call,std::string attempt){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("ReservePlanningContinuation",{impl_->text(call),impl_->text(attempt)}));}
+ std::string NativeWorkerModelClient::journal_start_model(std::string attempt){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("StartModel",{impl_->text(attempt)}));}
+ std::string NativeWorkerModelClient::journal_finish_model(std::string attempt){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("FinishModel",{impl_->text(attempt)}));}
+ std::string NativeWorkerModelClient::journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json){std::lock_guard lock(impl_->journal_mutex);if(!impl_->journal.IsValid())impl_->journal=impl_->call(impl_->worker,"Journal",{});return impl_->journal_response(impl_->journal_call("ModelEvent",{impl_->text(attempt),X::Value(ordinal),impl_->text(kind),impl_->text(json)}));}
+diff --git a/Native/src/persistence_service.cpp b/Native/src/persistence_service.cpp
+index 9a11ec99..62e96f44 100644
+--- a/Native/src/persistence_service.cpp
++++ b/Native/src/persistence_service.cpp
+@@ -215,6 +215,7 @@ std::future<ModelCallReservation> PersistenceService::start_agent_worker_model(A
+ std::future<AgentWorkerLeaseRecord> PersistenceService::retire_agent_worker(std::string generation,std::string reason){return impl_->submit([generation=std::move(generation),reason=std::move(reason)](Repository& r){return r.retire_agent_worker(generation,reason);});}
+ std::future<Run> PersistenceService::terminate_agent_worker(AgentWorkerLeaseSpec lease,RunState outcome,std::string reason){return impl_->submit([lease=std::move(lease),outcome,reason=std::move(reason)](Repository& r){return r.terminate_agent_worker(lease,outcome,reason);});}
+ std::future<AgentWorkerPlanningClaimRecord> PersistenceService::claim_agent_worker_planning(AgentWorkerLeaseSpec lease,std::string attempt,std::string call,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),attempt=std::move(attempt),call=std::move(call),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker planning cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker planning deadline elapsed");return r.claim_agent_worker_planning(lease,attempt,call);});}
++std::future<ModelCallReservation> PersistenceService::reserve_agent_worker_planning_continuation(AgentWorkerLeaseSpec lease,std::string call,std::string attempt,std::chrono::steady_clock::time_point deadline,std::stop_token owner,std::stop_token caller){return impl_->submit([lease=std::move(lease),call=std::move(call),attempt=std::move(attempt),deadline,owner,caller](Repository& r){if(owner.stop_requested()||caller.stop_requested())throw AgentWorkerAuthorityCancelled("Worker planning funding cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerAuthorityExpired("Worker planning funding expired");return r.reserve_dynamic_continuation(call,attempt,&lease);});}
+ std::future<AgentWorkerPlanningClaimRecord> PersistenceService::agent_worker_planning_claim(std::string root,std::string attempt){return impl_->submit([root=std::move(root),attempt=std::move(attempt)](Repository& r){return r.agent_worker_planning_claim(root,attempt);});}
+ std::future<AgentWorkerModelClaimRecord> PersistenceService::claim_agent_worker_model(AgentWorkerModelClaimSpec spec){return impl_->submit([spec=std::move(spec)](Repository& r){return r.claim_agent_worker_model(spec);});}
+ std::future<AgentWorkerModelClaimRecord> PersistenceService::agent_worker_model_claim(std::string root,std::string attempt){return impl_->observe([root=std::move(root),attempt=std::move(attempt)](Repository& r){return r.agent_worker_model_claim(root,attempt);});}
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 635fe5f6..0c66f7ad 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -31,6 +31,8 @@ void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,b
+ std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
+ std::string worker_assistant_receipt(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,const std::string& attempt,bool final);
+ void worker_require_tool_turns(XlangSqlite&,const AgentWorkerLeaseSpec&);
++void worker_planning_continuation_authority(Repository&,XlangSqlite&,const DynamicPlanCallRecord&,const AgentWorkerLeaseSpec*);
++bool worker_planning_attempt(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,const std::string&);
+ void settle_worker_planning(Repository&,XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt,const std::string& assistant,const std::string& accepted,const std::string& rejected);
+ BackendOwnerState decode_owner(const std::string&);
+ std::optional<std::string> owner_record(XlangSqlite&);
+@@ -1468,15 +1470,15 @@ void Repository::record_rejected_dynamic_tool_turn(const std::string& root,const
+     if(owner.state!=RunState::running||!completions.empty())throw Conflict("Rejected planning owner or activity is already retired");
+     impl_->event(owner_id,"tool.failed",Json{{"activity_id",activity},{"call_id",provider_call},{"name",name},{"data",output}}.dump());impl_->message(owner,"assistant",exact);impl_->message(owner,"tool",Json{{"content",output.dump()},{"tool_call_id",provider_call}}.dump());impl_->event(owner_id,"conversation.tool_turn",Json{{"rejected_plan_call_id",provider_call},{"origin_attempt_id",origin_id},{"error_code",code}}.dump());settle_worker_planning(*this,db,root_id,owner_id,origin_id,exact,{},code);tx.commit();
+ }catch(const DatabaseError&){throw DynamicOutcomeUnrecorded("Rejected actual planning turn was not durably committed");}
+-ModelCallReservation Repository::reserve_dynamic_continuation(const std::string& call_id,const std::string& attempt){
+-    bounded_identity(attempt);auto& db=impl_->database;Transaction tx(db);const auto c=dynamic_plan_call(call_id);const auto budget=root_budget(c.root_run_id);const auto caps=dynamic_capabilities(c.root_run_id);const auto role=c.owner_run_id==c.root_run_id?ModelCallRole::parent:ModelCallRole::leaf;if(run(c.root_run_id).state!=RunState::running||run(c.owner_run_id).state!=RunState::running||c.state!="turn_committed"||!c.conversation_commit_seq)throw Conflict("Planning continuation lacks its committed actual turn");
+-    if(!c.continuation_attempt_id.empty()){if(c.continuation_attempt_id!=attempt)throw Conflict("Planning continuation identity changed");const auto old=db.execute("SELECT owner_run_id,role,state,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{c.root_run_id,attempt}).rows;if(old.empty()||text(old[0][0])!=c.owner_run_id||text(old[0][1])!=call_role(role)||text(old[0][2])!="reserved")throw Conflict("Planning continuation already dispatched or retired");tx.commit();return {c.root_run_id,attempt,c.owner_run_id,role,"reserved",ModelCallPurpose::inference,text(old[0][3])};}
++ModelCallReservation Repository::reserve_dynamic_continuation(const std::string& call_id,const std::string& attempt,const AgentWorkerLeaseSpec* worker){
++    bounded_identity(attempt);auto& db=impl_->database;Transaction tx(db);const auto c=dynamic_plan_call(call_id);const auto budget=root_budget(c.root_run_id);const auto caps=dynamic_capabilities(c.root_run_id);const auto role=c.owner_run_id==c.root_run_id?ModelCallRole::parent:ModelCallRole::leaf;if(run(c.root_run_id).state!=RunState::running||run(c.owner_run_id).state!=RunState::running||c.state!="turn_committed"||!c.conversation_commit_seq)throw Conflict("Planning continuation lacks its committed actual turn");worker_planning_continuation_authority(*this,db,c,worker);
++    if(!c.continuation_attempt_id.empty()){if(c.continuation_attempt_id!=attempt)throw Conflict("Planning continuation identity changed");if(worker&&worker_attempt_generation(db,c.root_run_id,c.owner_run_id,attempt)!=std::optional<std::string>{worker->generation})throw Conflict("Planning continuation funding belongs to another generation");const auto old=db.execute("SELECT owner_run_id,role,state,COALESCE(inference_step_id,'') FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{c.root_run_id,attempt}).rows;if(old.empty()||text(old[0][0])!=c.owner_run_id||text(old[0][1])!=call_role(role)||text(old[0][2])!="reserved")throw Conflict("Planning continuation already dispatched or retired");tx.commit();return {c.root_run_id,attempt,c.owner_run_id,role,"reserved",ModelCallPurpose::inference,text(old[0][3])};}
+     if(budget.parent_calls_held<1||budget.model_calls_reserved>=budget.spec.max_model_calls)throw RootBudgetExhausted("Planning continuation allowance exhausted");
+     if(role==ModelCallRole::parent&&budget.parent_model_calls_reserved>=caps.max_parent_turns)throw RootBudgetExhausted("Root planning continuation allowance exhausted");
+     if(role==ModelCallRole::leaf){const auto admission=child_admission(c.owner_run_id);if(admission.kind!=ChildAdmissionKind::dynamic_agent||admission.root_run_id!=c.root_run_id)throw Conflict("Nested continuation owner is not a dynamic agent");const auto p=dynamic_plan(admission.plan_id);const auto n=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& node){return node.child_run_id==c.owner_run_id;});if(n==p.nodes.end())throw Conflict("Nested continuation lost its exact plan node");const auto& preset=dynamic_preset(p.capabilities,n->definition);const auto inference_turns=integer(db.execute("SELECT count(DISTINCT COALESCE(inference_step_id,attempt_id)) FROM agent_model_call_reservations WHERE root_run_id=? AND owner_run_id=? AND role='leaf' AND purpose='inference'",{c.root_run_id,c.owner_run_id}).rows.at(0).at(0));if(inference_turns>=preset.turn_limit)throw RootBudgetExhausted("Nested planning continuation allowance exhausted");}
+     changed_one(db.execute("UPDATE agent_execution_budgets SET model_calls_reserved=model_calls_reserved+1,parent_calls_held=parent_calls_held-1,revision=revision+1 WHERE root_run_id=? AND revision=?",{c.root_run_id,budget.revision}));
+     changed_one(db.execute("INSERT INTO agent_model_call_reservations(root_run_id,attempt_id,owner_run_id,role,state) VALUES(?,?,?,?, 'reserved')",{c.root_run_id,attempt,c.owner_run_id,call_role(role)}));
+-    changed_one(db.execute("UPDATE dynamic_plan_calls SET continuation_attempt_id=? WHERE id=? AND continuation_attempt_id IS NULL",{attempt,call_id}));impl_->event(c.owner_run_id,"budget.model_call.reserved",Json{{"root_run_id",c.root_run_id},{"attempt_id",attempt},{"role",call_role(role)},{"plan_call_id",call_id}}.dump());tx.commit();return {c.root_run_id,attempt,c.owner_run_id,role,"reserved"};
++    changed_one(db.execute("UPDATE dynamic_plan_calls SET continuation_attempt_id=? WHERE id=? AND continuation_attempt_id IS NULL",{attempt,call_id}));Json funding={{"root_run_id",c.root_run_id},{"attempt_id",attempt},{"role",call_role(role)},{"plan_call_id",call_id}};if(worker)funding["worker_generation"]=worker->generation;impl_->event(c.owner_run_id,"budget.model_call.reserved",funding.dump());tx.commit();return {c.root_run_id,attempt,c.owner_run_id,role,"reserved"};
+ }
+ DynamicHumanRequest Repository::dynamic_human_request(const std::string& plan,const std::string& id){
+     const auto rows=impl_->database.execute("SELECT root_run_id,label,backend_node_id,question,state,COALESCE(input_json,''),COALESCE(actor,''),definition_revision,published_event_seq,expires_ms,input_event_seq FROM dynamic_human_requests WHERE id=? AND plan_id=?",{id,plan}).rows;if(rows.empty())throw NotFound("Human request is not owned by this plan");const auto& r=rows[0];
+@@ -2209,7 +2211,7 @@ ModelCallReservation Repository::reserve_model_call(const std::string& root,cons
+ ModelCallReservation Repository::start_model_call(const std::string& root,const std::string& owner,const std::string& attempt,const AgentWorkerLeaseSpec* worker){
+     auto& db=impl_->database;Transaction transaction(db);(void)root_budget(root);const auto parent=run(root),actor=run(owner);
+     if(worker){worker_current_scope(*this,db,*worker);if(root!=worker->root_run_id||owner!=worker->owner_run_id||worker_attempt_generation(db,root,owner,attempt)!=std::optional<std::string>{worker->generation})throw Conflict("Worker cannot start an attempt funded by another authority");}
+-    if(worker&&!((owner==root&&(root_budget(root).spec.policy_id=="native.direct-agent"||root_budget(root).spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)||worker_uncounted_graph_owner(*this,*worker)))throw Conflict("Worker start requires ordinary direct-agent admission");
++    if(worker&&!((owner==root&&(root_budget(root).spec.policy_id=="native.direct-agent"||root_budget(root).spec.policy_id=="native.delegation"))||worker_delegated_owner(*this,*worker)||worker_uncounted_graph_owner(*this,*worker)||worker_planning_attempt(*this,db,*worker,attempt)))throw Conflict("Worker start requires exact ordinary or planning-continuation admission");
+     if(worker)worker_require_tool_turns(db,*worker);
+     if(parent.state!=RunState::running||actor.state!=RunState::running)throw Conflict("Model attempt owners are not running");
+     const auto rows=db.execute("SELECT role,state,purpose,inference_step_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=? AND owner_run_id=?",{root,attempt,owner}).rows;
+@@ -3210,6 +3212,22 @@ void settle_worker_planning(Repository& repository,XlangSqlite& db,const std::st
+     changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_planning_json(record).dump(),std::string(worker_planning_category),worker_claim_key(root,attempt)}));
+ }
+ 
++void worker_planning_continuation_authority(Repository& repository,XlangSqlite& db,const DynamicPlanCallRecord& call,const AgentWorkerLeaseSpec* worker){
++    const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_planning_category),worker_claim_key(call.root_run_id,call.origin_attempt_id)}).rows;
++    if(!worker){if(!rows.empty())throw Conflict("Worker planning requires its captured continuation lease");return;}
++    worker_current_scope(repository,db,*worker);
++    if(worker->root_run_id!=call.root_run_id||worker->owner_run_id!=call.owner_run_id||worker->root_run_id!=worker->owner_run_id||repository.root_budget(call.root_run_id).spec.policy_id!="native.dynamic-plan")throw Conflict("Worker continuation differs from native planning owner");
++    const auto record=read_worker_planning(db,call.root_run_id,call.origin_attempt_id);
++    if(record.state!="accepted"||record.native_call_id!=call.id||record.model.generation!=worker->generation||record.model.owner_run_id!=worker->owner_run_id||record.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Worker continuation lacks exact accepted planning authority");
++    const auto segment=repository.dynamic_budget_segment(call.root_run_id);if(segment.state!="open"||segment.id!=record.segment_id)throw Conflict("Worker planning continuation lost its admitted active segment");
++    worker_require_tool_turns(db,*worker);
++}
++bool worker_planning_attempt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt){
++    if(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.dynamic-plan")return false;
++    const auto rows=db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND owner_run_id=? AND continuation_attempt_id=? AND state='turn_committed' AND conversation_commit_seq IS NOT NULL",{lease.root_run_id,lease.owner_run_id,attempt}).rows;if(rows.size()!=1)return false;
++    const auto call=repository.dynamic_plan_call(text(rows[0][0]));worker_planning_continuation_authority(repository,db,call,&lease);return worker_attempt_generation(db,lease.root_run_id,lease.owner_run_id,attempt)==std::optional<std::string>{lease.generation};
++}
++
+ std::string worker_tool_call_key(const std::string& root,const std::string& attempt,const std::string& call){bounded_identity(root);bounded_identity(attempt);identifier(call);if(call.size()>256)throw std::invalid_argument("Provider tool call identity exceeds limits");return context_digest(Json::array({root,attempt,call}).dump());}
+ Json worker_read_json(const AgentWorkerReadClaimRecord& record){return {{"version",1},{"model",worker_claim_spec_json(record.model)},{"invocation",record.invocation.serialize()},{"state",record.state},{"dispatched",record.dispatched},{"success",record.success},{"actual_output_json",record.actual_output_json},{"output_binding",record.output_binding}};}
+ AgentWorkerReadClaimRecord read_worker_read(XlangSqlite& db,const std::string& root,const std::string& attempt,const std::string& call){
+@@ -3339,6 +3357,10 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
+     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.spec.root_run_id')=? AND json_extract(payload,'$.spec.owner_run_id')=? AND json_extract(payload,'$.state')='responded'",{std::string(worker_claim_category),lease.root_run_id,lease.owner_run_id}).rows;
+     for(const auto& row:rows){const auto saved=Json::parse(text(row[0]));const auto model=read_worker_claim(db,lease.root_run_id,saved.at("spec").at("attempt_id").get<std::string>());if(model.actual_assistant_json.empty())continue;
+         const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.tool_calls.empty()&&actual.finish_reason!="tool_calls")continue;
++        if(actual.tool_calls.size()==1&&(actual.tool_calls[0].name=="plan_tasks"||actual.tool_calls[0].name=="revise_plan"||actual.tool_calls[0].name=="inspect_plan")){
++            try{const auto planning=read_worker_planning(db,lease.root_run_id,model.spec.attempt_id);if(planning.model.generation!=lease.generation||planning.model.owner_run_id!=lease.owner_run_id)throw Conflict("Planning turn belongs to another generation");if(planning.state=="rejected")continue;if(planning.state=="accepted"){const auto committed=db.execute("SELECT id FROM dynamic_plan_calls WHERE id=? AND state='turn_committed' AND conversation_commit_seq IS NOT NULL",{planning.native_call_id}).rows;if(committed.size()==1)continue;}}catch(const NotFound&){}
++            throw Conflict("Worker planning turn has no signed native conversation commit");
++        }
+         try{(void)read_worker_turn(db,model.spec);}catch(const NotFound&){throw Conflict("Worker must commit its actual tool turn before another model call");}
+     }
+ }
+@@ -3446,7 +3468,7 @@ std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::
+     if(!saved.contains("worker_generation"))return {};if(!saved.at("worker_generation").is_string()||saved.at("worker_generation").get_ref<const std::string&>().empty())throw DatabaseError("Invalid model funding generation");return saved.at("worker_generation").get<std::string>();
+ }
+ std::string worker_assistant_receipt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool final){
+-    worker_current_scope(repository,db,lease);if(!worker_agent_owner(repository,lease))throw Conflict("Worker completion requires its exact agent admission");
++    worker_current_scope(repository,db,lease);if(!worker_agent_owner(repository,lease)&&(final||!worker_planning_attempt(repository,db,lease,attempt)))throw Conflict("Worker completion requires its exact agent admission");
+     const auto claim=read_worker_claim(db,lease.root_run_id,attempt);
+     if(claim.spec.generation!=lease.generation||claim.spec.owner_run_id!=lease.owner_run_id||claim.state!="responded"||claim.actual_assistant_json.empty())throw Conflict("Worker completion has no captured actual assistant receipt");
+     if(final){const auto response=decode_agent_model_completion(claim.actual_response_json);if(response.finish_reason!="stop"||!response.tool_calls.empty())throw Conflict("Worker cannot complete a non-final model response");
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 45e08ffa..1dc36453 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -1,6 +1,12 @@
+ // Native xlang3/SQLite and controlled HTTP peer. Process identities in this
+ // ledger fixture are synthetic; actual child/channel lifecycles are separate.
++#ifndef NOMINMAX
++#define NOMINMAX
++#endif
++#include <windows.h>
+ #include "agentflow/agent_worker_model_host.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/dynamic_plan.hpp"
+ #include "agentflow/agent_model_values.hpp"
+ #include "agentflow/agent_worker_read_host.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+@@ -68,6 +74,12 @@ void delegated_workers(PersistenceService& store){
+ }
+ 
+ 
++
++int planning_continuation_child(char** argv){
++    auto channel=AgentWorkerChannel::accept_inherited(std::stoull(argv[3]),std::chrono::steady_clock::now()+10s);const auto boot=channel->receive(std::chrono::steady_clock::now()+10s);require(boot.operation=="planning.funding.boot","Missing native planning funding bootstrap");const auto input=Json::parse(boot.payload);const auto& scope=channel->scope();NativeWorkerModelClient client({input.at("endpoint"),input.at("ticket"),input.at("pid")},scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision);const auto call=input.at("call").get<std::string>();
++    rejects<Conflict>([&]{client.journal_reserve_model("generic-bypass");});const auto reserved=Json::parse(client.journal_reserve_planning_continuation(call,"signed-next"));require(reserved.at("attempt_id")=="signed-next"&&reserved.at("state")=="reserved"&&reserved.at("root_run_id")==scope.root_id,"SDK planning funding returned foreign reservation");require(client.journal_reserve_planning_continuation(call,"signed-next")==reserved.dump(),"Repeated SDK funding must preserve exact reservation");rejects<Conflict>([&]{client.journal_reserve_planning_continuation(call,"changed-next");});require(Json::parse(client.journal_start_model("signed-next")).at("state")=="started","SDK must start only its funded planning continuation");
++    channel->send({"planning.funding.started","signed-next"},std::chrono::steady_clock::now()+5s);require(channel->receive(std::chrono::steady_clock::now()+5s).operation=="planning.funding.receipt","Backend must record actual continuation response");const auto finished=Json::parse(client.journal_finish_model("signed-next"));require(finished.at("state")=="finished"&&Json::parse(finished.at("actual_assistant_json").get<std::string>()).at("content")=="Actual backend continuation receipt","SDK finish must return backend-owned assistant facts");channel->send({"planning.funding.done","native"},std::chrono::steady_clock::now()+5s);return 0;
++}
+ void planning_admission(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
+     const auto deadline=std::chrono::steady_clock::now()+20s;const std::string authority(64,'a'),child_authority(64,'b');
+     auto seed=[&](const std::string& label,bool finalize=true){const auto id="planning-"+label;store.create_session(id,"Synthetic planning admission ledger").get();RootBudgetSpec budget{"native.dynamic-plan",1,"worker-fixture-workspace",provider,4,1,16,600000};DynamicPlanCapabilities caps;caps.backend_identity=authority;caps.workspace_identity=budget.workspace_identity;caps.provider_identity_json=Json::parse(provider).dump();caps.tool_catalog_json="{}";caps.presets={{"workspace.inspect",1,true,{},4,{}}};store.start_prompt_run(id,id,R"({"content":"Synthetic planning admission"})",budget,caps).get();store.transition(id,RunState::queued,RunState::running).get();store.append_event(id,"agent.workspace_membership",R"({"workspace_id":"worker-fixture-workspace","revision":7})").get();store.open_dynamic_budget_segment({id,"segment-"+label,authority,store.root_budget(id).get().revision}).get();if(finalize)store.finalize_dynamic_capabilities(id,authority,R"({"tools":[{"name":"read_file"}]})",{{"workspace.inspect",1,true,{"read_file"},4,child_authority}}).get();return store.admit_agent_worker(lease(id,"generation-"+label)).get().spec;};
+@@ -94,6 +106,14 @@ void planning_admission(PersistenceService& store,const std::string& path,const
+         rejects<DynamicOutcomeUnrecorded>([&]{store.record_rejected_dynamic_tool_turn(captured.owner_run_id,spec.origin_attempt_id,spec.parent_assistant_json,"plan_changed").get();});require(store.agent_worker_planning_claim(captured.root_run_id,spec.origin_attempt_id).get().state=="entered"&&store.run_history(captured.owner_run_id).get().size()==history&&store.events(captured.owner_run_id).get().size()==events,"Worker rejection SQL failure must roll back canonical history, failure event and claim");sql.execute("DROP TRIGGER fixture_planning_reject_abort");
+         store.record_rejected_dynamic_tool_turn(captured.owner_run_id,spec.origin_attempt_id,spec.parent_assistant_json,"plan_changed").get();const auto actual=store.agent_worker_planning_claim(captured.root_run_id,spec.origin_attempt_id).get();require(actual.state=="rejected"&&actual.rejection_code=="plan_changed"&&actual.native_call_id.empty(),"Worker rejection must derive its fixed safe code from native commit");sql.execute("UPDATE information SET payload=json_set(payload,'$.rejection_code',?) WHERE category='native-agent-worker-planning-claims' AND json_extract(payload,'$.model.attempt_id')=?",{std::string("invalid_plan_arguments"),spec.origin_attempt_id});rejects<DatabaseError>([&]{store.agent_worker_planning_claim(captured.root_run_id,spec.origin_attempt_id).get();});sql.execute("UPDATE information SET payload=json_set(payload,'$.rejection_code',?) WHERE category='native-agent-worker-planning-claims' AND json_extract(payload,'$.model.attempt_id')=?",{std::string("plan_changed"),spec.origin_attempt_id});const auto settled_events=store.events(captured.owner_run_id).get().size();store.record_rejected_dynamic_tool_turn(captured.owner_run_id,spec.origin_attempt_id,spec.parent_assistant_json,"plan_changed").get();require(store.events(captured.owner_run_id).get().size()==settled_events,"Repeated rejection observation must not repeat history or events");rejects<Conflict>([&]{store.record_rejected_dynamic_tool_turn(captured.owner_run_id,spec.origin_attempt_id,spec.parent_assistant_json,"invalid_plan_arguments").get();});rejects<Conflict>([&]{store.accept_dynamic_plan_change(spec).get();});require(!store.dynamic_plan_for_root(captured.root_run_id).get(),"A rejected worker claim cannot later create native accepted work");store.retire_agent_worker(captured.generation,"worker_exit").get();require(store.agent_worker_planning_claim(captured.root_run_id,spec.origin_attempt_id).get().state=="rejected","Worker retirement must preserve exact native rejection");
+     }
++
++    {
++        auto [captured,spec]=prepared("continuation");const auto accepted=store.accept_dynamic_plan_change(spec).get();rejects<Conflict>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"too-early",deadline).get();});rejects<Conflict>([&]{store.validate_agent_worker_model_window(captured,deadline).get();});
++        const auto plan=store.dynamic_plan(accepted.plan_id).get();const auto node=prepare_dynamic_node(plan,"leaf");const auto child=captured.root_run_id+"-child";DynamicFrontierSpec frontier;frontier.plan_id=plan.id;frontier.backend_identity=authority;frontier.plan_call_id=accepted.id;frontier.expected_revision=plan.revision;frontier.expected_state_sequence=plan.state_sequence;frontier.expected_budget_revision=store.root_budget(captured.root_run_id).get().revision;frontier.tasks.push_back({"leaf","continuation-child-claim",child,{},node.dependency_outputs_json,node.node.definition_revision});store.admit_dynamic_frontier(frontier).get();store.transition(child,RunState::queued,RunState::running).get();store.reserve_model_call(captured.root_run_id,child,"child-complete",ModelCallRole::leaf).get();store.start_model_call(captured.root_run_id,child,"child-complete").get();const std::string child_reply=R"({"content":"Synthetic child settled before continuation"})";store.finish_model_call(captured.root_run_id,child,"child-complete",child_reply).get();store.complete_run(child,child_reply).get();store.settle_dynamic_child(child).get();require(store.settle_dynamic_plan_step(accepted.id).get().ready,"Worker planning requires actual settled native report");store.commit_dynamic_tool_turn(captured.owner_run_id,accepted.id).get();
++        store.validate_agent_worker_model_window(captured,deadline).get();rejects<Conflict>([&]{store.reserve_agent_worker_model(captured,"generic-after-plan",deadline).get();});rejects<Conflict>([&]{store.reserve_dynamic_continuation(accepted.id,"unscoped-next").get();});auto foreign=captured;++foreign.pid;rejects<Conflict>([&]{store.reserve_agent_worker_planning_continuation(foreign,accepted.id,"foreign-next",deadline).get();});std::stop_source stopped;stopped.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"cancelled-next",deadline,{},stopped.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"expired-next",std::chrono::steady_clock::now()-1ms).get();});
++        const auto before=store.root_budget(captured.root_run_id).get();XlangSqlite sql(path,imports);sql.execute("CREATE TRIGGER fixture_planning_funding_abort BEFORE INSERT ON events WHEN NEW.kind='budget.model_call.reserved' AND json_extract(NEW.payload,'$.worker_generation') IS NOT NULL AND json_extract(NEW.payload,'$.plan_call_id') IS NOT NULL BEGIN SELECT RAISE(ABORT,'fixture_planning_funding_abort'); END");rejects<DatabaseError>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"rolled-back-next",deadline).get();});require(store.dynamic_plan_call(accepted.id).get().continuation_attempt_id.empty()&&store.root_budget(captured.root_run_id).get().revision==before.revision,"Planning funding failure must roll back held capacity, native link and model reservation");sql.execute("DROP TRIGGER fixture_planning_funding_abort");
++        auto gateway=std::make_shared<CountingModel>();ChatProviderConfig config{"http://127.0.0.1:1/model","worker-fixture-model",Capability::supported,Capability::supported};AgentWorkerModelHost model(store,captured,config,{},AgentWorkerModelPolicy{},gateway,deadline);AgentWorkerJournalHost journal(store,captured,deadline);NativeWorkerModelBinding binding(model,&journal);const auto access=binding.access();wchar_t image[32768]{};const auto length=GetModuleFileNameW(nullptr,image,32768);require(length&&length<32768,"Funding fixture image unavailable");auto worker=AgentWorkerProcess::launch(ForegroundProcess::bind_executable(std::filesystem::path(image).string()),{captured.root_run_id,captured.owner_run_id,captured.workspace_id,captured.generation,captured.workspace_revision},deadline);worker->channel().send({"planning.funding.boot",Json{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid},{"call",accepted.id}}.dump()},deadline);require(worker->channel().receive(deadline).operation=="planning.funding.started","Distinct SDK child must start its signed continuation");const auto actual_claim=claim(captured,"signed-next");store.claim_agent_worker_model(actual_claim).get();ModelCompletion actual{"Actual backend continuation receipt","","stop","{}",{},"[]"};const auto assistant=format_agent_model_assistant(actual,"worker-fixture-model",7,{});store.record_agent_worker_model_response(actual_claim,encode_agent_model_completion(actual),assistant).get();worker->channel().send({"planning.funding.receipt","ready"},deadline);require(worker->channel().receive(deadline).operation=="planning.funding.done"&&worker->wait(deadline)==0,"SDK child must finish exact planning funding lifecycle");worker->channel().close();const auto after=store.root_budget(captured.root_run_id).get();require(after.model_calls_reserved==before.model_calls_reserved+1&&after.parent_calls_held==before.parent_calls_held-1&&gateway->calls==0,"Planning continuation must consume one held charge without a model replay");rejects<Conflict>([&]{store.complete_agent_worker_run(captured,"signed-next",deadline).get();});store.retire_agent_worker(captured.generation,"worker_exit").get();rejects<Conflict>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"stale-next",deadline).get();});
++    }
+     {
+         auto [captured,spec]=prepared("stale-settlement");store.retire_agent_worker(captured.generation,"worker_exit").get();const auto before=store.root_budget(captured.root_run_id).get();rejects<Conflict>([&]{store.accept_dynamic_plan_change(spec).get();});rejects<Conflict>([&]{store.record_rejected_dynamic_tool_turn(captured.owner_run_id,spec.origin_attempt_id,spec.parent_assistant_json,"plan_changed").get();});require(!store.dynamic_plan_for_root(captured.root_run_id).get()&&store.root_budget(captured.root_run_id).get().revision==before.revision&&store.agent_worker_planning_claim(captured.root_run_id,spec.origin_attempt_id).get().state=="uncertain","Retired unresolved planning cannot be accepted/rejected or replayed");
+     }
+@@ -447,4 +467,4 @@ void model_host(const std::string& path,const std::vector<std::string>& imports,
+     std::stop_source stop;stop.request_stop();AgentWorkerModelHost stopped(store,captured,config,{},AgentWorkerModelPolicy{true,{}},failing,std::chrono::steady_clock::now()+20s,stop.get_token());rejects<TransportCancelled>([&]{stopped.admission();});start(store,"transport-root","stopped-attempt");rejects<TransportCancelled>([&]{stopped.complete("stopped-attempt",request,[](const ModelEvent&){});});rejects<NotFound>([&]{store.agent_worker_model_claim("transport-root","stopped-attempt").get();});require(failing->calls==1,"Owner cancellation before dispatch must not invoke gateway or create a claim");store.retire_agent_worker(captured.generation,"cancelled").get();rejects<Conflict>([&]{host.admission();});store.close();
+ }
+ }
+-int main(int argc,char** argv){if(argc!=4)return 2;std::filesystem::path folder;try{std::random_device random;for(unsigned i=0;i<32;++i){auto candidate=std::filesystem::temp_directory_path()/("xmind-worker-ledger-"+std::to_string(random())+"-"+std::to_string(random()));if(std::filesystem::create_directory(candidate)){folder=std::move(candidate);break;}}require(!folder.empty(),"Cannot create isolated worker ledger fixture");const std::vector<std::string> imports{argv[1],argv[2]};ledger((folder/"ledger.sqlite").string(),imports);terminal_boundary((folder/"terminal.sqlite").string(),imports);recovery_rollback((folder/"rollback.sqlite").string(),imports);model_host((folder/"model.sqlite").string(),imports,argv[3]);std::cout<<"Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; no child AgentRunner RPC is implemented.\n";std::filesystem::remove_all(folder);return 0;}catch(const std::exception& error){std::cerr<<error.what()<<"; retained fixture "<<folder.string()<<'\n';return 1;}}
++int main(int argc,char** argv){if(argc==4&&std::string(argv[1])=="agent-channel-worker"){try{return planning_continuation_child(argv);}catch(const std::exception& e){std::cerr<<e.what()<<std::endl;return 1;}}if(argc!=4)return 2;std::filesystem::path folder;try{std::random_device random;for(unsigned i=0;i<32;++i){auto candidate=std::filesystem::temp_directory_path()/("xmind-worker-ledger-"+std::to_string(random())+"-"+std::to_string(random()));if(std::filesystem::create_directory(candidate)){folder=std::move(candidate);break;}}require(!folder.empty(),"Cannot create isolated worker ledger fixture");const std::vector<std::string> imports{argv[1],argv[2]};ledger((folder/"ledger.sqlite").string(),imports);terminal_boundary((folder/"terminal.sqlite").string(),imports);recovery_rollback((folder/"rollback.sqlite").string(),imports);model_host((folder/"model.sqlite").string(),imports,argv[3]);std::cout<<"Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; no child AgentRunner RPC is implemented.\n";std::filesystem::remove_all(folder);return 0;}catch(const std::exception& error){std::cerr<<error.what()<<"; retained fixture "<<folder.string()<<'\n';return 1;}}

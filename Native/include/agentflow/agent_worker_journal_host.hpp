@@ -28,6 +28,7 @@ public:
     std::int64_t remaining_ms(std::stop_token={});
     Run begin_run(std::stop_token={});
     ModelCallReservation reserve_model(std::string,std::stop_token={});
+    ModelCallReservation reserve_planning_continuation(std::string call,std::string attempt,std::stop_token={});
     ModelCallReservation start_model(std::string,std::stop_token={});
     ModelCallReservation finish_model(std::string,std::stop_token={});
     Event model_event(std::string,std::int64_t,std::string kind,std::string json,std::stop_token={});

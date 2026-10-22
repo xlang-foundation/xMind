@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_native_execution.hpp"
+#include "agent_worker_ipc_wait.hpp"
 #include "agentflow/xmind_ipc_api.hpp"
 #include "agentflow/xmind_ipc_runtime.hpp"
 #include <atomic>
@@ -55,18 +56,9 @@ NativeExecutionBinding::~NativeExecutionBinding(){{std::lock_guard lock(registry
 NativeExecutionAccess NativeExecutionBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
 void NativeExecutionBinding::close()noexcept{{std::lock_guard lock(state_->mutex);state_->closed=true;state_->changed.notify_all();}state_->stop.request_stop();}
 void NativeExecutionBinding::wait_closed(AgentWorkerChannel::Deadline deadline,std::stop_token stop){std::unique_lock lock(state_->mutex);if(!state_->changed.wait_until(lock,stop,deadline,[&]{return state_->closed;})){if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution wait cancelled");throw AgentWorkerChannelTimeout("Native execution wait deadline elapsed");}}
-namespace {
-// The control observer needs a short bounded wait, not the system timer tick.
-// Failure to obtain a high-resolution timer preserves the original wait path.
-struct ExecutionPollWait {
-    HANDLE timer=CreateWaitableTimerExW(nullptr,nullptr,CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,TIMER_MODIFY_STATE|SYNCHRONIZE);
-    ~ExecutionPollWait(){if(timer)CloseHandle(timer);}
-    void pause(){LARGE_INTEGER due{};due.QuadPart=-20000;if(timer&&SetWaitableTimer(timer,&due,0,nullptr,nullptr,FALSE)){if(WaitForSingleObject(timer,10)==WAIT_OBJECT_0)return;}std::this_thread::sleep_for(std::chrono::milliseconds(2));}
-};
-}
 struct NativeExecutionClient::Impl {
     X::Runtime runtime;X::Value execution,start,status,cancel,close;
-    ExecutionPollWait poll;
+    AgentWorkerIpcWait poll;
     std::mutex execution_mutex,cancel_mutex;std::atomic<bool> dispatched=false,closed=false;AgentWorkerScope scope;
     X::Value invoke(const X::Value& method){X::Value result;if(!method.Call(std::vector<X::Value>{},result))throw AgentWorkerProtocolError("Native execution acknowledgement unavailable; no replay authorized");return result;}
     Impl(const NativeExecutionAccess& access,const AgentWorkerScope& scope):scope(scope){validate(scope);if(!access.endpoint.starts_with("lrpc:")||access.endpoint.size()>32||access.ticket.size()!=64||access.ticket.find_first_not_of("0123456789abcdef")!=std::string::npos||!access.pid)throw AgentWorkerProtocolError("Invalid native execution access");X3LrpcEndpointInfo info{};info.size=sizeof(info);if(x3_runtime_probe_remote(runtime.get(),access.endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=access.pid)throw AgentWorkerProtocolError("Native execution endpoint PID differs");auto root=runtime.ImportRemote("xmind",access.endpoint.c_str());auto services=invoke(root["Executions"]);X::Value opened;if(!services["Open"].Call(std::vector<X::Value>{X::Value(runtime,access.ticket)},opened))throw AgentWorkerProtocolError("Native execution access refused");execution=std::move(opened);const auto identity=invoke(execution["Identity"]);if(!identity.IsDict()||identity.Size()!=5||identity["root"].ToString()!=scope.root_id||identity["owner"].ToString()!=scope.run_id||identity["workspace"].ToString()!=scope.workspace_id||identity["generation"].ToString()!=scope.generation||!identity["revision"].IsInt64()||identity["revision"].ToInt64()!=scope.workspace_revision)throw AgentWorkerProtocolError("Native execution object scope differs");start=execution["Execute"];status=execution["Status"];cancel=execution["Cancel"];close=execution["Close"];}

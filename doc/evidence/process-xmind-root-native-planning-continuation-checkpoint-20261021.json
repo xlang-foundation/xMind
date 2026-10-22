@@ -1,0 +1,213 @@
+{
+  "recordedAt": "2026-10-22T02:22:24.765Z",
+  "gate": {
+    "recordedAt": "2026-10-22T02:21:16.742Z",
+    "sourceParent": "6531830de938bba23739ec398415897d62c2f09e",
+    "sourcePatchSha256": "9b832e439f83a47a648cab666410f1660243a1e95c31421c4e5df9d01432cea1",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 39540,
+      "launchedAt": "2026-10-22T02:18:14.172Z",
+      "completedAt": "2026-10-22T02:19:05.988Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "422a44f234df3ad59f3e98230ed1510addb7747749d6ad62fc0bfcea1be386fe"
+    },
+    "test": {
+      "pid": 31200,
+      "launchedAt": "2026-10-22T02:19:09.444Z",
+      "completedAt": "2026-10-22T02:21:13.950Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ba9f30da483b8431b43de92486a7ef9fff2531ab93adf6af694c34c5f6d4808b"
+    },
+    "total": 20,
+    "failed": 0,
+    "passed": 20,
+    "seconds": 124.46,
+    "projectFiles": 2784,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 138,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "969b50c25355948193b8d044971de3ba6fe817dc400b8dd6abf5be303fb6affa",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": [
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-gate.json",
+      "sha256": "822bae8eec1925535f093ddd1dbcf53ce25cbddc5b3cbe9252fb5d6ba2325978"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-build.log",
+      "sha256": "1962a367915a24afa89febac35f353e16e469f7db7918551e5cc1279f6414ac4"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-build-terminal.json",
+      "sha256": "d2ccdc819aa5a6a802fed32b3664f6df814d2128054a4b2c205c173a48c49c69"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-ctest.log",
+      "sha256": "e8db43c1c6b1737dc56b11249ffad3f025f9685e62d2bdf4dc9492208f96629b"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-ctest-terminal.json",
+      "sha256": "8e98957e68206bd43c52dc7972b2336a6fb3874185ca4a4c79fe90b51eae4b5c"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-LastTest.log",
+      "sha256": "bb8fcdd58b553752340d73408020589fefd235bc64664ff4afe240669482c149"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-source.patch",
+      "sha256": "c1ee40eed2b58430b224b3af5864dfc7727e54d0a876e224babd4aaba8181cad"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-20261021-owned-timeout-worker-before-retirement.json",
+      "sha256": "e35118ac52772d927fab2aba794bc6c865d69dff00d61c54da772272b295bc2b"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-gate.json",
+      "sha256": "3008bfada4f82b226c6dff2f26084b88b3b280cd41a3aa3d94c0a8d1a3ed8b01"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-build.log",
+      "sha256": "6625ceead8f1a48cbd5fc3c2f0be391647afaec06d09f909e5a194d64a9398a0"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-build-terminal.json",
+      "sha256": "4adf8b29f171c9e196baa196775c0c310e47fcff6c65e0ddfdeb34c7e662bc62"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-ctest.log",
+      "sha256": "34c20f60a0978558e9a750cbac4e144254d2248a27204041e20e7fa6d9709661"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-ctest-terminal.json",
+      "sha256": "a32d724db0ffa71c8d1a7e1381608edeb8c90dedd3616b0f4776fb9d18e3c0f3"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-LastTest.log",
+      "sha256": "5683615996ba6776bda720446ba8af490cd8727e35708e04101aa8707d274158"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-source.patch",
+      "sha256": "dae1b71ac335fe9c1985a749c9cc51fec57bf8edeb1886f944fde9165c7919e2"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-context-guard-20261021-owned-timeout-worker-before-retirement.json",
+      "sha256": "53dd4b44624c11c1ef17a528d6010fada42139e5cb0806979d31e4605802a866"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-gate.json",
+      "sha256": "5c9e8a3dbb59b01c221a90f5917201ce29635a356dfd92fcae49f2c37cf8420a"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-build.log",
+      "sha256": "422a44f234df3ad59f3e98230ed1510addb7747749d6ad62fc0bfcea1be386fe"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-build-terminal.json",
+      "sha256": "7f67e379e613513e5aab4dc3b0489b60c3e7930f23c8b98370fcaaf923c41cca"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-ctest.log",
+      "sha256": "ba9f30da483b8431b43de92486a7ef9fff2531ab93adf6af694c34c5f6d4808b"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-ctest-terminal.json",
+      "sha256": "0114a81d740f1423adc5b57cac60d00a23975b682ad93db2df40f3be88adbef0"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-LastTest.log",
+      "sha256": "7195d96c620d224572f0df9090e65066c39781df6ce964f0e8f02f507cdda399"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-source.patch",
+      "sha256": "9b832e439f83a47a648cab666410f1660243a1e95c31421c4e5df9d01432cea1"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-production-52796.json",
+      "sha256": "8ffc703fe4d846f66665ad5847bdde90f835da1b4ef58ad009fc21fcb04be923"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-transport-52796.json",
+      "sha256": "d29ed3ef1a52e44af4cc2448518cabdee72229f7726015d8d64848910c34218c"
+    }
+  ],
+  "timings": [
+    {
+      "phase": "production",
+      "pid": 71708,
+      "elapsedMs": 50359.6799,
+      "lastOutputMs": 50342.315800000004,
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-production-52796.json"
+    },
+    {
+      "phase": "transport",
+      "pid": 18932,
+      "elapsedMs": 6778.72,
+      "lastOutputMs": 6770.2345,
+      "path": "doc/evidence/process-xmind-root-native-planning-continuation-poll-20261021-transport-52796.json"
+    }
+  ],
+  "dumps": [
+    {
+      "path": "C:/xMindNativeValidation/process-xmind-native-planning-continuation-dumps-20261021/fixture-49324-661170218-slow.dmp",
+      "bytes": 269853,
+      "sha256": "45949471f82574ece017a0775bded5f59783a3031a8b13fd428adc3871c54dcc"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-xmind-native-planning-continuation-context-guard-dumps-20261021/fixture-38960-661477125-slow.dmp",
+      "bytes": 294269,
+      "sha256": "05680e7293036b2c6397ef3274d39c19256a6f08dbd928e8ebefd9d243cc7095"
+    },
+    {
+      "path": "C:/xMindNativeValidation/process-xmind-native-planning-continuation-poll-dumps-20261021/fixture-71708-661718265-slow.dmp",
+      "bytes": 247720,
+      "sha256": "e9263e79135fc416f29fbc5634096281ad01b0f06a7e58e4b8c4df7d9e6858de"
+    }
+  ],
+  "change": [
+    "Native worker Journal.ReservePlanningContinuation(call,attempt) uses the exact accepted native call, signed conversation turn, live lease/generation and original active segment.",
+    "Reservation atomically consumes one held native continuation and records worker-generation provenance. Generic/unscoped funding, renamed attempts, stale/foreign leases, cancellation/expiry and unresolved turns refuse.",
+    "Start/finish accept this exact signed continuation; ordinary-root completion remains forbidden. Backend-owned actual response facts are returned.",
+    "Context-managed journals refuse the plain continuation path until a dedicated context hook is available.",
+    "New ledger contract injects SQL funding failure and exercises reserve/repeated reserve/start/finish through an actual distinct SDK fixture process. Ownership metadata/model/child receipts are synthetic; no model gateway call is made.",
+    "Model/planning operation observers reuse the execution-control high-resolution wait through one internal RAII helper, with original fallback and no global timer setting or SDK change."
+  ],
+  "preservedFailures": [
+    {
+      "stage": "continuation",
+      "passed": 19,
+      "total": 20,
+      "reason": "Broad production child hit unchanged 60000ms Node deadline; exact orphan callable worker PID38484 retired with PID/birth/image/parent receipt."
+    },
+    {
+      "stage": "continuation-context-guard",
+      "passed": 19,
+      "total": 20,
+      "reason": "Same unchanged production limit; exact orphan callable worker PID10720 retired with receipt."
+    }
+  ],
+  "timingScope": "Final production phase measured 50359.6799ms; transport 6778.72ms; total broad contract 57.23s. Prior runs hit 60000ms production limit. This demonstrates observed improvement and completion, not a universal latency guarantee. All 219 independent peer requests/assertions remain unchanged.",
+  "remaining": [
+    "Worker runner initial/rejected planning admission and inspect-plan outcome integration.",
+    "Dedicated context-managed continuation admission.",
+    "Production scheduler/actual dynamic worker children and pause/resume lease-budget handoff.",
+    "Remaining obsolete RPC fixture cleanup.",
+    "Full current 169-test native suite and updated installed browser/CLI/editor acceptance.",
+    "Unresolved SDK access violation/heap corruption; no fix claimed."
+  ],
+  "externalClosure": "C:/xMindNativeValidation/process-xmind-native-planning-continuation-poll-20261021/inputs-before-build.json",
+  "externalBinaryInventory": "C:/xMindNativeValidation/process-xmind-native-planning-continuation-poll-20261021/binaries-before-test.json"
+}

@@ -1,3 +1,29 @@
+## Signed worker planning continuation funding — 2026-10-21
+
+Native Journal.ReservePlanningContinuation(call,attempt) now reserves only an
+exact accepted call with a signed conversation commit, live lease/generation and
+original active segment. One held charge becomes one generation-bound model
+attempt. Start/finish validate that same authority; generic funding and ordinary
+root completion remain forbidden. Context-managed journals refuse this plain
+path until their dedicated hook exists. Ledger tests prove SQL rollback and
+reserve/repeated-reserve/start/finish in a distinct SDK fixture process using
+synthetic ledger/model receipts and zero model gateway calls.
+
+Two frozen gates pass 19/20 but hit the unchanged 60000ms production limit.
+Their logs and exact orphan retirement receipts remain preserved. Model/planning
+observers now share the existing per-observer high-resolution wait, retaining
+the sleep fallback and all deadlines; no global timer or SDK change. Final
+frozen gate passes 20/20 in 124.46s. Broad worker contract 57.23s: production
+50.360s and transport 6.779s, with all 219 requests/assertions unchanged. This is
+an observed improvement, not a universal latency guarantee.
+
+Native 969b50c2 / SDK 1ff2a8e7; 2784 project inputs and all 138 binaries remain
+frozen. Full 169-test suite not run; nothing installed. Initial/rejected/inspect
+planning assembly, context funding, scheduler/process children and pause/resume
+handoff remain unfinished. Legacy cleanup and installed acceptance remain open.
+Earlier heap/access-violation failures are not diagnosed by this passing gate.
+[Exact gates, timing traces and retirement receipts](evidence/process-xmind-root-native-planning-continuation-checkpoint-20261021.json).
+
 ## Heap-failure diagnostics strengthened — 2026-10-21
 
 Test-only opt-in 0xC0000374 dumps now capture full memory, memory information

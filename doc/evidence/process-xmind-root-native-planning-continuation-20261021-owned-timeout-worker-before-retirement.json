@@ -1,0 +1,10 @@
+{
+  "ProcessId": 38484,
+  "ParentProcessId": 49324,
+  "CreationTimeUtc": "2026-10-22T02:11:14.1548460Z",
+  "ExecutablePath": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+  "ImageSha256": "3c7b2f2824f5632a249b8ba25880884b44e3e060969b151e538374ded3268460",
+  "CommandLine": "\"C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe\" worker \"--agent-port\" \"49346\" \"--modules\" \"C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules\" \"--stdlib\" \"C:/Python/Python314/Lib\" \"--code-root\" \"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-model-rpc-2215484206-1222556822\\coding_callable_worker\" \"--module\" \"worker_callable_fixture\" \"--function\" \"invoke\"",
+  "ParentAbsent": true,
+  "Reason": "Owned callable fixture orphan after unchanged Node 60000ms production process timeout. Only this verified synthetic fixture is retired."
+}

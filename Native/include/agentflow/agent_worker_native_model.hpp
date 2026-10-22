@@ -53,6 +53,7 @@ struct NativeWorkerJournalApi {
     X::Value ExecutionWindow();
     X::Value Begin();
     X::Value ReserveModel(std::string attempt);
+    X::Value ReservePlanningContinuation(std::string call,std::string attempt);
     X::Value StartModel(std::string attempt);
     X::Value FinishModel(std::string attempt);
     X::Value ModelEvent(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
@@ -72,6 +73,7 @@ struct NativeWorkerJournalApi {
         APISET().AddFunc<0>("ExecutionWindow",&NativeWorkerJournalApi::ExecutionWindow);
         APISET().AddFunc<0>("Begin",&NativeWorkerJournalApi::Begin);
         APISET().AddFunc<1>("ReserveModel",&NativeWorkerJournalApi::ReserveModel);
+        APISET().AddFunc<2>("ReservePlanningContinuation",&NativeWorkerJournalApi::ReservePlanningContinuation);
         APISET().AddFunc<1>("StartModel",&NativeWorkerJournalApi::StartModel);
         APISET().AddFunc<1>("FinishModel",&NativeWorkerJournalApi::FinishModel);
         APISET().AddFunc<4>("ModelEvent",&NativeWorkerJournalApi::ModelEvent);
@@ -186,6 +188,7 @@ public:
     std::string journal_execution_window();
     std::string journal_begin();
     std::string journal_reserve_model(std::string attempt);
+    std::string journal_reserve_planning_continuation(std::string call,std::string attempt);
     std::string journal_start_model(std::string attempt);
     std::string journal_finish_model(std::string attempt);
     std::string journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
