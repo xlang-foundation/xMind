@@ -1,3 +1,46 @@
+## Remaining schema-worker SDK migration design - 2026-10-22
+
+The schema worker remains an active private JSON-RPC/stdio route. Its parent uses
+SchemaWorker::evaluate; unified xmind launches schema-worker mode, while native
+contract executables use the adjacent helper. This is internal worker traffic,
+so its schema/validate envelope and McpRequestTracker/McpLineStream dispatch must
+be replaced with normal xlang3 root/subobject calls. External MCP protocols stay
+in their own adapters.
+
+The proposed group is xmind.Schemas. Open(private startup capability) returns a
+single-evaluation Validator object. Identity binds its actual child PID and API
+version. Validate accepts the existing schema JSON text, optional-instance flag
+and instance JSON text as typed SDK arguments, and returns a typed verdict.
+Keeping the original JSON text preserves duplicate-key rejection in the native
+schema parser. JSON remains domain data; SDK methods own transport serialization. Invalid
+schemas, invalid arguments and process/transport failures remain distinct native
+exceptions at the parent boundary.
+
+Keep the current fresh-child limits: 128 MiB committed memory, 2 seconds user CPU,
+one process and an independent 2-second wall deadline, clamped by the caller's
+request. The owned pipe is only a private startup capability/endpoint and parent
+lifetime channel. A bounded stdio process adapter can continue enforcing Windows
+job ownership without carrying JSON-RPC method calls. After an SDK reply, closing
+the inherited input lets the child exit cleanly; existing shutdown then retires
+remaining descendants. Cancellation/deadline retirement must wake and join any
+in-flight SDK caller before destroying its runtime, without retrying evaluation.
+
+The current hang fixture creates its marker after receiving the old JSON frame.
+Its replacement must mark actual SDK Validate entry, so cancellation cannot pass
+by stopping only bootstrap. Existing schema/argument/no-fetch, expensive-regex,
+OS job-limit, actual allocation-refusal and subsequent-healthy-evaluation checks
+remain required at their original budgets. Wrong capability, wrong PID, duplicate
+validation and malformed typed verdict need direct negative coverage.
+
+There is a build-graph constraint: agentflow_schema_worker currently explicitly
+depends on the helper executable. Linking that helper to the shared root would
+form an executable dependency cycle through the root's backend libraries. Keep
+the common root implementation; move helper build prerequisites to consuming
+executables/contracts rather than creating a second root implementation or a
+custom dispatcher. Audit all affected single-target builds before removing the
+old helper prerequisite. This design is pending implementation; current full
+Native validation remains frozen and running.
+
 ## Trusted Python-tool worker uses the shared root - 2026-10-22
 
 Trusted callable workers now register the same process-level xmind root as agent

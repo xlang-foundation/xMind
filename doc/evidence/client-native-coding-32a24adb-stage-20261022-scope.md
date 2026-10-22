@@ -1,0 +1,5 @@
+# Unexecuted runtime staging at 32a24adb
+
+The candidate stages 2398 manifest-covered files with native source 32a24adb and SDK f809da86. Source bundle binaries match the accepted 12-contract Native build and the active full run's frozen binaries. Existing module and license bytes are verified against the earlier source manifest before copying; current xmind.exe, SDK DLL and SDK CLI replace their older counterparts. The new source manifest has the new SDK revision and an honest pending-full qualification.
+
+Three SDK modules have no product callers in Native, extension, browser or CI adapter sources and are omitted: xlang1_compat_sample, xlang_curmodule_probe and xlang_graph_native. The original source bundle is preserved. The runtime stage is clean and unexecuted: no configuration, models, SQLite profile or interpreter process accessed. This is package byte staging, not release acceptance, a VSIX or installation. The pending full run, schema-worker transport and actual current-package client integration remain separate requirements.
