@@ -1,0 +1,247 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index c7647a05..506145ab 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -141,7 +141,7 @@ if(WIN32)
+   target_link_libraries(agentflow_worker_channel PRIVATE agentflow_ipc_runtime)
+   add_library(agentflow_worker_rpc STATIC src/agent_worker_rpc.cpp)
+   target_include_directories(agentflow_worker_rpc PUBLIC include PRIVATE third_party)
+-  target_link_libraries(agentflow_worker_rpc PUBLIC agentflow_worker_channel PRIVATE Threads::Threads)
++  target_link_libraries(agentflow_worker_rpc PUBLIC agentflow_worker_channel PRIVATE Threads::Threads agentflow_ipc_api)
+   target_include_directories(agentflow_worker_channel PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt agentflow_xlang3)
+   add_library(agentflow_process_effects STATIC src/process_executor.cpp)
+diff --git a/Native/include/agentflow/agent_worker_control.hpp b/Native/include/agentflow/agent_worker_control.hpp
+index 3fd5890a..ac8d5cde 100644
+--- a/Native/include/agentflow/agent_worker_control.hpp
++++ b/Native/include/agentflow/agent_worker_control.hpp
+@@ -6,6 +6,7 @@ namespace agentflow {
+ // A child reply is an intent only. The backend must separately observe physical
+ // exit and canonical durable facts before retiring ownership or freeing capacity.
+ RunState decode_agent_worker_execution_intent(const std::string&);
++void connect_agent_worker_execution(AgentWorkerRpcPeer&,AgentWorkerProcess&,AgentWorkerChannel::Deadline,std::stop_token={});
+ RunState request_agent_worker_execution(AgentWorkerRpcPeer&);
+ void request_agent_worker_cancellation(AgentWorkerRpcPeer&);
+ }
+diff --git a/Native/include/agentflow/agent_worker_native_execution.hpp b/Native/include/agentflow/agent_worker_native_execution.hpp
+index 5db7b306..2f4626b6 100644
+--- a/Native/include/agentflow/agent_worker_native_execution.hpp
++++ b/Native/include/agentflow/agent_worker_native_execution.hpp
+@@ -13,6 +13,7 @@ public:
+     NativeExecutionBinding(const NativeExecutionBinding&)=delete;
+     NativeExecutionBinding& operator=(const NativeExecutionBinding&)=delete;
+     NativeExecutionAccess access()const;
++    void close()noexcept;
+     void wait_closed(AgentWorkerChannel::Deadline,std::stop_token={});
+ private:std::shared_ptr<NativeExecutionState> state_;std::string ticket_;
+ };
+diff --git a/Native/include/agentflow/agent_worker_rpc.hpp b/Native/include/agentflow/agent_worker_rpc.hpp
+index b196dfb6..3ae9269f 100644
+--- a/Native/include/agentflow/agent_worker_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_rpc.hpp
+@@ -4,6 +4,7 @@
+ 
+ namespace agentflow {
+ class NativeWorkerModelClient;
++class NativeExecutionClient;
+ struct AgentWorkerRpcClosed:std::runtime_error {using std::runtime_error::runtime_error;};
+ struct AgentWorkerRpcCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
+ struct AgentWorkerRpcTimeout:std::runtime_error {using std::runtime_error::runtime_error;};
+@@ -33,6 +34,9 @@ public:
+     void start();
+     void bind_native_model(std::shared_ptr<NativeWorkerModelClient>);
+     std::shared_ptr<NativeWorkerModelClient> native_model()const;
++    void bind_native_execution(std::shared_ptr<NativeExecutionClient>);
++    std::shared_ptr<NativeExecutionClient> native_execution()const;
++    AgentWorkerChannel::Deadline execution_deadline()const noexcept;
+     std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={});
+     bool alive()const;
+     void wait_closed();
+diff --git a/Native/src/agent_worker_control.cpp b/Native/src/agent_worker_control.cpp
+index 76835011..55d78051 100644
+--- a/Native/src/agent_worker_control.cpp
++++ b/Native/src/agent_worker_control.cpp
+@@ -1,4 +1,6 @@
+ #include "agentflow/agent_worker_control.hpp"
++#include "agentflow/agent_worker_native_execution.hpp"
++#include "agentflow/mcp_wire.hpp"
+ #include "nlohmann/json.hpp"
+ #include <set>
+ 
+@@ -29,11 +31,17 @@ RunState decode_agent_worker_execution_intent(const std::string& bytes){
+     if(outcome=="cancelled")return RunState::cancelled;
+     invalid();
+ }
++void connect_agent_worker_execution(AgentWorkerRpcPeer& peer,AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
++    if(peer.scope()!=worker.channel().scope())throw AgentWorkerProtocolError("Native execution rendezvous scope differs");const auto ready=worker.channel().receive(deadline,stop);if(ready.operation!="worker.execution.ready"||ready.payload.size()>1024)throw AgentWorkerProtocolError("Invalid native execution rendezvous");
++    const auto value=Json::parse(mcp_compact_object(ready.payload));if(value.size()!=4||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("endpoint").is_string()||!value.at("ticket").is_string()||!value.at("pid").is_number_unsigned()||value.at("pid").get<std::uint64_t>()!=worker.pid())throw AgentWorkerProtocolError("Native execution rendezvous identity differs");
++    auto client=std::make_shared<NativeExecutionClient>(NativeExecutionAccess{value.at("endpoint").get<std::string>(),value.at("ticket").get<std::string>(),worker.pid()},peer.scope());if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution rendezvous cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerChannelTimeout("Native execution rendezvous expired");peer.bind_native_execution(std::move(client));
++}
+ RunState request_agent_worker_execution(AgentWorkerRpcPeer& peer){
+-    return decode_agent_worker_execution_intent(peer.call("worker.execute","{}"));
++    if(auto native=peer.native_execution())return native->execute(peer.execution_deadline());
++    throw AgentWorkerRpcClosed("Native execution control is not bound");
+ }
+ void request_agent_worker_cancellation(AgentWorkerRpcPeer& peer){
+-    const auto value=reply(peer.call("worker.cancel","{}"));
+-    if(!value.contains("stop_requested")||!value.at("stop_requested").is_boolean()||!value.at("stop_requested").get<bool>())invalid();
++    if(auto native=peer.native_execution()){native->cancel();return;}
++    throw AgentWorkerRpcClosed("Native execution control is not bound");
+ }
+ }
+diff --git a/Native/src/agent_worker_entry.cpp b/Native/src/agent_worker_entry.cpp
+index ad3e6703..84280f8b 100644
+--- a/Native/src/agent_worker_entry.cpp
++++ b/Native/src/agent_worker_entry.cpp
+@@ -3,6 +3,8 @@
+ #include "agentflow/agent_terminal_handoff.hpp"
+ #include "agentflow/http_stream_transport.hpp"
+ #include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/agent_worker_native_execution.hpp"
++#include <thread>
+ #include "agentflow/mcp_wire.hpp"
+ #include "nlohmann/json.hpp"
+ #include <atomic>
+@@ -30,25 +32,20 @@ int run_agent_channel_worker(int argc,char** argv){
+     // This is only a transport ceiling. Every backend operation still checks
+     // the captured original deadline, current lease and owner cancellation.
+     const auto transport_deadline=Clock::now()+std::chrono::hours(1);
+-    AgentWorkerRpcPeer* self=nullptr;std::stop_source execution_stop;std::atomic<bool> executed=false;
+-    AgentWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token handler_cancel)->std::string{
+-        if(method!="worker.execute"&&method!="worker.cancel")throw AgentWorkerRpcRemoteError("unsupported");
+-        if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");
+-        if(method=="worker.cancel"){execution_stop.request_stop();return "{\"version\":1,\"stop_requested\":true}";}
+-        if(executed.exchange(true))throw AgentWorkerRpcRemoteError("rejected");
+-        std::stop_callback propagate(handler_cancel,[&]{execution_stop.request_stop();});
+-        try{
+-            const auto result=coding?execute_agent_worker_coding_root(*self,execution_stop.get_token()):execute_agent_worker_read_root(*self,execution_stop.get_token());
+-            if(result.run.state!=RunState::completed)throw AgentWorkerRpcRemoteError("failed");
+-            return "{\"version\":1,\"outcome\":\"completed\"}";
+-        }catch(const AgentTerminalHandoff& intent){
+-            return intent.outcome()==RunState::cancelled?"{\"version\":1,\"outcome\":\"cancelled\"}":"{\"version\":1,\"outcome\":\"failed\"}";
+-        }catch(const TransportCancelled&){return "{\"version\":1,\"outcome\":\"cancelled\"}";}
+-        catch(const AgentWorkerRpcCancelled&){return "{\"version\":1,\"outcome\":\"cancelled\"}";}
+-        catch(...){return "{\"version\":1,\"outcome\":\"failed\"}";}
+-    },transport_deadline);
++    // The peer is a transitional local scope/client adapter only. No packet
++    // reader or packet execution handler is installed in the product child.
++    AgentWorkerRpcPeer peer(*channel,[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");},transport_deadline);
+     const auto& scope=peer.scope();
+     peer.bind_native_model(std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
+-    self=&peer;peer.start();peer.wait_closed();peer.stop();return 0;
++    NativeExecutionBinding execution(scope,[&](std::stop_token stop){
++        try{const auto result=coding?execute_agent_worker_coding_root(peer,stop):execute_agent_worker_read_root(peer,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
++        catch(const AgentTerminalHandoff& intent){return intent.outcome()==RunState::cancelled?RunState::cancelled:RunState::failed;}
++        catch(const TransportCancelled&){return RunState::cancelled;}
++        catch(const AgentWorkerRpcCancelled&){return RunState::cancelled;}
++        catch(...){return RunState::failed;}
++    });
++    const auto control=execution.access();channel->send({"worker.execution.ready",nlohmann::json{{"version",1},{"endpoint",control.endpoint},{"ticket",control.ticket},{"pid",control.pid}}.dump()},bootstrap_deadline);
++    std::jthread parent_lifetime([&](std::stop_token stop){try{(void)channel->receive(transport_deadline,stop);}catch(...){}execution.close();});
++    execution.wait_closed(transport_deadline);parent_lifetime.request_stop();return 0;
+ }
+ }
+diff --git a/Native/src/agent_worker_native_execution.cpp b/Native/src/agent_worker_native_execution.cpp
+index bd653e1a..65557988 100644
+--- a/Native/src/agent_worker_native_execution.cpp
++++ b/Native/src/agent_worker_native_execution.cpp
+@@ -53,16 +53,27 @@ X::Value NativeExecutionsApi::Open(std::string key){std::shared_ptr<NativeExecut
+ NativeExecutionBinding::NativeExecutionBinding(AgentWorkerScope scope,std::function<RunState(std::stop_token)> action):state_(std::make_shared<NativeExecutionState>(std::move(scope),std::move(action))),ticket_(ticket()){validate(state_->scope);if(!state_->action)throw std::invalid_argument("Native execution requires its captured action");ensure_xmind_ipc_api();(void)objects();std::lock_guard lock(registry_mutex);registry.emplace(ticket_,state_);}
+ NativeExecutionBinding::~NativeExecutionBinding(){{std::lock_guard lock(registry_mutex);registry.erase(ticket_);}{std::lock_guard lock(state_->mutex);state_->active=false;state_->closed=true;state_->changed.notify_all();}state_->stop.request_stop();if(state_->thread.joinable())state_->thread.join();state_->action={};}
+ NativeExecutionAccess NativeExecutionBinding::access()const{return {"lrpc:"+std::to_string(xmind_ipc_port()),ticket_,GetCurrentProcessId()};}
++void NativeExecutionBinding::close()noexcept{{std::lock_guard lock(state_->mutex);state_->closed=true;state_->changed.notify_all();}state_->stop.request_stop();}
+ void NativeExecutionBinding::wait_closed(AgentWorkerChannel::Deadline deadline,std::stop_token stop){std::unique_lock lock(state_->mutex);if(!state_->changed.wait_until(lock,stop,deadline,[&]{return state_->closed;})){if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution wait cancelled");throw AgentWorkerChannelTimeout("Native execution wait deadline elapsed");}}
++namespace {
++// The control observer needs a short bounded wait, not the system timer tick.
++// Failure to obtain a high-resolution timer preserves the original wait path.
++struct ExecutionPollWait {
++    HANDLE timer=CreateWaitableTimerExW(nullptr,nullptr,CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,TIMER_MODIFY_STATE|SYNCHRONIZE);
++    ~ExecutionPollWait(){if(timer)CloseHandle(timer);}
++    void pause(){LARGE_INTEGER due{};due.QuadPart=-20000;if(timer&&SetWaitableTimer(timer,&due,0,nullptr,nullptr,FALSE)){if(WaitForSingleObject(timer,10)==WAIT_OBJECT_0)return;}std::this_thread::sleep_for(std::chrono::milliseconds(2));}
++};
++}
+ struct NativeExecutionClient::Impl {
+     X::Runtime runtime;X::Value execution,start,status,cancel,close;
++    ExecutionPollWait poll;
+     std::mutex execution_mutex,cancel_mutex;std::atomic<bool> dispatched=false;
+     X::Value invoke(const X::Value& method){X::Value result;if(!method.Call(std::vector<X::Value>{},result))throw AgentWorkerProtocolError("Native execution acknowledgement unavailable; no replay authorized");return result;}
+     Impl(const NativeExecutionAccess& access,const AgentWorkerScope& scope){validate(scope);if(!access.endpoint.starts_with("lrpc:")||access.endpoint.size()>32||access.ticket.size()!=64||access.ticket.find_first_not_of("0123456789abcdef")!=std::string::npos||!access.pid)throw AgentWorkerProtocolError("Invalid native execution access");X3LrpcEndpointInfo info{};info.size=sizeof(info);if(x3_runtime_probe_remote(runtime.get(),access.endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=access.pid)throw AgentWorkerProtocolError("Native execution endpoint PID differs");auto root=runtime.ImportRemote("xmind",access.endpoint.c_str());auto services=invoke(root["Executions"]);X::Value opened;if(!services["Open"].Call(std::vector<X::Value>{X::Value(runtime,access.ticket)},opened))throw AgentWorkerProtocolError("Native execution access refused");execution=std::move(opened);const auto identity=invoke(execution["Identity"]);if(!identity.IsDict()||identity.Size()!=5||identity["root"].ToString()!=scope.root_id||identity["owner"].ToString()!=scope.run_id||identity["workspace"].ToString()!=scope.workspace_id||identity["generation"].ToString()!=scope.generation||!identity["revision"].IsInt64()||identity["revision"].ToInt64()!=scope.workspace_revision)throw AgentWorkerProtocolError("Native execution object scope differs");start=execution["Execute"];status=execution["Status"];cancel=execution["Cancel"];close=execution["Close"];}
+ };
+ NativeExecutionClient::NativeExecutionClient(NativeExecutionAccess access,AgentWorkerScope scope):impl_(std::make_unique<Impl>(access,scope)){}
+ NativeExecutionClient::~NativeExecutionClient()=default;
+-RunState NativeExecutionClient::execute(AgentWorkerChannel::Deadline deadline,std::stop_token stop){std::lock_guard lock(impl_->execution_mutex);if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution cancelled before dispatch");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerChannelTimeout("Native execution expired before dispatch");if(impl_->dispatched.exchange(true))throw AgentWorkerProtocolError("Native execution cannot be retried");impl_->invoke(impl_->start);for(;;){if(stop.stop_requested()){cancel();throw AgentWorkerChannelCancelled("Native execution observation cancelled");}if(std::chrono::steady_clock::now()>=deadline){cancel();throw AgentWorkerChannelTimeout("Native execution observation expired; retain ownership");}const auto value=impl_->invoke(impl_->status);if(!value.IsDict()||value.Size()!=3||value["started"].raw().tag!=X3_TAG_BOOL||!value["started"].ToInt64()||value["done"].raw().tag!=X3_TAG_BOOL||!value["outcome"].IsString())throw AgentWorkerProtocolError("Native execution status differs");const auto outcome=value["outcome"].ToString();if(value["done"].ToInt64()){if(outcome=="completed")return RunState::completed;if(outcome=="cancelled")return RunState::cancelled;if(outcome=="failed")return RunState::failed;throw AgentWorkerProtocolError("Invalid native execution intent");}if(!outcome.empty())throw AgentWorkerProtocolError("Premature native execution intent");std::this_thread::sleep_for(std::chrono::milliseconds(2));}}
++RunState NativeExecutionClient::execute(AgentWorkerChannel::Deadline deadline,std::stop_token stop){std::lock_guard lock(impl_->execution_mutex);if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution cancelled before dispatch");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerChannelTimeout("Native execution expired before dispatch");if(impl_->dispatched.exchange(true))throw AgentWorkerProtocolError("Native execution cannot be retried");impl_->invoke(impl_->start);for(;;){if(stop.stop_requested()){cancel();throw AgentWorkerChannelCancelled("Native execution observation cancelled");}if(std::chrono::steady_clock::now()>=deadline){cancel();throw AgentWorkerChannelTimeout("Native execution observation expired; retain ownership");}const auto value=impl_->invoke(impl_->status);if(!value.IsDict()||value.Size()!=3||value["started"].raw().tag!=X3_TAG_BOOL||!value["started"].ToInt64()||value["done"].raw().tag!=X3_TAG_BOOL||!value["outcome"].IsString())throw AgentWorkerProtocolError("Native execution status differs");const auto outcome=value["outcome"].ToString();if(value["done"].ToInt64()){if(outcome=="completed")return RunState::completed;if(outcome=="cancelled")return RunState::cancelled;if(outcome=="failed")return RunState::failed;throw AgentWorkerProtocolError("Invalid native execution intent");}if(!outcome.empty())throw AgentWorkerProtocolError("Premature native execution intent");impl_->poll.pause();}}
+ void NativeExecutionClient::cancel(){std::lock_guard lock(impl_->cancel_mutex);impl_->invoke(impl_->cancel);}
+ void NativeExecutionClient::close()noexcept{try{std::lock_guard lock(impl_->cancel_mutex);impl_->invoke(impl_->close);}catch(...){} }
+ }
+diff --git a/Native/src/agent_worker_rpc.cpp b/Native/src/agent_worker_rpc.cpp
+index 28786c66..17aa0cbe 100644
+--- a/Native/src/agent_worker_rpc.cpp
++++ b/Native/src/agent_worker_rpc.cpp
+@@ -1,4 +1,5 @@
+ #include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_native_execution.hpp"
+ #include "nlohmann/json.hpp"
+ #include <atomic>
+ #include <condition_variable>
+@@ -30,6 +31,7 @@ struct AgentWorkerRpcPeer::Impl {
+     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
+     struct Flight {std::shared_ptr<Incoming> owner;std::jthread thread;};
+     std::shared_ptr<NativeWorkerModelClient> native_model;
++    std::shared_ptr<NativeExecutionClient> native_execution;
+     AgentWorkerChannel& channel;AgentWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
+     std::mutex state,writer,request_order;std::condition_variable changed;bool closed=false,started=false;
+     std::uint64_t outgoing=1,incoming=1;std::size_t queued=0;
+@@ -78,14 +80,17 @@ struct AgentWorkerRpcPeer::Impl {
+             if(!done)continue;{std::lock_guard lock(state);queued-=call->result.size();pending.erase(id);}if(sink_failure)std::rethrow_exception(sink_failure);if(local){if(code=="timeout")throw AgentWorkerRpcTimeout("Native worker RPC deadline elapsed");throw AgentWorkerRpcClosed("Native worker RPC closed before acknowledgement");}if(!code.empty())throw AgentWorkerRpcRemoteError(code,result);if(cancel.stop_requested())throw AgentWorkerRpcCancelled("Native worker RPC cancelled");return result;
+         }}catch(...){std::lock_guard lock(state);const auto found=pending.find(id);if(found!=pending.end()){for(const auto& event:call->events)queued-=event.size();queued-=call->result.size();pending.erase(found);}throw;}
+     }
+-    void stop(){fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
++    void stop(){if(native_execution)native_execution->close();fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
+ };
+ AgentWorkerRpcPeer::AgentWorkerRpcPeer(AgentWorkerChannel& channel,AgentWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
+ AgentWorkerRpcPeer::~AgentWorkerRpcPeer(){impl_->stop();}
+ void AgentWorkerRpcPeer::bind_native_model(std::shared_ptr<NativeWorkerModelClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_model||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native model binding requires fresh worker");impl_->native_model=std::move(client);}
+ std::shared_ptr<NativeWorkerModelClient> AgentWorkerRpcPeer::native_model()const{std::lock_guard lock(impl_->state);return impl_->native_model;}
++void AgentWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
++std::shared_ptr<NativeExecutionClient> AgentWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
++AgentWorkerChannel::Deadline AgentWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}
+ void AgentWorkerRpcPeer::start(){impl_->start();}
+-std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){return impl_->call(method,payload,std::move(sink),cancel);}
++std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(native_execution())throw AgentWorkerRpcRemoteError("unsupported");return impl_->call(method,payload,std::move(sink),cancel);}
+ bool AgentWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
+ void AgentWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
+ void AgentWorkerRpcPeer::stop(){impl_->stop();}
+diff --git a/Native/src/agent_worker_supervisor.cpp b/Native/src/agent_worker_supervisor.cpp
+index 42cc3283..1211fe6c 100644
+--- a/Native/src/agent_worker_supervisor.cpp
++++ b/Native/src/agent_worker_supervisor.cpp
+@@ -70,6 +70,7 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
+     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
+         [state=impl_.get(),owner=impl_->owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
+     impl_->worker->channel().send({"worker.boot",worker_boot(impl_->owner->native_model_access(),false)},impl_->deadline,cancel);
++    connect_agent_worker_execution(*impl_->peer,*impl_->worker,impl_->deadline,cancel);
+     impl_->peer->start();
+     impl_->ready=true;
+ }
+@@ -83,6 +84,7 @@ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,Agent
+     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
+         [state=impl_.get(),owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
+     impl_->worker->channel().send({"worker.boot",worker_boot(impl_->coding_owner->native_model_access(),true)},impl_->deadline,cancel);
++    connect_agent_worker_execution(*impl_->peer,*impl_->worker,impl_->deadline,cancel);
+     impl_->peer->start();
+     impl_->ready=true;
+ }
+diff --git a/Native/tests/agent_worker_context_fixture.hpp b/Native/tests/agent_worker_context_fixture.hpp
+index 73be43aa..8044b528 100644
+--- a/Native/tests/agent_worker_context_fixture.hpp
++++ b/Native/tests/agent_worker_context_fixture.hpp
+@@ -90,7 +90,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+         }
+         startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
+     }
+-    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);peer.start();
++    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)connect_agent_worker_execution(peer,*worker,deadline);peer.start();
+     const auto execute_method=product_entry?"worker.execute":"fixture.run";
+     const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call(execute_method,"{}");};
+     if(!runner){

@@ -1,0 +1,9 @@
+{
+  "pid": 6192,
+  "createdAt": "2026-10-22T00:27:02.7517880Z",
+  "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+  "commandLine": "\"C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe\" worker \"--agent-port\" \"57204\" \"--modules\" \"C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules\" \"--stdlib\" \"C:/Python/Python314/Lib\" \"--code-root\" \"C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-model-rpc-486788069-1136757152\\coding_callable_worker\" \"--module\" \"worker_callable_fixture\" \"--function\" \"invoke\"",
+  "sourceGate": "process-xmind-native-execution-product-20261021",
+  "reason": "Recorded controlled-fixture process-limit failure",
+  "recordedAt": "2026-10-22T00:28:45.7383664Z"
+}

@@ -1,0 +1,11 @@
+{
+  "pid": 64504,
+  "parentPid": 48988,
+  "createdAt": "2026-10-22T00:27:28.5959390Z",
+  "image": "C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe",
+  "imageSource": "QueryFullProcessImageNameW PROCESS_QUERY_LIMITED_INFORMATION",
+  "commandLine": "\"C:\\xMindNativeValidation\\native-current-source-full\\Native\\Release\\xmind.exe\" agent-channel-worker --channel-handle 3904",
+  "sourceGate": "process-xmind-native-execution-product-20261021",
+  "reason": "Additional controlled child left at process-limit termination; blocked image relink",
+  "recordedAt": "2026-10-22T00:30:17.5280323Z"
+}

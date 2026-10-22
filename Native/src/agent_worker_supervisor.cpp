@@ -70,6 +70,7 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
         [state=impl_.get(),owner=impl_->owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
     impl_->worker->channel().send({"worker.boot",worker_boot(impl_->owner->native_model_access(),false)},impl_->deadline,cancel);
+    connect_agent_worker_execution(*impl_->peer,*impl_->worker,impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
 }
@@ -83,6 +84,7 @@ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,Agent
     impl_->peer=std::make_unique<AgentWorkerRpcPeer>(impl_->worker->channel(),
         [state=impl_.get(),owner=impl_->coding_owner.get()](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token stop){try{return owner->dispatch(method,payload,std::move(sink),stop);}catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="outcome_unrecorded")state->outcome_unrecorded=true;throw;}},impl_->deadline);
     impl_->worker->channel().send({"worker.boot",worker_boot(impl_->coding_owner->native_model_access(),true)},impl_->deadline,cancel);
+    connect_agent_worker_execution(*impl_->peer,*impl_->worker,impl_->deadline,cancel);
     impl_->peer->start();
     impl_->ready=true;
 }

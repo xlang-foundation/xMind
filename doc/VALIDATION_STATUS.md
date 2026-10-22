@@ -1,3 +1,24 @@
+## Product native execution control — 2026-10-21
+
+Production execution and cancellation now call xmind.Executions().Open(ticket)
+through native xlang3 SDK methods, with exact PID/scope checks. Old worker.execute
+and worker.cancel packet fallbacks are removed; remaining test calls assert refusal.
+The inherited channel still supplies private rendezvous and parent-lifetime
+monitoring. Obsolete RPC scaffolding cleanup remains unfinished.
+
+Frozen final gate: 19/19 focused checks in 131.18s, native bf5854f3 / SDK 1ff2a8e7;
+2781 project inputs and 137 native binaries unchanged. Full 169-test suite not run.
+Two real children supplied 200 Status calls: maximum 0.2923ms, below the 10ms
+single-call target. Simple completion observation measured 0.3818ms with a local
+high-resolution waitable timer; no general latency guarantee.
+
+Initial 18/19 process-limit failure and subsequent LNK1104 image-holder failure
+are preserved with exact owned-process retirement receipts. Final pass does not
+diagnose earlier SDK access violation, heap corruption or timing variability.
+Nothing installed; no live provider task replayed. Planning and installed product
+acceptance remain open.
+[Checkpoint and original evidence](evidence/process-xmind-root-native-execution-product-checkpoint-20261021.json).
+
 ## Native execution-control foundation and call timing — 2026-10-21
 
 New xmind.Executions().Open(ticket) exposes native Identity, Execute, Status,

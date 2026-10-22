@@ -1,4 +1,6 @@
 #include "agentflow/agent_worker_control.hpp"
+#include "agentflow/agent_worker_native_execution.hpp"
+#include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 #include <set>
 
@@ -29,11 +31,17 @@ RunState decode_agent_worker_execution_intent(const std::string& bytes){
     if(outcome=="cancelled")return RunState::cancelled;
     invalid();
 }
+void connect_agent_worker_execution(AgentWorkerRpcPeer& peer,AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
+    if(peer.scope()!=worker.channel().scope())throw AgentWorkerProtocolError("Native execution rendezvous scope differs");const auto ready=worker.channel().receive(deadline,stop);if(ready.operation!="worker.execution.ready"||ready.payload.size()>1024)throw AgentWorkerProtocolError("Invalid native execution rendezvous");
+    const auto value=Json::parse(mcp_compact_object(ready.payload));if(value.size()!=4||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("endpoint").is_string()||!value.at("ticket").is_string()||!value.at("pid").is_number_unsigned()||value.at("pid").get<std::uint64_t>()!=worker.pid())throw AgentWorkerProtocolError("Native execution rendezvous identity differs");
+    auto client=std::make_shared<NativeExecutionClient>(NativeExecutionAccess{value.at("endpoint").get<std::string>(),value.at("ticket").get<std::string>(),worker.pid()},peer.scope());if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution rendezvous cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerChannelTimeout("Native execution rendezvous expired");peer.bind_native_execution(std::move(client));
+}
 RunState request_agent_worker_execution(AgentWorkerRpcPeer& peer){
-    return decode_agent_worker_execution_intent(peer.call("worker.execute","{}"));
+    if(auto native=peer.native_execution())return native->execute(peer.execution_deadline());
+    throw AgentWorkerRpcClosed("Native execution control is not bound");
 }
 void request_agent_worker_cancellation(AgentWorkerRpcPeer& peer){
-    const auto value=reply(peer.call("worker.cancel","{}"));
-    if(!value.contains("stop_requested")||!value.at("stop_requested").is_boolean()||!value.at("stop_requested").get<bool>())invalid();
+    if(auto native=peer.native_execution()){native->cancel();return;}
+    throw AgentWorkerRpcClosed("Native execution control is not bound");
 }
 }

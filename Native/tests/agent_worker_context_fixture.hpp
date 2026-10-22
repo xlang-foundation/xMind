@@ -90,7 +90,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         }
         startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
     }
-    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);peer.start();
+    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)connect_agent_worker_execution(peer,*worker,deadline);peer.start();
     const auto execute_method=product_entry?"worker.execute":"fixture.run";
     const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call(execute_method,"{}");};
     if(!runner){

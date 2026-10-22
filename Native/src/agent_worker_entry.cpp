@@ -3,6 +3,8 @@
 #include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
+#include "agentflow/agent_worker_native_execution.hpp"
+#include <thread>
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 #include <atomic>
@@ -30,25 +32,20 @@ int run_agent_channel_worker(int argc,char** argv){
     // This is only a transport ceiling. Every backend operation still checks
     // the captured original deadline, current lease and owner cancellation.
     const auto transport_deadline=Clock::now()+std::chrono::hours(1);
-    AgentWorkerRpcPeer* self=nullptr;std::stop_source execution_stop;std::atomic<bool> executed=false;
-    AgentWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token handler_cancel)->std::string{
-        if(method!="worker.execute"&&method!="worker.cancel")throw AgentWorkerRpcRemoteError("unsupported");
-        if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");
-        if(method=="worker.cancel"){execution_stop.request_stop();return "{\"version\":1,\"stop_requested\":true}";}
-        if(executed.exchange(true))throw AgentWorkerRpcRemoteError("rejected");
-        std::stop_callback propagate(handler_cancel,[&]{execution_stop.request_stop();});
-        try{
-            const auto result=coding?execute_agent_worker_coding_root(*self,execution_stop.get_token()):execute_agent_worker_read_root(*self,execution_stop.get_token());
-            if(result.run.state!=RunState::completed)throw AgentWorkerRpcRemoteError("failed");
-            return "{\"version\":1,\"outcome\":\"completed\"}";
-        }catch(const AgentTerminalHandoff& intent){
-            return intent.outcome()==RunState::cancelled?"{\"version\":1,\"outcome\":\"cancelled\"}":"{\"version\":1,\"outcome\":\"failed\"}";
-        }catch(const TransportCancelled&){return "{\"version\":1,\"outcome\":\"cancelled\"}";}
-        catch(const AgentWorkerRpcCancelled&){return "{\"version\":1,\"outcome\":\"cancelled\"}";}
-        catch(...){return "{\"version\":1,\"outcome\":\"failed\"}";}
-    },transport_deadline);
+    // The peer is a transitional local scope/client adapter only. No packet
+    // reader or packet execution handler is installed in the product child.
+    AgentWorkerRpcPeer peer(*channel,[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");},transport_deadline);
     const auto& scope=peer.scope();
     peer.bind_native_model(std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
-    self=&peer;peer.start();peer.wait_closed();peer.stop();return 0;
+    NativeExecutionBinding execution(scope,[&](std::stop_token stop){
+        try{const auto result=coding?execute_agent_worker_coding_root(peer,stop):execute_agent_worker_read_root(peer,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
+        catch(const AgentTerminalHandoff& intent){return intent.outcome()==RunState::cancelled?RunState::cancelled:RunState::failed;}
+        catch(const TransportCancelled&){return RunState::cancelled;}
+        catch(const AgentWorkerRpcCancelled&){return RunState::cancelled;}
+        catch(...){return RunState::failed;}
+    });
+    const auto control=execution.access();channel->send({"worker.execution.ready",nlohmann::json{{"version",1},{"endpoint",control.endpoint},{"ticket",control.ticket},{"pid",control.pid}}.dump()},bootstrap_deadline);
+    std::jthread parent_lifetime([&](std::stop_token stop){try{(void)channel->receive(transport_deadline,stop);}catch(...){}execution.close();});
+    execution.wait_closed(transport_deadline);parent_lifetime.request_stop();return 0;
 }
 }

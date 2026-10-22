@@ -4,6 +4,7 @@
 
 namespace agentflow {
 class NativeWorkerModelClient;
+class NativeExecutionClient;
 struct AgentWorkerRpcClosed:std::runtime_error {using std::runtime_error::runtime_error;};
 struct AgentWorkerRpcCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
 struct AgentWorkerRpcTimeout:std::runtime_error {using std::runtime_error::runtime_error;};
@@ -33,6 +34,9 @@ public:
     void start();
     void bind_native_model(std::shared_ptr<NativeWorkerModelClient>);
     std::shared_ptr<NativeWorkerModelClient> native_model()const;
+    void bind_native_execution(std::shared_ptr<NativeExecutionClient>);
+    std::shared_ptr<NativeExecutionClient> native_execution()const;
+    AgentWorkerChannel::Deadline execution_deadline()const noexcept;
     std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={});
     bool alive()const;
     void wait_closed();

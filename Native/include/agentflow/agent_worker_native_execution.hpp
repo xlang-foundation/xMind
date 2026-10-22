@@ -13,6 +13,7 @@ public:
     NativeExecutionBinding(const NativeExecutionBinding&)=delete;
     NativeExecutionBinding& operator=(const NativeExecutionBinding&)=delete;
     NativeExecutionAccess access()const;
+    void close()noexcept;
     void wait_closed(AgentWorkerChannel::Deadline,std::stop_token={});
 private:std::shared_ptr<NativeExecutionState> state_;std::string ticket_;
 };

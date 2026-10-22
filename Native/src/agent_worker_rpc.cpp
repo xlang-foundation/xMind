@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_rpc.hpp"
+#include "agentflow/agent_worker_native_execution.hpp"
 #include "nlohmann/json.hpp"
 #include <atomic>
 #include <condition_variable>
@@ -30,6 +31,7 @@ struct AgentWorkerRpcPeer::Impl {
     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
     struct Flight {std::shared_ptr<Incoming> owner;std::jthread thread;};
     std::shared_ptr<NativeWorkerModelClient> native_model;
+    std::shared_ptr<NativeExecutionClient> native_execution;
     AgentWorkerChannel& channel;AgentWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
     std::mutex state,writer,request_order;std::condition_variable changed;bool closed=false,started=false;
     std::uint64_t outgoing=1,incoming=1;std::size_t queued=0;
@@ -78,14 +80,17 @@ struct AgentWorkerRpcPeer::Impl {
             if(!done)continue;{std::lock_guard lock(state);queued-=call->result.size();pending.erase(id);}if(sink_failure)std::rethrow_exception(sink_failure);if(local){if(code=="timeout")throw AgentWorkerRpcTimeout("Native worker RPC deadline elapsed");throw AgentWorkerRpcClosed("Native worker RPC closed before acknowledgement");}if(!code.empty())throw AgentWorkerRpcRemoteError(code,result);if(cancel.stop_requested())throw AgentWorkerRpcCancelled("Native worker RPC cancelled");return result;
         }}catch(...){std::lock_guard lock(state);const auto found=pending.find(id);if(found!=pending.end()){for(const auto& event:call->events)queued-=event.size();queued-=call->result.size();pending.erase(found);}throw;}
     }
-    void stop(){fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
+    void stop(){if(native_execution)native_execution->close();fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
 };
 AgentWorkerRpcPeer::AgentWorkerRpcPeer(AgentWorkerChannel& channel,AgentWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
 AgentWorkerRpcPeer::~AgentWorkerRpcPeer(){impl_->stop();}
 void AgentWorkerRpcPeer::bind_native_model(std::shared_ptr<NativeWorkerModelClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_model||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native model binding requires fresh worker");impl_->native_model=std::move(client);}
 std::shared_ptr<NativeWorkerModelClient> AgentWorkerRpcPeer::native_model()const{std::lock_guard lock(impl_->state);return impl_->native_model;}
+void AgentWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
+std::shared_ptr<NativeExecutionClient> AgentWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
+AgentWorkerChannel::Deadline AgentWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}
 void AgentWorkerRpcPeer::start(){impl_->start();}
-std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){return impl_->call(method,payload,std::move(sink),cancel);}
+std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(native_execution())throw AgentWorkerRpcRemoteError("unsupported");return impl_->call(method,payload,std::move(sink),cancel);}
 bool AgentWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
 void AgentWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
 void AgentWorkerRpcPeer::stop(){impl_->stop();}
