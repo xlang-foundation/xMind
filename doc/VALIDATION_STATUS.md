@@ -1,3 +1,30 @@
+## Production planning-root coding through SDK IPC — 2026-10-22
+
+The existing six real-production parent/child scheduler cases now use the coding
+owner for coding roots. Before planning, roots invoke create_file through their
+registered xlang3 workspace subobject. Approved cases require exactly one root
+approval before the file exists and verify exact newline-terminated bytes plus
+one succeeded operation. Inherited-denial cases verify no operation, approval or
+file. Both counted and plain context modes then schedule their original child.
+Readonly modes retain the original root read. Three parent/two child turns, five
+shared charges, typed inference counts, six root/four child messages, canonical
+signed continuation, root segment closure and exact physical drain remain checked.
+No production implementation changed in this checkpoint; model gateways remain
+synthetic. This proves root create_file execution, not all root effect families.
+Main WorkspaceExecutor planning admission, pause/resume, overflow and nested
+planning composition remain open.
+
+First run wrote and committed the approved root effect, then a fixture assertion
+incorrectly expected a succeeded field in create_file output. Its actual output
+is canonical file metadata. Corrected expectation checks the exact target path;
+the intended fixture content also uses an actual newline. Original failure and
+source remain under process-xmind-root-planning-root-coding-initial-result-check-failure-*.
+Corrected entire ledger passes 1/1 in 9.41 seconds. Native implementation remains
+74b95863be8473004fc6d53a7444ba658e92615aeada120614965438675560ba;
+fixture patch 336c99a266b26c7924abf3b24b7f38a5eeacaf261142685659c79ef9323fa67e.
+All frozen 2787 project/16 SDK/1870 library/30 SDK runtime/18598 dependency/102
+binary files and exact sets remain unchanged. Inventory172; focused ledger only.
+No paid inference, user task replay, CPython or installed-runtime change.
 ## Sealed planning-root effect authority — 2026-10-22
 
 Planning-root file/process/remote/callable invocation authority now requires an
