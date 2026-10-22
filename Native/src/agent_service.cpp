@@ -50,7 +50,7 @@ ContextFailureCode context_failure(const std::exception_ptr& failure){
 struct AgentService::Impl {
     enum class Phase {queued,working,waiting,faulted};
     struct Job {std::string id,model,agent_instructions,placement;std::optional<std::vector<std::string>> agent_tools;std::vector<AgentPermissionRule> agent_permissions;std::shared_ptr<const WorkspaceMembershipSnapshot> execution_workspace;Phase phase=Phase::queued;std::stop_source stop;bool user_cancel=false;std::unique_ptr<RootAdmissionPool::Lease> admission;std::unique_ptr<RootAdmissionPool::DispatchTicket> dispatch;std::unique_ptr<RootWorkExecutor::Ticket> work;bool work_committed=false;};
-    struct ContextJob {std::string request_id,session,model,owner_id;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
+    struct ContextJob {std::string request_id,session,model,owner_id;std::optional<AgentDefinition> agent;ContextBinding binding;std::int64_t head_revision=0;Phase phase=Phase::queued;};
     struct Prepared {};
     PersistenceService& persistence;
     std::shared_ptr<RootAdmissionPool> root_admission;
@@ -65,6 +65,9 @@ struct AgentService::Impl {
     AgentRunner runner;
     std::shared_ptr<AgentRootExecutor> root_executor;
     AgentRootExecutionRequest execution_request(const std::shared_ptr<Job>& job)const{return {job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions,job->execution_workspace,job->placement};}
+    std::optional<AgentDefinition> context_agent(const std::string& session)const{auto saved=persistence.session_agent(session).get().selected;if(saved)return saved;const auto catalog=AgentDefinitionStore(persistence).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[](const auto& entry){return entry.is_default;});return found==catalog.entries.end()?std::optional<AgentDefinition>{}:*found;}
+    ContextBinding context_binding(const std::string& session,const std::string& model)const{const auto agent=context_agent(session);return runner.context_binding(model,agent?agent->instructions:std::string{},agent?agent->tools:std::optional<std::vector<std::string>>{},agent?agent->permissions:std::vector<AgentPermissionRule>{});}
+    void validate_dynamic_owner(const std::shared_ptr<Job>& job)const{runner.validate_dynamic_owner(job->id,job->model,job->agent_instructions,job->agent_tools,job->agent_permissions);}
     bool uses_executor(const std::shared_ptr<Job>& job)const{return root_executor&&job->placement!="thread";}
     void validate_execution(const std::shared_ptr<Job>& job)const{if(job->placement=="process"&&!root_executor)throw RunUnavailable("Process agent placement has no configured worker owner");if(uses_executor(job))root_executor->validate(execution_request(job));}
     void capture_execution(const std::shared_ptr<Job>& job)const{
@@ -122,7 +125,7 @@ struct AgentService::Impl {
             verify_pause(run,*plan);
             auto job=std::make_shared<Job>();job->id=run.id;job->phase=Phase::waiting;
             job->admission=root_admission->try_reserve();if(!job->admission)throw RunBusy("Combined agent and graph root capacity is full");
-            try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
+            try{job->model=runner.admitted_dynamic_model(run.id);}
             catch(const DynamicPlanUnavailable&){}
             const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;job->placement=selected.selected->placement;}
             if(uses_executor(job)){
@@ -343,7 +346,8 @@ struct AgentService::Impl {
                 lease=persistence.claim_idle_context_owner(spec).get();
                 if(lease->state!="active")throw ContextUnavailable("Idle request has already been retired");
                 const auto deadline=started+std::chrono::milliseconds(spec.wall_limit_ms);
-                runner.compact_idle_context(*lease,deadline,job->model,context_stop.get_token());
+                if(context_binding(job->session,job->model)!=job->binding)throw ContextBindingChanged("Selected agent changed before idle context ownership");
+                runner.compact_idle_context(*lease,deadline,job->model,context_stop.get_token(),job->agent?job->agent->instructions:std::string{},job->agent?job->agent->tools:std::optional<std::vector<std::string>>{},job->agent?job->agent->permissions:std::vector<AgentPermissionRule>{});
                 std::lock_guard lock(mutex);remove_context_ticket(job);
             }catch(const ContextOutcomeUnrecorded&){
                 {std::lock_guard lock(mutex);job->phase=Phase::faulted;}fail();
@@ -455,11 +459,11 @@ bool AgentService::supports_delegation()const{std::lock_guard lock(impl_->mutex)
 bool AgentService::supports_dynamic_planning()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->planning_enabled&&impl_->children->healthy();}
 bool AgentService::supports_context()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted&&impl_->runner.supports_context();}
 ContextControlSnapshot AgentService::context_status(const std::string& session,const std::string& model)const{
-    std::lock_guard lock(impl_->mutex);impl_->require_available();return impl_->runner.context_status(session,model);
+    std::lock_guard lock(impl_->mutex);impl_->require_available();const auto agent=impl_->context_agent(session);return impl_->runner.context_status(session,model,agent?agent->instructions:std::string{},agent?agent->tools:std::optional<std::vector<std::string>>{},agent?agent->permissions:std::vector<AgentPermissionRule>{});
 }
 ContextManualStatus AgentService::context_request(const std::string& session,const std::string& request,const std::string& model)const{
     std::lock_guard lock(impl_->mutex);impl_->require_available();impl_->persistence.session(session).get();
-    const auto recorded=impl_->persistence.context_manual_request(request,impl_->runner.context_binding(model)).get();
+    const auto recorded=impl_->persistence.context_manual_request(request,impl_->context_binding(session,model),ContextScope{ContextScopeKind::session,session}).get();
     if(recorded.scope!=ContextScope{ContextScopeKind::session,session})throw NotFound("Context request belongs to another scope");
     return {recorded.id,recorded.state};
 }
@@ -474,12 +478,12 @@ ContextManualStatus AgentService::request_context(const std::string& session,con
         if(!selected.empty()&&selected!=actual_model)throw ContextBindingChanged("Manual context model differs from its active owner");
         selected=actual_model;busy=true;
     }
-    const auto binding=impl_->runner.context_binding(selected);
+    const auto binding=impl_->context_binding(session,selected);
     std::shared_ptr<Impl::ContextJob> job;
     if(!impl_->context_jobs.contains(request_id)){
         if(impl_->context_jobs.size()>=impl_->limit)throw RunBusy("Idle context ownership capacity is full");
         job=std::make_shared<Impl::ContextJob>();job->request_id=request_id;job->session=session;job->model=selected;
-        job->owner_id=context_owner_id();job->binding=binding;job->head_revision=revision;
+        job->owner_id=context_owner_id();job->agent=impl_->context_agent(session);job->binding=binding;job->head_revision=revision;
         job->phase=busy?Impl::Phase::waiting:Impl::Phase::queued;
         impl_->context_jobs.emplace(request_id,job);
         try{impl_->context_pending.push_back(job);}catch(...){impl_->context_jobs.erase(request_id);throw;}
@@ -532,6 +536,7 @@ Run AgentService::submit_message(std::string id,std::string context,std::string 
 Run AgentService::continue_a2a_task(std::string task,std::string message,std::string context,std::string identity,std::string content,std::string payload,std::string input,std::string human_request_id){
     std::unique_lock lock(impl_->mutex);if(const auto replay=impl_->persistence.a2a_continuation(message,task,context,identity,content,payload).get())return *replay;impl_->require_available();
     const auto owned=impl_->active.find(task);if(owned==impl_->active.end())throw NotFound("A2A task is not owned by this agent service");const auto job=owned->second;if(job->phase==Impl::Phase::faulted||job->user_cancel||job->stop.stop_requested())throw Conflict("A2A task cancellation or recovery is pending");if(job->phase==Impl::Phase::working){impl_->changed.wait(lock,[&]{return job->phase!=Impl::Phase::working||!impl_->active.contains(task)||!impl_->accepting||impl_->faulted;});if(!impl_->active.contains(task)||!impl_->accepting||impl_->faulted)throw RunUnavailable("A2A owner stopped while its pause was settling");if(job->phase!=Impl::Phase::waiting)throw Conflict("A2A owner did not settle into a human-wait pause");}if(job->phase!=Impl::Phase::waiting)throw Conflict("A2A task is not waiting for agent input");const auto current=impl_->persistence.run(task).get();if(current.state!=RunState::paused)throw Conflict("A2A task is not waiting for agent input");if(!context.empty()&&current.session_id!=context)throw Conflict("A2A context does not match its task");
+    impl_->validate_dynamic_owner(job);
     const auto plan=impl_->persistence.dynamic_plan_for_root(task).get();if(!plan)throw Conflict("A2A task has no dynamic human-input plan");impl_->verify_pause(current,*plan);
     const auto binding=impl_->persistence.dynamic_owner_pause(task).get();std::vector<std::pair<DynamicPlanRecord,DynamicHumanRequest>> waiting;for(const auto& entry:binding.waits){const auto plan=impl_->persistence.dynamic_plan(entry.plan_id).get();for(const auto& request:impl_->persistence.dynamic_human_requests(plan.id).get())if(request.state=="waiting")waiting.emplace_back(plan,request);}if(waiting.empty())throw Conflict("A2A continuation has no pending human question");if(human_request_id.empty()&&waiting.size()!=1)throw Conflict("A2A continuation must identify a human question when multiple questions are pending");const auto selected=human_request_id.empty()?waiting.begin():std::find_if(waiting.begin(),waiting.end(),[&](const auto& entry){return entry.second.id==human_request_id;});if(selected==waiting.end())throw Conflict("A2A human request is not pending on this task");const auto waiting_plan=selected->first;const auto waiting_request=selected->second;
     const bool reserved=impl_->reserve_wake(job);DynamicHumanInputSpec answer;answer.plan_id=waiting_plan.id;answer.request_id=waiting_request.id;answer.input_json=std::move(input);answer.authenticated_actor="a2a-owner";answer.backend_identity=waiting_plan.capabilities.backend_identity;answer.expected_revision=waiting_plan.revision;answer.expected_state_sequence=waiting_plan.state_sequence;
@@ -553,7 +558,7 @@ Run AgentService::plan_input(const std::string& root,const std::string& request,
         if(!impl_->active.contains(root)||!impl_->accepting||impl_->faulted)throw RunUnavailable("Dynamic owner stopped while its pause was settling");
         if(job->phase!=Impl::Phase::waiting)throw Conflict("Dynamic owner did not settle into a human-wait pause");
     }
-    impl_->runner.validate_dynamic_owner(root,job->model);const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();if(!plan)throw NotFound("Owned root has no dynamic plan");
+    impl_->validate_dynamic_owner(job);const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();if(!plan)throw NotFound("Owned root has no dynamic plan");
     const auto binding=impl_->persistence.dynamic_owner_pause(root).get();std::optional<DynamicPlanRecord> waiting;for(const auto& entry:binding.waits){const auto candidate=impl_->persistence.dynamic_plan(entry.plan_id).get();const auto requests=impl_->persistence.dynamic_human_requests(candidate.id).get();if(std::any_of(requests.begin(),requests.end(),[&](const auto& value){return value.id==request;})){waiting=candidate;break;}}if(!waiting)throw NotFound("Human request does not belong to this paused dynamic wait set");impl_->verify_pause(impl_->persistence.run(root).get(),*plan);
     const bool reserved=impl_->reserve_wake(job);
     DynamicHumanInputSpec spec;spec.plan_id=waiting->id;spec.request_id=request;spec.input_json=std::move(input);spec.authenticated_actor=actor;
@@ -575,7 +580,7 @@ Run AgentService::resume_plan(const std::string& root,const std::string& actor,s
     controller(actor);std::unique_lock lock(impl_->mutex);impl_->require_available();
     const auto owned=impl_->active.find(root);if(owned==impl_->active.end())throw NotFound("Dynamic root is not owned by this service");const auto job=owned->second;
     if(job->phase!=Impl::Phase::waiting||job->user_cancel||job->stop.stop_requested())throw Conflict("Dynamic owner is not waiting for resume");
-    impl_->runner.validate_dynamic_owner(root,job->model);const auto current=impl_->persistence.run(root).get();const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();
+    impl_->validate_dynamic_owner(job);const auto current=impl_->persistence.run(root).get();const auto plan=impl_->persistence.dynamic_plan_for_root(root).get();
     if(!plan||current.state!=RunState::paused)throw Conflict("Dynamic owner is not durably paused");
     if(plan->revision!=revision||plan->state_sequence!=sequence)throw DynamicPlanChanged("Dynamic plan observation changed");
     impl_->verify_pause(current,*plan);const auto binding=impl_->persistence.dynamic_owner_pause(root).get();const bool can_resume=std::any_of(binding.waits.begin(),binding.waits.end(),[&](const auto& entry){return runnable(impl_->persistence.dynamic_plan(entry.plan_id).get());});

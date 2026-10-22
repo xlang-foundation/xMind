@@ -54,6 +54,7 @@ struct Http {
 };
 void seed(PersistenceService& store,AgentService& service,Http& http,const std::string& mode,const std::string& scope="owned"){
     store.create_session(scope,"Synthetic owned context-control conversation").get();
+    if(mode=="idle"&&scope=="owned"){AgentDefinition selected{"context.selected",1,model_a,"Keep the selected instruction and permission snapshot during idle maintenance."};selected.mode="primary";selected.tools=std::vector<std::string>{};selected.permissions={{"read_file","private/**","deny"}};store.replace_session_agent(scope,selected,0).get();}
     for(int i=0;i<3;++i){const auto id=scope+"_seed_"+std::to_string(i);http.submit(id,scope,"fixture:"+mode+":"+scope+":seed:"+std::to_string(i));eventually([&]{return store.run(id).get().state==RunState::completed&&service.idle();},"Actual seed Agent did not retire");}
     require(store.history(scope).get().size()==6,"Three actual seed roots require six original messages");
 }
@@ -92,7 +93,8 @@ void idle_controller(const std::filesystem::path& root,const std::vector<std::st
     {std::ofstream port(root/"raw-controller-port.txt",std::ios::binary);port<<owner.port;require(static_cast<bool>(port),"Owned raw-query controller port write failed");}
     flag(root,"raw-query-checks-ready");marker(root,"raw-query-checks-completed");
     {std::ifstream result(root/"raw-query-result.txt",std::ios::binary);std::string value;result>>value;require(value=="passed","Independent raw-target context query checks failed");}
-    const auto binding=AgentRunner(owner.store,settings(base,"idle")).context_binding(model_a);
+    const auto selected=owner.store.session_agent("owned").get().selected;require(selected.has_value(),"Idle fixture must retain its selected policy");
+    const auto binding=AgentRunner(owner.store,settings(base,"idle")).context_binding(model_a,selected->instructions,selected->tools,selected->permissions);
     require(!owner.store.context_current_manual_request({ContextScopeKind::session,"owned"},binding).get()&&owner.store.runs("owned").get().size()==3,"Malformed raw queries cannot create a manual request or Run");
     exact_history(original,owner.store.history("owned").get());public_context(http.get("/v1/sessions/owned/context"),false);
     require(count(root,"count")==0&&count(root,"compact")==0&&count(root,"inference")==3,"Malformed raw queries cannot dispatch provider maintenance or inference");

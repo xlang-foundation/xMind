@@ -153,6 +153,12 @@ static std::string execution_authority_identity(const AgentSettings& settings,co
             {"output_limit",capability(settings.provider.output_limit)},{"reasoning",capability(settings.provider.reasoning)},
             {"deadline_ms",settings.provider.deadline.count()},{"idle_timeout_ms",settings.provider.idle_timeout.count()}}},
         {"credential_versions",Json::array()},{"process_profiles",Json::array()},{"language_servers",Json::array()},{"mcp_servers",Json::array()}};
+    validate_agent_tool_allowlist(settings.tool_allowlist);
+    encoded["tool_allowlist"]=settings.tool_allowlist?Json(*settings.tool_allowlist):Json(nullptr);
+    encoded["permission_layers"]=Json::array();
+    const auto append_rules=[&](const std::vector<AgentPermissionRule>& rules){validate_agent_permission_rules(rules);Json layer=Json::array();for(const auto& rule:rules)layer.push_back({{"action",rule.action},{"resource",rule.resource},{"effect",rule.effect}});encoded["permission_layers"].push_back(std::move(layer));};
+    for(const auto& layer:settings.inherited_permission_rule_layers)append_rules(layer);
+    if(!settings.permission_rules.empty())append_rules(settings.permission_rules);
     encoded["max_output_tokens"]=settings.max_output_tokens?Json(*settings.max_output_tokens):Json(nullptr);
     encoded["provider"]["reasoning_effort"]=settings.provider.reasoning_effort?Json(effort(*settings.provider.reasoning_effort)):Json(nullptr);
     if(settings.provider.chat_dialect==ChatDialect::deepseek){

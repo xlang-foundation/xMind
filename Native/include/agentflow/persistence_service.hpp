@@ -163,7 +163,7 @@ public:
     std::future<ContextProjection> commit_context_compaction(ContextCompactionCommit result);
     std::future<void> retire_context_compaction(ContextCompactionFailure failure);
     std::future<ContextManualRequest> request_context_compaction(ContextManualRequestSpec spec);
-    std::future<ContextManualRequest> context_manual_request(std::string id,ContextBinding binding);
+    std::future<ContextManualRequest> context_manual_request(std::string id,ContextBinding binding,std::optional<ContextScope> expected_scope={});
     std::future<std::optional<ContextManualRequest>> context_current_manual_request(ContextScope scope,ContextBinding binding);
     std::future<ContextManualRequest> retire_context_request(std::string id,ContextBinding binding,ContextFailureCode code);
     std::future<IdleContextOwnerRecord> claim_idle_context_owner(IdleContextOwnerSpec spec);

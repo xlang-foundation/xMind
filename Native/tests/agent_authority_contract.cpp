@@ -61,6 +61,21 @@ int main(){try{
     require(context_authority_identity(profile_selected,"session-selected-profile-model","synthetic-workspace-object",metadata)!=
         context_authority_identity(profile_selected,profile_selected.provider.model,"synthetic-workspace-object",metadata),
         "A provider-bound context run must bind its validated session model without requiring a global default catalogue");
+    {
+        auto changed=base;changed.tool_allowlist=std::vector<std::string>{};const auto empty=identity(changed,metadata);require(empty!=bound,"Absent and empty tool authority must differ");
+        changed.tool_allowlist=std::vector<std::string>{"read_file"};require(identity(changed,metadata)!=empty&&identity(changed,metadata)!=bound,"Exact selected tools must bind authority");
+        changed=base;changed.permission_rules={{"read_file","private/**","deny"}};const auto denied=identity(changed,metadata);require(denied!=bound,"Global permission policy must bind authority");
+        changed.permission_rules.front().effect="allow";require(identity(changed,metadata)!=denied,"Permission widening must change authority");
+        changed=base;changed.permission_rules={{"read_file","**","deny"},{"read_file","public/**","allow"}};const auto ordered=identity(changed,metadata);std::reverse(changed.permission_rules.begin(),changed.permission_rules.end());require(identity(changed,metadata)!=ordered,"Rule order must bind authority");
+        changed=base;changed.inherited_permission_rule_layers={{{"read_file","private/**","deny"}}};require(identity(changed,metadata)==denied,"Canonical effective layers must preserve equivalent global policy");
+        changed.inherited_permission_rule_layers.push_back({{"read_file","public/**","ask"}});const auto layers=identity(changed,metadata);std::reverse(changed.inherited_permission_rule_layers.begin(),changed.inherited_permission_rule_layers.end());require(identity(changed,metadata)!=layers,"Inherited layer order must bind authority");
+        const auto effective=effective_agent_settings(base,"Selected trusted instructions",std::vector<std::string>{"read_file"},{{"read_file","private/**","deny"}});
+        require(identity(effective,metadata)!=bound&&identity(effective_agent_settings(effective),metadata)==identity(effective,metadata),"Admission and execution must derive one idempotent selected policy");
+        require(effective.instructions.find("Selected trusted instructions")!=std::string::npos&&effective.tool_allowlist==std::optional<std::vector<std::string>>(std::vector<std::string>{"read_file"})&&effective.permission_rules.empty()&&effective.inherited_permission_rule_layers.size()==1,"Selected effective instructions/tools/permission snapshot must be retained");
+        changed=base;changed.permission_rules={{"read_file","../escape","allow"}};rejected([&]{identity(changed,metadata);});
+        changed=base;changed.inherited_permission_rule_layers={{{"read_file","**","invalid"}}};rejected([&]{identity(changed,metadata);});
+        changed=base;changed.tool_allowlist=std::vector<std::string>{"read_file","read_file"};rejected([&]{identity(changed,metadata);});
+    }
     auto reordered=metadata;std::reverse(reordered.begin(),reordered.end());require(identity(base,reordered)==bound,"Metadata order changed authority");
     auto different=base;different.instructions+=" changed";require(identity(different,metadata)!=bound,"Instructions were not bound");
     different=base;different.instruction_policy.instructions+=" changed";require(identity(different,metadata)!=bound,"Revision-zero policy content was not bound");

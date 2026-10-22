@@ -1,0 +1,13 @@
+import sys
+assert sys.implementation.name == 'xlang3'
+sys.path.insert(0,'C:/Python/Python314/Lib')
+import _sqlite3
+import json
+c=_sqlite3.connect('C:/Users/shaw9/AppData/Local/Temp/xmind-worker-ledger-4180660888-3122135023/ledger.sqlite')
+c.execute('PRAGMA query_only=ON')
+runs=c.execute("SELECT id,state,parent_run_id FROM runs WHERE id LIKE 'main-process-%' OR parent_run_id LIKE 'main-process-%' ORDER BY id").fetchall()
+print(json.dumps({'runs':runs}))
+for row in runs:
+ if row[1] != 'completed':
+  print(json.dumps({'run':row[0],'events':c.execute('SELECT kind,payload FROM events WHERE run_id=? ORDER BY seq DESC LIMIT 16',(row[0],)).fetchall()}))
+c.close()

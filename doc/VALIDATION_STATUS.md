@@ -1,3 +1,38 @@
+## Effective policy and selected context binding — 2026-10-22
+
+One effective native policy snapshot now binds selected instructions, an exact
+optional tool allowlist, ordered permission rules and inherited layers across
+admission, planning callbacks, planned-child identities, context ownership and
+resume. Empty and absent tool lists differ; a selected allow cannot erase a
+parent denial. Controller and A2A input validate this binding before committing
+an answer. Changed global permissions/layers/default tools leave the exact
+unanswered pause, model charges, worker leases and original history unchanged;
+matching policy resumes the accepted continuation without replaying its child.
+
+Selected-agent context observation and manual maintenance use the same binding.
+The idle job retains its selected snapshot, verifies it after claiming exclusive
+ownership, and filters trusted tools accordingly. Manual request lookup checks
+the expected session scope before comparing private authority, preserving a404
+for another session. Counted-worker compaction tests require the exact selected
+projection and actual canonical provider receipt, and refuse the old global
+projection rather than weakening receipt checks.
+
+The complete native build and17 focused contracts pass in160.32s. All2787 project
+inputs,16 SDK files,1870 pure libraries,30 runtime inputs,18598 Node dependencies
+and137 native binaries/file sets remain unchanged across that gate. Native patch
+SHA256 is672acc5348485bc2aa7817720172a51505dcd86289f05d2fde65510c004e1b8a;
+xmind.exe is127616b845b8b9ce00633cf1419ca219e3fdfbe6d2e6813f44b9192a3382d0f9.
+Two earlier failed validations remain separate:13/14 before context alignment,
+and13/15 before the scope-first lookup and selected-projection assertion. Their
+raw patches, full logs, closure maps, verifiers and terminal receipts are retained
+under process-xmind-root-effective-policy-{initial,context-initial,qualified}-20261022-*.
+The original synthetic scope error and read-only xlang diagnostic source are
+retained too. No paid inference, CPython, visible windows or installation change.
+
+This is a focused policy qualification, not a new full172 acceptance. The latest
+complete full run below predates these changes. Intermittent SDK faults, final
+package/client delivery and remaining goal acceptance remain unresolved.
+
 ## Complete native workspace-read checkpoint — 2026-10-22
 
 Native source d5b4231e43fff6e365fe04de115d1f56a1feabb2 passes its complete

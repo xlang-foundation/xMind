@@ -113,7 +113,7 @@ public:
     ContextProjection commit_context_compaction(const ContextCompactionCommit& result);
     void retire_context_compaction(const ContextCompactionFailure& failure);
     ContextManualRequest request_context_compaction(const ContextManualRequestSpec& spec);
-    ContextManualRequest context_manual_request(const std::string& id,const ContextBinding& binding);
+    ContextManualRequest context_manual_request(const std::string& id,const ContextBinding& binding,std::optional<ContextScope> expected_scope={});
     std::optional<ContextManualRequest> context_current_manual_request(const ContextScope& scope,const ContextBinding& binding);
     ContextManualRequest retire_context_request(const std::string& id,const ContextBinding& binding,ContextFailureCode code);
     IdleContextOwnerRecord claim_idle_context_owner(const IdleContextOwnerSpec& spec);

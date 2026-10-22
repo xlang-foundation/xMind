@@ -81,6 +81,9 @@ struct AgentSettings {
     // the backend catalogue and remain subject to the selected agent allowlist.
     std::vector<XlangPythonToolRegistration> xlang_python_tools;
 };
+// Canonical trusted snapshot shared by admission, planning and resume.
+AgentSettings effective_agent_settings(const AgentSettings& settings,
+    const std::string& selected_instructions={},const std::optional<std::vector<std::string>>& selected_tools={},const std::vector<AgentPermissionRule>& selected_permissions={});
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id={});
 // Explicit trusted dependencies; no implicit owner fallback on this path.
 // Adapters and their referenced capabilities must outlive all execute calls.
@@ -118,18 +121,20 @@ public:
         std::optional<std::vector<std::string>> tool_allowlist={},bool resume_dynamic_child=false,
         std::vector<AgentPermissionRule> permission_rules={});
     std::optional<RootBudgetSpec> execution_budget(const std::string& model_id={}) const;
-    std::optional<DynamicPlanCapabilities> execution_capabilities(const std::string& model_id={}) const;
+    std::optional<DynamicPlanCapabilities> execution_capabilities(const std::string& model_id={},
+        const std::string& selected_instructions={},const std::optional<std::vector<std::string>>& selected_tools={},const std::vector<AgentPermissionRule>& selected_permissions={}) const;
     // Metadata-only controller preflight; neither method launches MCP or models.
-    void validate_dynamic_owner(const std::string& root_id,const std::string& model_id={}) const;
+    void validate_dynamic_owner(const std::string& root_id,const std::string& model_id={},
+        const std::string& selected_instructions={},const std::optional<std::vector<std::string>>& selected_tools={},const std::vector<AgentPermissionRule>& selected_permissions={}) const;
     std::string admitted_dynamic_model(const std::string& root_id) const;
     std::vector<std::string> models() const;
     WorkspaceMembershipSnapshot workspace_membership_snapshot()const;
     bool provider_bound_model_overrides()const{return settings_.provider_identity.has_value();}
     bool supports_context()const{return settings_.context.has_value();}
-    ContextBinding context_binding(const std::string& model_id={})const;
-    ContextControlSnapshot context_status(const std::string& session,const std::string& model_id={})const;
+    ContextBinding context_binding(const std::string& model_id={},const std::string& selected_instructions={},const std::optional<std::vector<std::string>>& selected_tools={},const std::vector<AgentPermissionRule>& selected_permissions={})const;
+    ContextControlSnapshot context_status(const std::string& session,const std::string& model_id={},const std::string& selected_instructions={},const std::optional<std::vector<std::string>>& selected_tools={},const std::vector<AgentPermissionRule>& selected_permissions={})const;
     ContextProjection compact_idle_context(const IdleContextOwnerRecord& owner,
-        std::chrono::steady_clock::time_point deadline,const std::string& model_id={},std::stop_token cancel={});
+        std::chrono::steady_clock::time_point deadline,const std::string& model_id={},std::stop_token cancel={},const std::string& selected_instructions={},const std::optional<std::vector<std::string>>& selected_tools={},const std::vector<AgentPermissionRule>& selected_permissions={});
 private:
     AgentRunJournal& journal_;
     AgentContextJournal& context_journal_;

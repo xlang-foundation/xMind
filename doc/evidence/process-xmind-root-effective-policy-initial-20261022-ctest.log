@@ -1,0 +1,60 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+      Start  24: native_agent_authority_contract
+ 1/14 Test  #24: native_agent_authority_contract ...............   Passed    0.32 sec
+      Start  32: native_context_engine_contract
+ 2/14 Test  #32: native_context_engine_contract ................   Passed    5.52 sec
+      Start  33: native_context_graph_engine_contract
+ 3/14 Test  #33: native_context_graph_engine_contract ..........   Passed    1.59 sec
+      Start  34: native_nested_context_graph_engine_contract
+ 4/14 Test  #34: native_nested_context_graph_engine_contract ...   Passed    0.78 sec
+      Start  39: native_dynamic_plan_engine_contract
+ 5/14 Test  #39: native_dynamic_plan_engine_contract ...........   Passed    6.40 sec
+      Start  40: native_dynamic_plan_mcp_contract
+ 6/14 Test  #40: native_dynamic_plan_mcp_contract ..............   Passed   11.04 sec
+      Start  54: native_delegation_contract
+ 7/14 Test  #54: native_delegation_contract ....................   Passed    2.63 sec
+      Start  88: native_agent_worker_model_rpc_contract
+ 8/14 Test  #88: native_agent_worker_model_rpc_contract ........   Passed   53.04 sec
+      Start  90: native_agent_worker_graph_callable_contract
+ 9/14 Test  #90: native_agent_worker_graph_callable_contract ...   Passed    5.31 sec
+      Start  91: native_agent_worker_graph_remote_contract
+10/14 Test  #91: native_agent_worker_graph_remote_contract .....   Passed   10.92 sec
+      Start  94: native_agent_worker_ledger_contract
+11/14 Test  #94: native_agent_worker_ledger_contract ...........***Failed   12.64 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:64932
+Main process must reach a clean human pause; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-4180660888-3122135023
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:64932',
+  stdout: 'Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.\r\n',
+  stderr: 'Main process must reach a clean human pause; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-4180660888-3122135023\r\n'
+}
+
+Node.js v22.19.0
+
+      Start  97: native_agent_service_contract
+12/14 Test  #97: native_agent_service_contract .................   Passed    1.54 sec
+      Start  98: native_agent_runner_contract
+13/14 Test  #98: native_agent_runner_contract ..................   Passed   11.00 sec
+      Start 168: native_provider_profile_runtime_contract
+14/14 Test #168: native_provider_profile_runtime_contract ......   Passed    6.12 sec
+
+93% tests passed, 1 tests failed out of 14
+
+Total Test time (real) = 128.89 sec
+
+The following tests FAILED:
+	 94 - native_agent_worker_ledger_contract (Failed)
+Errors while running CTest

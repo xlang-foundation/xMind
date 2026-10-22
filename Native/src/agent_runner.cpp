@@ -181,6 +181,19 @@ std::vector<std::string> AgentRunner::models() const {
     for(const auto& model:settings_.selectable_models) if(std::find(result.begin(),result.end(),model)==result.end()) result.push_back(model);
     return result;
 }
+AgentSettings effective_agent_settings(const AgentSettings& settings,const std::string& selected_instructions,const std::optional<std::vector<std::string>>& selected_tools,const std::vector<AgentPermissionRule>& selected_permissions){
+    if(selected_instructions.size()>32768||selected_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Selected agent instructions exceed limits");
+    auto effective=settings;
+    if(!selected_instructions.empty())effective.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+selected_instructions;
+    if(selected_tools)effective.tool_allowlist=selected_tools;
+    validate_agent_tool_allowlist(effective.tool_allowlist);
+    for(const auto& layer:effective.inherited_permission_rule_layers)validate_agent_permission_rules(layer);
+    validate_agent_permission_rules(effective.permission_rules);validate_agent_permission_rules(selected_permissions);
+    if(!effective.permission_rules.empty())effective.inherited_permission_rule_layers.push_back(effective.permission_rules);
+    effective.permission_rules.clear();
+    if(!selected_permissions.empty())effective.inherited_permission_rule_layers.push_back(selected_permissions);
+    return effective;
+}
 std::string provider_context_json(const AgentSettings& settings,const std::string& model_id){
     if(!settings.provider_identity)return {};
     const auto& identity=*settings.provider_identity;
@@ -212,13 +225,13 @@ std::optional<RootBudgetSpec> AgentRunner::execution_budget(const std::string& m
     const auto policy=settings_.delegation.value_or(AgentDelegationPolicy{});const auto context=execution_identity(settings_,model_id);
     return RootBudgetSpec{settings_.planning?"native.dynamic-plan":"native.delegation",1,workspace_->identity(),context,static_cast<std::int64_t>(policy.max_children),static_cast<std::int64_t>(policy.max_parallel),static_cast<std::int64_t>(policy.max_model_calls),settings_.run_timeout.count()};
 }
-std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const std::string& model_id)const{
+std::optional<DynamicPlanCapabilities> AgentRunner::execution_capabilities(const std::string& model_id,const std::string& selected_instructions,const std::optional<std::vector<std::string>>& selected_tools,const std::vector<AgentPermissionRule>& selected_permissions)const{
     if(!settings_.planning||!planning_)return {};
     const auto& model=model_id.empty()?settings_.provider.model:model_id;
     DynamicPlanCapabilities caps;static_cast<DynamicPlanningPolicy&>(caps)=*settings_.planning;
     caps.tool_catalog_json="{}";
     caps.workspace_identity=workspace_->identity();caps.provider_identity_json=execution_identity(settings_,model);
-    auto admitted_settings=settings_;
+    auto admitted_settings=effective_agent_settings(settings_,selected_instructions,selected_tools,selected_permissions);
     admitted_settings.provider.model=model;
     caps.backend_identity=agent_authority_identity(admitted_settings,model,caps.workspace_identity,
         backend_catalog_->credential_versions(admitted_settings));
@@ -244,12 +257,12 @@ std::string AgentRunner::admitted_dynamic_model(const std::string& root_id)const
     if(std::find(configured.begin(),configured.end(),model)==configured.end())throw DynamicPlanUnavailable("Admitted dynamic model is no longer configured");
     return model;
 }
-void AgentRunner::validate_dynamic_owner(const std::string& root_id,const std::string& model_id)const{
+void AgentRunner::validate_dynamic_owner(const std::string& root_id,const std::string& model_id,const std::string& selected_instructions,const std::optional<std::vector<std::string>>& selected_tools,const std::vector<AgentPermissionRule>& selected_permissions)const{
     const auto root=journal_.run(root_id).get();
     if(root.graph_root||!root.parent_id.empty()||!settings_.planning||!planning_)throw DynamicPlanUnavailable("Dynamic execution requires its ordinary root owner");
     const auto model=model_id.empty()?admitted_dynamic_model(root_id):model_id;
     std::optional<DynamicPlanCapabilities> current;
-    try{current=execution_capabilities(model);}
+    try{current=execution_capabilities(model,selected_instructions,selected_tools,selected_permissions);}
     catch(const std::invalid_argument&){throw DynamicPlanUnavailable("Admitted dynamic credential metadata is unavailable");}
     const auto saved=journal_.dynamic_capabilities(root_id).get();
     const auto budget=journal_.root_budget(root_id).get();const auto expected=execution_budget(model);
@@ -296,22 +309,23 @@ Run AgentRunner::start(std::string id,std::string session_id,std::string prompt,
     }
     if(selected_agent){const auto& agent=*selected_agent;validate_agent_placement(agent);if(agent.id.empty()||agent.id.size()>64||agent.id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||agent.revision<1||agent.revision>9007199254740991LL||agent.instructions.empty()||agent.instructions.size()>32768||agent.instructions.find('\0')!=std::string::npos||agent.model_id.size()>256||agent.model_id.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid selected agent snapshot");validate_agent_tool_allowlist(agent.tools);input["agent_profile"]={{"id",agent.id},{"revision",agent.revision},{"model_id",agent.model_id}};if(!agent.placement.empty())input["agent_profile"]["placement"]=agent.placement;if(agent.tools)input["agent_profile"]["tools"]=*agent.tools;}
     auto serialized=input.dump();if(serialized.size()>2*1024*1024)throw std::invalid_argument("Prompt and file attachments exceed the 2 MiB persisted input limit");
-    return journal_.start_prompt_run(std::move(id),std::move(session_id),std::move(serialized),execution_budget(model_id),execution_capabilities(model_id),inbox_id).get();
+    return journal_.start_prompt_run(std::move(id),std::move(session_id),std::move(serialized),execution_budget(model_id),execution_capabilities(model_id,selected_agent?selected_agent->instructions:std::string{},selected_agent?selected_agent->tools:std::optional<std::vector<std::string>>{},selected_agent?selected_agent->permissions:std::vector<AgentPermissionRule>{}),inbox_id).get();
 }
-ContextBinding AgentRunner::context_binding(const std::string& model_id)const{
+ContextBinding AgentRunner::context_binding(const std::string& model_id,const std::string& selected_instructions,const std::optional<std::vector<std::string>>& selected_tools,const std::vector<AgentPermissionRule>& selected_permissions)const{
     if(!settings_.context)throw RunUnavailable("This provider has no registered context strategy");
     const auto& selected=model_id.empty()?settings_.provider.model:model_id;
     const auto allowed=models();if(!settings_.provider_identity&&std::find(allowed.begin(),allowed.end(),selected)==allowed.end())throw std::invalid_argument("Context model is not configured");
     const auto& policy=settings_.context->compaction;
-    return {execution_identity(settings_,selected),context_authority_identity(settings_,selected,
-        workspace_?workspace_->identity():"workspace:none",backend_catalog_->credential_versions(settings_)),
+    const auto effective=effective_agent_settings(settings_,selected_instructions,selected_tools,selected_permissions);
+    return {execution_identity(settings_,selected),context_authority_identity(effective,selected,
+        workspace_?workspace_->identity():"workspace:none",backend_catalog_->credential_versions(effective)),
         policy.id,policy.revision,policy.strategy_id,policy.strategy_revision};
 }
-ContextControlSnapshot AgentRunner::context_status(const std::string& session,const std::string& model)const{
+ContextControlSnapshot AgentRunner::context_status(const std::string& session,const std::string& model,const std::string& selected_instructions,const std::optional<std::vector<std::string>>& selected_tools,const std::vector<AgentPermissionRule>& selected_permissions)const{
     journal_.session(session).get();ContextControlSnapshot result;result.session_id=session;
     result.model_id=model.empty()?settings_.provider.model:model;result.enabled=settings_.context.has_value();
     if(!result.enabled)return result;
-    const auto binding=context_binding(result.model_id);const ContextScope scope{ContextScopeKind::session,session};
+    const auto binding=context_binding(result.model_id,selected_instructions,selected_tools,selected_permissions);const ContextScope scope{ContextScopeKind::session,session};
     const auto observation=journal_.context_status_observation(scope,binding).get();
     result.automatic=settings_.context->compaction.automatic;result.head_revision=observation.head.revision;
     result.source_watermark=observation.source_watermark;
@@ -323,8 +337,9 @@ ContextControlSnapshot AgentRunner::context_status(const std::string& session,co
     return result;
 }
 ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord& owner,
-    std::chrono::steady_clock::time_point deadline,const std::string& model,std::stop_token token){
-    const auto binding=context_binding(model);const auto before_read=std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point deadline,const std::string& model,std::stop_token token,const std::string& selected_instructions,const std::optional<std::vector<std::string>>& selected_tools,const std::vector<AgentPermissionRule>& selected_permissions){
+    const auto effective=effective_agent_settings(settings_,selected_instructions,selected_tools,selected_permissions);
+    const auto binding=context_binding(model,selected_instructions,selected_tools,selected_permissions);const auto before_read=std::chrono::steady_clock::now();
     const auto current=journal_.idle_context_owner(owner.spec.id).get();
     if(current.state!="active"||current.spec.scope.kind!=ContextScopeKind::session||
        current.spec.binding!=binding||current.spec.manual_request_id!=owner.spec.manual_request_id||
@@ -334,7 +349,7 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
     const auto check=[&]{cancelled(token);if(std::chrono::steady_clock::now()>=deadline)throw RootBudgetDeadlineExceeded("Idle context preparation deadline elapsed");};
     check();auto provider=settings_.provider;if(!model.empty())provider.model=model;
     ModelRequest trusted;trusted.include_usage=provider.stream_usage==Capability::supported;trusted.max_output_tokens=settings_.max_output_tokens;
-    auto instructions=settings_.instructions;
+    auto instructions=effective.instructions;
     if(workspace_){RepositoryInstructionContext context(*workspace_,workspace_->repository_instructions(".",token));instructions+=context.prepare(token);}
     if(!settings_.instruction_policy.instructions.empty()){instructions.append(instruction_prefix);instructions+=settings_.instruction_policy.instructions;}
     if(instructions.size()>65536)throw ModelRequestCapacityExceeded("Current idle context instructions exceed limits");
@@ -356,9 +371,10 @@ ContextProjection AgentRunner::compact_idle_context(const IdleContextOwnerRecord
         peers.push_back(std::move(runtime));
     }
     if(delegation_&&settings_.delegation)trusted.tools.push_back(DelegationExecutor::definition());
-    if(const auto planning=execution_capabilities(provider.model))for(auto& definition:context_dynamic_plan_tool_definitions(*planning))trusted.tools.push_back(std::move(definition));
+    if(const auto planning=execution_capabilities(provider.model,selected_instructions,selected_tools,selected_permissions))for(auto& definition:context_dynamic_plan_tool_definitions(*planning))trusted.tools.push_back(std::move(definition));
     if(trusted.tools.size()>64)throw ModelRequestCapacityExceeded("Idle model tool catalogue exceeds limits");
-    if(context_binding(provider.model)!=binding)throw ContextBindingChanged("Idle context authority changed during preparation");
+    if(effective.tool_allowlist)std::erase_if(trusted.tools,[&](const auto& tool){return std::find(effective.tool_allowlist->begin(),effective.tool_allowlist->end(),tool.name)==effective.tool_allowlist->end();});
+    if(context_binding(provider.model,selected_instructions,selected_tools,selected_permissions)!=binding)throw ContextBindingChanged("Idle context authority changed during preparation");
     check();ContextManager manager(journal_,context_journal_,*model_gateway_,provider,*settings_.context,message);
     return manager.compact_idle(current.spec.scope,binding,current.spec.id,trusted,nullptr,token,deadline);
 }
@@ -368,7 +384,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     std::vector<AgentPermissionRule> permission_rules) {
     if(graph_instructions.size()>32768 || graph_instructions.find('\0')!=std::string::npos)throw std::invalid_argument("Graph agent instructions exceed limits");
     if(read_workspace_&&(!graph_instructions.empty()||tool_allowlist||resume_dynamic_child||!permission_rules.empty()))throw std::invalid_argument("Read workspace execution requires its captured backend policy");
-    auto effective_tool_allowlist=tool_allowlist?std::move(tool_allowlist):settings_.tool_allowlist;
+    auto effective_tool_allowlist=tool_allowlist?tool_allowlist:settings_.tool_allowlist;
     validate_agent_tool_allowlist(effective_tool_allowlist);
     auto inherited_permission_layers=settings_.inherited_permission_rule_layers;
     if(!settings_.permission_rules.empty())inherited_permission_layers.push_back(settings_.permission_rules);
@@ -379,8 +395,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& layer:inherited_permission_layers)if(agent_permission_denies(layer,action,resource))return true;
         return agent_permission_denies(agent_permission_rules,action,resource);
     };
-    auto execution_settings=settings_;execution_settings.tool_allowlist=effective_tool_allowlist;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
-    if(!agent_permission_rules.empty())execution_settings.inherited_permission_rule_layers.push_back(agent_permission_rules);
+    auto execution_settings=effective_agent_settings(settings_,graph_instructions,tool_allowlist,agent_permission_rules);
     const auto admitted=journal_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     if(!read_workspace_){
         const auto history=journal_.run_history(id).get();
@@ -481,7 +496,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     std::optional<DynamicResumeRecord> resume;std::optional<DynamicPlanCapabilities> root_caps;
     const auto initial_active_started=std::chrono::steady_clock::now();
     if(resumed){
-        validate_dynamic_owner(id,provider.model);
+        validate_dynamic_owner(id,provider.model,graph_instructions,tool_allowlist,agent_permission_rules);
         const auto plan=journal_.dynamic_plan_for_root(id).get();if(!plan)throw DynamicPlanUnavailable("Paused dynamic owner has no plan");
         const auto saved=journal_.root_budget(id).get();
         DynamicResumeSpec spec{plan->id,operation_id(),plan->capabilities.backend_identity,plan->revision,plan->state_sequence,saved.revision};
@@ -517,7 +532,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             const auto saved=journal_.root_budget(id).get();const auto expected=execution_budget(provider.model);
             if(saved.spec.workspace_identity!=expected->workspace_identity||saved.spec.policy_id!=expected->policy_id||saved.spec.policy_revision!=expected->policy_revision||saved.spec.provider_identity_json!=expected->provider_identity_json||saved.spec.max_children!=expected->max_children||saved.spec.max_parallel!=expected->max_parallel||saved.spec.max_model_calls!=expected->max_model_calls||saved.spec.wall_limit_ms!=expected->wall_limit_ms)throw Conflict("Root execution no longer matches its admitted immutable policy");
             if(dynamic_root){
-                validate_dynamic_owner(id,provider.model);root_caps=journal_.dynamic_capabilities(id).get();
+                validate_dynamic_owner(id,provider.model,graph_instructions,tool_allowlist,agent_permission_rules);root_caps=journal_.dynamic_capabilities(id).get();
                 if(!resumed){
                     DynamicSegmentSpec spec{id,operation_id(),root_caps->backend_identity,saved.revision};
                     const auto segment=journal_.open_dynamic_budget_segment(std::move(spec)).get();
@@ -669,11 +684,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             for(const auto& binding:approval_bindings)if(std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==binding.at("alias").get<std::string>();}))offered_bindings.push_back(binding);
             if(dynamic_child&&!read_workspace_)verify_child_catalogue(request.tools,offered_bindings,*child_caps,*child_preset);
             if(dynamic_root){
-                validate_dynamic_owner(id,provider.model);
+                validate_dynamic_owner(id,provider.model,graph_instructions,tool_allowlist,agent_permission_rules);
                 auto presets=root_caps->presets;
                 for(auto& preset:presets){
                     preset.tools=dynamic_preset_tools(preset,request.tools);
-                    const auto child=dynamic_child_settings(settings_,preset,provider.model);
+                    const auto child=dynamic_child_settings(execution_settings,preset,provider.model);
                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,backend_catalog_->credential_versions(child));
                 }
                 root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,seal_dynamic_tool_catalogue(request.tools,offered_bindings.dump()),std::move(presets)).get();
@@ -805,7 +820,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(std::size_t turn=0;turn<settings_.max_turns;++turn) {
             cancelled(token);
             if(!leaf&&budget&&delegation_&&!delegation_->healthy())throw DelegationOutcomeUnrecorded("Native delegation owner is faulted");
-            if(dynamic_plan_owner&&!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");if(dynamic_root)validate_dynamic_owner(id,provider.model);
+            if(dynamic_plan_owner&&!planning_->healthy())throw DynamicOutcomeUnrecorded("Native planning owner is faulted");if(dynamic_root)validate_dynamic_owner(id,provider.model,graph_instructions,tool_allowlist,agent_permission_rules);
             else if(!leaf&&process_)try{for(const auto& profile:settings_.process_profiles)
                 if(profile.executable_id.empty()||ForegroundProcess::executable_identity(profile.executable)!=profile.executable_id)
                     throw ProcessBeforeDispatchError("Admitted process binding changed");
@@ -834,7 +849,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     admitted.parent_id.empty()?admitted.session_id:id};
                 owner.root_run_id=budget->root_id();owner.owner_run_id=id;owner.role=leaf||graph_agent?ModelCallRole::leaf:ModelCallRole::parent;
                 owner.binding.provider_identity_json=execution_identity(settings_,provider.model);
-                owner.binding.authority_identity=context_authority_identity(settings_,provider.model,workspace_?workspace_->identity():"workspace:none",
+                owner.binding.authority_identity=context_authority_identity(leaf?settings_:execution_settings,provider.model,workspace_?workspace_->identity():"workspace:none",
                     backend_catalog_->credential_versions(settings_));
                 const auto& p=settings_.context->compaction;owner.binding.policy_id=p.id;owner.binding.policy_revision=p.revision;
                 owner.binding.strategy_id=p.strategy_id;owner.binding.strategy_revision=p.strategy_revision;
@@ -848,7 +863,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                     request=trusted_current;for(const auto& note:joined_process_notes)request.messages.push_back({MessageRole::system,note});
                     ProviderHistoryOwner owner{budget->root_id(),id,leaf||graph_agent?ModelCallRole::leaf:ModelCallRole::parent,
                         {admitted.parent_id.empty()?ContextScopeKind::session:ContextScopeKind::execution,admitted.parent_id.empty()?admitted.session_id:id},
-                        execution_identity(settings_,provider.model),context_authority_identity(settings_,provider.model,workspace_?workspace_->identity():"workspace:none",backend_catalog_->credential_versions(settings_))};
+                        execution_identity(settings_,provider.model),context_authority_identity(leaf?settings_:execution_settings,provider.model,workspace_?workspace_->identity():"workspace:none",backend_catalog_->credential_versions(settings_))};
                     const auto history=context_journal_.provider_history(owner).get();std::vector<std::size_t> projected;
                     for(const auto& payload:history.groups)for(const auto& original:payload.source.originals){
                         auto decoded=message(original);
