@@ -1,3 +1,20 @@
+## Full native cleanup validation — 2026-10-21
+
+Full current 169-test run completed: 168 passed, one failed in 1238.31 seconds.
+The broad worker test failed while writing optional timing output: this run
+set a directory path without creating it (ENOENT), before production execution.
+Created diagnostic directories and reran only that contract: 1/1 passed in
+57.21 seconds. Source c0d39118, SDK and all 138 native binaries are identical
+and their complete frozen file sets/hashes were verified around both gates.
+Do not combine these results into a clean full-suite pass. The full run
+includes successful local profile (545.67 seconds), local view (149.92 seconds),
+provider-view configuration (69.26 seconds), CLI/HTTP, persistence and native
+provider/MCP/A2A/graph checks. No install, live model replay or visible UI.
+Earlier intermittent native crashes remain unresolved; production planning
+assembly and installed client acceptance remain unfinished. Raw failed and
+corrected receipts plus timing are preserved in
+doc/evidence/process-xmind-root-native-full-cleanup-checkpoint-20261021.json.
+
 ## Coding owner uses native services only — 2026-10-21
 
 Removed the unused coding-owner packet dispatch API, seven packet handler
