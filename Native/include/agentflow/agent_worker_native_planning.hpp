@@ -40,6 +40,9 @@ public:
     DynamicExecutionResult resume(const std::string&,const std::string&,const AgentSettings&,const DynamicPlanCapabilities&,
         std::shared_ptr<RootExecutionBudget>,std::stop_token={},DynamicInstructionPrecondition={})override;
     bool healthy()const override;
-private:struct Impl;std::unique_ptr<Impl> impl_;
+private:
+    friend class NativeWorkerModelClient;
+    NativePlanningClient(X::Runtime&,X::Value,AgentWorkerScope,AgentWorkerChannel::Deadline,std::shared_ptr<void>);
+    struct Impl;std::unique_ptr<Impl> impl_;
 };
 }

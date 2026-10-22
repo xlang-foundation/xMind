@@ -1,3 +1,34 @@
+## Planning execution port from the worker SDK object — 2026-10-21
+
+NativeWorkerModelClient.planning(deadline) now acquires the existing worker
+Planning subobject and returns the DynamicPlanExecution port. It reuses the
+worker client runtime and validates the complete planning identity. The private
+borrowed constructor retains the client implementation until SDK values retire;
+the model client remains explicitly noncopyable. The standalone planning client
+retains its owned-runtime path. This adds no packet fallback, bootstrap field,
+serializer, SDK change or extra root import on the worker path.
+
+Focused 20/20 passed in 125.98 seconds (ledger 3.01; broad worker 57.45). The
+accepted-owner SDK child uses this port after its outer acquisition client is
+destroyed, verifies health and wrong-parent refusal, and invokes with forged
+local tool/settings/assistant fields. Only stored IDs reach the backend. The
+same signed owner/context continuation then hands out, starts and finishes its
+backend-selected attempt. Unbound workers refuse port acquisition. Synthetic
+model/child facts and controlled accepted callback; no provider execution.
+
+Source patch e9d48cf46838cc71939cf01f49c5682c04f92b33d3dddecab99f5507a841fbf8;
+native SHA f9b40e78aee26cd028db95d7f01ccbae3b2ca011f49aef544b4652e2603b810b.
+Frozen 2786 source inputs, SDK, libraries, dependencies and all 138 native
+binary sets/hashes verified. Evidence:
+doc/evidence/process-xmind-root-native-worker-planning-port-20261021-gate.json.
+
+The main worker runner does not yet select this port: dynamic admission and
+journal projections remain closed. Main factory construction, actual accepted
+plan worker-child scheduling, overflow/retry adoption, human handoff, legacy
+cleanup and final client acceptance remain open. Full 169 suite not rerun;
+SDK unchanged, no install, CPython or live model replay. This scoped runtime
+lifetime change does not establish a fix for earlier intermittent SDK faults.
+
 ## Accepted owner context continuation handoff — 2026-10-21
 
 Journal.ReservePlanningContinuation(call,attempt) now accepts an empty attempt

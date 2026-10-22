@@ -7,9 +7,11 @@
 #include "agentflow/agent_worker_callable_service.hpp"
 #include "xlang3/xlang3.h"
 #include <memory>
+#include <chrono>
 namespace agentflow {
 class AgentWorkerJournalHost;
 class NativePlanningBinding;
+class DynamicPlanExecution;
 struct NativeWorkerModelState;
 struct NativeWorkerModelAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 class NativeWorkerModelBinding final {
@@ -171,6 +173,9 @@ class NativeWorkerModelClient final {
 public:
     NativeWorkerModelClient(NativeWorkerModelAccess,std::string root,std::string owner,std::string workspace,std::string generation,std::int64_t revision);
     ~NativeWorkerModelClient();
+    NativeWorkerModelClient(const NativeWorkerModelClient&)=delete;
+    NativeWorkerModelClient& operator=(const NativeWorkerModelClient&)=delete;
+    std::shared_ptr<DynamicPlanExecution> planning(std::chrono::steady_clock::time_point);
     AgentWorkerModelAdmission admission(std::stop_token={});
     ModelRequest prepare_request(std::stop_token={});
     ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
@@ -201,6 +206,6 @@ public:
     std::string journal_commit_read_turn(std::string attempt);
     std::string journal_commit_workspace_turn(std::string attempt);
     std::string journal_complete(std::string attempt);
-private:struct Impl;std::unique_ptr<Impl> impl_;
+private:struct Impl;std::shared_ptr<Impl> impl_;
 };
 }

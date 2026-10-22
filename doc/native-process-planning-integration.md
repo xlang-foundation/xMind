@@ -13,7 +13,11 @@ Follow Cantor's registered root and native service objects. The existing
 A worker binding may now expose the same service as
 `xmind.Workers().Open(ticket).Planning()`. Attaching it verifies the complete
 lease scope; ordinary bindings without that service refuse acquisition. Both
-access paths share the same native operation registry. Distinct-process scope,
+access paths share the same native operation registry.
+NativeWorkerModelClient.planning(deadline) now supplies the runner-facing
+DynamicPlanExecution port from that subobject, reusing and retaining its SDK
+runtime. Distinct-child accepted-context handoff survives outer client retirement;
+main worker runner selection and dynamic journal/admission remain unassembled. Distinct-process scope,
 duplicate and retired-object checks are verified. Main owner/runner wiring is
 still required.
 

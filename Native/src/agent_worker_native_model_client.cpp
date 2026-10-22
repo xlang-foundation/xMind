@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_native_model.hpp"
+#include "agentflow/agent_worker_native_planning.hpp"
 #include "agentflow/agent_model_values.hpp"
 #include "agent_worker_sdk_values.hpp"
 #include "agent_worker_ipc_wait.hpp"
@@ -21,9 +22,10 @@ namespace {
 struct NativeWorkerModelClient::Impl {
     X::Runtime runtime;
     X::Value root,worker,model,journal,reads,files,processes,remotes,callables;
+    AgentWorkerScope scope;
     std::mutex mutex,journal_mutex,read_mutex,file_mutex,process_mutex,remote_mutex,callable_mutex;
     std::map<std::string,X::Value> model_methods,journal_methods,read_methods,file_methods,process_methods,remote_methods,callable_methods;
-    Impl(const NativeWorkerModelAccess& access,const std::string& root_id,const std::string& owner,const std::string& workspace,const std::string& generation,std::int64_t revision){
+    Impl(const NativeWorkerModelAccess& access,const std::string& root_id,const std::string& owner,const std::string& workspace,const std::string& generation,std::int64_t revision):scope{root_id,owner,workspace,generation,revision}{
         if(!access.endpoint.starts_with("lrpc:")||access.endpoint.size()>32||access.ticket.size()!=64||access.ticket.find_first_not_of("0123456789abcdef")!=std::string::npos||!access.pid)throw Conflict("Invalid native worker model access");
         X3LrpcEndpointInfo info{};info.size=sizeof(info);if(x3_runtime_probe_remote(runtime.get(),access.endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=access.pid)throw Conflict("Native model endpoint identity differs");
         root=runtime.ImportRemote("xmind",access.endpoint.c_str());auto services=call(root,"Workers",{});worker=call(services,"Open",{text(access.ticket)});const auto identity=call(worker,"Identity",{});
@@ -50,7 +52,8 @@ struct NativeWorkerModelClient::Impl {
     }
 
 };
-NativeWorkerModelClient::NativeWorkerModelClient(NativeWorkerModelAccess access,std::string root,std::string owner,std::string workspace,std::string generation,std::int64_t revision):impl_(std::make_unique<Impl>(access,root,owner,workspace,generation,revision)){}
+NativeWorkerModelClient::NativeWorkerModelClient(NativeWorkerModelAccess access,std::string root,std::string owner,std::string workspace,std::string generation,std::int64_t revision):impl_(std::make_shared<Impl>(access,root,owner,workspace,generation,revision)){}
+std::shared_ptr<DynamicPlanExecution> NativeWorkerModelClient::planning(std::chrono::steady_clock::time_point deadline){std::lock_guard lock(impl_->mutex);auto service=impl_->call(impl_->worker,"Planning",{});return std::shared_ptr<DynamicPlanExecution>(new NativePlanningClient(impl_->runtime,std::move(service),impl_->scope,deadline,impl_));}
 NativeWorkerModelClient::~NativeWorkerModelClient()=default;
 AgentWorkerModelAdmission NativeWorkerModelClient::admission(std::stop_token cancel){std::lock_guard lock(impl_->mutex);if(cancel.stop_requested())throw TransportCancelled("Native model admission cancelled");return decode_agent_worker_model_admission(impl_->await(impl_->model_call("Admission",{}),{},cancel));}
 ModelRequest NativeWorkerModelClient::prepare_request(std::stop_token cancel){std::lock_guard lock(impl_->mutex);if(cancel.stop_requested())throw TransportCancelled("Native model prepare cancelled");return decode_agent_model_request(impl_->await(impl_->model_call("Prepare",{}),{},cancel));}
