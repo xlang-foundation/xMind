@@ -1,0 +1,29 @@
+{
+  "recordedAt": "2026-10-22T09:19:13.615Z",
+  "package": {
+    "output": "D:\\CantorAI2026\\xMind\\.agentflow\\workspace-switch-validation\\package\\native-runtime",
+    "manifestSha256": "1a24a5fbdb1c75ff2fc25f21201e3c7b21c281d2457f1855c1d99744bd42d8eb",
+    "nativeFiles": 5,
+    "pureSourceFiles": 1869,
+    "files": 2401,
+    "nativeExecuted": false,
+    "configAccessed": false,
+    "installed": false,
+    "sourceRevision": "97b61d2957252ce3b3e2daeffa92e1c77c7f7a4e",
+    "nativeSha256": "4a684f1e3a851f6b1d42740448da0648c9a4740331c2aa4037beabc7345eb140"
+  },
+  "profileReopen": {
+    "exitCode": 0,
+    "agent_execution": "thread",
+    "origin": "http://127.0.0.1:55493",
+    "process_id": 22120,
+    "profile_directory": "C:\\Users\\shaw9\\.xMind\\p\\6360eb3545e089d2928dac6f4437041b0b536fbbc8505174c4e3b2071f7bc71d",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj",
+    "workspace_edits": "approved"
+  },
+  "modelCalls": 0,
+  "taskReplayed": false,
+  "renderedFinalPackage": false,
+  "installed": false
+}

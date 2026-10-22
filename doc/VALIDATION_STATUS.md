@@ -25,6 +25,13 @@ receipt is quiesced and has no committed retirement target. Actual rendered
 browser evidence below used the earlier qualified recovery runtime, not this
 final binary. No new model calls or replayed tasks; no full-suite claim.
 
+Final committed-source package stages and verifies 2401 runtime files, manifest
+1a24a5fbdb1c75ff2fc25f21201e3c7b21c281d2457f1855c1d99744bd42d8eb.
+The packaged CLI successfully reopens the existing TestProj profile, reports
+started=false and reuses its running backend. This is package integrity and CLI
+reconnection evidence, not rendered final-package acceptance or backend upgrade.
+The installed extension and existing browser host remain unchanged. See
+[evidence](evidence/workspace-switch-final-package-20261022.json).
 The reported browser switch failure reproduces as selection HTTP 503. The
 TestProj profile had a protected replacement receipt and a stopped process,
 but its database owner was only quiesced: no retirement target had committed.
