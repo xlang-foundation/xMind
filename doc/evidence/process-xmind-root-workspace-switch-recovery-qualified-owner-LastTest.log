@@ -1,0 +1,19 @@
+Start testing: Oct 22 01:16 Pacific Daylight Time
+----------------------------------------------------------
+154/169 Testing: native_backend_owner_contract
+154/169 Test: native_backend_owner_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_backend_owner_contract.exe" "C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules" "C:/Python/Python314/Lib"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_backend_owner_contract" start time: Oct 22 01:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual C++/embedded-xlang3 owner fence, retirement race, exact target/bootstrap checks, atomic schema migration/publication rollback, closed preparation/restart and activation passed; typed target metadata and prompts are fixtures
+<end of output>
+Test time =   2.58 sec
+----------------------------------------------------------
+Test Passed.
+"native_backend_owner_contract" end time: Oct 22 01:16 Pacific Daylight Time
+"native_backend_owner_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Oct 22 01:16 Pacific Daylight Time

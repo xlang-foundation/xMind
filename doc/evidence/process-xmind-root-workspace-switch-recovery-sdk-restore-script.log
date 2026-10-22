@@ -1,0 +1,26 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+const repo='D:/CantorAI2026/xMind',root=repo+'/.agentflow/xlang3-sdk',commit='58a8aab9b40a464e38a741129b4804ac36e27a53',installed='C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.60/native-runtime';
+const expected=JSON.parse(await fs.readFile(repo+'/.agentflow/workspace-switch-validation/native/inputs-before-build.json','utf8')),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+assert.equal(execFileSync('git',['cat-file','-t',commit],{cwd:'D:/CantorAI2026/xlang3',encoding:'utf8',windowsHide:true}).trim(),'commit');await fs.mkdir(root,{recursive:true});
+async function save(p,bytes){try{assert.equal(sha(await fs.readFile(p)),sha(bytes));}catch(e){if(e.code!=='ENOENT')throw e;await fs.mkdir(path.dirname(p),{recursive:true});await fs.writeFile(p,bytes,{flag:'wx'});}}
+for(const [name,hash]of Object.entries(expected.sdkSource)){
+  let bytes=execFileSync('git',['show',commit+':'+name],{cwd:'D:/CantorAI2026/xlang3',windowsHide:true,maxBuffer:8*1024*1024});
+  if(sha(bytes)!==hash)bytes=Buffer.from(bytes.toString('utf8').replace(/\r?\n/g,'\r\n'));
+  assert.equal(sha(bytes),hash,'Pinned SDK source differs: '+name);await fs.mkdir(path.dirname(root+'/'+name),{recursive:true});await save(root+'/'+name,bytes);
+}
+const omittedDevelopmentFiles=[];for(const [name,hash]of Object.entries(expected.runtime)){
+  if(name.startsWith('modules/')&&/\.(exp|lib|pdb)$/.test(name)){omittedDevelopmentFiles.push(name);continue;}
+  if(name==='xlang3_runtime.lib')continue;const bytes=await fs.readFile(installed+'/'+name);assert.equal(sha(bytes),hash,'Accepted SDK runtime differs: '+name);await fs.mkdir(path.dirname(root+'/Release/'+name),{recursive:true});await save(root+'/Release/'+name,bytes);
+}
+const dll=await fs.readFile(root+'/Release/xlang3_runtime.dll'),nt=dll.readUInt32LE(0x3c),optional=nt+24;assert.equal(dll.readUInt16LE(optional),0x20b);const exportRva=dll.readUInt32LE(optional+112),exportSize=dll.readUInt32LE(optional+116),sections=[];
+for(let i=0,n=dll.readUInt16LE(nt+6),offset=optional+dll.readUInt16LE(nt+20);i<n;i++,offset+=40)sections.push({rva:dll.readUInt32LE(offset+12),size:Math.max(dll.readUInt32LE(offset+8),dll.readUInt32LE(offset+16)),raw:dll.readUInt32LE(offset+20),flags:dll.readUInt32LE(offset+36)});
+const section=rva=>{const s=sections.find(s=>rva>=s.rva&&rva<s.rva+s.size);assert.ok(s);return s;},at=rva=>{const s=section(rva);return s.raw+rva-s.rva;},z=rva=>{const p=at(rva),end=dll.indexOf(0,p);assert.ok(end>p&&end-p<65536);return dll.toString('ascii',p,end);};
+const dir=at(exportRva),base=dll.readUInt32LE(dir+16),count=dll.readUInt32LE(dir+24),functions=at(dll.readUInt32LE(dir+28)),names=at(dll.readUInt32LE(dir+32)),ordinals=at(dll.readUInt32LE(dir+36));assert.equal(count,dll.readUInt32LE(dir+20));const exports=[];
+for(let i=0;i<count;i++){const name=z(dll.readUInt32LE(names+i*4));assert.match(name,/^[A-Za-z_?][A-Za-z0-9_?@$<>]*$/);const index=dll.readUInt16LE(ordinals+i*2),rva=dll.readUInt32LE(functions+index*4),forwarded=rva>=exportRva&&rva<exportRva+exportSize,data=!forwarded&&!(section(rva).flags&0x20000000);exports.push({name,ordinal:base+index,data});}
+const definition='LIBRARY xlang3_runtime.dll\nEXPORTS\n'+exports.map(e=>'  '+e.name+' @'+e.ordinal+(e.data?' DATA':'')).join('\n')+'\n';await fs.writeFile(root+'/Release/xlang3_runtime.def',definition,{flag:'wx'});
+const lib='C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lib.exe';execFileSync(lib,['/nologo','/machine:x64','/def:'+root+'/Release/xlang3_runtime.def','/out:'+root+'/Release/xlang3_runtime.lib'],{windowsHide:true});
+const result={commit,files:expected.sdkSource,omittedDevelopmentFiles,runtimeSource:'Exact frozen runtime files recovered from installed60; import library regenerated from the same DLL PE export table, without executing or rebuilding the engine',runtimeSha256:sha(dll),originalImportLibrarySha256:expected.runtime['xlang3_runtime.lib'],generatedImportLibrarySha256:sha(await fs.readFile(root+'/Release/xlang3_runtime.lib')),exports};await fs.writeFile(root+'/provenance.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({root,commit,sdkFiles:Object.keys(expected.sdkSource).length,runtimeSha256:result.runtimeSha256,importLibrarySha256:result.generatedImportLibrarySha256,exports:exports.length}));

@@ -1,0 +1,138 @@
+diff --git a/Native/include/agentflow/interrupted_owner_recovery.hpp b/Native/include/agentflow/interrupted_owner_recovery.hpp
+new file mode 100644
+index 00000000..fd3089a9
+--- /dev/null
++++ b/Native/include/agentflow/interrupted_owner_recovery.hpp
+@@ -0,0 +1,12 @@
++#pragma once
++#include "agentflow/backend_owner.hpp"
++
++namespace agentflow {
++class BackendLease;
++class XlangSqlite;
++// Internal managed-profile recovery. The caller retains its protected profile
++// lock and verified replacement runtime; this never opens model admission.
++BackendOwnerState finish_interrupted_backend_retirement(
++    XlangSqlite&,const BackendLease&,const BackendOwnerReceipt&,
++    const BackendOwnerTarget&,std::uint32_t source_pid,const std::string& source_birth);
++}
+diff --git a/Native/src/local_profile.cpp b/Native/src/local_profile.cpp
+index ea5a21a1..134bbf5d 100644
+--- a/Native/src/local_profile.cpp
++++ b/Native/src/local_profile.cpp
+@@ -3,6 +3,10 @@
+ #include "agentflow/context_records.hpp"
+ #include "agentflow/owner_process.hpp"
+ #include "agentflow/runtime_generation.hpp"
++#include "agentflow/interrupted_owner_recovery.hpp"
++#include "agentflow/backend_owner_control.hpp"
++#include "agentflow/backend_lease.hpp"
++#include "agentflow/xlang_sqlite.hpp"
+ #include "agentflow/workspace_tools.hpp"
+ #include "httplib.h"
+ #include "nlohmann/json.hpp"
+@@ -715,6 +719,34 @@ void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace
+     require(!pid||observe_owner_exit(pid,birth,0).exited,
+         "Backend retirement is unresolved; the saved handoff was preserved"+
+         (retirement_error.empty()?std::string{}:std::string(". ")+retirement_error));
++    {
++        // A crash can follow quiescence before the live owner commits retirement.
++        // Its protected receipt and an exclusive database lease allow finishing
++        // that transition; normal startup must continue to refuse the database.
++        BackendLease lease(text(store.directory/L"state.sqlite"));
++        const auto source=absolute(loaded_root());
++        XlangSqlite db(lease.canonical_database_path(),{text(source/L"modules"),text(source/L"stdlib")});
++        const auto rows=db.execute("SELECT payload FROM information WHERE category='native-backend-owner' AND id='owner'").rows;
++        if(rows.size()==1){
++            const auto owner=Json::parse(std::get<std::string>(rows[0][0]));
++            if(owner.value("quiesced",false)&&!owner.value("retirement_requested",false)&&!owner.value("replacement_prepared",false)&&!owner.contains("replacement_target")){
++                const auto& saved=state.at("owner_receipt");
++                BackendOwnerReceipt receipt{saved.at("generation").get<std::string>(),saved.at("receipt_id").get<std::string>(),saved.at("revision").get<std::int64_t>()};
++                require(owner.at("generation")==receipt.generation&&owner.at("revision")==receipt.revision&&owner.at("receipt_id")==receipt.receipt_id,"Interrupted backend receipt differs from protected profile");
++                const auto digest=context_digest(file_bytes(source/L"native-runtime-manifest.json",4*1024*1024));
++                if(state.at("replacement_manifest")!=digest){
++                    auto [replacement,manifest]=stage_current_runtime(store,workspace);
++                    state["replacement_runtime"]=text(replacement);state["replacement_manifest"]=manifest;
++                    // Persist the exact target before the transaction so a crash
++                    // after commit resumes this intent rather than staging again.
++                    store.write(state);
++                }
++                VerifiedRuntimeGeneration replacement(VerifiedRuntimeGeneration::managed_profile_copy(state.at("replacement_runtime").get<std::string>(),state.at("replacement_manifest").get<std::string>(),workspace.root_path()));
++                const auto target=qualify_backend_target(replacement,workspace,state.at("auth").get<std::string>(),state.at("approved_edits").get<bool>(),false);
++                (void)finish_interrupted_backend_retirement(db,lease,receipt,target,pid,birth);
++            }
++        }
++    }
+     VerifiedRuntimeGeneration target(VerifiedRuntimeGeneration::managed_profile_copy(state.at("replacement_runtime").get<std::string>(),state.at("replacement_manifest").get<std::string>(),workspace.root_path()));target.revalidate();
+     state["runtime"]=state.at("replacement_runtime");state["manifest"]=state.at("replacement_manifest");state["pid"]=static_cast<std::uint32_t>(0);state["birth"]="";state["port"]=0;state["phase"]="preparing";store.write(state);
+ }
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 0b867df3..e8182a70 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -2,6 +2,8 @@
+ #include "agentflow/json_schema.hpp"
+ #include "agentflow/xlang_sqlite.hpp"
+ #include "agentflow/backend_lease.hpp"
++#include "agentflow/interrupted_owner_recovery.hpp"
++#include "agentflow/owner_process.hpp"
+ #include "agentflow/graph.hpp"
+ #include "agentflow/dynamic_plan.hpp"
+ #include "agentflow/context_selection.hpp"
+@@ -3131,6 +3133,17 @@ BackendOwnerState Repository::request_backend_retirement(const BackendLease& lea
+     if(target){target_json(*target);current.replacement_target=std::move(target);current.database_path=lease.canonical_database_path();current.replacement_source=expected;}
+     require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.retirement_requested=true;write_owner(db,current,previous);tx.commit();return current;
+ }
++BackendOwnerState finish_interrupted_backend_retirement(XlangSqlite& db,const BackendLease& lease,const BackendOwnerReceipt& expected,const BackendOwnerTarget& target,std::uint32_t source_pid,const std::string& source_birth){
++    receipt_json(expected);target_json(target);
++    if(!source_pid||source_birth.empty()||!observe_owner_exit(source_pid,source_birth,0).exited)throw Conflict("Interrupted handoff requires observed source process exit");
++    const auto databases=db.execute("PRAGMA database_list").rows;
++    const auto main=std::find_if(databases.begin(),databases.end(),[](const auto& row){return row.size()==3&&text(row[1])=="main";});
++    if(main==databases.end()||!lease.covers(text((*main)[2])))throw Conflict("Interrupted handoff requires its exact database lease");
++    Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Interrupted handoff source owner is absent");auto current=decode_owner(*previous);
++    if(current.retirement_requested&&current.replacement_source==std::optional<BackendOwnerReceipt>{expected}&&current.replacement_target==std::optional<BackendOwnerTarget>{target}&&current.database_path==lease.canonical_database_path()){tx.commit();return current;}
++    if(!current.quiesced||current.retirement_requested||current.replacement_prepared||current.replacement_target||current.generation!=expected.generation||current.revision!=expected.revision||current.receipt_id!=expected.receipt_id)throw Conflict("Interrupted handoff receipt changed");
++    require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.retirement_requested=true;current.replacement_source=expected;current.replacement_target=target;current.database_path=lease.canonical_database_path();write_owner(db,current,previous);tx.commit();return current;
++}
+ BackendOwnerState Repository::activate_backend_replacement(const BackendLease& lease,const BackendOwnerReceipt& expected,const BackendOwnerTarget& target){
+     if(!lease.covers(impl_->path))throw Conflict("Activation requires this database lease");receipt_json(expected);target_json(target);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");const auto prior=decode_owner(*previous);
+     if(!prior.quiesced)throw Conflict("Prepared replacement owner is not quiesced");
+diff --git a/Native/tests/backend_owner_contract.cpp b/Native/tests/backend_owner_contract.cpp
+index 9558be29..f2794025 100644
+--- a/Native/tests/backend_owner_contract.cpp
++++ b/Native/tests/backend_owner_contract.cpp
+@@ -1,6 +1,13 @@
+ #include "agentflow/persistence_service.hpp"
+ #include "graph_schema_fixture.hpp"
+ #include "agentflow/xlang_sqlite.hpp"
++#include "agentflow/backend_lease.hpp"
++#include "agentflow/interrupted_owner_recovery.hpp"
++#include "agentflow/owner_process.hpp"
++#ifndef NOMINMAX
++#define NOMINMAX
++#endif
++#include <windows.h>
+ #include <barrier>
+ #include <chrono>
+ #include <filesystem>
+@@ -158,6 +165,20 @@ int main(int argc,char** argv){
+             }
+             rejects<Conflict>([&]{PersistenceService replay(path,roots,1024,bootstrap);});
+         }
++        {
++            const auto path=(directory.path/"interrupted-retirement.sqlite").string();BackendOwnerReceipt expected;
++            BackendOwnerTarget target{{(directory.path/"synthetic-recovery-generation").string(),"windows-runtime-file-v1:1:2",std::string(64,'a'),std::string(40,'b'),std::string(40,'c'),std::string(64,'d'),std::string(64,'e')},"D:\\synthetic-workspace","windows-local-file-v1:fixture",std::string(64,'f'),true};
++            {PersistenceService store(path,roots);store.create_session("saved","interrupted handoff retains history").get();expected=receipt(store.quiesce_backend(condition(store.backend_owner().get())).get());}
++            rejects<BackendQuiesced>([&]{PersistenceService refused(path,roots);});
++            {BackendLease lease(path);XlangSqlite db(path,roots);const auto raw=[&]{return std::get<std::string>(db.execute("SELECT payload FROM information WHERE category='native-backend-owner' AND id='owner'").rows.at(0).at(0));};const auto before=raw();const auto pid=GetCurrentProcessId();const auto live_birth=inspect_owner_process_birth(pid);
++                rejects<Conflict>([&]{finish_interrupted_backend_retirement(db,lease,expected,target,pid,live_birth);});
++                auto changed=expected;++changed.revision;rejects<Conflict>([&]{finish_interrupted_backend_retirement(db,lease,changed,target,pid,"1");});require(raw()==before,"Live source and changed receipt must preserve the exact closed owner");
++                db.execute("CREATE TRIGGER reject_recovery BEFORE UPDATE ON information WHEN NEW.category='native-backend-owner' BEGIN SELECT RAISE(ABORT,'recovery rollback fixture'); END");rejects<DatabaseError>([&]{finish_interrupted_backend_retirement(db,lease,expected,target,pid,"1");});require(raw()==before,"Interrupted retirement failure must roll back the complete owner transition");db.execute("DROP TRIGGER reject_recovery");
++                const auto recovered=finish_interrupted_backend_retirement(db,lease,expected,target,pid,"1");require(recovered.quiesced&&recovered.retirement_requested&&recovered.replacement_source==std::optional<BackendOwnerReceipt>{expected},"PID reuse proves the original source exited while recovery retains its exact receipt");
++                require(finish_interrupted_backend_retirement(db,lease,expected,target,pid,"1").revision==recovered.revision,"Repeated recovery must reuse its exact durable target without another revision");auto other=target;other.workspace_id+="-foreign";rejects<Conflict>([&]{finish_interrupted_backend_retirement(db,lease,expected,other,pid,"1");});require(db.execute("SELECT id FROM sessions WHERE id='saved'").rows.size()==1,"Recovery must retain the saved session");
++            }
++            {PersistenceService replacement(path,roots,1024,BackendOwnerBootstrap{expected,target});require(replacement.backend_owner().get().quiesced,"Recovered replacement must stay closed until native activation");const auto owner=replacement.backend_owner().get();replacement.activate_backend_replacement(receipt(owner),target).get();require(replacement.session("saved").get().title=="interrupted handoff retains history","Activation after recovered retirement must retain original history");}
++        }
+         std::cout<<"Actual C++/embedded-xlang3 owner fence, retirement race, exact target/bootstrap checks, atomic schema migration/publication rollback, closed preparation/restart and activation passed; typed target metadata and prompts are fixtures\n";return 0;
+     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
+ }

@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-10-22T08:24:44.4630868Z",
+  "url": "http://127.0.0.1:60405/ui/",
+  "scope": "Authenticated native view workspace selection, metadata, history list and file list; no rendered-browser or model inference claim",
+  "modelCalls": 0,
+  "results": [
+    {
+      "requested": "TestProj",
+      "connected": true,
+      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000b044070000000000",
+      "root": "D:\\CantorAI2026\\TestProj",
+      "sessionCount": 7,
+      "fileResponseFields": [
+        "entries",
+        "path",
+        "truncated",
+        "workspace_id"
+      ]
+    },
+    {
+      "requested": "xMind",
+      "connected": true,
+      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000000e4f060000000000",
+      "root": "D:\\CantorAI2026\\xMind",
+      "sessionCount": 16,
+      "fileResponseFields": [
+        "entries",
+        "path",
+        "truncated",
+        "workspace_id"
+      ]
+    }
+  ]
+}

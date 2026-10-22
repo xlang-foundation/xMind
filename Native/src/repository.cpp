@@ -2,6 +2,8 @@
 #include "agentflow/json_schema.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/backend_lease.hpp"
+#include "agentflow/interrupted_owner_recovery.hpp"
+#include "agentflow/owner_process.hpp"
 #include "agentflow/graph.hpp"
 #include "agentflow/dynamic_plan.hpp"
 #include "agentflow/context_selection.hpp"
@@ -3130,6 +3132,21 @@ BackendOwnerState Repository::request_backend_retirement(const BackendLease& lea
     if(!current.quiesced||current.retirement_requested||current.replacement_prepared||current.generation!=expected.generation||current.receipt_id!=expected.receipt_id||current.revision!=expected.revision)throw Conflict("Native retirement receipt changed");
     if(target){target_json(*target);current.replacement_target=std::move(target);current.database_path=lease.canonical_database_path();current.replacement_source=expected;}
     require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.retirement_requested=true;write_owner(db,current,previous);tx.commit();return current;
+}
+BackendOwnerState finish_interrupted_backend_retirement(XlangSqlite& db,const BackendLease& lease,const BackendOwnerReceipt& expected,const BackendOwnerTarget& target,std::uint32_t source_pid,const std::string& source_birth){
+    receipt_json(expected);target_json(target);
+#if defined(_WIN32)
+    if(!source_pid||source_birth.empty()||!observe_owner_exit(source_pid,source_birth,0).exited)throw Conflict("Interrupted handoff requires observed source process exit");
+#else
+    (void)source_pid;(void)source_birth;throw Conflict("Managed interrupted handoff recovery requires Windows process identity");
+#endif
+    const auto databases=db.execute("PRAGMA database_list").rows;
+    const auto main=std::find_if(databases.begin(),databases.end(),[](const auto& row){return row.size()==3&&text(row[1])=="main";});
+    if(main==databases.end()||!lease.covers(text((*main)[2])))throw Conflict("Interrupted handoff requires its exact database lease");
+    Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Interrupted handoff source owner is absent");auto current=decode_owner(*previous);
+    if(current.retirement_requested&&current.replacement_source==std::optional<BackendOwnerReceipt>{expected}&&current.replacement_target==std::optional<BackendOwnerTarget>{target}&&current.database_path==lease.canonical_database_path()){tx.commit();return current;}
+    if(!current.quiesced||current.retirement_requested||current.replacement_prepared||current.replacement_target||current.generation!=expected.generation||current.revision!=expected.revision||current.receipt_id!=expected.receipt_id)throw Conflict("Interrupted handoff receipt changed");
+    require_database_idle(db);owner_revision(current.revision+1);++current.revision;current.retirement_requested=true;current.replacement_source=expected;current.replacement_target=target;current.database_path=lease.canonical_database_path();write_owner(db,current,previous);tx.commit();return current;
 }
 BackendOwnerState Repository::activate_backend_replacement(const BackendLease& lease,const BackendOwnerReceipt& expected,const BackendOwnerTarget& target){
     if(!lease.covers(impl_->path))throw Conflict("Activation requires this database lease");receipt_json(expected);target_json(target);auto& db=impl_->database;Transaction tx(db);const auto previous=owner_record(db);if(!previous)throw NotFound("Native owner is absent");const auto prior=decode_owner(*previous);

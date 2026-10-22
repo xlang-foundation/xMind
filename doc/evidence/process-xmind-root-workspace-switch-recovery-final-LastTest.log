@@ -1,0 +1,85 @@
+Start testing: Oct 22 02:16 Pacific Daylight Time
+----------------------------------------------------------
+60/172 Testing: native_process_configuration_contract
+60/172 Test: native_process_configuration_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_process_configuration_contract.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_schema_worker.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_process_configuration_contract" start time: Oct 22 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process configuration passed actual executable binding/hash changes, embedded-xlang3 storage/reopen, backend revisions, rejected replacement preservation, spoof/plain environment/credential/duplicate rejection and permanent profile retirement. No child/model/UI activation claimed.
+<end of output>
+Test time =   0.43 sec
+----------------------------------------------------------
+Test Passed.
+"native_process_configuration_contract" end time: Oct 22 02:16 Pacific Daylight Time
+"native_process_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+157/172 Testing: native_backend_owner_contract
+157/172 Test: native_backend_owner_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_backend_owner_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_backend_owner_contract" start time: Oct 22 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual C++/embedded-xlang3 owner fence, retirement race, exact target/bootstrap checks, atomic schema migration/publication rollback, closed preparation/restart and activation passed; typed target metadata and prompts are fixtures
+<end of output>
+Test time =   2.09 sec
+----------------------------------------------------------
+Test Passed.
+"native_backend_owner_contract" end time: Oct 22 02:16 Pacific Daylight Time
+"native_backend_owner_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+160/172 Testing: native_owner_process_contract
+160/172 Test: native_owner_process_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_owner_process_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_owner_process_contract" start time: Oct 22 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual Windows live identity, bounded wait, exact child exit and PID-reuse preconditions passed; no process was signalled
+<end of output>
+Test time =   0.26 sec
+----------------------------------------------------------
+Test Passed.
+"native_owner_process_contract" end time: Oct 22 02:16 Pacific Daylight Time
+"native_owner_process_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+161/172 Testing: native_runtime_generation_contract
+161/172 Test: native_runtime_generation_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/runtime_generation_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_runtime_generation_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/xlang3_runtime.dll"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_runtime_generation_contract" start time: Oct 22 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualWindowsVerifier":true,"actualLoadedImageVerification":true,"loadedImageOnlyCheck":true,"unicodeRoot":true,"unicodeFilename":true,"transientExclusiveManifestLockRetried":true,"managedPayloadPinnedAfterFullVerification":true,"managedLateInventoryRejected":true,"pinnedSourceWriteDeleteRenameRejected":true,"pinnedRuntimeRootRenameRejected":true,"ancestorControlAtomicReplaceAllowed":true,"lateInventoryChangeRejected":true,"lateHardlinkCreated":true,"lateHardlinkPreventedOrDetected":true,"syntheticPackageMetadata":true,"providerRequests":0,"cpythonExecuted":false,"installed":false}
+<end of output>
+Test time =  15.72 sec
+----------------------------------------------------------
+Test Passed.
+"native_runtime_generation_contract" end time: Oct 22 02:16 Pacific Daylight Time
+"native_runtime_generation_contract" time elapsed: 00:00:15
+----------------------------------------------------------
+
+162/172 Testing: native_backend_owner_http_contract
+162/172 Test: native_backend_owner_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/backend_owner_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_backend_owner_http_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/xlang3_runtime.dll" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_backend_owner_http_contract" start time: Oct 22 02:16 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+warning: in the working copy of 'status fixture.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'status fixture.txt', LF will be replaced by CRLF the next time Git touches it
+{"actualNativeOwnerHttp":true,"actualEmbeddedSqlite":true,"scopedViewDenied":true,"workspaceAndReceiptCas":true,"activeLedgerRejected":true,"contextAndA2aAdmissionFenced":true,"concurrentHttpRaces":8,"durableRetirementRequestTested":true,"resumeAfterRetirementDenied":true,"providerRequests":0,"retirementShutdownTested":false,"migrationTested":false,"installed":false}
+<end of output>
+Test time =   7.03 sec
+----------------------------------------------------------
+Test Passed.
+"native_backend_owner_http_contract" end time: Oct 22 02:16 Pacific Daylight Time
+"native_backend_owner_http_contract" time elapsed: 00:00:07
+----------------------------------------------------------
+
+End testing: Oct 22 02:16 Pacific Daylight Time

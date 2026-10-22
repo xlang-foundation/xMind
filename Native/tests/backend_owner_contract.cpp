@@ -1,6 +1,15 @@
 #include "agentflow/persistence_service.hpp"
 #include "graph_schema_fixture.hpp"
 #include "agentflow/xlang_sqlite.hpp"
+#include "agentflow/backend_lease.hpp"
+#include "agentflow/interrupted_owner_recovery.hpp"
+#include "agentflow/owner_process.hpp"
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 #include <barrier>
 #include <chrono>
 #include <filesystem>
@@ -158,6 +167,22 @@ int main(int argc,char** argv){
             }
             rejects<Conflict>([&]{PersistenceService replay(path,roots,1024,bootstrap);});
         }
+#if defined(_WIN32)
+        {
+            const auto path=(directory.path/"interrupted-retirement.sqlite").string();BackendOwnerReceipt expected;
+            BackendOwnerTarget target{{(directory.path/"synthetic-recovery-generation").string(),"windows-runtime-file-v1:1:2",std::string(64,'a'),std::string(40,'b'),std::string(40,'c'),std::string(64,'d'),std::string(64,'e')},"D:\\synthetic-workspace","windows-local-file-v1:fixture",std::string(64,'f'),true};
+            {PersistenceService store(path,roots);store.create_session("saved","interrupted handoff retains history").get();expected=receipt(store.quiesce_backend(condition(store.backend_owner().get())).get());}
+            rejects<BackendQuiesced>([&]{PersistenceService refused(path,roots);});
+            {BackendLease lease(path);XlangSqlite db(path,roots);const auto raw=[&]{return std::get<std::string>(db.execute("SELECT payload FROM information WHERE category='native-backend-owner' AND id='owner'").rows.at(0).at(0));};const auto before=raw();const auto pid=GetCurrentProcessId();const auto live_birth=inspect_owner_process_birth(pid);
+                rejects<Conflict>([&]{finish_interrupted_backend_retirement(db,lease,expected,target,pid,live_birth);});
+                auto changed=expected;++changed.revision;rejects<Conflict>([&]{finish_interrupted_backend_retirement(db,lease,changed,target,pid,"1");});require(raw()==before,"Live source and changed receipt must preserve the exact closed owner");
+                db.execute("CREATE TRIGGER reject_recovery BEFORE UPDATE ON information WHEN NEW.category='native-backend-owner' BEGIN SELECT RAISE(ABORT,'recovery rollback fixture'); END");rejects<DatabaseError>([&]{finish_interrupted_backend_retirement(db,lease,expected,target,pid,"1");});require(raw()==before,"Interrupted retirement failure must roll back the complete owner transition");db.execute("DROP TRIGGER reject_recovery");
+                const auto recovered=finish_interrupted_backend_retirement(db,lease,expected,target,pid,"1");require(recovered.quiesced&&recovered.retirement_requested&&recovered.replacement_source==std::optional<BackendOwnerReceipt>{expected},"PID reuse proves the original source exited while recovery retains its exact receipt");
+                require(finish_interrupted_backend_retirement(db,lease,expected,target,pid,"1").revision==recovered.revision,"Repeated recovery must reuse its exact durable target without another revision");auto other=target;other.workspace_id+="-foreign";rejects<Conflict>([&]{finish_interrupted_backend_retirement(db,lease,expected,other,pid,"1");});require(db.execute("SELECT id FROM sessions WHERE id='saved'").rows.size()==1,"Recovery must retain the saved session");
+            }
+            {PersistenceService replacement(path,roots,1024,BackendOwnerBootstrap{expected,target});require(replacement.backend_owner().get().quiesced,"Recovered replacement must stay closed until native activation");const auto owner=replacement.backend_owner().get();replacement.activate_backend_replacement(receipt(owner),target).get();require(replacement.session("saved").get().title=="interrupted handoff retains history","Activation after recovered retirement must retain original history");}
+        }
+#endif
         std::cout<<"Actual C++/embedded-xlang3 owner fence, retirement race, exact target/bootstrap checks, atomic schema migration/publication rollback, closed preparation/restart and activation passed; typed target metadata and prompts are fixtures\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

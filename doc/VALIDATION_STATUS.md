@@ -1,3 +1,79 @@
+## TestProj workspace switch recovery — 2026-10-22 (focused checks passed)
+
+Final exact-source gate passes 5/5 in 25.55 seconds: process configuration,
+backend owner, OS owner identity, runtime generation and backend owner HTTP.
+Native patch 9b315f6997bbda06be053b47b2837ae97aadcebea1572c4d67b9ae13a98017dc;
+xmind.exe 4a684f1e3a851f6b1d42740448da0648c9a4740331c2aa4037beabc7345eb140.
+All 2787 project, 16 SDK, 1870 pure-library, 30 consumed SDK-runtime,
+18598 Node dependency and 101 native binary files and sets remain unchanged.
+The current inventory has 172 registrations; only the named five ran.
+The first stable-SDK build succeeded but stopped at the stale 169-count
+assertion before tests; its source/build receipts remain alongside the final gate.
+
+User cleanup removed the prior C: SDK during validation. The existing repository
+build now uses .agentflow/xlang3-sdk: 16 headers recovered from pinned commit
+58a8aab9b40a464e38a741129b4804ac36e27a53 and accepted runtime files recovered
+byte-for-byte from installed60. DLL SHA remains
+1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3.
+The missing import library was regenerated from that DLL's 20748 PE exports;
+no engine execution/rebuild or CPython was used. Unused module development
+.lib/.exp/.pdb files are omitted explicitly in SDK provenance. Original SDK
+checkout remains untouched. Recovery scripts and import-library hashes are saved.
+Final source also verifies the loaded source runtime before database access and
+permits target replacement only on an explicit upgrade while the exact source
+receipt is quiesced and has no committed retirement target. Actual rendered
+browser evidence below used the earlier qualified recovery runtime, not this
+final binary. No new model calls or replayed tasks; no full-suite claim.
+
+The reported browser switch failure reproduces as selection HTTP 503. The
+TestProj profile had a protected replacement receipt and a stopped process,
+but its database owner was only quiesced: no retirement target had committed.
+Starting the proposed old runtime correctly refused the incomplete binding.
+The existing retire_for_upgrade path could advance the profile without
+finishing that database transition after source exit.
+
+The new internal recovery completes retirement under an exclusive matching
+database lease, exact quiescence receipt, observed PID/birth exit, validated
+target and idle database. It never opens admission. The protected target intent
+is persisted before the transaction so interrupted observation can reuse the
+same target. Changed receipt/target and live source refuse; injected SQL failure
+rolls back. Core links its Windows process-observation dependency explicitly.
+Tests also cover idempotence, retained history and activation afterward.
+
+The actual saved database then reached prepared replacement but its registered
+process executable identity was stale. An explicit upgrade/reimport of the same
+trusted process document now sets the pending import even when the file's path
+and bytes are unchanged. Existing refusal of different configuration during a
+handoff remains. The replacement applies the supported trusted import before
+loading its process catalogue; no direct SQLite record rewrite was used.
+
+Initial build failed on the missing process-observation link dependency; raw
+log/source retained. Corrected owner 1/1 passes in 2.62 seconds. With process
+refresh, owner/configuration 2/2 pass in 2.86 seconds, patch
+42f5946a48eb222d6fefa5e2a3eb1db3e5a166f42def094fba021fb6574d996f,
+native bbf83e1c5f1101a2ef124b5da5e204aecb13d7e0ced11f02638ae072b2be43fa.
+Both gates freeze project/SDK/library/dependency/binary sets and hashes. They
+are focused checks, not a full-suite claim. A subsequent Windows test guard
+preserves non-Windows compilation; final exact-source lifecycle checks are
+now pass in the existing build/skill-state-native directory, as recorded above.
+Additional gate attempts could not inventory a broken SDK node_modules
+junction; its recorded target was restored from the pinned lockfile with
+install scripts disabled. Cleanup also removed the earlier C: build directory.
+The first repository-cache configure used the wrong source root; the corrected
+invocation uses Native/. These unsuccessful setup/build results are not passes.
+
+The qualified working-tree runtime recovered the existing TestProj profile,
+preserving its seven sessions. Authenticated browser round trip selects TestProj
+and returns its own ID/root/history/files, then xMind and its sixteen sessions.
+Hidden IAB additionally verifies the actual workspace dropdown changes the
+header, file tree and conversation list; TestProj reload retains selection;
+switching back restores xMind/Native and sixteen conversation options. Screenshot
+and DOM/API receipts: doc/evidence/workspace-switch-recovery-20261022-*.
+This is hidden rendered verification, not external-browser automation. No
+prompts, models or tool effects were submitted or replayed. User-initiated
+model usage remains separate. Runtime staging used the existing repository
+.agentflow development area; user data stays in the standard .xMind/p root.
+
 ## Standard web UI reopening and saved configuration — 2026-10-22
 
 The user confirmed cleanup is running under C:/xMindNativeValidation and chose

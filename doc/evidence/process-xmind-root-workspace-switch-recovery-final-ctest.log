@@ -1,0 +1,15 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  60: native_process_configuration_contract
+1/5 Test  #60: native_process_configuration_contract ...   Passed    0.43 sec
+    Start 157: native_backend_owner_contract
+2/5 Test #157: native_backend_owner_contract ...........   Passed    2.09 sec
+    Start 160: native_owner_process_contract
+3/5 Test #160: native_owner_process_contract ...........   Passed    0.26 sec
+    Start 161: native_runtime_generation_contract
+4/5 Test #161: native_runtime_generation_contract ......   Passed   15.72 sec
+    Start 162: native_backend_owner_http_contract
+5/5 Test #162: native_backend_owner_http_contract ......   Passed    7.03 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  25.55 sec

@@ -3,6 +3,10 @@
 #include "agentflow/context_records.hpp"
 #include "agentflow/owner_process.hpp"
 #include "agentflow/runtime_generation.hpp"
+#include "agentflow/interrupted_owner_recovery.hpp"
+#include "agentflow/backend_owner_control.hpp"
+#include "agentflow/backend_lease.hpp"
+#include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -693,7 +697,7 @@ Json authority_body(const Json& workspace){
     require(workspace.value("configured",false)&&workspace.contains("workspace_id")&&workspace.contains("authority_id"));
     return {{"expected_workspace_id",workspace.at("workspace_id")},{"expected_workspace_authority_id",workspace.at("authority_id")}};
 }
-void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace){
+void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace,bool allow_retarget){
     require(state.contains("owner_receipt")&&state.contains("replacement_port")&&state.contains("replacement_manifest")&&state.contains("replacement_runtime"),"Incomplete persisted backend handoff intent; profile was preserved");
     const auto pid=state.at("pid").get<std::uint32_t>();const auto birth=state.value("birth",std::string{});
     std::string retirement_error;
@@ -715,6 +719,35 @@ void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace
     require(!pid||observe_owner_exit(pid,birth,0).exited,
         "Backend retirement is unresolved; the saved handoff was preserved"+
         (retirement_error.empty()?std::string{}:std::string(". ")+retirement_error));
+    {
+        // A crash can follow quiescence before the live owner commits retirement.
+        // Its protected receipt and an exclusive database lease allow finishing
+        // that transition; normal startup must continue to refuse the database.
+        BackendLease lease(text(store.directory/L"state.sqlite"));
+        const auto source=absolute(loaded_root());
+        const auto digest=context_digest(file_bytes(source/L"native-runtime-manifest.json",4*1024*1024));
+        VerifiedRuntimeGeneration source_generation(text(source),digest);source_generation.require_loaded_server_image();
+        XlangSqlite db(lease.canonical_database_path(),{text(source/L"modules"),text(source/L"stdlib")});
+        const auto rows=db.execute("SELECT payload FROM information WHERE category='native-backend-owner' AND id='owner'").rows;
+        if(rows.size()==1){
+            const auto owner=Json::parse(std::get<std::string>(rows[0][0]));
+            if(owner.value("quiesced",false)&&!owner.value("retirement_requested",false)&&!owner.value("replacement_prepared",false)&&!owner.contains("replacement_target")){
+                const auto& saved=state.at("owner_receipt");
+                BackendOwnerReceipt receipt{saved.at("generation").get<std::string>(),saved.at("receipt_id").get<std::string>(),saved.at("revision").get<std::int64_t>()};
+                require(owner.at("generation")==receipt.generation&&owner.at("revision")==receipt.revision&&owner.at("receipt_id")==receipt.receipt_id,"Interrupted backend receipt differs from protected profile");
+                if(allow_retarget&&state.at("replacement_manifest")!=digest){
+                    auto [replacement,manifest]=stage_current_runtime(store,workspace);
+                    state["replacement_runtime"]=text(replacement);state["replacement_manifest"]=manifest;
+                    // Persist the exact target before the transaction so a crash
+                    // after commit resumes this intent rather than staging again.
+                    store.write(state);
+                }
+                VerifiedRuntimeGeneration replacement(VerifiedRuntimeGeneration::managed_profile_copy(state.at("replacement_runtime").get<std::string>(),state.at("replacement_manifest").get<std::string>(),workspace.root_path()));
+                const auto target=qualify_backend_target(replacement,workspace,state.at("auth").get<std::string>(),state.at("approved_edits").get<bool>(),false);
+                (void)finish_interrupted_backend_retirement(db,lease,receipt,target,pid,birth);
+            }
+        }
+    }
     VerifiedRuntimeGeneration target(VerifiedRuntimeGeneration::managed_profile_copy(state.at("replacement_runtime").get<std::string>(),state.at("replacement_manifest").get<std::string>(),workspace.root_path()));target.revalidate();
     state["runtime"]=state.at("replacement_runtime");state["manifest"]=state.at("replacement_manifest");state["pid"]=static_cast<std::uint32_t>(0);state["birth"]="";state["port"]=0;state["phase"]="preparing";store.write(state);
 }
@@ -855,6 +888,11 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
              state.value("process_config_digest",std::string{})!=requested_process_digest);
         if(state.contains("owner_receipt")&&process_configuration_changed)
             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing process configuration");
+        if(state.contains("owner_receipt")&&options.upgrade_backend&&!options.process_config.empty()&&!process_configuration_changed){
+            // An explicit reimport of the same trusted document must reach the
+            // replacement even when only the executable's file identity changed.
+            state["process_config_pending"]=true;store.write(state);
+        }
         if(process_configuration_changed&&!options.upgrade_backend)
             throw std::invalid_argument("Process configuration changed; update the existing backend explicitly");
         if(recovered_stopped_owner&&process_configuration_changed){
@@ -946,7 +984,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                 if(state.contains("owner_receipt")&&state.at("phase")=="ready"&&state.at("pid").get<std::uint32_t>()){
                     try{auto replacement=state;replacement["runtime"]=state.at("replacement_runtime");replacement["manifest"]=state.at("replacement_manifest");verify_process(replacement);replacement_already_running=true;}catch(...){}
                 }
-                if(!replacement_already_running)retire_for_upgrade(store,state,workspace);
+                if(!replacement_already_running)retire_for_upgrade(store,state,workspace,options.upgrade_backend);
             }
         }
     } else {

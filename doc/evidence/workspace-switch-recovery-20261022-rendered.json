@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-10-22T08:27:42.707Z",
+  "scope": "Hidden IAB UI dropdown switches and TestProj reload, no prompt submission",
+  "testProjAfterReload": {
+    "fileTree": "TestProjPrimaryD:\\CantorAI2026\\TestProj▸%SystemDrive%·hello.py＋▸model-zoo▸xmind-browser-acceptance-20261019▸xmind-browser57-coding-20261020▸xmind-browser58-coding-20261020▸xmind-cli55-coding-20261019▸xmind-live-coding-app▸xmind-patch-proof-622c9d1▸xmind-ui-folder-smoke·xmind_coding_smoke.py＋·xmind_dynamic_plan_smoke.py＋·xmind_vscode_coding_smoke.py＋·xmind_web_coding_smoke.py＋",
+    "sessionOptions": 7,
+    "workspace": "TestProj⌄"
+  },
+  "xMindAfterSwitchBack": {
+    "fileTree": "xMindPrimaryD:\\CantorAI2026\\xMind·.gitattributes＋▸.github·.gitignore＋·AGENTS.md＋·CMakeLists.txt＋·LICENSE＋▸Native·README.md＋▸Testing▸Tools▸build▸doc·endpoint.obj＋▸extensions·probe.obj＋▸views",
+    "sessionOptions": 16,
+    "workspace": "xMind⌄"
+  }
+}

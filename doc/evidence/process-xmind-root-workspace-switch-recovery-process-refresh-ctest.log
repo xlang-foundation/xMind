@@ -1,0 +1,9 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start  60: native_process_configuration_contract
+1/2 Test  #60: native_process_configuration_contract ...   Passed    0.40 sec
+    Start 154: native_backend_owner_contract
+2/2 Test #154: native_backend_owner_contract ...........   Passed    2.45 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   2.86 sec
