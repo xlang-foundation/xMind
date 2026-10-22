@@ -1,0 +1,78 @@
+Start testing: Oct 22 05:36 Pacific Daylight Time
+----------------------------------------------------------
+23/172 Testing: native_dynamic_plan_contract
+23/172 Test: native_dynamic_plan_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_dynamic_plan_contract" start time: Oct 22 05:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native pure dynamic-plan contracts passed strict UTF-8/duplicate/authority schemas, dependency joins, success/observed failure semantics, immutable same-plan replanning, stale state and protected-work rejection, exact data-string observations, private-field exclusion, escaped byte limits and final-human report readiness. Snapshot values are synthetic; runtime/SQLite/execution acceptance is separate.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_contract" end time: Oct 22 05:36 Pacific Daylight Time
+"native_dynamic_plan_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/172 Testing: native_dynamic_plan_repository_contract
+25/172 Test: native_dynamic_plan_repository_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_repository_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_dynamic_plan_repository_contract" start time: Oct 22 05:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared root-wide node/revision/human limits, concurrent nested wait pause/resume and recovery, nested claimed-owner admission through depth eight, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only
+<end of output>
+Test time =   3.52 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_repository_contract" end time: Oct 22 05:36 Pacific Daylight Time
+"native_dynamic_plan_repository_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+39/172 Testing: native_dynamic_plan_engine_contract
+39/172 Test: native_dynamic_plan_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/dynamic_plan_engine_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_engine_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_dynamic_plan_engine_contract" start time: Oct 22 05:36 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native dynamic engine contract passed: actual dependency children/failure, same-plan revision, closed-pause reopen, same-owner human wake, child edit approval/effect, dependent read, independent signed histories/usage, A2A human continuation and idempotent retry, paused cancel and native expiry. Provider replies/key are synthetic.
+<end of output>
+Test time =   6.48 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_engine_contract" end time: Oct 22 05:37 Pacific Daylight Time
+"native_dynamic_plan_engine_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+94/172 Testing: native_agent_worker_ledger_contract
+94/172 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_ledger_contract" start time: Oct 22 05:37 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.
+Delegated worker ledger verified queued admission, named provider binding, shared funding, four-turn cap, read-only authority, canonical child history, sibling-independent completion and cancellation without refund; synthetic process identities, no child runner dispatch.
+Graph worker admission boundary verified exact registered node/model, active graph segment, captured membership, sibling isolation, tool-node rejection and no untyped funding; synthetic identities, no graph worker dispatch.
+Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.
+Durable process claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no command dispatch or process RPC.
+Durable remote claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no remote peer dispatch or worker RPC.
+Durable callable claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no callable peer dispatch or worker RPC.
+Durable process control ledger binds wait and stop to one captured service with distinct call receipts, no duplicate control, exact canonical observations and read-only rejection. Synthetic job facts; no native process control or RPC.
+Mixed workspace turns preserve exact ordered read/file/process/remote/callable results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.
+Atomic online worker terminal boundary: rollback, exact identity, queued cancellation, interrupted reservations and retained charges verified.
+Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; no child AgentRunner RPC is implemented.
+Independent peer observed exactly one native model request; rejected duplicates caused no extra HTTP.
+<end of output>
+Test time =  21.67 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_ledger_contract" end time: Oct 22 05:37 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:21
+----------------------------------------------------------
+
+End testing: Oct 22 05:37 Pacific Daylight Time

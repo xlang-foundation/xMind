@@ -170,7 +170,7 @@ public:
         if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n"+settings_.instruction_policy.instructions;
         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
-        if(delegation_&&!planning_root())for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
+        if(delegation_)for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
         for(const auto& definition:selected_tools)if(definition.name=="language_server"||((definition.name=="list_skills"||definition.name=="load_skill")&&!callable_tool(definition.name)))policy.tools.push_back(definition);
         if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
@@ -199,7 +199,6 @@ public:
             if(!resumed){planning_segment=store_.open_dynamic_budget_segment({root,generation(),caps.backend_identity,store_.root_budget(root).get().revision}).get();deadline=execution_started+std::chrono::milliseconds(planning_segment->remaining_active_ms);}
             const auto allowed=request.agent_tools?request.agent_tools:settings_.tool_allowlist;for(const auto& definition:dynamic_plan_tool_definitions(caps))if(!allowed||std::find(allowed->begin(),allowed->end(),definition.name)!=allowed->end())policy.tools.push_back(definition);
         }
-        if(delegation_&&planning_root())for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
         if(settings_.provider_identity){
             policy.history_owner=ProviderHistoryOwner{root,request.run_id,(delegated_||graph_||dynamic_)?ModelCallRole::leaf:ModelCallRole::parent,
                 {(delegated_||graph_||dynamic_)?ContextScopeKind::execution:ContextScopeKind::session,(delegated_||graph_||dynamic_)?request.run_id:admitted.session_id},provider_identity.dump(),

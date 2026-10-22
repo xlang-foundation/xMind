@@ -679,8 +679,10 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,seal_dynamic_tool_catalogue(request.tools,offered_bindings.dump()),std::move(presets)).get();
             }
         };
-        auto offer_orchestration=[&]{
+        auto offer_delegation=[&]{
         if(budget&&!leaf&&delegation_&&settings_.delegation){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(DelegationExecutor::definition());}
+        };
+        auto offer_orchestration=[&]{
         if(dynamic_plan_owner&&!remote_planning){const auto& capabilities=dynamic_root?*root_caps:*child_caps;for(auto& definition:dynamic_plan_tool_definitions(capabilities)){if(request.tools.size()>=64)throw std::invalid_argument("Model tool catalogue exceeds limits");request.tools.push_back(std::move(definition));}}
         };
         auto apply_tool_allowlist=[&](bool require_all){
@@ -690,7 +692,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             request.tools.erase(std::remove_if(request.tools.begin(),request.tools.end(),[&](const auto& tool){return !allowed.contains(tool.name);}),request.tools.end());
         };
         auto refresh_tools=[&]{
-            discover_mcp();discover_a2a();apply_tool_allowlist(false);
+            discover_mcp();discover_a2a();offer_delegation();apply_tool_allowlist(false);
             if(dynamic_child&&!read_workspace_){
                 // A dynamic child may inherit optional workspace extensions
                 // (language servers and xlang tools) from the root runtime.

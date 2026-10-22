@@ -15,13 +15,23 @@ selections, including SDK process children with no tools and exact canonical rea
 Fresh primary-only local roots also persist their captured membership before
 process-child dispatch. See VALIDATION_STATUS.md for accepted scopes and hashes.
 
+### Root delegation catalogue ordering
+
+Local and process roots now include selected delegate_tasks in their frozen
+native catalogue before finalization. Shared preset assembly removes that root
+capability from every child preset. The restricted application matrix now has
+fifteen cases, with delegation configured throughout: explicit delegation-only
+selection is sealed exactly once, and other selections do not gain delegation.
+These cases inspect offered authority; they do not execute direct delegation on
+a planning root. Shared segment funding and typed IPC admission remain pending.
+
 ### Next default-enablement boundary
 
 Built-in process-profile enablement must retain direct delegate_tasks alongside
 plan_tasks. Main delegation currently captures an ordinary budget separately, and
 worker delegation guards require native.delegation while planning roots use
-native.dynamic-plan. Both paths need the same live segment-backed clock, an exact
-sealed root delegation capability and child-kind-specific admission/funding, with
+native.dynamic-plan. Both paths still need the same live segment-backed clock and
+child-kind-specific admission/funding using the sealed root capability, with
 physical drain before settlement. Qualify normal, denied and cancelled direct
 delegation and planning under the same application configuration before enabling
 the built-in default. Injected executor factories continue owning their explicit

@@ -1,3 +1,29 @@
+## Selected root delegation catalogue — 2026-10-22
+
+Local and process planning roots now seal a selected delegate_tasks descriptor
+before finalizing native capabilities. Child presets continue excluding all root
+orchestration. Fifteen application catalogue cases cover read-process,
+coding-process and local roots with delegation configured: empty, read-only,
+planning-only, language-server-only and delegation-only selections. Each selected
+native descriptor is sealed exactly once; unselected delegation stays absent.
+These new cases verify capability offering, not actual delegation execution from
+a process planning root.
+
+Final focused planning/schema/repository/worker-ledger gate passes 4/4 in 31.72s;
+the separate ordinary agent-runner gate passes 1/1 in 9.93s. Both freeze Native
+patch 1878b2495d7da01a162e6a020cd63a1080b5b6a868dae2d8a9c0d83ef21ebadc
+and xmind.exe 65a92f17a9ce844cc15196be550498f0be82aeabe94827263dbf64ce892df4a6.
+All tracked input sets, SDK headers/runtime, pure libraries, dependencies and
+native binary sets remain unchanged through each gate. The earlier pre-fixture
+4/4 gate (31.69s) is archived separately. Raw evidence and exact verifiers:
+doc/evidence/process-xmind-root-delegation-catalogue-*-20261022-*.
+
+No paid provider inference, CPython, installation or user-data changes. These are
+focused gates against a 172-test inventory, not full-suite acceptance. Shared
+segment budgeting and typed IPC delegation admission remain required before
+managed process planning defaults can be enabled. The intermittent heap failure,
+restart policy binding and current installed-client validation remain open.
+
 ## Restricted and empty native tool catalogues — 2026-10-22
 
 Finalized planning presets may now contain an empty tool list. That means a
