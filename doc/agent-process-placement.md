@@ -1,5 +1,34 @@
 # Agent execution placement
 
+## Current placement implementation - 2026-10-22
+
+The C++ AgentRunner executes in the backend or in a separate native xmind
+process. Trusted primary-agent definitions select `thread` or `process`; empty
+placement inherits the backend's `thread`, `process-read` or `process-code`
+mode. Process backend assembly also dispatches graph agents, delegated leaves
+and eligible planned agents through the same executable and shared scheduling
+budgets. xMind registers one root at startup and exposes service subobjects
+through the standard xlang3 SDK, following Cantor. The SDK owns remote references,
+serialization and transport. Public and private services retain separate backend
+authorization and scope.
+
+Actual SDK workers execute model/tool loops, canonical journal calls, workspace
+reads, reviewed file/process effects, remote tools and registered callables.
+Main process roots support planning, direct delegation and clean human
+pause/reopen. Retirement retains the exact process identity and physical drain;
+completed work is not replayed. Nested planning inside dynamic process children
+and broader acceptance remain unfinished.
+
+The complete native 172-test inventory passed on d5b4231e. Newer policy changes
+are being validated and do not inherit that full-suite result. The intermittent
+SDK runtime fault remains unresolved. Candidate browser and CLI coding have
+controlled-provider acceptance; latest installed-client and actual VS Code
+rendered acceptance remain separate. See [current validation](VALIDATION_STATUS.md)
+and [the process IPC architecture](architecture.md).
+
+The dated sections below preserve earlier implementation stages and their
+original evidence; their open-work statements describe those checkpoints.
+
 ## Owned repository and skill tools — 2026-10-19
 
 Explicit attached-folder repository-instruction calls previously built a primary-
@@ -88,20 +117,13 @@ contains the corrected shared client; rendered headless delegated execution,
 package verification and their limits are recorded in
 [coding-package-0.1.33](evidence/coding-package-0.1.33-20261018.json).
 
-## Current behavior
+## Shared execution contract
 
-The native `AgentRunner` is the shared C++ model/tool loop. `AgentService`
-executes root runs in its bounded in-process worker threads. Graph nodes and
-delegated children use the same loop through `NativeChildExecutor`; they do not
-currently select a separate process. The existing `xmind worker` mode hosts a
-trusted xlang3 callable over the xlang3 LRPC interface. It isolates that
-callable, not the C++ agent/model/tool loop.
-
-This leaves the user's requested choice between in-process and out-of-process
-agent execution unfinished. Process placement is an execution policy, not a
-different kind of agent, tool, graph, or model. Both placements must execute
-the same `AgentRunner` and preserve the same backend-owned workspace, provider,
-permission, MCP/A2A, graph, budget and persistence rules.
+The native `AgentRunner` remains the shared C++ model/tool loop for both
+placements. Process placement is an execution policy; it preserves the same
+backend-owned workspace, provider, permission, MCP/A2A, graph, budget and
+persistence rules. The separate `xmind worker` callable mode does not substitute
+for the process-bound AgentRunner.
 
 ## Process-tool owner boundary — 2026-10-18
 
@@ -138,9 +160,9 @@ Claude coding task; the later read-tool owner is installed in 0.1.32/0.1.33.
 
 ## Target contract
 
-Trusted agent and graph configuration may select `in_process` or `process`.
-`in_process` remains the default. The model cannot select placement or launch
-commands. A process-bound run keeps its existing durable run and session IDs;
+Trusted primary-agent configuration may select `thread` or `process`; an empty
+placement inherits the configured backend mode. The model cannot select placement
+or launch commands. A process-bound run keeps its existing durable run and session IDs;
 all clients continue to inspect and control it through the same xMind Server.
 
 The native supervisor owns worker admission, executable identity, process
@@ -164,7 +186,7 @@ of that binary, not a user-authored Python entry point. The xlang3 tool worker
 remains a separate feature and cannot stand in for process-bound AgentRunner
 execution.
 
-## Implementation and acceptance sequence
+## Initial implementation and acceptance sequence (historical)
 
 1. Finish an `AgentExecutionHost` capability boundary for model calls, run and
    context journals, tool discovery/invocation, approval waits, and effect

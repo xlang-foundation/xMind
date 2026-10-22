@@ -11,9 +11,13 @@ planning, graph readiness, scheduling, cancellation, budgets and recovery.
 An agent is an LLM-driven execution instance. Its normal loop requests a model,
 executes permitted tools and supplies actual results to the next model turn.
 Another turn is not automatically another agent. Delegation explicitly creates
-a child execution. The agent loop currently runs in the backend process. A
-trusted registered xlang3 tool can execute in-process or in a short-lived
-`xmind` worker; durable agent-level worker placement remains pending.
+a child execution. The agent loop can run in the backend or another native
+`xmind` process. Trusted primary-agent configuration selects `thread` or
+`process`; an empty placement inherits the backend mode (`thread`,
+`process-read` or `process-code`). Process roots, graph agents and delegated
+leaves use registered xlang3 SDK service objects and the same durable backend
+ownership. A trusted registered xlang3 callable also has its separate short-lived
+tool-worker mode.
 
 **Coding Agent / Harness** is a first-class application of that runtime. It
 supplies coding agent definitions, repository instructions, skills, workspace
@@ -142,6 +146,17 @@ The product entry point is `xmind.exe`:
 | `xmind serve` | Persistent authenticated backend, called xMind Runtime |
 | `xmind` | Console client; discover/start or attach to a selected local runtime |
 | `xmind worker` | Private xlang3 worker for one trusted registered-tool invocation |
+
+The supervisor also starts a private agent-worker mode of this same executable.
+It runs the C++ model/tool loop and calls the backend through xlang3 SDK remote
+objects; it is not a user-authored entry point. The backend retains database,
+credential, permission and effect authority. Main read/coding process roots can
+compose planning and direct delegation with the shared root budget, including
+clean human pause/reopen. Nested planning in dynamic process children remains
+unfinished. Source d5b4231e passed its complete 172-test native inventory; newer
+effective-policy changes are under validation. Current installation, rendered
+VS Code and intermittent runtime-fault acceptance remain separate. See
+[current validation](VALIDATION_STATUS.md).
 
 One executable can run in multiple processes. Closing a console/view detaches
 observation; it does not cancel agent execution. The runtime owns durable
