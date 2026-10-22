@@ -1,0 +1,160 @@
+{
+  "recordedAt": "2026-10-22T01:32:50.946Z",
+  "gate": {
+    "recordedAt": "2026-10-22T01:32:21.665Z",
+    "sourceParent": "2edefef81fd805b9e327e0a8ecb7a3d8863e1dc6",
+    "sourcePatchSha256": "517f496a597d99232b7a1f08c1dad54fac64151e7f54cd2027bdd2a75220db73",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 28352,
+      "launchedAt": "2026-10-22T01:29:24.642Z",
+      "completedAt": "2026-10-22T01:30:00.611Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f6c6df1e975d5438ff7ec88a56ec9d0c76a8dfe2db9d7e265123ceebdeaa0965"
+    },
+    "test": {
+      "pid": 63324,
+      "launchedAt": "2026-10-22T01:30:03.391Z",
+      "completedAt": "2026-10-22T01:32:18.881Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c9bd8968c74c949e3e2e9e47462db35999ed0cce301c3344a863a802770f0c6a"
+    },
+    "total": 20,
+    "failed": 0,
+    "passed": 20,
+    "seconds": 135.44,
+    "projectFiles": 2783,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 138,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "a5711613c04529eb842015035847ab1197a98a17a47834f142c1b7c638e0f922",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": [
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-20261021-build.log",
+      "sha256": "dba0495d46ccd25fd75095b14612fc188473f086d28bb5cb815737345b3308a7"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-20261021-build-terminal.json",
+      "sha256": "fbd209efca4545c9f6e58f33dd2c9c505246ce919433528f169cb1c48454168d"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-20261021-source.patch",
+      "sha256": "58c414978407cbf57e6392add7d6ff45d6d4449e1680bdf02445da4b8fff54df"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-gate.json",
+      "sha256": "b4543aac032b22ca7f9a124521067d0cd83f95ba4bc784dd68390d4ae3731b6a"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-build.log",
+      "sha256": "a014a3823a93b6b15ef7c128d565174c1a18e8c4d561b8e2a0c5c25494f77aab"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-build-terminal.json",
+      "sha256": "a21f5539684e025ed5018149fe4ff95733880d478304002bdeb3fccaf865f0ca"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-ctest.log",
+      "sha256": "a131e941fd22be290e4bba553a45edfa965a99aadc4a564c90b2f25d2121b058"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-ctest-terminal.json",
+      "sha256": "0d40259f6346dbc97f60c5dc1d10bd7c30187cc51c5ade92becd4d2af9d0b49f"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-LastTest.log",
+      "sha256": "bf8239457768660c956b700f1fcae98b090cf84f3f41abac9468a6854cb152de"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-fixed-20261021-source.patch",
+      "sha256": "bc4f0b2146fd9849df039b251ff1daff11ddaf7049123fc19536cf1d798ae660"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-gate.json",
+      "sha256": "7be81142471cc93034d5278f1643bcb3dc65f73a7abdf0394ed5069b23a38cc7"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-build.log",
+      "sha256": "f6c6df1e975d5438ff7ec88a56ec9d0c76a8dfe2db9d7e265123ceebdeaa0965"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-build-terminal.json",
+      "sha256": "faa992a335888b4a00c2c7a2a176c80afe6c1ab54bbc193ef7243692512074cd"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-ctest.log",
+      "sha256": "c9bd8968c74c949e3e2e9e47462db35999ed0cce301c3344a863a802770f0c6a"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-ctest-terminal.json",
+      "sha256": "2d7f3af4881190b8af88229c3202edd535d7f8b4bb46b0b5cd909d33fcb8c12c"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-LastTest.log",
+      "sha256": "6a96c078526aec88661e9de6afd2978aff71dce5ce46eb90032ff32a39ce0bf9"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-settlement-qualified-20261021-source.patch",
+      "sha256": "517f496a597d99232b7a1f08c1dad54fac64151e7f54cd2027bdd2a75220db73"
+    }
+  ],
+  "dumps": [
+    {
+      "path": "C:/xMindNativeValidation/process-xmind-native-planning-settlement-dumps-20261021/fixture-18212-658772453-slow.dmp",
+      "bytes": 291371,
+      "sha256": "ba2b2825bb40318b9ac7ea9386c050893f09001c5d06b97624d8a01807e7da31"
+    }
+  ],
+  "change": [
+    "Native plan acceptance transaction atomically links a worker planning claim to the exact accepted native call.",
+    "Native rejected tool-turn transaction atomically records the worker rejection code with canonical history/events. No public outcome-setting API was added.",
+    "Settlements revalidate the captured model receipt and current worker lease. Accepted/rejected facts remain immutable and survive retirement; only entered claims become uncertain.",
+    "Stored accepted IDs and rejection codes are validated against native call records and canonical rejection markers.",
+    "Ledger tests inject SQL failures to prove acceptance/budget/events and rejection/history/claim rollback; test stale settlement, changed outcomes, repeated observations and corrupted links."
+  ],
+  "failures": [
+    {
+      "stage": "settlement",
+      "result": "Compiler C2676: missing claim-spec comparison operator; no tests run. Corrected to explicit field comparison."
+    },
+    {
+      "stage": "settlement-fixed",
+      "result": "18/20: ledger fixture omitted required depends_on; broad worker production process exited 3221226356 / 0xC0000374 heap corruption after graph coding output. Original logs preserved; crash cause remains unresolved."
+    }
+  ],
+  "finalDiagnosticEnvironment": {
+    "XMIND_WORKER_FIXTURE_DUMP_DIR": "C:/xMindNativeValidation/process-xmind-native-planning-settlement-dumps-20261021",
+    "changesDeadlinesOrAssertions": false
+  },
+  "equivalentProductComparison": {
+    "changedBinaries": [
+      "agentflow_agent_worker_ledger_contract.exe"
+    ],
+    "unchangedBinaries": 137,
+    "productExecutableIdenticalAcrossHeapFailureAndFinalPass": true,
+    "heapCorruptionFixed": false
+  },
+  "remaining": [
+    "Worker journal must recognize signed planning turns and exact native continuation reservations.",
+    "Production scheduler callbacks and actual dynamic child workers, pause/resume lease/budget handoff.",
+    "Remaining legacy RPC fixture cleanup.",
+    "Full current 169-test native suite and updated installed browser/CLI/editor acceptance.",
+    "Prior SDK access violation, heap corruption and timing investigation."
+  ],
+  "externalClosure": "C:/xMindNativeValidation/process-xmind-native-planning-settlement-qualified-20261021/inputs-before-build.json",
+  "externalBinaryInventory": "C:/xMindNativeValidation/process-xmind-native-planning-settlement-qualified-20261021/binaries-before-test.json"
+}

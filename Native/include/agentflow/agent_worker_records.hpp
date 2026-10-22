@@ -43,6 +43,8 @@ struct AgentWorkerModelClaimRecord {
 struct AgentWorkerPlanningClaimRecord {
     AgentWorkerModelClaimSpec model;
     std::string call_id,tool_name,arguments_json,backend_identity,segment_id,state;
+    // Derived atomically by native acceptance/rejection transactions only.
+    std::string native_call_id,rejection_code;
 };
 struct AgentWorkerReadClaimRecord {
     AgentWorkerModelClaimSpec model;

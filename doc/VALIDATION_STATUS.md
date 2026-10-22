@@ -1,3 +1,29 @@
+## Worker planning settlement is atomic — 2026-10-21
+
+Native plan acceptance now links a worker claim to its exact native call ID in
+the same transaction. Native rejection commits its safe code together with the
+canonical failed tool turn. Captured model receipt and live lease are rechecked;
+settled facts remain immutable and survive retirement. Only unresolved entered
+claims become uncertain. Stored links/codes are checked against native ledgers.
+No caller-facing outcome mutation API was introduced.
+
+Final frozen diagnostic gate passes 20/20 in 135.44s, native a5711613 / SDK
+1ff2a8e7. Ledger checks prove SQL rollback, idempotent observation, changed-outcome
+and stale-generation refusal, corrupt-link detection and retirement behavior.
+All 2783 project inputs and 138 observed binaries remain frozen. Full 169-test
+suite not run; nothing installed.
+
+Earlier attempt: compiler comparison error, then 18/20 gate with invalid new
+fixture dependencies and broad worker heap corruption 0xC0000374. Both remain
+preserved. Final rerun corrects the fixture and enables existing test-only dump
+diagnostics; all 137 other binaries, including product xmind, are identical.
+The passing rerun does not diagnose or fix heap corruption.
+
+Production integration still needs signed planning-turn/continuation funding,
+scheduler assembly, actual dynamic worker children and pause/resume handoff.
+Legacy fixture cleanup and installed product acceptance remain unfinished.
+[Exact gates, failures and diagnostics](evidence/process-xmind-root-native-planning-settlement-checkpoint-20261021.json).
+
 ## Planning boundary migrated to native SDK — 2026-10-21
 
 Removed the old planning RPC source/header/contract. Native
