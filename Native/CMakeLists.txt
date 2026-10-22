@@ -973,7 +973,7 @@ if(BUILD_TESTING)
       set_tests_properties(native_agent_worker_coding_server_contract PROPERTIES TIMEOUT 60)
     endif()
     target_include_directories(agentflow_agent_worker_ledger_contract PRIVATE third_party)
-    target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent agentflow_worker_journal_rpc)
+    target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent agentflow_worker_journal_rpc agentflow_worker_runner)
     add_custom_command(TARGET agentflow_agent_worker_ledger_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_ledger_contract>")
     if(AGENTFLOW_NODE_EXECUTABLE)

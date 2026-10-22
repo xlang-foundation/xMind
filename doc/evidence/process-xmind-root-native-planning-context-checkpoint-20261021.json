@@ -1,0 +1,295 @@
+{
+  "recordedAt": "2026-10-22T03:28:07.935Z",
+  "gates": [
+    {
+      "name": "process-xmind-native-planning-context-window-20261021",
+      "result": null,
+      "files": [
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-20261021-source.patch",
+          "sha256": "4cf774cd3d71b5730daa1a8456ea8e499fb9e830b41bdb3a5622e2847c6b95e6"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-20261021-build.log",
+          "sha256": "a6d625761a69141028d5cdcd0007ecc90e076bfc47161bc52b786a3785c5323e"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-20261021-build-terminal.json",
+          "sha256": "6b6ff395b0d0502c83fb841c0badaf883a3f7268d7ea6a4bfc50f1ba5d0e49d6"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-20261021/inputs-before-build.json",
+          "sha256": "d54782038101555b0dfd0f6b54c1797174ea672b49afb8ba25710be318ab8aac"
+        }
+      ]
+    },
+    {
+      "name": "process-xmind-native-planning-context-window-linked-20261021",
+      "result": {
+        "recordedAt": "2026-10-22T03:20:47.271Z",
+        "sourceParent": "a2bf2ddf5d7c5cfec20dd86411dde9f8fa682281",
+        "sourcePatchSha256": "f1385ebbdbb04e8460feb66557e79f24618c1f8b11e1f69bbe52303a8ba6c2cc",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 49708,
+          "launchedAt": "2026-10-22T03:17:18.294Z",
+          "completedAt": "2026-10-22T03:18:35.892Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "667b1f408b703680e1bbd036fd5c6c5812ac5b5f663dfafeddb75a895de6d197"
+        },
+        "test": {
+          "pid": 29520,
+          "launchedAt": "2026-10-22T03:18:40.783Z",
+          "completedAt": "2026-10-22T03:20:44.519Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "e949342682145ef12aa800b57baf039f7fe2416c5ba1b7904812b240ad353950"
+        },
+        "total": 20,
+        "failed": 1,
+        "passed": 19,
+        "seconds": 123.67,
+        "projectFiles": 2784,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 138,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "91a55005e4841e8c5f16402da78ab969f2fa0f4e22fb7e370d639b845bbce509",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "files": [
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-gate.json",
+          "sha256": "d8b109f81286bc5a063c59c4d7522b7b32bf4c44f6a910718250d2bf8271db9d"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-source.patch",
+          "sha256": "f1385ebbdbb04e8460feb66557e79f24618c1f8b11e1f69bbe52303a8ba6c2cc"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-build.log",
+          "sha256": "667b1f408b703680e1bbd036fd5c6c5812ac5b5f663dfafeddb75a895de6d197"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-build-terminal.json",
+          "sha256": "0373a5f810bc0821be8ba7e3bb66881e4fe63e6a7fda7b6094c9c3c6f538014c"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-ctest.log",
+          "sha256": "e949342682145ef12aa800b57baf039f7fe2416c5ba1b7904812b240ad353950"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-ctest-terminal.json",
+          "sha256": "97084225e17ee1bb87fcd4b355bc87843d66944a45e73dbec51cf61aa55b9e4f"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-linked-20261021-LastTest.log",
+          "sha256": "793a304741b54badfbb393a553f28f9ee02cfae9cb2b8eee8d6c7e88d3dc8580"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-linked-20261021/inputs-before-build.json",
+          "sha256": "2e2f8c72f9fb4a7e81f44659d54cef4d35f8446b35bb8779d9b49eefa7a1d263"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-linked-20261021/binaries-before-test.json",
+          "sha256": "cfcada904145e80a769d984846f670909946689cee3f70de448115475dc19d68"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-linked-20261021/test-inventory.json",
+          "sha256": "42d3faf2548ae9374e0b8c94bd9d66965e8eaf0e518d3ee360507a59a31d0bed"
+        }
+      ]
+    },
+    {
+      "name": "process-xmind-native-planning-context-window-responses-20261021",
+      "result": {
+        "recordedAt": "2026-10-22T03:24:09.984Z",
+        "sourceParent": "a2bf2ddf5d7c5cfec20dd86411dde9f8fa682281",
+        "sourcePatchSha256": "8052020464a78c1e0cbfc3523e5a3fde4f1afa59c048a7f8afc9466264a1a1a2",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 12428,
+          "launchedAt": "2026-10-22T03:21:23.417Z",
+          "completedAt": "2026-10-22T03:22:02.652Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "38838dec1db2377ffd245de244c002739ef4b7ae016a814a9bc571c421333ff4"
+        },
+        "test": {
+          "pid": 52332,
+          "launchedAt": "2026-10-22T03:22:05.504Z",
+          "completedAt": "2026-10-22T03:24:07.254Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "fe76756c804b24bced1b9b83d9f1502392bfa3f244ca242a8e65d82daf755d32"
+        },
+        "total": 20,
+        "failed": 1,
+        "passed": 19,
+        "seconds": 121.7,
+        "projectFiles": 2784,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 138,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "91a55005e4841e8c5f16402da78ab969f2fa0f4e22fb7e370d639b845bbce509",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": false
+      },
+      "files": [
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-gate.json",
+          "sha256": "d680b329730a5e030db3106c5122b5a5c2c6b1b8fedac40ca7931eceedefafc9"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-source.patch",
+          "sha256": "8052020464a78c1e0cbfc3523e5a3fde4f1afa59c048a7f8afc9466264a1a1a2"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-build.log",
+          "sha256": "38838dec1db2377ffd245de244c002739ef4b7ae016a814a9bc571c421333ff4"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-build-terminal.json",
+          "sha256": "36ce1d5d7c81df401e3e77cb12f4ac348eb56468cf9eebfedf1394118f41af91"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-ctest.log",
+          "sha256": "fe76756c804b24bced1b9b83d9f1502392bfa3f244ca242a8e65d82daf755d32"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-ctest-terminal.json",
+          "sha256": "2032740c2b8c56ea178a72b1228d98fa73283b5c6541ebfbc00891029abf7643"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-responses-20261021-LastTest.log",
+          "sha256": "017e061d41bf39b16ca23293ef4f2077c13b2898285f142dfe303e0ebb27425f"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-responses-20261021/inputs-before-build.json",
+          "sha256": "a6561fefb212ac8a837d219d3ba51af03b9641f23d340769763d0b0da89c435d"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-responses-20261021/binaries-before-test.json",
+          "sha256": "8bbe51c77f5fe894a6db1dc3911a8eb0b7040e544ea86a7db7d0c20819bf0b0e"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-responses-20261021/test-inventory.json",
+          "sha256": "42d3faf2548ae9374e0b8c94bd9d66965e8eaf0e518d3ee360507a59a31d0bed"
+        }
+      ]
+    },
+    {
+      "name": "process-xmind-native-planning-context-window-projection-20261021",
+      "result": {
+        "recordedAt": "2026-10-22T03:27:33.919Z",
+        "sourceParent": "a2bf2ddf5d7c5cfec20dd86411dde9f8fa682281",
+        "sourcePatchSha256": "b367a1a308650efab2c78d300d4873c34d4204209757ca58ba67c410aa3987c1",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 36876,
+          "launchedAt": "2026-10-22T03:24:40.963Z",
+          "completedAt": "2026-10-22T03:25:23.156Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "38838dec1db2377ffd245de244c002739ef4b7ae016a814a9bc571c421333ff4"
+        },
+        "test": {
+          "pid": 39220,
+          "launchedAt": "2026-10-22T03:25:26.148Z",
+          "completedAt": "2026-10-22T03:27:30.994Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "5b22cd44a1f2b8ceb72d43badcbb1bd085fe30e20fa90b2ae344335bbed133bd"
+        },
+        "total": 20,
+        "failed": 0,
+        "passed": 20,
+        "seconds": 124.8,
+        "projectFiles": 2784,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 138,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "91a55005e4841e8c5f16402da78ab969f2fa0f4e22fb7e370d639b845bbce509",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": [
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-gate.json",
+          "sha256": "3b066ad1d0c4ef1fe9e0b1025a099b8ac5cbfdaae18ef026c9f3b887c6b91eab"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-source.patch",
+          "sha256": "b367a1a308650efab2c78d300d4873c34d4204209757ca58ba67c410aa3987c1"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-build.log",
+          "sha256": "38838dec1db2377ffd245de244c002739ef4b7ae016a814a9bc571c421333ff4"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-build-terminal.json",
+          "sha256": "27b0433c92aa80c34d4105fb80adb5c0b387ec2c11d44c102446c29b2b803ea1"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-ctest.log",
+          "sha256": "5b22cd44a1f2b8ceb72d43badcbb1bd085fe30e20fa90b2ae344335bbed133bd"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-ctest-terminal.json",
+          "sha256": "6f334d805d653a60eaab0b11d89d8ce845799e40beec00983d51e59b23c842c0"
+        },
+        {
+          "file": "doc/evidence/process-xmind-root-native-planning-context-window-projection-20261021-LastTest.log",
+          "sha256": "bb0e61d4e59007911204142141dd781583b4a60e3846112234341dae088a20ca"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-projection-20261021/inputs-before-build.json",
+          "sha256": "3119743b5bd3b87129b20337c842e55e772e9c3f97716a89c8876ac51e0227a7"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-projection-20261021/binaries-before-test.json",
+          "sha256": "ba1a29f65663844d46d8613ac73c0114769b2d28405110e086c7767f1a6f49b8"
+        },
+        {
+          "externalFile": "C:/xMindNativeValidation/process-xmind-native-planning-context-window-projection-20261021/test-inventory.json",
+          "sha256": "42d3faf2548ae9374e0b8c94bd9d66965e8eaf0e518d3ee360507a59a31d0bed"
+        }
+      ]
+    }
+  ],
+  "failures": [
+    "Initial ledger link omitted worker-runner library; link failure retained.",
+    "Linked fixture used Chat Completions; ContextManager correctly refused the invalid route.",
+    "Responses fixture retained a fixed model request digest; funded inference projection correctly refused it."
+  ],
+  "final": "20/20 focused contracts passed after explicit Responses identity and exact prepared request binding. Negative assertions retain generic reserve and wrong projection refusal.",
+  "scope": "Actual distinct SDK child, context journal and SQLite. Model response and plan-child settlement are synthetic. Unknown capacity, automatic compaction disabled; no token count, overflow or provider maintenance coverage. Production planner/runner/child scheduling not assembled. No installation or CPython."
+}

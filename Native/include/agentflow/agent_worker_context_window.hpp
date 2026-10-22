@@ -13,8 +13,10 @@ public:
     using Admit=std::function<void(const std::string&,const ModelRequest&,std::stop_token)>;
     AgentWorkerContextWindow(PersistenceService&,AgentWorkerLeaseSpec,ChatProviderConfig,
         AgentWorkerContextPolicy,std::shared_ptr<AgentModelGateway>,Preview,Admit,
-        AgentWorkerChannel::Deadline,std::stop_token);
+        AgentWorkerChannel::Deadline,std::stop_token,std::shared_ptr<RootExecutionBudget> shared_budget={});
     ModelRequest prepare(std::stop_token);
+    ModelRequest prepare_planning_continuation(const std::string&,std::stop_token);
+    ModelCallReservation reserve_planning_continuation(const std::string&,const std::string&,std::stop_token);
     void admit(const std::string&,const ModelRequest&,std::stop_token);
     bool reject(const std::string&,const ModelRequest&,std::int64_t,std::stop_token);
     ModelRequest rebuild(const std::string&,const ModelRequest&,std::stop_token);
@@ -23,6 +25,7 @@ public:
     ModelCallReservation finish(const std::string&,std::stop_token);
 private:
     void check(std::stop_token);
+    ModelRequest prepare_window(std::optional<std::string>,std::stop_token);
     PersistenceService& store_;
     AgentWorkerLeaseSpec lease_;
     ChatProviderConfig provider_;
@@ -32,7 +35,7 @@ private:
     Admit admit_;
     AgentWorkerChannel::Deadline deadline_;
     std::stop_token owner_cancel_;
-    RootExecutionBudget budget_;
+    std::shared_ptr<RootExecutionBudget> budget_;
     ContextManager manager_;
     ContextOwner owner_;
     std::optional<PreparedModelContext> prepared_;

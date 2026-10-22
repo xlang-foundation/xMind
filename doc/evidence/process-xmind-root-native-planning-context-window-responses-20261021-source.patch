@@ -1,0 +1,190 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 9ff9ab13..a2fa3005 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -973,7 +973,7 @@ if(BUILD_TESTING)
+       set_tests_properties(native_agent_worker_coding_server_contract PROPERTIES TIMEOUT 60)
+     endif()
+     target_include_directories(agentflow_agent_worker_ledger_contract PRIVATE third_party)
+-    target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent agentflow_worker_journal_rpc)
++    target_link_libraries(agentflow_agent_worker_ledger_contract PRIVATE agentflow_agent agentflow_worker_journal_rpc agentflow_worker_runner)
+     add_custom_command(TARGET agentflow_agent_worker_ledger_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_ledger_contract>")
+     if(AGENTFLOW_NODE_EXECUTABLE)
+diff --git a/Native/include/agentflow/agent_worker_context_window.hpp b/Native/include/agentflow/agent_worker_context_window.hpp
+index e600ec3d..0de5a339 100644
+--- a/Native/include/agentflow/agent_worker_context_window.hpp
++++ b/Native/include/agentflow/agent_worker_context_window.hpp
+@@ -13,8 +13,10 @@ public:
+     using Admit=std::function<void(const std::string&,const ModelRequest&,std::stop_token)>;
+     AgentWorkerContextWindow(PersistenceService&,AgentWorkerLeaseSpec,ChatProviderConfig,
+         AgentWorkerContextPolicy,std::shared_ptr<AgentModelGateway>,Preview,Admit,
+-        AgentWorkerChannel::Deadline,std::stop_token);
++        AgentWorkerChannel::Deadline,std::stop_token,std::shared_ptr<RootExecutionBudget> shared_budget={});
+     ModelRequest prepare(std::stop_token);
++    ModelRequest prepare_planning_continuation(const std::string&,std::stop_token);
++    ModelCallReservation reserve_planning_continuation(const std::string&,const std::string&,std::stop_token);
+     void admit(const std::string&,const ModelRequest&,std::stop_token);
+     bool reject(const std::string&,const ModelRequest&,std::int64_t,std::stop_token);
+     ModelRequest rebuild(const std::string&,const ModelRequest&,std::stop_token);
+@@ -23,6 +25,7 @@ public:
+     ModelCallReservation finish(const std::string&,std::stop_token);
+ private:
+     void check(std::stop_token);
++    ModelRequest prepare_window(std::optional<std::string>,std::stop_token);
+     PersistenceService& store_;
+     AgentWorkerLeaseSpec lease_;
+     ChatProviderConfig provider_;
+@@ -32,7 +35,7 @@ private:
+     Admit admit_;
+     AgentWorkerChannel::Deadline deadline_;
+     std::stop_token owner_cancel_;
+-    RootExecutionBudget budget_;
++    std::shared_ptr<RootExecutionBudget> budget_;
+     ContextManager manager_;
+     ContextOwner owner_;
+     std::optional<PreparedModelContext> prepared_;
+diff --git a/Native/include/agentflow/agent_worker_journal_host.hpp b/Native/include/agentflow/agent_worker_journal_host.hpp
+index 6f95b344..dc859962 100644
+--- a/Native/include/agentflow/agent_worker_journal_host.hpp
++++ b/Native/include/agentflow/agent_worker_journal_host.hpp
+@@ -8,6 +8,7 @@ class PersistenceService;
+ class AgentWorkerFileHost;
+ struct AgentWorkerJournalModelHooks {
+     std::function<ModelCallReservation(const std::string&,std::stop_token)> reserve,start,finish;
++    std::function<ModelCallReservation(const std::string&,const std::string&,std::stop_token)> reserve_planning_continuation;
+     std::function<void(AgentWorkerJournalReadKind,std::stop_token)> before_read;
+ };
+ // Backend authority for one captured worker lease. Native services and temporary
+diff --git a/Native/src/agent_worker_context_window.cpp b/Native/src/agent_worker_context_window.cpp
+index 17ddc09b..0f7e439c 100644
+--- a/Native/src/agent_worker_context_window.cpp
++++ b/Native/src/agent_worker_context_window.cpp
+@@ -5,23 +5,29 @@
+ #include <algorithm>
+ 
+ namespace agentflow {
+-namespace {RootExecutionBudget context_budget(PersistenceService& store,const AgentWorkerLeaseSpec& lease,AgentWorkerChannel::Deadline deadline,std::stop_token cancel){
++namespace {std::shared_ptr<RootExecutionBudget> context_budget(PersistenceService& store,const AgentWorkerLeaseSpec& lease,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<RootExecutionBudget> shared){
+     auto record=store.root_budget(lease.root_run_id).get();
+-    if(record.spec.policy_id=="native.graph-context"){const auto captured=store.graph_context_owner(lease.root_run_id).get();if(!captured.segment||captured.segment->state!="open")throw Conflict("Graph worker context requires its owning active segment");return RootExecutionBudget(store,std::move(record),deadline,cancel,captured.segment,captured.authority.backend_identity);}
+-    return RootExecutionBudget(store,std::move(record),deadline,cancel);
++    if(record.spec.policy_id=="native.dynamic-plan"){
++        const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
++        if(!shared||lease.owner_run_id!=lease.root_run_id||shared->root_id()!=lease.root_run_id||shared->deadline()!=deadline||!shared->segment_open()||segment.state!="open"||shared->segment_id()!=segment.id)throw Conflict("Planning context requires its exact shared active budget");
++        return shared;
++    }
++    if(shared)throw Conflict("Ordinary worker context cannot adopt a planning budget");
++    if(record.spec.policy_id=="native.graph-context"){const auto captured=store.graph_context_owner(lease.root_run_id).get();if(!captured.segment||captured.segment->state!="open")throw Conflict("Graph worker context requires its owning active segment");return std::make_shared<RootExecutionBudget>(store,std::move(record),deadline,cancel,captured.segment,captured.authority.backend_identity);}
++    return std::make_shared<RootExecutionBudget>(store,std::move(record),deadline,cancel);
+ }
+ AgentModelGateway& required_gateway(const std::shared_ptr<AgentModelGateway>& gateway){if(!gateway)throw std::invalid_argument("Context owner requires its backend gateway");return *gateway;}}
+ AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,AgentWorkerLeaseSpec lease,
+     ChatProviderConfig provider,AgentWorkerContextPolicy policy,std::shared_ptr<AgentModelGateway> gateway,
+-    Preview preview,Admit admit,AgentWorkerChannel::Deadline deadline,std::stop_token cancel)
++    Preview preview,Admit admit,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::shared_ptr<RootExecutionBudget> shared_budget)
+     :store_(store),lease_(std::move(lease)),provider_(std::move(provider)),policy_(std::move(policy)),gateway_(std::move(gateway)),
+      preview_(std::move(preview)),admit_(std::move(admit)),deadline_(deadline),owner_cancel_(cancel),
+-     budget_(context_budget(store,lease_,deadline,cancel)),
++     budget_(context_budget(store,lease_,deadline,cancel,std::move(shared_budget))),
+      manager_(store,required_gateway(gateway_),provider_,policy_.runtime,model_message_from_history){
+     const bool leaf=lease_.owner_run_id!=lease_.root_run_id;
+     if(leaf)(void)store.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::child_admission,lease_.owner_run_id}).get();
+     if(!gateway_||!preview_||!admit_||
+-       (leaf?(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.graph-context"):(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"))||
++       (leaf?(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.graph-context"):(store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.context"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.delegation"&&store.root_budget(lease_.root_run_id).get().spec.policy_id!="native.dynamic-plan"))||
+        policy_.binding.provider_identity_json!=lease_.provider_identity_json)
+         throw Conflict("Worker context differs from captured ordinary context root");
+     const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};
+@@ -34,14 +40,20 @@ void AgentWorkerContextWindow::check(std::stop_token cancel){
+     (void)store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::run,lease_.owner_run_id}).get();
+ }
+ ModelRequest AgentWorkerContextWindow::prepare(std::stop_token cancel){
++    return prepare_window({},cancel);
++}
++ModelRequest AgentWorkerContextWindow::prepare_planning_continuation(const std::string& call,std::stop_token cancel){return prepare_window(call,cancel);}
++ModelRequest AgentWorkerContextWindow::prepare_window(std::optional<std::string> call,std::stop_token cancel){
+     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
+     if(rejected_)throw Conflict("Rejected worker context requires its one typed rebuild");
+-    if(prepared_)return prepared_->request;
++    if(prepared_){if(call&&call!=owner_.planning_call_id)throw Conflict("Prepared context belongs to another planning call");return prepared_->request;}
++    if(call){const auto accepted=store_.dynamic_plan_call(*call).get();if(accepted.root_run_id!=lease_.root_run_id||accepted.owner_run_id!=lease_.owner_run_id||!accepted.conversation_commit_seq||accepted.state!="turn_committed")throw Conflict("Planning context requires its signed committed call");}
++    owner_.planning_call_id=std::move(call);
+     store_.validate_agent_worker_model_window(lease_,deadline_,owner_cancel_,cancel).get();
+     raw_=preview_(cancel);auto trusted=raw_;
+     std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});
+     trusted.canonical_window.reset();
+-    prepared_=manager_.prepare(owner_,trusted,budget_,nullptr,cancel);handed_out_=false;rejected_=false;rebuild_used_=false;check(cancel);return prepared_->request;
++    prepared_=manager_.prepare(owner_,trusted,*budget_,nullptr,cancel);handed_out_=false;rejected_=false;rebuild_used_=false;check(cancel);return prepared_->request;
+ }
+ void AgentWorkerContextWindow::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel){
+     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
+@@ -58,15 +70,23 @@ ModelRequest AgentWorkerContextWindow::rebuild(const std::string& attempt,const
+     if(!prepared_||!rejected_||rebuild_used_||attempt!=prepared_->inference.attempt_id||encode_agent_model_request(request)!=encode_agent_model_request(prepared_->request))throw Conflict("Context rebuild differs from its one actual rejection");
+     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="rejected")throw Conflict("Context rebuild lacks its backend rejection receipt");
+     rebuild_used_=true;auto trusted=raw_;std::erase_if(trusted.messages,[](const auto& message){return message.role!=MessageRole::system&&message.role!=MessageRole::developer;});trusted.canonical_window.reset();
+-    auto rebuilt=manager_.rebuild(owner_,trusted,*prepared_,budget_,nullptr,cancel);prepared_=std::move(rebuilt);rejected_=false;handed_out_=false;check(cancel);return prepared_->request;
++    auto rebuilt=manager_.rebuild(owner_,trusted,*prepared_,*budget_,nullptr,cancel);prepared_=std::move(rebuilt);rejected_=false;handed_out_=false;check(cancel);return prepared_->request;
+ }
+ ModelCallReservation AgentWorkerContextWindow::reserve(const std::string&,std::stop_token cancel){
+     std::lock_guard lock(mutex_);check(cancel);if(!prepared_||handed_out_)throw Conflict("Worker context reservation is not available");
++    if(owner_.planning_call_id)throw Conflict("Planning context requires its typed reservation");
+     handed_out_=true;return prepared_->inference;
+ }
++ModelCallReservation AgentWorkerContextWindow::reserve_planning_continuation(const std::string& call,const std::string& attempt,std::stop_token cancel){
++    std::lock_guard lock(mutex_);check(cancel);
++    if(!prepared_||rejected_||owner_.planning_call_id!=call||prepared_->inference.attempt_id!=attempt)throw Conflict("Planning reservation differs from its prepared context");
++    const auto actual=store_.reserve_agent_worker_planning_continuation(lease_,call,attempt,deadline_,owner_cancel_,cancel).get();
++    if(actual.inference_step_id!=prepared_->inference_step_id)throw Conflict("Planning reservation lost its counted inference step");
++    handed_out_=true;return actual;
++}
+ ModelCallReservation AgentWorkerContextWindow::start(const std::string& attempt,std::stop_token cancel){
+     std::lock_guard lock(mutex_);check(cancel);if(!prepared_||!handed_out_||attempt!=prepared_->inference.attempt_id)throw Conflict("Worker start differs from its funded context attempt");
+-    budget_.start(prepared_->inference,cancel);auto result=prepared_->inference;result.state="started";return result;
++    budget_->start(prepared_->inference,cancel);auto result=prepared_->inference;result.state="started";return result;
+ }
+ ModelCallReservation AgentWorkerContextWindow::finish(const std::string& attempt,std::stop_token cancel){
+     std::lock_guard lock(mutex_);check(cancel);if(!prepared_||!handed_out_||attempt!=prepared_->inference.attempt_id)throw Conflict("Worker completion differs from its context attempt");
+diff --git a/Native/src/agent_worker_journal_host.cpp b/Native/src/agent_worker_journal_host.cpp
+index 2417feec..49621359 100644
+--- a/Native/src/agent_worker_journal_host.cpp
++++ b/Native/src/agent_worker_journal_host.cpp
+@@ -19,7 +19,7 @@ bool AgentWorkerJournalHost::coding_workspace_admitted(std::stop_token cancel){(
+ std::int64_t AgentWorkerJournalHost::remaining_ms(std::stop_token cancel){(void)run(lease_.owner_run_id,cancel);const auto remaining=std::chrono::duration_cast<std::chrono::milliseconds>(deadline_-std::chrono::steady_clock::now()).count();if(remaining<0||remaining>3600000)throw AgentWorkerAuthorityExpired("Worker journal execution window elapsed");return remaining;}
+ Run AgentWorkerJournalHost::begin_run(std::stop_token cancel){check(cancel);return store_.start_agent_worker_run(lease_,deadline_,owner_cancel_,cancel).get();}
+ ModelCallReservation AgentWorkerJournalHost::reserve_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.reserve?hooks_.reserve(id,cancel):store_.reserve_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+-ModelCallReservation AgentWorkerJournalHost::reserve_planning_continuation(std::string call,std::string id,std::stop_token cancel){check(cancel);if(hooks_.reserve||hooks_.start||hooks_.finish)throw Conflict("Context-managed planning continuation requires its typed funding hook");return store_.reserve_agent_worker_planning_continuation(lease_,attempt(std::move(call)),attempt(std::move(id)),deadline_,owner_cancel_,cancel).get();}
++ModelCallReservation AgentWorkerJournalHost::reserve_planning_continuation(std::string call,std::string id,std::stop_token cancel){check(cancel);call=attempt(std::move(call));id=attempt(std::move(id));if(hooks_.reserve_planning_continuation)return hooks_.reserve_planning_continuation(call,id,cancel);if(hooks_.reserve||hooks_.start||hooks_.finish)throw Conflict("Context-managed planning continuation requires its typed funding hook");return store_.reserve_agent_worker_planning_continuation(lease_,attempt(std::move(call)),attempt(std::move(id)),deadline_,owner_cancel_,cancel).get();}
+ ModelCallReservation AgentWorkerJournalHost::start_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.start?hooks_.start(id,cancel):store_.start_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+ ModelCallReservation AgentWorkerJournalHost::finish_model(std::string id,std::stop_token cancel){check(cancel);id=attempt(std::move(id));return hooks_.finish?hooks_.finish(id,cancel):store_.finish_agent_worker_model(lease_,std::move(id),deadline_,owner_cancel_,cancel).get();}
+ Event AgentWorkerJournalHost::model_event(std::string id,std::int64_t ordinal,std::string kind,std::string json,std::stop_token cancel){check(cancel);auto result=store_.agent_worker_model_event(lease_,attempt(std::move(id)),ordinal,std::move(kind),std::move(json)).get();check(cancel);return result;}
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 624e5fb1..476a3b34 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -8,6 +8,7 @@
+ #include "agentflow/agent_worker_native_model.hpp"
+ #include "agentflow/dynamic_plan.hpp"
+ #include "agentflow/root_execution_budget.hpp"
++#include "agentflow/agent_worker_context_window.hpp"
+ #include "agentflow/agent_model_values.hpp"
+ #include "agentflow/agent_worker_read_host.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+@@ -83,7 +84,7 @@ int planning_continuation_child(char** argv){
+ }
+ void planning_admission(PersistenceService& store,const std::string& path,const std::vector<std::string>& imports){
+     const auto deadline=std::chrono::steady_clock::now()+20s;const std::string authority(64,'a'),child_authority(64,'b');
+-    auto seed=[&](const std::string& label,bool finalize=true){const auto id="planning-"+label;store.create_session(id,"Synthetic planning admission ledger").get();RootBudgetSpec budget{"native.dynamic-plan",1,"worker-fixture-workspace",provider,4,1,16,600000};DynamicPlanCapabilities caps;caps.backend_identity=authority;caps.workspace_identity=budget.workspace_identity;caps.provider_identity_json=Json::parse(provider).dump();caps.tool_catalog_json="{}";caps.presets={{"workspace.inspect",1,true,{},4,{}}};store.start_prompt_run(id,id,R"({"content":"Synthetic planning admission"})",budget,caps).get();store.transition(id,RunState::queued,RunState::running).get();store.append_event(id,"agent.workspace_membership",R"({"workspace_id":"worker-fixture-workspace","revision":7})").get();store.open_dynamic_budget_segment({id,"segment-"+label,authority,store.root_budget(id).get().revision}).get();if(finalize)store.finalize_dynamic_capabilities(id,authority,R"({"tools":[{"name":"read_file"}]})",{{"workspace.inspect",1,true,{"read_file"},4,child_authority}}).get();return store.admit_agent_worker(lease(id,"generation-"+label)).get().spec;};
++    auto seed=[&](const std::string& label,bool finalize=true){const auto id="planning-"+label;const auto identity=label=="continuation"?std::string(R"({"wire":"responses","model_id":"worker-fixture-model"})"):provider;store.create_session(id,"Synthetic planning admission ledger").get();RootBudgetSpec budget{"native.dynamic-plan",1,"worker-fixture-workspace",identity,4,1,16,600000};DynamicPlanCapabilities caps;caps.backend_identity=authority;caps.workspace_identity=budget.workspace_identity;caps.provider_identity_json=Json::parse(identity).dump();caps.tool_catalog_json="{}";caps.presets={{"workspace.inspect",1,true,{},4,{}}};store.start_prompt_run(id,id,R"({"content":"Synthetic planning admission"})",budget,caps).get();store.transition(id,RunState::queued,RunState::running).get();store.append_event(id,"agent.workspace_membership",R"({"workspace_id":"worker-fixture-workspace","revision":7})").get();store.open_dynamic_budget_segment({id,"segment-"+label,authority,store.root_budget(id).get().revision}).get();if(finalize)store.finalize_dynamic_capabilities(id,authority,R"({"tools":[{"name":"read_file"}]})",{{"workspace.inspect",1,true,{"read_file"},4,child_authority}}).get();auto captured=lease(id,"generation-"+label);captured.provider_identity_json=identity;return store.admit_agent_worker(captured).get().spec;};
+     auto response=[&](const AgentWorkerLeaseSpec& owner,const std::string& attempt,const std::vector<ModelToolCall>& calls,bool finish=true,bool assistant=true){start(store,owner.root_run_id,attempt);const auto model=claim(owner,attempt);store.claim_agent_worker_model(model).get();ModelCompletion actual{"","","tool_calls","{}",calls,"[]"};const auto canonical=format_agent_model_assistant(actual,"worker-fixture-model",7,{});store.record_agent_worker_model_response(model,encode_agent_model_completion(actual),assistant?canonical:std::string{}).get();if(finish)store.finish_model_call(owner.root_run_id,owner.owner_run_id,attempt,canonical).get();};
+     auto owner=seed("once");response(owner,"planning-model",{{"provider-planning-call","plan_tasks",R"({"tasks":[]})"}});auto one=store.claim_agent_worker_planning(owner,"planning-model","provider-planning-call",deadline),two=store.claim_agent_worker_planning(owner,"planning-model","provider-planning-call",deadline);unsigned accepted=0,rejected=0;for(auto* f:{&one,&two})try{const auto r=f->get();require(r.state=="entered"&&r.call_id=="provider-planning-call"&&r.tool_name=="plan_tasks"&&r.arguments_json==R"({"tasks":[]})"&&r.backend_identity==authority&&r.segment_id=="segment-once"&&r.model.generation==owner.generation,"Planning admission must derive exact call and native identity from stored receipt");++accepted;}catch(const Conflict&){++rejected;}require(accepted==1&&rejected==1,"Concurrent planning claims must admit only once");
+     store.retire_agent_worker(owner.generation,"worker_exit").get();require(store.agent_worker_planning_claim(owner.root_run_id,"planning-model").get().state=="uncertain","Retirement retains unresolved planning entry without replay");auto replacement=owner;replacement.generation="replacement-planning";store.admit_agent_worker(replacement).get();rejects<Conflict>([&]{store.claim_agent_worker_planning(replacement,"planning-model","provider-planning-call",deadline).get();});rejects<Conflict>([&]{store.claim_agent_worker_planning(owner,"planning-model","provider-planning-call",deadline).get();});store.retire_agent_worker(replacement.generation,"cancelled").get();
+@@ -113,7 +114,7 @@ void planning_admission(PersistenceService& store,const std::string& path,const
+         const auto plan=store.dynamic_plan(accepted.plan_id).get();const auto node=prepare_dynamic_node(plan,"leaf");const auto child=captured.root_run_id+"-child";DynamicFrontierSpec frontier;frontier.plan_id=plan.id;frontier.backend_identity=authority;frontier.plan_call_id=accepted.id;frontier.expected_revision=plan.revision;frontier.expected_state_sequence=plan.state_sequence;frontier.expected_budget_revision=store.root_budget(captured.root_run_id).get().revision;frontier.tasks.push_back({"leaf","continuation-child-claim",child,{},node.dependency_outputs_json,node.node.definition_revision});store.admit_dynamic_frontier(frontier).get();store.transition(child,RunState::queued,RunState::running).get();store.reserve_model_call(captured.root_run_id,child,"child-complete",ModelCallRole::leaf).get();store.start_model_call(captured.root_run_id,child,"child-complete").get();const std::string child_reply=R"({"content":"Synthetic child settled before continuation"})";store.finish_model_call(captured.root_run_id,child,"child-complete",child_reply).get();store.complete_run(child,child_reply).get();store.settle_dynamic_child(child).get();require(store.settle_dynamic_plan_step(accepted.id).get().ready,"Worker planning requires actual settled native report");store.commit_dynamic_tool_turn(captured.owner_run_id,accepted.id).get();
+         store.validate_agent_worker_model_window(captured,deadline).get();rejects<Conflict>([&]{store.reserve_agent_worker_model(captured,"generic-after-plan",deadline).get();});rejects<Conflict>([&]{store.reserve_dynamic_continuation(accepted.id,"unscoped-next").get();});auto foreign=captured;++foreign.pid;rejects<Conflict>([&]{store.reserve_agent_worker_planning_continuation(foreign,accepted.id,"foreign-next",deadline).get();});std::stop_source stopped;stopped.request_stop();rejects<AgentWorkerAuthorityCancelled>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"cancelled-next",deadline,{},stopped.get_token()).get();});rejects<AgentWorkerAuthorityExpired>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"expired-next",std::chrono::steady_clock::now()-1ms).get();});
+         const auto before=store.root_budget(captured.root_run_id).get();XlangSqlite sql(path,imports);sql.execute("CREATE TRIGGER fixture_planning_funding_abort BEFORE INSERT ON events WHEN NEW.kind='budget.model_call.reserved' AND json_extract(NEW.payload,'$.worker_generation') IS NOT NULL AND json_extract(NEW.payload,'$.plan_call_id') IS NOT NULL BEGIN SELECT RAISE(ABORT,'fixture_planning_funding_abort'); END");rejects<DatabaseError>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"rolled-back-next",deadline).get();});require(store.dynamic_plan_call(accepted.id).get().continuation_attempt_id.empty()&&store.root_budget(captured.root_run_id).get().revision==before.revision,"Planning funding failure must roll back held capacity, native link and model reservation");sql.execute("DROP TRIGGER fixture_planning_funding_abort");
+-        auto gateway=std::make_shared<CountingModel>();ChatProviderConfig config{"http://127.0.0.1:1/model","worker-fixture-model",Capability::supported,Capability::supported};AgentWorkerModelHost model(store,captured,config,{},AgentWorkerModelPolicy{},gateway,deadline);bool context_hook_called=false;AgentWorkerJournalModelHooks context_hooks;context_hooks.reserve=[&](const std::string&,std::stop_token)->ModelCallReservation{context_hook_called=true;throw std::logic_error("Context funding must not be bypassed");};AgentWorkerJournalHost context_journal(store,captured,deadline,{},context_hooks);rejects<Conflict>([&]{context_journal.reserve_planning_continuation(accepted.id,"counted-bypass");});require(!context_hook_called&&store.dynamic_plan_call(accepted.id).get().continuation_attempt_id.empty(),"Plain planning reserve must refuse context-managed admission before funding");const auto segment=store.dynamic_budget_segment(captured.root_run_id).get();const auto budget_deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(segment.remaining_active_ms);unsigned scoped_reservations=0;RootExecutionBudget shared_budget(store,store.root_budget(captured.root_run_id).get(),budget_deadline,{},segment,authority,{},[&](const std::string& call,const std::string& attempt,std::stop_token stop){++scoped_reservations;return store.reserve_agent_worker_planning_continuation(captured,call,attempt,deadline,{},stop).get();});std::stop_source budget_stop;budget_stop.request_stop();rejects<TransportCancelled>([&]{shared_budget.reserve_continuation(accepted.id,budget_stop.get_token());});require(scoped_reservations==0,"Cancelled shared budget must not invoke funding authority");const auto funded=shared_budget.reserve_continuation(accepted.id);const auto next=funded.attempt_id;require(!next.empty()&&funded.state=="reserved"&&shared_budget.reserve_continuation(accepted.id).attempt_id==next&&scoped_reservations==2,"Shared planning budget must reserve once under captured worker authority and retain exact attempt");AgentWorkerJournalHost journal(store,captured,deadline);NativeWorkerModelBinding binding(model,&journal);const auto access=binding.access();wchar_t image[32768]{};const auto length=GetModuleFileNameW(nullptr,image,32768);require(length&&length<32768,"Funding fixture image unavailable");auto worker=AgentWorkerProcess::launch(ForegroundProcess::bind_executable(std::filesystem::path(image).string()),{captured.root_run_id,captured.owner_run_id,captured.workspace_id,captured.generation,captured.workspace_revision},deadline);worker->channel().send({"planning.funding.boot",Json{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid},{"call",accepted.id},{"attempt",next}}.dump()},deadline);require(worker->channel().receive(deadline).operation=="planning.funding.started","Distinct SDK child must start its signed continuation");const auto actual_claim=claim(captured,next);store.claim_agent_worker_model(actual_claim).get();ModelCompletion actual{"Actual backend continuation receipt","","stop","{}",{},"[]"};const auto assistant=format_agent_model_assistant(actual,"worker-fixture-model",7,{});store.record_agent_worker_model_response(actual_claim,encode_agent_model_completion(actual),assistant).get();worker->channel().send({"planning.funding.receipt","ready"},deadline);require(worker->channel().receive(deadline).operation=="planning.funding.done"&&worker->wait(deadline)==0,"SDK child must finish exact planning funding lifecycle");worker->channel().close();const auto after=store.root_budget(captured.root_run_id).get();require(after.model_calls_reserved==before.model_calls_reserved+1&&after.parent_calls_held==before.parent_calls_held-1&&gateway->calls==0,"Planning continuation must consume one held charge without a model replay");rejects<Conflict>([&]{store.complete_agent_worker_run(captured,next,deadline).get();});store.retire_agent_worker(captured.generation,"worker_exit").get();rejects<Conflict>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"stale-next",deadline).get();});
++        auto gateway=std::make_shared<CountingModel>();ChatProviderConfig config{"http://127.0.0.1:1/model","worker-fixture-model",Capability::supported,Capability::supported};config.wire=ProviderWire::responses;AgentWorkerModelHost model(store,captured,config,{},AgentWorkerModelPolicy{},gateway,deadline);bool context_hook_called=false;AgentWorkerJournalModelHooks context_hooks;context_hooks.reserve=[&](const std::string&,std::stop_token)->ModelCallReservation{context_hook_called=true;throw std::logic_error("Context funding must not be bypassed");};AgentWorkerJournalHost context_journal(store,captured,deadline,{},context_hooks);rejects<Conflict>([&]{context_journal.reserve_planning_continuation(accepted.id,"counted-bypass");});require(!context_hook_called&&store.dynamic_plan_call(accepted.id).get().continuation_attempt_id.empty(),"Plain planning reserve must refuse context-managed admission before funding");const auto segment=store.dynamic_budget_segment(captured.root_run_id).get();const auto budget_deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(segment.remaining_active_ms);unsigned scoped_reservations=0;auto shared_budget=std::make_shared<RootExecutionBudget>(store,store.root_budget(captured.root_run_id).get(),budget_deadline,std::stop_token{},segment,authority,std::vector<std::string>{},[&](const std::string& call,const std::string& attempt,std::stop_token stop){++scoped_reservations;return store.reserve_agent_worker_planning_continuation(captured,call,attempt,deadline,{},stop).get();});std::stop_source budget_stop;budget_stop.request_stop();rejects<TransportCancelled>([&]{shared_budget->reserve_continuation(accepted.id,budget_stop.get_token());});require(scoped_reservations==0,"Cancelled shared budget must not invoke funding authority");const auto funded=shared_budget->reserve_continuation(accepted.id);const auto next=funded.attempt_id;require(!next.empty()&&funded.state=="reserved"&&shared_budget->reserve_continuation(accepted.id).attempt_id==next&&scoped_reservations==2,"Shared planning budget must reserve once under captured worker authority and retain exact attempt");AgentWorkerContextPolicy counted_policy;counted_policy.binding.provider_identity_json=captured.provider_identity_json;counted_policy.binding.authority_identity=authority;counted_policy.runtime.compaction.automatic=false;auto preview=[](std::stop_token){ModelRequest request;request.messages.push_back({MessageRole::system,"Backend captured planning instructions"});return request;};rejects<Conflict>([&]{AgentWorkerContextWindow missing(store,captured,config,counted_policy,gateway,preview,[](const std::string&,const ModelRequest&,std::stop_token){},budget_deadline,{});});AgentWorkerContextWindow counted(store,captured,config,counted_policy,gateway,preview,[](const std::string&,const ModelRequest&,std::stop_token){},budget_deadline,{},shared_budget);const auto prepared_request=counted.prepare_planning_continuation(accepted.id,{});require(encode_agent_model_request(counted.prepare({}))==encode_agent_model_request(prepared_request),"Preview must retain the exact prepared planning window");require(!prepared_request.messages.empty()&&store.root_budget(captured.root_run_id).get().model_calls_reserved==before.model_calls_reserved+1,"Planning context must reuse the held shared reservation without another charge");rejects<Conflict>([&]{counted.reserve_planning_continuation(accepted.id,"changed-context-attempt",{});});AgentWorkerJournalModelHooks counted_hooks;counted_hooks.reserve=[&](const std::string& attempt,std::stop_token stop){return counted.reserve(attempt,stop);};counted_hooks.start=[&](const std::string& attempt,std::stop_token stop){return counted.start(attempt,stop);};counted_hooks.finish=[&](const std::string& attempt,std::stop_token stop){return counted.finish(attempt,stop);};counted_hooks.reserve_planning_continuation=[&](const std::string& call,const std::string& attempt,std::stop_token stop){return counted.reserve_planning_continuation(call,attempt,stop);};AgentWorkerJournalHost journal(store,captured,deadline,{},counted_hooks);NativeWorkerModelBinding binding(model,&journal);const auto access=binding.access();wchar_t image[32768]{};const auto length=GetModuleFileNameW(nullptr,image,32768);require(length&&length<32768,"Funding fixture image unavailable");auto worker=AgentWorkerProcess::launch(ForegroundProcess::bind_executable(std::filesystem::path(image).string()),{captured.root_run_id,captured.owner_run_id,captured.workspace_id,captured.generation,captured.workspace_revision},deadline);worker->channel().send({"planning.funding.boot",Json{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid},{"call",accepted.id},{"attempt",next}}.dump()},deadline);require(worker->channel().receive(deadline).operation=="planning.funding.started","Distinct SDK child must start its signed continuation");const auto actual_claim=claim(captured,next);store.claim_agent_worker_model(actual_claim).get();ModelCompletion actual{"Actual backend continuation receipt","","stop","{}",{},"[]"};const auto assistant=format_agent_model_assistant(actual,"worker-fixture-model",7,{});store.record_agent_worker_model_response(actual_claim,encode_agent_model_completion(actual),assistant).get();worker->channel().send({"planning.funding.receipt","ready"},deadline);require(worker->channel().receive(deadline).operation=="planning.funding.done"&&worker->wait(deadline)==0,"SDK child must finish exact planning funding lifecycle");worker->channel().close();const auto after=store.root_budget(captured.root_run_id).get();require(after.model_calls_reserved==before.model_calls_reserved+1&&after.parent_calls_held==before.parent_calls_held-1&&gateway->calls==0,"Planning continuation must consume one held charge without a model replay");rejects<Conflict>([&]{store.complete_agent_worker_run(captured,next,deadline).get();});store.retire_agent_worker(captured.generation,"worker_exit").get();rejects<Conflict>([&]{store.reserve_agent_worker_planning_continuation(captured,accepted.id,"stale-next",deadline).get();});
+     }
+     {
+         auto [captured,spec]=prepared("stale-settlement");store.retire_agent_worker(captured.generation,"worker_exit").get();const auto before=store.root_budget(captured.root_run_id).get();rejects<Conflict>([&]{store.accept_dynamic_plan_change(spec).get();});rejects<Conflict>([&]{store.record_rejected_dynamic_tool_turn(captured.owner_run_id,spec.origin_attempt_id,spec.parent_assistant_json,"plan_changed").get();});require(!store.dynamic_plan_for_root(captured.root_run_id).get()&&store.root_budget(captured.root_run_id).get().revision==before.revision&&store.agent_worker_planning_claim(captured.root_run_id,spec.origin_attempt_id).get().state=="uncertain","Retired unresolved planning cannot be accepted/rejected or replayed");

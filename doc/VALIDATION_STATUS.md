@@ -1,3 +1,27 @@
+## Worker planning context preparation — 2026-10-21
+
+AgentWorkerContextWindow now accepts the exact shared dynamic root budget and
+active segment/deadline, prepares a signed planning continuation through the
+existing ContextManager and exposes a typed reservation hook in the journal.
+Generic funding remains closed for a prepared planning context. Normal preview
+retains the same prepared request; start/finish retain the inference step.
+Ordinary and graph context construction retain their prior paths.
+
+Focused 20/20 passed in 124.80 seconds (ledger 2.29; broad worker 57.08). Final
+source patch b367a1a308650efab2c78d300d4873c34d4204209757ca58ba67c410aa3987c1;
+native SHA 91a55005e4841e8c5f16402da78ab969f2fa0f4e22fb7e370d639b845bbce509.
+All frozen source/SDK/dependency/binary file sets and hashes verified. Initial
+link failure and two fixture setup failures are preserved. Exact Responses
+request binding and generic-funding rejection assertions remain enforced.
+Evidence: doc/evidence/process-xmind-root-native-planning-context-checkpoint-20261021.json.
+
+This proves a distinct SDK child with real context/inference accounting and
+synthetic model/child-plan receipts. Automatic compaction is disabled and no
+verified capacity is registered: no token counting, overflow or compaction
+coverage is claimed. Production planning owners/runner/scheduling and human
+pause/resume integration remain open, alongside final client acceptance. Full
+169 suite not rerun, SDK unchanged, no installed update or real model replay.
+
 ## Shared planning budget worker authority — 2026-10-21
 
 RootExecutionBudget now accepts a backend-only continuation reservation

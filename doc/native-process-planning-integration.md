@@ -59,12 +59,14 @@ existing unscoped journal route continues to refuse worker-linked plans. This
 function is an internal reservation dependency, not a worker packet dispatcher;
 production context-window and planning owners still need to share that budget.
 
-Add an explicit typed planning preparation/reservation operation to the backend
-context window and its journal hooks. It must set the planning call on the
-ContextOwner, prepare/count/compact through the existing ContextManager, and
-hand out that preparation's exact attempt. Journal start/finish use the same
-prepared inference step and canonical backend assistant. Preserve the current
-refusal for context-managed planning funding until the complete hook is wired.
+The context window now has explicit typed planning preparation/reservation
+operations and the journal has a corresponding hook. They set the planning
+call on ContextOwner, prepare through the existing ContextManager and retain
+its exact inference step for start/finish. The distinct SDK child ledger case
+verifies this with unknown capacity and automatic compaction disabled. Token
+counting/overflow/compaction tests and production owner wiring remain required.
+Context-managed journals without this hook continue to refuse plain planning
+funding.
 Never reserve once through the plain endpoint and again through ContextManager.
 The worker cannot select a different attempt after context preparation.
 
