@@ -1,0 +1,21 @@
+Start testing: Oct 21 17:20 Pacific Daylight Time
+----------------------------------------------------------
+27/169 Testing: native_agent_worker_native_execution_contract
+27/169 Test: native_agent_worker_native_execution_contract
+Command: "C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_native_execution_contract.exe"
+Directory: C:/xMindNativeValidation/native-current-source-full/Native
+"native_agent_worker_native_execution_contract" start time: Oct 21 17:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"child_pre_registration_ms":26.2282,"client_bind_ms":11.506,"close_and_exit_ms":21.6975,"execute_ms":17.7485,"launch_ms":78.6664,"mode":"complete","negative_identity_probes_ms":35.2066,"publish_ms":1.0231,"root_registration_ms":0.2694,"status_and_duplicate_probes_ms":40.1555,"status_call_ms_max":0.1349,"status_call_ms_p50":0.0745,"status_call_ms_p95":0.0925,"total_ms":206.0036}
+{"child_pre_registration_ms":25.0334,"client_bind_ms":10.5467,"close_and_exit_ms":11.1365,"execute_ms":18.8965,"launch_ms":72.4442,"mode":"cancel","negative_identity_probes_ms":33.9953,"publish_ms":0.9691,"root_registration_ms":0.199,"status_and_duplicate_probes_ms":35.1955,"status_call_ms_max":0.33,"status_call_ms_p50":0.088,"status_call_ms_p95":0.2285,"total_ms":183.1838}
+Native xmind execution subobject verified: exact process/scope, wrong-ticket refusal, one dispatch, concurrent cancel, terminal intent before physical close, retained-object refusal and joined retirement.
+<end of output>
+Test time =   0.52 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_native_execution_contract" end time: Oct 21 17:20 Pacific Daylight Time
+"native_agent_worker_native_execution_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 21 17:20 Pacific Daylight Time

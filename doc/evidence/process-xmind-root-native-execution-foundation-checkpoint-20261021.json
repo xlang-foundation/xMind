@@ -1,0 +1,231 @@
+{
+  "recordedAt": "2026-10-22T00:20:58.901Z",
+  "sourceParent": "ff6e8db85525fd146fa70db50ed5d6e450ef4575",
+  "currentSourcePatchSha256": "eab45e346ac84f4b49853b47ef56fc091fb1004a3652ca5b5d556a8b4119271b",
+  "status": "Native execution API foundation; product supervisor wiring remains open; not installed",
+  "implementation": [
+    "xmind.Executions().Open(ticket) exposes Identity, Execute, Status, Cancel, Close through native APISET methods. No application packet codec or serializer for these calls.",
+    "Execution starts once on an owned thread; owner retirement cancels and joins before callback dependencies disappear. Stop callbacks execute outside the state mutex.",
+    "Parent SDK client verifies endpoint PID and exact scope, retains method handles, refuses replay and validates fixed terminal intent. Physical/durable retirement remains a separate supervisor responsibility."
+  ],
+  "gates": [
+    {
+      "name": "foundation",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-execution-foundation-20261021",
+      "result": {
+        "recordedAt": "2026-10-22T00:19:02.664Z",
+        "sourceParent": "ff6e8db85525fd146fa70db50ed5d6e450ef4575",
+        "sourcePatchSha256": "90d5d1586817b7ce2314968517c6255c3f76f910bef1d96994606d62e6c8f212",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 16308,
+          "launchedAt": "2026-10-22T00:15:28.527Z",
+          "completedAt": "2026-10-22T00:16:42.302Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "f23dfb781e13c9efdab3a7575b07af20d10091430634b07c65d7a38a702fb0b1"
+        },
+        "test": {
+          "pid": 22752,
+          "launchedAt": "2026-10-22T00:16:45.886Z",
+          "completedAt": "2026-10-22T00:19:00.043Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "6c75882593d11593f97deef47f12aa64861e5105df2518aa0d747d1a0434dec8"
+        },
+        "total": 19,
+        "failed": 0,
+        "passed": 19,
+        "seconds": 134.11,
+        "projectFiles": 2781,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 137,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "283f6f729885cf4e55c2e470051678d696c5c122a3644f6ac2811366befa8b43",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-gate.json",
+          "sha256": "3d9654b34ec85866e36c962376d3b586ed9ba931a0779e3bd44df832b1ed8862",
+          "bytes": 1671
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-build.log",
+          "sha256": "f23dfb781e13c9efdab3a7575b07af20d10091430634b07c65d7a38a702fb0b1",
+          "bytes": 56886
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-build-terminal.json",
+          "sha256": "097dbc68ee20abc2e47453209dd8a2f23e564f64dbcc1e005b750ee569205b7f",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-ctest.log",
+          "sha256": "6c75882593d11593f97deef47f12aa64861e5105df2518aa0d747d1a0434dec8",
+          "bytes": 2803
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-ctest-terminal.json",
+          "sha256": "1e3aa179e4dcda1f4335be42eae81ebe3956e438d8d5927ef840c2afe4b69cfd",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-LastTest.log",
+          "sha256": "03cec3de12840576711e052f13a6b8bba8964ae8d0fffe17fb860e3fd35f47fb",
+          "bytes": 58088
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-foundation-20261021-source.patch",
+          "sha256": "90d5d1586817b7ce2314968517c6255c3f76f910bef1d96994606d62e6c8f212",
+          "bytes": 21243
+        }
+      ]
+    },
+    {
+      "name": "timing",
+      "externalDirectory": "C:/xMindNativeValidation/process-xmind-native-execution-timing-20261021",
+      "result": {
+        "recordedAt": "2026-10-22T00:20:10.345Z",
+        "sourceParent": "ff6e8db85525fd146fa70db50ed5d6e450ef4575",
+        "sourcePatchSha256": "eab45e346ac84f4b49853b47ef56fc091fb1004a3652ca5b5d556a8b4119271b",
+        "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uncommittedSource": true,
+        "build": {
+          "pid": 15240,
+          "launchedAt": "2026-10-22T00:19:32.369Z",
+          "completedAt": "2026-10-22T00:20:04.180Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "2923c02559340ebcfcbc854b2edf67b9164685fa70c224bf826d96b0a9c7fa32"
+        },
+        "test": {
+          "pid": 3212,
+          "launchedAt": "2026-10-22T00:20:07.078Z",
+          "completedAt": "2026-10-22T00:20:07.683Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "ed92993df0808b442e1c30cc96bb4a9e4abbfec9100e98afe2931f0e351dd40d"
+        },
+        "total": 1,
+        "failed": 0,
+        "passed": 1,
+        "seconds": 0.54,
+        "projectFiles": 2781,
+        "sdkSourceFiles": 16,
+        "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 76,
+        "nativeBinaries": 137,
+        "nodeDependencyFiles": 18598,
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "nativeSha256": "283f6f729885cf4e55c2e470051678d696c5c122a3644f6ac2811366befa8b43",
+        "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic fixtures only; no live model key used",
+        "installed": false,
+        "cpythonExecuted": false,
+        "scopePassed": true
+      },
+      "files": [
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-gate.json",
+          "sha256": "613c6e13d437a0e8d4f6f855128e1fa18ae2e28aa2cb8eb65095622e148cdcd8",
+          "bytes": 1666
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-build.log",
+          "sha256": "2923c02559340ebcfcbc854b2edf67b9164685fa70c224bf826d96b0a9c7fa32",
+          "bytes": 45053
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-build-terminal.json",
+          "sha256": "186e5f1f1fce43b93d288c3cbe91b3c4e28b6cbbd6b50f2b66a232154aaaaa42",
+          "bytes": 226
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-ctest.log",
+          "sha256": "ed92993df0808b442e1c30cc96bb4a9e4abbfec9100e98afe2931f0e351dd40d",
+          "bytes": 291
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-ctest-terminal.json",
+          "sha256": "63e20d976f6460200e535d09ba35514b70fad0e83e5f62d2189175733007673a",
+          "bytes": 225
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-LastTest.log",
+          "sha256": "2e493887ce46dbc0e6afe2a328a3f5ac1842fde052916e563cbc44a3187bdc82",
+          "bytes": 1961
+        },
+        {
+          "path": "doc/evidence/process-xmind-root-native-execution-timing-20261021-source.patch",
+          "sha256": "eab45e346ac84f4b49853b47ef56fc091fb1004a3652ca5b5d556a8b4119271b",
+          "bytes": 23038
+        }
+      ]
+    }
+  ],
+  "measurements": [
+    {
+      "child_pre_registration_ms": 26.2282,
+      "client_bind_ms": 11.506,
+      "close_and_exit_ms": 21.6975,
+      "execute_ms": 17.7485,
+      "launch_ms": 78.6664,
+      "mode": "complete",
+      "negative_identity_probes_ms": 35.2066,
+      "publish_ms": 1.0231,
+      "root_registration_ms": 0.2694,
+      "status_and_duplicate_probes_ms": 40.1555,
+      "status_call_ms_max": 0.1349,
+      "status_call_ms_p50": 0.0745,
+      "status_call_ms_p95": 0.0925,
+      "total_ms": 206.0036
+    },
+    {
+      "child_pre_registration_ms": 25.0334,
+      "client_bind_ms": 10.5467,
+      "close_and_exit_ms": 11.1365,
+      "execute_ms": 18.8965,
+      "launch_ms": 72.4442,
+      "mode": "cancel",
+      "negative_identity_probes_ms": 33.9953,
+      "publish_ms": 0.9691,
+      "root_registration_ms": 0.199,
+      "status_and_duplicate_probes_ms": 35.1955,
+      "status_call_ms_max": 0.33,
+      "status_call_ms_p50": 0.088,
+      "status_call_ms_p95": 0.2285,
+      "total_ms": 183.1838
+    }
+  ],
+  "measurementScope": "100 retained native SDK Status calls in each of two actual child-process cases. These are representative simple-call latency samples, not a universal latency guarantee or a provider/tool-work benchmark.",
+  "requestedSingleCallTargetMs": 10,
+  "observedSingleCallTargetMet": true,
+  "verificationScope": "Foundation source passed 19/19 focused checks including the new contract. Final test-only timing instrumentation passed its changed contract 1/1. These are separate gates, not a combined final-source 19-test claim. All 136 other native binaries, including xmind.exe and SDK DLL, are byte-identical across gates.",
+  "changedNativeBinariesBetweenGates": [
+    "agentflow_agent_worker_native_execution_contract.exe"
+  ],
+  "remaining": [
+    "Integrate native execution control into product worker entry/supervisor and replace the old startup/control packet path.",
+    "Remove obsolete production packet/RPC implementation after migrating fault fixtures.",
+    "Previous heap corruption, SDK access violation and broad fixture timing variability remain unresolved.",
+    "Full current native suite, native planning and installed browser/editor/CLI acceptance remain open."
+  ],
+  "installed": false,
+  "fullNativeSuiteRun": false,
+  "fullGoalComplete": false,
+  "liveUserTasksReplayed": false,
+  "cpythonExecuted": false
+}

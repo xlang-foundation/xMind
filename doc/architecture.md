@@ -15,8 +15,10 @@ Requests, events and results use SDK values.
 Long work returns an operation object exposing Status, Events, Result and
 Cancel. The backend keeps lease admission, credentials, budgets, permissions and
 durable effects. Third-party callers use the registered public service API;
-private worker tickets remain scoped to their admitted worker. The remaining
-tool/control packet path is a migration task, not the target architecture.
+private worker tickets remain scoped to their admitted worker.
+The native Executions().Open(ticket) control foundation exposes one-shot Execute,
+Status, Cancel and Close; product supervisor wiring remains pending. The remaining
+worker-control packet path is a migration task, not the target architecture.
 
 
 The October 9 product decision defines three native components: **Agent

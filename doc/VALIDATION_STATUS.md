@@ -1,3 +1,28 @@
+## Native execution-control foundation and call timing — 2026-10-21
+
+New xmind.Executions().Open(ticket) exposes native Identity, Execute, Status,
+Cancel and Close methods. Execute starts once outside SDK callbacks; lifetime
+retirement cancels and joins the owned thread. Parent SDK client checks endpoint
+PID/exact scope, retains method handles and accepts only fixed terminal intent.
+Production supervisor/startup is not wired to this service yet.
+
+Foundation source passes 19/19 focused checks, including two actual child
+processes, completion/cancellation, wrong identity/ticket/scope refusal, duplicate
+refusal, terminal intent before physical close and retained-object retirement.
+Final test-only timing instrumentation passes that changed contract 1/1. These
+are separate scopes; all 136 other native binaries remain byte-identical.
+Inventory is now 169 tests and 137 native binaries; full suite not run.
+
+User target: one cross-process call at most 10ms. Two 100-call native SDK Status
+samples measured median 0.0745/0.088ms, p95 0.0925/0.2285ms and maximum
+0.1349/0.33ms. These simple-call samples meet the target. Whole lifecycle test
+0.44s includes two child launches, negative probes, cancellation/drain and stale
+object checks; it is not one call. Timing test with 200 extra Status calls is
+0.52s. Process launch measured 72–79ms. No universal latency guarantee claimed.
+Nothing installed. Product control wiring, obsolete code removal, prior crash/
+timing issues and full product acceptance remain open.
+[Exact gates and per-stage measurements](evidence/process-xmind-root-native-execution-foundation-checkpoint-20261021.json).
+
 ## Native remote/callable SDK checkpoint — 2026-10-21
 
 Product workers use Remotes().Invoke and Callables().Invoke/Catalogue through
