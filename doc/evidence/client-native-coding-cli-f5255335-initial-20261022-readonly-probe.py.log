@@ -1,0 +1,10 @@
+import sys
+assert sys.implementation.name=='xlang3'
+sys.path.insert(0,'D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/f5255335/package/native-runtime/stdlib')
+import _sqlite3
+import json
+c=_sqlite3.connect('D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/f5255335/cli/state.sqlite')
+c.execute('PRAGMA query_only=ON')
+for table,query in [('runs','SELECT id,state FROM runs'),('operations','SELECT id,state,tool FROM operations'),('budget','SELECT wall_limit_ms FROM agent_execution_budgets')]:
+ print(json.dumps([table,c.execute(query).fetchall()]))
+c.close()

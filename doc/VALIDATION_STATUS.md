@@ -1,3 +1,42 @@
+## Actual packaged CLI coding — 2026-10-22
+
+The candidate's actual xmind console completes a new coding task by explicit
+loopback backend port. CLI commands create the session, submit one prompt, read
+operation metadata, inspect recorded before/after content, and approve one native
+literal replacement plus the exact Node command. The actual Node process exits 0
+with '3 modulo checks passed'. CLI history/status/events/watch retain canonical
+results; repeated observation makes no new model call.
+
+Completed root 3bc04893343759dc9afae931454ed663, session
+26fe79a47d629aa07ff937e226f0aa47: eight history messages, four finished model
+charges, two succeeded approved operations and one completed/retired SDK worker
+11232. The task fixture is TestProj/xmind-delivery-validation/cli-qualified-f5255335.
+NEVER replay this task. The 29 recorded CLI commands and backend/model receipts
+are archived. The provider is a scripted local HTTP peer, not a live account.
+
+Candidate Native source remains f525533511395939f0ddf8b0dde62f4baa30e783,
+xmind.exe 63b032149e02f7192272b55310615bdd14730f6ed29ac4380b0015a5954fbebe.
+Post-run comparison matches prior frozen references: 2783 project inputs,14908
+Node dependencies and the exact2419 files in the executed runtime (2401 manifest
+files plus the18 previously recorded xlang bytecode caches). The clean unexecuted
+delivery copy remains separate. No further cache additions, source/dependency
+changes or installed-runtime changes are claimed or required for this proof.
+
+Initial driver used inspect-edit (uncertain-edit recovery) during an unexecuted
+approval; it failed before any edit/command approval. Its backend/worker exited,
+while its retained fixture ledger still records root34583444a6ba771f3625ebfd2dfa8b7b
+running and operationa52364ccf5fb35bc157c41d8f5b4cb42 awaiting approval. This is a
+failed driver fixture, not a completed run or qualified recovery. No history was
+rewritten and that request was not resubmitted. The corrected driver validates
+pending metadata through operation, then uses decide; it also cancels/drains its
+own active test run on error instead of masking the original failure at teardown.
+
+No paid inference, CPython, visible console/editor or installation. This qualifies
+explicit-backend CLI coding, not current managed-profile auto-discovery/upgrade,
+interactive terminal presentation or actual VS Code editor rendering. Native172
+full acceptance and the intermittent runtime failure remain open. Evidence:
+doc/evidence/client-native-coding-cli-f5255335-*-20261022-*.
+
 ## Current client suites and rendered candidate coding — 2026-10-22
 
 Source f525533511395939f0ddf8b0dde62f4baa30e783 passes all 464 extension tests

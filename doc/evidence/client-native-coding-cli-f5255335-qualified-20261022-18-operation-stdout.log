@@ -1,0 +1,14 @@
+{
+  "arguments_json": "{\"arguments\":[\"check-modulo.cjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"environment\":[],\"executable\":\"C:/Program Files/nodejs/node.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:42050100000042000000000000000000:995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"node\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"timeout_ms\":10000,\"workdir\":\".\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"workspace_revision\":1}",
+  "decision_actor": "",
+  "expires_unix_ms": 1792701304274,
+  "id": "ac8decdc99fe25f64e41d1abda5a857d",
+  "resources": [
+    "process-profile:node"
+  ],
+  "result_json": "{}",
+  "run_id": "3bc04893343759dc9afae931454ed663",
+  "state": "awaiting_approval",
+  "tool": "run_process",
+  "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000"
+}

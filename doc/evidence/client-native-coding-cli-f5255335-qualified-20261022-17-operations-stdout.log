@@ -1,0 +1,28 @@
+[
+  {
+    "arguments_json": "{\"after_content\":\"module.exports = (value, divisor) => ((value % divisor) + divisor) % divisor;\\n\",\"after_sha256\":\"1f004876f12e28e8f3f07b2283f73f8a86dd5793c7bccdd0aa1ff4bc23e8fc6e\",\"before_content\":\"module.exports = (value, divisor) => ((value % divisor) - divisor) % divisor;\\n\",\"before_sha256\":\"193f313e389917394a3f3364f8315cadab07993370df06a961458e163f693d32\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:020000000000000099c40b0000000000\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"path\":\"positive-modulo.cjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"workspace_revision\":1}",
+    "decision_actor": "local-owner",
+    "expires_unix_ms": 1792701303972,
+    "id": "fa0e532b329abe2ecf118f228039542e",
+    "resources": [],
+    "result_json": "{\"after_sha256\":\"1f004876f12e28e8f3f07b2283f73f8a86dd5793c7bccdd0aa1ff4bc23e8fc6e\",\"before_sha256\":\"193f313e389917394a3f3364f8315cadab07993370df06a961458e163f693d32\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:020000000000000099c40b0000000000\",\"path\":\"positive-modulo.cjs\",\"size\":78,\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\"}",
+    "run_id": "3bc04893343759dc9afae931454ed663",
+    "state": "succeeded",
+    "tool": "replace_file",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000"
+  },
+  {
+    "arguments_json": "{\"arguments\":[\"check-modulo.cjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"environment\":[],\"executable\":\"C:/Program Files/nodejs/node.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:42050100000042000000000000000000:995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"node\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"timeout_ms\":10000,\"workdir\":\".\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000\",\"workspace_revision\":1}",
+    "decision_actor": "",
+    "expires_unix_ms": 1792701304274,
+    "id": "ac8decdc99fe25f64e41d1abda5a857d",
+    "resources": [
+      "process-profile:node"
+    ],
+    "result_json": "{}",
+    "run_id": "3bc04893343759dc9afae931454ed663",
+    "state": "awaiting_approval",
+    "tool": "run_process",
+    "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000099c40b0000000000"
+  }
+]
