@@ -1,0 +1,3 @@
+# Isolated Rust diagnostic, 2026-10-22
+
+The unchanged current native executable passed the fixture setup and actual Rust Analyzer semantic/editor/HTTP/provider integration contract in 28.01 seconds. Existing deadlines were unchanged. The diagnostic enabled existing Rust Analyzer logging and checked three named toolchain executables before/after; this does not freeze every Rust shim, library, cache or external system input. Logs show the actual Cargo shim under the user .cargo directory. The full 171/172 result remains failed. No source fix or cause of its null definition result has been established; do not union this focused diagnostic into full acceptance. Complete logs and input maps are retained. No paid model, CPython, installation or completed task replay.

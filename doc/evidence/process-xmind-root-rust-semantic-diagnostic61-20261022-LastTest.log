@@ -1,0 +1,39 @@
+Start testing: Oct 22 15:46 Pacific Daylight Time
+----------------------------------------------------------
+80/172 Testing: native_language_server_rust_fixture_check
+80/172 Test: native_language_server_rust_fixture_check
+Command: "C:/Users/shaw9/.cargo/bin/cargo.exe" "check" "--offline" "--manifest-path" "D:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/Cargo.toml"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_language_server_rust_fixture_check" start time: Oct 22 15:46 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+note: did not finalize incremental compilation session directory `\\?\D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\target\debug\incremental\xmind_lsp_contract-1q69ubandmju4\s-hn6averpq7-10mmbaf-working`: Access is denied. (os error 5)
+  |
+  = help: the next build will not be able to reuse work from this compilation
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"native_language_server_rust_fixture_check" end time: Oct 22 15:46 Pacific Daylight Time
+"native_language_server_rust_fixture_check" time elapsed: 00:00:00
+----------------------------------------------------------
+
+81/172 Testing: native_language_server_rust_analyzer_contract
+81/172 Test: native_language_server_rust_analyzer_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_language_server_contract.exe" "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rust-analyzer.exe" "D:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust" "src/lib.rs" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_language_server_rust_analyzer_contract" start time: Oct 22 15:46 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual rust-analyzer verified persistent native stdio, symbols, definition, references, hover, clean diagnostics and authenticated formatting. Real AgentRunner used an explicit model fixture to verify owned language queries and path-specific denial through xlang3 SQLite; no live model or synthetic LSP peer used
+<end of output>
+Test time =  27.87 sec
+----------------------------------------------------------
+Test Passed.
+"native_language_server_rust_analyzer_contract" end time: Oct 22 15:47 Pacific Daylight Time
+"native_language_server_rust_analyzer_contract" time elapsed: 00:00:27
+----------------------------------------------------------
+
+End testing: Oct 22 15:47 Pacific Daylight Time

@@ -1,0 +1,14 @@
+{
+  "rustAnalyzer": {
+    "path": "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rust-analyzer.exe",
+    "sha256": "175d90eec94f4d34ed9401fadae7f0faf61560c539f9d5f09f930523036aac27"
+  },
+  "rustc": {
+    "path": "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe",
+    "sha256": "ca9988af88b1463f6857fdfe909299fee50a63260b3e5f7dbcb5b4d3318b27bc"
+  },
+  "cargo": {
+    "path": "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/cargo.exe",
+    "sha256": "c37545ec61d48d31bdefce53280ecab61c4ea54eaace372fac6a0316c6e165d9"
+  }
+}
