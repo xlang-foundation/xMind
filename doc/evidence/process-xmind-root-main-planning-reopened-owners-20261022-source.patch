@@ -1,0 +1,300 @@
+diff --git a/Native/include/agentflow/agent_root_executor.hpp b/Native/include/agentflow/agent_root_executor.hpp
+index a9ac66e2..7bcd4d12 100644
+--- a/Native/include/agentflow/agent_root_executor.hpp
++++ b/Native/include/agentflow/agent_root_executor.hpp
+@@ -8,6 +8,7 @@ namespace agentflow {
+ struct WorkspaceMembershipSnapshot;
+ class NativeChildExecutor;
+ class DelegationExecutor;
++class DynamicPlanExecutor;
+ struct AgentRootExecutionRequest {
+     std::string run_id,model_id,agent_instructions;
+     std::optional<std::vector<std::string>> agent_tools;
+@@ -25,6 +26,7 @@ public:
+     virtual ~AgentRootExecutor()=default;
+     virtual std::shared_ptr<NativeChildExecutor> shared_children()const{return {};}
+     virtual std::shared_ptr<DelegationExecutor> shared_delegation()const{return {};}
++    virtual std::shared_ptr<DynamicPlanExecutor> shared_planning()const{return {};}
+     virtual void validate(const AgentRootExecutionRequest&)const=0;
+     virtual Run execute(const AgentRootExecutionRequest&,std::stop_token)=0;
+ };
+diff --git a/Native/include/agentflow/agent_worker_read_executor.hpp b/Native/include/agentflow/agent_worker_read_executor.hpp
+index 3c0cc160..98cb94ec 100644
+--- a/Native/include/agentflow/agent_worker_read_executor.hpp
++++ b/Native/include/agentflow/agent_worker_read_executor.hpp
+@@ -11,7 +11,7 @@ AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService&
+ // Trusted backend factory. Captures settings and executable once; no client
+ // supplies credentials, executable paths or per-dispatch replacement policy.
+ std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(
+-    PersistenceService&,AgentSettings,std::shared_ptr<const BoundProcessExecutable>);
++    PersistenceService&,AgentSettings,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
+ std::shared_ptr<AgentRootExecutor> make_agent_worker_coding_executor(
+-    PersistenceService&,AgentSettings,std::shared_ptr<const BoundProcessExecutable>);
++    PersistenceService&,AgentSettings,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
+ }
+diff --git a/Native/src/agent_service.cpp b/Native/src/agent_service.cpp
+index 88113bcb..d9b1ff02 100644
+--- a/Native/src/agent_service.cpp
++++ b/Native/src/agent_service.cpp
+@@ -110,7 +110,7 @@ struct AgentService::Impl {
+          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
+          children(settings.delegation||settings.planning?(execution&&execution->shared_children()?execution->shared_children():std::make_shared<NativeChildExecutor>()):nullptr),
+          delegation(settings.delegation?(execution&&execution->shared_delegation()?execution->shared_delegation():std::make_shared<DelegationExecutor>(store,children)):nullptr),
+-         planning(settings.planning?std::make_shared<DynamicPlanExecutor>(store,children):nullptr),
++         planning(settings.planning?(execution&&execution->shared_planning()?execution->shared_planning():std::make_shared<DynamicPlanExecutor>(store,children)):nullptr),
+          runner(store,std::move(settings),delegation,planning),root_executor(std::move(execution)),limit(capacity),owned_limit(capacity+count){
+         if(count==0||count>16||capacity==0||capacity>4096)throw std::invalid_argument("Invalid agent worker capacity");
+         // Recovery already interrupts every non-clean owner. Adopt only ordinary
+@@ -125,6 +125,15 @@ struct AgentService::Impl {
+             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
+             catch(const DynamicPlanUnavailable&){}
+             const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;job->placement=selected.selected->placement;}
++            if(uses_executor(job)){
++                // Reopen the exact admitted folder set; a current callback can
++                // describe another workspace revision after a clean pause.
++                for(const auto& event:store.events(run.id).get())if(event.kind=="agent.workspace_membership"){
++                    if(job->execution_workspace)throw DatabaseError("Paused worker has duplicate membership receipts");
++                    const auto value=Json::parse(event.json);auto captured=std::make_shared<WorkspaceMembershipSnapshot>();captured->workspace_id=value.at("workspace_id");captured->revision=value.at("revision");for(const auto& folder:value.at("folders"))captured->folders.push_back({folder.at("folder_id").get<std::string>(),folder.at("root").get<std::string>()});job->execution_workspace=std::move(captured);
++                }
++                if(!job->execution_workspace)throw DatabaseError("Paused worker lost its admitted workspace membership");
++            }
+             active.emplace(run.id,job);
+             // Even an already-answered clean pause waits for an authenticated
+             // duplicate answer or explicit resume; startup never replays it.
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index 132301e7..26a6742c 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -11,6 +11,9 @@
+ #include "agentflow/repository_instruction_context.hpp"
+ #include "agentflow/agent_authority.hpp"
+ #include "agentflow/delegation_executor.hpp"
++#include "agentflow/dynamic_plan_executor.hpp"
++#include "agentflow/agent_worker_planning_owner.hpp"
++#include <mutex>
+ #include "nlohmann/json.hpp"
+ #include <algorithm>
+ #include <filesystem>
+@@ -49,6 +52,10 @@ public:
+     ~RemoteRunTools(){for(const auto& peer:peers_)peer->stop_observer();}
+     void observe(const std::string& run){for(const auto& peer:peers_)if(!peer->start_observer(run))store_.append_event(run,"mcp.subscription.unavailable",R"({"reason":"listener_unavailable"})").get();}
+     const std::vector<ModelToolDefinition>& definitions()const noexcept{return definitions_;}
++    std::string approval_bindings(const std::vector<ModelToolDefinition>& offered)const{
++        Json result=Json::array();auto append=[&](const std::string& encoded){const auto bindings=Json::parse(encoded);if(!bindings.is_array())throw DynamicPlanUnavailable("Invalid native approval bindings");for(const auto& binding:bindings)if(std::any_of(offered.begin(),offered.end(),[&](const auto& tool){return tool.name==binding.at("alias").get<std::string>();}))result.push_back(binding);};
++        for(const auto& peer:peers_)append(peer->approval_bindings_json());if(a2a_)append(a2a_->approval_bindings_json());return result.dump();
++    }
+     McpToolRegistry* mcp(const std::string& alias)const{const auto found=mcp_.find(alias);return found==mcp_.end()?nullptr:found->second;}
+     A2aAgentToolRegistry* a2a(const std::string& alias)const{if(!a2a_)return nullptr;const auto definitions=a2a_->definitions();return std::any_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==alias;})?a2a_.get():nullptr;}
+ };
+@@ -58,6 +65,8 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+     bool coding_=false,delegated_=false,graph_=false,dynamic_=false;
+     std::shared_ptr<NativeChildExecutor> children_;
+     std::shared_ptr<DelegationExecutor> delegation_;
++    std::shared_ptr<DynamicPlanExecutor> planning_;
++    bool planning_root()const{return settings_.planning&&!dynamic_&&!delegated_&&!graph_;}
+     std::shared_ptr<const BoundProcessExecutable> image_;
+     std::unique_ptr<WorkspaceTools> primary_;
+     std::shared_ptr<ProcessExecutor> process_catalogue_;
+@@ -69,7 +78,9 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
+         auto selected=request.agent_tools?request.agent_tools:settings_.tool_allowlist;
+         if(!primary_){if(selected&&!selected->empty())throw std::invalid_argument("Model-only worker cannot acquire tools");return {};}
+-        if(!selected){if(!coding_)throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation","read_repository_instructions","list_skills","load_skill"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
++        if(!selected){if(!coding_&&!planning_root())throw std::invalid_argument("Worker read execution requires an explicit tool catalogue");selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","edit_file","create_file","apply_patch","restore_operation","read_repository_instructions","list_skills","load_skill"};if(process_catalogue_)for(const auto* name:{"run_process","wait_process","stop_process"})selected->push_back(name);if(language_catalogue_)selected->push_back("language_server");for(const auto& tool:settings_.xlang_python_tools)selected->push_back(tool.definition.name);}
++        if(!coding_&&planning_root()&&!request.agent_tools&&!settings_.tool_allowlist)selected=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions","list_skills","load_skill"};
++        if(planning_root()&&!request.agent_tools&&!settings_.tool_allowlist)for(const auto* name:{"plan_tasks","revise_plan","inspect_plan"})selected->push_back(name);
+         if(!delegated_&&settings_.delegation&&!request.agent_tools&&!settings_.tool_allowlist)selected->push_back("delegate_tasks");
+         validate_agent_tool_allowlist(selected);std::vector<ModelToolDefinition> result;
+         auto definitions=primary_->definitions();if(!delegated_&&settings_.delegation)definitions.push_back(DelegationExecutor::definition());if(coding_)for(auto definition:{EditExecutor::definition(),CreateExecutor::definition(),PatchTool::definition(),RestoreExecutor::definition()})definitions.push_back(std::move(definition));
+@@ -77,7 +88,7 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+         for(auto definition:SkillContext::definitions())definitions.push_back(std::move(definition));
+         if(language_catalogue_)for(auto definition:language_catalogue_->definitions())definitions.push_back(std::move(definition));
+         for(const auto& tool:settings_.xlang_python_tools){if(std::any_of(definitions.begin(),definitions.end(),[&](const auto& existing){return existing.name==tool.definition.name;}))throw std::invalid_argument("Callable alias collides with a configured native tool");definitions.push_back(tool.definition);}
+-        for(const auto& name:*selected){const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
++        for(const auto& name:*selected){if(planning_root()&&(name=="plan_tasks"||name=="revise_plan"||name=="inspect_plan"))continue;const auto found=std::find_if(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==name;});
+             if(coding_&&callable_tool(name)&&found!=definitions.end()){result.push_back(*found);continue;}
+             if(coding_&&is_agent_remote_tool(name)&&(settings_.a2a_enabled||!settings_.mcp_servers.empty()))continue; // Exact discovery is checked before worker launch.
+             if((!is_agent_read_tool(name)&&!is_agent_guidance_tool(name)&&!(name=="delegate_tasks"&&!delegated_&&settings_.delegation)&&!(coding_&&(is_agent_file_tool(name)||(is_agent_process_tool(name)&&process_catalogue_))))||found==definitions.end())throw std::invalid_argument("Worker read execution cannot acquire this capability");result.push_back(*found);}
+@@ -86,7 +97,8 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+ public:
+     WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={},bool graph=false,bool dynamic=false)
+         :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),graph_(graph),dynamic_(dynamic),image_(std::move(image)){
+-        if(!image_||(!settings_.workspace&&(coding_||delegated_||graph_||dynamic_||settings_.delegation||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch))||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_||dynamic_)&&settings_.delegation)||(settings_.planning&&!dynamic_)||(!coding_&&settings_.workspace&&!delegated_&&!graph_&&!dynamic_&&!settings_.delegation&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
++        if(!image_||(!settings_.workspace&&(coding_||delegated_||graph_||dynamic_||settings_.delegation||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch))||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_||dynamic_)&&settings_.delegation)||((delegated_||graph_)&&settings_.planning)||(!coding_&&settings_.workspace&&!delegated_&&!graph_&&!dynamic_&&!settings_.delegation&&!settings_.planning&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
++        if(planning_root())settings_.planning->max_parent_turns=static_cast<std::int64_t>(std::min(settings_.max_turns,static_cast<std::size_t>(settings_.planning->max_parent_turns)));
+         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
+         // AgentService owns the single admission-time membership capture.
+         settings_.workspace_membership_snapshot={};
+@@ -97,11 +109,13 @@ public:
+         }
+         if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
+         if(!delegated_&&settings_.delegation){if(!settings_.delegated_execution)settings_.delegated_execution=make_agent_worker_delegated_executor(store_,image_);children_=std::make_shared<NativeChildExecutor>();delegation_=std::make_shared<DelegationExecutor>(store_,children_);}
+-        if(!dynamic_)validator_=std::make_unique<AgentRunner>(store_,settings_,delegation_);
++        if(planning_root()){if(!children_)children_=std::make_shared<NativeChildExecutor>();planning_=std::make_shared<DynamicPlanExecutor>(store_,children_,make_agent_worker_dynamic_executor(store_,image_,gateway));}
++        if(!dynamic_)validator_=std::make_unique<AgentRunner>(store_,settings_,delegation_,planning_);
+         gateway_=gateway?std::move(gateway):make_persistence_agent_model_gateway(store_,settings_.credential);
+     }
+     std::shared_ptr<NativeChildExecutor> shared_children()const override{return children_;}
+     std::shared_ptr<DelegationExecutor> shared_delegation()const override{return delegation_;}
++    std::shared_ptr<DynamicPlanExecutor> shared_planning()const override{return planning_;}
+     void validate(const AgentRootExecutionRequest& request)const override{
+         if(!request.placement.empty()&&request.placement!="process")throw std::invalid_argument("Only process placement can enter a process worker executor");
+         const auto selected=model(request);const auto models=dynamic_?std::vector<std::string>{settings_.provider.model}:validator_->models();
+@@ -118,9 +132,10 @@ public:
+     Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{if(delegated_||graph_)throw Conflict("Child executor requires its original shared budget");return execute_owned(request,{},cancel);}
+     Run execute_owned(const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared,std::stop_token cancel){
+         if((delegated_||graph_||dynamic_)!=bool(shared))throw Conflict("Worker executor budget kind differs from captured admission");
+-        const auto deadline=shared?shared->deadline():Clock::now()+settings_.run_timeout;validate(request);
++        auto deadline=shared?shared->deadline():Clock::now()+settings_.run_timeout;validate(request);
+         const auto admitted=store_.run(request.run_id).get();
+-        if(admitted.graph_root||admitted.state!=RunState::queued||((graph_||dynamic_)?admitted.parent_id.empty():delegated_?admitted.parent_id!=shared->root_id():!admitted.parent_id.empty()))throw Conflict("Worker execution requires its fresh queued owner");
++        const bool resumed=planning_root()&&admitted.state==RunState::paused;
++        if(admitted.graph_root||(admitted.state!=RunState::queued&&!resumed)||((graph_||dynamic_)?admitted.parent_id.empty():delegated_?admitted.parent_id!=shared->root_id():!admitted.parent_id.empty()))throw Conflict("Worker execution requires its fresh queued owner");
+         if(delegated_){const auto child=store_.child_admission(request.run_id).get();if(child.kind!=ChildAdmissionKind::delegated_leaf||child.root_run_id!=shared->root_id()||child.preset_id!="workspace.inspect"||child.preset_revision!=1||settings_.max_turns>4)throw Conflict("Worker differs from bounded delegated admission");shared->check(cancel);}
+         const auto history=store_.run_history(request.run_id).get();
+         if(history.empty()||history.front().role!="user")throw Conflict("Worker root has no admitted prompt");
+@@ -130,9 +145,10 @@ public:
+         const auto budget=store_.root_budget(root).get();const auto expected=dynamic_?RootBudgetSpec{}:*validator_->execution_budget(model(request));
+         auto provider_identity=Json::parse(budget.spec.provider_identity_json);if(delegated_||graph_||dynamic_)provider_identity["model_id"]=model(request);
+         if(delegated_&&provider_identity!=Json::parse(provider_context_json(settings_,model(request)).empty()?expected.provider_identity_json:provider_context_json(settings_,model(request))))throw Conflict("Delegated worker provider differs from frozen settings");
+-        if(!delegated_&&!graph_&&!dynamic_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||budget.model_calls_reserved!=0))throw Conflict("Worker root differs from immutable admission or was already executed");
++        if(!delegated_&&!graph_&&!dynamic_&&(budget.spec.policy_id!=expected.policy_id||budget.spec.policy_revision!=expected.policy_revision||budget.spec.workspace_identity!=expected.workspace_identity||budget.spec.provider_identity_json!=expected.provider_identity_json||budget.spec.max_children!=expected.max_children||budget.spec.max_parallel!=expected.max_parallel||budget.spec.max_model_calls!=expected.max_model_calls||budget.spec.wall_limit_ms!=expected.wall_limit_ms||(!resumed&&budget.model_calls_reserved!=0)))throw Conflict("Worker root differs from immutable admission or was already executed");
+         if(graph_){const auto child=store_.child_admission(request.run_id).get();const auto captured=store_.graph_context_owner(root).get();const auto node=std::find_if(captured.authority.agents.begin(),captured.authority.agents.end(),[&](const auto& item){return item.node_id==child.graph_node_path;});if(child.kind!=ChildAdmissionKind::graph_agent||child.root_run_id!=root||budget.spec.policy_id!="native.graph-context"||captured.authority.token_context!=settings_.context.has_value()||!captured.segment||captured.segment->state!="open"||!shared->segment_open()||shared->segment_id()!=captured.segment->id||node==captured.authority.agents.end()||node->model_id!=model(request)||node->turn_limit!=static_cast<std::int64_t>(settings_.max_turns)||node->backend_identity!=context_authority_identity(settings_,model(request),primary_->identity(),agent_authority_credentials(store_,settings_)))throw Conflict("Graph worker differs from captured scheduler authority");provider_identity=Json::parse(node->provider_identity_json);shared->check(cancel);}
+         if(dynamic_){const auto child=store_.child_admission(request.run_id).get();const auto plan=store_.dynamic_plan(child.plan_id).get();const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});if(child.kind!=ChildAdmissionKind::dynamic_agent||child.root_run_id!=root||budget.spec.policy_id!="native.dynamic-plan"||!shared->segment_open()||shared->segment_id()!=store_.dynamic_budget_segment(root).get().id||preset==plan.capabilities.presets.end()||preset->turn_limit!=static_cast<std::int64_t>(settings_.max_turns)||preset->readonly==coding_||child.backend_identity!=agent_authority_identity(settings_,model(request),primary_->identity(),agent_authority_credentials(store_,settings_)))throw Conflict("Dynamic worker differs from signed scheduler admission");provider_identity=Json::parse(plan.capabilities.provider_identity_json);shared->check(cancel);}
++        if(cancel.stop_requested()&&resumed)return admitted;
+         if(cancel.stop_requested())return store_.transition(request.run_id,RunState::queued,RunState::cancelled,R"({"reason":"cancelled_before_start"})").get();
+         if(!primary_){
+             AgentWorkerReadRequestPolicy policy;policy.instructions=settings_.instructions;if(!request.agent_instructions.empty())policy.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions:\n"+settings_.instruction_policy.instructions;policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+@@ -155,7 +171,7 @@ public:
+         if(!settings_.instruction_policy.instructions.empty())policy.instruction_suffix="\n\nBackend-configured agent instructions (native permissions and execution evidence remain authoritative):\n"+settings_.instruction_policy.instructions;
+         if(policy.instructions.size()+policy.instruction_suffix.size()>65536)throw std::invalid_argument("Worker instructions exceed limits");
+         const auto selected_tools=tools(request);for(const auto& definition:members.definitions())if(std::any_of(selected_tools.begin(),selected_tools.end(),[&](const auto& selected){return selected.name==definition.name;}))policy.tools.push_back(definition);
+-        if(delegation_)for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
++        if(delegation_&&!planning_root())for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
+         if(coding_)for(const auto& definition:selected_tools)if(is_agent_file_tool(definition.name)||is_agent_process_tool(definition.name))policy.tools.push_back(definition);
+         for(const auto& definition:selected_tools)if(definition.name=="language_server"||((definition.name=="list_skills"||definition.name=="load_skill")&&!callable_tool(definition.name)))policy.tools.push_back(definition);
+         if(coding_)for(const auto& definition:selected_tools)if(callable_tool(definition.name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==definition.name;}))policy.tools.push_back(definition);
+@@ -170,6 +186,21 @@ public:
+             }
+             if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
+         }
++        std::optional<DynamicBudgetSegment> planning_segment;std::optional<DynamicResumeRecord> planning_resume;
++        if(planning_root()){
++            validator_->validate_dynamic_owner(root,model(request));auto caps=store_.dynamic_capabilities(root).get();auto presets=caps.presets;
++            for(auto& preset:presets){preset.tools.clear();for(const auto& tool:policy.tools)if(!preset.readonly||is_agent_read_tool(tool.name)||is_agent_guidance_tool(tool.name))preset.tools.push_back(tool.name);std::sort(preset.tools.begin(),preset.tools.end());const auto child=dynamic_child_settings(settings_,preset,model(request));preset.backend_identity=agent_authority_identity(child,model(request),membership.workspace_id,agent_authority_credentials(store_,child));}
++            Json bindings=remote_tools?Json::parse(remote_tools->approval_bindings(policy.tools)):Json::array();for(const auto& tool:settings_.xlang_python_tools)if(std::any_of(policy.tools.begin(),policy.tools.end(),[&](const auto& offered){return offered.name==tool.definition.name;}))bindings.push_back({{"kind","trusted_xlang3_callable"},{"alias",tool.definition.name},{"input_schema_json",tool.definition.input_schema_json},{"execution",tool.execution==XlangPythonExecution::worker?"worker":"in_process"}});
++            const auto catalogue=seal_dynamic_tool_catalogue(policy.tools,bindings.dump());
++            if(resumed){
++                if(!caps.catalogue_finalized||caps.tool_catalog_json!=catalogue||caps.presets.size()!=presets.size())throw DynamicPlanUnavailable("Paused worker catalogue changed");
++                for(std::size_t i=0;i<presets.size();++i){const auto& a=caps.presets[i];const auto& b=presets[i];if(a.id!=b.id||a.revision!=b.revision||a.readonly!=b.readonly||a.tools!=b.tools||a.turn_limit!=b.turn_limit||a.backend_identity!=b.backend_identity)throw DynamicPlanUnavailable("Paused worker preset changed");}
++            }else{store_.transition(root,RunState::queued,RunState::running).get();caps=store_.finalize_dynamic_capabilities(root,caps.backend_identity,catalogue,presets).get();}
++            // Retain a closed pause until membership and all discovery agree.
++            if(!resumed){const auto started=Clock::now();planning_segment=store_.open_dynamic_budget_segment({root,generation(),caps.backend_identity,store_.root_budget(root).get().revision}).get();deadline=started+std::chrono::milliseconds(planning_segment->remaining_active_ms);}
++            const auto allowed=request.agent_tools?request.agent_tools:settings_.tool_allowlist;for(const auto& definition:dynamic_plan_tool_definitions(caps))if(!allowed||std::find(allowed->begin(),allowed->end(),definition.name)!=allowed->end())policy.tools.push_back(definition);
++        }
++        if(delegation_&&planning_root())for(const auto& definition:selected_tools)if(definition.name=="delegate_tasks")policy.tools.push_back(definition);
+         if(settings_.provider_identity){
+             policy.history_owner=ProviderHistoryOwner{root,request.run_id,(delegated_||graph_||dynamic_)?ModelCallRole::leaf:ModelCallRole::parent,
+                 {(delegated_||graph_||dynamic_)?ContextScopeKind::execution:ContextScopeKind::session,(delegated_||graph_||dynamic_)?request.run_id:admitted.session_id},provider_identity.dump(),
+@@ -194,11 +225,12 @@ public:
+         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+         auto provider=settings_.provider;provider.model=model(request);
+         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
+-        for(const auto& event:store_.events(request.run_id).get())if(event.kind=="agent.workspace_membership")throw Conflict("Worker root already has an execution membership receipt");
++        std::optional<std::string> saved_membership;for(const auto& event:store_.events(request.run_id).get())if(event.kind=="agent.workspace_membership"){if(saved_membership||!resumed)throw Conflict("Worker root already has an execution membership receipt");saved_membership=event.json;}
+         auto captured_membership=Json{{"workspace_id",membership.workspace_id},{"revision",membership.revision},{"primary_folder_id",membership.folders.front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump();
+         if(delegated_||graph_||dynamic_){bool found=false;for(const auto& event:store_.events(root).get())if(event.kind=="agent.workspace_membership"){captured_membership=event.json;found=true;break;}if(!found)throw Conflict("Delegated worker requires the parent membership snapshot");}
+-        store_.append_event(request.run_id,"agent.workspace_membership",captured_membership).get();
+-        if(settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
++        if(resumed){if(!saved_membership||Json::parse(*saved_membership)!=Json::parse(captured_membership))throw DynamicPlanUnavailable("Paused worker membership differs from its admitted snapshot");const auto plan=store_.dynamic_plan_for_root(root).get();if(!plan)throw DynamicPlanUnavailable("Paused worker has no plan");DynamicResumeSpec wake{plan->id,generation(),plan->capabilities.backend_identity,plan->revision,plan->state_sequence,store_.root_budget(root).get().revision};wake.context_pin=store_.dynamic_context_pause(root).get();if(settings_.context&&!wake.context_pin)throw DynamicPlanUnavailable("Paused worker has no context pin");const auto started=Clock::now();planning_resume=store_.resume_dynamic_owner(wake).get();planning_segment=planning_resume->segment;deadline=started+std::chrono::milliseconds(planning_segment->remaining_active_ms);}
++        else store_.append_event(request.run_id,"agent.workspace_membership",captured_membership).get();
++        if(!resumed&&settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
+         AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;owner.approval_timeout=settings_.run_timeout;
+         owner.repository_context=[&](std::size_t index){return index<contexts.size()?contexts[index].get():nullptr;};
+         if(language_catalogue_)owner.language_server_query=[&](const AgentWorkspaceInvocation& call,std::stop_token stop){return language_catalogue_->invoke(call.arguments_json,stop,&members.folders(),settings_.language_server_dispatch);};
+@@ -223,26 +255,29 @@ public:
+             for(const auto& tool:settings_.xlang_python_tools)if(owner.offered_tool(tool.definition.name))context.bindings.push_back({tool.definition,[binding=&tool](const std::string& arguments,std::stop_token stop){return binding->execution==XlangPythonExecution::worker?binding->callable.invoke_json_worker(arguments,stop):binding->callable.invoke_json(arguments,stop);}});
+             if(!context.bindings.empty())callable_owner=std::move(context);
+         }
+-        return supervise(request,root,membership.workspace_id,membership.revision,provider_identity,deadline,std::move(owner),std::move(policy),std::move(provider),cancel,std::move(remote_owner),std::move(callable_owner));
++        return supervise(request,root,membership.workspace_id,membership.revision,provider_identity,deadline,std::move(owner),std::move(policy),std::move(provider),cancel,std::move(remote_owner),std::move(callable_owner),planning_segment,planning_resume);
+     }
+-    Run supervise(const AgentRootExecutionRequest& request,const std::string& root,const std::string& workspace_id,std::int64_t workspace_revision,const Json& provider_identity,Clock::time_point deadline,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::stop_token cancel,std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={}){
++    Run supervise(const AgentRootExecutionRequest& request,const std::string& root,const std::string& workspace_id,std::int64_t workspace_revision,const Json& provider_identity,Clock::time_point deadline,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,std::stop_token cancel,std::optional<AgentRemoteToolOwnerContext> remote_owner={},std::optional<AgentCallableToolOwnerContext> callable_owner={},std::optional<DynamicBudgetSegment> segment={},std::optional<DynamicResumeRecord> resume={}){
+         auto supervisor=AgentWorkerSupervisor::prepare(store_,image_,{root,request.run_id,workspace_id,generation(),workspace_revision},provider_identity.dump(),deadline);
+         // An observation failure cannot release the physical slot. Retain this
+         // same supervisor, including uncertain launch before a returned handle;
+         // no new child, model dispatch or durable terminal write is retried.
+         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
+                 catch(...){std::this_thread::sleep_for(1s);}}};
+-        std::exception_ptr failure;
+-        try{supervisor->launch();if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
++        std::exception_ptr failure;std::shared_ptr<RootExecutionBudget> planning_budget;std::mutex guidance_mutex;
++        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);auto frozen=settings_;frozen.provider.model=provider.model;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto guidance=[&](const std::string& directory,std::stop_token stop){std::lock_guard lock(guidance_mutex);InstructionPrecondition result;if(owner.repository_context){const auto context=owner.repository_context(0);if(context&&context->ready(directory,stop))result=context->precondition(directory);}return result;};auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel,std::move(guidance));policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
++            if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+         catch(...){failure=std::current_exception();}
+         try{
+             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}
+             for(;;){try{
+                     if(store_.run(request.run_id).get().state==RunState::completed)return supervisor->drain_completed(Clock::now()+5s).run;
++                    if(segment&&store_.run(request.run_id).get().state==RunState::paused)return supervisor->drain_paused(segment->id,Clock::now()+5s).run;
+                     const bool cancelled=cancel.stop_requested();std::string reason=cancelled?"cancelled":Clock::now()>=deadline?"deadline":"dispatch_error";
+                     // Only backend model-host events may establish provider failure.
+                     if(!cancelled&&reason!="deadline")for(const auto& event:store_.events(request.run_id).get()){if(event.kind!="worker.model.uncertain")continue;const auto data=Json::parse(event.json,nullptr,false);if(data.is_object()&&data.contains("generation")&&data["generation"]==supervisor->lease().generation&&data.contains("failure_code")&&data["failure_code"]=="provider_failure")reason="provider_failure";}
+-                    const auto observed=supervisor->drain_terminal(cancelled?RunState::cancelled:RunState::failed,reason,Clock::now()+5s).run;
++                    const auto elapsed=segment?std::max<std::int64_t>(0,std::chrono::ceil<std::chrono::milliseconds>(Clock::now()-(deadline-std::chrono::milliseconds(segment->remaining_active_ms))).count()):0;
++                    const auto observed=segment?supervisor->drain_planning_terminal(cancelled?RunState::cancelled:RunState::failed,reason,segment->id,elapsed,Clock::now()+5s).run:supervisor->drain_terminal(cancelled?RunState::cancelled:RunState::failed,reason,Clock::now()+5s).run;
+                     // Preserve the backend's uncertain receipt after physical
+                     // drain; the worker's generic failure cannot clear it.
+                     if(supervisor->outcome_unrecorded()&&!cancelled&&Clock::now()<deadline)throw AgentWorkerReadOutcomeUnrecorded("Backend worker outcome requires ownership recovery");
+@@ -284,7 +319,7 @@ AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService&
+         return executor.execute_owned(request,std::move(budget),cancel);
+     };
+ }
+-std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),false);}
+-std::shared_ptr<AgentRootExecutor> make_agent_worker_coding_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),true);}
++std::shared_ptr<AgentRootExecutor> make_agent_worker_read_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),false,false,std::move(gateway));}
++std::shared_ptr<AgentRootExecutor> make_agent_worker_coding_executor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){return std::make_shared<WorkspaceExecutor>(store,std::move(settings),std::move(image),true,false,std::move(gateway));}
+ 
+ }
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index 6a9fea88..5fb9422f 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -16,6 +16,7 @@
+ #include "agentflow/create_executor.hpp"
+ #include "agentflow/agent_authority.hpp"
+ #include "agentflow/agent_runner.hpp"
++#include "agentflow/agent_service.hpp"
+ #include "agentflow/agent_model_values.hpp"
+ #include "agentflow/agent_worker_read_host.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+@@ -85,6 +86,19 @@ public:
+     std::optional<ModelToolCall> before;
+     std::string before_result="Actual dynamic child SDK read";
+ };
++void main_process_planning(PersistenceService& store,const std::string& path){
++    wchar_t executable[32768]{};const auto length=GetModuleFileNameW(nullptr,executable,32768);require(length&&length<32768,"Main planning fixture image unavailable");const auto image=std::filesystem::path(executable).parent_path()/"xmind.exe";
++    for(const bool coding:{false,true})for(const bool counted:{false,true})for(const bool human:{false,true}){
++        const std::string id=std::string("main-process-")+(coding?"coding-":"read-")+(counted?"counted-":"plain-")+(human?"human":"inspection");auto settings=dynamic_fixture_child(std::filesystem::path(path).parent_path().string());settings.planning=DynamicPlanningPolicy{};settings.approved_edits=coding;if(counted){settings.context=ContextRuntimePolicy{};settings.context->compaction.automatic=false;}settings.tool_allowlist.reset();auto gateway=std::make_shared<PlanningLoopModel>();
++        if(human)gateway->first={"main-human-plan","plan_tasks",R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"answer","type":"human","question":"Synthetic main process answer","depends_on":[]}]})"};
++        auto executor=coding?make_agent_worker_coding_executor(store,settings,ForegroundProcess::bind_executable(image.string()),gateway):make_agent_worker_read_executor(store,settings,ForegroundProcess::bind_executable(image.string()),gateway);require(executor->shared_children()&&executor->shared_planning(),"Main worker must expose its single child pool and planning scheduler");
++        auto service=std::make_unique<AgentService>(store,settings,1,8,std::shared_ptr<RootAdmissionPool>{},executor);store.create_session(id,"Main production process planning fixture").get();service->submit(id,id,"Synthetic main process planning input");
++        const auto until=std::chrono::steady_clock::now()+30s;while(std::chrono::steady_clock::now()<until&&service->healthy()){const auto state=store.run(id).get().state;if(human?(state==RunState::paused||state==RunState::failed||state==RunState::cancelled||state==RunState::completed):service->idle())break;std::this_thread::sleep_for(5ms);}
++        if(human){require(service->healthy()&&store.run(id).get().state==RunState::paused,"Main process must reach a clean human pause");const auto wait_until=std::chrono::steady_clock::now()+5s;while(std::chrono::steady_clock::now()<wait_until){bool active=false;for(const auto& event:store.events(id).get())if(event.kind=="worker.lease.admitted"){const auto value=Json::parse(event.json);if(value.contains("generation")&&store.agent_worker_lease(value.at("generation")).get().state=="active")active=true;}if(!active)break;std::this_thread::sleep_for(5ms);}const auto plan=store.dynamic_plan_for_root(id).get();require(plan.has_value(),"Main pause must retain its plan");const auto requests=store.dynamic_human_requests(plan->id).get();require(requests.size()==1,"Main pause must publish one human request");service->close();service.reset();executor=coding?make_agent_worker_coding_executor(store,settings,ForegroundProcess::bind_executable(image.string()),gateway):make_agent_worker_read_executor(store,settings,ForegroundProcess::bind_executable(image.string()),gateway);service=std::make_unique<AgentService>(store,settings,1,8,std::shared_ptr<RootAdmissionPool>{},executor);require(service->healthy()&&store.run(id).get().state==RunState::paused&&gateway->calls==1,"Reopened service must retain its clean pause without replay");service->plan_input(id,requests.front().id,R"({"answer":"synthetic"})","fixture-controller",plan->revision,plan->state_sequence);}
++        const auto finish_until=std::chrono::steady_clock::now()+30s;while(std::chrono::steady_clock::now()<finish_until&&service->healthy()&&!service->idle())std::this_thread::sleep_for(5ms);
++        require(service->healthy()&&service->idle()&&store.run(id).get().state==RunState::completed&&gateway->calls==2&&store.root_budget(id).get().model_calls_reserved==2&&store.run_history(id).get().size()==4,"Main AgentService must complete via production SDK worker with exact model/history counts");require(store.dynamic_budget_segment(id).get().state=="closed","Main completion must close its actual segment");std::size_t generations=0;for(const auto& event:store.events(id).get())if(event.kind=="worker.lease.admitted"){const auto lease=store.agent_worker_lease(Json::parse(event.json).at("generation")).get();require(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Main service must physically retire actual distinct worker generations");++generations;}require(generations==(human?2u:1u),"Main resume must launch exactly one replacement generation");service->close();
++    }
++}
+ void delegated_workers(PersistenceService& store){
+     const std::string parent="delegated-worker-root",membership=R"({"workspace_id":"worker-fixture-workspace","revision":7,"snapshot":"synthetic_backend_fixture"})";
+     store.create_session(parent,"Synthetic admitted child IPC ledger").get();store.start_prompt_run(parent,parent,R"({"content":"Bounded child admission"})",RootBudgetSpec{"native.delegation",1,"worker-fixture-workspace",provider,8,2,8,600000}).get();store.transition(parent,RunState::queued,RunState::running).get();store.append_event(parent,"agent.workspace_membership",membership).get();
+@@ -519,7 +533,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);planning_admission(store,path,imports);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);planning_admission(store,path,imports);main_process_planning(store,path);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});

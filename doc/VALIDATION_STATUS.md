@@ -1,3 +1,48 @@
+## Main application process planning composition — 2026-10-22
+
+WorkspaceExecutor now accepts explicit root planning policies and shares its
+DynamicPlanExecutor and physical child pool with AgentService. It seals actual
+native/remote/callable catalogues before offering planning, retains the original
+fresh-run deadline across discovery, and binds SDK callbacks and continuation
+funding to the captured worker lease and shared root clock. Failure/cancellation
+uses typed planning retirement; human pause drains the old process before resume.
+Invalid parent-turn limits remain rejected before normalization.
+
+AgentService restores the saved admission folder snapshot when reopening a clean
+process pause. It does not recapture current membership or automatically resume.
+Eight application cases cover read/coding owners, plain/counted context and
+inspection/human plans. Human cases schedule one actual xmind child, pause after
+its completion, close the service, construct fresh execution ownership and resume
+in one replacement process. Exactly one child call, two parent calls, three shared
+charges and four root messages remain; inspection cases retain two charges and
+four messages. All exact root/child generations retire, and completed children do
+not replay. Gateways are synthetic; no paid provider inference was performed.
+
+The first integration attempts exposed premature planning-schema construction,
+missing offered planning tools and use of a child-only context-budget field on a
+root. Diagnostic logging was removed after identifying that last cause. A malformed
+human fixture was correctly rejected and corrected to the published add/revision
+contract. The reopen fixture initially reused a deliberately closed child pool;
+it now constructs fresh ownership. All original failed gates/patches are retained.
+A broader provider-runtime gate launched a stale xmind_server binary; its target
+now depends on that actual indirect executable. The corrected final gate builds
+that dependency and passes all five tests without changing their deadlines.
+
+Final planning-engine/worker-model/ledger/AgentService/provider-runtime gate:
+5/5 in 84.11s, ledger15.37s. Native patch
+1bb70f9d9deb4d569d2316418b7ffff101955f5c1533a221b91070386ef01bc9;
+xmind.exe ec83ba3195ccaad2cd9e3b72681502e95de5e70d94eefe79e423326f5ceba817.
+Frozen exact sets: 2787 project/16 SDK/1870 libraries/30 runtime/18598 dependencies/
+105 binaries. Inventory172; this is not a full-suite pass. No CPython, installation,
+user-profile writes, completed user-task replay or visible windows.
+Evidence: process-xmind-root-main-planning-*-20261022-*.
+
+Managed process provider profiles still do not acquire planning by default.
+Before enabling that policy, qualify selected-agent restrictions for deterministic
+plan tools and narrowed/empty catalogues, remaining main root effect/discovery
+families, nested/repeated waits and overflow/compaction. Installed CLI/browser/
+extension qualification and the full delivery audit remain open.
+
 ## Planning worker terminal retirement — 2026-10-22
 
 Added typed planning-root failure/cancellation retirement and supervisor drain.

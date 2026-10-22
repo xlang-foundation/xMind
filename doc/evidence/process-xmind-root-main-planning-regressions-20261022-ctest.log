@@ -1,0 +1,30 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  39: native_dynamic_plan_engine_contract
+1/4 Test  #39: native_dynamic_plan_engine_contract ........   Passed    6.61 sec
+    Start  88: native_agent_worker_model_rpc_contract
+2/4 Test  #88: native_agent_worker_model_rpc_contract .....   Passed   55.82 sec
+    Start  97: native_agent_service_contract
+3/4 Test  #97: native_agent_service_contract ..............   Passed    1.61 sec
+    Start 168: native_provider_profile_runtime_contract
+4/4 Test #168: native_provider_profile_runtime_contract ...***Failed    5.46 sec
+file:///D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs:21
+      backend.once('error',error=>{clearTimeout(timer);reject(error);});backend.once('exit',code=>{clearTimeout(timer);reject(new Error(`Native profile startup exited ${code}: ${stderr}`));});
+                                                                                                                              ^
+
+Error: Native profile startup exited 1: Database schema requires a newer xMind runtime
+
+    at ChildProcess.<anonymous> (file:///D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs:21:127)
+    at Object.onceWrapper (node:events:634:26)
+    at ChildProcess.emit (node:events:519:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+
+Node.js v22.19.0
+
+
+75% tests passed, 1 tests failed out of 4
+
+Total Test time (real) =  69.52 sec
+
+The following tests FAILED:
+	168 - native_provider_profile_runtime_contract (Failed)
+Errors while running CTest

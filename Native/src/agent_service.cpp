@@ -110,7 +110,7 @@ struct AgentService::Impl {
          context_policy(settings.context?std::optional<ContextPolicy>(settings.context->compaction):std::nullopt),
          children(settings.delegation||settings.planning?(execution&&execution->shared_children()?execution->shared_children():std::make_shared<NativeChildExecutor>()):nullptr),
          delegation(settings.delegation?(execution&&execution->shared_delegation()?execution->shared_delegation():std::make_shared<DelegationExecutor>(store,children)):nullptr),
-         planning(settings.planning?std::make_shared<DynamicPlanExecutor>(store,children):nullptr),
+         planning(settings.planning?(execution&&execution->shared_planning()?execution->shared_planning():std::make_shared<DynamicPlanExecutor>(store,children)):nullptr),
          runner(store,std::move(settings),delegation,planning),root_executor(std::move(execution)),limit(capacity),owned_limit(capacity+count){
         if(count==0||count>16||capacity==0||capacity>4096)throw std::invalid_argument("Invalid agent worker capacity");
         // Recovery already interrupts every non-clean owner. Adopt only ordinary
@@ -125,6 +125,15 @@ struct AgentService::Impl {
             try{job->model=runner.admitted_dynamic_model(run.id);runner.validate_dynamic_owner(run.id,job->model);}
             catch(const DynamicPlanUnavailable&){}
             const auto selected=store.session_agent(run.session_id).get();if(selected.selected){job->agent_instructions=selected.selected->instructions;job->agent_tools=selected.selected->tools;job->agent_permissions=selected.selected->permissions;job->placement=selected.selected->placement;}
+            if(uses_executor(job)){
+                // Reopen the exact admitted folder set; a current callback can
+                // describe another workspace revision after a clean pause.
+                for(const auto& event:store.events(run.id).get())if(event.kind=="agent.workspace_membership"){
+                    if(job->execution_workspace)throw DatabaseError("Paused worker has duplicate membership receipts");
+                    const auto value=Json::parse(event.json);auto captured=std::make_shared<WorkspaceMembershipSnapshot>();captured->workspace_id=value.at("workspace_id");captured->revision=value.at("revision");for(const auto& folder:value.at("folders"))captured->folders.push_back({folder.at("folder_id").get<std::string>(),folder.at("root").get<std::string>()});job->execution_workspace=std::move(captured);
+                }
+                if(!job->execution_workspace)throw DatabaseError("Paused worker lost its admitted workspace membership");
+            }
             active.emplace(run.id,job);
             // Even an already-answered clean pause waits for an authenticated
             // duplicate answer or explicit resume; startup never replays it.

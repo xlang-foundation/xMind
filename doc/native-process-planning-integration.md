@@ -2,9 +2,29 @@
 
 Status: implementation and remaining integration, 2026-10-22. The current
 checkpoint below supersedes historical implementation notes in this document.
-Main process planning placement remains closed.
+Main process planning is composed for explicit backend planning policies. Managed
+process-profile defaults and installed-client acceptance remain open.
 
-## Current integration checkpoint
+## Current application integration checkpoint
+
+AgentService and WorkspaceExecutor now share one backend planning scheduler and
+child pool. Explicitly configured read/coding process roots finalize actual tool
+catalogues and bind planning callbacks to their captured SDK worker lease and
+shared active clock. The supervisor handles completion, typed terminal retirement
+and physical pause drain. Reopening a service restores the exact saved membership
+without dispatch; authenticated input starts one replacement generation.
+
+Eight plain/counted read/coding cases pass through actual application dispatch.
+Human cases finish one actual scheduled process child before pausing, recreate
+service ownership and complete without replaying that child. Five focused contracts
+pass in 84.11 seconds; see VALIDATION_STATUS.md for hashes, failed attempts and
+limits. Provider gateways remain synthetic, and no installed clients were changed.
+
+Managed-profile default planning, selected-agent deterministic-tool permission and
+narrow catalogue qualification, other main effect/discovery families, nested and
+repeated waits, overflow/compaction and installed-client acceptance remain open.
+
+## Earlier integration evidence
 
 The actual DynamicPlanExecutor scheduler now dispatches agent children through
 the production process factory and supervisor, using signed child admission and

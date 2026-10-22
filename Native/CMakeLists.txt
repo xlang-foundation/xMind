@@ -1522,6 +1522,7 @@ if(BUILD_TESTING)
     add_executable(agentflow_provider_profile_runtime_contract tests/provider_profile_runtime_contract.cpp)
     target_include_directories(agentflow_provider_profile_runtime_contract PRIVATE third_party third_party/cpp-httplib)
     target_link_libraries(agentflow_provider_profile_runtime_contract PRIVATE agentflow_runtime agentflow_http)
+    add_dependencies(agentflow_provider_profile_runtime_contract xmind_server)
     add_custom_command(TARGET agentflow_provider_profile_runtime_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_provider_profile_runtime_contract>")
     add_test(NAME native_provider_profile_runtime_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
