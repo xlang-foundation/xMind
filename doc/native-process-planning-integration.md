@@ -14,7 +14,9 @@ local-runner fallback. Capacity is retained through physical process retirement.
 Six scheduler cases now use production xmind.exe for the supervised parent and
 scheduled children with synthetic model gateways. They verify SDK reads, approved
 create_file and inherited denial, each with counted and uncounted children.
-Each case includes a parent SDK read before planning and retains three parent
+Readonly cases include a parent SDK read before planning; coding cases now
+include a root create_file through the coding SDK owner, with one approval
+before exact bytes exist or inherited denial with no operation/file. Both retain three parent
 and two child model turns, five shared charges, six parent/four child messages.
 Counted children retain two completed typed leaf inferences and three execution
 conversation groups. The parent consumes its signed continuation and completes
@@ -40,7 +42,12 @@ and physically drains it after canonical completion. Both parent and child are
 production processes; provider replies remain synthetic. Whole-fixture timings
 do not measure individual IPC-call latency.
 
-Main WorkspaceExecutor root planning admission, root effects, nested planning
+Root effects now require an exact unique finalized catalogue entry and preserve
+normal model/lease/operation authority. The production parent/child ledger passes
+with approved/denied root creation in counted/plain modes (9.41 seconds).
+This establishes create_file, not every root effect family.
+
+Main WorkspaceExecutor root planning admission, remaining root effects, nested planning
 services, new-owner human pause/resume, context overflow/compaction and current
 installed CLI/browser/extension qualification remain open. Dynamic child resume
 is refused. Intermittent SDK/heap faults remain unresolved. Historical evidence
@@ -248,6 +255,37 @@ physical process capacity until its exact process has drained. Cancellation or
 lost result never authorizes replay of an uncertain effect.
 
 ## Pause and resume
+
+### Main-path composition audit, 2026-10-22
+
+The next admission change must compose the following existing owners rather
+than merely remove the constructor's planning refusal:
+
+| Owner | Current source | Required change |
+| --- | --- | --- |
+| Root settings and admission | `Native/src/agent_worker_read_executor.cpp`, WorkspaceExecutor constructor/execute_owned | Retain a shared DynamicPlanExecutor and NativeChildExecutor; validate the original provisional capabilities and budget before starting a root segment; finalize the actual discovered catalogue before launching its worker. |
+| Service scheduler | `Native/src/agent_service.cpp`, Impl constructor/uses_executor/resume_plan | Use the same captured planning scheduler and child capacity for root execution and resume. Preserve selected process placement when a waiting job wakes. |
+| Worker physical lifetime | `Native/src/agent_worker_supervisor.cpp`, drain_completed/drain_terminal | Add a paused-owner drain distinct from completion/failure; validate the exact durable pause and closed segment before shutdown, observe the original process exit, then retire that lease without converting the root to failed. Observation timeout retains the same supervisor. |
+| Durable handoff | `Native/src/repository.cpp`, worker_current_scope/retire_worker | Add an atomic exact-lease paused retirement check. Existing generic worker reads require running owners and cannot authorize this transition. Preserve accepted native planning work and committed effects; unresolved dispatch prevents a clean handoff. |
+| Resumed planning | `Native/src/agent_worker_planning_owner.cpp`, Owner::resume | A new lease cannot satisfy the current originating-generation equality. Introduce backend-recorded adoption of the exact durable paused call/owner/segment, while preserving its original model and accepted-call provenance. Never rewrite the old claim's generation or replay Invoke. |
+| Counted continuation | `Native/src/agent_worker_context_window.cpp` and RootExecutionBudget | Adopt the existing signed ContextPausePin and newly opened segment; reserve once through its captured lease. Keep the old inference and completed tool groups unchanged. |
+
+These are implementation requirements, not implemented APIs. In particular,
+draining a paused root through drain_terminal would classify it as failed, and
+using drain_physical alone would leave an active durable worker lease. Neither
+is a valid main integration. The existing resume callback accepts only the
+original generation; opening main admission first would expose an incomplete
+human-wait path.
+
+Implement the durable pause retirement and supervisor drain together, then
+new-lease adoption/context resumption, then WorkspaceExecutor/AgentService
+composition. For each step retain SQL rollback, concurrent duplicate, stale
+generation, wrong pause/segment, cancellation and exact process-exit evidence.
+The decisive end-to-end case pauses after a completed effect and accepted human
+node, drains the old production process, records one human answer, resumes in
+a distinct production generation, and reaches final completion with that effect
+and all completed nodes executed exactly once. Run it with and without counted
+context, and exercise observation timeout without launching a replacement.
 
 Human waits suspend the complete dynamic owner path and active segment using
 existing durable pause records. A later owner/segment obtains new lease-bound
