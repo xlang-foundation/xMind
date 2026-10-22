@@ -5,7 +5,29 @@ checkpoint below supersedes historical implementation notes in this document.
 Main process planning is composed for explicit backend planning policies. Managed
 process-profile defaults and installed-client acceptance remain open.
 
-## Current planned-tool permission checkpoint
+## Current restricted-catalogue checkpoint
+
+Local and process planning owners now use shared actual-tool preset assembly.
+Empty lists remain model-only; inspection excludes language-server/effect methods,
+and coding preserves only offered methods. Zero-tool plan schemas omit the
+deterministic tool variant. Twelve actual-root cases cover empty and narrow
+selections, including SDK process children with no tools and exact canonical reads.
+Fresh primary-only local roots also persist their captured membership before
+process-child dispatch. See VALIDATION_STATUS.md for accepted scopes and hashes.
+
+### Next default-enablement boundary
+
+Built-in process-profile enablement must retain direct delegate_tasks alongside
+plan_tasks. Main delegation currently captures an ordinary budget separately, and
+worker delegation guards require native.delegation while planning roots use
+native.dynamic-plan. Both paths need the same live segment-backed clock, an exact
+sealed root delegation capability and child-kind-specific admission/funding, with
+physical drain before settlement. Qualify normal, denied and cancelled direct
+delegation and planning under the same application configuration before enabling
+the built-in default. Injected executor factories continue owning their explicit
+policy. Restart policy binding and current installed-client acceptance remain open.
+
+## Earlier planned-tool permission checkpoint
 
 Deterministic reads now use the ordinary native read permission/approval owner.
 Planning callbacks copy their binding onto the context actually admitted to the

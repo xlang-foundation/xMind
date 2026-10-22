@@ -1,0 +1,35 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  39: native_dynamic_plan_engine_contract
+1/8 Test  #39: native_dynamic_plan_engine_contract ............   Passed    6.43 sec
+    Start  40: native_dynamic_plan_mcp_contract
+2/8 Test  #40: native_dynamic_plan_mcp_contract ...............   Passed   11.21 sec
+    Start  87: native_agent_worker_native_planning_contract
+3/8 Test  #87: native_agent_worker_native_planning_contract ...   Passed    0.17 sec
+    Start  88: native_agent_worker_model_rpc_contract
+4/8 Test  #88: native_agent_worker_model_rpc_contract .........   Passed   55.09 sec
+    Start  94: native_agent_worker_ledger_contract
+5/8 Test  #94: native_agent_worker_ledger_contract ............   Passed   20.85 sec
+    Start  97: native_agent_service_contract
+6/8 Test  #97: native_agent_service_contract ..................   Passed    1.51 sec
+    Start  98: native_agent_runner_contract
+7/8 Test  #98: native_agent_runner_contract ...................   Passed    9.78 sec
+    Start 168: native_provider_profile_runtime_contract
+8/8 Test #168: native_provider_profile_runtime_contract .......***Failed    4.57 sec
+file:///D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs:115
+  let result;try{result=await running;}catch(error){throw new Error(JSON.stringify({message:error.message,stdout:error.stdout,stderr:error.stderr,observed,failure:String(failure??'')}));}
+                                                          ^
+
+Error: {"message":"Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_profile_runtime_contract.exe C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-profile-runtime-y4vB2a D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:51952\nEach owner must read only the actual bytes from its own opened root\r\n","stdout":"fixture-discovery-committed\r\nfixture-workspace-alias-captured\r\n","stderr":"Each owner must read only the actual bytes from its own opened root\r\n","observed":[{"route":"/chat","model":"fixture-openai"},{"route":"/messages","model":"fixture-claude"},{"route":"/chat","model":"fixture-openai-updated"},{"route":"/messages","model":"fixture-claude"},{"route":"/messages","model":"fixture-claude"},{"route":"/messages","model":"fixture-claude"},{"route":"/messages","model":"fixture-claude"},{"route":"/chat","model":"fixture-openai"},{"route":"/chat","model":"fixture-openai"},{"route":"/messages","model":"fixture-claude"},{"route":"/chat","model":"fixture-openai-alternate"},{"route":"/chat","model":"fixture-openai-alternate"},{"route":"/chat","model":"fixture-openai-alternate"},{"route":"/chat","model":"fixture-openai"},{"route":"/chat","model":"fixture-openai"},{"route":"/messages","model":"claude-sonnet-5-fixture"},{"route":"/messages","model":"claude-sonnet-4-6-fixture"},{"route":"/messages","model":"claude-sonnet-4-6-fixture"},{"route":"/workspace-messages","model":"fixture-claude"},{"route":"/workspace-messages","model":"fixture-claude"}],"failure":""}
+    at file:///D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs:115:59
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+Node.js v22.19.0
+
+
+88% tests passed, 1 tests failed out of 8
+
+Total Test time (real) = 109.62 sec
+
+The following tests FAILED:
+	168 - native_provider_profile_runtime_contract (Failed)
+Errors while running CTest

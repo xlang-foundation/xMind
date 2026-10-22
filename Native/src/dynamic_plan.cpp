@@ -8,6 +8,13 @@
 #include <set>
 
 namespace agentflow {
+std::vector<std::string> dynamic_preset_tools(const DynamicPresetCapability& preset,const std::vector<ModelToolDefinition>& offered){
+    if(preset.revision!=1||(preset.id!="workspace.inspect"&&preset.id!="workspace.coding")||preset.readonly!=(preset.id=="workspace.inspect"))throw DynamicPlanUnavailable("Unsupported native preset boundary");
+    const std::set<std::string> readonly{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions","list_skills","load_skill"};
+    const std::set<std::string> orchestration{"delegate_tasks","plan_tasks","revise_plan","inspect_plan"};std::vector<std::string> result;
+    for(const auto& tool:offered)if(!orchestration.contains(tool.name)&&(!preset.readonly||readonly.contains(tool.name)))result.push_back(tool.name);
+    std::sort(result.begin(),result.end());if(std::adjacent_find(result.begin(),result.end())!=result.end())throw DynamicPlanUnavailable("Duplicate offered preset tool");return result;
+}
 std::string seal_dynamic_tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const std::string& approval_bindings_json){
     using Json=nlohmann::json;const auto actual_bindings=Json::parse(approval_bindings_json);
     if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual external-agent approval bindings are not a native array");
@@ -142,7 +149,7 @@ void capabilities(const DynamicPlanCapabilities& value){
     for(const auto& preset:value.presets){
         if((preset.id!="workspace.inspect"&&preset.id!="workspace.coding")||preset.revision!=1||!ids.insert(preset.id).second||preset.readonly!=(preset.id=="workspace.inspect")||preset.turn_limit<1||preset.turn_limit>(preset.readonly?4:16))throw std::invalid_argument("Invalid registered dynamic preset binding");
         if(preset.backend_identity.size()!=64||preset.backend_identity.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Dynamic preset lacks its private immutable settings identity");
-        if(preset.tools.empty()||preset.tools.size()>128)throw std::invalid_argument("Invalid registered dynamic tool catalogue");
+        if(preset.tools.size()>128)throw std::invalid_argument("Invalid registered dynamic tool catalogue");
         std::set<std::string> tools;
         for(const auto& tool:preset.tools){valid_text(tool,128);if(!tools.insert(tool).second)throw std::invalid_argument("Duplicate registered dynamic tool");
             if(preset.readonly&&tool!="read_repository_instructions"&&tool!="read_file"&&tool!="list_files"&&tool!="search_files"&&tool!="find_files"&&tool!="glob_files"&&tool!="list_skills"&&tool!="load_skill")throw std::invalid_argument("Read-only dynamic preset contains an effect tool");
@@ -398,12 +405,14 @@ std::vector<ModelToolDefinition> context_dynamic_plan_tool_definitions(const Dyn
         const auto found=std::find_if(catalog["tools"].begin(),catalog["tools"].end(),[](const auto& item){return item.is_object()&&item.value("name",std::string{})=="run_process";});
         if(found!=catalog["tools"].end()&&!found->contains("mcp_binding"))read_tools.push_back("run_process");
     }
-    auto tool_properties=common;tool_properties["type"]={{"const","tool"}};tool_properties.erase("objective");tool_properties.erase("preset");
-    tool_properties["tool"]={{"enum",read_tools}};tool_properties["arguments_json"]={{"type","string"},{"minLength",2},{"maxLength",65536}};
-    const auto tool=Json{{"type","object"},{"properties",tool_properties},{"required",{"id","type","tool","arguments_json","depends_on"}},{"additionalProperties",false}};
     auto human_properties=common;human_properties.erase("objective");human_properties.erase("preset");human_properties["type"]={{"const","human"}};human_properties["question"]={{"type","string"},{"minLength",1},{"maxLength",8192}};
     const auto human=Json{{"type","object"},{"properties",human_properties},{"required",{"id","type","question","depends_on"}},{"additionalProperties",false}};
-    const auto definitions=Json{{"type","array"},{"maxItems",32},{"items",{{"oneOf",{agent,tool,human}}}}};
+    auto choices=Json::array({agent});
+    if(!read_tools.empty()){
+        auto properties=common;properties["type"]={{"const","tool"}};properties.erase("objective");properties.erase("preset");properties["tool"]={{"enum",read_tools}};properties["arguments_json"]={{"type","string"},{"minLength",2},{"maxLength",65536}};
+        choices.push_back({{"type","object"},{"properties",properties},{"required",{"id","type","tool","arguments_json","depends_on"}},{"additionalProperties",false}});
+    }
+    choices.push_back(human);const auto definitions=Json{{"type","array"},{"maxItems",32},{"items",{{"oneOf",choices}}}};
     Json initial={{"type","object"},{"properties",{{"expected_revision",{{"type","integer"},{"const",0}}},{"expected_state_sequence",{{"type","integer"},{"const",0}}},{"add",definitions}}},{"required",{"expected_revision","expected_state_sequence","add"}},{"additionalProperties",false}};initial["properties"]["add"]["minItems"]=1;
     auto revised=initial;revised["required"]={"expected_revision","expected_state_sequence"};
     for(const auto* field:{"expected_revision","expected_state_sequence"})revised["properties"][field]={{"type","integer"},{"minimum",1},{"maximum",safe_integer}};

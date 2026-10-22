@@ -7,6 +7,9 @@ namespace agentflow {
 // Preserves schema text and requires exact discovered approval bindings.
 std::string seal_dynamic_tool_catalogue(const std::vector<ModelToolDefinition>&,
     const std::string& approval_bindings_json);
+// Intersect the native offered catalogue with the fixed preset boundary. An
+// empty result is a model-only child, never a request for default tools.
+std::vector<std::string> dynamic_preset_tools(const DynamicPresetCapability&,const std::vector<ModelToolDefinition>&);
 // These functions validate model data and reduce a repository-owned snapshot.
 // They grant no execution authority and never claim, settle or replay a child.
 DynamicPlanChange parse_dynamic_plan_change(const std::string& raw_json,bool initial);

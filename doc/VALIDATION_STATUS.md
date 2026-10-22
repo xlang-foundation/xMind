@@ -1,3 +1,55 @@
+## Restricted and empty native tool catalogues — 2026-10-22
+
+Finalized planning presets may now contain an empty tool list. That means a
+model-only child, with no native or orchestration defaults. Shared
+ dynamic_preset_tools assembly narrows both local and process owners to actual
+offered native definitions. Inspection retains its fixed read/guidance boundary;
+language-server and effect methods stay outside that preset. Coding retains only
+actual offered methods. Root orchestration is never copied into a child preset.
+Selected allowlists are also retained in frozen execution settings.
+
+When no deterministic tool is available, plan schemas contain only agent and
+human variants instead of an empty tool-name enum. Pure schema/coordinator cases
+reject a forged deterministic read under that empty authority. Repository
+finalization preserves the same exact identity, generation and budget checks.
+
+Twelve application cases cover read-process, coding-process and local roots with
+empty, read-file-only, planning-only and language-server-only selections. Actual
+model requests match the selected list exactly. Planning-only roots launch one
+actual xmind child with no tools, one model response and physical retirement;
+root history/charges and active-segment closure remain exact. Restricted reads
+must deliver actual canonical file bytes, not merely a result-shaped message.
+The language case verifies offered capability, not a new language-server exchange.
+
+An initial local-root case failed before its process child because primary-only
+local roots lacked a durable membership receipt. Fresh queued roots now capture
+that primary binding through the existing workspace snapshot contract; saved
+receipts retain precedence. This also qualifies ordinary primary read results
+with workspace_id, folder_id and workspace_revision. The independent provider
+peer and C++ persistence fixture now compare exact bytes plus that identity and
+revision against captured model context and the workspace membership API. Old
+bare-result expectations caused two preserved regression failures; their exact
+qualified-result expectations are corrected, with no deadline/count relaxation.
+
+Focused pure/repository/engine/ledger scope passes4/4 in31.09s before the final
+provider-fixture strengthening. Final engine/MCP/native-planning/worker-model/
+ledger/service/runner/provider-runtime scope passes8/8 in110.62s, ledger21.12s.
+Native patch 250ddfc464fd575de1a96e223be342ac917fe1f6b942e1070a68b45bf8ef24cd;
+xmind.exe 84b88f13d0e8a57f173dea83f6fdd57c4484f349a01e13c799e7833f3f0db72f.
+Exact frozen sets: 2787 project/16 SDK/1870 libraries/30 runtime/18598 dependencies/
+105 binaries. Inventory172; no full-suite claim. Synthetic gateways/controlled
+provider peers only; no paid inference, CPython, installation, visible windows,
+user-profile writes or completed-user-task replay. Earlier intermittent heap
+corruption remains unexplained; passing this worker regression does not fix it.
+Evidence: process-xmind-root-restricted-catalogues-*-20261022-*.
+
+Built-in process-profile default planning remains off. Its next integration must
+retain direct delegate_tasks and use the same segment-backed root clock for both
+orchestration paths, with typed child-kind authority and actual drain. Injected
+third-party executor factories retain explicit capability ownership. Restart
+policy binding, remaining context/effect cases and installed CLI/browser/extension
+qualification also remain open; the delivery goal is incomplete.
+
 ## Planned tool permissions and admitted guidance — 2026-10-22
 
 Deterministic plan reads now use the existing native read owner instead of direct

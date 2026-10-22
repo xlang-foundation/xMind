@@ -379,7 +379,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         for(const auto& layer:inherited_permission_layers)if(agent_permission_denies(layer,action,resource))return true;
         return agent_permission_denies(agent_permission_rules,action,resource);
     };
-    auto execution_settings=settings_;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
+    auto execution_settings=settings_;execution_settings.tool_allowlist=effective_tool_allowlist;execution_settings.permission_rules.clear();execution_settings.inherited_permission_rule_layers=inherited_permission_layers;
     if(!agent_permission_rules.empty())execution_settings.inherited_permission_rule_layers.push_back(agent_permission_rules);
     const auto admitted=journal_.run(id).get();if(admitted.graph_root)throw std::invalid_argument("Graph roots require their owning graph executor");
     if(!read_workspace_){
@@ -395,7 +395,9 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
     if(workspace_){
         auto membership=admitted.parent_id.empty()?saved_workspace_membership(journal_,id):
             (budget?saved_workspace_membership(journal_,budget->root_id()):saved_workspace_membership(journal_,admitted.parent_id));
-        if(!membership&&admitted.parent_id.empty()&&settings_.workspace_membership_snapshot)membership=settings_.workspace_membership_snapshot();
+        // Fresh primary-only roots need the same durable binding as configured
+        // multi-folder roots before any native process child can be admitted.
+        if(!membership&&admitted.parent_id.empty()&&(settings_.workspace_membership_snapshot||admitted.state==RunState::queued))membership=workspace_membership_snapshot();
         if(membership){
         if(membership->workspace_id!=workspace_->identity()||membership->folders.empty()||membership->folders.front().root!=workspace_->root_path())
             throw ToolAccessDenied("Current workspace membership does not match the admitted primary folder");
@@ -670,8 +672,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 validate_dynamic_owner(id,provider.model);
                 auto presets=root_caps->presets;
                 for(auto& preset:presets){
-                    if(!preset.readonly){preset.tools.clear();for(const auto& definition:request.tools)if(!effective_tool_allowlist||std::find(effective_tool_allowlist->begin(),effective_tool_allowlist->end(),definition.name)!=effective_tool_allowlist->end())preset.tools.push_back(definition.name);}
-                    std::sort(preset.tools.begin(),preset.tools.end());
+                    preset.tools=dynamic_preset_tools(preset,request.tools);
                     const auto child=dynamic_child_settings(settings_,preset,provider.model);
                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,backend_catalog_->credential_versions(child));
                 }

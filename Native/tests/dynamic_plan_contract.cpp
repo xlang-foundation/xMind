@@ -70,6 +70,16 @@ int main(){try{
         auto repeated=bindings;repeated.push_back(remote);rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,repeated.dump());});
     }
     const auto caps=capabilities();
+    {
+        auto empty=caps;empty.tool_catalog_json=seal_dynamic_tool_catalogue({},"[]");for(auto& preset:empty.presets)preset.tools.clear();
+        const auto schema=Json::parse(dynamic_plan_tool_definitions(empty)[0].input_schema_json);const auto& variants=schema.at("properties").at("add").at("items").at("oneOf");require(variants.size()==2&&variants[0].at("properties").at("type").at("const")=="agent"&&variants[1].at("properties").at("type").at("const")=="human","Empty native catalogue must offer only reasoning-agent and human tasks");
+        const auto forbidden=Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",Json::array({{{"id","read"},{"type","tool"},{"tool","read_file"},{"arguments_json",R"({"path":"private.txt"})"},{"depends_on",Json::array()}}})}};
+        rejects<SchemaArgumentsInvalid>([&]{JsonSchema(schema.dump()).validate_object(forbidden.dump());});
+        DynamicPlanRecord root;root.root_run_id="empty-tool-root";root.capabilities=empty;rejects<std::invalid_argument>([&]{reduce_dynamic_plan(root,parse_dynamic_plan_change(forbidden.dump(),true),empty);});
+        const std::vector<ModelToolDefinition> offered{{"read_file","Read","{}"},{"language_server","LSP","{}"},{"create_file","Create","{}"},{"plan_tasks","Plan","{}"}};
+        require(dynamic_preset_tools(empty.presets[0],offered)==std::vector<std::string>{"read_file"},"Inspection preset must not acquire language-server, effect or orchestration methods");
+        require(dynamic_preset_tools(empty.presets[1],offered)==std::vector<std::string>({"create_file","language_server","read_file"}),"Coding preset must retain actual native methods without orchestration recursion");
+    }
     require(caps.max_parent_turns==32,"Default planning availability must retain the ordinary coding allowance");
     for(const auto turns:{0,33}){auto invalid=caps;invalid.max_parent_turns=turns;rejects<std::invalid_argument>([&]{dynamic_plan_tool_definitions(invalid);});}
     const auto initial=Json{{"expected_revision",0},{"expected_state_sequence",0},{"add",Json::array({task("left"),task("right"),

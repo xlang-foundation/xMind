@@ -408,7 +408,7 @@ void validate_dynamic_caps(const DynamicPlanCapabilities& c,const RootBudgetSpec
     (void)object_json(c.tool_catalog_json,262144);std::set<std::string> ids;
     for(const auto& p:c.presets){if(!ids.insert(p.id).second||(p.id!="workspace.inspect"&&p.id!="workspace.coding")||p.revision!=1||p.readonly!=(p.id=="workspace.inspect")||p.turn_limit<1||p.turn_limit>(p.readonly?4:16))throw std::invalid_argument("Invalid dynamic registered preset");
         if(finalized)private_identity(p.backend_identity);else if(!p.backend_identity.empty())private_identity(p.backend_identity);
-        if(p.tools.size()>128||(finalized&&p.tools.empty()))throw std::invalid_argument("Invalid dynamic preset tools");std::set<std::string> tools;
+        if(p.tools.size()>128)throw std::invalid_argument("Invalid dynamic preset tools");std::set<std::string> tools;
         for(const auto& t:p.tools){bounded_identity(t);if(!tools.insert(t).second||t=="delegate_tasks"||t=="plan_tasks"||t=="revise_plan"||t=="inspect_plan"||(p.readonly&&t!="read_file"&&t!="list_files"&&t!="search_files"&&t!="find_files"&&t!="glob_files"&&t!="read_repository_instructions"&&t!="list_skills"&&t!="load_skill"))throw std::invalid_argument("Invalid bounded child tool authority");}
     }
 }
