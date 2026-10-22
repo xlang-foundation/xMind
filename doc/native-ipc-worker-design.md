@@ -1,3 +1,36 @@
+## Active worker transport audit - 2026-10-22
+
+The current agent execution path registers the process root as `xmind` in
+`Native/src/xmind_ipc_api.cpp`. Its Host, Workers, Executions, WorkerLinks,
+Planning, Sessions and Runs classes expose SDK methods and subobjects. Native
+model, planning and execution clients resolve those classes through the root.
+This follows the Cantor pattern checked in
+`D:/CantorAI/Cantor/src/Tasks/WorkerProcess.cpp` (WorkerLoop resolves
+`cantor.Host` and `cantor.TaskManager`) and `TaskManager.h` (SDK method
+registration). SDK ImportRemote is the standard SDK lookup used by that pattern.
+
+A separate trusted Python-tool process path remains active. Both
+`AgentRunner::run` bindings in `Native/src/agent_runner.cpp` and process-root
+bindings in `Native/src/agent_worker_read_executor.cpp` select
+`XlangPythonCallable::invoke_json_worker` for tools configured with worker
+execution. `Native/src/agent_worker.cpp` currently registers
+`xmind_agent_worker` separately and exposes handshake/invoke. It also computes
+per-request HMAC/sequence tags and sends JSON strings as method payloads. Thus
+removing the earlier agent worker.execute route did not remove every production
+worker-specific protocol. This path cannot be deleted as unused code.
+
+The shared-root delivery audit must include these configured callable workers:
+move their service into the standard root/subobject arrangement and use SDK
+values for transport, retaining native callable validation, cancellation and
+owned-process retirement. JSON conversion required by the application-facing
+callable API is distinct from defining a private IPC envelope. Do not introduce
+another serializer outside the SDK. Verify the existing worker callable, service,
+planning and cancellation callers before removing the old service/entry path.
+
+This is a source audit and remaining implementation requirement, not new runtime
+acceptance. No worker source was changed while the current full native gate was
+running. Earlier dated sections below retain their original evidence and limits.
+
 ## Actual read AgentRunner child — 2026-10-20
 
 The actual shared C++ AgentRunner now accepts an owned ordinary read-workspace port and executes a real read loop in the supervised child fixture. The port supplies backend-prepared model windows and the authenticated read capability. The backend retains native filesystem/guidance/skill objects and SQLite. The loop uses captured workspace identity/revision for budget/read calls, checks stable controls/catalogue and refreshes the authoritative window before each model. Conflicting native workspace/policy/effect settings and child-selected run creation reject.
