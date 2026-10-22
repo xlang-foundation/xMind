@@ -1,3 +1,33 @@
+## Worker runner journal admits captured planning continuations — 2026-10-21
+
+The serialized worker AgentRunJournal adapter now admits a running dynamic root
+only through an exact native SDK scope and healthy captured planning service.
+Its reserve_dynamic_continuation uses the existing SDK journal method with no
+packet fallback. Reservation decoding accepts the captured dynamic inference
+link while retaining root/owner/role/purpose/state checks. Private dynamic
+capability, segment, plan-mutation and lifecycle APIs remain closed.
+
+The distinct accepted-owner child now constructs NativeWorkerContext and the
+actual runner journal, receives its backend-selected continuation, starts and
+finishes the same counted inference and completes through that adapter. The
+backend canonical assistant remains authoritative. Existing completion refusal
+and transaction rollback checks still run. This uses synthetic model/child
+facts and a controlled accepted callback, not actual dynamic child scheduling.
+
+Focused 20/20 passed in 121.38 seconds (ledger 2.77; broad worker 55.63).
+Patch 667ec176d99f626b75637b291a2cf1a7ec0c3a41fad93cc0a7e1b6ccc5944711; native
+0681164b3585d7d8c0230547a658e9cbfe36e4a30162e45b8b5978755150a79d. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact file sets and hashes.
+Evidence: doc/evidence/process-xmind-root-native-planning-runner-journal-20261021-gate.json.
+The first build failed because DynamicPlanExecution was only forward declared;
+including dynamic_plan_execution.hpp corrected it. Raw failed build preserved.
+
+Main AgentRunner loop/worker construction and WorkspaceExecutor planning
+admission remain unassembled. Actual plan child scheduling, overflow/retry,
+human handoff, legacy cleanup, full suite and final installed client acceptance
+remain open. No installation, SDK change, CPython or completed-user-task replay.
+
 ## Backend-owned dynamic worker completion — 2026-10-21
 
 Read/coding owners with captured planning services now route the existing SDK

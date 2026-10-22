@@ -25,6 +25,7 @@ public:
     Event acknowledge_workspace_tool_event(const std::string& attempt,std::int64_t ordinal,bool returned,const std::string& kind,const std::string& json);
     // Root, owner and role come from captured backend admission, not arguments.
     ModelCallReservation reserve_model_call(const std::string& attempt);
+    ModelCallReservation reserve_planning_continuation(const std::string& call,const std::string& attempt);
     ModelCallReservation start_model_call(const std::string& attempt);
     ModelCallReservation finish_model_call(const std::string& attempt);
     AgentWorkerToolTurnRecord commit_read_turn(const std::string& attempt);

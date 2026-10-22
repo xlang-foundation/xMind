@@ -32,6 +32,11 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+The worker AgentRunJournal adapter now admits exact running planning roots
+through a healthy native SDK service and exposes signed continuation reservation.
+The distinct child uses it for funding/start/finish/final completion. Capability
+and segment APIs stay closed; shared loop and main construction remain open.
+
 Captured planning read/coding owners now complete through the existing SDK journal
 Complete method using only the final model attempt ID. The backend owns the
 segment clock, derives the canonical receipt, checks completed native work, and

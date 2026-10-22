@@ -1,5 +1,7 @@
 #include "agentflow/agent_worker_run_journal.hpp"
 #include "agentflow/agent_worker_journal_rpc.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
+#include "agentflow/dynamic_plan_execution.hpp"
 #include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/agent_model_values.hpp"
 #include "agentflow/http_stream_transport.hpp"
@@ -32,6 +34,7 @@ public:
             session_=run.session_id;return;
         }
         const bool delegation=budget.spec.policy_id=="native.delegation";
+        if(budget.spec.policy_id=="native.dynamic-plan"){auto native=peer.native_model();if(!native||budget.root_run_id!=scope_.root_id||!run.parent_id.empty()||run.graph_root||run.state!=RunState::running||budget.spec.policy_revision!=1||budget.spec.workspace_identity!=scope_.workspace_id||budget.spec.max_children<1||budget.spec.max_children>32||budget.spec.max_parallel<1||budget.spec.max_parallel>2||!native->planning(client_.execution_deadline())->healthy())throw Conflict("Worker planning journal differs from its captured SDK admission");planning_=true;session_=run.session_id;return;}
         if(budget.root_run_id!=scope_.root_id||!run.parent_id.empty()||run.graph_root||(run.state!=RunState::queued&&run.state!=RunState::running)||(!delegation&&budget.spec.policy_id!="native.direct-agent"&&budget.spec.policy_id!="native.context")||budget.spec.policy_revision!=1||(delegation?(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2):(budget.spec.max_children!=0||budget.spec.max_parallel!=0))||budget.spec.workspace_identity!=scope_.workspace_id)
             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
         session_=run.session_id;
@@ -103,7 +106,7 @@ public:
     std::future<DynamicResumeRecord> resume_dynamic_owner([[maybe_unused]] DynamicResumeSpec spec)override{throw std::logic_error("Ordinary worker journal capability is not admitted: resume_dynamic_owner");}
     std::future<DynamicPlanCallRecord> dynamic_plan_call([[maybe_unused]] std::string call)override{throw std::logic_error("Ordinary worker journal capability is not admitted: dynamic_plan_call");}
     std::future<std::vector<DynamicPlanRecord>> dynamic_plans_for_root([[maybe_unused]] std::string root)override{throw std::logic_error("Ordinary worker journal capability is not admitted: dynamic_plans_for_root");}
-    std::future<ModelCallReservation> reserve_dynamic_continuation([[maybe_unused]] std::string call,[[maybe_unused]] std::string attempt)override{throw std::logic_error("Ordinary worker journal capability is not admitted: reserve_dynamic_continuation");}
+    std::future<ModelCallReservation> reserve_dynamic_continuation(std::string call,std::string attempt)override{return owned<ModelCallReservation>([&]{std::lock_guard lock(mutex_);if(!planning_)throw Conflict("Worker has no captured planning continuation");live();return client_.reserve_planning_continuation(call,attempt);});}
     std::future<std::vector<OwnedChildRecord>> owned_children([[maybe_unused]] std::string parent)override{throw std::logic_error("Ordinary worker journal capability is not admitted: owned_children");}
     std::future<Run> suspend_dynamic_owner([[maybe_unused]] DynamicPauseSpec spec)override{throw std::logic_error("Ordinary worker journal capability is not admitted: suspend_dynamic_owner");}
     std::future<Operation> request_operation([[maybe_unused]] std::string id,[[maybe_unused]] OperationSpec spec,[[maybe_unused]] std::int64_t expires_unix_ms)override{throw std::logic_error("Ordinary worker journal capability is not admitted: request_operation");}
@@ -119,7 +122,7 @@ private:
     std::optional<ChildAdmissionRecord> admission_;
     void own(const std::string& id)const{if(id!=scope_.run_id)throw Conflict("Worker journal owner differs from captured root");}
     void live()const{if(cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal execution cancelled");}
-    AgentWorkerClientContext* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;
+    AgentWorkerClientContext* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false,planning_=false;
     mutable std::mutex mutex_;AgentWorkerJournalProgress progress_;std::vector<ModelToolCall> calls_;std::set<std::int64_t> activity_;std::set<std::string> turns_;
 };
 }
