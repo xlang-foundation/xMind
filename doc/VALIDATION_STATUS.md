@@ -1,3 +1,40 @@
+## Planning services retained by read/coding owners — 2026-10-21
+
+Backend-only AgentWorkerPlanningServices now passes captured callbacks and the
+shared budget through the existing worker policy. Read/coding owners retain a
+NativePlanningBinding, attach it to their worker SDK object, and pass the shared
+budget to the context window when enabled. Their context journal installs the
+typed continuation reservation hook. Native scope/root/segment/deadline checks
+precede admission of planning tool definitions. Service bindings drain before
+context destruction. A common callback wrapper commits an accepted signed tool
+turn before preparing its context continuation; this accepted-owner flow still
+needs its own positive execution coverage. Generic context preparation refuses
+a pending signed continuation, including a reserved attempt without a receipt.
+
+Focused 20/20 passed in 127.94 seconds (ledger 2.62; broad worker 58.28). A
+distinct SDK child uses Planning objects attached by actual read/coding owners
+with a real WorkspaceToolSet/native guidance, while model/lease facts remain
+synthetic. An inspection succeeds through the read owner; replay through the
+other binding is refused without repeating the committed model/tool turn, and
+planning uncertainty reaches coding-owner outcome_unrecorded. Retained owner
+objects refuse after owner destruction. The earlier shared binding and forged
+parameter checks remain. A context-window test refuses generic preparation of
+the held planning attempt. No provider invocation or task replay.
+
+Source patch d6adbec9db83a7000c92457ada92667ce5abd9ac5b0fc2484f0733f84a640fa4;
+native SHA 1fdfa9649082303f43b55720b5770b9a0d05a4466382498c8d1d9b06cb7bceaf.
+Frozen source/SDK/library/dependency and 138 binary sets/hashes all verified.
+Evidence: doc/evidence/process-xmind-root-native-planning-worker-owners-20261021-gate.json.
+
+WorkspaceExecutor still rejects planning settings; the child runner journal
+still rejects dynamic roots. Main factory construction, public worker planning
+admission/journal projections, accepted plans on actual worker children, human
+handoff, planning overflow/rebuild logical-attempt adoption and final clients
+remain open. New owner inspection cases have no context policy; the context
+funding proof is the separate window case in the same ledger, not a combined
+accepted owner/compaction acceptance. Full 169 suite not rerun. SDK unchanged,
+no installed update, CPython or live provider replay.
+
 ## Worker Planning SDK subobject — 2026-10-21
 
 NativeWorkerModelBinding can attach an exact-scope NativePlanningBinding.

@@ -4,6 +4,7 @@
 #include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/agent_worker_context_window.hpp"
+#include "agentflow/agent_worker_planning_owner.hpp"
 
 namespace agentflow {
 namespace {
@@ -17,6 +18,7 @@ struct AgentWorkerReadOwner::Impl {
     std::unique_ptr<AgentWorkerContextWindow> context_window;
     std::unique_ptr<AgentWorkerModelHost> model;
     std::unique_ptr<AgentWorkerJournalHost> native_journal;
+    std::unique_ptr<NativePlanningBinding> native_planning;
     std::unique_ptr<NativeWorkerModelBinding> native_model;
     bool native_model_required=false;
     AgentWorkerRpcHandler model_rpc,read_rpc,journal_rpc;
@@ -32,7 +34,7 @@ struct AgentWorkerReadOwner::Impl {
         if(policy.context){
             context_window=std::make_unique<AgentWorkerContextWindow>(store,lease,provider,*policy.context,gateway,
                 [this](std::stop_token stop){return context.prepare(stop);},
-                [this](const std::string& attempt,const ModelRequest& raw,std::stop_token stop){context.admit(attempt,raw,stop);},deadline,cancel);
+                [this](const std::string& attempt,const ModelRequest& raw,std::stop_token stop){context.admit(attempt,raw,stop);},deadline,cancel,policy.planning?policy.planning->budget:std::shared_ptr<RootExecutionBudget>{});
             model_policy.request_context=[this](std::stop_token stop){return context_window->prepare(stop);};
             model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context_window->admit(attempt,request,stop);};
             model_policy.reject_context=[this](const std::string& attempt,const ModelRequest& request,std::int64_t elapsed,std::stop_token stop){return context_window->reject(attempt,request,elapsed,stop);};
@@ -40,11 +42,13 @@ struct AgentWorkerReadOwner::Impl {
             hooks.reserve=[this](const std::string& attempt,std::stop_token stop){return context_window->reserve(attempt,stop);};
             hooks.start=[this](const std::string& attempt,std::stop_token stop){return context_window->start(attempt,stop);};
             hooks.finish=[this](const std::string& attempt,std::stop_token stop){return context_window->finish(attempt,stop);};
+            if(policy.planning)hooks.reserve_planning_continuation=[this](const std::string& call,const std::string& attempt,std::stop_token stop){return context_window->reserve_planning_continuation(call,attempt,stop);};
         }
+        if(policy.planning)native_planning=std::make_unique<NativePlanningBinding>(bind_agent_worker_planning_context(policy.planning->callbacks,store,lease,context_window.get()));
         model=std::make_unique<AgentWorkerModelHost>(store,lease,std::move(provider),std::move(policy.tools),
             std::move(model_policy),std::move(gateway),deadline,cancel);
         native_journal=std::make_unique<AgentWorkerJournalHost>(store,lease,deadline,cancel,hooks);
-        native_model=std::make_unique<NativeWorkerModelBinding>(*model,native_journal.get(),&context);
+        native_model=std::make_unique<NativeWorkerModelBinding>(*model,native_journal.get(),&context,nullptr,nullptr,nullptr,nullptr,native_planning.get());
         model_rpc=bind_agent_worker_model_rpc(*model,scope);
         read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
         journal_rpc=bind_agent_worker_journal_rpc(store,std::move(lease),scope,deadline,cancel,std::move(hooks));

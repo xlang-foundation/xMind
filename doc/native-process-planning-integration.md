@@ -22,6 +22,12 @@ capabilities, context policy, backend identity and budget authority stay in the
 backend. No peer.call planning/execution route or packet fallback is added.
 SDK values and remote object handles use xlang3's IPC implementation.
 
+Read/coding owners now retain a planning binding when their backend policy
+contains AgentWorkerPlanningServices, attach it to the SDK worker, and pass its
+shared budget into the context window. Their bindings close before context
+destruction. Distinct-process owner inspection and retirement are verified;
+main WorkspaceExecutor construction and the dynamic child runner remain open.
+
 One backend owner retains the workspace, model host, journal, context window,
 planning binding and captured root execution budget through physical child
 retirement. A planning operation may block on children or human input; it must
@@ -82,6 +88,14 @@ verifies this with unknown capacity and automatic compaction disabled. Token
 counting/overflow/compaction tests and production owner wiring remain required.
 Context-managed journals without this hook continue to refuse plain planning
 funding.
+The owner callback wrapper now commits accepted native reports before typed
+context preparation. Generic preparation refuses pending signed continuations;
+combined accepted-owner coverage remains required. Planning overflow must hand
+out the backend rebuilt physical attempt and recognize successful logical
+inference even when the call retains its original continuation pointer. Current
+worker gates still close this retry/adoption path; verify it explicitly before
+enabling placement.
+
 Never reserve once through the plain endpoint and again through ContextManager.
 The worker cannot select a different attempt after context preparation.
 

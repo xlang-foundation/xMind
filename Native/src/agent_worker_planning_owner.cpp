@@ -2,6 +2,7 @@
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/agent_authority.hpp"
 #include "agentflow/root_execution_budget.hpp"
+#include "agentflow/agent_worker_context_window.hpp"
 #include "nlohmann/json.hpp"
 
 namespace agentflow {
@@ -73,5 +74,20 @@ NativePlanningCallbacks make_agent_worker_planning_callbacks(PersistenceService&
     result.resume=[owner](const auto& call,std::stop_token stop){return owner->resume(call,stop);};
     result.healthy=[owner]{try{owner->check();return true;}catch(...){return false;}};
     return result;
+}
+NativePlanningCallbacks bind_agent_worker_planning_context(NativePlanningCallbacks callbacks,
+    PersistenceService& store,AgentWorkerLeaseSpec lease,AgentWorkerContextWindow* window){
+    const AgentWorkerScope expected{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision};
+    if(callbacks.scope!=expected||!callbacks.invoke||!callbacks.resume||!callbacks.healthy)throw Conflict("Planning callbacks differ from the context owner");
+    auto complete=[&store,lease=std::move(lease),window](DynamicExecutionResult result,std::stop_token stop){
+        if(!result.paused&&!result.call_id.empty()){
+            store.commit_dynamic_tool_turn(lease.owner_run_id,result.call_id).get();
+            if(window)(void)window->prepare_planning_continuation(result.call_id,stop);
+        }
+        return result;
+    };
+    callbacks.invoke=[invoke=std::move(callbacks.invoke),complete](const auto& attempt,const auto& call,std::stop_token stop){return complete(invoke(attempt,call,stop),stop);};
+    callbacks.resume=[resume=std::move(callbacks.resume),complete](const auto& call,std::stop_token stop){return complete(resume(call,stop),stop);};
+    return callbacks;
 }
 }

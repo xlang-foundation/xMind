@@ -47,6 +47,13 @@ ModelRequest AgentWorkerContextWindow::prepare_window(std::optional<std::string>
     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker context owner is busy");check(cancel);
     if(rejected_)throw Conflict("Rejected worker context requires its one typed rebuild");
     if(prepared_){if(call&&call!=owner_.planning_call_id)throw Conflict("Prepared context belongs to another planning call");return prepared_->request;}
+    if(!call&&budget_->snapshot().spec.policy_id=="native.dynamic-plan"){
+        const auto events=store_.events(lease_.owner_run_id).get();
+        for(const auto& accepted:store_.dynamic_plan_calls(lease_.root_run_id).get())if(accepted.owner_run_id==lease_.owner_run_id&&accepted.state=="turn_committed"){
+            bool completed=false;if(!accepted.continuation_attempt_id.empty())try{const auto receipt=store_.agent_worker_model_claim(lease_.root_run_id,accepted.continuation_attempt_id).get();completed=receipt.spec.generation==lease_.generation&&receipt.state=="responded"&&std::any_of(events.begin(),events.end(),[&](const auto& event){return event.kind=="budget.model_call.finished"&&nlohmann::json::parse(event.json).value("attempt_id",std::string{})==accepted.continuation_attempt_id;});}catch(const NotFound&){}
+            if(!completed)throw Conflict("Planning continuation requires typed context preparation");
+        }
+    }
     if(call){const auto accepted=store_.dynamic_plan_call(*call).get();if(accepted.root_run_id!=lease_.root_run_id||accepted.owner_run_id!=lease_.owner_run_id||!accepted.conversation_commit_seq||accepted.state!="turn_committed")throw Conflict("Planning context requires its signed committed call");}
     owner_.planning_call_id=std::move(call);
     store_.validate_agent_worker_model_window(lease_,deadline_,owner_cancel_,cancel).get();
