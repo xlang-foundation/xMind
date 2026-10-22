@@ -2,8 +2,10 @@
 #include "agentflow/agent_root_executor.hpp"
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/agent_worker_channel.hpp"
+#include "agentflow/dynamic_plan_execution.hpp"
 
 namespace agentflow {
+DynamicAgentExecution make_agent_worker_dynamic_executor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
 AgentGraphExecution make_agent_worker_graph_executor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
 AgentDelegatedExecution make_agent_worker_delegated_executor(PersistenceService&,std::shared_ptr<const BoundProcessExecutable>,std::shared_ptr<AgentModelGateway> gateway={});
 // Trusted backend factory. Captures settings and executable once; no client

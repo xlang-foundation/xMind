@@ -6,6 +6,7 @@
 #include "agentflow/agent_worker_native_execution.hpp"
 #include "nlohmann/json.hpp"
 #include <mutex>
+#include <algorithm>
 #include <set>
 
 namespace agentflow {
@@ -27,7 +28,7 @@ struct AgentWorkerSupervisor::Impl {
     Impl(PersistenceService& persistence,std::shared_ptr<const BoundProcessExecutable> image,
         AgentWorkerScope captured_scope,std::string captured_identity,AgentWorkerChannel::Deadline until,bool launch_now=true)
         :store(persistence),deadline(until),image(std::move(image)),scope(std::move(captured_scope)),identity(std::move(captured_identity)){
-        if(scope.root_id!=scope.run_id){const auto admitted=store.child_admission(scope.run_id).get();if(admitted.root_run_id!=scope.root_id||!((admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1)||(admitted.kind==ChildAdmissionKind::graph_agent&&!admitted.graph_node_path.empty())))throw std::invalid_argument("Worker supervisor requires exact agent child admission");}
+        if(scope.root_id!=scope.run_id){const auto admitted=store.child_admission(scope.run_id).get();bool dynamic=false;if(admitted.kind==ChildAdmissionKind::dynamic_agent){const auto plan=store.dynamic_plan(admitted.plan_id).get();const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& n){return n.child_run_id==scope.run_id;});const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==admitted.preset_id&&p.revision==admitted.preset_revision;});dynamic=plan.root_run_id==scope.root_id&&plan.state=="active"&&plan.capabilities.catalogue_finalized&&plan.capabilities.workspace_identity==scope.workspace_id&&nlohmann::json::parse(plan.capabilities.provider_identity_json)==nlohmann::json::parse(identity)&&store.run(plan.owner_run_id).get().state==RunState::running&&store.run(scope.run_id).get().parent_id==plan.owner_run_id&&store.dynamic_budget_segment(scope.root_id).get().state=="open"&&node!=plan.nodes.end()&&preset!=plan.capabilities.presets.end()&&node->state==DynamicNodeState::claimed&&node->claim_id==admitted.claim_id&&node->definition_revision==admitted.definition_revision&&node->claim_revision==admitted.claim_revision&&node->definition.label==admitted.node_label&&node->definition.preset_id==preset->id&&node->definition.preset_revision==preset->revision&&admitted.backend_identity==preset->backend_identity;}if(admitted.root_run_id!=scope.root_id||!((admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1)||(admitted.kind==ChildAdmissionKind::graph_agent&&!admitted.graph_node_path.empty())||dynamic))throw std::invalid_argument("Worker supervisor requires exact agent child admission");}
         if(launch_now)launch();
     }
     ~Impl(){if(control)control->close();if(worker)worker->channel().close();}

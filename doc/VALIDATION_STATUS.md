@@ -1,3 +1,41 @@
+## Production xmind dynamic-child supervisor factory — 2026-10-21
+
+make_agent_worker_dynamic_executor now captures a bound executable/backend
+gateway and validates frozen child settings against the signed preset before
+launch. It reuses WorkspaceExecutor and AgentWorkerSupervisor, captures the
+root membership and shared active budget, exposes only preset tools and returns
+after exact physical drain. Supervisor preflight and completion observation now
+recognize dynamic children through exact immutable node/claim/preset lineage.
+This initial factory explicitly refuses counted and planning-capable child
+settings; it does not clear them or fall back to a local runner.
+
+The accepted-parent SDK loop test now launches actual built xmind.exe through
+that production factory. Changed instructions refuse before a lease/model call;
+valid signed settings produce a distinct real PID/birth and exact image identity,
+a native file read, four canonical child messages, two child charges, completed
+lease and confirmed physical exit before settlement and signed parent funding.
+The parent is still the distinct fixture worker with controlled model gateway
+and scheduler callback. DynamicPlanExecutor has not yet selected the new port.
+
+Two earlier 19/20 runs are preserved: supervisor preflight rejected dynamic kind
+(124.32 seconds), then completed-child drain rejected it (123.73). Exact signed
+checks were added at each boundary. Corrected ledger passed 1/1 in 4.04 seconds;
+final focused 20/20 passed in 125.78 (ledger 3.77; broad worker 56.48). These
+are separate scopes, not a full-suite or stability claim. Existing opt-in dump/
+timing capture was enabled for the final 20 run; no crash dump was produced.
+Earlier intermittent heap/SDK faults remain unresolved.
+
+Patch 1169570c5aaa8ca50980727a1c9e3d523d52ed6dcc672e6fa76e244052a241ea; native
+921d54b79744a2d82cb206c4a368911853312bd5b885e5b116090528a4680eba. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact sets and hashes. Evidence:
+doc/evidence/process-xmind-root-native-dynamic-child-factory-qualified-20261021-gate.json.
+
+Scheduler selection, counted/coding/nested child coverage, main planning
+admission, overflow/retry adoption, human handoff, legacy cleanup, full suite,
+broad stability and installed client acceptance remain open. No install, SDK
+change, CPython, live provider execution or replay of completed user tasks.
+
 ## Dynamic child shared runner over actual SDK processes — 2026-10-21
 
 Worker journal values now carry only public dynamic-child lineage, with exact

@@ -32,19 +32,26 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+The production dynamic-child factory now reuses WorkspaceExecutor and the
+existing supervisor with signed preflight/completion checks. Actual built
+xmind.exe child read/completion/drain is verified under the controlled parent
+callback. It currently refuses counted/planning-capable child settings without
+mutation or fallback. DynamicPlanExecutor selection and wider child-policy
+assembly remain open; main process planning admission is still closed.
+
 Dynamic child journal serialization, native adapter admission and shared runner
 now work in actual distinct fixture processes. The controlled backend callback
 launches the child, verifies an SDK file read and canonical completion, and
 waits for physical exit before settlement/parent continuation. Public child
 lineage omits backend identity; remote children use backend-owned catalogues.
-Production DynamicPlanExecutor/supervisor wiring and counted/coding/nested
+Production DynamicPlanExecutor selection and counted/coding/nested
 child coverage remain open. The local-preset filter is gated to local runners.
 
 Repository now admits dynamic child worker leases against exact signed node,
 claim/preset revisions, provider/workspace and open root segment. Typed model
 funding/start/final completion and private-identity redaction are ledger-tested
-with synthetic child process identity. Production supervisor and scheduler
-assembly are still required for actual xmind.exe dynamic child execution.
+with synthetic child process identity. Production scheduler selection remains required; the supervisor factory now
+executes actual xmind.exe children in the controlled accepted-parent contract.
 
 A distinct worker shared-loop test now verifies accepted-plan continuation
 funding and final completion: two parent model turns, one synthetic child
