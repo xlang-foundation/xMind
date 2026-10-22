@@ -90,7 +90,11 @@ Context-managed journals without this hook continue to refuse plain planning
 funding.
 The owner callback wrapper now commits accepted native reports before typed
 context preparation. Generic preparation refuses pending signed continuations;
-combined accepted-owner coverage remains required. Planning overflow must hand
+combined accepted-owner context funding now has a distinct SDK child case
+using synthetic settled children and a controlled accepted-report callback.
+The child obtains the backend-selected attempt through the existing journal
+method with an empty hint; plain unprepared funding still requires an ID.
+Positive production DynamicPlanExecutor/worker-child scheduling remains required. Planning overflow must hand
 out the backend rebuilt physical attempt and recognize successful logical
 inference even when the call retains its original continuation pointer. Current
 worker gates still close this retry/adoption path; verify it explicitly before

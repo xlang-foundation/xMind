@@ -1,3 +1,35 @@
+## Accepted owner context continuation handoff — 2026-10-21
+
+Journal.ReservePlanningContinuation(call,attempt) now accepts an empty attempt
+hint only through a configured backend context hook. It can hand out only the
+exact already-prepared inference for that call; changed explicit attempts still
+refuse. Ordinary funding retains nonempty-ID validation. No new transport,
+serializer, method or authority payload is added.
+
+Focused 20/20 passed in 124.67 seconds (ledger 2.79; broad worker 57.31). The
+new case uses a real read owner/WorkspaceToolSet, a genuine accepted native
+plan with synthetic child settlement, and a controlled accepted-report callback.
+The owner wrapper commits its signed turn and prepares context before returning
+the SDK operation. A distinct child receives no attempt ID in bootstrap,
+obtains the backend-selected attempt, rejects generic funding/changed hints,
+and starts/finishes the same inference step. The parent derives request binding
+from the server-prepared request. Exactly one held charge is consumed; callback
+entered once, no gateway dispatch or replay. Unknown capacity, automatic
+compaction disabled. The standalone context child also uses the empty hint.
+Shared settlement fixture code was consolidated with unique child claim IDs.
+
+Source patch 05d855781ecdf1a77831b98a5a13c4c8bb2d044c4d4fe3f435efd710e76d455b;
+native SHA f8d07139beb426232e2ac1a33911f4cd01f2f0231795807acda9ee6bbf0b9cf8.
+Frozen source/SDK/library/dependency and 138 binary sets/hashes verified.
+Evidence: doc/evidence/process-xmind-root-native-planning-owned-continuation-20261021-gate.json.
+
+This combines owner/context/SDK funding with synthetic model and child facts;
+it is not positive production DynamicPlanExecutor scheduling. Main factory and
+worker journal/runner remain closed for dynamic roots. Actual worker child
+plans, token count/overflow/retry adoption, human handoff, legacy cleanup and
+final installed client acceptance remain open. Full 169 suite not rerun; SDK
+unchanged; no installation, CPython or live provider replay.
+
 ## Planning services retained by read/coding owners — 2026-10-21
 
 Backend-only AgentWorkerPlanningServices now passes captured callbacks and the

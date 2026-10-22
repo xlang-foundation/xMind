@@ -86,8 +86,8 @@ ModelCallReservation AgentWorkerContextWindow::reserve(const std::string&,std::s
 }
 ModelCallReservation AgentWorkerContextWindow::reserve_planning_continuation(const std::string& call,const std::string& attempt,std::stop_token cancel){
     std::lock_guard lock(mutex_);check(cancel);
-    if(!prepared_||rejected_||owner_.planning_call_id!=call||prepared_->inference.attempt_id!=attempt)throw Conflict("Planning reservation differs from its prepared context");
-    const auto actual=store_.reserve_agent_worker_planning_continuation(lease_,call,attempt,deadline_,owner_cancel_,cancel).get();
+    if(!prepared_||rejected_||owner_.planning_call_id!=call||(!attempt.empty()&&prepared_->inference.attempt_id!=attempt))throw Conflict("Planning reservation differs from its prepared context");
+    const auto actual=store_.reserve_agent_worker_planning_continuation(lease_,call,prepared_->inference.attempt_id,deadline_,owner_cancel_,cancel).get();
     if(actual.inference_step_id!=prepared_->inference_step_id)throw Conflict("Planning reservation lost its counted inference step");
     handed_out_=true;return actual;
 }
