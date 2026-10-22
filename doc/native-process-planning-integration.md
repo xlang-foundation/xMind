@@ -2,8 +2,8 @@
 
 Status: implementation and remaining integration, 2026-10-22. The current
 checkpoint below supersedes historical implementation notes in this document.
-Main process planning is composed for explicit backend planning policies. Managed
-process-profile defaults and installed-client acceptance remain open.
+Main process planning is composed for explicit policies and eligible built-in
+process-profile defaults. Installed-client acceptance remains open.
 
 ## Current restricted-catalogue checkpoint
 
@@ -23,7 +23,7 @@ capability from every child preset. The restricted application matrix now has
 fifteen cases, with delegation configured throughout: explicit delegation-only
 selection is sealed exactly once, and other selections do not gain delegation.
 These cases inspect offered authority; they do not execute direct delegation on
-a planning root. Shared segment funding and typed IPC admission remain pending.
+a planning root. Shared segment funding and typed IPC admission are covered below.
 
 ### Direct delegation and planning coexistence
 
@@ -40,14 +40,22 @@ access violation in the unchanged xlang3 runtime. One diagnostic worker-model
 run passes without a dump; the failure remains unresolved. See VALIDATION_STATUS.md
 and raw evidence for scopes and hashes. No installed clients changed.
 
-### Next default-enablement boundary
+### Built-in process-profile defaults
 
-Built-in process profiles still need default planning configuration after actual
-workspace binding, retaining direct delegation and restricted tool selections.
-Injected factories continue owning explicit policy. Restart permission/instruction
-binding, broader main-root effect families, the intermittent runtime fault and
-current installed-client acceptance remain open. The twelve coexistence cases
-qualify explicit configurations, not default enablement or full-suite acceptance.
+Eligible workspace process-read/process-code server profiles now enable bounded
+planning after binding their actual workspace. Read defaults retain delegation
+and add the three planning tools; model-only read roots retain an empty surface.
+Injected executor factories continue owning their explicit policy.
+
+Actual server contracts pass read/graph behavior, approved native editing and
+command execution under the defaults. A separate server-owned SDK worker calls
+inspect_plan and completes with one canonical tool turn and two model responses.
+Managed process-read/code profile enrollment publishes planning metadata. The
+focused server/provider gate passes 3/3; see VALIDATION_STATUS.md for hashes.
+
+Restart permission/instruction binding, broader main-root effect families, the
+intermittent runtime fault and current installed-client acceptance remain open.
+Default eligibility and this focused gate do not establish full-suite acceptance.
 
 ## Earlier planned-tool permission checkpoint
 

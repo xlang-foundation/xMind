@@ -1,0 +1,55 @@
+Start testing: Oct 22 13:05 Pacific Daylight Time
+----------------------------------------------------------
+92/172 Testing: native_agent_worker_server_contract
+92/172 Test: native_agent_worker_server_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_server_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_server_contract" start time: Oct 22 13:05 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Unified process-read server graph verified authenticated public graph submission, actual distinct xmind worker, canonical file bytes and exact worker retirement without token management.
+Unified process-read model-only server verified unsupported tool capability, no workspace, actual distinct xmind worker, one controlled inference and exact canonical completion.
+Unified server process-read entry verified: authenticated public session/run/history/events, actual distinct worker PID, native file bytes, one read dispatch, two controlled model windows and canonical completion.
+<end of output>
+Test time =   1.85 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_server_contract" end time: Oct 22 13:05 Pacific Daylight Time
+"native_agent_worker_server_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+93/172 Testing: native_agent_worker_coding_server_contract
+93/172 Test: native_agent_worker_coding_server_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_coding_server_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_coding_server_contract" start time: Oct 22 13:05 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Unified process-code server verified actual child AgentRunner, authenticated public approval, one native creation, mixed canonical history and two controlled model windows.
+<end of output>
+Test time =   1.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_coding_server_contract" end time: Oct 22 13:05 Pacific Daylight Time
+"native_agent_worker_coding_server_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+168/172 Testing: native_provider_profile_runtime_contract
+168/172 Test: native_provider_profile_runtime_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/provider_profile_runtime_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_provider_profile_runtime_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_provider_profile_runtime_contract" start time: Oct 22 13:05 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+fixture-discovery-committed
+fixture-workspace-alias-captured
+Native profile runtime passed actual OpenAI/Claude wire and key isolation, actual two-root workspace metadata/bound native reads/atomic CAS/restart rejection, explicit output overrides and saved-profile defaults for legacy and adaptive-thinking Anthropic models, authenticated inference/reopen, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested
+<end of output>
+Test time =   5.90 sec
+----------------------------------------------------------
+Test Passed.
+"native_provider_profile_runtime_contract" end time: Oct 22 13:05 Pacific Daylight Time
+"native_provider_profile_runtime_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Oct 22 13:05 Pacific Daylight Time

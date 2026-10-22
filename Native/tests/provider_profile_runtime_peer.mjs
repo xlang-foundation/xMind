@@ -12,9 +12,9 @@ const [binary,modules,stdlib]=process.argv.slice(2);
 let failure;const observed=[];const workspaceTurns=new Map(),workspaceBindings=new Map();
 let openaiDiscoveries=0,claudePages=0,pageLimitPages=0,child,stalledDiscovery,discoveryReleased=false,aliasRetargeted=false;
 const event=value=>`event: ${value.type}\ndata: ${JSON.stringify(value)}\n\n`;
-async function startup(database,check){
+async function startup(database,check,extra=[]){
   const token='synthetic-profile-startup-owner-access-token';
-  const backend=spawn(join(dirname(binary),'xmind_server.exe'),['--db',join(root,database),'--modules',modules,'--stdlib',stdlib,'--port','0'],{windowsHide:true,env:{...process.env,XMIND_AUTH_TOKEN:token}});
+  const backend=spawn(join(dirname(binary),'xmind_server.exe'),['--db',join(root,database),'--modules',modules,'--stdlib',stdlib,'--port','0',...extra],{windowsHide:true,env:{...process.env,XMIND_AUTH_TOKEN:token}});
   let stdout='',stderr='';backend.stderr.on('data',data=>stderr+=data);
   try{
     const port=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Native profile startup readiness timed out')),10000);
@@ -120,5 +120,7 @@ try{
   await startup('startup-valid.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.active,'openai');assert.equal(profiles.profiles[0].model,'gpt-4.1');assert.equal((await api('/v1/health')).agent_execution,true);});
   await startup('startup-repair.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.profiles[0].model,'');assert.equal((await api('/v1/health')).agent_execution,true);assert.deepEqual((await api('/v1/models')).models,[]);const repaired=await api('/v1/provider/configuration',{model:'gpt-4.1',expected_revision:1});assert.equal(repaired.revision,2);assert.equal((await api('/v1/health')).agent_execution,true);});
   await startup('startup-repair.sqlite',async api=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,2);assert.equal(profiles.profiles[0].model,'gpt-4.1');});
+  const processWorkspace=join(root,'managed-process-workspace');await mkdir(processWorkspace);
+  for(const mode of ['process-read','process-code'])await startup('managed-'+mode+'.sqlite',async api=>{const enrolled=await api('/v1/provider/profiles',{id:'openai',route_id:'openai.chat',model:'gpt-4.1',api_key:'runtime-openai-fixture-key',expected_revision:0,activate:true});assert.equal(enrolled.active,'openai');assert.equal((await api('/v1/health')).agent_planning,true);assert.deepEqual(await api('/v1/agent/planning'),{enabled:true,tools:['inspect_plan','plan_tasks','revise_plan']});},['--agent-execution',mode,'--workspace',processWorkspace,...(mode==='process-code'?['--workspace-edits','approved']:[])]);
   process.stdout.write(result.stdout);
 }finally{await new Promise(resolve=>server.close(resolve));await rm(root,{recursive:true,force:true});}

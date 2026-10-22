@@ -317,7 +317,7 @@ int run_server(int argc,char** argv) {
             if(!process_worker)return;
             settings.graph_execution=agentflow::make_agent_worker_graph_executor(persistence,worker_image);
             if(process_code){settings.process_profiles=process_profiles;settings.tool_allowlist.reset();return;}
-            settings.a2a_enabled=false;if(!options.contains("--workspace")){settings.tool_allowlist=std::vector<std::string>{};return;}settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files"};
+            settings.a2a_enabled=false;if(!settings.workspace){settings.tool_allowlist=std::vector<std::string>{};return;}settings.tool_allowlist=std::vector<std::string>{"read_file","list_files","search_files","find_files","glob_files","plan_tasks","revise_plan","inspect_plan"};
             settings.tool_allowlist->push_back("delegate_tasks");
         };
 #endif
@@ -342,7 +342,7 @@ int run_server(int argc,char** argv) {
             if(options.contains("--models")) {std::istringstream configured(options.at("--models"));std::string model;while(std::getline(configured,model,',')){if(model.empty())throw std::invalid_argument("Empty configured model");settings.selectable_models.push_back(model);}if(options.at("--models").empty() || options.at("--models").back()==',')throw std::invalid_argument("Empty configured model");}
             if(options.contains("--model-stream-usage")) settings.provider.stream_usage=options.at("--model-stream-usage")=="supported"?agentflow::Capability::supported:(options.at("--model-stream-usage")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
             if(options.contains("--model-tools")) settings.provider.tools=options.at("--model-tools")=="supported"?agentflow::Capability::supported:(options.at("--model-tools")=="unsupported"?agentflow::Capability::unsupported:agentflow::Capability::unknown);
-            if(settings.workspace&&settings.provider.tools==agentflow::Capability::supported)settings.delegation=agentflow::AgentDelegationPolicy{};
+            if(settings.workspace&&settings.provider.tools==agentflow::Capability::supported){settings.delegation=agentflow::AgentDelegationPolicy{};if(process_worker)settings.planning.emplace();}
             const auto purpose=provider_purpose(settings.provider.endpoint);
             const auto* key=std::getenv("XMIND_API_KEY");
             if(key && *key) {
@@ -366,12 +366,13 @@ int run_server(int argc,char** argv) {
         }
 #if defined(_WIN32)
         if(!executor){
-            agentflow::AgentSettings settings;if(!process_read){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;configure_execution_mode(settings);
+            agentflow::AgentSettings settings;if(!process_read){settings.mcp_servers=mcp_settings;if(options.contains("--workspace"))settings.process_profiles=process_profiles;settings.language_servers=language_servers;settings.xlang_python_tools=xlang_python_tools;}settings.instruction_policy=instruction_policy;
             if(options.contains("--workspace"))settings.workspace=options.at("--workspace");settings.approved_edits=options.contains("--workspace-edits");
             bind_workspace_membership(settings);
             // The configured profile generation enables the registered leaf
             // policy only when its actual workspace/model tools are eligible.
-            if(settings.workspace)settings.delegation=agentflow::AgentDelegationPolicy{};
+            configure_execution_mode(settings);
+            if(settings.workspace){settings.delegation=agentflow::AgentDelegationPolicy{};if(process_worker)settings.planning.emplace();}
             std::vector<agentflow::ProviderProfileExecutionPolicy> policies;
             std::vector<agentflow::ProviderProfileRoute> routes;
             const auto add=[&](std::string id,std::string provider,std::string endpoint,agentflow::ProviderWire wire,std::string catalogue,agentflow::ProviderCatalogueFormat format,agentflow::ChatDialect dialect=agentflow::ChatDialect::openai){

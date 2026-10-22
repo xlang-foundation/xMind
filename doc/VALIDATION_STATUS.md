@@ -1,3 +1,36 @@
+## Built-in process-profile planning defaults — 2026-10-22
+
+The server now enables bounded planning for eligible workspace-backed built-in
+process-read/process-code profiles. Process-read's explicit default catalogue
+retains delegation and adds plan_tasks/revise_plan/inspect_plan. Managed profile
+execution configuration is applied after actual workspace membership binding.
+The direct-model path enables planning only with declared workspace tool support.
+No-workspace process-read remains model-only. Injected factory policy in
+ProviderProfileRuntime is unchanged.
+
+Actual unified server contracts retain existing read/graph behavior, approved
+native create/command effects, exact history, supplied usage and physical worker
+retirement. Both workspace process modes publish planning capability and close
+one active segment. A fresh authenticated process-read root calls inspect_plan
+through its actual SDK worker, retains its canonical tool result and final reply,
+and retires after exactly two controlled model responses. Managed process-read
+and process-code server startup/enrollment also publish planning metadata with
+synthetic credentials; those two enrollment checks do not invoke provider models.
+
+Final server/provider gate passes 3/3 in 8.86s. Native patch
+17efedaf489bbe6ceb0207931e344a7be8295c1c12716a090777a53d6bea7a1e;
+xmind.exe 63b032149e02f7192272b55310615bdd14730f6ed29ac4380b0015a5954fbebe.
+All source/input, SDK/runtime, libraries, dependency and native-binary file sets
+remain unchanged during each gate. Initial 3/3 (8.34s) and strengthened final
+3/3 are separately archived with exact verifiers under
+ doc/evidence/process-xmind-root-process-profile-defaults-*-20261022-*.
+
+No paid inference, CPython, installed-client or user-data changes. This focused
+server gate is not a full 172-test acceptance. The prior 7/8 regression failure
+in xlang3_runtime.dll remains unresolved; this change does not claim a runtime
+fix. Restart permission/instruction binding, broader effect qualification and
+current rendered browser/CLI/VS Code acceptance remain open.
+
 ## Direct delegation within process planning roots — 2026-10-22
 
 Explicit read/coding process roots now bind direct delegate_tasks and planning
