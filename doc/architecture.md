@@ -22,6 +22,9 @@ endpoint PID and scope checks; legacy execution/cancellation packet fallbacks
 are removed. Private inherited rendezvous/liveness and obsolete RPC scaffolding
 remain migration work. The product child now owns a captured native SDK worker
 context without constructing an RPC peer; runner adapters accept that context.
+The product supervisor also owns native execution control directly, with no
+packet reader or dispatch handler; native retirement retains physical identity
+and durable lease checks.
 
 
 The October 9 product decision defines three native components: **Agent

@@ -1,3 +1,19 @@
+## Product supervisor uses native control directly — 2026-10-21
+
+Product parent supervisor now owns NativeExecutionClient directly, with no RPC
+peer, reader or dispatch handler. The child already uses a native SDK context.
+Native retirement checks PID/birth/image/scope, canonical completion and lease
+authority before closing and observing the exact child. Close is locally
+idempotent; physical observation timeout retains ownership and never replays.
+
+Frozen final gate passes 19/19 in 130.47s, native 42fae3a2 / SDK 1ff2a8e7.
+All 2782 project inputs and 137 binaries remain frozen. Initial compile failure
+from a missed legacy helper call is preserved separately; no tests ran there.
+Full 169-test suite not run; nothing installed. Private inherited bootstrap/
+liveness, legacy fixtures and packet machinery remain. Planning, product
+acceptance and prior SDK/heap/timing investigations also remain open.
+[Exact gate and original logs](evidence/process-xmind-root-native-supervisor-control-checkpoint-20261021.json).
+
 ## Product child uses native worker context — 2026-10-21
 
 Product startup now owns NativeWorkerContext with captured scope and SDK service

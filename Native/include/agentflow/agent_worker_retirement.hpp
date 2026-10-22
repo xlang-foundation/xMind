@@ -21,4 +21,11 @@ AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
 AgentWorkerTerminalObservation drain_completed_agent_worker(
     PersistenceService&,AgentWorkerProcess&,AgentWorkerRpcPeer&,
     const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline observation_deadline);
+// Product path: native SDK execution control, no packet peer.
+AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
+    PersistenceService&,AgentWorkerProcess&,NativeExecutionClient&,
+    const AgentWorkerLeaseSpec&,RunState,const std::string&,AgentWorkerChannel::Deadline);
+AgentWorkerTerminalObservation drain_completed_agent_worker(
+    PersistenceService&,AgentWorkerProcess&,NativeExecutionClient&,
+    const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline);
 }

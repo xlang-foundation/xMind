@@ -32,6 +32,8 @@ public:
     RunState execute(AgentWorkerChannel::Deadline,std::stop_token={});
     void cancel();
     void close()noexcept;
+    bool closed()const noexcept;
+    const AgentWorkerScope& scope()const noexcept;
 private:struct Impl;std::unique_ptr<Impl> impl_;
 };
 }
