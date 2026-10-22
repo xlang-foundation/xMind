@@ -1,3 +1,20 @@
+## Coding owner uses native services only — 2026-10-21
+
+Removed the unused coding-owner packet dispatch API, seven packet handler
+instances and four context binder methods. Coding files, processes, callable
+and remote tools retain their native service implementations and authorization.
+Exact lease/scope validation is explicit in the owner constructor. The context
+header includes native hosts instead of the retired binder headers.
+
+Serial build and focused 20/20 contracts passed in 123.96 seconds. The broad
+worker contract passed in 57.44 seconds. Source/input closures and all 138
+native binary hashes/file sets verified unchanged around the gate; SDK unchanged.
+Initial missing direct channel include compile failure is preserved. This is
+synthetic focused validation, not the full 169-test suite or installed UI acceptance.
+Evidence: doc/evidence/process-xmind-root-native-coding-owner-cleanup-final-20261021-gate.json.
+Read-owner fixture adapters, production planning assembly and final product
+verification remain unfinished.
+
 ## Native execution control wrapper cleanup — 2026-10-21
 
 Removed the peer-based execution connection, execute and cancel wrappers. The

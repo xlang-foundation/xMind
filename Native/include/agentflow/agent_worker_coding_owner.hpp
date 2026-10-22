@@ -12,7 +12,6 @@ public:
     ~AgentWorkerCodingOwner();
     NativeWorkerModelAccess native_model_access()const;
     bool outcome_unrecorded()const noexcept;
-    std::string dispatch(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token={});
 private:
     struct Impl;std::unique_ptr<Impl> impl_;
 };

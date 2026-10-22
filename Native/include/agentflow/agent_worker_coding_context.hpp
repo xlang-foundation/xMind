@@ -1,10 +1,11 @@
 #pragma once
+#include "agentflow/agent_worker_channel.hpp"
 #include "agentflow/agent_worker_read_context.hpp"
-#include "agentflow/agent_worker_file_rpc.hpp"
-#include "agentflow/agent_worker_process_rpc.hpp"
+#include "agentflow/agent_worker_file_host.hpp"
+#include "agentflow/agent_worker_process_host.hpp"
 #include "agentflow/agent_worker_process_service.hpp"
-#include "agentflow/agent_worker_remote_rpc.hpp"
-#include "agentflow/agent_worker_callable_rpc.hpp"
+#include "agentflow/agent_worker_remote_host.hpp"
+#include "agentflow/agent_worker_callable_host.hpp"
 #include "agentflow/process_executor.hpp"
 #include <map>
 #include <set>
@@ -25,10 +26,6 @@ public:
     AgentRemoteToolResult invoke(const AgentRemoteToolInvocation&,std::stop_token={})override;
     AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
     std::vector<std::string> tool_names(std::stop_token={})override;
-    AgentWorkerRpcHandler bind_files(const AgentWorkerScope&);
-    AgentWorkerRpcHandler bind_processes(const AgentWorkerScope&);
-    AgentWorkerRpcHandler bind_callables(const AgentWorkerScope&);
-    AgentWorkerRpcHandler bind_remotes(const AgentWorkerScope&);
     AgentWorkerFileHost& files()noexcept{return *files_;}
 private:
     AgentWorkerReadContext reads_;
