@@ -1,0 +1,5 @@
+# Source-bound 0.1.61 VSIX archive
+
+The uninstalled archive has 2443 entries. Every expected runtime, client, browser asset and required renderer/sanitizer library was read from the actual ZIP and checked by SHA-256. 64 frontend source files match the accepted 0.1.61 client gate (464 extension and 162 browser tests); those unchanged unit suites were not rerun or represented as fresh native/rendered acceptance. Runtime 2398 covered files plus its manifest remain clean and unexecuted. Tests/scripts/CPython native extensions and bytecode caches are excluded.
+
+The staged xmind.exe matches source 32a24adb's accepted full 172 gate and SDK f809da86. Full native acceptance is separate from the earlier staging receipt, which accurately records pending status at staging. The archive was not installed or executed. Actual current-package browser/CLI shared-backend coding and restore, protected upgrade and rendered VSCode acceptance remain required. The remaining schema-worker private transport must still be migrated before claiming the complete architecture goal.

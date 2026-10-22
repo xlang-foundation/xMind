@@ -1,3 +1,26 @@
+## Full shared-root and fixed-SDK Native qualification - 2026-10-22
+
+Native source 32a24adbe8bda1dbc668d07d7325498882a20336 with SDK f809da86 passes the
+complete 172/172 inventory in 1197.08 seconds. Configure/build and all terminal
+checks pass. Exact sets/hashes remain unchanged: 2788 project inputs,16 SDK headers,
+1870 pure-library inputs,30 SDK/runtime inputs,18598 Node dependencies and137 native
+binaries. Native patch is empty; xmind.exe remains
+01c9980e7b6d60da31e26c196526d942ccf0a92fa30049f550aa4aa5cb789231.
+
+The real Rust semantic contract passes in 9.71 seconds and model RPC passes in 53.44 seconds.
+Rust diagnostic logs and four named Rust executable hashes are retained alongside
+the complete inventory, closure maps, raw logs and exact verifier. This does not
+claim every Rust shim/library/cache was frozen. Earlier 171/172 and 11/12 failures
+remain separate; no pass union or deadline change was used. Evidence prefix:
+process-xmind-root-python-tool-shared-full61-20261022-*.
+
+The uninstalled 0.1.61 VSIX contains 2443 verified entries, with 2398 manifest-covered
+runtime files and 64 unchanged frontend source files matched to the accepted client
+gate. Staging/ZIP checks did not execute Native or access configuration. Source
+assets match the prior 464 extension/162 browser gate, not fresh rendered evidence.
+Current-package client integration, schema-worker SDK migration and final goal
+acceptance remain open. Installed 0.1.60 and all user history/settings are preserved.
+
 ## Shared-root callable worker qualified - 2026-10-22
 
 Trusted Python-tool workers use xmind.PythonTools.Open(capability) and bound SDK
