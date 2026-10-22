@@ -9,6 +9,7 @@ class AgentWorkerFileHost;
 struct AgentWorkerJournalModelHooks {
     std::function<ModelCallReservation(const std::string&,std::stop_token)> reserve,start,finish;
     std::function<ModelCallReservation(const std::string&,const std::string&,std::stop_token)> reserve_planning_continuation;
+    std::function<Run(const std::string&,std::stop_token)> complete;
     std::function<void(AgentWorkerJournalReadKind,std::stop_token)> before_read;
 };
 // Backend authority for one captured worker lease. Native services and temporary

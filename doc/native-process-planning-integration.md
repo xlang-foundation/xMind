@@ -32,6 +32,13 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+Captured planning read/coding owners now complete through the existing SDK journal
+Complete method using only the final model attempt ID. The backend owns the
+segment clock, derives the canonical receipt, checks completed native work, and
+atomically closes the root/segment and retires the lease. Distinct-process
+positive, scope/cancellation/deadline refusal and SQL rollback checks pass.
+The main worker loop still needs dynamic admission and port selection.
+
 One backend owner retains the workspace, model host, journal, context window,
 planning binding and captured root execution budget through physical child
 retirement. A planning operation may block on children or human input; it must

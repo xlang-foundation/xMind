@@ -1,3 +1,41 @@
+## Backend-owned dynamic worker completion — 2026-10-21
+
+Read/coding owners with captured planning services now route the existing SDK
+journal Complete method to backend dynamic-root completion. The worker sends
+only its final attempt ID. The backend derives the canonical final assistant,
+checks the exact current lease, latest retired model, finished native plan and
+unresolved effects, and closes its captured budget segment and retires the
+worker lease in the same SQLite transaction. The segment ID and measured active
+time come from the retained backend budget, never the child.
+
+Distinct SDK child coverage verifies accepted planning/context continuation and
+final completion. Refusals cover an unfinished dispatched model, altered PID,
+cancelled caller and expired deadline. An injected lease-update SQL failure
+rolls back root state, segment closure, assistant/history, events, lease and
+budget revision; subsequent SDK completion adds exactly one canonical final
+assistant. Model responses and child settlement are synthetic; the accepted
+planning callback is controlled, not actual DynamicPlanExecutor scheduling.
+
+Final focused 20/20 passed in 125.35 seconds (ledger 2.83; broad worker
+57.97). Source patch a2ea6da054bcad1ad6dbc4e23e432291ea92d807089b47e139776ece4de12c9f;
+native SHA 4aa448971853b893541098562df4b449bd6745e527036b76130a4ebaa625456a. Frozen
+2786 source inputs, 16 SDK includes, 1870 pure-library files, 76 runtime
+files, 18598 Node dependencies and 138 native binaries retain exact sets
+and hashes. Full 169 inventory recorded; full suite not rerun. Evidence:
+doc/evidence/process-xmind-root-native-planning-completion-final-20261021-gate.json.
+
+Initial positive coverage passed 20/20 in 126.09 seconds. Expanded coverage first
+failed 19/20 in 121.65 seconds because the early-completion fixture ran before
+the model dispatch existed (NotFound instead of the asserted Conflict). Moving
+that assertion after dispatch and before response corrected the setup without
+changing production behavior or deadlines. All three raw runs are retained.
+
+Main worker admission/loop, actual accepted-plan child scheduling, overflow and
+retry adoption, human handoff, legacy adapter cleanup, full current suite and
+installed CLI/browser/extension acceptance remain open. SDK unchanged; no
+installation, CPython, provider execution or replay of completed user tasks.
+This does not establish a fix for earlier intermittent SDK faults.
+
 ## Planning execution port from the worker SDK object — 2026-10-21
 
 NativeWorkerModelClient.planning(deadline) now acquires the existing worker
