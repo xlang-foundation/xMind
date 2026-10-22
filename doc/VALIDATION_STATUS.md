@@ -8,8 +8,8 @@ are unchanged. A restricted isolated control raises that exception code: exit
 This validates capture only; it is not actual corruption or a product repro.
 
 Frozen compatibility gate passes 20/20 in 135.16s. Only the model-worker and
-graph-remote contract binaries change; product a5711613 and SDK 1ff2a8e7 plus
-136 other observed binaries remain identical. All 2783 source inputs and 138
+graph-remote contract binaries change; 136 of 138 observed binaries remain
+identical, including product a5711613 and SDK 1ff2a8e7. All 2783 source inputs and 138
 binaries remain frozen around the gate. The actual heap failure did not recur.
 Root cause remains open; nothing installed or replayed. Full suite, production
 planning integration and installed product acceptance remain unfinished.
