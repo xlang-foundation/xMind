@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_native_execution.hpp"
+#include "agentflow/agent_worker_native_links.hpp"
 #include "agentflow/xmind_ipc_api.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/xmind_ipc_runtime.hpp"
@@ -77,6 +78,7 @@ struct RootApi {
         APISET().AddClass<0,HostApi,RootApi>("Host");
         APISET().AddClass<0,NativeWorkersApi>("Workers");
         APISET().AddClass<0,NativeExecutionsApi>("Executions");
+        APISET().AddClass<0,NativeWorkerLinksApi>("WorkerLinks");
         APISET().AddClass<1,SessionsApi,RootApi>("Sessions");
         APISET().AddClass<1,RunsApi,RootApi>("Runs");
     END_PACKAGE

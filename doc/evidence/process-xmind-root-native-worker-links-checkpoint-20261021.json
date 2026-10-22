@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-10-22T00:59:33.180Z",
+  "gate": {
+    "recordedAt": "2026-10-22T00:59:12.447Z",
+    "sourceParent": "ac544fd38a76c4e776bd628cb56b4d3fe52236f5",
+    "sourcePatchSha256": "9cf8238c804729d7c7d57d797e35ab7317afe0f2ca24ffaafbe0aca2385c88db",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 36788,
+      "launchedAt": "2026-10-22T00:53:16.991Z",
+      "completedAt": "2026-10-22T00:56:52.624Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ffd6719e1659d40d7d8fcb64a0455e0916714473df101d8269738f199ed84c24"
+    },
+    "test": {
+      "pid": 34412,
+      "launchedAt": "2026-10-22T00:56:56.329Z",
+      "completedAt": "2026-10-22T00:59:09.736Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f4e84cc3554a1fb60f343c0abb80bc404218afaedf6ed8a1040b5db6ba20603f"
+    },
+    "total": 20,
+    "failed": 0,
+    "passed": 20,
+    "seconds": 133.35,
+    "projectFiles": 2783,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 137,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "927493cf4b45271c1fe6251790f23939865eb884c4d2394329957cdcdcb053b8",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": [
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-gate.json",
+      "sha256": "30859efaa08e2dc3b4cbd18dec7765c9d3090f3d424257afbe443e06ef8f1912"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-build.log",
+      "sha256": "ffd6719e1659d40d7d8fcb64a0455e0916714473df101d8269738f199ed84c24"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-build-terminal.json",
+      "sha256": "de256a5afb9f40c24a2153af43d42f1b24f2918c4321036e54b091d1843eabb4"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-ctest.log",
+      "sha256": "f4e84cc3554a1fb60f343c0abb80bc404218afaedf6ed8a1040b5db6ba20603f"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-ctest-terminal.json",
+      "sha256": "67b740c07fbb56b43c5a0e423a14aa51a946185bff4811a375d948c89c517ae8"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-LastTest.log",
+      "sha256": "6f6ad3ec3e27c066f50f95eaec098370705a76d1cd20bf174f33d03d9684a8c0"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-links-20261021-source.patch",
+      "sha256": "9cf8238c804729d7c7d57d797e35ab7317afe0f2ca24ffaafbe0aca2385c88db"
+    }
+  ],
+  "change": [
+    "Deleted custom AgentWorkerFrameCodec, HMAC framing and redundant bootstrap MAC key. SDK arguments now carry operation and payload directly.",
+    "Deleted separate xmind_worker remote root. Root xmind.WorkerLinks().Open(private_ticket) returns native Deliver(operation,payload) and Close subobject.",
+    "Private random 256-bit route tickets remain in inherited bootstrap; exact endpoint PID, parent birth, captured scope, owned jobs and retained native process checks remain.",
+    "Removed retired-format codec tests; direct channel contract verifies actual distinct children, isolated environment, NUL/UTF-8 bytes, size/operation limits, independent links, cancellation, crash, timeout and descendant retirement."
+  ],
+  "remaining": [
+    "Generic private startup/liveness rendezvous still exists as native WorkerLinks.",
+    "Higher-level legacy RPC fixtures/adapters still compiled and require migration/removal.",
+    "Production native planning, full suite and updated installed browser/CLI/editor acceptance.",
+    "Prior SDK access violation, heap corruption and timing investigation."
+  ],
+  "externalClosure": "C:/xMindNativeValidation/process-xmind-native-worker-links-20261021/inputs-before-build.json",
+  "externalBinaryInventory": "C:/xMindNativeValidation/process-xmind-native-worker-links-20261021/binaries-before-test.json"
+}

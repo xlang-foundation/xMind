@@ -1,5 +1,4 @@
 #pragma once
-#include "agentflow/secret_protection.hpp"
 #include "agentflow/process.hpp"
 #include <chrono>
 #include <cstdint>
@@ -17,33 +16,17 @@ struct AgentWorkerScope {
     std::int64_t workspace_revision=0;
     bool operator==(const AgentWorkerScope&)const=default;
 };
-enum class AgentWorkerSide {backend,worker};
 struct AgentWorkerMessage {std::string operation,payload;};
 struct AgentWorkerChannelStatistics {
     std::uint64_t pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;
 };
-// Bounded, direction-separated and strictly sequenced authentication. A bad
-// frame permanently poisons this codec. No method/authority dispatch lives here.
-class AgentWorkerFrameCodec {
-public:
-    static constexpr std::size_t max_frame_bytes=4*1024*1024;
-    AgentWorkerFrameCodec(AgentWorkerScope,SecretBytes,AgentWorkerSide);
-    ~AgentWorkerFrameCodec();
-    AgentWorkerFrameCodec(const AgentWorkerFrameCodec&)=delete;
-    AgentWorkerFrameCodec& operator=(const AgentWorkerFrameCodec&)=delete;
-    std::string encode(const AgentWorkerMessage&);
-    AgentWorkerMessage decode(const std::string&);
-private:
-    struct Impl;std::unique_ptr<Impl> impl_;
-};
-SecretBytes new_agent_worker_channel_key();
-
 // One reader and one writer may run concurrently; callers join them before
 // destruction. Any I/O/protocol failure poisons the channel; never retry an
 // effect based on transport failure. Native remote objects use xlang3 LRPC;
 // rendezvous waits honor cancellation and the captured deadline.
 class AgentWorkerChannel {
 public:
+    static constexpr std::size_t max_message_bytes=4*1024*1024;
     using Deadline=std::chrono::steady_clock::time_point;
     ~AgentWorkerChannel();
     AgentWorkerChannel(const AgentWorkerChannel&)=delete;

@@ -1,3 +1,21 @@
+## Worker rendezvous uses root SDK subobjects — 2026-10-21
+
+Removed AgentWorkerFrameCodec and its JSON/HMAC wrapper, redundant bootstrap MAC
+key, and separate xmind_worker remote root. Private links now open through
+xmind.WorkerLinks().Open(ticket), with native Deliver(operation,payload) and
+Close methods. SDK owns wire serialization. Random private route tickets, exact
+endpoint PID/parent birth, captured scope and owned process/job checks remain.
+The inherited mapping remains a private OS bootstrap, not a second IPC codec.
+
+Frozen gate passes 20/20 focused checks in 133.35s, native 927493cf / SDK 1ff2a8e7.
+Direct channel tests cover NUL/UTF-8 payloads, bounds, invalid operations, isolated
+environment, independent children, crash/cancellation/timeout and descendant
+retirement. All 2783 project inputs and 137 binaries remain frozen. Full 169-test
+suite not run; nothing installed. Generic private startup/liveness, higher-level
+legacy RPC fixtures, native planning and product acceptance remain unfinished.
+Prior SDK/heap/timing investigations remain open.
+[Exact gate and original logs](evidence/process-xmind-root-native-worker-links-checkpoint-20261021.json).
+
 ## Product supervisor uses native control directly — 2026-10-21
 
 Product parent supervisor now owns NativeExecutionClient directly, with no RPC

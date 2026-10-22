@@ -25,6 +25,10 @@ context without constructing an RPC peer; runner adapters accept that context.
 The product supervisor also owns native execution control directly, with no
 packet reader or dispatch handler; native retirement retains physical identity
 and durable lease checks.
+Private startup/liveness now opens WorkerLinks().Open(ticket) beneath the same
+xmind root. Its Deliver(operation,payload) and Close methods use SDK arguments;
+the old JSON/HMAC frame codec and separate worker remote root are deleted.
+Private inherited OS bootstrap and higher-level legacy fixtures remain.
 
 
 The October 9 product decision defines three native components: **Agent
