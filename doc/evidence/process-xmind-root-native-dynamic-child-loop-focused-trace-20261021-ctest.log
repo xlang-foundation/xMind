@@ -1,0 +1,36 @@
+Test project C:/xMindNativeValidation/native-current-source-full
+    Start 91: native_agent_worker_ledger_contract
+1/1 Test #91: native_agent_worker_ledger_contract ...***Failed    1.31 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:62895
+Controlled dynamic child callback failed: Actual dynamic SDK child failed: Agent terminal observation awaits owner drain
+Shared SDK runner failed: Native planning outcome requires ownership recovery; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-5699110-3779783545
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'C:/xMindNativeValidation/native-current-source-full/Native/Release/agentflow_agent_worker_ledger_contract.exe C:/xMindNativeValidation/xlang3-unicode-library-build/Release/modules C:/Python/Python314/Lib http://127.0.0.1:62895',
+  stdout: '',
+  stderr: 'Controlled dynamic child callback failed: Actual dynamic SDK child failed: Agent terminal observation awaits owner drain\r\n' +
+    'Shared SDK runner failed: Native planning outcome requires ownership recovery; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-5699110-3779783545\r\n'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.33 sec
+
+The following tests FAILED:
+	 91 - native_agent_worker_ledger_contract (Failed)
+Errors while running CTest

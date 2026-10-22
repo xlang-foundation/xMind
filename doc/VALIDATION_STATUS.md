@@ -1,3 +1,44 @@
+## Dynamic child shared runner over actual SDK processes — 2026-10-21
+
+Worker journal values now carry only public dynamic-child lineage, with exact
+shape/preset/revision checks and no backend identity. Native SDK admission
+allows that signed child to use the shared runner and typed journal. A remote
+child uses its captured backend catalogue instead of fetching private plan
+capabilities or filtering against a nonexistent local preset. Known preset
+bounds limit the child loop; durable backend turn limits remain authoritative.
+
+The controlled accepted-parent callback now launches a second distinct process
+running the actual read-worker entry point. Both parent and child processes are
+copies of the ledger fixture executable, not production xmind.exe. The child
+reads exact file bytes through native SDK model/journal/read services, commits
+one canonical tool turn, completes and physically exits before child settlement
+and signed parent continuation. Four shared model charges, four messages in
+each run, exact continuation, closed root segment and retired leases verified.
+Model gateways and parent scheduler callback are controlled; the production
+DynamicPlanExecutor/supervisor factory is not yet used for this child.
+
+Initial run: 18/20, ledger failed behind generic link close and broad production
+worker exited 0xC0000374. Diagnostic run: 19/20, broad passed; child error reply
+revealed terminal handoff. Two focused ledger traces (0/1 each) exposed the
+underlying catalogue mismatch after retaining the local exception_ptr in
+AgentTerminalHandoff. Its authority and drain semantics are unchanged. The
+remaining local-child preset filter dereferenced an unset optional on the
+remote path; gating that filter to local children fixed the ledger. No heap
+corruption fix is claimed. All five raw source/build/test runs are retained.
+
+Final diagnostic focused 20/20 passed in 127.12 seconds (ledger 3.81; broad
+57.00), with existing dump/timing capture enabled and directories created first.
+No dump was produced. Patch ad8fbf0e43a8f8db3f11391370b1b2904bf1266d2faf40704768d4f7a66e9777;
+native 6385a7ef9e13792fce9ffd890032af5d9f26e0549cf00f1c486f1b1d8571310b. Frozen 2786
+project files, 16 SDK includes, 1870 pure libraries, 76 runtime files,
+18598 Node dependencies and 138 native binaries retain exact sets/hashes.
+Evidence: doc/evidence/process-xmind-root-native-dynamic-child-loop-final-20261021-gate.json.
+
+Production scheduler/supervisor assembly, counted/coding/nested-planning child
+coverage, main admission, overflow/retry adoption, human handoff, legacy cleanup,
+full suite, broad stability and installed client acceptance remain open. No
+install, SDK change, CPython, live provider execution or replay of user tasks.
+
 ## Durable dynamic agent-child worker admission — 2026-10-21
 
 Repository worker ownership now recognizes an exact dynamic-agent child only

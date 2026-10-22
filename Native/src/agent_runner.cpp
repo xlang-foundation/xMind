@@ -420,7 +420,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 throw std::invalid_argument("Pinned process placement requires its owning worker executor");
         }
     }
-    if(read_workspace_&&!admitted.parent_id.empty()&&coding_workspace_&&read_workspace_->execution_policy_id()!="native.graph-context")throw std::invalid_argument("Delegated read worker cannot acquire coding authority");
+    if(read_workspace_&&!admitted.parent_id.empty()&&coding_workspace_&&read_workspace_->execution_policy_id()!="native.graph-context"&&read_workspace_->execution_policy_id()!="native.dynamic-plan")throw std::invalid_argument("Delegated read worker cannot acquire coding authority");
     std::unique_ptr<WorkspaceToolSet> run_workspace_tools;
     if(workspace_){
         auto membership=admitted.parent_id.empty()?saved_workspace_membership(journal_,id):
@@ -444,7 +444,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         if(leaf&&(!budget||budget->root_id()!=admission.root_run_id||(!dynamic_child&&settings_.planning)||settings_.delegation||!settings_.selectable_models.empty()))throw std::invalid_argument("Agent child requires its exact bounded root owner");
         if(dynamic_child&&settings_.planning&&!planning_)throw std::invalid_argument("Planning-capable dynamic child requires the shared native planning executor");
         if(!dynamic_child&&leaf&&(admission.preset_id!="workspace.inspect"||admission.preset_revision!=1||settings_.approved_edits||!settings_.process_profiles.empty()||!settings_.mcp_servers.empty()||settings_.a2a_enabled||settings_.max_turns>4))throw std::invalid_argument("Delegated leaf requires its exact bounded read-only owner");
-        if(dynamic_child){
+        if(dynamic_child&&!read_workspace_){
             const auto plan=journal_.dynamic_plan(admission.plan_id).get();
             const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& value){return value.child_run_id==id;});
             const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& value){return value.id==admission.preset_id&&value.revision==admission.preset_revision;});
@@ -690,7 +690,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         auto seal_catalogue=[&]{
             Json offered_bindings=Json::array();
             for(const auto& binding:approval_bindings)if(std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==binding.at("alias").get<std::string>();}))offered_bindings.push_back(binding);
-            if(dynamic_child)verify_child_catalogue(request.tools,offered_bindings,*child_caps,*child_preset);
+            if(dynamic_child&&!read_workspace_)verify_child_catalogue(request.tools,offered_bindings,*child_caps,*child_preset);
             if(dynamic_root){
                 validate_dynamic_owner(id,provider.model);
                 auto presets=root_caps->presets;
@@ -715,7 +715,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         };
         auto refresh_tools=[&]{
             discover_mcp();discover_a2a();apply_tool_allowlist(false);
-            if(dynamic_child){
+            if(dynamic_child&&!read_workspace_){
                 // A dynamic child may inherit optional workspace extensions
                 // (language servers and xlang tools) from the root runtime.
                 // Its frozen preset is the authority for what the model can

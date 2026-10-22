@@ -27,11 +27,12 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerClientContext& pee
     settings.max_output_tokens=admission.max_output_tokens;
     settings.instructions.clear();
     const bool leaf=peer.scope().root_id!=peer.scope().run_id;
-    if(leaf&&coding&&budget.spec.policy_id!="native.graph-context")throw Conflict("Delegated worker cannot acquire coding assembly");
+    if(leaf&&coding&&budget.spec.policy_id!="native.graph-context"&&budget.spec.policy_id!="native.dynamic-plan")throw Conflict("Delegated worker cannot acquire coding assembly");
     settings.max_turns=leaf&&budget.spec.policy_id!="native.graph-context"?4:static_cast<std::size_t>(budget.spec.max_model_calls);
+    if(leaf&&budget.spec.policy_id=="native.dynamic-plan"){const auto child=journal->child_admission(peer.scope().run_id).get();if(child.kind!=ChildAdmissionKind::dynamic_agent)throw Conflict("Dynamic worker lacks captured child admission");settings.max_turns=child.preset_id=="workspace.coding"?16:4;}
     settings.run_timeout=std::chrono::milliseconds(budget.spec.wall_limit_ms);
     settings.a2a_enabled=false;
-    std::shared_ptr<DynamicPlanExecution> planning;if(budget.spec.policy_id=="native.dynamic-plan"){auto native=peer.native_model();if(!native||leaf)throw Conflict("Planning worker requires its captured native root service");planning=native->planning(AgentWorkerJournalClient(peer).execution_deadline());}
+    std::shared_ptr<DynamicPlanExecution> planning;if(!leaf&&budget.spec.policy_id=="native.dynamic-plan"){auto native=peer.native_model();if(!native||leaf)throw Conflict("Planning worker requires its captured native root service");planning=native->planning(AgentWorkerJournalClient(peer).execution_deadline());}
     AgentRunner runner(*journal,*closed.context,std::move(settings),
         AgentRunnerPorts{model,closed.catalogue,closed.tools,closed.runtime,workspace,coding_workspace},{},std::move(planning));
     std::shared_ptr<RootExecutionBudget> shared;

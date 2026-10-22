@@ -1,0 +1,27 @@
+{
+  "diagnosticEnvironment": {
+    "XMIND_WORKER_FIXTURE_DUMP_DIR": "C:/xMindNativeValidation/dynamic-child-loop-dumps-20261021",
+    "XMIND_WORKER_FIXTURE_TIMING_DIR": "C:/xMindNativeValidation/dynamic-child-loop-timing-20261021"
+  },
+  "dumps": [
+    "fixture-16876-674810203-slow.dmp"
+  ],
+  "timings": {
+    "production-10640.json": {
+      "bytes": 28281,
+      "sha256": "08265f7aae2cedcfbc8db92f5c84a946e3a10d22dd2cd7c884d3addd2c1ae857"
+    },
+    "production-38984.json": {
+      "bytes": 28107,
+      "sha256": "cf347dcd8959392ec17a93880473575873683785d94e4fe1615d205f44ed3516"
+    },
+    "transport-10640.json": {
+      "bytes": 11369,
+      "sha256": "fc38e324876652d5f9ed1f3e282715a24a4c1c1be7cfe5a6ba36d106c379ebe6"
+    },
+    "transport-38984.json": {
+      "bytes": 11352,
+      "sha256": "d37ff072ae25ef5ebd12e766715c477ec047a87f7fccdd4ad88c47524d8cad8e"
+    }
+  }
+}
