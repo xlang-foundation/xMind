@@ -32,12 +32,20 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+Planning roots now use sealed native SDK read turns before planning. Root
+provider/workspace/capability/segment and exact catalogue entries are checked;
+ordinary funding, effects and lifecycle gates remain closed. Shared scope checks
+reject dynamic leases predating the active segment, including journal/read/model
+dispatch. Actual late replies are still retained as facts. All six scheduler
+cases retain a root read plus signed planning continuation and child drain.
+Root effects, uncounted model funding and lifecycle assembly remain open.
+
 Scheduled actual xmind coding children now verify create_file approval and
 inherited denial, both counted/uncounted. One approval precedes exact bytes and
 a succeeded operation; denial creates no approval, operation or file. Canonical
 tool turns, four shared charges and physical drain-before-settlement pass.
 This covers child file creation, not full coding/client acceptance or root
-ordinary-tool authority; those and other effects/lifecycle paths remain open.
+effect authority; those and other effects/lifecycle paths remain open.
 
 Counted dynamic process children now receive the original shared backend
 budget through a private child-context policy field. Root/deadline/segment and

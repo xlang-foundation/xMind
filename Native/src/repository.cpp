@@ -3366,9 +3366,12 @@ void worker_require_tool_turns(XlangSqlite& db,const AgentWorkerLeaseSpec& lease
     }
 }
 bool worker_read_tool(const std::string& name){const std::set<std::string> reads{"read_file","list_files","search_files","find_files","glob_files","language_server","read_repository_instructions","list_skills","load_skill"};return reads.contains(name);}
+bool worker_planning_root_read(Repository& repository,const AgentWorkerLeaseSpec& lease,const std::string& tool={}){
+    if(lease.root_run_id!=lease.owner_run_id||lease.workspace_id=="workspace:none")return false;const auto root=repository.run(lease.root_run_id);const auto budget=repository.root_budget(root.id);if(root.state!=RunState::running||root.graph_root||!root.parent_id.empty()||budget.spec.policy_id!="native.dynamic-plan"||budget.spec.policy_revision!=1)return false;const auto caps=repository.dynamic_capabilities(root.id);if(!caps.catalogue_finalized||caps.workspace_identity!=lease.workspace_id||Json::parse(caps.provider_identity_json)!=Json::parse(lease.provider_identity_json)||repository.dynamic_budget_segment(root.id).state!="open")return false;if(tool.empty())return true;if(!worker_read_tool(tool))return false;const auto catalogue=Json::parse(caps.tool_catalog_json);if(!catalogue.contains("tools")||!catalogue["tools"].is_array())return false;return std::count_if(catalogue["tools"].begin(),catalogue["tools"].end(),[&](const auto& t){return t.is_object()&&t.value("name",std::string{})==tool;})==1;
+}
 template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
     (void)call.serialize();worker_current_scope(repository,db,lease);
-    if(((file||process)?!worker_effect_owner(repository,lease):!worker_agent_owner(repository,lease))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+    if(((file||process)?!worker_effect_owner(repository,lease):(!worker_agent_owner(repository,lease)&&!worker_planning_root_read(repository,lease,call.tool_name)))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
     const bool delegation=!file&&!process&&call.tool_name=="delegate_tasks";
     if(delegation&&(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.delegation"))throw Conflict("Worker delegation differs from owning root policy");
     if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):(!worker_read_tool(call.tool_name)&&!delegation))throw Conflict("Worker workspace tool is not admitted");
@@ -3472,6 +3475,7 @@ void worker_current_scope(Repository& repository,XlangSqlite& db,const AgentWork
     const auto lease=read_worker_lease(db,expected.generation);if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker has no exact active captured lease");worker_running_scope(repository,db,expected,allow_queued_root);
     const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
     if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Worker generation is stale");
+    if(repository.root_budget(expected.root_run_id).spec.policy_id=="native.dynamic-plan"){const auto segment=repository.dynamic_budget_segment(expected.root_run_id);const auto admitted=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{expected.owner_run_id,expected.generation}).rows;if(segment.state!="open"||admitted.size()!=1||integer(admitted[0][0])<segment.opened_event_seq)throw Conflict("Worker lease predates its active planning segment");}
 }
 std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::string& root,const std::string& owner,const std::string& attempt){
     const auto rows=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? AND json_extract(payload,'$.attempt_id')=?",{owner,root,attempt}).rows;
@@ -3580,8 +3584,7 @@ AgentWorkerPlanningClaimRecord Repository::agent_worker_planning_claim(const std
 AgentWorkerModelClaimRecord Repository::agent_worker_model_claim(const std::string& root,const std::string& attempt){return read_worker_claim(impl_->database,root,attempt);}
 AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,spec.generation);
-    if(lease.state!="active"||lease.spec.root_run_id!=spec.root_run_id||lease.spec.owner_run_id!=spec.owner_run_id)throw Conflict("Worker model dispatch has no active scoped lease");worker_running_scope(*this,db,lease.spec);
-    const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),spec.owner_run_id}).rows;if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=spec.generation)throw Conflict("Worker generation is stale");
+    if(lease.state!="active"||lease.spec.root_run_id!=spec.root_run_id||lease.spec.owner_run_id!=spec.owner_run_id)throw Conflict("Worker model dispatch has no active scoped lease");worker_current_scope(*this,db,lease.spec);
     worker_require_tool_turns(db,lease.spec);
     const auto funded=worker_attempt_generation(db,spec.root_run_id,spec.owner_run_id,spec.attempt_id);if(funded&&*funded!=spec.generation)throw Conflict("Worker cannot dispatch another generation's funded attempt");
     if(!funded){
@@ -3655,7 +3658,7 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_workspace_turn(const A
 }
 AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool allow_files){
     auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
-    if(!worker_agent_owner(*this,lease)||(allow_files&&!worker_effect_owner(*this,lease)))throw Conflict("Worker tool turn differs from its exact read-only or coding admission");
+    if((!worker_agent_owner(*this,lease)&&!worker_planning_root_read(*this,lease))||(allow_files&&!worker_effect_owner(*this,lease)))throw Conflict("Worker tool turn differs from its exact read-only or coding admission");
     const auto model=read_worker_claim(db,lease.root_run_id,attempt);if(model.spec.owner_run_id!=lease.owner_run_id||model.spec.generation!=lease.generation||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read turn has no actual assistant receipt");
     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
     // Check the admitted vocabulary even for an already committed turn. A read

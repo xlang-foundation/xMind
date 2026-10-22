@@ -1,3 +1,44 @@
+## Sealed planning-root SDK reads and active-segment lease checks — 2026-10-22
+
+Planning roots can now claim/commit native read turns only while running under
+finalized capabilities, matching workspace/provider, an open segment and an
+exact unique sealed catalogue tool entry. This adds workspace-read authority
+without opening ordinary startup, generic model funding, effects or final
+completion. Existing measured dynamic completion remains required.
+
+The shared worker scope check also rejects dynamic leases whose admission
+event predates the current active segment. Model dispatch now uses that shared
+check instead of a weaker running-only check; redundant generation lookup was
+removed. Actual late backend model replies remain recordable as facts, but
+stale worker journal/read/model calls cannot acquire new authority.
+
+All six real scheduler cases now make the distinct parent fixture worker read
+exact native file bytes through SDK before planning. The planning model receives
+that canonical result, then actual xmind child execution/drain, signed report
+and continuation complete. Each case retains three parent/two child turns,
+five shared charges, six root/four child messages. Child approval/denial and
+counted inference checks remain active. Unsealed list_files is refused without
+a claim/events/budget revision change. A lease admitted before its segment is
+refused for journal/read/model calls with no writes. Ordinary dynamic-root
+completion refusal coverage remains unchanged. Gateways are synthetic; parent
+is the fixture, actual scheduled child is production xmind.exe.
+
+Initial root-read ledger 1/1 passed in 9.06 seconds. With segment checks, ledger
+1/1 passed in 9.42 seconds, then focused 20/20 in 133.16 seconds (ledger
+9.20; broad worker 57.41), same final source and binary. Patch
+85929e77ad0094a9040fc48778ad43c83dd9da5ae4dfe1e5fe8e6130f411b225; native
+77ddd9d036e998576e19cbf3eb4f68cd44c92f14b52c32a846bd6926b6dd12d2. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact sets and hashes. Evidence:
+doc/evidence/process-xmind-root-native-planning-root-read-qualified-20261021-gate.json.
+Diagnostic capture enabled; no dump. Earlier heap/SDK faults remain unresolved.
+
+Main planning admission remains closed. Root effects and uncounted model
+funding, additional child effects, nested planning, resume/human handoff,
+overflow/retry, main factory selection, legacy cleanup, full suite, broad
+stability and installed client acceptance remain open. No install, SDK change,
+CPython, live provider execution or replay of completed user tasks.
+
 ## Scheduled dynamic child file creation respects approval and denial — 2026-10-21
 
 The real scheduler/production-xmind fixture now exercises six variants: read,
