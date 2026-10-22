@@ -3455,15 +3455,24 @@ bool worker_planning_root_owner(Repository& repository,const AgentWorkerLeaseSpe
 bool worker_planning_root_tool(Repository& repository,const AgentWorkerLeaseSpec& lease,const std::string& tool){
     if(!worker_planning_root_owner(repository,lease)||tool.empty())return false;const auto catalogue=Json::parse(repository.dynamic_capabilities(lease.root_run_id).tool_catalog_json);if(!catalogue.contains("tools")||!catalogue["tools"].is_array())return false;return std::count_if(catalogue["tools"].begin(),catalogue["tools"].end(),[&](const auto& t){return t.is_object()&&t.value("name",std::string{})==tool;})==1;
 }
+bool worker_delegation_policy(Repository& repository,const std::string& root_id){
+    const auto budget=repository.root_budget(root_id);if(budget.spec.policy_revision!=1)return false;
+    if(budget.spec.policy_id=="native.delegation")return true;
+    if(budget.spec.policy_id!="native.dynamic-plan")return false;
+    const auto root=repository.run(root_id);const auto caps=repository.dynamic_capabilities(root_id);
+    if(root.state!=RunState::running||root.graph_root||!root.parent_id.empty()||!caps.catalogue_finalized||caps.workspace_identity!=budget.spec.workspace_identity||Json::parse(caps.provider_identity_json)!=Json::parse(budget.spec.provider_identity_json)||repository.dynamic_budget_segment(root_id).state!="open")return false;
+    const auto catalogue=Json::parse(caps.tool_catalog_json);if(!catalogue.contains("tools")||!catalogue["tools"].is_array())return false;
+    return std::count_if(catalogue["tools"].begin(),catalogue["tools"].end(),[](const auto& tool){return tool.is_object()&&tool.value("name",std::string{})=="delegate_tasks";})==1;
+}
 bool worker_planning_root_read(Repository& repository,const AgentWorkerLeaseSpec& lease,const std::string& tool={}){
     return tool.empty()?worker_planning_root_owner(repository,lease):(worker_read_tool(tool)&&worker_planning_root_tool(repository,lease,tool));
 }
 
 template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
     (void)call.serialize();worker_current_scope(repository,db,lease);
-    if(((file||process)?!worker_effect_owner(repository,lease,call.tool_name):(!worker_agent_owner(repository,lease)&&!worker_planning_root_read(repository,lease,call.tool_name)))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+    if(((file||process)?!worker_effect_owner(repository,lease,call.tool_name):(!worker_agent_owner(repository,lease)&&!worker_planning_root_read(repository,lease,call.tool_name)&&!(call.tool_name=="delegate_tasks"&&worker_planning_root_tool(repository,lease,call.tool_name))))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
     const bool delegation=!file&&!process&&call.tool_name=="delegate_tasks";
-    if(delegation&&(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.delegation"))throw Conflict("Worker delegation differs from owning root policy");
+    if(delegation&&(lease.root_run_id!=lease.owner_run_id||!worker_delegation_policy(repository,lease.root_run_id)))throw Conflict("Worker delegation differs from owning root policy");
     if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):(!worker_read_tool(call.tool_name)&&!delegation))throw Conflict("Worker workspace tool is not admitted");
     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read has no actual model receipt");
@@ -3541,7 +3550,7 @@ bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& l
     if(lease.owner_run_id==lease.root_run_id)return false;
     const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);
     const auto budget=repository.root_budget(lease.root_run_id);
-    if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.parent_id!=root.id||owner.session_id!=root.session_id||budget.spec.policy_id!="native.delegation"||budget.spec.policy_revision!=1)return false;
+    if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.parent_id!=root.id||owner.session_id!=root.session_id||!worker_delegation_policy(repository,root.id)||budget.spec.policy_revision!=1)return false;
     const auto admitted=repository.child_admission(owner.id);
     return admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.root_run_id==root.id&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1&&repository.delegation_batch(admitted.batch_id).state=="accepted";
 }
@@ -3573,7 +3582,7 @@ std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::
     if(!saved.contains("worker_generation"))return {};if(!saved.at("worker_generation").is_string()||saved.at("worker_generation").get_ref<const std::string&>().empty())throw DatabaseError("Invalid model funding generation");return saved.at("worker_generation").get<std::string>();
 }
 std::string worker_assistant_receipt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt,bool final,bool planning_root){
-    worker_current_scope(repository,db,lease);if(planning_root&&(!final||lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.dynamic-plan"||!repository.dynamic_capabilities(lease.root_run_id).catalogue_finalized))throw Conflict("Worker final planning completion lost its captured root");if(!planning_root&&!worker_agent_owner(repository,lease)&&(final||(!worker_planning_attempt(repository,db,lease,attempt)&&!worker_planning_root_owner(repository,lease))))throw Conflict("Worker completion requires its exact agent admission");
+    worker_current_scope(repository,db,lease);if(planning_root&&(!final||lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.dynamic-plan"||!repository.dynamic_capabilities(lease.root_run_id).catalogue_finalized))throw Conflict("Worker final planning completion lost its captured root");if(!planning_root&&!worker_agent_owner(repository,lease)&&(final||(!worker_planning_root_owner(repository,lease)&&!worker_planning_attempt(repository,db,lease,attempt))))throw Conflict("Worker completion requires its exact agent admission");
     const auto claim=read_worker_claim(db,lease.root_run_id,attempt);
     if(claim.spec.generation!=lease.generation||claim.spec.owner_run_id!=lease.owner_run_id||claim.state!="responded"||claim.actual_assistant_json.empty())throw Conflict("Worker completion has no captured actual assistant receipt");
     if(final){const auto response=decode_agent_model_completion(claim.actual_response_json);if(response.finish_reason!="stop"||!response.tool_calls.empty())throw Conflict("Worker cannot complete a non-final model response");
@@ -3761,7 +3770,7 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
     // Check the admitted vocabulary even for an already committed turn. A read
     // channel must never acknowledge a coding turn through idempotent lookup.
-    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(call.name=="delegate_tasks"&&lease.root_run_id==lease.owner_run_id&&root_budget(lease.root_run_id).spec.policy_id=="native.delegation")&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
+    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(call.name=="delegate_tasks"&&lease.root_run_id==lease.owner_run_id&&worker_delegation_policy(*this,lease.root_run_id))&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
     if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
     std::set<std::string> calls;std::vector<std::string> outputs;
     for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");

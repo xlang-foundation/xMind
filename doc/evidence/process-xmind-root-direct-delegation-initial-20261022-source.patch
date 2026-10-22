@@ -1,0 +1,184 @@
+diff --git a/Native/src/agent_worker_context_window.cpp b/Native/src/agent_worker_context_window.cpp
+index 103b73b7..3548a87c 100644
+--- a/Native/src/agent_worker_context_window.cpp
++++ b/Native/src/agent_worker_context_window.cpp
+@@ -10,7 +10,7 @@ namespace {std::shared_ptr<RootExecutionBudget> context_budget(PersistenceServic
+     if(record.spec.policy_id=="native.dynamic-plan"){
+         const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
+         if(!shared||shared->root_id()!=lease.root_run_id||shared->deadline()!=deadline||!shared->segment_open()||segment.state!="open"||shared->segment_id()!=segment.id)throw Conflict("Planning context requires its exact shared active budget");
+-        if(lease.owner_run_id!=lease.root_run_id){const auto child=std::get<ChildAdmissionRecord>(store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::child_admission,lease.owner_run_id}).get());if(child.kind!=ChildAdmissionKind::dynamic_agent)throw Conflict("Shared planning child context requires exact signed child admission");}
++        if(lease.owner_run_id!=lease.root_run_id){const auto child=std::get<ChildAdmissionRecord>(store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::child_admission,lease.owner_run_id}).get());if(child.root_run_id!=lease.root_run_id||(child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Shared planning child context requires exact typed child admission");}
+         return shared;
+     }
+     if(shared)throw Conflict("Ordinary worker context cannot adopt a planning budget");
+diff --git a/Native/src/agent_worker_read_executor.cpp b/Native/src/agent_worker_read_executor.cpp
+index 2df03352..689f39b8 100644
+--- a/Native/src/agent_worker_read_executor.cpp
++++ b/Native/src/agent_worker_read_executor.cpp
+@@ -72,6 +72,20 @@ class WorkspaceExecutor final:public AgentRootExecutor {
+     std::shared_ptr<LanguageServerToolRegistry> language_catalogue_;
+     std::unique_ptr<AgentRunner> validator_;
+     std::shared_ptr<AgentModelGateway> gateway_;
++    void bind_delegation(AgentWorkerReadRequestPolicy& policy,const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared_budget,std::stop_token cancel){
++        if(!delegation_)return;
++            auto frozen=settings_;frozen.provider.model=model(request);frozen.tool_allowlist=std::vector<std::string>{};for(const auto& tool:policy.tools)frozen.tool_allowlist->push_back(tool.name);frozen.selectable_models=validator_->models();
++            if(!request.agent_instructions.empty())frozen.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
++            if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);
++            policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget,cancel](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){
++                // Controller cancellation must reach child ownership directly;
++                // an IPC handler can remain live while its caller is draining.
++                std::stop_source combined;
++                std::stop_callback owner_cancel(cancel,[&]{combined.request_stop();});
++                std::stop_callback call_cancel(stop,[&]{combined.request_stop();});
++                return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,combined.get_token())};
++            };
++        }
+     bool callable_tool(const std::string& name)const{return std::any_of(settings_.xlang_python_tools.begin(),settings_.xlang_python_tools.end(),[&](const auto& tool){return tool.definition.name==name;});}
+     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
+     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
+@@ -205,21 +219,8 @@ public:
+                 context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
+             policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
+         }
+-        if(delegation_){
+-            auto frozen=settings_;frozen.provider.model=model(request);frozen.tool_allowlist=std::vector<std::string>{};for(const auto& tool:policy.tools)frozen.tool_allowlist->push_back(tool.name);frozen.selectable_models=validator_->models();
+-            if(!request.agent_instructions.empty())frozen.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
+-            if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);
+-            auto shared_budget=std::make_shared<RootExecutionBudget>(store_,budget,deadline,cancel);
+-            policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget,cancel](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){
+-                // Controller cancellation must reach child ownership directly;
+-                // an IPC handler can remain live while its caller is draining.
+-                std::stop_source combined;
+-                std::stop_callback owner_cancel(cancel,[&]{combined.request_stop();});
+-                std::stop_callback call_cancel(stop,[&]{combined.request_stop();});
+-                return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,combined.get_token())};
+-            };
+-        }
+-        if(settings_.context){if(dynamic_){const auto& p=settings_.context->compaction;policy.context=AgentWorkerContextPolicy{*settings_.context,{provider_identity.dump(),context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_)),p.id,p.revision,p.strategy_id,p.strategy_revision}};policy.context_budget=shared;}else policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};}
++        if(delegation_&&!planning_root())bind_delegation(policy,request,std::make_shared<RootExecutionBudget>(store_,budget,deadline,cancel),cancel);
++        if(settings_.context){if(dynamic_||(delegated_&&shared->snapshot().spec.policy_id=="native.dynamic-plan")){const auto& p=settings_.context->compaction;policy.context=AgentWorkerContextPolicy{*settings_.context,{provider_identity.dump(),context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_)),p.id,p.revision,p.strategy_id,p.strategy_revision}};policy.context_budget=shared;}else policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};}
+         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
+         auto provider=settings_.provider;provider.model=model(request);
+         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
+@@ -263,7 +264,7 @@ public:
+         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
+                 catch(...){std::this_thread::sleep_for(1s);}}};
+         std::exception_ptr failure;std::shared_ptr<RootExecutionBudget> planning_budget;
+-        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);auto frozen=settings_;frozen.provider.model=provider.model;if(request.agent_tools)frozen.tool_allowlist=request.agent_tools;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
++        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);bind_delegation(policy,request,planning_budget,cancel);auto frozen=settings_;frozen.provider.model=provider.model;if(request.agent_tools)frozen.tool_allowlist=request.agent_tools;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
+             if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
+         catch(...){failure=std::current_exception();}
+         try{
+diff --git a/Native/src/repository.cpp b/Native/src/repository.cpp
+index 33cb5848..6a4dc3d1 100644
+--- a/Native/src/repository.cpp
++++ b/Native/src/repository.cpp
+@@ -3455,15 +3455,24 @@ bool worker_planning_root_owner(Repository& repository,const AgentWorkerLeaseSpe
+ bool worker_planning_root_tool(Repository& repository,const AgentWorkerLeaseSpec& lease,const std::string& tool){
+     if(!worker_planning_root_owner(repository,lease)||tool.empty())return false;const auto catalogue=Json::parse(repository.dynamic_capabilities(lease.root_run_id).tool_catalog_json);if(!catalogue.contains("tools")||!catalogue["tools"].is_array())return false;return std::count_if(catalogue["tools"].begin(),catalogue["tools"].end(),[&](const auto& t){return t.is_object()&&t.value("name",std::string{})==tool;})==1;
+ }
++bool worker_delegation_policy(Repository& repository,const std::string& root_id){
++    const auto budget=repository.root_budget(root_id);if(budget.spec.policy_revision!=1)return false;
++    if(budget.spec.policy_id=="native.delegation")return true;
++    if(budget.spec.policy_id!="native.dynamic-plan")return false;
++    const auto root=repository.run(root_id);const auto caps=repository.dynamic_capabilities(root_id);
++    if(root.state!=RunState::running||root.graph_root||!root.parent_id.empty()||!caps.catalogue_finalized||caps.workspace_identity!=budget.spec.workspace_identity||Json::parse(caps.provider_identity_json)!=Json::parse(budget.spec.provider_identity_json)||repository.dynamic_budget_segment(root_id).state!="open")return false;
++    const auto catalogue=Json::parse(caps.tool_catalog_json);if(!catalogue.contains("tools")||!catalogue["tools"].is_array())return false;
++    return std::count_if(catalogue["tools"].begin(),catalogue["tools"].end(),[](const auto& tool){return tool.is_object()&&tool.value("name",std::string{})=="delegate_tasks";})==1;
++}
+ bool worker_planning_root_read(Repository& repository,const AgentWorkerLeaseSpec& lease,const std::string& tool={}){
+     return tool.empty()?worker_planning_root_owner(repository,lease):(worker_read_tool(tool)&&worker_planning_root_tool(repository,lease,tool));
+ }
+ 
+ template<class Invocation>AgentWorkerModelClaimSpec worker_workspace_authority(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const Invocation& call,bool file,bool process=false){
+     (void)call.serialize();worker_current_scope(repository,db,lease);
+-    if(((file||process)?!worker_effect_owner(repository,lease,call.tool_name):(!worker_agent_owner(repository,lease)&&!worker_planning_root_read(repository,lease,call.tool_name)))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
++    if(((file||process)?!worker_effect_owner(repository,lease,call.tool_name):(!worker_agent_owner(repository,lease)&&!worker_planning_root_read(repository,lease,call.tool_name)&&!(call.tool_name=="delegate_tasks"&&worker_planning_root_tool(repository,lease,call.tool_name))))||lease.workspace_id=="workspace:none"||call.run_id!=lease.owner_run_id||call.workspace_id!=lease.workspace_id||call.workspace_revision!=lease.workspace_revision)throw Conflict("Worker read differs from its ordinary workspace owner");
+     const bool delegation=!file&&!process&&call.tool_name=="delegate_tasks";
+-    if(delegation&&(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.delegation"))throw Conflict("Worker delegation differs from owning root policy");
++    if(delegation&&(lease.root_run_id!=lease.owner_run_id||!worker_delegation_policy(repository,lease.root_run_id)))throw Conflict("Worker delegation differs from owning root policy");
+     if(process?!is_agent_process_tool(call.tool_name):file?!is_agent_file_tool(call.tool_name):(!worker_read_tool(call.tool_name)&&!delegation))throw Conflict("Worker workspace tool is not admitted");
+     const auto model=read_worker_claim(db,lease.root_run_id,call.attempt_id);
+     if(model.spec.generation!=lease.generation||model.spec.owner_run_id!=lease.owner_run_id||model.state!="responded"||model.actual_assistant_json.empty())throw Conflict("Worker read has no actual model receipt");
+@@ -3541,7 +3550,7 @@ bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& l
+     if(lease.owner_run_id==lease.root_run_id)return false;
+     const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);
+     const auto budget=repository.root_budget(lease.root_run_id);
+-    if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.parent_id!=root.id||owner.session_id!=root.session_id||budget.spec.policy_id!="native.delegation"||budget.spec.policy_revision!=1)return false;
++    if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.parent_id!=root.id||owner.session_id!=root.session_id||!worker_delegation_policy(repository,root.id)||budget.spec.policy_revision!=1)return false;
+     const auto admitted=repository.child_admission(owner.id);
+     return admitted.kind==ChildAdmissionKind::delegated_leaf&&admitted.root_run_id==root.id&&admitted.preset_id=="workspace.inspect"&&admitted.preset_revision==1&&repository.delegation_batch(admitted.batch_id).state=="accepted";
+ }
+@@ -3761,7 +3770,7 @@ AgentWorkerToolTurnRecord Repository::commit_agent_worker_tool_turn(const AgentW
+     const auto actual=decode_agent_model_completion(model.actual_response_json);if(actual.finish_reason!="tool_calls"||actual.tool_calls.empty()||actual.tool_calls.size()>64)throw Conflict("Worker read turn requires a complete supported tool batch");
+     // Check the admitted vocabulary even for an already committed turn. A read
+     // channel must never acknowledge a coding turn through idempotent lookup.
+-    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(call.name=="delegate_tasks"&&lease.root_run_id==lease.owner_run_id&&root_budget(lease.root_run_id).spec.policy_id=="native.delegation")&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
++    for(const auto& call:actual.tool_calls){const bool callable=worker_callable_tool(db,lease,call.name);if((callable&&!allow_files)||(!callable&&!worker_read_tool(call.name)&&!(call.name=="delegate_tasks"&&lease.root_run_id==lease.owner_run_id&&worker_delegation_policy(*this,lease.root_run_id))&&!(allow_files&&(is_agent_file_tool(call.name)||is_agent_process_tool(call.name)||is_agent_remote_tool(call.name)))))throw Conflict("Worker turn contains an unsupported tool");}
+     if(!db.execute("SELECT id FROM information WHERE category=? AND id=?",{std::string(worker_turn_category),worker_claim_key(lease.root_run_id,attempt)}).rows.empty()){const auto prior=read_worker_turn(db,model.spec);tx.commit();return prior;}
+     std::set<std::string> calls;std::vector<std::string> outputs;
+     for(const auto& call:actual.tool_calls){if(!calls.insert(call.id).second)throw Conflict("Worker read turn has ambiguous provider call identities");
+diff --git a/Native/tests/agent_worker_ledger_contract.cpp b/Native/tests/agent_worker_ledger_contract.cpp
+index bd314f70..f885b4bf 100644
+--- a/Native/tests/agent_worker_ledger_contract.cpp
++++ b/Native/tests/agent_worker_ledger_contract.cpp
+@@ -33,6 +33,7 @@
+ #include "agentflow/agent_worker_supervisor.hpp"
+ #include "agentflow/agent_terminal_handoff.hpp"
+ #include "agentflow/agent_worker_journal_values.hpp"
++#include <atomic>
+ #include <filesystem>
+ #include <fstream>
+ #include <thread>
+@@ -132,6 +133,42 @@ public:
+     ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected restricted count");}
+     ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected restricted compaction");}
+ };
++
++class PlanningDelegationModel final:public AgentModelGateway {
++public:
++    bool denied=false,cancel_child=false;std::atomic<unsigned> roots{0},delegated{0},planned{0};std::atomic<bool> child_entered{false};
++    ModelCompletion complete(const ChatProviderConfig&,const ModelRequest& request,ChatCompletionStream::Sink,std::stop_token stop)override{
++        const auto objective=std::find_if(request.messages.begin(),request.messages.end(),[](const auto& m){return m.role==MessageRole::user&&(m.content.starts_with("Coexisting delegated objective")||m.content.starts_with("Coexisting planned objective"));});
++        if(objective!=request.messages.end()){
++            require(std::none_of(request.tools.begin(),request.tools.end(),[](const auto& t){return t.name=="delegate_tasks"||t.name=="plan_tasks";}),"Neither child kind may acquire root orchestration");
++            if(objective->content.starts_with("Coexisting planned")){++planned;return {"Planned child complete","","stop","{}",{},"[]"};}
++            ++delegated;child_entered=true;if(cancel_child){while(!stop.stop_requested())std::this_thread::sleep_for(2ms);throw TransportCancelled("Synthetic child cancellation");}
++            const auto result=std::find_if(request.messages.begin(),request.messages.end(),[](const auto& m){return m.role==MessageRole::tool&&m.tool_call_id=="coexisting-read";});
++            if(result==request.messages.end())return {"","","tool_calls","{}",{{"coexisting-read","read_file",R"({"path":"coexisting-private.txt"})"}},"[]"};
++            require((result->content.find("COEXISTING_PRIVATE_BYTES")!=std::string::npos)==!denied,"Delegated read must preserve inherited denial and actual bytes");return {"Delegated child complete","","stop","{}",{},"[]"};
++        }
++        const auto phase=++roots;for(const auto* name:{"delegate_tasks","plan_tasks","read_file"})require(std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& t){return t.name==name;}),"Root must offer delegation and planning together");
++        if(phase==1||phase==3){const auto id=phase==1?"coexisting-before":"coexisting-after";return {"","","tool_calls","{}",{{id,"delegate_tasks",R"({"tasks":[{"id":"inspect","objective":"Coexisting delegated objective","preset":"workspace.inspect"}]})"}},"[]"};}
++        require(std::any_of(request.messages.begin(),request.messages.end(),[](const auto& m){return m.role==MessageRole::tool&&m.tool_call_id=="coexisting-before"&&m.content.find("Delegated child complete")!=std::string::npos;}),"Root must receive its canonical direct delegation report");
++        if(phase==2)return {"","","tool_calls","{}",{{"coexisting-plan","plan_tasks",R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"reason","type":"agent","objective":"Coexisting planned objective","preset":"workspace.inspect","depends_on":[]}]})"}},"[]"};
++        require(phase==4&&std::any_of(request.messages.begin(),request.messages.end(),[](const auto& m){return m.role==MessageRole::tool&&m.tool_call_id=="coexisting-plan";})&&std::any_of(request.messages.begin(),request.messages.end(),[](const auto& m){return m.role==MessageRole::tool&&m.tool_call_id=="coexisting-after";}),"Final continuation must preserve both delegation calls and signed planning report");return {"Coexisting root complete","","stop","{}",{},"[]"};
++    }
++    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected coexistence count");}
++    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected coexistence compaction");}
++};
++void main_planning_delegation(PersistenceService& store,const std::string& path){
++    wchar_t executable[32768]{};const auto length=GetModuleFileNameW(nullptr,executable,32768);require(length&&length<32768,"Coexistence image unavailable");const auto image=ForegroundProcess::bind_executable((std::filesystem::path(executable).parent_path()/"xmind.exe").string());const auto directory=std::filesystem::path(path).parent_path();{std::ofstream out(directory/"coexisting-private.txt");out<<"COEXISTING_PRIVATE_BYTES";}
++    for(const bool coding:{false,true})for(const bool counted:{false,true})for(const std::string mode:{"normal","deny","cancel"}){
++        const auto id=std::string("coexisting-")+(coding?"coding-":"read-")+(counted?"counted-":"plain-")+mode;auto settings=dynamic_fixture_child(directory.string());settings.planning=DynamicPlanningPolicy{};settings.delegation=AgentDelegationPolicy{};settings.approved_edits=coding;settings.tool_allowlist=std::vector<std::string>{"read_file","delegate_tasks","plan_tasks"};if(counted){settings.context=ContextRuntimePolicy{};settings.context->compaction.automatic=false;}auto gateway=std::make_shared<PlanningDelegationModel>();gateway->denied=mode=="deny";gateway->cancel_child=mode=="cancel";settings.delegated_execution=make_agent_worker_delegated_executor(store,image,gateway);if(gateway->denied)settings.inherited_permission_rule_layers.push_back({{"read_file","coexisting-private.txt","deny"}});
++        auto executor=coding?make_agent_worker_coding_executor(store,settings,image,gateway):make_agent_worker_read_executor(store,settings,image,gateway);AgentService service(store,settings,1,8,{},executor);store.create_session(id,"Actual process planning and direct delegation coexistence").get();service.submit(id,id,"Synthetic coexistence parent input");const auto until=std::chrono::steady_clock::now()+12s;
++        if(gateway->cancel_child){while(std::chrono::steady_clock::now()<until&&service.healthy()&&!service.idle()&&!gateway->child_entered)std::this_thread::sleep_for(2ms);require(gateway->child_entered,"Cancellation must reach actual delegated child model dispatch");service.cancel(id);}
++        while(std::chrono::steady_clock::now()<until&&service.healthy()&&!service.idle())std::this_thread::sleep_for(5ms);require(service.healthy()&&service.idle()&&store.run(id).get().state==(gateway->cancel_child?RunState::cancelled:RunState::completed),"Actual process coexistence must settle its exact root");
++        const auto children=store.owned_children(id).get();require(children.size()==(gateway->cancel_child?1u:3u),"Coexistence must retain exact typed children");unsigned leaves=0,agents=0;for(const auto& child:children){const auto admission=store.child_admission(child.run.id).get();leaves+=admission.kind==ChildAdmissionKind::delegated_leaf;agents+=admission.kind==ChildAdmissionKind::dynamic_agent;require(child.run.state==(gateway->cancel_child?RunState::cancelled:RunState::completed),"Child must settle before root completion");unsigned generations=0;for(const auto& event:store.events(child.run.id).get())if(event.kind=="worker.lease.admitted"){const auto lease=store.agent_worker_lease(Json::parse(event.json).at("generation")).get();require(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Every child must physically retire its distinct SDK process");++generations;}require(generations==1,"Each child must use one actual process without replay");}
++        require(leaves==(gateway->cancel_child?1u:2u)&&agents==(gateway->cancel_child?0u:1u),"Delegated leaves and planned agents must keep distinct admissions");if(!gateway->cancel_child){require(gateway->roots==4&&gateway->delegated==4&&gateway->planned==1&&store.root_budget(id).get().model_calls_reserved==9&&store.run_history(id).get().size()==8,"Coexistence must charge exact parent/leaf calls and preserve canonical history");require(store.delegation_batches(id).get().size()==2,"Both direct delegation calls must retain their batches");}
++        require(store.dynamic_budget_segment(id).get().state=="closed","Coexistence must close its shared planning segment");for(const auto& event:store.events(id).get())if(event.kind=="worker.lease.admitted")require(store.agent_worker_lease(Json::parse(event.json).at("generation")).get().state=="retired","Coexistence root must physically retire");service.close();
++    }
++}
++
+ void restricted_planning_catalogues(PersistenceService& store,const std::string& path){
+     wchar_t executable[32768]{};const auto length=GetModuleFileNameW(nullptr,executable,32768);require(length&&length<32768,"Restricted fixture image unavailable");const auto image=ForegroundProcess::bind_executable((std::filesystem::path(executable).parent_path()/"xmind.exe").string());const auto directory=std::filesystem::path(path).parent_path();{std::ofstream output(directory/"restricted-tools.txt");output<<"Restricted native read result";}
+     for(const std::string placement:{"read","coding","thread"})for(const std::string mode:{"none","read","plan","language","delegate"}){
+@@ -581,7 +618,7 @@ void completion_receipts(PersistenceService& store){
+ void ledger(const std::string& path,const std::vector<std::string>& imports){
+     const auto original=lease("worker-root","generation-one");AgentWorkerModelClaimSpec pending,acknowledged;std::string actual;std::size_t recovered_events=0;
+     {
+-        PersistenceService store(path,imports);planning_admission(store,path,imports);main_process_planning(store,path);main_planned_read_permissions(store,path);restricted_planning_catalogues(store,path);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
++        PersistenceService store(path,imports);planning_admission(store,path,imports);main_process_planning(store,path);main_planning_delegation(store,path);main_planned_read_permissions(store,path);restricted_planning_catalogues(store,path);queued_start(store);delegated_workers(store);graph_worker_admission(store);funding(store);file_claims(store,path,imports);process_claims(store,path,imports);remote_claims(store,path,imports);callable_claims(store,path,imports);process_controls(store);completion_receipts(store);tool_turns(store);workspace_turns(store,path,imports);read_claims(store);late_read_cancellation(store,std::filesystem::path(path).parent_path());root(store,"worker-root");root(store,"foreign-root");root(store,"no-snapshot",false);
+         rejects<Conflict>([&]{store.admit_agent_worker(lease("no-snapshot","missing-snapshot")).get();});
+         for(unsigned changed=0;changed<3;++changed){auto invalid=original;invalid.generation="invalid-"+std::to_string(changed);if(changed==0)invalid.workspace_id="foreign-workspace";if(changed==1)++invalid.workspace_revision;if(changed==2)invalid.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.admit_agent_worker(invalid).get();});}
+         require(store.admit_agent_worker(original).get().state=="active","Actual private lease must be admitted once");rejects<Conflict>([&]{store.admit_agent_worker(original).get();});rejects<Conflict>([&]{store.admit_agent_worker(lease("worker-root","parallel-generation")).get();});

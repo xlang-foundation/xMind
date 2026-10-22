@@ -25,17 +25,29 @@ selection is sealed exactly once, and other selections do not gain delegation.
 These cases inspect offered authority; they do not execute direct delegation on
 a planning root. Shared segment funding and typed IPC admission remain pending.
 
+### Direct delegation and planning coexistence
+
+Explicit process owners now share one segment-backed delegation/planning budget
+and retain the sealed root delegation capability. SDK journal, child execution,
+context and model-receipt checks preserve delegated-leaf versus planned-agent
+admissions. Twelve actual read/coding plain/counted normal/deny/cancel cases pass,
+including delegation before and after a signed planning continuation. Current
+response retirement no longer eagerly requires its own future tool-turn commit.
+Prior-turn funding checks and exact canonical model receipts remain required.
+
+Focused planning/ledger gates pass, but broader regression is 7/8 with a native
+access violation in the unchanged xlang3 runtime. One diagnostic worker-model
+run passes without a dump; the failure remains unresolved. See VALIDATION_STATUS.md
+and raw evidence for scopes and hashes. No installed clients changed.
+
 ### Next default-enablement boundary
 
-Built-in process-profile enablement must retain direct delegate_tasks alongside
-plan_tasks. Main delegation currently captures an ordinary budget separately, and
-worker delegation guards require native.delegation while planning roots use
-native.dynamic-plan. Both paths still need the same live segment-backed clock and
-child-kind-specific admission/funding using the sealed root capability, with
-physical drain before settlement. Qualify normal, denied and cancelled direct
-delegation and planning under the same application configuration before enabling
-the built-in default. Injected executor factories continue owning their explicit
-policy. Restart policy binding and current installed-client acceptance remain open.
+Built-in process profiles still need default planning configuration after actual
+workspace binding, retaining direct delegation and restricted tool selections.
+Injected factories continue owning explicit policy. Restart permission/instruction
+binding, broader main-root effect families, the intermittent runtime fault and
+current installed-client acceptance remain open. The twelve coexistence cases
+qualify explicit configurations, not default enablement or full-suite acceptance.
 
 ## Earlier planned-tool permission checkpoint
 

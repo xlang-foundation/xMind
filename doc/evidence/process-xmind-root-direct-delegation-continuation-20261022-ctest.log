@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 23: native_dynamic_plan_contract
+1/4 Test #23: native_dynamic_plan_contract ..............   Passed    0.37 sec
+    Start 25: native_dynamic_plan_repository_contract
+2/4 Test #25: native_dynamic_plan_repository_contract ...   Passed    3.53 sec
+    Start 39: native_dynamic_plan_engine_contract
+3/4 Test #39: native_dynamic_plan_engine_contract .......   Passed    6.45 sec
+    Start 94: native_agent_worker_ledger_contract
+4/4 Test #94: native_agent_worker_ledger_contract .......   Passed   35.71 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  46.08 sec

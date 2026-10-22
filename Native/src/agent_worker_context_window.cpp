@@ -10,7 +10,7 @@ namespace {std::shared_ptr<RootExecutionBudget> context_budget(PersistenceServic
     if(record.spec.policy_id=="native.dynamic-plan"){
         const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
         if(!shared||shared->root_id()!=lease.root_run_id||shared->deadline()!=deadline||!shared->segment_open()||segment.state!="open"||shared->segment_id()!=segment.id)throw Conflict("Planning context requires its exact shared active budget");
-        if(lease.owner_run_id!=lease.root_run_id){const auto child=std::get<ChildAdmissionRecord>(store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::child_admission,lease.owner_run_id}).get());if(child.kind!=ChildAdmissionKind::dynamic_agent)throw Conflict("Shared planning child context requires exact signed child admission");}
+        if(lease.owner_run_id!=lease.root_run_id){const auto child=std::get<ChildAdmissionRecord>(store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::child_admission,lease.owner_run_id}).get());if(child.root_run_id!=lease.root_run_id||(child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))throw Conflict("Shared planning child context requires exact typed child admission");}
         return shared;
     }
     if(shared)throw Conflict("Ordinary worker context cannot adopt a planning budget");

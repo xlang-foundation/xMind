@@ -1,3 +1,55 @@
+## Direct delegation within process planning roots — 2026-10-22
+
+Explicit read/coding process roots now bind direct delegate_tasks and planning
+callbacks to the same segment-backed RootExecutionBudget after capturing the
+actual SDK lease. The ordinary delegation path uses the same callback binder.
+Worker admission, workspace-tool claims and canonical turn commits require the
+sealed root delegation capability for native.dynamic-plan. Delegated leaves stay
+workspace.inspect revision one, read-only and distinct from signed dynamic-agent
+admissions. Counted leaf context uses that exact shared segment/deadline.
+
+SDK child journal, runner and counted inference-receipt checks recognize both
+child kinds without reclassifying them. A live planning root can finish a model
+response containing another tool call; prior-turn checks still gate funding and
+final completion. This fixes the previous eager check of the current response's
+not-yet-committed tool turn during model retirement.
+
+Twelve actual AgentService cases cover read/coding x plain/counted x normal,
+inherited read denial and cancellation after actual delegated model dispatch.
+Successful runs delegate before and after a signed plan: two delegated leaves,
+one planned agent, four parent and five child model calls, eight root history
+messages, exact typed admissions and physically retired SDK child processes.
+Denial exposes no private file bytes; cancellation settles child/root ownership
+before the shared segment closes. An unsealed delegation claim is refused without
+child creation or budget changes. Existing fifteen restricted-catalogue cases stay
+in the ledger gate.
+
+Final focused gate passes 4/4 in 46.08s (ledger 35.71s). Broader eight-contract
+gate is FAILED, 7/8 in 89.23s: worker-model RPC terminates with 0xC0000005 in
+xlang3_runtime.dll +0xf67f5 after graph-process-denied output. This is not attributed
+to a root cause. PE unwind/export metadata identifies containing range
+0xf6780..0xf6a29 as string-to-xlang3::Value hash-map insertion, not an executing
+source line or corruption origin. One unchanged-source diagnostic run with existing
+opt-in dump/timing capture passes 1/1 in 53.12s; no dump is produced. That does not
+convert the failed eight-contract gate into a pass or establish a runtime fix.
+Earlier heap corruption and access violations remain unresolved.
+
+All final gates freeze Native patch
+c4b4835b85f890bff2e4ec386efa812f813872e78b0e8a2a5e64d3210728e041 and
+xmind.exe d1426110a4b247f94b21c96a5d781ee1dc8194618bf82faeaa6d25fd21d6c452;
+source/input file sets, SDK/runtime, pure libraries, dependencies and native
+binaries stay unchanged through each gate. Five gates, including the initial
+child-journal and continuation failures, are preserved under
+ doc/evidence/process-xmind-root-direct-delegation-*-20261022-* with exact verifiers.
+The first focused verifiers' inherited 'No model calls' label means no external
+provider inference here: synthetic model gateway calls do occur and are counted
+above; broader/diagnostic labels explicitly say so.
+
+No SDK changes, CPython, paid inference, installed-client or user-data changes.
+The inventory remains 172 tests; no full-suite pass is claimed. Managed process
+planning defaults, restart policy binding, broader effect-family qualification
+and current browser/CLI/VS Code acceptance remain open.
+
 ## Selected root delegation catalogue — 2026-10-22
 
 Local and process planning roots now seal a selected delegate_tasks descriptor

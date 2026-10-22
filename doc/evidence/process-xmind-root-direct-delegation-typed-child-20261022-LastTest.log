@@ -1,0 +1,88 @@
+Start testing: Oct 22 12:50 Pacific Daylight Time
+----------------------------------------------------------
+23/172 Testing: native_dynamic_plan_contract
+23/172 Test: native_dynamic_plan_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_dynamic_plan_contract" start time: Oct 22 12:50 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native pure dynamic-plan contracts passed strict UTF-8/duplicate/authority schemas, dependency joins, success/observed failure semantics, immutable same-plan replanning, stale state and protected-work rejection, exact data-string observations, private-field exclusion, escaped byte limits and final-human report readiness. Snapshot values are synthetic; runtime/SQLite/execution acceptance is separate.
+<end of output>
+Test time =   0.07 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_contract" end time: Oct 22 12:50 Pacific Daylight Time
+"native_dynamic_plan_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/172 Testing: native_dynamic_plan_repository_contract
+25/172 Test: native_dynamic_plan_repository_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_repository_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_dynamic_plan_repository_contract" start time: Oct 22 12:50 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Dynamic plan repository contract passed: real xlang3 SQLite signed-call ownership, shared root-wide node/revision/human limits, concurrent nested wait pause/resume and recovery, nested claimed-owner admission through depth eight, revision, native effect mapping/registry binding, SQL-fault rollback and migration; synthetic repository DTOs only
+<end of output>
+Test time =   3.68 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_repository_contract" end time: Oct 22 12:50 Pacific Daylight Time
+"native_dynamic_plan_repository_contract" time elapsed: 00:00:03
+----------------------------------------------------------
+
+39/172 Testing: native_dynamic_plan_engine_contract
+39/172 Test: native_dynamic_plan_engine_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/dynamic_plan_engine_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_dynamic_plan_engine_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_dynamic_plan_engine_contract" start time: Oct 22 12:50 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native dynamic engine contract passed: actual dependency children/failure, same-plan revision, closed-pause reopen, same-owner human wake, child edit approval/effect, dependent read, independent signed histories/usage, A2A human continuation and idempotent retry, paused cancel and native expiry. Provider replies/key are synthetic.
+<end of output>
+Test time =   6.94 sec
+----------------------------------------------------------
+Test Passed.
+"native_dynamic_plan_engine_contract" end time: Oct 22 12:50 Pacific Daylight Time
+"native_dynamic_plan_engine_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+94/172 Testing: native_agent_worker_ledger_contract
+94/172 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_ledger_contract" start time: Oct 22 12:50 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:56661
+Actual process coexistence must settle its exact root; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-4004264811-1245904811
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:56661',
+  stdout: 'Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.\r\n',
+  stderr: 'Actual process coexistence must settle its exact root; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-4004264811-1245904811\r\n'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =  16.14 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_ledger_contract" end time: Oct 22 12:50 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:16
+----------------------------------------------------------
+
+End testing: Oct 22 12:50 Pacific Daylight Time

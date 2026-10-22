@@ -1,0 +1,13 @@
+{
+  "dumps": [],
+  "timing": {
+    "production-18676.json": {
+      "sha256": "59e3630aa7d95b30458f427643b6a1b4c0bd28916e1a8776b9f612c9399e760c",
+      "bytes": 28282
+    },
+    "transport-18676.json": {
+      "sha256": "4760c85580fe8fc841b0a54ec052a4cf3b27b7205ce15734678ed1df392eefd5",
+      "bytes": 11245
+    }
+  }
+}

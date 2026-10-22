@@ -72,6 +72,20 @@ class WorkspaceExecutor final:public AgentRootExecutor {
     std::shared_ptr<LanguageServerToolRegistry> language_catalogue_;
     std::unique_ptr<AgentRunner> validator_;
     std::shared_ptr<AgentModelGateway> gateway_;
+    void bind_delegation(AgentWorkerReadRequestPolicy& policy,const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared_budget,std::stop_token cancel){
+        if(!delegation_)return;
+        auto frozen=settings_;frozen.provider.model=model(request);frozen.tool_allowlist=std::vector<std::string>{};for(const auto& tool:policy.tools)frozen.tool_allowlist->push_back(tool.name);frozen.selectable_models=validator_->models();
+        if(!request.agent_instructions.empty())frozen.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
+        if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);
+        policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget,cancel](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){
+            // Controller cancellation must reach child ownership directly;
+            // an IPC handler can remain live while its caller is draining.
+            std::stop_source combined;
+            std::stop_callback owner_cancel(cancel,[&]{combined.request_stop();});
+            std::stop_callback call_cancel(stop,[&]{combined.request_stop();});
+            return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,combined.get_token())};
+        };
+    }
     bool callable_tool(const std::string& name)const{return std::any_of(settings_.xlang_python_tools.begin(),settings_.xlang_python_tools.end(),[&](const auto& tool){return tool.definition.name==name;});}
     std::string model(const AgentRootExecutionRequest& request)const{return request.model_id.empty()?settings_.provider.model:request.model_id;}
     std::vector<ModelToolDefinition> tools(const AgentRootExecutionRequest& request)const{
@@ -205,21 +219,8 @@ public:
                 context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_))};
             policy.history_provider=settings_.provider;policy.history_provider->model=model(request);
         }
-        if(delegation_){
-            auto frozen=settings_;frozen.provider.model=model(request);frozen.tool_allowlist=std::vector<std::string>{};for(const auto& tool:policy.tools)frozen.tool_allowlist->push_back(tool.name);frozen.selectable_models=validator_->models();
-            if(!request.agent_instructions.empty())frozen.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
-            if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);
-            auto shared_budget=std::make_shared<RootExecutionBudget>(store_,budget,deadline,cancel);
-            policy.delegation=[executor=delegation_,frozen=std::move(frozen),shared_budget,cancel](const AgentWorkspaceInvocation& call,const std::string& assistant,std::stop_token stop){
-                // Controller cancellation must reach child ownership directly;
-                // an IPC handler can remain live while its caller is draining.
-                std::stop_source combined;
-                std::stop_callback owner_cancel(cancel,[&]{combined.request_stop();});
-                std::stop_callback call_cancel(stop,[&]{combined.request_stop();});
-                return AgentReadToolResult{true,executor->invoke(call.run_id,{call.call_id,call.tool_name,call.arguments_json},assistant,frozen,shared_budget,combined.get_token())};
-            };
-        }
-        if(settings_.context){if(dynamic_){const auto& p=settings_.context->compaction;policy.context=AgentWorkerContextPolicy{*settings_.context,{provider_identity.dump(),context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_)),p.id,p.revision,p.strategy_id,p.strategy_revision}};policy.context_budget=shared;}else policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};}
+        if(delegation_&&!planning_root())bind_delegation(policy,request,std::make_shared<RootExecutionBudget>(store_,budget,deadline,cancel),cancel);
+        if(settings_.context){if(dynamic_||(delegated_&&shared->snapshot().spec.policy_id=="native.dynamic-plan")){const auto& p=settings_.context->compaction;policy.context=AgentWorkerContextPolicy{*settings_.context,{provider_identity.dump(),context_authority_identity(settings_,model(request),membership.workspace_id,agent_authority_credentials(store_,settings_)),p.id,p.revision,p.strategy_id,p.strategy_revision}};policy.context_budget=shared;}else policy.context=AgentWorkerContextPolicy{*settings_.context,validator_->context_binding(model(request))};}
         policy.include_usage=settings_.provider.stream_usage==Capability::supported;policy.max_output_tokens=settings_.max_output_tokens;
         auto provider=settings_.provider;provider.model=model(request);
         if(!policy.max_output_tokens&&provider.wire==ProviderWire::anthropic_messages)policy.max_output_tokens=anthropic_default_output_tokens(provider.model);
@@ -263,7 +264,7 @@ public:
         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
                 catch(...){std::this_thread::sleep_for(1s);}}};
         std::exception_ptr failure;std::shared_ptr<RootExecutionBudget> planning_budget;
-        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);auto frozen=settings_;frozen.provider.model=provider.model;if(request.agent_tools)frozen.tool_allowlist=request.agent_tools;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
+        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);bind_delegation(policy,request,planning_budget,cancel);auto frozen=settings_;frozen.provider.model=provider.model;if(request.agent_tools)frozen.tool_allowlist=request.agent_tools;if(!request.agent_permissions.empty())frozen.inherited_permission_rule_layers.push_back(request.agent_permissions);auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
             if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
         catch(...){failure=std::current_exception();}
         try{

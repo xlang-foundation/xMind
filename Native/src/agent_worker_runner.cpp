@@ -29,7 +29,7 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerClientContext& pee
     const bool leaf=peer.scope().root_id!=peer.scope().run_id;
     if(leaf&&coding&&budget.spec.policy_id!="native.graph-context"&&budget.spec.policy_id!="native.dynamic-plan")throw Conflict("Delegated worker cannot acquire coding assembly");
     settings.max_turns=leaf&&budget.spec.policy_id!="native.graph-context"?4:static_cast<std::size_t>(budget.spec.max_model_calls);
-    if(leaf&&budget.spec.policy_id=="native.dynamic-plan"){const auto child=journal->child_admission(peer.scope().run_id).get();if(child.kind!=ChildAdmissionKind::dynamic_agent)throw Conflict("Dynamic worker lacks captured child admission");settings.max_turns=child.preset_id=="workspace.coding"?16:4;}
+    if(leaf&&budget.spec.policy_id=="native.dynamic-plan"){const auto child=journal->child_admission(peer.scope().run_id).get();if(child.kind==ChildAdmissionKind::dynamic_agent)settings.max_turns=child.preset_id=="workspace.coding"?16:4;else if(child.kind!=ChildAdmissionKind::delegated_leaf||coding||child.preset_id!="workspace.inspect"||child.preset_revision!=1)throw Conflict("Planning worker lacks its typed read-only delegated or signed dynamic admission");}
     settings.run_timeout=std::chrono::milliseconds(budget.spec.wall_limit_ms);
     settings.a2a_enabled=false;
     std::shared_ptr<DynamicPlanExecution> planning;if(!leaf&&budget.spec.policy_id=="native.dynamic-plan"){auto native=peer.native_model();if(!native||leaf)throw Conflict("Planning worker requires its captured native root service");planning=native->planning(AgentWorkerJournalClient(peer).execution_deadline());}
