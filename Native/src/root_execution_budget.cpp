@@ -22,9 +22,10 @@ bool finished(RunState state){return state==RunState::completed||state==RunState
 }
 RootExecutionBudget::RootExecutionBudget(AgentRunJournal& journal,RootBudgetRecord record,
     std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
-    std::optional<DynamicBudgetSegment> segment,std::string backend_identity,std::vector<std::string> resumable_owners)
+    std::optional<DynamicBudgetSegment> segment,std::string backend_identity,std::vector<std::string> resumable_owners,ContinuationReserve continuation_reserve)
     :journal_(journal),root_(std::move(record.root_run_id)),policy_(record.spec.policy_id),deadline_(deadline),cancel_(cancel),parallel_(static_cast<std::size_t>(record.spec.max_parallel)),
-      segment_(std::move(segment)),backend_identity_(std::move(backend_identity)),resumable_owners_(std::move(resumable_owners)),active_started_(std::chrono::steady_clock::now()){
+      segment_(std::move(segment)),backend_identity_(std::move(backend_identity)),resumable_owners_(std::move(resumable_owners)),continuation_reserve_(std::move(continuation_reserve)),active_started_(std::chrono::steady_clock::now()){
+    if(continuation_reserve_&&(!segment_||policy_!="native.dynamic-plan"))throw std::invalid_argument("Worker continuation authority requires an active planning budget");
     if(root_.empty() || record.spec.max_parallel<0 || record.spec.max_parallel>2||
        (record.spec.max_parallel==0&&record.spec.policy_id!="native.context"&&record.spec.policy_id!="native.direct-agent"))throw std::invalid_argument("Invalid root execution budget");
     if(segment_&&((record.spec.policy_id!="native.dynamic-plan"&&record.spec.policy_id!="native.graph-context")||segment_->root_run_id!=root_||segment_->state!="open"||
@@ -67,7 +68,7 @@ ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string
     if(accepted.root_run_id!=root_)throw Conflict("Planning call belongs to another root budget");
     // A repeated native wake can inspect the old binding, never mint an attempt.
     const auto attempt=accepted.continuation_attempt_id.empty()?attempt_id():accepted.continuation_attempt_id;
-    return journal_.reserve_dynamic_continuation(call,attempt).get();
+    return continuation_reserve_?continuation_reserve_(call,attempt,cancel):journal_.reserve_dynamic_continuation(call,attempt).get();
 }
 void RootExecutionBudget::pin_context(const ContextSnapshot& snapshot){
     check();const auto root=journal_.run(root_).get();

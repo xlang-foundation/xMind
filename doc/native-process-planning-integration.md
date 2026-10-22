@@ -51,12 +51,13 @@ canonical rejected tool turn; it is not an accepted plan reservation.
 
 ContextManager already uses ContextOwner.planning_call_id and
 RootExecutionBudget.reserve_continuation for signed planning preparations.
-That budget currently calls the unscoped AgentRunJournal reservation, which
-correctly refuses worker-linked plans. The integration must supply an internal,
-lease-bound journal implementation for this reservation, forwarding to
-PersistenceService.reserve_agent_worker_planning_continuation with the captured
-lease/deadline/stop tokens. This adapter stays in the backend, is not a worker
-packet dispatcher, and does not authorize arbitrary journal calls.
+The shared budget now accepts a backend-only ContinuationReserve function.
+Worker owners capture their exact lease/deadline/stop tokens in that function
+and forward to PersistenceService.reserve_agent_worker_planning_continuation.
+The ledger proves this path and SDK child reuse of its exact reservation. The
+existing unscoped journal route continues to refuse worker-linked plans. This
+function is an internal reservation dependency, not a worker packet dispatcher;
+production context-window and planning owners still need to share that budget.
 
 Add an explicit typed planning preparation/reservation operation to the backend
 context window and its journal hooks. It must set the planning call on the

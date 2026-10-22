@@ -1,3 +1,23 @@
+## Shared planning budget worker authority — 2026-10-21
+
+RootExecutionBudget now accepts a backend-only continuation reservation
+function, permitted only for an active native.dynamic-plan segment. It retains
+root/cancellation/deadline checks and the accepted call's exact attempt binding;
+ordinary callers retain existing journal behavior. The ledger contract captures
+a worker lease in that function, reserves through the shared root budget,
+checks cancellation before funding and duplicate reservation, then has an actual
+distinct SDK child reuse/start/finish the exact attempt. Exactly one held charge
+is consumed; synthetic model/child-plan receipts, zero provider calls.
+
+Serial build passed in 588.04 seconds; focused 20/20 passed in 126.24 seconds
+(broad worker 58.46 seconds, ledger 2.27 seconds). Frozen source, SDK, dependency
+and all 138 binary sets/hashes verified. Native SHA 2de8321eadedb4172dd9762eda53d934f76617365efc5901f54e3f07e747d2f8.
+Evidence: doc/evidence/process-xmind-root-native-planning-shared-budget-20261021-gate.json.
+Full current suite was not rerun. Context-window sharing/preparation hooks,
+planning runner/scheduler assembly and installed client acceptance remain open.
+This adds no new IPC transport or SDK change; earlier native crashes remain
+unresolved.
+
 ## Full native cleanup validation — 2026-10-21
 
 Full current 169-test run completed: 168 passed, one failed in 1238.31 seconds.

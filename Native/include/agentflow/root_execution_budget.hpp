@@ -6,6 +6,7 @@
 #include <stop_token>
 #include <atomic>
 #include <exception>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -18,10 +19,13 @@ struct RootBudgetDeadlineExceeded : std::runtime_error {using std::runtime_error
 // Durable counters/attempt ownership remain in Repository; no transport retry.
 class RootExecutionBudget {
 public:
+    // Backend-only reservation authority, captured with the owning worker lease.
+    // Context preparation still selects the attempt through this shared budget.
+    using ContinuationReserve=std::function<ModelCallReservation(const std::string&,const std::string&,std::stop_token)>;
     RootExecutionBudget(AgentRunJournal& journal,RootBudgetRecord record,
         std::chrono::steady_clock::time_point deadline,std::stop_token cancel,
         std::optional<DynamicBudgetSegment> segment={},std::string backend_identity={},
-        std::vector<std::string> resumable_owners={});
+        std::vector<std::string> resumable_owners={},ContinuationReserve continuation_reserve={});
     const std::string& root_id() const{return root_;}
     std::chrono::steady_clock::time_point deadline() const{return deadline_;}
     void check(std::stop_token cancel={}) const;
@@ -54,6 +58,7 @@ private:
     std::optional<DynamicBudgetSegment> segment_;
     std::string backend_identity_;
     std::vector<std::string> resumable_owners_;
+    ContinuationReserve continuation_reserve_;
     std::chrono::steady_clock::time_point active_started_;
     std::optional<ContextPausePin> context_pin_;
     std::mutex human_wait_mutex_;
