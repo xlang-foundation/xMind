@@ -32,6 +32,12 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+Repository now admits dynamic child worker leases against exact signed node,
+claim/preset revisions, provider/workspace and open root segment. Typed model
+funding/start/final completion and private-identity redaction are ledger-tested
+with synthetic child process identity. Supervisor, child adapters and shared
+loop assembly are still required for actual dynamic child process execution.
+
 A distinct worker shared-loop test now verifies accepted-plan continuation
 funding and final completion: two parent model turns, one synthetic child
 charge, exact signed continuation and zero residual holds. Backend acceptance

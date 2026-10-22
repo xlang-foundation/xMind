@@ -1,3 +1,35 @@
+## Durable dynamic agent-child worker admission — 2026-10-21
+
+Repository worker ownership now recognizes an exact dynamic-agent child only
+under its signed claimed node, claim/definition revisions, preset and private
+backend identity, captured provider/workspace, running parent and open ultimate
+root segment. Queue admission, provider derivation, membership equality and
+typed model funding/start/completion use that same predicate. Read-only presets
+cannot acquire effect ownership. Child journal admission strips private backend
+identity while retaining public lineage. No root policy alone grants a child.
+
+Controlled native settlement now admits a synthetic child worker lease, rejects
+changed workspace revision/provider and foreign child reads, starts and funds
+its exact model, records the controlled response, finishes/completes through
+typed worker contracts and rejects funding after lease retirement. Accepted
+parent-loop continuation and existing context/rollback coverage remain active.
+This ledger uses synthetic process identity/model facts; no actual dynamic
+agent child process or coding-effect boundary is established by this coverage.
+
+Focused 20/20 passed in 126.53 seconds (ledger 3.51; broad worker 56.54).
+Patch 77d1445abd85f0aff33b2132e4796a5e9f30a763f89765f4f1311900b9a840e4; native
+6f0752184667c2e0d8dc089722b9af88934064c26c0b885f4399513c6d7a62cc. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact sets and hashes. Evidence:
+doc/evidence/process-xmind-root-native-dynamic-child-admission-20261021-gate.json.
+Earlier heap/SDK faults remain unresolved; this pass does not establish a fix.
+
+Supervisor factory, dynamic child worker adapters and shared loop still need
+assembly before actual process scheduling can replace local dynamic runners.
+Main planning admission, overflow/retry, human handoff, legacy cleanup, full
+current suite and installed client acceptance remain open. No install, SDK
+change, CPython, live provider execution or replay of completed user tasks.
+
 ## Actual worker loop consumes accepted planning continuation — 2026-10-21
 
 The distinct-process shared AgentRunner contract now covers a plan_tasks model
