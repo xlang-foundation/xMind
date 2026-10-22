@@ -29,6 +29,11 @@ Private startup/liveness now opens WorkerLinks().Open(ticket) beneath the same
 xmind root. Its Deliver(operation,payload) and Close methods use SDK arguments;
 the old JSON/HMAC frame codec and separate worker remote root are deleted.
 Private inherited OS bootstrap and higher-level legacy fixtures remain.
+Planning().Open(ticket) now has a native SDK boundary with Identity, Healthy,
+Invoke and Resume; long calls return Status/Result/Cancel operation objects.
+Only captured attempt/call identifiers cross the boundary. The old planning
+packet adapter is deleted. Durable settlement and production scheduler binding
+remain required before enabling this service in product worker assembly.
 
 
 The October 9 product decision defines three native components: **Agent

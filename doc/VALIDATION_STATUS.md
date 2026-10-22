@@ -1,3 +1,26 @@
+## Planning boundary migrated to native SDK — 2026-10-21
+
+Removed the old planning RPC source/header/contract. Native
+xmind.Planning().Open(ticket) now exposes Identity, Healthy, Invoke and Resume.
+Long work returns Status/Result/Cancel operation objects. Captured backend
+callbacks retain settings/capabilities/budgets; only attempt and call identities
+are passed. Client checks exact PID/scope and bounded terminal facts. Retirement
+cancels/joins callbacks and refuses retained service/operation objects.
+
+Frozen gate passes 20/20 in 132.72s, native 0edf2748 / SDK 1ff2a8e7. New
+actual-child native planning contract passes in 0.27s, including duplicate and
+wrong-access refusal, paused results, uncertain/invalid outcomes and cancellation
+after actual callback entry. All 2783 project inputs and 138 observed binaries
+remain frozen. One binary is the retired external planning fixture artifact;
+its source, target and CTest entry are removed. Current inventory stays 169.
+An initial pre-build inventory failure is preserved separately.
+
+Controlled callbacks only: durable planning settlement/accepted identity and
+production scheduler assembly remain unfinished. Full suite, remaining legacy
+fixture cleanup and updated installed product acceptance also remain open.
+Nothing installed or replayed; earlier SDK/heap/timing issues remain open.
+[Exact gate and evidence](evidence/process-xmind-root-native-planning-checkpoint-20261021.json).
+
 ## Worker rendezvous uses root SDK subobjects — 2026-10-21
 
 Removed AgentWorkerFrameCodec and its JSON/HMAC wrapper, redundant bootstrap MAC

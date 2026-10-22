@@ -1,0 +1,7 @@
+{
+  "recordedAt": "2026-10-22T01:02:23.116Z",
+  "phase": "project input hashing before build",
+  "error": "ENOENT Native/include/agentflow/agent_worker_planning_rpc.hpp: deleted file remained in Git index inventory. Stage deletions before freezing actual current source set.",
+  "buildStarted": false,
+  "testsStarted": false
+}

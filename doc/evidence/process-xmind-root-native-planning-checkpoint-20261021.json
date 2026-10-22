@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-10-22T01:06:16.998Z",
+  "gate": {
+    "recordedAt": "2026-10-22T01:05:53.329Z",
+    "sourceParent": "e7f96c585bcfd794ea76e12a1655af384247e726",
+    "sourcePatchSha256": "562298531568a79874dd31299db672c07f72880196d11f92444c98f9a819ab31",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 53836,
+      "launchedAt": "2026-10-22T01:02:25.748Z",
+      "completedAt": "2026-10-22T01:03:34.454Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6d77ff9066be2f57e645a8e3bd65b6cdc2b91f481dd1eff6e92652383f63a503"
+    },
+    "test": {
+      "pid": 12000,
+      "launchedAt": "2026-10-22T01:03:37.916Z",
+      "completedAt": "2026-10-22T01:05:50.684Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4ebccc7553c28e7293031aa84d4a360022325cfeace03064bfe4e290583391f4"
+    },
+    "total": 20,
+    "failed": 0,
+    "passed": 20,
+    "seconds": 132.72,
+    "projectFiles": 2783,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 138,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "0edf274803617ee9d27615b91d5f195ed0c3667cfde7a5d1f5507d201b71429d",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": [
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-20261021-source.patch",
+      "sha256": "562298531568a79874dd31299db672c07f72880196d11f92444c98f9a819ab31"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-20261021-pre-freeze-failure.json",
+      "sha256": "b532807f7090c3666ee3217648f272b13851f29f1f7ebf0f4a6ee8ca1832ea68"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-gate.json",
+      "sha256": "c7ffab53eea73277d0e35ba79cc2c0b345b885d55ec479dd459e4d64d1f042b6"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-build.log",
+      "sha256": "6d77ff9066be2f57e645a8e3bd65b6cdc2b91f481dd1eff6e92652383f63a503"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-build-terminal.json",
+      "sha256": "b6bcebb4e7cb93adf153be60be4b49ffe0b0eb419942dfe0580599002942d9ce"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-ctest.log",
+      "sha256": "4ebccc7553c28e7293031aa84d4a360022325cfeace03064bfe4e290583391f4"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-ctest-terminal.json",
+      "sha256": "c1c905299b33ce513b9b5ad0cb52520ffe9d15cd03d9363cde6b6178e915d019"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-LastTest.log",
+      "sha256": "785af3ce1e91f9016aec93dc096d3ff6e06099100a8692d9ba19e81d45efca6a"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-planning-indexed-20261021-source.patch",
+      "sha256": "562298531568a79874dd31299db672c07f72880196d11f92444c98f9a819ab31"
+    }
+  ],
+  "change": [
+    "Removed old planning RPC source/header/contract and their CMake references.",
+    "Added xmind.Planning().Open(private_ticket), native Identity/Healthy/Invoke/Resume methods and async Status/Result/Cancel operation subobjects.",
+    "Native client pins exact endpoint PID/scope, sends only attempt/call identities, rejects duplicate calls and malformed outcomes, preserves bounded rejection codes and fail-stop recovery after interrupted observation.",
+    "Binding retirement cancels and joins callbacks and refuses retained service/operation objects.",
+    "Actual child contract covers invoke/resume/health/paused result, wrong PID/scope/ticket, duplicate refusal, uncertain/invalid results and cancellation after actual callback entry."
+  ],
+  "preFreezeFailure": "Deleted source remained in index inventory; helper stopped before build/test. Deletions staged before the indexed frozen gate. Initial source patch and failure receipt preserved.",
+  "externalBinaries": "138 observed exe/dll files includes the prior retired planning RPC fixture executable left as external build evidence. Old source/target/test removed; no old planning fixture is in current CTest inventory.",
+  "remaining": [
+    "Bind native callbacks to durable planning claim/outcome settlement and accepted native call identity.",
+    "Assemble production planning/resume with backend frozen settings/capabilities/budget/guidance and actual worker children.",
+    "Remove remaining legacy RPC fixture machinery.",
+    "Full current 169-test native suite and updated installed browser/CLI/editor acceptance.",
+    "Prior SDK access violation, heap corruption and timing investigation."
+  ],
+  "externalClosure": "C:/xMindNativeValidation/process-xmind-native-planning-indexed-20261021/inputs-before-build.json",
+  "externalBinaryInventory": "C:/xMindNativeValidation/process-xmind-native-planning-indexed-20261021/binaries-before-test.json"
+}
