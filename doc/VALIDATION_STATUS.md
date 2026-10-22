@@ -32,6 +32,15 @@ started=false and reuses its running backend. This is package integrity and CLI
 reconnection evidence, not rendered final-package acceptance or backend upgrade.
 The installed extension and existing browser host remain unchanged. See
 [evidence](evidence/workspace-switch-final-package-20261022.json).
+Final-package hidden IAB verification also passes: native view package manifest
+1a24a5fbdb1c75ff2fc25f21201e3c7b21c281d2457f1855c1d99744bd42d8eb
+with current browser assets connects to TestProj (7 conversations), switches to
+xMind (16), retains xMind through reload and switches back to TestProj. Distinct
+workspace roots and explorer trees render correctly. Existing managed backend
+generations are reused; this does not claim a final-binary backend upgrade.
+No prompts were submitted, no completed work replayed, no provider inference.
+[Rendered evidence](evidence/workspace-switch-final-package-rendered-20261022.json)
+and [screenshot](evidence/workspace-switch-final-package-rendered-20261022.png).
 The reported browser switch failure reproduces as selection HTTP 503. The
 TestProj profile had a protected replacement receipt and a stopped process,
 but its database owner was only quiesced: no retirement target had committed.

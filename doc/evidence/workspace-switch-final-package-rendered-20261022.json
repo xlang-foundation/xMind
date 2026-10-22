@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-10-22T09:20:47.116Z",
+  "url": "http://127.0.0.1:55979/ui/",
+  "packageManifestSha256": "1a24a5fbdb1c75ff2fc25f21201e3c7b21c281d2457f1855c1d99744bd42d8eb",
+  "testProjConversations": 7,
+  "xmindConversations": 16,
+  "xmindSwitchAndReloadConfirmed": true,
+  "roundTripConfirmed": true,
+  "newModelCalls": 0,
+  "taskReplays": 0,
+  "scope": "Final native view package and current browser assets; reused existing managed backend generations, no backend upgrade"
+}
