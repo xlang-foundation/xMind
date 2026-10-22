@@ -1,3 +1,27 @@
+## Resume requires old worker retirement — 2026-10-22
+
+resume_dynamic_owner now refuses any active worker lease for the root before
+opening another segment. Previously an answered human wait could reopen the
+segment before the old production process drained. The check runs inside the
+existing resume transaction and covers descendant leases as well as the root.
+Thread-only roots have no worker leases and retain their existing resume path.
+
+Both production human-pause cases now submit one synthetic answer, verify resume
+before drain refuses without event/segment writes, perform the existing physical
+drain and SQL-rollback checks, then resume. The next segment has ordinal+1, exact
+remaining active time, original accepted-call/model provenance and unchanged
+history. The old generation's journal is refused. The fixture explicitly ends
+with typed cancellation before new-worker adoption; it does not claim execution
+or final completion in a replacement process. New-generation adoption and main
+process planning admission remain open.
+
+Frozen ledger passes 1/1 in 10.75 seconds, patch
+ dc68b34c33d5377c0d0de1bd33468d7a831cca3de750ad15ad9b330c489e4af0;
+xmind.exe ad8a2e08756fc901b51e775e3136181642489f4ece3dea51477e6d17fa867f24.
+Exact sets/hashes unchanged: 2787 project/16 SDK/1870 libraries/30 SDK runtime/
+18598 dependencies/104 binaries. Inventory172; focused ledger only, no full-suite
+claim, paid provider calls, CPython, user task replay or installed-runtime change.
+Evidence: process-xmind-root-resume-drain-gate-20261022-* under doc/evidence.
 ## Production planning human-pause drain — 2026-10-22
 
 AgentWorkerSupervisor now drains a verified paused root separately from terminal
