@@ -1,3 +1,30 @@
+## Accepted-call adoption by a replacement worker — 2026-10-22
+
+Typed backend adoption stores an immutable per-call/per-generation record instead
+of rewriting the originating model/planning claim. It binds the original claim
+digest, retired paused source generation/segment, exact next resumed segment and
+current new lease. Existing repeated-pause adoption links can resolve their prior
+source record; that repeated chain still needs explicit execution coverage.
+Continuation authority now requires this exact record for a different generation.
+Captured backend planning resume creates/verifies adoption before scheduler resume;
+settings, root capability and active budget checks remain in that owner.
+
+Both plain/counted production pause fixtures now launch a distinct actual xmind
+replacement after typed resume. Foreign PID and retired old lease refuse adoption.
+An injected INSERT failure rolls back record and event. Successful and duplicate
+observations produce one event with unchanged history and original claim/model/
+segment provenance. The fixture physically drains the replacement and cancels
+before adopted SDK execution. This proves backend adoption, not new-generation
+continuation funding/final completion through the worker loop. Main admission,
+worker selection of pending accepted work and broader lifecycle checks remain open.
+
+Frozen ledger passes 1/1 in 10.69 seconds, patch
+6383c07ce331743f5842331fcd921c8998394953a1b9ac7e761814bd8a3ad1b4;
+xmind.exe 66dcca5e12704e10061af94ffb9fcfe0d6000aeacc5a7ec88c9d482b475d6cb5.
+Exact sets/hashes unchanged: 2787 project/16 SDK/1870 libraries/30 SDK runtime/
+18598 dependencies/104 binaries. Inventory172; focused ledger only. No paid
+provider calls, CPython, user task replay, installation or user-profile changes.
+Evidence: process-xmind-root-generation-adoption-20261022-* under doc/evidence.
 ## Resume requires old worker retirement — 2026-10-22
 
 resume_dynamic_owner now refuses any active worker lease for the root before

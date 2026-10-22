@@ -3233,14 +3233,34 @@ void settle_worker_planning(Repository& repository,XlangSqlite& db,const std::st
     changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_planning_json(record).dump(),std::string(worker_planning_category),worker_claim_key(root,attempt)}));
 }
 
+constexpr const char* worker_planning_adoption_category="native-agent-worker-planning-adoptions";
+std::string planning_adoption_key(const std::string& call,const std::string& generation){return context_digest(Json::array({call,generation}).dump());}
+Json planning_adoption(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const DynamicPlanCallRecord& call,const AgentWorkerPlanningClaimRecord& origin){
+    worker_current_scope(repository,db,lease);
+    if(lease.root_run_id!=lease.owner_run_id||call.root_run_id!=lease.root_run_id||call.owner_run_id!=lease.owner_run_id||origin.state!="accepted"||origin.native_call_id!=call.id||origin.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Planning adoption differs from its captured root");
+    const auto pause=db.execute("SELECT segment_id FROM dynamic_owner_pauses WHERE root_run_id=? AND state='resumed'",{lease.root_run_id}).rows;
+    if(pause.size()!=1)throw Conflict("Planning adoption requires a typed resumed pause");const auto source_segment=text(pause[0][0]);
+    const auto old=db.execute("SELECT ordinal,state FROM agent_budget_segments WHERE root_run_id=? AND id=?",{lease.root_run_id,source_segment}).rows;const auto current=repository.dynamic_budget_segment(lease.root_run_id);
+    if(old.size()!=1||text(old[0][1])!="closed"||current.state!="open"||current.ordinal!=integer(old[0][0])+1)throw Conflict("Planning adoption requires the exact next active segment");
+    const auto origin_binding=context_digest(worker_planning_json(origin).dump());std::string source_generation=origin.model.generation;
+    if(origin.segment_id!=source_segment){
+        const auto previous=db.execute("SELECT payload FROM information WHERE category=? AND json_extract(payload,'$.call_id')=? AND json_extract(payload,'$.segment')=?",{std::string(worker_planning_adoption_category),call.id,source_segment}).rows;
+        if(previous.size()!=1)throw Conflict("Repeated planning adoption lost its prior generation");const auto value=Json::parse(text(previous[0][0]));source_generation=value.at("generation").get<std::string>();const auto prior=read_worker_lease(db,source_generation);
+        if(value.size()!=8||value.at("version")!=1||value.at("origin_binding")!=origin_binding||value.at("lease")!=worker_spec_json(prior.spec))throw Conflict("Prior planning adoption provenance changed");
+    }
+    const auto source=read_worker_lease(db,source_generation);
+    if(source_generation==lease.generation||source.state!="retired"||source.retirement_reason!="paused"||source.spec.root_run_id!=lease.root_run_id||source.spec.owner_run_id!=lease.owner_run_id||source.spec.workspace_id!=lease.workspace_id||source.spec.workspace_revision!=lease.workspace_revision||Json::parse(source.spec.provider_identity_json)!=Json::parse(lease.provider_identity_json))throw Conflict("Planning adoption requires its retired paused source lease");
+    return {{"version",1},{"call_id",call.id},{"origin_binding",origin_binding},{"source_generation",source_generation},{"source_segment",source_segment},{"generation",lease.generation},{"segment",current.id},{"lease",worker_spec_json(lease)}};
+}
 void worker_planning_continuation_authority(Repository& repository,XlangSqlite& db,const DynamicPlanCallRecord& call,const AgentWorkerLeaseSpec* worker){
     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_planning_category),worker_claim_key(call.root_run_id,call.origin_attempt_id)}).rows;
     if(!worker){if(!rows.empty())throw Conflict("Worker planning requires its captured continuation lease");return;}
     worker_current_scope(repository,db,*worker);
     if(worker->root_run_id!=call.root_run_id||worker->owner_run_id!=call.owner_run_id||worker->root_run_id!=worker->owner_run_id||repository.root_budget(call.root_run_id).spec.policy_id!="native.dynamic-plan")throw Conflict("Worker continuation differs from native planning owner");
     const auto record=read_worker_planning(db,call.root_run_id,call.origin_attempt_id);
-    if(record.state!="accepted"||record.native_call_id!=call.id||record.model.generation!=worker->generation||record.model.owner_run_id!=worker->owner_run_id||record.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Worker continuation lacks exact accepted planning authority");
-    const auto segment=repository.dynamic_budget_segment(call.root_run_id);if(segment.state!="open"||segment.id!=record.segment_id)throw Conflict("Worker planning continuation lost its admitted active segment");
+    if(record.state!="accepted"||record.native_call_id!=call.id||record.model.owner_run_id!=worker->owner_run_id||record.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Worker continuation lacks exact accepted planning authority");
+    const auto segment=repository.dynamic_budget_segment(call.root_run_id);if(record.model.generation==worker->generation){if(segment.state!="open"||segment.id!=record.segment_id)throw Conflict("Worker planning continuation lost its admitted active segment");}
+    else{const auto expected=planning_adoption(repository,db,*worker,call,record);const auto saved=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_planning_adoption_category),planning_adoption_key(call.id,worker->generation)}).rows;if(saved.size()!=1||Json::parse(text(saved[0][0]))!=expected)throw Conflict("Worker continuation lacks its exact durable adoption");}
     worker_require_tool_turns(db,*worker);
 }
 bool worker_planning_attempt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt){
@@ -3608,6 +3628,14 @@ std::string Repository::commit_agent_worker_plan_inspection(const AgentWorkerLea
     const auto owner=run(lease.owner_run_id);impl_->event(owner.id,"tool.completed",Json{{"activity_id",activity},{"call_id",record.call_id},{"name","inspect_plan"},{"data",Json::parse(report)}}.dump());impl_->message(owner,"assistant",model.actual_assistant_json);impl_->message(owner,"tool",Json{{"content",report},{"tool_call_id",record.call_id}}.dump());impl_->event(owner.id,"conversation.tool_turn",Json{{"inspected_plan_call_id",record.call_id},{"origin_attempt_id",attempt},{"inspection_result_json",report}}.dump());record.state="inspected";changed_one(db.execute("UPDATE information SET payload=? WHERE category=? AND id=?",{worker_planning_json(record).dump(),std::string(worker_planning_category),worker_claim_key(lease.root_run_id,attempt)}));tx.commit();return report;
 }
 AgentWorkerPlanningClaimRecord Repository::agent_worker_planning_claim(const std::string& root,const std::string& attempt){return read_worker_planning(impl_->database,root,attempt);}
+AgentWorkerPlanningClaimRecord Repository::adopt_agent_worker_planning(const AgentWorkerLeaseSpec& lease,const std::string& id){
+    auto& db=impl_->database;Transaction tx(db);const auto call=dynamic_plan_call(id);const auto origin=read_worker_planning(db,call.root_run_id,call.origin_attempt_id);
+    if(call.state!="accepted"||!call.continuation_attempt_id.empty()||call.conversation_commit_seq)throw Conflict("Only pending accepted planning work can be adopted");
+    const auto value=planning_adoption(*this,db,lease,call,origin);const auto key=planning_adoption_key(id,lease.generation);const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_planning_adoption_category),key}).rows;
+    if(rows.empty()){changed_one(db.execute("INSERT INTO information(category,id,payload) VALUES(?,?,?)",{std::string(worker_planning_adoption_category),key,value.dump()}));impl_->event(lease.owner_run_id,"worker.planning.adopted",value.dump());}
+    else if(rows.size()!=1||Json::parse(text(rows[0][0]))!=value)throw Conflict("Planning adoption binding changed");
+    tx.commit();return origin;
+}
 AgentWorkerModelClaimRecord Repository::agent_worker_model_claim(const std::string& root,const std::string& attempt){return read_worker_claim(impl_->database,root,attempt);}
 AgentWorkerModelClaimRecord Repository::claim_agent_worker_model(const AgentWorkerModelClaimSpec& spec){
     (void)worker_claim_spec_json(spec);auto& db=impl_->database;Transaction tx(db);const auto lease=read_worker_lease(db,spec.generation);

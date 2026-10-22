@@ -39,6 +39,7 @@ public:
     std::future<AgentWorkerPlanningClaimRecord> claim_agent_worker_planning(AgentWorkerLeaseSpec,std::string attempt,std::string call,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<ModelCallReservation> reserve_agent_worker_planning_continuation(AgentWorkerLeaseSpec,std::string call,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerPlanningClaimRecord> agent_worker_planning_claim(std::string root,std::string attempt);
+    std::future<AgentWorkerPlanningClaimRecord> adopt_agent_worker_planning(AgentWorkerLeaseSpec,std::string call);
     std::future<Run> complete_agent_worker_dynamic_run(AgentWorkerLeaseSpec,std::string attempt,std::string segment,std::int64_t elapsed,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<std::string> commit_agent_worker_plan_inspection(AgentWorkerLeaseSpec,std::string attempt,std::chrono::steady_clock::time_point,std::stop_token owner_cancel={},std::stop_token caller_cancel={});
     std::future<AgentWorkerModelClaimRecord> claim_agent_worker_model(AgentWorkerModelClaimSpec);

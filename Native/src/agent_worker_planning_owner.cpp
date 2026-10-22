@@ -58,8 +58,10 @@ struct Owner {
     DynamicExecutionResult resume(const std::string& call,std::stop_token stop){
         std::stop_source linked;std::stop_callback owner_stop(cancel,[&]{linked.request_stop();});std::stop_callback caller_stop(stop,[&]{linked.request_stop();});check(linked.get_token());
         const auto accepted=store.dynamic_plan_call(call).get();
-        const auto claim=store.agent_worker_planning_claim(lease.root_run_id,accepted.origin_attempt_id).get();
-        if(accepted.root_run_id!=lease.root_run_id||accepted.owner_run_id!=lease.owner_run_id||claim.model.generation!=lease.generation||claim.state!="accepted"||claim.native_call_id!=call||claim.segment_id!=budget->segment_id())throw DynamicPlanUnavailable("Planning resume differs from its captured accepted call");
+        auto claim=store.agent_worker_planning_claim(lease.root_run_id,accepted.origin_attempt_id).get();
+        if(accepted.root_run_id!=lease.root_run_id||accepted.owner_run_id!=lease.owner_run_id||claim.state!="accepted"||claim.native_call_id!=call)throw DynamicPlanUnavailable("Planning resume differs from its captured accepted call");
+        if(claim.model.generation!=lease.generation)claim=store.adopt_agent_worker_planning(lease,call).get();
+        else if(claim.segment_id!=budget->segment_id())throw DynamicPlanUnavailable("Planning resume lost its original segment");
         return execution->resume(lease.owner_run_id,call,settings,capabilities,budget,linked.get_token(),guidance);
     }
 };
