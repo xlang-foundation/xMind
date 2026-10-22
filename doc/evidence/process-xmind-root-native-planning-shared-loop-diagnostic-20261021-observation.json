@@ -1,0 +1,24 @@
+{
+  "diagnosticEnvironment": {
+    "XMIND_WORKER_FIXTURE_DUMP_DIR": "C:/xMindNativeValidation/planning-shared-loop-dumps-20261021",
+    "XMIND_WORKER_FIXTURE_TIMING_DIR": "C:/xMindNativeValidation/planning-shared-loop-timing-20261021"
+  },
+  "dumpFiles": [],
+  "timingFiles": {
+    "production-59284.json": {
+      "bytes": 28350,
+      "sha256": "8145af13efc1dab64a5a57dd143e54dc4bd963231fbe19a12000a3be661e15ca"
+    },
+    "transport-59284.json": {
+      "bytes": 11362,
+      "sha256": "b0325776240c592cbf82e8785c6d2c55a4f12f4bd5d17c8e57c0a8acc1f947d4"
+    }
+  },
+  "originalFailure": {
+    "exitCode": 3221226356,
+    "hex": "0xC0000374",
+    "cause": "Unproven; earlier intermittent heap failures remain unresolved"
+  },
+  "sourcePatchSha256": "617e7e3107025266bcb7b3e2c38452afc94863dde4b1bca338d4ff3a1f867cdb",
+  "nativeSha256": "633beeebb8d3dba6c8cf19d0a18e916b83ac7d6ebe2fb324575145ef55744122"
+}

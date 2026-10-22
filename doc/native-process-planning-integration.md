@@ -17,7 +17,7 @@ access paths share the same native operation registry.
 NativeWorkerModelClient.planning(deadline) now supplies the runner-facing
 DynamicPlanExecution port from that subobject, reusing and retaining its SDK
 runtime. Distinct-child accepted-context handoff survives outer client retirement;
-main worker runner selection and dynamic journal/admission remain unassembled. Distinct-process scope,
+main WorkspaceExecutor admission and dynamic child scheduling remain unassembled. Distinct-process scope,
 duplicate and retired-object checks are verified. Main owner/runner wiring is
 still required.
 
@@ -32,17 +32,25 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+The worker entry point and shared AgentRunner now select the captured SDK
+planning port for running dynamic roots. A distinct actual worker loop verifies
+initial counted context, canonical inspection, a second counted model and final
+completion. Accepted-plan child scheduling and continuation, rejection, overflow
+and human handoff still require integration evidence. Main WorkspaceExecutor
+planning placement remains closed. Initial 19/20 heap failure and unchanged
+diagnostic 20/20 run are retained; broad stability is unproven.
+
 The worker AgentRunJournal adapter now admits exact running planning roots
 through a healthy native SDK service and exposes signed continuation reservation.
 The distinct child uses it for funding/start/finish/final completion. Capability
-and segment APIs stay closed; shared loop and main construction remain open.
+and segment APIs stay closed; accepted-plan loop evidence and main construction remain open.
 
 Captured planning read/coding owners now complete through the existing SDK journal
 Complete method using only the final model attempt ID. The backend owns the
 segment clock, derives the canonical receipt, checks completed native work, and
 atomically closes the root/segment and retires the lease. Distinct-process
 positive, scope/cancellation/deadline refusal and SQL rollback checks pass.
-The main worker loop still needs dynamic admission and port selection.
+Main WorkspaceExecutor still needs dynamic admission and scheduling.
 
 One backend owner retains the workspace, model host, journal, context window,
 planning binding and captured root execution budget through physical child
@@ -52,21 +60,22 @@ Retirement invalidates access, cancels/joins work, then releases services.
 
 ## Admission and initial context
 
-AgentWorkerReadContext currently restricts its tool catalogue to read/guidance
-and captured delegation tools; it does not admit planning tools.
-AgentWorkerContextWindow restricts root policies to context/delegation and
-additionally admits graph children. OrdinaryJournal rejects dynamic roots;
-execute_workspace_root assembles an ordinary runner without planning ports.
-These are separate checks, not one flag to remove. Introduce a distinct captured planning admission
-for the exact native.dynamic-plan root. It requires finalized capabilities,
-provider identity, current lease, matching workspace revision and the root's
-active budget segment/backend identity. Child journal admission remains based
-on a durable child record; a root grant cannot create arbitrary child authority.
+Read/coding contexts admit planning tools only with captured planning services.
+The context window requires the exact shared active backend budget. The worker
+journal admits a running dynamic root only with a healthy captured SDK planning
+object, and the worker entry point passes that port to the shared runner.
+Main WorkspaceExecutor still rejects planning settings and must assemble the
+finalized capabilities, provider identity, current lease, workspace revision
+and active segment/backend identity before enabling placement. Child journal
+admission remains based on a durable child record; a root grant cannot create
+arbitrary child authority.
 
 The backend owns one RootExecutionBudget for the dynamic root, including its
 active segment clock. ContextManager and DynamicPlanExecutor must use that
 same budget. Do not construct an independent ordinary context budget, overwrite
-native.dynamic-plan with native.context, or drop the segment for convenience.
+native.dynamic-plan with native.context, or drop the backend segment for convenience.
+The child runner has only a public budget/deadline projection, with every
+mutation routed through its typed journal; it never owns an active segment.
 Initial counted context uses ContextManager's ordinary initial preparation;
 the child receives the resulting prepared request and inference identity.
 

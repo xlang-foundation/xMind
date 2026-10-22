@@ -1,5 +1,6 @@
 #include "agentflow/agent_worker_runner.hpp"
 #include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/agent_worker_model_gateway.hpp"
 #include "agentflow/agent_worker_read_workspace.hpp"
 #include "agentflow/agent_worker_closed_ports.hpp"
@@ -30,8 +31,9 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerClientContext& pee
     settings.max_turns=leaf&&budget.spec.policy_id!="native.graph-context"?4:static_cast<std::size_t>(budget.spec.max_model_calls);
     settings.run_timeout=std::chrono::milliseconds(budget.spec.wall_limit_ms);
     settings.a2a_enabled=false;
+    std::shared_ptr<DynamicPlanExecution> planning;if(budget.spec.policy_id=="native.dynamic-plan"){auto native=peer.native_model();if(!native||leaf)throw Conflict("Planning worker requires its captured native root service");planning=native->planning(AgentWorkerJournalClient(peer).execution_deadline());}
     AgentRunner runner(*journal,*closed.context,std::move(settings),
-        AgentRunnerPorts{model,closed.catalogue,closed.tools,closed.runtime,workspace,coding_workspace});
+        AgentRunnerPorts{model,closed.catalogue,closed.tools,closed.runtime,workspace,coding_workspace},{},std::move(planning));
     std::shared_ptr<RootExecutionBudget> shared;
     if(leaf)shared=std::make_shared<RootExecutionBudget>(*journal,budget,AgentWorkerJournalClient(peer).execution_deadline(),cancel);
     auto run=runner.execute(peer.scope().run_id,cancel,{},std::move(shared));

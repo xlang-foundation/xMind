@@ -1,0 +1,271 @@
+{
+  "phase": "transport",
+  "pid": 58760,
+  "elapsedMs": 6598.7265,
+  "timing": [
+    {
+      "elapsedMs": 401.6789,
+      "text": "Native RPC case normal child_pid=15108 creation_time=134371202170311848\r\n"
+    },
+    {
+      "elapsedMs": 627.3976,
+      "text": "Native RPC case cancel child_pid=69028 creation_time=134371202172512762\r\n"
+    },
+    {
+      "elapsedMs": 770.6338,
+      "text": "Owned cancel worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n"
+    },
+    {
+      "elapsedMs": 842.0276,
+      "text": "Native RPC case crash child_pid=70120 creation_time=134371202174711930\r\n"
+    },
+    {
+      "elapsedMs": 891.5314,
+      "text": "Streaming crash retirement: exit_code=73 claim=uncertain\r\n"
+    },
+    {
+      "elapsedMs": 891.6667,
+      "text": "Owned worker exit drained before terminal commit; actual exit code 73 and charged uncertainty retained.\r\n"
+    },
+    {
+      "elapsedMs": 962.8876,
+      "text": "Native RPC case delivery child_pid=18272 creation_time=134371202175916053\r\n"
+    },
+    {
+      "elapsedMs": 1096.1005,
+      "text": "Native RPC case overflow child_pid=71448 creation_time=134371202177149228\r\n"
+    },
+    {
+      "elapsedMs": 1152.9922000000001,
+      "text": "Owned overflow worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n"
+    },
+    {
+      "elapsedMs": 1230.9898,
+      "text": "Native RPC case other_error child_pid=11180 creation_time=134371202178560302\r\n"
+    },
+    {
+      "elapsedMs": 1322.9512000000002,
+      "text": "Post-drain terminal write fault verified: exact exited child retained, durable ownership rolled back, no model replay.\r\n"
+    },
+    {
+      "elapsedMs": 1327.5041,
+      "text": "Owned other_error worker drained before terminal commit; actual exit code 0 and charged uncertainty retained.\r\n"
+    },
+    {
+      "elapsedMs": 1400.0688,
+      "text": "Native RPC case completion child_pid=18788 creation_time=134371202180292515\r\n"
+    },
+    {
+      "elapsedMs": 1557.2352,
+      "text": "Native RPC case completion_delivery child_pid=48136 creation_time=134371202181802752\r\n"
+    },
+    {
+      "elapsedMs": 1631.7421000000002,
+      "text": "Native completed drain preserved lost completion reply and nonzero exit without terminal rewrite or replay.\r\n"
+    },
+    {
+      "elapsedMs": 1709.1670000000001,
+      "text": "Native RPC case completion_rollback child_pid=42472 creation_time=134371202183331127\r\n"
+    },
+    {
+      "elapsedMs": 1767.1619,
+      "text": "Observed injected completion retirement fault; run/history/events/lease rollback verified.\r\n"
+    },
+    {
+      "elapsedMs": 1880.5548000000001,
+      "text": "Native RPC case completion_hold child_pid=67776 creation_time=134371202185056202\r\n"
+    },
+    {
+      "elapsedMs": 1957.6188000000002,
+      "text": "Completed drain physical capacity verified: child_pid=67776 creation_time=134371202185056202; timeout retained one occupied root slot and queued work until explicit exit, without model replay.\r\n"
+    },
+    {
+      "elapsedMs": 2027.9669,
+      "text": "Native RPC case runner child_pid=6444 creation_time=134371202186577662\r\n"
+    },
+    {
+      "elapsedMs": 2090.0838,
+      "text": "Actual AgentRunner executed in child PID 6444 through queued startup, scoped funding, backend stream acknowledgements and canonical completion.\r\n"
+    },
+    {
+      "elapsedMs": 2180.0941000000003,
+      "text": "Native RPC case runner_error child_pid=65964 creation_time=134371202188108740\r\n"
+    },
+    {
+      "elapsedMs": 2255.6563,
+      "text": "Actual child AgentRunner provider failure verified: terminal handoff before drain, no fabricated Run, one retained charged attempt, post-exit atomic retirement.\r\n"
+    },
+    {
+      "elapsedMs": 2329.1778,
+      "text": "Native RPC case runner_cancel child_pid=7156 creation_time=134371202189554278\r\n"
+    },
+    {
+      "elapsedMs": 2409.8099,
+      "text": "Actual child AgentRunner cancellation verified: explicit controller stop reached the real runner and model, cancelled handoff before drain, one retained charge and post-exit atomic retirement.\r\n"
+    },
+    {
+      "elapsedMs": 2486.7341,
+      "text": "Native read RPC case read child_pid=39432 creation_time=134371202191150022\r\n"
+    },
+    {
+      "elapsedMs": 2567.7862,
+      "text": "Actual child read turn continued through a second native model call and canonical completion.\r\n"
+    },
+    {
+      "elapsedMs": 2594.4541,
+      "text": "Actual child read RPC read verified durable dispatch count 1 and exact native outcome.\r\n"
+    },
+    {
+      "elapsedMs": 2664.9477,
+      "text": "Native read RPC case read_delivery child_pid=48816 creation_time=134371202192972037\r\n"
+    },
+    {
+      "elapsedMs": 2717.9959,
+      "text": "Actual child read RPC read_delivery verified durable dispatch count 1 and exact native outcome.\r\n"
+    },
+    {
+      "elapsedMs": 2795.3230000000003,
+      "text": "Native read RPC case read_denied child_pid=63464 creation_time=134371202194201601\r\n"
+    },
+    {
+      "elapsedMs": 2871.378,
+      "text": "Actual child read RPC read_denied verified durable dispatch count 0 and exact native outcome.\r\n"
+    },
+    {
+      "elapsedMs": 2947.9778,
+      "text": "Native read RPC case read_cancel child_pid=38656 creation_time=134371202195739331\r\n"
+    },
+    {
+      "elapsedMs": 3040.0034,
+      "text": "Actual child read RPC read_cancel verified durable dispatch count 0 and exact native outcome.\r\n"
+    },
+    {
+      "elapsedMs": 3120.4171,
+      "text": "Native read RPC case read_turn_delivery child_pid=71356 creation_time=134371202197450524\r\n"
+    },
+    {
+      "elapsedMs": 3195.5666,
+      "text": "Actual read-turn lost delivery retained one canonical committed turn.\r\n"
+    },
+    {
+      "elapsedMs": 3196.9845,
+      "text": "Actual child read RPC read_turn_delivery verified durable dispatch count 1 and exact native outcome.\r\n"
+    },
+    {
+      "elapsedMs": 3285.9453000000003,
+      "text": "Native read RPC case read_turn_rollback child_pid=65948 creation_time=134371202199089229\r\n"
+    },
+    {
+      "elapsedMs": 3334.3323,
+      "text": "Observed injected read-turn storage fault; history/events rollback verified.\r\n"
+    },
+    {
+      "elapsedMs": 3364.5199000000002,
+      "text": "Actual child read RPC read_turn_rollback verified durable dispatch count 1 and exact native outcome.\r\n"
+    },
+    {
+      "elapsedMs": 3445.9157,
+      "text": "Actual child file RPC file_create child_pid=24448 creation_time=134371202200662477\r\n"
+    },
+    {
+      "elapsedMs": 3660.2362000000003,
+      "text": "Actual child file RPC file_create verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 3744.8845,
+      "text": "Actual child file RPC file_denied child_pid=43440 creation_time=134371202203618756\r\n"
+    },
+    {
+      "elapsedMs": 3815.4975,
+      "text": "Actual child file RPC file_denied verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 3895.6283000000003,
+      "text": "Actual child file RPC file_cancel child_pid=46368 creation_time=134371202205163406\r\n"
+    },
+    {
+      "elapsedMs": 3985.4871000000003,
+      "text": "Actual child file RPC file_cancel verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 4065.2728,
+      "text": "Actual child file RPC file_delivery child_pid=41964 creation_time=134371202206861859\r\n"
+    },
+    {
+      "elapsedMs": 4250.8826,
+      "text": "Actual child file RPC file_delivery verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 4333.505999999999,
+      "text": "Actual child file RPC file_unrecorded child_pid=9032 creation_time=134371202209530589\r\n"
+    },
+    {
+      "elapsedMs": 4593.5126,
+      "text": "Actual child file RPC file_unrecorded verified backend-owned native effects and durable receipts without replay.\r\n"
+    },
+    {
+      "elapsedMs": 4692.7325,
+      "text": "Native context RPC child_pid=52092 creation_time=134371202213174814\r\n"
+    },
+    {
+      "elapsedMs": 4714.8687,
+      "text": "Worker explicit empty tool catalogue verified: backend guidance/history retained, no default tools, forged catalogue/read rejected without funding.\r\n"
+    },
+    {
+      "elapsedMs": 5149.352199999999,
+      "text": "Actual child backend context verified: previews withheld two reads, three native model windows matched guidance/history, one fresh read dispatched, twenty-four changed requests rejected.\r\n"
+    },
+    {
+      "elapsedMs": 5249.7815,
+      "text": "Native read AgentRunner RPC child_pid=38364 creation_time=134371202218672393\r\n"
+    },
+    {
+      "elapsedMs": 5549.9607,
+      "text": "Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.\r\n"
+    },
+    {
+      "elapsedMs": 5644.894499999999,
+      "text": "Native read AgentRunner RPC child_pid=34592 creation_time=134371202222636077\r\nNative read approval cancellation child_pid=34592 creation_time=134371202222636077\r\n"
+    },
+    {
+      "elapsedMs": 5891.8769999999995,
+      "text": "Actual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.\r\n"
+    },
+    {
+      "elapsedMs": 5973.437,
+      "text": "Native read AgentRunner RPC child_pid=72436 creation_time=134371202226005883\r\n"
+    },
+    {
+      "elapsedMs": 6249.583799999999,
+      "text": "Actual child AgentRunner read loop verified: queued startup, three backend model windows, two canonical tool turns, six native activity facts, one fresh filesystem read and canonical completion.\r\nNative worker assembly verified in captured child: production journal, model gateway, read workspace, closed ports, backend controls and shared AgentRunner.\r\n"
+    },
+    {
+      "elapsedMs": 6345.579199999999,
+      "text": "Native read AgentRunner RPC child_pid=15312 creation_time=134371202229698809\r\nNative read approval cancellation child_pid=15312 creation_time=134371202229698809\r\n"
+    },
+    {
+      "elapsedMs": 6562.354399999999,
+      "text": "Actual read AgentRunner approval cancellation verified: two actual model windows, one native approval cancelled before dispatch, prior canonical turn retained, post-exit retirement and two charges retained.\r\n"
+    },
+    {
+      "elapsedMs": 6572.4009,
+      "text": "Fixture persistence close begin.\r\n"
+    },
+    {
+      "elapsedMs": 6577.5566,
+      "text": "Fixture persistence close returned.\r\n"
+    },
+    {
+      "elapsedMs": 6577.616099999999,
+      "text": "Fixture workspace removal begin.\r\n"
+    },
+    {
+      "elapsedMs": 6585.929099999999,
+      "text": "Fixture workspace removal returned.\r\n"
+    },
+    {
+      "elapsedMs": 6589.5742,
+      "text": "Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open.\r\n"
+    }
+  ]
+}

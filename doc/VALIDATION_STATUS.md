@@ -1,3 +1,43 @@
+## Shared AgentRunner executes remote planning inspection — 2026-10-21
+
+The worker entry point now acquires its captured Planning SDK subobject and
+passes it to the shared AgentRunner. A running dynamic root uses backend-owned
+request windows and public budget limits. Planning tools come from the backend
+catalogue. The child sends attempt/call IDs, reloads canonical committed history
+and uses the typed journal continuation method for accepted-call funding. It
+does not acquire private capabilities, segment clocks or plan mutation APIs.
+Backend completion validates native work and canonical final facts.
+
+A distinct SDK child now executes the actual worker entry point and shared
+AgentRunner through initial context preparation, a controlled inspect_plan
+model reply, backend canonical inspection, the second counted model turn and
+SDK final completion. Exactly two model charges and four history messages, one
+inspection, a closed segment and completed lease are verified. The gateway is
+synthetic and callback controlled. Accepted-plan scheduling/continuation in the
+shared loop, bounded rejection, pause/resume and ordinary coding tools on this
+planning path are not established by this inspection case.
+
+Initial focused run: 19/20 in 89.87 seconds. The new ledger case passed (3.15),
+but broad worker production exited 3221226356 (0xC0000374 heap corruption) after
+its parent delegation checks. Cause remains unproven. All failed logs retained:
+doc/evidence/process-xmind-root-native-planning-shared-loop-heap-failure-20261021-gate.json.
+
+One diagnostic run enabled existing dump/timing capture with actual directories
+created first; unchanged source and native binaries passed 20/20 in 121.86
+seconds (ledger 2.96; broad worker 55.65). Two timing records and diagnostic
+environment are retained; no dump was produced because the failure did not
+recur. This is not a heap-corruption fix or stability claim. Evidence:
+doc/evidence/process-xmind-root-native-planning-shared-loop-diagnostic-20261021-gate.json.
+
+Patch 617e7e3107025266bcb7b3e2c38452afc94863dde4b1bca338d4ff3a1f867cdb; native
+633beeebb8d3dba6c8cf19d0a18e916b83ac7d6ebe2fb324575145ef55744122. Both runs froze 2786
+project files, 16 SDK includes, 1870 pure-library files, 76 runtime
+files, 18598 Node dependencies and 138 native binaries, checking sets and
+hashes. SDK unchanged. Full suite not rerun; no install, CPython, real provider
+execution or replay of user tasks. Main WorkspaceExecutor planning admission
+remains closed. Actual child scheduling, overflow/retry adoption, human handoff,
+legacy cleanup, broad stability and installed client acceptance remain open.
+
 ## Worker runner journal admits captured planning continuations — 2026-10-21
 
 The serialized worker AgentRunJournal adapter now admits a running dynamic root
