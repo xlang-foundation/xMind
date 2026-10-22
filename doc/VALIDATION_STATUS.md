@@ -1,3 +1,34 @@
+## Actual worker loop consumes accepted planning continuation — 2026-10-21
+
+The distinct-process shared AgentRunner contract now covers a plan_tasks model
+turn as well as inspection. Its controlled backend callback derives the actual
+call and arguments from the canonical stored receipt, claims and accepts the
+native plan, and settles a synthetic child through existing repository
+contracts. Owner integration commits the signed report and prepares counted
+continuation; the actual worker loop consumes the backend-selected inference
+through its typed SDK journal and completes with the canonical final receipt.
+
+Verified one accepted call, one signed turn, nonempty exact continuation link,
+responded final model in the same lease generation, zero remaining parent holds,
+three charges (two actual parent model dispatches and one synthetic child), four
+root history messages, closed segment and completed worker lease. Synthetic
+model gateway and child settlement: no actual agent child process is claimed.
+No production code changed in this checkpoint.
+
+Focused 20/20 passed in 122.83 seconds (ledger 3.27; broad worker 56.19).
+Patch 70f4a66a049b29c14c1c5ae70a8c0bed714785494702da22f1326bc8e85a44e1; native
+633beeebb8d3dba6c8cf19d0a18e916b83ac7d6ebe2fb324575145ef55744122. Frozen 2786 project
+files, 16 SDK includes, 1870 pure libraries, 76 runtime files, 18598 Node
+dependencies and 138 native binaries retain exact sets and hashes. Evidence:
+doc/evidence/process-xmind-root-native-planning-accepted-loop-20261021-gate.json.
+Earlier intermittent heap/SDK failures remain unresolved; this pass is not a fix.
+
+DynamicPlanExecutor still constructs local AgentRunner agent children. Actual
+process child dispatch and physical drain, main planning admission, overflow and
+retry adoption, human handoff, legacy cleanup, full suite and installed client
+acceptance remain open. No install, SDK change, CPython, live provider request
+or replay of completed user tasks.
+
 ## Shared AgentRunner executes remote planning inspection — 2026-10-21
 
 The worker entry point now acquires its captured Planning SDK subobject and

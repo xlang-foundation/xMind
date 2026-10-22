@@ -32,10 +32,16 @@ shared budget into the context window. Their bindings close before context
 destruction. Distinct-process owner inspection and retirement are verified;
 main WorkspaceExecutor construction and the dynamic child runner remain open.
 
+A distinct worker shared-loop test now verifies accepted-plan continuation
+funding and final completion: two parent model turns, one synthetic child
+charge, exact signed continuation and zero residual holds. Backend acceptance
+and synthetic child settlement are controlled; actual DynamicPlanExecutor
+agent child dispatch still constructs local runners and must move to processes.
+
 The worker entry point and shared AgentRunner now select the captured SDK
 planning port for running dynamic roots. A distinct actual worker loop verifies
 initial counted context, canonical inspection, a second counted model and final
-completion. Accepted-plan child scheduling and continuation, rejection, overflow
+completion. Accepted-plan child process scheduling, rejection, overflow
 and human handoff still require integration evidence. Main WorkspaceExecutor
 planning placement remains closed. Initial 19/20 heap failure and unchanged
 diagnostic 20/20 run are retained; broad stability is unproven.
@@ -43,7 +49,7 @@ diagnostic 20/20 run are retained; broad stability is unproven.
 The worker AgentRunJournal adapter now admits exact running planning roots
 through a healthy native SDK service and exposes signed continuation reservation.
 The distinct child uses it for funding/start/finish/final completion. Capability
-and segment APIs stay closed; accepted-plan loop evidence and main construction remain open.
+and segment APIs stay closed; actual child scheduling and main construction remain open.
 
 Captured planning read/coding owners now complete through the existing SDK journal
 Complete method using only the final model attempt ID. The backend owns the
