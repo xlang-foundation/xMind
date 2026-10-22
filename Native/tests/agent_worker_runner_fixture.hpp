@@ -24,7 +24,7 @@ template<class T,class F> std::future<T> ready(F f){std::promise<T> p;auto resul
 class ChildJournal:public AgentWorkerOrdinaryJournal {
 public:
     explicit ChildJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
-    bool bound_to(const AgentWorkerRpcPeer& peer)const noexcept override{return native->bound_to(peer);}
+    bool bound_to(const AgentWorkerClientContext& peer)const noexcept override{return native->bound_to(peer);}
     AgentWorkerJournalProgress progress()const override{return native->progress();}
     void own(const std::string& id){if(id!=peer.scope().run_id)throw Conflict("Child journal owner differs");}
     void refresh(){const auto actual=native->progress();current_attempt=actual.current_attempt;canonical=actual.canonical_assistant;ordinal=actual.model_event_ordinal;}
@@ -121,7 +121,7 @@ inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     std::stop_source metadata_stop;metadata_stop.request_stop();rejects<TransportCancelled>([&]{AgentWorkerModelClient(peer).admission(metadata_stop.get_token());});
     const auto model_only=make_agent_worker_read_workspace(peer,journal.native);check(model_only->workspace_id()=="workspace:none"&&model_only->captured_budget()->workspace_identity=="workspace:none","Model-only proxy must retain its exact absence of workspace authority");
     rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,{});});
-    struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
+    struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerClientContext&)const noexcept override{return false;}};
     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,foreign);});
     rejects<Conflict>([&]{journal.native->run("foreign-root").get();});
     rejects<Conflict>([&]{journal.native->session("foreign-session").get();});

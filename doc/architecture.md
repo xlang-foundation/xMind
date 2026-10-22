@@ -20,7 +20,8 @@ The native Executions().Open(ticket) service exposes one-shot Execute,
 Status, Cancel and Close. Product supervisors use these SDK methods with exact
 endpoint PID and scope checks; legacy execution/cancellation packet fallbacks
 are removed. Private inherited rendezvous/liveness and obsolete RPC scaffolding
-remain migration work.
+remain migration work. The product child now owns a captured native SDK worker
+context without constructing an RPC peer; runner adapters accept that context.
 
 
 The October 9 product decision defines three native components: **Agent

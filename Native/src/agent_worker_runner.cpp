@@ -9,7 +9,7 @@
 #include "agentflow/http_stream_transport.hpp"
 
 namespace agentflow {
-static AgentWorkerRunResult execute_workspace_root(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool coding){
+static AgentWorkerRunResult execute_workspace_root(AgentWorkerClientContext& peer,std::stop_token cancel,bool coding){
     if(cancel.stop_requested())throw TransportCancelled("Worker execution cancelled before admission");
     const auto admission=AgentWorkerModelClient(peer).admission(cancel);
     if(!admission.owned_request_window)throw Conflict("Worker execution requires backend-owned request windows");
@@ -37,7 +37,7 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerRpcPeer& peer,std:
     auto run=runner.execute(peer.scope().run_id,cancel,{},std::move(shared));
     return {std::move(run),journal->progress()};
 }
-AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerRpcPeer& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,false);}
-AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerRpcPeer& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,true);}
+AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerClientContext& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,false);}
+AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerClientContext& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,true);}
 
 }

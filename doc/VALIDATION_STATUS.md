@@ -1,3 +1,18 @@
+## Product child uses native worker context — 2026-10-21
+
+Product startup now owns NativeWorkerContext with captured scope and SDK service
+client; it constructs no AgentWorkerRpcPeer. Runner, journal, model and tool
+adapters accept that context interface. Exact journal/context binding remains
+checked; native contexts refuse packet calls. Controlled fixtures retain the
+legacy peer implementation while their transport migration remains pending.
+
+Frozen focused gate passes 19/19 in 130.58s, native 9bdf03f0 / SDK 1ff2a8e7.
+All 2782 project inputs and 137 native binaries remain unchanged around testing.
+Full 169-test suite not run; nothing installed. Parent peer, private inherited
+bootstrap/liveness, production planning and installed product acceptance remain
+open, alongside prior crash/heap/timing investigations.
+[Exact gate and raw evidence](evidence/process-xmind-root-native-worker-context-checkpoint-20261021.json).
+
 ## Obsolete execution packet decoder removed — 2026-10-21
 
 Deleted the unused execution-intent packet decoder and its retired-format tests.

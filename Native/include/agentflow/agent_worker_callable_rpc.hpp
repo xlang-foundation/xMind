@@ -4,9 +4,9 @@
 namespace agentflow {
 class AgentWorkerCallableClient final:public AgentCallableToolHost {
 public:
-    explicit AgentWorkerCallableClient(AgentWorkerRpcPeer& peer):peer_(peer){}
+    explicit AgentWorkerCallableClient(AgentWorkerClientContext& peer):peer_(peer){}
     AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
-private:AgentWorkerRpcPeer& peer_;
+private:AgentWorkerClientContext& peer_;
 };
 // Only the durable backend host can bind this endpoint. A local callable host or
 // worker-selected lease cannot bypass per-call and per-operation admission.

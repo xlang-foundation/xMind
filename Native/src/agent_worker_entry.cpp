@@ -32,13 +32,10 @@ int run_agent_channel_worker(int argc,char** argv){
     // This is only a transport ceiling. Every backend operation still checks
     // the captured original deadline, current lease and owner cancellation.
     const auto transport_deadline=Clock::now()+std::chrono::hours(1);
-    // The peer is a transitional local scope/client adapter only. No packet
-    // reader or packet execution handler is installed in the product child.
-    AgentWorkerRpcPeer peer(*channel,[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");},transport_deadline);
-    const auto& scope=peer.scope();
-    peer.bind_native_model(std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
+    const auto scope=channel->scope();
+    NativeWorkerContext context(scope,std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
     NativeExecutionBinding execution(scope,[&](std::stop_token stop){
-        try{const auto result=coding?execute_agent_worker_coding_root(peer,stop):execute_agent_worker_read_root(peer,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
+        try{const auto result=coding?execute_agent_worker_coding_root(context,stop):execute_agent_worker_read_root(context,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
         catch(const AgentTerminalHandoff& intent){return intent.outcome()==RunState::cancelled?RunState::cancelled:RunState::failed;}
         catch(const TransportCancelled&){return RunState::cancelled;}
         catch(const AgentWorkerRpcCancelled&){return RunState::cancelled;}

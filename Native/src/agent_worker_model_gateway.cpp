@@ -11,7 +11,7 @@ namespace {
 const char* wire_name(ProviderWire wire){switch(wire){case ProviderWire::chat_completions:return "chat-completions";case ProviderWire::responses:return "responses";case ProviderWire::anthropic_messages:return "anthropic-messages";case ProviderWire::gemini_generate_content:return "gemini-generate-content";}throw std::invalid_argument("Invalid worker provider wire");}
 class WorkerModelGateway final:public AgentModelGateway {
 public:
-    WorkerModelGateway(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):client_(peer),journal_(std::move(journal)){
+    WorkerModelGateway(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):client_(peer),journal_(std::move(journal)){
         if(!journal_||!journal_->bound_to(peer))throw std::invalid_argument("Worker model gateway requires its exact captured peer and journal");
         const auto budget=journal_->root_budget(peer.scope().root_id).get();auto identity=nlohmann::json::parse(budget.spec.provider_identity_json);
         if(peer.scope().root_id!=peer.scope().run_id)identity["model_id"]=AgentWorkerModelClient(peer).admission().model_id;
@@ -34,5 +34,5 @@ private:
     AgentWorkerModelClient client_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;std::string model_,wire_;std::atomic_flag active_=ATOMIC_FLAG_INIT;
 };
 }
-std::shared_ptr<AgentModelGateway> make_agent_worker_model_gateway(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerModelGateway>(peer,std::move(journal));}
+std::shared_ptr<AgentModelGateway> make_agent_worker_model_gateway(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerModelGateway>(peer,std::move(journal));}
 }

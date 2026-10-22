@@ -10,7 +10,7 @@ class AgentWorkerFileHost;
 // deliberately not a partial AgentRunJournal implementation with no-op writes.
 class AgentWorkerJournalClient {
 public:
-    explicit AgentWorkerJournalClient(AgentWorkerRpcPeer& peer):peer_(peer){}
+    explicit AgentWorkerJournalClient(AgentWorkerClientContext& peer):peer_(peer){}
     Run run(const std::string&);
     Session session(const std::string&);
     std::vector<Message> run_history(const std::string&);
@@ -30,7 +30,7 @@ public:
     AgentWorkerToolTurnRecord commit_read_turn(const std::string& attempt);
     AgentWorkerToolTurnRecord commit_workspace_turn(const std::string& attempt);
     Run complete_run(const std::string& final_attempt);
-private:AgentWorkerRpcPeer& peer_;
+private:AgentWorkerClientContext& peer_;
 };
 // Bind only this captured backend lease to its exact authenticated channel.
 // Completion uses backend-captured model facts, never a supplied assistant.

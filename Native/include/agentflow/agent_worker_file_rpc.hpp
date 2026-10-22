@@ -4,9 +4,9 @@
 namespace agentflow {
 class AgentWorkerFileClient final:public AgentFileToolHost {
 public:
-    explicit AgentWorkerFileClient(AgentWorkerRpcPeer& peer):peer_(peer){}
+    explicit AgentWorkerFileClient(AgentWorkerClientContext& peer):peer_(peer){}
     AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
-private:AgentWorkerRpcPeer& peer_;
+private:AgentWorkerClientContext& peer_;
 };
 // Only the durable backend host can bind this endpoint. A local file host or
 // worker-selected lease cannot bypass per-call and per-operation admission.

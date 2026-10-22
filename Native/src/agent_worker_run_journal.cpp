@@ -24,7 +24,7 @@ template<class T,class F> std::future<T> owned(F action){
 }
 class OrdinaryJournal final:public AgentWorkerOrdinaryJournal {
 public:
-    OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
+    OrdinaryJournal(AgentWorkerClientContext& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.root_id);
         if(scope_.root_id!=scope_.run_id){
             admission_=client_.child_admission(scope_.run_id);const bool graph=admission_->kind==ChildAdmissionKind::graph_agent;
@@ -36,7 +36,7 @@ public:
             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
         session_=run.session_id;
     }
-    bool bound_to(const AgentWorkerRpcPeer& peer)const noexcept override{return peer_==&peer;}
+    bool bound_to(const AgentWorkerClientContext& peer)const noexcept override{return peer_==&peer;}
     AgentWorkerJournalProgress progress()const override{std::lock_guard lock(mutex_);return progress_;}
     std::future<Run> run(std::string id)override{return owned<Run>([&]{std::lock_guard lock(mutex_);own(id);return client_.run(id);});}
     std::future<Session> session(std::string id)override{return owned<Session>([&]{std::lock_guard lock(mutex_);if(id!=session_)throw Conflict("Worker session differs from captured admission");return client_.session(id);});}
@@ -119,16 +119,16 @@ private:
     std::optional<ChildAdmissionRecord> admission_;
     void own(const std::string& id)const{if(id!=scope_.run_id)throw Conflict("Worker journal owner differs from captured root");}
     void live()const{if(cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal execution cancelled");}
-    AgentWorkerRpcPeer* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;
+    AgentWorkerClientContext* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;
     mutable std::mutex mutex_;AgentWorkerJournalProgress progress_;std::vector<ModelToolCall> calls_;std::set<std::int64_t> activity_;std::set<std::string> turns_;
 };
 }
-std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){
+std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(AgentWorkerClientContext& peer,std::stop_token cancel){
     try{return std::make_unique<OrdinaryJournal>(peer,cancel);}
     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}
 }
-std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){
+std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(AgentWorkerClientContext& peer,std::stop_token cancel){
     try{return std::make_unique<OrdinaryJournal>(peer,cancel,true);}
     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}

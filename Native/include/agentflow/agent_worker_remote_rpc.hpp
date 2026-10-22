@@ -4,9 +4,9 @@
 namespace agentflow {
 class AgentWorkerRemoteClient final:public AgentRemoteToolHost {
 public:
-    explicit AgentWorkerRemoteClient(AgentWorkerRpcPeer& peer):peer_(peer){}
+    explicit AgentWorkerRemoteClient(AgentWorkerClientContext& peer):peer_(peer){}
     AgentRemoteToolResult invoke(const AgentRemoteToolInvocation&,std::stop_token={})override;
-private:AgentWorkerRpcPeer& peer_;
+private:AgentWorkerClientContext& peer_;
 };
 // Only the durable backend host can bind this endpoint. A local remote host or
 // worker-selected lease cannot bypass per-call and per-operation admission.

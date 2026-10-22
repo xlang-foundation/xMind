@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-10-22T00:46:08.084Z",
+  "gate": {
+    "recordedAt": "2026-10-22T00:45:55.744Z",
+    "sourceParent": "7769cf765e379b5cd721d5b4e526d65afe2cc6f2",
+    "sourcePatchSha256": "8629e431087889b8444c44146ec0c8ffe9e4651d80c4774f5c8047ebf819055e",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 66860,
+      "launchedAt": "2026-10-22T00:41:09.896Z",
+      "completedAt": "2026-10-22T00:43:39.314Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2bfcf8cb1be4aed20db0fa68b665566d534ade5f9ac04f7be5dde58da0410502"
+    },
+    "test": {
+      "pid": 21496,
+      "launchedAt": "2026-10-22T00:43:42.420Z",
+      "completedAt": "2026-10-22T00:45:53.048Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8f92c6383863efb3b8f1936409ecbd087ef8a8289f9757253e3fa540c90327eb"
+    },
+    "total": 19,
+    "failed": 0,
+    "passed": 19,
+    "seconds": 130.58,
+    "projectFiles": 2782,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 137,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "9bdf03f0d446388e795e529c36c88523bb82f97c4fb4c4279e50e727e4c83530",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": [
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-gate.json",
+      "sha256": "39a4293015ce24f0fa5cc926f004c421c6458b2fa85527090c9724e24f9b0a12"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-build.log",
+      "sha256": "2bfcf8cb1be4aed20db0fa68b665566d534ade5f9ac04f7be5dde58da0410502"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-build-terminal.json",
+      "sha256": "5eabe8739482f0ea95725489617114d6a8b3e2a9f5e26cdb54fdb87937dda4e9"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-ctest.log",
+      "sha256": "8f92c6383863efb3b8f1936409ecbd087ef8a8289f9757253e3fa540c90327eb"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-ctest-terminal.json",
+      "sha256": "e7b9d63b6884d24b2a8e7e28aa55478d31f97cc9bb5417e0144fc5c00618ae50"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-LastTest.log",
+      "sha256": "d0cce1b8818abe57a685b8f3a099d1ec838130ebe837fc8cd7a4bd779ac11eaf"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-worker-context-20261021-source.patch",
+      "sha256": "8629e431087889b8444c44146ec0c8ffe9e4651d80c4774f5c8047ebf819055e"
+    }
+  ],
+  "change": "Product child owns NativeWorkerContext and SDK service client without constructing AgentWorkerRpcPeer. Runner and model/journal/tool adapters accept captured AgentWorkerClientContext. Legacy peer implements that interface for existing controlled fixtures. Journal exact-context binding retained. Native context refuses packet calls.",
+  "remaining": "Parent supervisor peer and private inherited bootstrap/liveness remain; migrate controlled fixtures and remove obsolete packet machinery. Full suite, production planning and installed product acceptance remain open.",
+  "externalClosure": "C:/xMindNativeValidation/process-xmind-native-worker-context-20261021/inputs-before-build.json",
+  "externalBinaryInventory": "C:/xMindNativeValidation/process-xmind-native-worker-context-20261021/binaries-before-test.json"
+}

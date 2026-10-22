@@ -4,9 +4,9 @@
 namespace agentflow {
 class AgentWorkerReadClient final:public AgentReadToolHost {
 public:
-    explicit AgentWorkerReadClient(AgentWorkerRpcPeer& peer):peer_(peer){}
+    explicit AgentWorkerReadClient(AgentWorkerClientContext& peer):peer_(peer){}
     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
-private:AgentWorkerRpcPeer& peer_;
+private:AgentWorkerClientContext& peer_;
 };
 AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost&,const AgentWorkerScope&);
 AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);

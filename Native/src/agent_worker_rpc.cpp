@@ -25,7 +25,6 @@ Json parse(const std::string& bytes){
 }
 std::uint64_t envelope_id(const Json& value,std::size_t fields){if(!value.is_object()||value.size()!=fields||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("id").is_number_unsigned())throw AgentWorkerProtocolError("Invalid native RPC envelope");const auto id=value.at("id").get<std::uint64_t>();if(!id||id>max_id)throw AgentWorkerProtocolError("Invalid native RPC identity");return id;}
 }
-AgentWorkerRpcRemoteError::AgentWorkerRpcRemoteError(std::string code,std::string detail):std::runtime_error("Remote native worker call failed"),code_(std::move(code)),detail_(std::move(detail)){}
 struct AgentWorkerRpcPeer::Impl {
     struct Pending {std::deque<std::string> events;bool done=false,local_failure=false;std::string result,code;};
     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};

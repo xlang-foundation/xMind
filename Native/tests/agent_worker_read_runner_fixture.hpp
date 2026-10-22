@@ -30,7 +30,7 @@ inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
     const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Read admission metadata must omit backend destinations, credentials and deadlines");
     for(const auto* payload:{R"({"include_usage":false})",R"({"deadline_ms":999999})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
     rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,{});});
-    struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
+    struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerClientContext&)const noexcept override{return false;}};
     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,foreign);});
     check(workspace->workspace_id()==peer.scope().workspace_id&&workspace->workspace_revision()==peer.scope().workspace_revision&&workspace->provider_identity_json()==journal.native->root_budget(peer.scope().root_id).get().spec.provider_identity_json,"Native read workspace must preserve exact captured metadata");
     std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{workspace->prepare_request(stopped.get_token());});

@@ -1,0 +1,531 @@
+diff --git a/Native/include/agentflow/agent_worker_callable_rpc.hpp b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+index 32a46ff2..88bdf3c3 100644
+--- a/Native/include/agentflow/agent_worker_callable_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+@@ -4,9 +4,9 @@
+ namespace agentflow {
+ class AgentWorkerCallableClient final:public AgentCallableToolHost {
+ public:
+-    explicit AgentWorkerCallableClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerCallableClient(AgentWorkerClientContext& peer):peer_(peer){}
+     AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ // Only the durable backend host can bind this endpoint. A local callable host or
+ // worker-selected lease cannot bypass per-call and per-operation admission.
+diff --git a/Native/include/agentflow/agent_worker_client_context.hpp b/Native/include/agentflow/agent_worker_client_context.hpp
+new file mode 100644
+index 00000000..93ed630e
+--- /dev/null
++++ b/Native/include/agentflow/agent_worker_client_context.hpp
+@@ -0,0 +1,41 @@
++#pragma once
++#include "agentflow/agent_worker_channel.hpp"
++#include <functional>
++
++namespace agentflow {
++class NativeWorkerModelClient;
++struct AgentWorkerRpcClosed:std::runtime_error {using std::runtime_error::runtime_error;};
++struct AgentWorkerRpcCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
++struct AgentWorkerRpcTimeout:std::runtime_error {using std::runtime_error::runtime_error;};
++class AgentWorkerRpcRemoteError:public std::runtime_error {
++public:
++    AgentWorkerRpcRemoteError(std::string code,std::string detail={})
++        :std::runtime_error("Remote native worker call failed"),code_(std::move(code)),detail_(std::move(detail)){}
++    const std::string& code()const noexcept{return code_;}
++    const std::string& detail()const noexcept{return detail_;}
++private:std::string code_,detail_;
++};
++using AgentWorkerRpcSink=std::function<void(const std::string&)>;
++// Captured worker services used by runner adapters. Product instances own only
++// native SDK clients; transport fixtures implement call() for fault injection.
++class AgentWorkerClientContext {
++public:
++    virtual ~AgentWorkerClientContext()=default;
++    virtual const AgentWorkerScope& scope()const noexcept=0;
++    virtual std::shared_ptr<NativeWorkerModelClient> native_model()const=0;
++    virtual std::string call(const std::string&,const std::string&,AgentWorkerRpcSink={},std::stop_token={})=0;
++};
++class NativeWorkerContext final:public AgentWorkerClientContext {
++public:
++    NativeWorkerContext(AgentWorkerScope scope,std::shared_ptr<NativeWorkerModelClient> client)
++        :scope_(std::move(scope)),client_(std::move(client)){
++        if(!client_)throw std::invalid_argument("Native worker context requires SDK services");
++    }
++    const AgentWorkerScope& scope()const noexcept override{return scope_;}
++    std::shared_ptr<NativeWorkerModelClient> native_model()const override{return client_;}
++    std::string call(const std::string&,const std::string&,AgentWorkerRpcSink={},std::stop_token={})override{
++        throw AgentWorkerRpcRemoteError("unsupported");
++    }
++private:AgentWorkerScope scope_;std::shared_ptr<NativeWorkerModelClient> client_;
++};
++}
+diff --git a/Native/include/agentflow/agent_worker_file_rpc.hpp b/Native/include/agentflow/agent_worker_file_rpc.hpp
+index 61d786b9..bb61e419 100644
+--- a/Native/include/agentflow/agent_worker_file_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_file_rpc.hpp
+@@ -4,9 +4,9 @@
+ namespace agentflow {
+ class AgentWorkerFileClient final:public AgentFileToolHost {
+ public:
+-    explicit AgentWorkerFileClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerFileClient(AgentWorkerClientContext& peer):peer_(peer){}
+     AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ // Only the durable backend host can bind this endpoint. A local file host or
+ // worker-selected lease cannot bypass per-call and per-operation admission.
+diff --git a/Native/include/agentflow/agent_worker_journal_rpc.hpp b/Native/include/agentflow/agent_worker_journal_rpc.hpp
+index a42156ab..b5762dac 100644
+--- a/Native/include/agentflow/agent_worker_journal_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_journal_rpc.hpp
+@@ -10,7 +10,7 @@ class AgentWorkerFileHost;
+ // deliberately not a partial AgentRunJournal implementation with no-op writes.
+ class AgentWorkerJournalClient {
+ public:
+-    explicit AgentWorkerJournalClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerJournalClient(AgentWorkerClientContext& peer):peer_(peer){}
+     Run run(const std::string&);
+     Session session(const std::string&);
+     std::vector<Message> run_history(const std::string&);
+@@ -30,7 +30,7 @@ public:
+     AgentWorkerToolTurnRecord commit_read_turn(const std::string& attempt);
+     AgentWorkerToolTurnRecord commit_workspace_turn(const std::string& attempt);
+     Run complete_run(const std::string& final_attempt);
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ // Bind only this captured backend lease to its exact authenticated channel.
+ // Completion uses backend-captured model facts, never a supplied assistant.
+diff --git a/Native/include/agentflow/agent_worker_model_gateway.hpp b/Native/include/agentflow/agent_worker_model_gateway.hpp
+index af21903a..941c14ed 100644
+--- a/Native/include/agentflow/agent_worker_model_gateway.hpp
++++ b/Native/include/agentflow/agent_worker_model_gateway.hpp
+@@ -1,6 +1,6 @@
+ #pragma once
+ #include "agentflow/agent_model_gateway.hpp"
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ 
+ namespace agentflow {
+ class AgentWorkerOrdinaryJournal;
+@@ -10,5 +10,5 @@ class AgentWorkerOrdinaryJournal;
+ // and compaction require separate capabilities and currently reject explicitly.
+ // The peer must outlive the gateway and its retained journal.
+ std::shared_ptr<AgentModelGateway> make_agent_worker_model_gateway(
+-    AgentWorkerRpcPeer&,std::shared_ptr<AgentWorkerOrdinaryJournal>);
++    AgentWorkerClientContext&,std::shared_ptr<AgentWorkerOrdinaryJournal>);
+ }
+diff --git a/Native/include/agentflow/agent_worker_model_rpc.hpp b/Native/include/agentflow/agent_worker_model_rpc.hpp
+index 7ae2c77c..00dbebca 100644
+--- a/Native/include/agentflow/agent_worker_model_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_model_rpc.hpp
+@@ -5,12 +5,12 @@
+ namespace agentflow {
+ class AgentWorkerModelClient {
+ public:
+-    explicit AgentWorkerModelClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerModelClient(AgentWorkerClientContext& peer):peer_(peer){}
+     ModelCompletion complete(const std::string& attempt,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+     ModelRequest prepare_request(std::stop_token={});
+     ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
+     AgentWorkerModelAdmission admission(std::stop_token={});
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ // Bind this one authorized inference host to its exact authenticated channel.
+ // No dynamic service lookup, provider config, credentials or SQL is exposed.
+diff --git a/Native/include/agentflow/agent_worker_process_rpc.hpp b/Native/include/agentflow/agent_worker_process_rpc.hpp
+index 3bcc3b11..e8d4a9b9 100644
+--- a/Native/include/agentflow/agent_worker_process_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_process_rpc.hpp
+@@ -4,9 +4,9 @@
+ namespace agentflow {
+ class AgentWorkerProcessClient final:public AgentProcessOwnerHost {
+ public:
+-    explicit AgentWorkerProcessClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerProcessClient(AgentWorkerClientContext& peer):peer_(peer){}
+     AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token={})override;
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ // Only the durable backend host can bind this endpoint. A local process host or
+ // worker-selected lease cannot bypass per-call and per-operation admission.
+diff --git a/Native/include/agentflow/agent_worker_read_rpc.hpp b/Native/include/agentflow/agent_worker_read_rpc.hpp
+index 84ac4c8e..9ec7bc74 100644
+--- a/Native/include/agentflow/agent_worker_read_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_read_rpc.hpp
+@@ -4,9 +4,9 @@
+ namespace agentflow {
+ class AgentWorkerReadClient final:public AgentReadToolHost {
+ public:
+-    explicit AgentWorkerReadClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerReadClient(AgentWorkerClientContext& peer):peer_(peer){}
+     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost&,const AgentWorkerScope&);
+ AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
+diff --git a/Native/include/agentflow/agent_worker_read_workspace.hpp b/Native/include/agentflow/agent_worker_read_workspace.hpp
+index 4f8221fa..4f92d144 100644
+--- a/Native/include/agentflow/agent_worker_read_workspace.hpp
++++ b/Native/include/agentflow/agent_worker_read_workspace.hpp
+@@ -1,7 +1,7 @@
+ #pragma once
+ #include "agentflow/agent_runner_read_workspace.hpp"
+ #include "agentflow/agent_runner_coding_workspace.hpp"
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ 
+ namespace agentflow {
+ class AgentWorkerOrdinaryJournal;
+@@ -10,7 +10,7 @@ class AgentWorkerOrdinaryJournal;
+ // request admission and native read authorization remain authoritative. The
+ // peer must outlive this adapter and every read host obtained from it.
+ std::shared_ptr<AgentRunnerReadWorkspace> make_agent_worker_read_workspace(
+-    AgentWorkerRpcPeer&,std::shared_ptr<AgentWorkerOrdinaryJournal>);
++    AgentWorkerClientContext&,std::shared_ptr<AgentWorkerOrdinaryJournal>);
+ std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(
+-    AgentWorkerRpcPeer&,std::shared_ptr<AgentWorkerOrdinaryJournal>);
++    AgentWorkerClientContext&,std::shared_ptr<AgentWorkerOrdinaryJournal>);
+ }
+diff --git a/Native/include/agentflow/agent_worker_remote_rpc.hpp b/Native/include/agentflow/agent_worker_remote_rpc.hpp
+index 69a24129..533da8d2 100644
+--- a/Native/include/agentflow/agent_worker_remote_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_remote_rpc.hpp
+@@ -4,9 +4,9 @@
+ namespace agentflow {
+ class AgentWorkerRemoteClient final:public AgentRemoteToolHost {
+ public:
+-    explicit AgentWorkerRemoteClient(AgentWorkerRpcPeer& peer):peer_(peer){}
++    explicit AgentWorkerRemoteClient(AgentWorkerClientContext& peer):peer_(peer){}
+     AgentRemoteToolResult invoke(const AgentRemoteToolInvocation&,std::stop_token={})override;
+-private:AgentWorkerRpcPeer& peer_;
++private:AgentWorkerClientContext& peer_;
+ };
+ // Only the durable backend host can bind this endpoint. A local remote host or
+ // worker-selected lease cannot bypass per-call and per-operation admission.
+diff --git a/Native/include/agentflow/agent_worker_rpc.hpp b/Native/include/agentflow/agent_worker_rpc.hpp
+index 3ae9269f..168ed790 100644
+--- a/Native/include/agentflow/agent_worker_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_rpc.hpp
+@@ -1,21 +1,9 @@
+ #pragma once
+-#include "agentflow/agent_worker_channel.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include <functional>
+ 
+ namespace agentflow {
+-class NativeWorkerModelClient;
+ class NativeExecutionClient;
+-struct AgentWorkerRpcClosed:std::runtime_error {using std::runtime_error::runtime_error;};
+-struct AgentWorkerRpcCancelled:std::runtime_error {using std::runtime_error::runtime_error;};
+-struct AgentWorkerRpcTimeout:std::runtime_error {using std::runtime_error::runtime_error;};
+-class AgentWorkerRpcRemoteError:public std::runtime_error {
+-public:
+-    AgentWorkerRpcRemoteError(std::string code,std::string detail={});
+-    const std::string& code()const noexcept{return code_;}
+-    const std::string& detail()const noexcept{return detail_;}
+-private:std::string code_,detail_;
+-};
+-using AgentWorkerRpcSink=std::function<void(const std::string&)>;
+ using AgentWorkerRpcHandler=std::function<std::string(const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)>;
+ // Multiplexed owned-value transport, not method authorization. One bounded
+ // reader routes replies/events; handlers run separately, so a streaming callback
+@@ -23,21 +11,21 @@ using AgentWorkerRpcHandler=std::function<std::string(const std::string& method,
+ // every method against captured admission and honor cancellation/deadlines.
+ // This object exclusively owns channel I/O. Owner calls stop(), then joins its
+ // caller threads before destruction; stop must not run inside a handler/sink.
+-class AgentWorkerRpcPeer {
++class AgentWorkerRpcPeer:public AgentWorkerClientContext {
+ public:
+     AgentWorkerRpcPeer(AgentWorkerChannel&,AgentWorkerRpcHandler,AgentWorkerChannel::Deadline);
+-    ~AgentWorkerRpcPeer();
++    ~AgentWorkerRpcPeer()override;
+     AgentWorkerRpcPeer(const AgentWorkerRpcPeer&)=delete;
+     AgentWorkerRpcPeer& operator=(const AgentWorkerRpcPeer&)=delete;
+     // Start only after handler dependencies (including nested-call adapters)
+     // are fully constructed. Start once; a closed session cannot restart.
+     void start();
+     void bind_native_model(std::shared_ptr<NativeWorkerModelClient>);
+-    std::shared_ptr<NativeWorkerModelClient> native_model()const;
++    std::shared_ptr<NativeWorkerModelClient> native_model()const override;
+     void bind_native_execution(std::shared_ptr<NativeExecutionClient>);
+     std::shared_ptr<NativeExecutionClient> native_execution()const;
+     AgentWorkerChannel::Deadline execution_deadline()const noexcept;
+-    std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={});
++    std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={})override;
+     bool alive()const;
+     void wait_closed();
+     void stop();
+@@ -45,7 +33,7 @@ public:
+     // joins handlers, closes this exact child's channel, then observes its exit.
+     // A wait timeout retains process ownership and never kills or restarts it.
+     std::uint32_t drain(AgentWorkerProcess&,AgentWorkerChannel::Deadline);
+-    const AgentWorkerScope& scope()const noexcept;
++    const AgentWorkerScope& scope()const noexcept override;
+ private:struct Impl;std::unique_ptr<Impl> impl_;
+ };
+ }
+diff --git a/Native/include/agentflow/agent_worker_run_journal.hpp b/Native/include/agentflow/agent_worker_run_journal.hpp
+index b5b36cf1..32a11d9c 100644
+--- a/Native/include/agentflow/agent_worker_run_journal.hpp
++++ b/Native/include/agentflow/agent_worker_run_journal.hpp
+@@ -1,6 +1,6 @@
+ #pragma once
+ #include "agentflow/agent_run_journal.hpp"
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include <memory>
+ 
+ namespace agentflow {
+@@ -14,11 +14,11 @@ struct AgentWorkerJournalProgress {
+ // not live execution authority. The peer must outlive this serialized adapter.
+ class AgentWorkerOrdinaryJournal:public AgentRunJournal {
+ public:
+-    virtual bool bound_to(const AgentWorkerRpcPeer&)const noexcept=0;
++    virtual bool bound_to(const AgentWorkerClientContext&)const noexcept=0;
+     virtual AgentWorkerJournalProgress progress()const=0;
+ };
+ std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(
+-    AgentWorkerRpcPeer&,std::stop_token owner_cancel={});
++    AgentWorkerClientContext&,std::stop_token owner_cancel={});
+ std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(
+-    AgentWorkerRpcPeer&,std::stop_token owner_cancel={});
++    AgentWorkerClientContext&,std::stop_token owner_cancel={});
+ }
+diff --git a/Native/include/agentflow/agent_worker_runner.hpp b/Native/include/agentflow/agent_worker_runner.hpp
+index be29567d..e676c71e 100644
+--- a/Native/include/agentflow/agent_worker_runner.hpp
++++ b/Native/include/agentflow/agent_worker_runner.hpp
+@@ -6,10 +6,10 @@ struct AgentWorkerRunResult {
+     Run run;
+     AgentWorkerJournalProgress progress;
+ };
+-// Execute the captured ordinary read root using only native RPC adapters.
+-// The peer must remain alive through this call and supervisor drain. Failure
++// Execute the captured ordinary read root using captured worker service adapters.
++// The context must remain alive through this call and supervisor drain. Failure
+ // and cancellation propagate, including AgentTerminalHandoff; no Run is forged.
+ // Backend-owned request windows are required; no child policy is substituted.
+-AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerRpcPeer&,std::stop_token cancel={});
+-AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerRpcPeer&,std::stop_token cancel={});
++AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerClientContext&,std::stop_token cancel={});
++AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerClientContext&,std::stop_token cancel={});
+ }
+diff --git a/Native/src/agent_worker_entry.cpp b/Native/src/agent_worker_entry.cpp
+index 84280f8b..f40c416b 100644
+--- a/Native/src/agent_worker_entry.cpp
++++ b/Native/src/agent_worker_entry.cpp
+@@ -32,13 +32,10 @@ int run_agent_channel_worker(int argc,char** argv){
+     // This is only a transport ceiling. Every backend operation still checks
+     // the captured original deadline, current lease and owner cancellation.
+     const auto transport_deadline=Clock::now()+std::chrono::hours(1);
+-    // The peer is a transitional local scope/client adapter only. No packet
+-    // reader or packet execution handler is installed in the product child.
+-    AgentWorkerRpcPeer peer(*channel,[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");},transport_deadline);
+-    const auto& scope=peer.scope();
+-    peer.bind_native_model(std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
++    const auto scope=channel->scope();
++    NativeWorkerContext context(scope,std::make_shared<NativeWorkerModelClient>(std::move(access),scope.root_id,scope.run_id,scope.workspace_id,scope.generation,scope.workspace_revision));
+     NativeExecutionBinding execution(scope,[&](std::stop_token stop){
+-        try{const auto result=coding?execute_agent_worker_coding_root(peer,stop):execute_agent_worker_read_root(peer,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
++        try{const auto result=coding?execute_agent_worker_coding_root(context,stop):execute_agent_worker_read_root(context,stop);return result.run.state==RunState::completed?RunState::completed:RunState::failed;}
+         catch(const AgentTerminalHandoff& intent){return intent.outcome()==RunState::cancelled?RunState::cancelled:RunState::failed;}
+         catch(const TransportCancelled&){return RunState::cancelled;}
+         catch(const AgentWorkerRpcCancelled&){return RunState::cancelled;}
+diff --git a/Native/src/agent_worker_journal_rpc.cpp b/Native/src/agent_worker_journal_rpc.cpp
+index 81cf2b4c..cf8a0940 100644
+--- a/Native/src/agent_worker_journal_rpc.cpp
++++ b/Native/src/agent_worker_journal_rpc.cpp
+@@ -43,12 +43,12 @@ AgentWorkerJournalValue decode(AgentWorkerJournalReadKind k,const std::string& b
+         }invalid();
+     }catch(const Json::exception&){invalid();}
+ }
+-AgentWorkerJournalValue call(AgentWorkerRpcPeer& peer,const std::string& method,const std::string& target,std::int64_t after=0){
++AgentWorkerJournalValue call(AgentWorkerClientContext& peer,const std::string& method,const std::string& target,std::int64_t after=0){
+     try{std::string bytes;if(auto native=peer.native_model()){switch(kind(method)){case AgentWorkerJournalReadKind::run:bytes=native->journal_run(target);break;case AgentWorkerJournalReadKind::session:bytes=native->journal_session(target);break;case AgentWorkerJournalReadKind::history:bytes=native->journal_history(target);break;case AgentWorkerJournalReadKind::events:bytes=native->journal_events(target,after);break;case AgentWorkerJournalReadKind::root_budget:bytes=native->journal_root_budget(target);break;case AgentWorkerJournalReadKind::child_admission:bytes=native->journal_child_admission(target);break;}}else bytes=peer.call(method,Json{{"target",target},{"after",after}}.dump());return decode(kind(method),bytes);}
+     catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker journal read rejected");if(error.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker journal owner cancelled");if(error.code()=="timeout")throw AgentWorkerRpcTimeout("Worker journal deadline elapsed");throw;}
+ }
+ std::string attempt_id(const Json& v){auto id=text(v);if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)invalid();return id;}
+-ModelCallReservation attempt_call(AgentWorkerRpcPeer& peer,const std::string& method,const std::string& attempt,const std::string& expected_state){
++ModelCallReservation attempt_call(AgentWorkerClientContext& peer,const std::string& method,const std::string& attempt,const std::string& expected_state){
+     try{const auto v=parse((peer.native_model()?(method=="journal.reserve_model"?peer.native_model()->journal_reserve_model(attempt):method=="journal.start_model"?peer.native_model()->journal_start_model(attempt):peer.native_model()->journal_finish_model(attempt)):peer.call(method,Json{{"attempt_id",attempt}}.dump())));object(v,8);const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
+         if(text(v.at("root_run_id"))!=scope.root_id||text(v.at("owner_run_id"))!=scope.run_id||(attempt_id(v.at("attempt_id"))!=attempt&&method!="journal.reserve_model")||text(v.at("role"))!=(role==ModelCallRole::parent?"parent":"leaf")||text(v.at("state"))!=expected_state||text(v.at("purpose"))!="inference")invalid();
+         const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(scope.root_id==scope.run_id){if(budget.spec.policy_id=="native.delegation"){if(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else{const auto child=AgentWorkerJournalClient(peer).child_admission(scope.run_id);if(budget.spec.policy_id=="native.graph-context"){if(child.kind!=ChildAdmissionKind::graph_agent||budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)invalid();}else if(budget.spec.policy_id!="native.delegation"||child.kind!=ChildAdmissionKind::delegated_leaf)invalid();}}else if(attempt_id(v.at("attempt_id"))!=attempt)invalid();
+diff --git a/Native/src/agent_worker_model_gateway.cpp b/Native/src/agent_worker_model_gateway.cpp
+index 475f7691..59fab1c9 100644
+--- a/Native/src/agent_worker_model_gateway.cpp
++++ b/Native/src/agent_worker_model_gateway.cpp
+@@ -11,7 +11,7 @@ namespace {
+ const char* wire_name(ProviderWire wire){switch(wire){case ProviderWire::chat_completions:return "chat-completions";case ProviderWire::responses:return "responses";case ProviderWire::anthropic_messages:return "anthropic-messages";case ProviderWire::gemini_generate_content:return "gemini-generate-content";}throw std::invalid_argument("Invalid worker provider wire");}
+ class WorkerModelGateway final:public AgentModelGateway {
+ public:
+-    WorkerModelGateway(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):client_(peer),journal_(std::move(journal)){
++    WorkerModelGateway(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):client_(peer),journal_(std::move(journal)){
+         if(!journal_||!journal_->bound_to(peer))throw std::invalid_argument("Worker model gateway requires its exact captured peer and journal");
+         const auto budget=journal_->root_budget(peer.scope().root_id).get();auto identity=nlohmann::json::parse(budget.spec.provider_identity_json);
+         if(peer.scope().root_id!=peer.scope().run_id)identity["model_id"]=AgentWorkerModelClient(peer).admission().model_id;
+@@ -34,5 +34,5 @@ private:
+     AgentWorkerModelClient client_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;std::string model_,wire_;std::atomic_flag active_=ATOMIC_FLAG_INIT;
+ };
+ }
+-std::shared_ptr<AgentModelGateway> make_agent_worker_model_gateway(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerModelGateway>(peer,std::move(journal));}
++std::shared_ptr<AgentModelGateway> make_agent_worker_model_gateway(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerModelGateway>(peer,std::move(journal));}
+ }
+diff --git a/Native/src/agent_worker_read_workspace.cpp b/Native/src/agent_worker_read_workspace.cpp
+index 14cdd58e..567e4e30 100644
+--- a/Native/src/agent_worker_read_workspace.cpp
++++ b/Native/src/agent_worker_read_workspace.cpp
+@@ -17,7 +17,7 @@ namespace agentflow {
+ namespace {
+ class WorkerReadWorkspace final:public AgentRunnerReadWorkspace {
+ public:
+-    WorkerReadWorkspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):peer_(peer),model_(peer),journal_(std::move(journal)),scope_(peer.scope()){
++    WorkerReadWorkspace(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):peer_(peer),model_(peer),journal_(std::move(journal)),scope_(peer.scope()){
+         if(!journal_||!journal_->bound_to(peer))throw std::invalid_argument("Worker read workspace requires its exact captured peer and journal");
+         if(scope_.workspace_id.empty()||(scope_.workspace_id=="workspace:none"&&scope_.root_id!=scope_.run_id)||scope_.workspace_revision<=0||scope_.workspace_revision>9007199254740991LL)
+             throw std::invalid_argument("Worker read workspace has no captured native workspace");
+@@ -36,15 +36,15 @@ public:
+     ModelRequest rebuild_request(const std::string& attempt,const ModelRequest& request,std::stop_token cancel)override{return model_.rebuild_request(attempt,request,cancel);}
+     std::unique_ptr<AgentReadToolHost> read_host()override{return std::make_unique<AgentWorkerReadClient>(peer_);}
+ private:
+-    AgentWorkerRpcPeer& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;RootBudgetSpec budget_;std::chrono::steady_clock::time_point deadline_;
++    AgentWorkerClientContext& peer_;AgentWorkerModelClient model_;std::shared_ptr<AgentWorkerOrdinaryJournal> journal_;AgentWorkerScope scope_;std::string provider_identity_,policy_id_;RootBudgetSpec budget_;std::chrono::steady_clock::time_point deadline_;
+ };
+ }
+-std::shared_ptr<AgentRunnerReadWorkspace> make_agent_worker_read_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerReadWorkspace>(peer,std::move(journal));}
++std::shared_ptr<AgentRunnerReadWorkspace> make_agent_worker_read_workspace(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerReadWorkspace>(peer,std::move(journal));}
+ namespace {
+ class WorkerCodingWorkspace final:public AgentRunnerCodingWorkspace {
+-    AgentWorkerRpcPeer& peer_;std::shared_ptr<AgentRunnerReadWorkspace> read_;
++    AgentWorkerClientContext& peer_;std::shared_ptr<AgentRunnerReadWorkspace> read_;
+ public:
+-    WorkerCodingWorkspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):peer_(peer),read_(make_agent_worker_read_workspace(peer,std::move(journal))){}
++    WorkerCodingWorkspace(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal):peer_(peer),read_(make_agent_worker_read_workspace(peer,std::move(journal))){}
+     std::string workspace_id()const override{return read_->workspace_id();}
+     std::int64_t workspace_revision()const override{return read_->workspace_revision();}
+     std::string provider_identity_json()const override{return read_->provider_identity_json();}
+@@ -70,6 +70,6 @@ public:
+     }
+ };
+ }
+-std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerRpcPeer& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}
++std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}
+ 
+ }
+diff --git a/Native/src/agent_worker_rpc.cpp b/Native/src/agent_worker_rpc.cpp
+index 17aa0cbe..946ba991 100644
+--- a/Native/src/agent_worker_rpc.cpp
++++ b/Native/src/agent_worker_rpc.cpp
+@@ -25,7 +25,6 @@ Json parse(const std::string& bytes){
+ }
+ std::uint64_t envelope_id(const Json& value,std::size_t fields){if(!value.is_object()||value.size()!=fields||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("id").is_number_unsigned())throw AgentWorkerProtocolError("Invalid native RPC envelope");const auto id=value.at("id").get<std::uint64_t>();if(!id||id>max_id)throw AgentWorkerProtocolError("Invalid native RPC identity");return id;}
+ }
+-AgentWorkerRpcRemoteError::AgentWorkerRpcRemoteError(std::string code,std::string detail):std::runtime_error("Remote native worker call failed"),code_(std::move(code)),detail_(std::move(detail)){}
+ struct AgentWorkerRpcPeer::Impl {
+     struct Pending {std::deque<std::string> events;bool done=false,local_failure=false;std::string result,code;};
+     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
+diff --git a/Native/src/agent_worker_run_journal.cpp b/Native/src/agent_worker_run_journal.cpp
+index c16dd635..96fc343e 100644
+--- a/Native/src/agent_worker_run_journal.cpp
++++ b/Native/src/agent_worker_run_journal.cpp
+@@ -24,7 +24,7 @@ template<class T,class F> std::future<T> owned(F action){
+ }
+ class OrdinaryJournal final:public AgentWorkerOrdinaryJournal {
+ public:
+-    OrdinaryJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
++    OrdinaryJournal(AgentWorkerClientContext& peer,std::stop_token cancel,bool workspace=false):peer_(&peer),client_(peer),scope_(peer.scope()),cancel_(cancel),workspace_(workspace){
+         const auto run=client_.run(scope_.run_id);const auto budget=client_.root_budget(scope_.root_id);
+         if(scope_.root_id!=scope_.run_id){
+             admission_=client_.child_admission(scope_.run_id);const bool graph=admission_->kind==ChildAdmissionKind::graph_agent;
+@@ -36,7 +36,7 @@ public:
+             throw Conflict("Worker journal admission is not an ordinary non-delegating root");
+         session_=run.session_id;
+     }
+-    bool bound_to(const AgentWorkerRpcPeer& peer)const noexcept override{return peer_==&peer;}
++    bool bound_to(const AgentWorkerClientContext& peer)const noexcept override{return peer_==&peer;}
+     AgentWorkerJournalProgress progress()const override{std::lock_guard lock(mutex_);return progress_;}
+     std::future<Run> run(std::string id)override{return owned<Run>([&]{std::lock_guard lock(mutex_);own(id);return client_.run(id);});}
+     std::future<Session> session(std::string id)override{return owned<Session>([&]{std::lock_guard lock(mutex_);if(id!=session_)throw Conflict("Worker session differs from captured admission");return client_.session(id);});}
+@@ -119,16 +119,16 @@ private:
+     std::optional<ChildAdmissionRecord> admission_;
+     void own(const std::string& id)const{if(id!=scope_.run_id)throw Conflict("Worker journal owner differs from captured root");}
+     void live()const{if(cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Worker journal execution cancelled");}
+-    AgentWorkerRpcPeer* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;
++    AgentWorkerClientContext* peer_;AgentWorkerJournalClient client_;AgentWorkerScope scope_;std::stop_token cancel_;std::string session_;bool workspace_=false;
+     mutable std::mutex mutex_;AgentWorkerJournalProgress progress_;std::vector<ModelToolCall> calls_;std::set<std::int64_t> activity_;std::set<std::string> turns_;
+ };
+ }
+-std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){
++std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(AgentWorkerClientContext& peer,std::stop_token cancel){
+     try{return std::make_unique<OrdinaryJournal>(peer,cancel);}
+     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
+     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}
+ }
+-std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(AgentWorkerRpcPeer& peer,std::stop_token cancel){
++std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(AgentWorkerClientContext& peer,std::stop_token cancel){
+     try{return std::make_unique<OrdinaryJournal>(peer,cancel,true);}
+     catch(const AgentWorkerRpcCancelled&){throw TransportCancelled("Worker journal admission cancelled");}
+     catch(const AgentWorkerRpcTimeout&){throw TransportTimeout("Worker journal admission deadline elapsed");}
+diff --git a/Native/src/agent_worker_runner.cpp b/Native/src/agent_worker_runner.cpp
+index 3c198eac..88ca5707 100644
+--- a/Native/src/agent_worker_runner.cpp
++++ b/Native/src/agent_worker_runner.cpp
+@@ -9,7 +9,7 @@
+ #include "agentflow/http_stream_transport.hpp"
+ 
+ namespace agentflow {
+-static AgentWorkerRunResult execute_workspace_root(AgentWorkerRpcPeer& peer,std::stop_token cancel,bool coding){
++static AgentWorkerRunResult execute_workspace_root(AgentWorkerClientContext& peer,std::stop_token cancel,bool coding){
+     if(cancel.stop_requested())throw TransportCancelled("Worker execution cancelled before admission");
+     const auto admission=AgentWorkerModelClient(peer).admission(cancel);
+     if(!admission.owned_request_window)throw Conflict("Worker execution requires backend-owned request windows");
+@@ -37,7 +37,7 @@ static AgentWorkerRunResult execute_workspace_root(AgentWorkerRpcPeer& peer,std:
+     auto run=runner.execute(peer.scope().run_id,cancel,{},std::move(shared));
+     return {std::move(run),journal->progress()};
+ }
+-AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerRpcPeer& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,false);}
+-AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerRpcPeer& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,true);}
++AgentWorkerRunResult execute_agent_worker_read_root(AgentWorkerClientContext& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,false);}
++AgentWorkerRunResult execute_agent_worker_coding_root(AgentWorkerClientContext& peer,std::stop_token cancel){return execute_workspace_root(peer,cancel,true);}
+ 
+ }
+diff --git a/Native/tests/agent_worker_read_runner_fixture.hpp b/Native/tests/agent_worker_read_runner_fixture.hpp
+index 59fdf9e3..f49172a7 100644
+--- a/Native/tests/agent_worker_read_runner_fixture.hpp
++++ b/Native/tests/agent_worker_read_runner_fixture.hpp
+@@ -30,7 +30,7 @@ inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
+     const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Read admission metadata must omit backend destinations, credentials and deadlines");
+     for(const auto* payload:{R"({"include_usage":false})",R"({"deadline_ms":999999})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
+     rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,{});});
+-    struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
++    struct ForeignBinding final:worker_runner_fixture::ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerClientContext&)const noexcept override{return false;}};
+     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_read_workspace(peer,foreign);});
+     check(workspace->workspace_id()==peer.scope().workspace_id&&workspace->workspace_revision()==peer.scope().workspace_revision&&workspace->provider_identity_json()==journal.native->root_budget(peer.scope().root_id).get().spec.provider_identity_json,"Native read workspace must preserve exact captured metadata");
+     std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{workspace->prepare_request(stopped.get_token());});
+diff --git a/Native/tests/agent_worker_runner_fixture.hpp b/Native/tests/agent_worker_runner_fixture.hpp
+index 33286b8e..744a99a8 100644
+--- a/Native/tests/agent_worker_runner_fixture.hpp
++++ b/Native/tests/agent_worker_runner_fixture.hpp
+@@ -24,7 +24,7 @@ template<class T,class F> std::future<T> ready(F f){std::promise<T> p;auto resul
+ class ChildJournal:public AgentWorkerOrdinaryJournal {
+ public:
+     explicit ChildJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
+-    bool bound_to(const AgentWorkerRpcPeer& peer)const noexcept override{return native->bound_to(peer);}
++    bool bound_to(const AgentWorkerClientContext& peer)const noexcept override{return native->bound_to(peer);}
+     AgentWorkerJournalProgress progress()const override{return native->progress();}
+     void own(const std::string& id){if(id!=peer.scope().run_id)throw Conflict("Child journal owner differs");}
+     void refresh(){const auto actual=native->progress();current_attempt=actual.current_attempt;canonical=actual.canonical_assistant;ordinal=actual.model_event_ordinal;}
+@@ -121,7 +121,7 @@ inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
+     std::stop_source metadata_stop;metadata_stop.request_stop();rejects<TransportCancelled>([&]{AgentWorkerModelClient(peer).admission(metadata_stop.get_token());});
+     const auto model_only=make_agent_worker_read_workspace(peer,journal.native);check(model_only->workspace_id()=="workspace:none"&&model_only->captured_budget()->workspace_identity=="workspace:none","Model-only proxy must retain its exact absence of workspace authority");
+     rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,{});});
+-    struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerRpcPeer&)const noexcept override{return false;}};
++    struct ForeignBinding final:ChildJournal {using ChildJournal::ChildJournal;bool bound_to(const AgentWorkerClientContext&)const noexcept override{return false;}};
+     auto foreign=std::make_shared<ForeignBinding>(peer);rejects<std::invalid_argument>([&]{make_agent_worker_model_gateway(peer,foreign);});
+     rejects<Conflict>([&]{journal.native->run("foreign-root").get();});
+     rejects<Conflict>([&]{journal.native->session("foreign-session").get();});

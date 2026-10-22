@@ -1,6 +1,6 @@
 #pragma once
 #include "agentflow/agent_run_journal.hpp"
-#include "agentflow/agent_worker_rpc.hpp"
+#include "agentflow/agent_worker_client_context.hpp"
 #include <memory>
 
 namespace agentflow {
@@ -14,11 +14,11 @@ struct AgentWorkerJournalProgress {
 // not live execution authority. The peer must outlive this serialized adapter.
 class AgentWorkerOrdinaryJournal:public AgentRunJournal {
 public:
-    virtual bool bound_to(const AgentWorkerRpcPeer&)const noexcept=0;
+    virtual bool bound_to(const AgentWorkerClientContext&)const noexcept=0;
     virtual AgentWorkerJournalProgress progress()const=0;
 };
 std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_ordinary_journal(
-    AgentWorkerRpcPeer&,std::stop_token owner_cancel={});
+    AgentWorkerClientContext&,std::stop_token owner_cancel={});
 std::unique_ptr<AgentWorkerOrdinaryJournal> make_agent_worker_coding_journal(
-    AgentWorkerRpcPeer&,std::stop_token owner_cancel={});
+    AgentWorkerClientContext&,std::stop_token owner_cancel={});
 }
