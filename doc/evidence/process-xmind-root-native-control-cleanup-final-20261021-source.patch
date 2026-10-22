@@ -1,0 +1,71 @@
+diff --git a/Native/include/agentflow/agent_worker_control.hpp b/Native/include/agentflow/agent_worker_control.hpp
+index bf76df3a..60f25022 100644
+--- a/Native/include/agentflow/agent_worker_control.hpp
++++ b/Native/include/agentflow/agent_worker_control.hpp
+@@ -1,12 +1,10 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_channel.hpp"
+ #include "agentflow/records.hpp"
+ 
+ namespace agentflow {
++class NativeExecutionClient;
+ // A child reply is an intent only. The backend must separately observe physical
+ // exit and canonical durable facts before retiring ownership or freeing capacity.
+ std::shared_ptr<NativeExecutionClient> connect_agent_worker_execution(AgentWorkerProcess&,AgentWorkerChannel::Deadline,std::stop_token={});
+-void connect_agent_worker_execution(AgentWorkerRpcPeer&,AgentWorkerProcess&,AgentWorkerChannel::Deadline,std::stop_token={});
+-RunState request_agent_worker_execution(AgentWorkerRpcPeer&);
+-void request_agent_worker_cancellation(AgentWorkerRpcPeer&);
+ }
+diff --git a/Native/src/agent_worker_control.cpp b/Native/src/agent_worker_control.cpp
+index 797c8b3c..ce9333c3 100644
+--- a/Native/src/agent_worker_control.cpp
++++ b/Native/src/agent_worker_control.cpp
+@@ -10,15 +10,4 @@ std::shared_ptr<NativeExecutionClient> connect_agent_worker_execution(AgentWorke
+     const auto value=Json::parse(mcp_compact_object(ready.payload));if(value.size()!=4||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("endpoint").is_string()||!value.at("ticket").is_string()||!value.at("pid").is_number_unsigned()||value.at("pid").get<std::uint64_t>()!=worker.pid())throw AgentWorkerProtocolError("Native execution rendezvous identity differs");
+     auto client=std::make_shared<NativeExecutionClient>(NativeExecutionAccess{value.at("endpoint").get<std::string>(),value.at("ticket").get<std::string>(),worker.pid()},worker.channel().scope());if(stop.stop_requested())throw AgentWorkerChannelCancelled("Native execution rendezvous cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerChannelTimeout("Native execution rendezvous expired");return client;
+ }
+-void connect_agent_worker_execution(AgentWorkerRpcPeer& peer,AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
+-    if(peer.scope()!=worker.channel().scope())throw AgentWorkerProtocolError("Native execution rendezvous scope differs");peer.bind_native_execution(connect_agent_worker_execution(worker,deadline,stop));
+-}
+-RunState request_agent_worker_execution(AgentWorkerRpcPeer& peer){
+-    if(auto native=peer.native_execution())return native->execute(peer.execution_deadline());
+-    throw AgentWorkerRpcClosed("Native execution control is not bound");
+-}
+-void request_agent_worker_cancellation(AgentWorkerRpcPeer& peer){
+-    if(auto native=peer.native_execution()){native->cancel();return;}
+-    throw AgentWorkerRpcClosed("Native execution control is not bound");
+-}
+ }
+diff --git a/Native/tests/agent_worker_context_fixture.hpp b/Native/tests/agent_worker_context_fixture.hpp
+index 77dc4ad1..6ee005c3 100644
+--- a/Native/tests/agent_worker_context_fixture.hpp
++++ b/Native/tests/agent_worker_context_fixture.hpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/agent_worker_read_context.hpp"
+ #include "agentflow/agent_worker_read_owner.hpp"
+ #include "agentflow/agent_worker_control.hpp"
++#include "agentflow/agent_worker_native_execution.hpp"
+ #include <future>
+ #include <thread>
+ namespace worker_context_fixture {
+@@ -90,8 +91,8 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+         }
+         startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
+     }
+-    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)connect_agent_worker_execution(peer,*worker,deadline);peer.start();
+-    const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(request_agent_worker_execution(peer))}}.dump():peer.call("fixture.run","{}");};
++    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)peer.bind_native_execution(connect_agent_worker_execution(*worker,deadline));peer.start();
++    const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(peer.native_execution()->execute(deadline))}}.dump():peer.call("fixture.run","{}");};
+     if(product_entry){rejects<Conflict>([&]{drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);});check(worker->alive()&&peer.alive(),"Queued root is not proof of completed drain");rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute",R"({"instructions":"forged"})");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.unknown","{}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.cancel",R"({"run_id":"foreign"})");});check(store.root_budget(id).get().model_calls_reserved==0,"Rejected product controls must not reserve a model");}
+     if(mode.starts_with("product_admission_")||mode.starts_with("product_journal_")){
+         const bool cancelled=mode.ends_with("_cancel");const auto intent=Json::parse(execute_reply());check(intent.size()==2&&intent.at("version")==1&&intent.at("outcome")== (cancelled?"cancelled":"failed"),"Typed journal cancellation/timeout must retain its terminal intent");
+@@ -116,7 +117,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     if(approval_cancel){
+         auto running=std::async(std::launch::async,[&]{return execute_reply();});bool pending=false;const auto until=Clock::now()+5s;
+         while(Clock::now()<until&&!pending){for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval)pending=true;if(!pending)std::this_thread::sleep_for(5ms);}
+-        check(pending,"Actual read AgentRunner must reach its native approval before controller cancellation");if(product_entry)rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute","{}");});if(product_entry)request_agent_worker_cancellation(peer);else check(peer.call("fixture.cancel","{}")=="stop_requested","Captured read child must acknowledge controller stop");
++        check(pending,"Actual read AgentRunner must reach its native approval before controller cancellation");if(product_entry)rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute","{}");});if(product_entry)peer.native_execution()->cancel();else check(peer.call("fixture.cancel","{}")=="stop_requested","Captured read child must acknowledge controller stop");
+         const auto intent=Json::parse(running.get());if(intent.contains("runner_failure"))throw std::runtime_error(intent.at("runner_failure").get<std::string>());check(product_entry?(intent.size()==2&&intent.at("version")==1&&intent.at("outcome")=="cancelled"):(intent.size()==2&&intent.at("pid")==worker->pid()&&intent.at("terminal_handoff")=="cancelled"),"Read AgentRunner must hand off cancellation without a fabricated Run");
+         const auto events=store.events(id).get();std::vector<std::string> attempts;for(const auto& event:events)if(event.kind=="budget.model_call.reserved")attempts.push_back(Json::parse(event.json).at("attempt_id").get<std::string>());check(attempts.size()==2,"Approval cancellation must fund only two actual model windows");
+         const auto read=store.agent_worker_read_claim(id,attempts.back(),"context-third").get();const auto ops=store.operations(id).get();const auto history=store.run_history(id).get();

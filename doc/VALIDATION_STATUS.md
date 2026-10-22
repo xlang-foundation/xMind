@@ -1,3 +1,17 @@
+## Native execution control wrapper cleanup — 2026-10-21
+
+Removed the peer-based execution connection, execute and cancel wrappers. The
+context fixture calls NativeExecutionClient directly; product control no longer
+includes the legacy RPC header. Packet-route rejection assertions remain intact.
+
+Serial build and focused 20/20 contracts passed in 124.99 seconds, including the
+broad worker contract (57.30 seconds). Inputs and all 138 native binaries were
+frozen and verified; SDK unchanged. This is synthetic focused coverage, not the
+full 169-test suite or installed UI acceptance. Initial compile failure from a
+missing explicit fixture include is preserved alongside the corrected gate.
+Evidence: doc/evidence/process-xmind-root-native-control-cleanup-final-20261021-gate.json.
+Remaining peer adapters and production planning assembly are unfinished.
+
 ## Signed worker planning continuation funding — 2026-10-21
 
 Native Journal.ReservePlanningContinuation(call,attempt) now reserves only an
