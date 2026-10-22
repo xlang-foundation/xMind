@@ -1,3 +1,43 @@
+## Adopted production worker resumes to completion — 2026-10-22
+
+The registered Planning subobject now exposes Pending(), a backend-selected
+accepted call ID. A fresh remote planning runner resumes that call before any
+context-window preparation/model funding. The original read and accepted plan
+are not redispatched. Backend resume still validates/adopts exact lease and
+segment authority; Pending alone grants no execution authority. Unbound fixture
+callbacks return no pending call. Unexpected report-recovery states refuse.
+
+The complete-tool-turn guard now retains immutable historical inspected/rejected
+facts only from exact retired paused source leases. Historical accepted turns
+require a canonical finished continuation receipt or the exact current adoption.
+A reserved continuation does not yet have a model receipt and must continue to
+validate its adoption. No blanket generation bypass or original-claim rewrite.
+
+Actual production plain/counted cases pause after two model calls and one read,
+answer once, drain/retire the source, open the next segment, launch a replacement,
+adopt and execute through Planning.Pending/Resume, spend one signed continuation,
+complete and physically drain. Exactly three total charges and six history
+messages remain; original model provenance and paused source lease stay intact.
+The final attempt belongs to the replacement and its lease retires completed.
+Existing production parent/child read/create/denial cases remain in the ledger.
+Main WorkspaceExecutor/AgentService composition, repeated/nested human waits,
+overflow/compaction and current installed-client qualification remain open.
+
+Initial production failure committed the resumed report but the tool-turn guard
+refused original-generation planning. Isolated shared-loop/funding diagnostics
+recovered that cause in synthetic fixtures only; their deliberately failed gates
+and patches are retained and are not production acceptance. The next production
+failure funded the continuation but looked for a receipt before dispatch. Both
+issues are corrected; final tests use actual product worker processes again.
+Ledger 1/1 passes 10.80 seconds; separate SDK execution/planning/worker-model
+contracts pass 3/3 in 56.37 seconds. Final Native patch
+1ee2abb9c9fd7fe7e092140059b1eefbfdf360bf40d4e08ecf1f364ced440525;
+xmind.exe 67f35d3c7c971888d7267bbeb676c98dd9ddd037d904dce7b794066580eb7a4c.
+Exact source/input/file sets remain unchanged: 2787 project/16 SDK/1870 pure
+libraries/30 SDK runtime/18598 Node dependencies, 104 ledger and 105 regression
+binaries. Inventory172. Focused evidence only, no full-suite pass, paid provider
+calls, CPython, user-task replay, installation or user-profile changes.
+Evidence: process-xmind-root-adopted-sdk-resume-*-20261022-* under doc/evidence.
 ## Accepted-call adoption by a replacement worker — 2026-10-22
 
 Typed backend adoption stores an immutable per-call/per-generation record instead

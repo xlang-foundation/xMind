@@ -626,6 +626,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         };
         reload_history();
         std::set<std::string> worker_callables;if(coding_workspace_)for(const auto& name:coding_workspace_->callable_tool_names())if(!worker_callables.insert(name).second)throw Conflict("Duplicate backend worker callable alias");
+        // Resume backend-selected accepted work before requesting a context
+        // window. Preparing an ordinary window here could reserve a second
+        // model attempt before the signed planning report is committed.
+        std::string remote_resumed_call;
+        if(remote_planning){const auto pending=planning_->pending(id,token);if(!pending.empty()){const DynamicPlanCapabilities remote_capabilities;const auto actual=planning_->resume(id,pending,execution_settings,remote_capabilities,budget,token);if(actual.paused)return actual.root;if(actual.root.id!=id||actual.call_id!=pending||actual.result_json.empty())throw DynamicOutcomeUnrecorded("Resumed planning report differs from its backend-selected call");remote_resumed_call=actual.call_id;reload_history();}}
         const auto prepare_workspace_window=[&]{auto window=read_workspace_->prepare_request(token);if((read_workspace_->workspace_id()=="workspace:none"&&!window.tools.empty())||window.include_usage!=request.include_usage||window.max_output_tokens!=request.max_output_tokens||std::any_of(window.tools.begin(),window.tools.end(),[&](const auto& tool){return !worker_callables.contains(tool.name)&&!is_agent_read_tool(tool.name)&&!is_agent_guidance_tool(tool.name)&&!(tool.name=="delegate_tasks"&&!leaf)&&!(remote_planning&&(tool.name=="plan_tasks"||tool.name=="revise_plan"||tool.name=="inspect_plan"))&&!(coding_workspace_&&(is_agent_file_tool(tool.name)||is_agent_process_tool(tool.name)||is_agent_remote_tool(tool.name)));}))throw Conflict("Workspace changed its admitted model controls or capabilities");(void)encode_agent_model_request(window);return window;};
         if(read_workspace_)request=prepare_workspace_window();
         if(workspace_tool_host){request.tools=workspace_tool_host->tool_catalogue();for(auto& definition:SkillContext::definitions())request.tools.push_back(std::move(definition));}
@@ -778,7 +783,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             owner.offered_tool=[&](const std::string& name){return std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==name;});};
             guidance_tool_host=checked_tool_host(tool_hosts_->guidance(std::move(owner)));
         }
-        std::string planning_continuation;
+        std::string planning_continuation=std::move(remote_resumed_call);
         std::unique_ptr<AgentCallableToolHost> callable_tool_host;
         if(coding_workspace_&&!worker_callables.empty())callable_tool_host=checked_tool_host(coding_workspace_->callable_host());
         if(!xlang_tools.empty()){

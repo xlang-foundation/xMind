@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-10-22T10:12:02.908Z",
+  "sourceParent": "475f7e7f8c245773df427bd1c0292fbceeed5896",
+  "sourcePatchSha256": "05196cc3630df0d9616c9c2a47d05ef67d2c8c7d3bf89327fa7a893e9a714f97",
+  "build": {
+    "pid": 10104,
+    "launchedAt": "2026-10-22T10:08:36.640Z",
+    "completedAt": "2026-10-22T10:11:49.420Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "70eafe16e7b7a28db34b172b069d70b825fd9fd43724249e5fbf9aa8d75f27af"
+  },
+  "test": {
+    "pid": 29408,
+    "launchedAt": "2026-10-22T10:11:52.002Z",
+    "completedAt": "2026-10-22T10:12:00.339Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "eb7a75106d90668ff487401cac5dc4c8babbb9bf02f08e47477e21d84a37db33"
+  },
+  "total": 1,
+  "failed": 1,
+  "passed": 0,
+  "seconds": 8.3,
+  "projectFiles": 2787,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 104,
+  "nativeSha256": "7a979ba517def6dc0b08b03fda13de46730d2074763b3042e35b05187649bd67",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "No model calls",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false
+}

@@ -75,6 +75,7 @@ NativePlanningCallbacks make_agent_worker_planning_callbacks(PersistenceService&
     result.invoke=[owner](const auto& attempt,const auto& call,std::stop_token stop){return owner->invoke(attempt,call,stop);};
     result.resume=[owner](const auto& call,std::stop_token stop){return owner->resume(call,stop);};
     result.healthy=[owner]{try{owner->check();return true;}catch(...){return false;}};
+    result.pending=[owner]{owner->check();std::string pending;for(const auto& call:owner->store.dynamic_plan_calls(owner->lease.root_run_id).get()){if(call.owner_run_id!=owner->lease.owner_run_id)continue;if(call.state=="accepted"){if(!pending.empty())throw Conflict("Planning owner has multiple accepted continuations");pending=call.id;}else if(call.state=="report_ready"||(call.state=="turn_committed"&&call.continuation_attempt_id.empty()))throw DynamicPlanUnavailable("Pending planning report requires separate ownership recovery");}return pending;};
     return result;
 }
 NativePlanningCallbacks bind_agent_worker_planning_context(NativePlanningCallbacks callbacks,

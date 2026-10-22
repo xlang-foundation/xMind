@@ -10,6 +10,7 @@ struct NativePlanningCallbacks {
     std::function<DynamicExecutionResult(const std::string&,const std::string&,std::stop_token)> invoke;
     std::function<DynamicExecutionResult(const std::string&,std::stop_token)> resume;
     std::function<bool()> healthy;
+    std::function<std::string()> pending;
 };
 struct NativePlanningAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 struct NativePlanningState;
@@ -40,6 +41,7 @@ public:
     DynamicExecutionResult resume(const std::string&,const std::string&,const AgentSettings&,const DynamicPlanCapabilities&,
         std::shared_ptr<RootExecutionBudget>,std::stop_token={},DynamicInstructionPrecondition={})override;
     bool healthy()const override;
+    std::string pending(const std::string&,std::stop_token={})override;
 private:
     friend class NativeWorkerModelClient;
     NativePlanningClient(X::Runtime&,X::Value,AgentWorkerScope,AgentWorkerChannel::Deadline,std::shared_ptr<void>);

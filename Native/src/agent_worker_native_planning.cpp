@@ -63,11 +63,13 @@ struct PlanningService {
     auto enter(){if(!state)throw Conflict("Unbound planning service");return state->enter();}
     X::Value Identity(){auto life=enter();return sdk_values::to_value(Host(),identity(state->callbacks.scope));}
     bool Healthy(){auto life=enter();return state->callbacks.healthy();}
+    std::string Pending(){auto life=enter();const auto call=state->callbacks.pending?state->callbacks.pending():std::string{};if(!call.empty())id(call);return call;}
     X::Value Invoke(std::string attempt,std::string call){id(attempt);id(call);auto life=enter();return begin(state,std::move(attempt),std::move(call),false);}
     X::Value Resume(std::string call){id(call);auto life=enter();return begin(state,{},std::move(call),true);}
     BEGIN_PACKAGE(PlanningService)
         APISET().AddFunc<0>("Identity",&PlanningService::Identity);
         APISET().AddFunc<0>("Healthy",&PlanningService::Healthy);
+        APISET().AddFunc<0>("Pending",&PlanningService::Pending);
         APISET().AddFunc<2>("Invoke",&PlanningService::Invoke);
         APISET().AddFunc<1>("Resume",&PlanningService::Resume);
     END_PACKAGE
@@ -115,4 +117,5 @@ NativePlanningClient::~NativePlanningClient()=default;
 DynamicExecutionResult NativePlanningClient::invoke(const std::string& parent,const ModelToolCall& call,const std::string&,const std::string& attempt,const AgentSettings&,const DynamicPlanCapabilities&,std::shared_ptr<RootExecutionBudget>,std::stop_token stop,DynamicInstructionPrecondition){if(parent!=impl_->scope.run_id)throw Conflict("Planning caller differs from admitted owner");id(attempt);id(call.id);return impl_->request(attempt,call.id,false,stop);}
 DynamicExecutionResult NativePlanningClient::resume(const std::string& parent,const std::string& call,const AgentSettings&,const DynamicPlanCapabilities&,std::shared_ptr<RootExecutionBudget>,std::stop_token stop,DynamicInstructionPrecondition){if(parent!=impl_->scope.run_id)throw Conflict("Planning resume differs from admitted owner");id(call);return impl_->request({},call,true,stop);}
 bool NativePlanningClient::healthy()const{std::lock_guard lock(impl_->mutex);try{const auto value=impl_->call(impl_->health);if(value.raw().tag!=X3_TAG_BOOL)throw Conflict("Invalid planning health");return value.ToInt64()!=0;}catch(...){throw DynamicOutcomeUnrecorded("Native planning health unavailable");}}
+std::string NativePlanningClient::pending(const std::string& owner,std::stop_token stop){std::lock_guard lock(impl_->mutex);if(owner!=impl_->scope.run_id)throw Conflict("Pending planning owner differs");if(stop.stop_requested())throw TransportCancelled("Pending planning observation cancelled");if(std::chrono::steady_clock::now()>=impl_->deadline)throw DynamicOutcomeUnrecorded("Pending planning observation expired");const auto value=impl_->call(impl_->service["Pending"]);if(!value.IsString())throw DynamicOutcomeUnrecorded("Pending planning result differs");const auto call=value.ToString();if(!call.empty())id(call);return call;}
 }

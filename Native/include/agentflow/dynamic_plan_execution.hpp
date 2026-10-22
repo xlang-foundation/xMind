@@ -24,6 +24,7 @@ using DynamicInstructionPrecondition = std::function<InstructionPrecondition(con
 class DynamicPlanExecution {
 public:
     virtual ~DynamicPlanExecution()=default;
+    virtual std::string pending(const std::string&,std::stop_token={}){return {};}
     virtual DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
         const std::string& actual_assistant_json,const std::string& originating_model_attempt,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,
