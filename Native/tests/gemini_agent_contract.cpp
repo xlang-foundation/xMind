@@ -1,5 +1,6 @@
 #include "agentflow/agent_runner.hpp"
 #include "nlohmann/json.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include <iostream>
 #include <vector>
 
@@ -27,6 +28,8 @@ void private_key_absent(const std::vector<Message>& history,const std::vector<Ev
 }
 }
 int main(int argc,char** argv){if(argc!=6)return 2;try{
+    const auto workspace_identity=WorkspaceTools(argv[4]).identity();
+    const auto expected_file=[&](const char* path,const char* content){return Json{{"path",path},{"content",content},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}};};
     const std::vector<std::string> roots{argv[2],argv[3]};const std::string endpoint=argv[5];
     AgentSettings settings;settings.provider={endpoint+"/main/v1beta","fixture-gemini",Capability::supported,Capability::supported,Capability::supported};settings.provider.wire=ProviderWire::gemini_generate_content;
     settings.provider.deadline=std::chrono::seconds(5);settings.provider.idle_timeout=std::chrono::seconds(5);settings.workspace=argv[4];settings.max_output_tokens=64;settings.run_timeout=std::chrono::seconds(10);
@@ -46,7 +49,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(parts.size()==4&&parts[0]["thought"]==true&&parts[1]["thoughtSignature"]=="Y2FsbC1zaWduYXR1cmU="&&parts[2]["thoughtSignature"]=="c2lnbmF0dXJlLW9ubHk="&&parts[2]["thought"]==false&&!parts[3]["functionCall"].contains("id"),"Signed, signature-only and anonymous call parts must keep their original identity and boundaries");
         require(raw_parts.find(precise_metadata)!=std::string::npos&&raw_parts.find(first_arguments)!=std::string::npos,"Provider receipt numeric tokens and escaped argument keys must survive actual JSON persistence");
         require(receipt["bindings"][0]==Json{{"tool_call_id",first_native_id},{"part_index",1}}&&receipt["bindings"][1]==Json{{"tool_call_id",second_native_id},{"part_index",3}},"Durable binding table must correlate native calls with original provider parts");
-        require(first["tool_call_id"]==first_native_id&&second["tool_call_id"]==second_native_id&&Json::parse(first["content"].get<std::string>())==Json{{"path","README.md"},{"content",first_file}}&&Json::parse(second["content"].get<std::string>())==Json{{"path","second.txt"},{"content",second_file}},"Actual filesystem reads must reach the persisted native tool results");
+        require(first["tool_call_id"]==first_native_id&&second["tool_call_id"]==second_native_id&&Json::parse(first["content"].get<std::string>())==expected_file("README.md",first_file)&&Json::parse(second["content"].get<std::string>())==expected_file("second.txt",second_file),"Actual filesystem reads must reach the persisted native tool results");
         require(turn["usage"]["prompt_tokens"]==11&&turn["usage"]["completion_tokens"]==4&&turn["usage"]["total_tokens"]==47,"Agent usage must preserve supplied counts rather than compute a replacement total");
         require(answer["content"]==final_answer&&answer["usage"]["prompt_tokens"]==19&&answer["usage"]["completion_tokens"]==6&&!answer["usage"].contains("total_tokens")&&answer["usage"]["prompt_tokens_details"]["cached_tokens"]==4&&answer["usage"]["completion_tokens_details"]["reasoning_tokens"]==5,"Final native response must carry only supplied usage and peer-confirmed text");
         require(answer["elapsed_ms"].is_number_integer()&&answer["elapsed_ms"]>=0&&answer["first_token_ms"].is_number_integer()&&answer["first_token_ms"]>=0,"Native response timings must come from actual backend measurements");

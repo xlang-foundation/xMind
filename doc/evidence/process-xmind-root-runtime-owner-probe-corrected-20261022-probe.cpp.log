@@ -1,0 +1,24 @@
+#define NOMINMAX
+#include <windows.h>
+#include "xlang3/cpp/runtime.h"
+#include "agent_worker_crash_fixture.hpp"
+#include <atomic>
+#include <barrier>
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <stdexcept>
+std::atomic<unsigned> live{0},created{0},completed{0};
+struct Leaf {
+ Leaf(){++live;++created;}~Leaf(){--live;}
+ X::Value Status(){auto result=X::Value::Dict(Host());result.Set("value",X::Value(std::int64_t(7)));return result;}
+ BEGIN_PACKAGE(Leaf)
+ APISET().AddFunc<0>("Status",&Leaf::Status);
+ END_PACKAGE
+};
+struct Root {
+ BEGIN_PACKAGE(Root)
+ APISET().AddClass<0,Leaf>("Leaf");
+ END_PACKAGE
+};
+int main(){worker_crash_fixture::install();try{X::Runtime runtime;Root root;auto package=runtime.RegisterPackage("probe_objects",root);auto one=[&]{auto object=root.__xlang3_package_->CreateInstance("Leaf",std::make_shared<Leaf>());if(!object.IsValid())throw std::runtime_error("Invalid native instance");auto callable=object["Status"];X::Value result;if(!callable.Call(nullptr,0,result)||result.Get("value").ToInt64()!=7)throw std::runtime_error("Native result mismatch");++completed;};for(unsigned i=0;i<1000;++i)one();if(live!=0)throw std::runtime_error("Single-thread native owner leaked");std::cout<<"single-thread completed="<<completed.load()<<" live="<<live.load()<<std::endl;std::barrier start(4);std::atomic<bool> failed=false;std::vector<std::thread> threads;for(unsigned t=0;t<4;++t)threads.emplace_back([&]{start.arrive_and_wait();try{for(unsigned i=0;i<1000;++i)one();}catch(const std::exception& error){failed=true;std::cerr<<error.what()<<std::endl;}});for(auto& thread:threads)thread.join();if(failed||live!=0||completed!=5000||created!=5000)throw std::runtime_error("Concurrent native owner accounting differs");std::cout<<"four-thread completed="<<completed.load()<<" created="<<created.load()<<" live="<<live.load()<<std::endl;return 0;}catch(const std::exception& error){std::cerr<<error.what()<<std::endl;return 1;}}

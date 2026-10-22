@@ -2,6 +2,7 @@
 #include "agentflow/agent_runner.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "nlohmann/json.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include <chrono>
 #include <future>
 #include <iostream>
@@ -51,6 +52,8 @@ void no_effects(PersistenceService& store,const std::string& run,const std::stri
 }
 }
 int main(int argc,char** argv){if(argc!=6)return 2;try{
+    const auto workspace_identity=WorkspaceTools(argv[4]).identity();
+    const auto expected_file=[&](const char* path,const char* content){return Json{{"path",path},{"content",content},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}};};
     const std::vector<std::string> roots{argv[2],argv[3]};const std::string endpoint=argv[5];
     AgentSettings settings;settings.provider={endpoint+"/main","fixture-claude",Capability::supported,Capability::supported,Capability::supported};settings.provider.wire=ProviderWire::anthropic_messages;
     settings.provider.deadline=std::chrono::seconds(6);settings.provider.idle_timeout=std::chrono::seconds(5);settings.workspace=argv[4];settings.max_output_tokens=64;settings.max_turns=4;settings.run_timeout=std::chrono::seconds(12);
@@ -69,7 +72,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         require(blocks[0]==Json{{"type","thinking"},{"thinking","Synthetic hidden Claude thought"},{"signature","opaque-claude-fixture-signature"}}&&blocks[1].at("type")=="tool_use"&&blocks[2]==Json{{"type","text"},{"text",batch_text}}&&blocks[3]==Json{{"type","redacted_thinking"},{"data","opaque-redacted-claude-fixture"}}&&blocks[4].at("type")=="tool_use","Signed/redacted thinking and interleaved text must retain exact provider block order");
         require(receipt.at("content_json").get<std::string>().find(escaped_arguments)!=std::string::npos,"Receipt string must retain exact original JSON tokens");
         require(calls.at("tool_calls")[0].at("name")=="read_file"&&calls.at("tool_calls")[1].at("name")=="read_file"&&Json::parse(calls.at("tool_calls")[0].at("arguments").get<std::string>())==Json{{"path","README.md"}}&&Json::parse(calls.at("tool_calls")[1].at("arguments").get<std::string>())==Json{{"path","second.txt"}},"Tool arguments must retain actual native file requests");
-        require(left.at("tool_call_id")=="toolu-native-left"&&right.at("tool_call_id")=="toolu-native-right"&&Json::parse(left.at("content").get<std::string>())==Json{{"path","README.md"},{"content",first_file}}&&Json::parse(right.at("content").get<std::string>())==Json{{"path","second.txt"},{"content",second_file}},"Matching actual filesystem bytes must reach each persisted Claude tool result");
+        require(left.at("tool_call_id")=="toolu-native-left"&&right.at("tool_call_id")=="toolu-native-right"&&Json::parse(left.at("content").get<std::string>())==expected_file("README.md",first_file)&&Json::parse(right.at("content").get<std::string>())==expected_file("second.txt",second_file),"Matching actual filesystem bytes must reach each persisted Claude tool result");
         metrics(calls);metrics(answer);require(answer.at("content")==final_answer,"Only independent peer-confirmed answer text can persist");
         require(calls.at("usage").at("input_tokens")==11&&calls.at("usage").at("output_tokens")==4&&calls.at("usage").at("cache_creation_input_tokens")==0&&calls.at("usage").at("cache_read_input_tokens")==7,"Tool turn usage must retain raw supplied cache write zero/read count without adding input");
         require(answer.at("usage").at("prompt_tokens")==19&&answer.at("usage").at("completion_tokens")==6&&answer.at("usage").at("cache_creation_input_tokens")==5&&answer.at("usage").at("cache_read_input_tokens")==0,"Final usage must retain supplied cache read zero and exclude cache writes from input alias");
@@ -114,7 +117,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         const auto rollback_history=store.history("rollback").get(),rollback_run_history=store.run_history("claude-rollback").get();const auto rollback_events=store.events("claude-rollback").get();
         require(rollback_history.size()==1&&rollback_history[0].role=="user"&&rollback_run_history.size()==1,"SQL transaction rollback must leave no dangling assistant/tool/task rows");
         require(count(rollback_events,"tool.started")==2&&count(rollback_events,"tool.completed")==2&&count(rollback_events,"conversation.tool_turn")==0&&count(rollback_events,"run.completed")==0&&rollback_events.back().kind=="run.failed","Read effects occur before the failed atomic batch; conversation success must not commit");
-        std::size_t index=0;for(const auto& event:rollback_events)if(event.kind=="tool.completed"){const auto data=Json::parse(event.json);require(data.at("call_id")==(index?"toolu-rollback-right":"toolu-rollback-left")&&data.at("data")==Json{{"path",index?"second.txt":"README.md"},{"content",index?second_file:first_file}},"Rollback fixture must still verify both actual native read results");++index;}
+        std::size_t index=0;for(const auto& event:rollback_events)if(event.kind=="tool.completed"){const auto data=Json::parse(event.json);require(data.at("call_id")==(index?"toolu-rollback-right":"toolu-rollback-left")&&data.at("data")==expected_file(index?"second.txt":"README.md",index?second_file:first_file),"Rollback fixture must still verify both actual native read results");++index;}
         require(Json::parse(rollback_events.back().json).at("reason")=="agent_error","SQL persistence failure must remain a native agent error");private_absent(rollback_history,rollback_events);
         same_history(after,store.history("claude-main").get());require(store.credentials("fixture").get().size()==1,"Failures/cancellation/rollback cannot rotate the owned encrypted provider key");store.close();
     }

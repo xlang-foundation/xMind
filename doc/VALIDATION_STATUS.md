@@ -1,3 +1,31 @@
+## Native inventory and workspace read contracts — 2026-10-22
+
+The complete current 172-test native inventory finished 168/172 in 1369.69s.
+Four fixtures still expected bare path/content results after primary-workspace
+binding began adding workspace_id, folder_id and workspace_revision. Preserve
+this failed full run; it is not qualified by the later focused result.
+
+Corrected delegation, Gemini, Anthropic and enrolled Gemini fixtures now require
+the exact five-field result in provider continuations and persisted native
+history/events. Provider peers use the primary folder from actual model context;
+C++ assertions independently obtain the filesystem workspace identity. All four
+contracts pass in 5.51s, including signed conversation reload and rejection paths.
+Source, SDK, pure libraries, dependencies and all 137 native binaries/file sets
+were unchanged across that focused gate. The product executable remains 63b0321.
+No installed runtime changed and no paid provider inference was used.
+
+The model-worker fixture now captures the first native fault by default under
+Testing/Temporary/worker-crash-dumps; explicit diagnostic paths still take
+precedence. Budgets and failure exits are unchanged. No dump appeared in this
+full run. The earlier intermittent SDK access violation remains unresolved.
+A separate corrected SDK native-object ownership probe completed 5000 calls with
+zero remaining owners; it excludes IPC and does not establish the crash cause.
+Its original harness failure is retained alongside the corrected evidence.
+
+Evidence: process-xmind-root-workspace-read-{initial-full,focused}-20261022-*
+and process-xmind-root-runtime-owner-probe-{initial,corrected}-20261022-*.
+Current full-suite acceptance and overall delivery remain incomplete.
+
 ## Actual packaged CLI coding — 2026-10-22
 
 The candidate's actual xmind console completes a new coding task by explicit

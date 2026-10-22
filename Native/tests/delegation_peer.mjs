@@ -117,7 +117,8 @@ const server=createServer((request,response)=>{
    else send(response,wire);return;
   }
   assert.equal(count,2);const actual=results(body.messages).at(-1);assert.equal(actual.tool_use_id,'read-'+label);
-  assert.deepEqual(JSON.parse(actual.content),{path,content:files[left?'left':'right']},'Only actual native workspace file bytes satisfy leaf continuation');
+  const primary=systemText(body).match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
+  assert.deepEqual(JSON.parse(actual.content),{path,content:files[left?'left':'right'],workspace_id:primary,folder_id:primary,workspace_revision:1},'Only actual native workspace file bytes satisfy leaf continuation');
   assert.ok(source.includes(rawArguments),'Raw escaped leaf call arguments must replay within its own signed turn');
   assert.ok(source.includes('opaque-leaf-'+label));
   const answer=label==='oversize'?'"'.repeat(40000):findings[label];

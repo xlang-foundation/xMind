@@ -1,0 +1,258 @@
+diff --git a/Native/tests/agent_worker_model_rpc_peer.mjs b/Native/tests/agent_worker_model_rpc_peer.mjs
+index 47addeaf..c32062a8 100644
+--- a/Native/tests/agent_worker_model_rpc_peer.mjs
++++ b/Native/tests/agent_worker_model_rpc_peer.mjs
+@@ -3,12 +3,17 @@ import assert from 'node:assert/strict';
+ import {createServer} from 'node:http';
+ import {execFile} from 'node:child_process';
+ import {promisify} from 'node:util';
+-import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
++import {mkdtempSync,writeFileSync,readFileSync,rmSync,mkdirSync} from 'node:fs';
+ import {tmpdir} from 'node:os';
+-import {join} from 'node:path';
++import {join,dirname} from 'node:path';
+ import {fileURLToPath} from 'node:url';
+ const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0,a2aCalls=0,refreshCalls=0,refreshSubscriptions=0,refreshClosed=0,catalogueChanged=false;const refreshListeners=new Set();
+ const [executable,modules,stdlib]=process.argv.slice(2);
++// Preserve the first intermittent native fault, including ordinary CTest runs.
++// An explicit diagnostic directory still takes precedence; exits/budgets stay unchanged.
++const dumpDirectory=process.env.XMIND_WORKER_FIXTURE_DUMP_DIR||join(dirname(executable),'..','Testing','Temporary','worker-crash-dumps');
++mkdirSync(dumpDirectory,{recursive:true});
++
+ const parentCancelling=new Set();
+ const expected={parent_delegation_counted:6,parent_delegation_counted_count:6,parent_delegation_unrecorded:5,parent_delegation_child_failure:5,parent_delegation_cancel:3,parent_delegation_denied:2,parent_delegation_budget:1,parent_delegation:6,worker_context_compact_failure:2,worker_context_compact_failure_count:3,worker_context_compact_failure_compact:1,worker_context_compact_cancel:2,worker_context_compact_cancel_count:3,worker_context_compact_cancel_compact:1,coding_context_overflow:4,coding_context_overflow_count:5,coding_context_overflow_compact:1,coding_context_overflow_repeat:4,coding_context_overflow_repeat_count:5,coding_context_overflow_repeat_compact:1,worker_context_count_failure:0,worker_context_count_failure_count:1,worker_context_count_cancel:0,worker_context_count_cancel_count:1,worker_context_inference_failure:1,worker_context_inference_failure_count:1,worker_context_inference_cancel:1,worker_context_inference_cancel_count:1,coding_context:2,coding_context_count:2,coding_context_compact:3,coding_context_compact_count:4,coding_context_compact_compact:1,coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
+ const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
+@@ -245,7 +250,7 @@ try{
+  const result={stdout:""};
+  for(const phase of ["transport","production"]){
+   const started=performance.now(),timing=[];
+-  const pending=promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`,phase],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024});
++  const pending=promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`,phase],{env:{...process.env,XMIND_WORKER_FIXTURE_DUMP_DIR:dumpDirectory,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024});
+   if(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR)pending.child.stdout.on('data',bytes=>timing.push({elapsedMs:performance.now()-started,text:bytes.toString()}));
+   let part;try{part=await pending.catch(error=>{if(error.stdout)process.stdout.write(error.stdout);if(error.stderr)process.stderr.write(error.stderr);if(failure)throw failure;throw error;});}
+   finally{if(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR)writeFileSync(join(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR,phase+'-'+process.pid+'.json'),JSON.stringify({phase,pid:pending.child.pid,elapsedMs:performance.now()-started,timing},null,2)+'\n',{flag:'wx'});}
+diff --git a/Native/tests/anthropic_agent_contract.cpp b/Native/tests/anthropic_agent_contract.cpp
+index 2cda7962..93074be2 100644
+--- a/Native/tests/anthropic_agent_contract.cpp
++++ b/Native/tests/anthropic_agent_contract.cpp
+@@ -2,6 +2,7 @@
+ #include "agentflow/agent_runner.hpp"
+ #include "agentflow/xlang_sqlite.hpp"
+ #include "nlohmann/json.hpp"
++#include "agentflow/workspace_tools.hpp"
+ #include <chrono>
+ #include <future>
+ #include <iostream>
+@@ -51,6 +52,8 @@ void no_effects(PersistenceService& store,const std::string& run,const std::stri
+ }
+ }
+ int main(int argc,char** argv){if(argc!=6)return 2;try{
++    const auto workspace_identity=WorkspaceTools(argv[4]).identity();
++    const auto expected_file=[&](const char* path,const char* content){return Json{{"path",path},{"content",content},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}};};
+     const std::vector<std::string> roots{argv[2],argv[3]};const std::string endpoint=argv[5];
+     AgentSettings settings;settings.provider={endpoint+"/main","fixture-claude",Capability::supported,Capability::supported,Capability::supported};settings.provider.wire=ProviderWire::anthropic_messages;
+     settings.provider.deadline=std::chrono::seconds(6);settings.provider.idle_timeout=std::chrono::seconds(5);settings.workspace=argv[4];settings.max_output_tokens=64;settings.max_turns=4;settings.run_timeout=std::chrono::seconds(12);
+@@ -69,7 +72,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
+         require(blocks[0]==Json{{"type","thinking"},{"thinking","Synthetic hidden Claude thought"},{"signature","opaque-claude-fixture-signature"}}&&blocks[1].at("type")=="tool_use"&&blocks[2]==Json{{"type","text"},{"text",batch_text}}&&blocks[3]==Json{{"type","redacted_thinking"},{"data","opaque-redacted-claude-fixture"}}&&blocks[4].at("type")=="tool_use","Signed/redacted thinking and interleaved text must retain exact provider block order");
+         require(receipt.at("content_json").get<std::string>().find(escaped_arguments)!=std::string::npos,"Receipt string must retain exact original JSON tokens");
+         require(calls.at("tool_calls")[0].at("name")=="read_file"&&calls.at("tool_calls")[1].at("name")=="read_file"&&Json::parse(calls.at("tool_calls")[0].at("arguments").get<std::string>())==Json{{"path","README.md"}}&&Json::parse(calls.at("tool_calls")[1].at("arguments").get<std::string>())==Json{{"path","second.txt"}},"Tool arguments must retain actual native file requests");
+-        require(left.at("tool_call_id")=="toolu-native-left"&&right.at("tool_call_id")=="toolu-native-right"&&Json::parse(left.at("content").get<std::string>())==Json{{"path","README.md"},{"content",first_file}}&&Json::parse(right.at("content").get<std::string>())==Json{{"path","second.txt"},{"content",second_file}},"Matching actual filesystem bytes must reach each persisted Claude tool result");
++        require(left.at("tool_call_id")=="toolu-native-left"&&right.at("tool_call_id")=="toolu-native-right"&&Json::parse(left.at("content").get<std::string>())==expected_file("README.md",first_file)&&Json::parse(right.at("content").get<std::string>())==expected_file("second.txt",second_file),"Matching actual filesystem bytes must reach each persisted Claude tool result");
+         metrics(calls);metrics(answer);require(answer.at("content")==final_answer,"Only independent peer-confirmed answer text can persist");
+         require(calls.at("usage").at("input_tokens")==11&&calls.at("usage").at("output_tokens")==4&&calls.at("usage").at("cache_creation_input_tokens")==0&&calls.at("usage").at("cache_read_input_tokens")==7,"Tool turn usage must retain raw supplied cache write zero/read count without adding input");
+         require(answer.at("usage").at("prompt_tokens")==19&&answer.at("usage").at("completion_tokens")==6&&answer.at("usage").at("cache_creation_input_tokens")==5&&answer.at("usage").at("cache_read_input_tokens")==0,"Final usage must retain supplied cache read zero and exclude cache writes from input alias");
+@@ -114,7 +117,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
+         const auto rollback_history=store.history("rollback").get(),rollback_run_history=store.run_history("claude-rollback").get();const auto rollback_events=store.events("claude-rollback").get();
+         require(rollback_history.size()==1&&rollback_history[0].role=="user"&&rollback_run_history.size()==1,"SQL transaction rollback must leave no dangling assistant/tool/task rows");
+         require(count(rollback_events,"tool.started")==2&&count(rollback_events,"tool.completed")==2&&count(rollback_events,"conversation.tool_turn")==0&&count(rollback_events,"run.completed")==0&&rollback_events.back().kind=="run.failed","Read effects occur before the failed atomic batch; conversation success must not commit");
+-        std::size_t index=0;for(const auto& event:rollback_events)if(event.kind=="tool.completed"){const auto data=Json::parse(event.json);require(data.at("call_id")==(index?"toolu-rollback-right":"toolu-rollback-left")&&data.at("data")==Json{{"path",index?"second.txt":"README.md"},{"content",index?second_file:first_file}},"Rollback fixture must still verify both actual native read results");++index;}
++        std::size_t index=0;for(const auto& event:rollback_events)if(event.kind=="tool.completed"){const auto data=Json::parse(event.json);require(data.at("call_id")==(index?"toolu-rollback-right":"toolu-rollback-left")&&data.at("data")==expected_file(index?"second.txt":"README.md",index?second_file:first_file),"Rollback fixture must still verify both actual native read results");++index;}
+         require(Json::parse(rollback_events.back().json).at("reason")=="agent_error","SQL persistence failure must remain a native agent error");private_absent(rollback_history,rollback_events);
+         same_history(after,store.history("claude-main").get());require(store.credentials("fixture").get().size()==1,"Failures/cancellation/rollback cannot rotate the owned encrypted provider key");store.close();
+     }
+diff --git a/Native/tests/anthropic_agent_peer.mjs b/Native/tests/anthropic_agent_peer.mjs
+index bae65a7c..21e40c24 100644
+--- a/Native/tests/anthropic_agent_peer.mjs
++++ b/Native/tests/anthropic_agent_peer.mjs
+@@ -45,13 +45,14 @@ function write(response,wire,end=true){
+  const bytes=Buffer.from(wire);for(let offset=0;offset<bytes.length;offset+=7)response.write(bytes.subarray(offset,offset+7));
+  if(end)response.end();
+ }
+-function assertResults(messages,left='toolu-native-left',right='toolu-native-right'){
++function assertResults(system,messages,left='toolu-native-left',right='toolu-native-right'){
++ const primary=system.match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
+  assert.deepEqual(messages[0],{role:'user',content:[{type:'text',text:'Read the actual Claude fixture files'}]});
+  assert.deepEqual(messages[1],{role:'assistant',content:[{type:'thinking',thinking:hiddenThought,signature:'opaque-claude-fixture-signature'},{type:'tool_use',id:left,name:'read_file',input:{path:'README.md'}},{type:'text',text:batchText},{type:'redacted_thinking',data:'opaque-redacted-claude-fixture'},{type:'tool_use',id:right,name:'read_file',input:{path:'second.txt'}}]});
+  assert.equal(messages[2].role,'user');assert.equal(messages[2].content.length,2);
+  for(const [index,id,path,content] of [[0,left,'README.md',firstFile],[1,right,'second.txt',secondFile]]){
+   const result=messages[2].content[index];assert.equal(result.type,'tool_result');assert.equal(result.tool_use_id,id);assert.equal(typeof result.content,'string');
+-  assert.deepEqual(JSON.parse(result.content),{path,content},'Only actual native filesystem bytes may satisfy the provider continuation');
++  assert.deepEqual(JSON.parse(result.content),{path,content,workspace_id:primary,folder_id:primary,workspace_revision:1},'Only actual native filesystem bytes may satisfy the provider continuation');
+  }
+ }
+ const peer=createServer((request,response)=>{
+@@ -68,7 +69,7 @@ const peer=createServer((request,response)=>{
+     assert.deepEqual(body.messages,[{role:'user',content:[{type:'text',text:'Read the actual Claude fixture files'}]}]);
+     write(response,event(start({input_tokens:11,output_tokens:0,cache_creation_input_tokens:0,cache_read_input_tokens:7}))+thinking(0)+tool(1,'toolu-native-left','README.md','read_file',false,escapedArguments)+text(batchText,2)+redacted(3)+tool(4,'toolu-native-right','second.txt')+terminal('tool_use',4));return;
+    }
+-   assertResults(body.messages);
++   assertResults(body.system[0].text,body.messages);
+    assert.ok(source.includes(escapedArguments),'Original escaped argument keys must survive native receipt continuation and SQLite replay');
+    if(mainRequests===2){
+     assert.equal(body.messages.length,3);continuationPrefix=JSON.stringify(body.messages);
+diff --git a/Native/tests/delegation_peer.mjs b/Native/tests/delegation_peer.mjs
+index a648f601..9b0f34b2 100644
+--- a/Native/tests/delegation_peer.mjs
++++ b/Native/tests/delegation_peer.mjs
+@@ -117,7 +117,8 @@ const server=createServer((request,response)=>{
+    else send(response,wire);return;
+   }
+   assert.equal(count,2);const actual=results(body.messages).at(-1);assert.equal(actual.tool_use_id,'read-'+label);
+-  assert.deepEqual(JSON.parse(actual.content),{path,content:files[left?'left':'right']},'Only actual native workspace file bytes satisfy leaf continuation');
++  const primary=systemText(body).match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
++  assert.deepEqual(JSON.parse(actual.content),{path,content:files[left?'left':'right'],workspace_id:primary,folder_id:primary,workspace_revision:1},'Only actual native workspace file bytes satisfy leaf continuation');
+   assert.ok(source.includes(rawArguments),'Raw escaped leaf call arguments must replay within its own signed turn');
+   assert.ok(source.includes('opaque-leaf-'+label));
+   const answer=label==='oversize'?'"'.repeat(40000):findings[label];
+diff --git a/Native/tests/gemini_agent_contract.cpp b/Native/tests/gemini_agent_contract.cpp
+index c1b9dd46..385afa1d 100644
+--- a/Native/tests/gemini_agent_contract.cpp
++++ b/Native/tests/gemini_agent_contract.cpp
+@@ -1,5 +1,6 @@
+ #include "agentflow/agent_runner.hpp"
+ #include "nlohmann/json.hpp"
++#include "agentflow/workspace_tools.hpp"
+ #include <iostream>
+ #include <vector>
+ 
+@@ -27,6 +28,8 @@ void private_key_absent(const std::vector<Message>& history,const std::vector<Ev
+ }
+ }
+ int main(int argc,char** argv){if(argc!=6)return 2;try{
++    const auto workspace_identity=WorkspaceTools(argv[4]).identity();
++    const auto expected_file=[&](const char* path,const char* content){return Json{{"path",path},{"content",content},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}};};
+     const std::vector<std::string> roots{argv[2],argv[3]};const std::string endpoint=argv[5];
+     AgentSettings settings;settings.provider={endpoint+"/main/v1beta","fixture-gemini",Capability::supported,Capability::supported,Capability::supported};settings.provider.wire=ProviderWire::gemini_generate_content;
+     settings.provider.deadline=std::chrono::seconds(5);settings.provider.idle_timeout=std::chrono::seconds(5);settings.workspace=argv[4];settings.max_output_tokens=64;settings.run_timeout=std::chrono::seconds(10);
+@@ -46,7 +49,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
+         require(parts.size()==4&&parts[0]["thought"]==true&&parts[1]["thoughtSignature"]=="Y2FsbC1zaWduYXR1cmU="&&parts[2]["thoughtSignature"]=="c2lnbmF0dXJlLW9ubHk="&&parts[2]["thought"]==false&&!parts[3]["functionCall"].contains("id"),"Signed, signature-only and anonymous call parts must keep their original identity and boundaries");
+         require(raw_parts.find(precise_metadata)!=std::string::npos&&raw_parts.find(first_arguments)!=std::string::npos,"Provider receipt numeric tokens and escaped argument keys must survive actual JSON persistence");
+         require(receipt["bindings"][0]==Json{{"tool_call_id",first_native_id},{"part_index",1}}&&receipt["bindings"][1]==Json{{"tool_call_id",second_native_id},{"part_index",3}},"Durable binding table must correlate native calls with original provider parts");
+-        require(first["tool_call_id"]==first_native_id&&second["tool_call_id"]==second_native_id&&Json::parse(first["content"].get<std::string>())==Json{{"path","README.md"},{"content",first_file}}&&Json::parse(second["content"].get<std::string>())==Json{{"path","second.txt"},{"content",second_file}},"Actual filesystem reads must reach the persisted native tool results");
++        require(first["tool_call_id"]==first_native_id&&second["tool_call_id"]==second_native_id&&Json::parse(first["content"].get<std::string>())==expected_file("README.md",first_file)&&Json::parse(second["content"].get<std::string>())==expected_file("second.txt",second_file),"Actual filesystem reads must reach the persisted native tool results");
+         require(turn["usage"]["prompt_tokens"]==11&&turn["usage"]["completion_tokens"]==4&&turn["usage"]["total_tokens"]==47,"Agent usage must preserve supplied counts rather than compute a replacement total");
+         require(answer["content"]==final_answer&&answer["usage"]["prompt_tokens"]==19&&answer["usage"]["completion_tokens"]==6&&!answer["usage"].contains("total_tokens")&&answer["usage"]["prompt_tokens_details"]["cached_tokens"]==4&&answer["usage"]["completion_tokens_details"]["reasoning_tokens"]==5,"Final native response must carry only supplied usage and peer-confirmed text");
+         require(answer["elapsed_ms"].is_number_integer()&&answer["elapsed_ms"]>=0&&answer["first_token_ms"].is_number_integer()&&answer["first_token_ms"]>=0,"Native response timings must come from actual backend measurements");
+diff --git a/Native/tests/gemini_agent_peer.mjs b/Native/tests/gemini_agent_peer.mjs
+index 3c64bb14..35120da9 100644
+--- a/Native/tests/gemini_agent_peer.mjs
++++ b/Native/tests/gemini_agent_peer.mjs
+@@ -19,10 +19,11 @@ function reply(response,rawParts,finish,usage,responseId){
+  const wire=Buffer.from(`data: {"candidates":[${candidate}],"usageMetadata":${JSON.stringify(usage)},"modelVersion":"fixture-gemini","responseId":"${responseId}"}\n\n`);
+  response.writeHead(200,{'Content-Type':'text/event-stream'});for(let offset=0;offset<wire.length;offset+=7)response.write(wire.subarray(offset,offset+7));response.end();
+ }
+-function observedResults(content){
++function observedResults(system,content){
++ const primary=system.match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
+  assert.equal(content.role,'user');assert.equal(content.parts.length,2);
+  for(const [index,path,text] of [[0,'README.md',firstFile],[1,'second.txt',secondFile]]){
+-  const result=content.parts[index].functionResponse;assert.equal(result.name,'read_file');if(index===0)assert.equal(result.id,'provider-identified-call');else assert.equal(Object.hasOwn(result,'id'),false,'Absent provider IDs must remain absent in results');assert.deepEqual(Object.keys(result.response),['output']);assert.equal(typeof result.response.output,'string');assert.deepEqual(JSON.parse(result.response.output),{path,content:text});
++  const result=content.parts[index].functionResponse;assert.equal(result.name,'read_file');if(index===0)assert.equal(result.id,'provider-identified-call');else assert.equal(Object.hasOwn(result,'id'),false,'Absent provider IDs must remain absent in results');assert.deepEqual(Object.keys(result.response),['output']);assert.equal(typeof result.response.output,'string');assert.deepEqual(JSON.parse(result.response.output),{path,content:text,workspace_id:primary,folder_id:primary,workspace_revision:1});
+  }
+ }
+ const peer=createServer((request,response)=>{const buffers=[];let bytes=0;request.on('data',chunk=>{bytes+=chunk.length;if(bytes>512*1024){request.destroy();return;}buffers.push(chunk);});request.on('end',()=>{try{
+@@ -32,7 +33,7 @@ const peer=createServer((request,response)=>{const buffers=[];let bytes=0;reques
+  if(route==='/main'){
+   ++mainRequests;
+   if(mainRequests===1){assert.deepEqual(body.contents,[{role:'user',parts:[{text:'Read the actual fixture files'}]}]);reply(response,parts,'STOP',{promptTokenCount:11,candidatesTokenCount:4,totalTokenCount:47,cachedContentTokenCount:3,thoughtsTokenCount:2},'synthetic-native-tool-turn');return;}
+-  assert.ok(source.includes(preciseMetadata),'Raw signed metadata numeric tokens must survive native continuation and SQLite reload');assert.ok(source.includes(firstArguments),'Escaped original argument keys must survive native receipt replay');assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the actual fixture files'}]});assert.deepEqual(body.contents[1],{role:'model',parts:JSON.parse(parts)});observedResults(body.contents[2]);
++  assert.ok(source.includes(preciseMetadata),'Raw signed metadata numeric tokens must survive native continuation and SQLite reload');assert.ok(source.includes(firstArguments),'Escaped original argument keys must survive native receipt replay');assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the actual fixture files'}]});assert.deepEqual(body.contents[1],{role:'model',parts:JSON.parse(parts)});observedResults(body.systemInstruction.parts[0].text,body.contents[2]);
+   if(mainRequests===2){assert.equal(body.contents.length,3);reply(response,JSON.stringify(finalParts),'STOP',{promptTokenCount:19,candidatesTokenCount:6,cachedContentTokenCount:4,thoughtsTokenCount:5},'synthetic-native-final-turn');return;}
+   assert.equal(mainRequests,3);assert.equal(body.contents.length,5);assert.deepEqual(body.contents[3],{role:'model',parts:finalParts});assert.deepEqual(body.contents[4],{role:'user',parts:[{text:'Continue after SQLite reopen'}]});reply(response,JSON.stringify([{text:reopenedAnswer}]),'STOP',{promptTokenCount:23,candidatesTokenCount:2},'synthetic-native-reopened-turn');return;
+  }
+diff --git a/Native/tests/gemini_profile_runtime_contract.cpp b/Native/tests/gemini_profile_runtime_contract.cpp
+index f13cac17..79623261 100644
+--- a/Native/tests/gemini_profile_runtime_contract.cpp
++++ b/Native/tests/gemini_profile_runtime_contract.cpp
+@@ -3,6 +3,7 @@
+ #include "agentflow/xlang_sqlite.hpp"
+ #include "httplib.h"
+ #include "nlohmann/json.hpp"
++#include "agentflow/workspace_tools.hpp"
+ #include <filesystem>
+ #include <future>
+ #include <iostream>
+@@ -59,6 +60,8 @@ void provenance(const Json& value,const std::string& model="models/fixture-gemin
+ const Json coding_models={{"models",Json::array({{{"id","models/fixture-gemini"}},{{"id","models/fixture-gemini-second"}}})}};
+ }
+ int main(int argc,char** argv){if(argc!=6)return 2;try{
++    const auto workspace_identity=WorkspaceTools(argv[4]).identity();
++    const auto expected_file=[&](const char* path,const char* content){return Json{{"path",path},{"content",content},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}};};
+     const auto root=std::filesystem::u8path(argv[1]);const auto database=(root/"profile.sqlite").string();
+     const std::vector<std::string> imports{argv[2],argv[3]};const std::string origin=argv[5];
+     AgentSettings base;base.workspace=argv[4];base.max_output_tokens=64;base.run_timeout=std::chrono::seconds(12);
+@@ -116,7 +119,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
+         const auto completed=wait(store,"enrolled-run",RunState::completed);provenance(Json{{"provider_context",Json::parse(completed.provider_context_json)}});
+         persisted=store.history("enrolled").get();require(persisted.size()==4&&persisted[0].role=="user"&&persisted[1].role=="assistant"&&persisted[2].role=="tool"&&persisted[3].role=="assistant","The enrolled runtime must persist its actual read-tool continuation");
+         const auto turn=Json::parse(persisted[1].json),result=Json::parse(persisted[2].json),answer=Json::parse(persisted[3].json);const auto native_id=turn.at("tool_calls").at(0).at("id").get<std::string>();
+-        require(native_id.starts_with("gm_")&&native_id!="provider-profile-read"&&result.at("tool_call_id")==native_id&&Json::parse(result.at("content").get<std::string>())==Json{{"path","README.md"},{"content",file_text}},"Actual native file bytes must be correlated through native call identities");
++        require(native_id.starts_with("gm_")&&native_id!="provider-profile-read"&&result.at("tool_call_id")==native_id&&Json::parse(result.at("content").get<std::string>())==expected_file("README.md",file_text),"Actual native file bytes must be correlated through native call identities");
+         require(turn.at("provider_items").at(0).at("parts_json").is_string()&&answer.at("content")==final_answer&&answer.at("usage").at("prompt_tokens")==13&&answer.at("usage").at("completion_tokens")==4,"Native execution must retain signed receipts and real supplied provider reply metrics");
+         std::size_t started=0,finished=0,done=0;for(const auto& event:store.events("enrolled-run").get()){public_only(event.json);if(event.kind=="tool.started")++started;if(event.kind=="tool.completed")++finished;if(event.kind=="model.done")++done;}
+         require(started==1&&finished==1&&done==2,"Enrollment contract must observe one actual native read and two model turns");
+diff --git a/Native/tests/gemini_profile_runtime_peer.mjs b/Native/tests/gemini_profile_runtime_peer.mjs
+index 385b251c..54e59fc4 100644
+--- a/Native/tests/gemini_profile_runtime_peer.mjs
++++ b/Native/tests/gemini_profile_runtime_peer.mjs
+@@ -27,10 +27,11 @@ function reply(response,parts,input,output,responseId){
+  const wire=Buffer.from(`data: ${JSON.stringify(data)}\n\n`);response.writeHead(200,{'Content-Type':'text/event-stream'});
+  for(let offset=0;offset<wire.length;offset+=11)response.write(wire.subarray(offset,offset+11));response.end();
+ }
+-function results(content){
++function results(system,content){
++ const primary=system.match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
+  assert.equal(content.role,'user');assert.equal(content.parts.length,1);const result=content.parts[0].functionResponse;
+  assert.equal(result.name,'read_file');assert.equal(result.id,'provider-profile-read');assert.deepEqual(Object.keys(result.response),['output']);
+- assert.deepEqual(JSON.parse(result.response.output),{path:'README.md',content:fileText},'Only actual native file bytes may satisfy the synthetic peer');
++ assert.deepEqual(JSON.parse(result.response.output),{path:'README.md',content:fileText,workspace_id:primary,folder_id:primary,workspace_revision:1},'Only actual native file bytes may satisfy the synthetic peer');
+ }
+ const peer=createServer((request,response)=>{
+  const chunks=[];let size=0;request.on('data',chunk=>{size+=chunk.length;if(size>512*1024){request.destroy();return;}chunks.push(chunk);});
+@@ -69,7 +70,7 @@ const peer=createServer((request,response)=>{
+   if(prompt==='Cancel enrolled native run'){
+    assert.deepEqual(body.contents,[{role:'user',parts:[{text:prompt}]}]);response.once('close',()=>{heldRequestClosed=true;});child.stdin.write('fixture-run-started\n');return;
+   }
+-  assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the enrolled fixture file'}]});assert.deepEqual(body.contents[1],{role:'model',parts:callParts});results(body.contents[2]);
++  assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the enrolled fixture file'}]});assert.deepEqual(body.contents[1],{role:'model',parts:callParts});results(body.systemInstruction.parts[0].text,body.contents[2]);
+   if(body.contents.length===3){reply(response,finalParts,13,4,'synthetic-profile-completed');return;}
+   assert.equal(body.contents.length,5);assert.deepEqual(body.contents[3],{role:'model',parts:finalParts});assert.deepEqual(body.contents[4],{role:'user',parts:[{text:'Continue enrolled run after reopen'}]});
+   reply(response,[{text:reopenedAnswer}],17,3,'synthetic-profile-reopened');
+diff --git a/Native/tests/native_delegation_contract.cpp b/Native/tests/native_delegation_contract.cpp
+index b4ea7d01..64382fb0 100644
+--- a/Native/tests/native_delegation_contract.cpp
++++ b/Native/tests/native_delegation_contract.cpp
+@@ -9,6 +9,7 @@
+ #include "agentflow/xlang_sqlite.hpp"
+ #include "graph_schema_fixture.hpp"
+ #include "nlohmann/json.hpp"
++#include "agentflow/workspace_tools.hpp"
+ #include <chrono>
+ #include <filesystem>
+ #include <fstream>
+@@ -45,6 +46,7 @@ AgentSettings settings(const std::string& endpoint,const std::string& workspace)
+ }
+ void metrics(const Json& answer){require(answer.contains("usage")&&answer["usage"].at("input_tokens").is_number_integer()&&answer["usage"].at("output_tokens").is_number_integer(),"Actual child must retain supplied per-response usage");require(!answer["usage"].contains("total_tokens"),"Missing provider totals must remain missing");require(answer.contains("elapsed_ms")&&answer["elapsed_ms"]>=0&&answer.contains("first_token_ms")&&answer["first_token_ms"]>=0,"Actual child must retain measured native timing");}
+ void actual_success(PersistenceService& store,const AgentSettings& value,const std::filesystem::path& workspace,std::vector<Message>& root_history,std::vector<OwnedChildRecord>& saved_children){
++    const auto workspace_identity=WorkspaceTools(workspace.string()).identity();
+     auto pool=std::make_shared<DelegationExecutor>(store,4,64);AgentRunner runner(store,value,pool);store.create_session("success-session","Actual native delegation and controller-approved edit").get();runner.start("success-root","success-session","fixture-parent-success: Investigate the actual files and apply one reviewed edit after observing findings.");
+     require(store.root_budget("success-root").get().children_admitted==0,"Root budget must be admitted atomically before provider execution");
+     Execution execution(runner,"success-root");const auto proposed=approval(store,"success-root");
+@@ -64,7 +66,7 @@ void actual_success(PersistenceService& store,const AgentSettings& value,const s
+         if(child.task_id=="left"){const auto input=Json::parse(rows[0].json);require(input.at("agent_profile").at("id")=="fixture.reader"&&input.at("agent_profile").at("mode")=="subagent"&&input.at("agent_profile").at("revision")==1,"Delegated child prompt must persist the exact selected subagent profile identity and revision");}
+         const bool left=child.task_id=="left";const auto tool=Json::parse(rows[1].json),result=Json::parse(Json::parse(rows[2].json).at("content").get<std::string>()),answer=Json::parse(rows.back().json);metrics(tool);metrics(answer);
+         require(tool.at("tool_calls")[0].at("arguments")==std::string("{\"pa\\u0074h\":\"")+(left?"left.txt":"right.txt")+"\"}","Leaf signed replay must retain original escaped argument spelling");
+-        require(result==Json{{"path",left?"left.txt":"right.txt"},{"content",left?left_file:right_file}},"Actual native workspace bytes must reach the leaf's durable result");
++        require(result==Json{{"path",left?"left.txt":"right.txt"},{"content",left?left_file:right_file},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}},"Actual native workspace bytes must reach the leaf's durable result");
+         require(answer["usage"]["input_tokens"]==(left?29:31)&&answer["usage"]["output_tokens"]==(left?7:9),"Leaf metrics must retain its own supplied counters without sums or sibling substitution");
+         for(const auto& row:rows)require(row.json.find("opaque-parent-")==std::string::npos&&row.json.find(left?"opaque-leaf-right":"opaque-leaf-left")==std::string::npos,"Signed provider histories must stay inside their actual execution");
+         private_absent(rows,store.events(child.run.id).get());const auto admission=store.child_admission(child.run.id).get();require(admission.kind==ChildAdmissionKind::delegated_leaf&&admission.root_run_id=="success-root"&&admission.preset_id=="workspace.inspect","Typed child admission must bind actual owner/root/preset");

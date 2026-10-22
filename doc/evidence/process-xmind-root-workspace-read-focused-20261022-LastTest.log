@@ -1,0 +1,68 @@
+Start testing: Oct 22 14:09 Pacific Daylight Time
+----------------------------------------------------------
+54/172 Testing: native_delegation_contract
+54/172 Test: native_delegation_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/delegation_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_native_delegation_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_delegation_contract" start time: Oct 22 14:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native delegation contract passed real signed parent/leaf provider transport, independent filesystem reads/history/metrics, one controller-approved parent edit, observed failure follow-up, cancellation/draining, atomic admission rollback, coupled conversation/settlement fail-stop, encoded output bounds, shared call allowances, exact deduplication/ownership and xlang3 SQLite recovery without replay. Provider replies/signatures/key and direct repository lifecycle inputs are synthetic; no live provider or rendered UI acceptance claimed.
+<end of output>
+Test time =   2.60 sec
+----------------------------------------------------------
+Test Passed.
+"native_delegation_contract" end time: Oct 22 14:09 Pacific Daylight Time
+"native_delegation_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+99/172 Testing: native_gemini_agent_contract
+99/172 Test: native_gemini_agent_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/gemini_agent_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_agent_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_gemini_agent_contract" start time: Oct 22 14:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Gemini AgentRunner contract passed real two-file execution, encrypted credential reuse, actual xlang3 SQLite persistence/reopen, signed precise receipt/result replay, native/provider ID separation, supplied usage and malformed/truncated/unoffered failure without tool execution. Socket model replies are synthetic; no product enrollment or live Gemini inference tested.
+<end of output>
+Test time =   0.51 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_agent_contract" end time: Oct 22 14:09 Pacific Daylight Time
+"native_gemini_agent_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+100/172 Testing: native_anthropic_agent_contract
+100/172 Test: native_anthropic_agent_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/anthropic_agent_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_anthropic_agent_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_anthropic_agent_contract" start time: Oct 22 14:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Actual native Claude agent contract passed two filesystem reads, ordered text/tool/signed-redacted thinking receipts, exact escaped arguments, correlated provider IDs/results, encrypted xlang3 SQLite close/reopen and exact signed history replay without tool repetition, supplied uncached/cache/zero usage and timings, protocol/signature failure before effects, held-stream cancellation/recovery and actual SQL tool-row rollback. Provider socket replies/credentials/signatures are synthetic; no thinking request controls, cryptographic signature verification, live account or UI acceptance claimed.
+<end of output>
+Test time =   0.73 sec
+----------------------------------------------------------
+Test Passed.
+"native_anthropic_agent_contract" end time: Oct 22 14:09 Pacific Daylight Time
+"native_anthropic_agent_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+171/172 Testing: native_gemini_profile_runtime_contract
+171/172 Test: native_gemini_profile_runtime_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/gemini_profile_runtime_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_gemini_profile_runtime_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_gemini_profile_runtime_contract" start time: Oct 22 14:09 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+fixture-discovery-committed
+Native Gemini profile runtime contract passed authenticated paginated draft/saved-key discovery, native model/capability validation before key persistence, selection/CAS and cancellation ownership, actual file-tool execution, encrypted xlang3 SQLite restart, key-only migration, text-only enrollment and stale discovery rejection. Provider socket replies and keys are synthetic; no live account inference or UI enrollment tested.
+<end of output>
+Test time =   1.65 sec
+----------------------------------------------------------
+Test Passed.
+"native_gemini_profile_runtime_contract" end time: Oct 22 14:09 Pacific Daylight Time
+"native_gemini_profile_runtime_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 22 14:09 Pacific Daylight Time

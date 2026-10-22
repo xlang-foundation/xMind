@@ -19,10 +19,11 @@ function reply(response,rawParts,finish,usage,responseId){
  const wire=Buffer.from(`data: {"candidates":[${candidate}],"usageMetadata":${JSON.stringify(usage)},"modelVersion":"fixture-gemini","responseId":"${responseId}"}\n\n`);
  response.writeHead(200,{'Content-Type':'text/event-stream'});for(let offset=0;offset<wire.length;offset+=7)response.write(wire.subarray(offset,offset+7));response.end();
 }
-function observedResults(content){
+function observedResults(system,content){
+ const primary=system.match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
  assert.equal(content.role,'user');assert.equal(content.parts.length,2);
  for(const [index,path,text] of [[0,'README.md',firstFile],[1,'second.txt',secondFile]]){
-  const result=content.parts[index].functionResponse;assert.equal(result.name,'read_file');if(index===0)assert.equal(result.id,'provider-identified-call');else assert.equal(Object.hasOwn(result,'id'),false,'Absent provider IDs must remain absent in results');assert.deepEqual(Object.keys(result.response),['output']);assert.equal(typeof result.response.output,'string');assert.deepEqual(JSON.parse(result.response.output),{path,content:text});
+  const result=content.parts[index].functionResponse;assert.equal(result.name,'read_file');if(index===0)assert.equal(result.id,'provider-identified-call');else assert.equal(Object.hasOwn(result,'id'),false,'Absent provider IDs must remain absent in results');assert.deepEqual(Object.keys(result.response),['output']);assert.equal(typeof result.response.output,'string');assert.deepEqual(JSON.parse(result.response.output),{path,content:text,workspace_id:primary,folder_id:primary,workspace_revision:1});
  }
 }
 const peer=createServer((request,response)=>{const buffers=[];let bytes=0;request.on('data',chunk=>{bytes+=chunk.length;if(bytes>512*1024){request.destroy();return;}buffers.push(chunk);});request.on('end',()=>{try{
@@ -32,7 +33,7 @@ const peer=createServer((request,response)=>{const buffers=[];let bytes=0;reques
  if(route==='/main'){
   ++mainRequests;
   if(mainRequests===1){assert.deepEqual(body.contents,[{role:'user',parts:[{text:'Read the actual fixture files'}]}]);reply(response,parts,'STOP',{promptTokenCount:11,candidatesTokenCount:4,totalTokenCount:47,cachedContentTokenCount:3,thoughtsTokenCount:2},'synthetic-native-tool-turn');return;}
-  assert.ok(source.includes(preciseMetadata),'Raw signed metadata numeric tokens must survive native continuation and SQLite reload');assert.ok(source.includes(firstArguments),'Escaped original argument keys must survive native receipt replay');assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the actual fixture files'}]});assert.deepEqual(body.contents[1],{role:'model',parts:JSON.parse(parts)});observedResults(body.contents[2]);
+  assert.ok(source.includes(preciseMetadata),'Raw signed metadata numeric tokens must survive native continuation and SQLite reload');assert.ok(source.includes(firstArguments),'Escaped original argument keys must survive native receipt replay');assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the actual fixture files'}]});assert.deepEqual(body.contents[1],{role:'model',parts:JSON.parse(parts)});observedResults(body.systemInstruction.parts[0].text,body.contents[2]);
   if(mainRequests===2){assert.equal(body.contents.length,3);reply(response,JSON.stringify(finalParts),'STOP',{promptTokenCount:19,candidatesTokenCount:6,cachedContentTokenCount:4,thoughtsTokenCount:5},'synthetic-native-final-turn');return;}
   assert.equal(mainRequests,3);assert.equal(body.contents.length,5);assert.deepEqual(body.contents[3],{role:'model',parts:finalParts});assert.deepEqual(body.contents[4],{role:'user',parts:[{text:'Continue after SQLite reopen'}]});reply(response,JSON.stringify([{text:reopenedAnswer}]),'STOP',{promptTokenCount:23,candidatesTokenCount:2},'synthetic-native-reopened-turn');return;
  }

@@ -3,12 +3,17 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,readFileSync,rmSync,mkdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const peerRoot=mkdtempSync(join(tmpdir(),'xmind-worker-mcp-'));let peerCalls=0,a2aCalls=0,refreshCalls=0,refreshSubscriptions=0,refreshClosed=0,catalogueChanged=false;const refreshListeners=new Set();
 const [executable,modules,stdlib]=process.argv.slice(2);
+// Preserve the first intermittent native fault, including ordinary CTest runs.
+// An explicit diagnostic directory still takes precedence; exits/budgets stay unchanged.
+const dumpDirectory=process.env.XMIND_WORKER_FIXTURE_DUMP_DIR||join(dirname(executable),'..','Testing','Temporary','worker-crash-dumps');
+mkdirSync(dumpDirectory,{recursive:true});
+
 const parentCancelling=new Set();
 const expected={parent_delegation_counted:6,parent_delegation_counted_count:6,parent_delegation_unrecorded:5,parent_delegation_child_failure:5,parent_delegation_cancel:3,parent_delegation_denied:2,parent_delegation_budget:1,parent_delegation:6,worker_context_compact_failure:2,worker_context_compact_failure_count:3,worker_context_compact_failure_compact:1,worker_context_compact_cancel:2,worker_context_compact_cancel_count:3,worker_context_compact_cancel_compact:1,coding_context_overflow:4,coding_context_overflow_count:5,coding_context_overflow_compact:1,coding_context_overflow_repeat:4,coding_context_overflow_repeat_count:5,coding_context_overflow_repeat_compact:1,worker_context_count_failure:0,worker_context_count_failure_count:1,worker_context_count_cancel:0,worker_context_count_cancel_count:1,worker_context_inference_failure:1,worker_context_inference_failure_count:1,worker_context_inference_cancel:1,worker_context_inference_cancel_count:1,coding_context:2,coding_context_count:2,coding_context_compact:3,coding_context_compact_count:4,coding_context_compact_compact:1,coding_skills:5,coding_skills_denied:3,coding_skills_rollback:2,coding_skills_manual:1,coding_callable:2,coding_callable_array:2,coding_callable_denied:2,coding_callable_policy:2,coding_callable_cancel:1,coding_callable_unrecorded:1,coding_callable_alias:2,coding_callable_worker:2,coding_callable_default:2,coding_language:2,coding_language_denied:2,coding_language_attached:2,coding_remote_factory_refresh:3,coding_remote_refresh:3,coding_a2a_factory:2,coding_remote_factory:2,coding_remote:2,coding_async_unrecorded:2,coding_async:3,coding_service:5,coding_command:2,process_create:1,process_denied:1,process_cancel:1,process_delivery:1,process_unrecorded:1,coding_create:2,coding_denied:2,coding_cancel:1,coding_unrecorded:1,coding_attached:2,file_create:1,file_denied:1,file_cancel:1,file_delivery:1,file_unrecorded:1,product_factory_thread:1,product_factory_profile:4,product_factory_attached:2,product_factory_read:2,product_factory_denied:2,product_factory:1,product_service:1,product_supervised_cancel:1,product_supervised:1,product_no_tools:1,normal:1,cancel:1,crash:1,delivery:1,overflow:1,other_error:1,completion:1,completion_delivery:1,completion_rollback:1,completion_hold:1,runner:1,runner_error:1,runner_cancel:1,read:2,read_delivery:1,read_denied:1,read_cancel:1,read_turn_delivery:1,read_turn_rollback:1,read_context:3,runner_read:3,runner_read_cancel:2,native_runner_read:3,native_runner_read_cancel:2,product_read:3,product_read_cancel:2,product_read_error:1,product_profile_read:3,product_profile_read_cancel:2};
 const counts=Object.fromEntries(Object.keys(expected).map(mode=>[mode,0]));
@@ -245,7 +250,7 @@ try{
  const result={stdout:""};
  for(const phase of ["transport","production"]){
   const started=performance.now(),timing=[];
-  const pending=promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`,phase],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024});
+  const pending=promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`,phase],{env:{...process.env,XMIND_WORKER_FIXTURE_DUMP_DIR:dumpDirectory,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024});
   if(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR)pending.child.stdout.on('data',bytes=>timing.push({elapsedMs:performance.now()-started,text:bytes.toString()}));
   let part;try{part=await pending.catch(error=>{if(error.stdout)process.stdout.write(error.stdout);if(error.stderr)process.stderr.write(error.stderr);if(failure)throw failure;throw error;});}
   finally{if(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR)writeFileSync(join(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR,phase+'-'+process.pid+'.json'),JSON.stringify({phase,pid:pending.child.pid,elapsedMs:performance.now()-started,timing},null,2)+'\n',{flag:'wx'});}

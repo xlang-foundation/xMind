@@ -27,10 +27,11 @@ function reply(response,parts,input,output,responseId){
  const wire=Buffer.from(`data: ${JSON.stringify(data)}\n\n`);response.writeHead(200,{'Content-Type':'text/event-stream'});
  for(let offset=0;offset<wire.length;offset+=11)response.write(wire.subarray(offset,offset+11));response.end();
 }
-function results(content){
+function results(system,content){
+ const primary=system.match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
  assert.equal(content.role,'user');assert.equal(content.parts.length,1);const result=content.parts[0].functionResponse;
  assert.equal(result.name,'read_file');assert.equal(result.id,'provider-profile-read');assert.deepEqual(Object.keys(result.response),['output']);
- assert.deepEqual(JSON.parse(result.response.output),{path:'README.md',content:fileText},'Only actual native file bytes may satisfy the synthetic peer');
+ assert.deepEqual(JSON.parse(result.response.output),{path:'README.md',content:fileText,workspace_id:primary,folder_id:primary,workspace_revision:1},'Only actual native file bytes may satisfy the synthetic peer');
 }
 const peer=createServer((request,response)=>{
  const chunks=[];let size=0;request.on('data',chunk=>{size+=chunk.length;if(size>512*1024){request.destroy();return;}chunks.push(chunk);});
@@ -69,7 +70,7 @@ const peer=createServer((request,response)=>{
   if(prompt==='Cancel enrolled native run'){
    assert.deepEqual(body.contents,[{role:'user',parts:[{text:prompt}]}]);response.once('close',()=>{heldRequestClosed=true;});child.stdin.write('fixture-run-started\n');return;
   }
-  assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the enrolled fixture file'}]});assert.deepEqual(body.contents[1],{role:'model',parts:callParts});results(body.contents[2]);
+  assert.deepEqual(body.contents[0],{role:'user',parts:[{text:'Read the enrolled fixture file'}]});assert.deepEqual(body.contents[1],{role:'model',parts:callParts});results(body.systemInstruction.parts[0].text,body.contents[2]);
   if(body.contents.length===3){reply(response,finalParts,13,4,'synthetic-profile-completed');return;}
   assert.equal(body.contents.length,5);assert.deepEqual(body.contents[3],{role:'model',parts:finalParts});assert.deepEqual(body.contents[4],{role:'user',parts:[{text:'Continue enrolled run after reopen'}]});
   reply(response,[{text:reopenedAnswer}],17,3,'synthetic-profile-reopened');

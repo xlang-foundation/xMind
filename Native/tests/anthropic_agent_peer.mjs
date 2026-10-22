@@ -45,13 +45,14 @@ function write(response,wire,end=true){
  const bytes=Buffer.from(wire);for(let offset=0;offset<bytes.length;offset+=7)response.write(bytes.subarray(offset,offset+7));
  if(end)response.end();
 }
-function assertResults(messages,left='toolu-native-left',right='toolu-native-right'){
+function assertResults(system,messages,left='toolu-native-left',right='toolu-native-right'){
+ const primary=system.match(/folder_id=([^\s]+)[^\n]*\(primary\)/)?.[1];assert.ok(primary,'Actual model context must identify the primary workspace folder');
  assert.deepEqual(messages[0],{role:'user',content:[{type:'text',text:'Read the actual Claude fixture files'}]});
  assert.deepEqual(messages[1],{role:'assistant',content:[{type:'thinking',thinking:hiddenThought,signature:'opaque-claude-fixture-signature'},{type:'tool_use',id:left,name:'read_file',input:{path:'README.md'}},{type:'text',text:batchText},{type:'redacted_thinking',data:'opaque-redacted-claude-fixture'},{type:'tool_use',id:right,name:'read_file',input:{path:'second.txt'}}]});
  assert.equal(messages[2].role,'user');assert.equal(messages[2].content.length,2);
  for(const [index,id,path,content] of [[0,left,'README.md',firstFile],[1,right,'second.txt',secondFile]]){
   const result=messages[2].content[index];assert.equal(result.type,'tool_result');assert.equal(result.tool_use_id,id);assert.equal(typeof result.content,'string');
-  assert.deepEqual(JSON.parse(result.content),{path,content},'Only actual native filesystem bytes may satisfy the provider continuation');
+  assert.deepEqual(JSON.parse(result.content),{path,content,workspace_id:primary,folder_id:primary,workspace_revision:1},'Only actual native filesystem bytes may satisfy the provider continuation');
  }
 }
 const peer=createServer((request,response)=>{
@@ -68,7 +69,7 @@ const peer=createServer((request,response)=>{
     assert.deepEqual(body.messages,[{role:'user',content:[{type:'text',text:'Read the actual Claude fixture files'}]}]);
     write(response,event(start({input_tokens:11,output_tokens:0,cache_creation_input_tokens:0,cache_read_input_tokens:7}))+thinking(0)+tool(1,'toolu-native-left','README.md','read_file',false,escapedArguments)+text(batchText,2)+redacted(3)+tool(4,'toolu-native-right','second.txt')+terminal('tool_use',4));return;
    }
-   assertResults(body.messages);
+   assertResults(body.system[0].text,body.messages);
    assert.ok(source.includes(escapedArguments),'Original escaped argument keys must survive native receipt continuation and SQLite replay');
    if(mainRequests===2){
     assert.equal(body.messages.length,3);continuationPrefix=JSON.stringify(body.messages);

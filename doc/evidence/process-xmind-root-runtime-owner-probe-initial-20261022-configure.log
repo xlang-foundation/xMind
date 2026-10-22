@@ -1,0 +1,10 @@
+-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.
+-- The CXX compiler identification is MSVC 19.51.36256.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (2.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/CantorAI2026/xMind/.agentflow/runtime-concurrency-diagnostic/build

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(xmind_sdk_concurrency_probe LANGUAGES CXX)
+add_executable(sdk_concurrency_probe probe.cpp)
+target_compile_features(sdk_concurrency_probe PRIVATE cxx_std_20)
+target_include_directories(sdk_concurrency_probe PRIVATE "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/sdk" "D:/CantorAI2026/xMind/Native/tests")
+target_link_libraries(sdk_concurrency_probe PRIVATE "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/xlang3_runtime.lib")
+add_custom_command(TARGET sdk_concurrency_probe POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/xlang3_runtime.dll" "$<TARGET_FILE_DIR:sdk_concurrency_probe>")

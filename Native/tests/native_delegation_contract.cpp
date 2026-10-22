@@ -9,6 +9,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "graph_schema_fixture.hpp"
 #include "nlohmann/json.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -45,6 +46,7 @@ AgentSettings settings(const std::string& endpoint,const std::string& workspace)
 }
 void metrics(const Json& answer){require(answer.contains("usage")&&answer["usage"].at("input_tokens").is_number_integer()&&answer["usage"].at("output_tokens").is_number_integer(),"Actual child must retain supplied per-response usage");require(!answer["usage"].contains("total_tokens"),"Missing provider totals must remain missing");require(answer.contains("elapsed_ms")&&answer["elapsed_ms"]>=0&&answer.contains("first_token_ms")&&answer["first_token_ms"]>=0,"Actual child must retain measured native timing");}
 void actual_success(PersistenceService& store,const AgentSettings& value,const std::filesystem::path& workspace,std::vector<Message>& root_history,std::vector<OwnedChildRecord>& saved_children){
+    const auto workspace_identity=WorkspaceTools(workspace.string()).identity();
     auto pool=std::make_shared<DelegationExecutor>(store,4,64);AgentRunner runner(store,value,pool);store.create_session("success-session","Actual native delegation and controller-approved edit").get();runner.start("success-root","success-session","fixture-parent-success: Investigate the actual files and apply one reviewed edit after observing findings.");
     require(store.root_budget("success-root").get().children_admitted==0,"Root budget must be admitted atomically before provider execution");
     Execution execution(runner,"success-root");const auto proposed=approval(store,"success-root");
@@ -64,7 +66,7 @@ void actual_success(PersistenceService& store,const AgentSettings& value,const s
         if(child.task_id=="left"){const auto input=Json::parse(rows[0].json);require(input.at("agent_profile").at("id")=="fixture.reader"&&input.at("agent_profile").at("mode")=="subagent"&&input.at("agent_profile").at("revision")==1,"Delegated child prompt must persist the exact selected subagent profile identity and revision");}
         const bool left=child.task_id=="left";const auto tool=Json::parse(rows[1].json),result=Json::parse(Json::parse(rows[2].json).at("content").get<std::string>()),answer=Json::parse(rows.back().json);metrics(tool);metrics(answer);
         require(tool.at("tool_calls")[0].at("arguments")==std::string("{\"pa\\u0074h\":\"")+(left?"left.txt":"right.txt")+"\"}","Leaf signed replay must retain original escaped argument spelling");
-        require(result==Json{{"path",left?"left.txt":"right.txt"},{"content",left?left_file:right_file}},"Actual native workspace bytes must reach the leaf's durable result");
+        require(result==Json{{"path",left?"left.txt":"right.txt"},{"content",left?left_file:right_file},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}},"Actual native workspace bytes must reach the leaf's durable result");
         require(answer["usage"]["input_tokens"]==(left?29:31)&&answer["usage"]["output_tokens"]==(left?7:9),"Leaf metrics must retain its own supplied counters without sums or sibling substitution");
         for(const auto& row:rows)require(row.json.find("opaque-parent-")==std::string::npos&&row.json.find(left?"opaque-leaf-right":"opaque-leaf-left")==std::string::npos,"Signed provider histories must stay inside their actual execution");
         private_absent(rows,store.events(child.run.id).get());const auto admission=store.child_admission(child.run.id).get();require(admission.kind==ChildAdmissionKind::delegated_leaf&&admission.root_run_id=="success-root"&&admission.preset_id=="workspace.inspect","Typed child admission must bind actual owner/root/preset");

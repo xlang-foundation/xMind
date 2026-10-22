@@ -3,6 +3,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
+#include "agentflow/workspace_tools.hpp"
 #include <filesystem>
 #include <future>
 #include <iostream>
@@ -59,6 +60,8 @@ void provenance(const Json& value,const std::string& model="models/fixture-gemin
 const Json coding_models={{"models",Json::array({{{"id","models/fixture-gemini"}},{{"id","models/fixture-gemini-second"}}})}};
 }
 int main(int argc,char** argv){if(argc!=6)return 2;try{
+    const auto workspace_identity=WorkspaceTools(argv[4]).identity();
+    const auto expected_file=[&](const char* path,const char* content){return Json{{"path",path},{"content",content},{"workspace_id",workspace_identity},{"folder_id",workspace_identity},{"workspace_revision",1}};};
     const auto root=std::filesystem::u8path(argv[1]);const auto database=(root/"profile.sqlite").string();
     const std::vector<std::string> imports{argv[2],argv[3]};const std::string origin=argv[5];
     AgentSettings base;base.workspace=argv[4];base.max_output_tokens=64;base.run_timeout=std::chrono::seconds(12);
@@ -116,7 +119,7 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
         const auto completed=wait(store,"enrolled-run",RunState::completed);provenance(Json{{"provider_context",Json::parse(completed.provider_context_json)}});
         persisted=store.history("enrolled").get();require(persisted.size()==4&&persisted[0].role=="user"&&persisted[1].role=="assistant"&&persisted[2].role=="tool"&&persisted[3].role=="assistant","The enrolled runtime must persist its actual read-tool continuation");
         const auto turn=Json::parse(persisted[1].json),result=Json::parse(persisted[2].json),answer=Json::parse(persisted[3].json);const auto native_id=turn.at("tool_calls").at(0).at("id").get<std::string>();
-        require(native_id.starts_with("gm_")&&native_id!="provider-profile-read"&&result.at("tool_call_id")==native_id&&Json::parse(result.at("content").get<std::string>())==Json{{"path","README.md"},{"content",file_text}},"Actual native file bytes must be correlated through native call identities");
+        require(native_id.starts_with("gm_")&&native_id!="provider-profile-read"&&result.at("tool_call_id")==native_id&&Json::parse(result.at("content").get<std::string>())==expected_file("README.md",file_text),"Actual native file bytes must be correlated through native call identities");
         require(turn.at("provider_items").at(0).at("parts_json").is_string()&&answer.at("content")==final_answer&&answer.at("usage").at("prompt_tokens")==13&&answer.at("usage").at("completion_tokens")==4,"Native execution must retain signed receipts and real supplied provider reply metrics");
         std::size_t started=0,finished=0,done=0;for(const auto& event:store.events("enrolled-run").get()){public_only(event.json);if(event.kind=="tool.started")++started;if(event.kind=="tool.completed")++finished;if(event.kind=="model.done")++done;}
         require(started==1&&finished==1&&done==2,"Enrollment contract must observe one actual native read and two model turns");

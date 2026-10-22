@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  54: native_delegation_contract
+1/4 Test  #54: native_delegation_contract ...............   Passed    2.60 sec
+    Start  99: native_gemini_agent_contract
+2/4 Test  #99: native_gemini_agent_contract .............   Passed    0.51 sec
+    Start 100: native_anthropic_agent_contract
+3/4 Test #100: native_anthropic_agent_contract ..........   Passed    0.73 sec
+    Start 171: native_gemini_profile_runtime_contract
+4/4 Test #171: native_gemini_profile_runtime_contract ...   Passed    1.65 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   5.51 sec
