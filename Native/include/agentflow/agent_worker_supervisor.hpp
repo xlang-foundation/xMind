@@ -26,6 +26,7 @@ public:
     void cancel();
     AgentWorkerTerminalObservation drain_completed(AgentWorkerChannel::Deadline);
     AgentWorkerTerminalObservation drain_paused(const std::string& segment,AgentWorkerChannel::Deadline);
+    AgentWorkerTerminalObservation drain_planning_terminal(RunState,const std::string& reason,const std::string& segment,std::int64_t elapsed_ms,AgentWorkerChannel::Deadline);
     AgentWorkerTerminalObservation drain_terminal(RunState,const std::string& reason,AgentWorkerChannel::Deadline);
     const AgentWorkerLeaseSpec& lease()const noexcept;
     bool alive()const;

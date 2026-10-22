@@ -33,6 +33,7 @@ public:
     std::future<AgentWorkerLeaseRecord> retire_agent_worker(std::string generation,std::string reason);
     std::future<Run> paused_agent_worker(AgentWorkerLeaseSpec,std::string segment);
     std::future<Run> retire_paused_agent_worker(AgentWorkerLeaseSpec,std::string segment);
+    std::future<Run> terminate_dynamic_agent_worker(AgentWorkerLeaseSpec,RunState,std::string reason,std::string segment,std::int64_t elapsed_ms);
     // Terminal observations remain recordable after the execution token/deadline stops.
     // The supervisor must drain physical work before calling; never expose as generic RPC.
     std::future<Run> terminate_agent_worker(AgentWorkerLeaseSpec,RunState outcome,std::string reason);

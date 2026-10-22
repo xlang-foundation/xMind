@@ -1,3 +1,27 @@
+## Planning worker terminal retirement — 2026-10-22
+
+Added typed planning-root failure/cancellation retirement and supervisor drain.
+The supervisor validates the captured lease, policy and segment before shutdown;
+persistence independently requires exact Windows process exit. Root outcome,
+segment closure, interrupted model reservations and lease retirement share the
+terminal transaction. Generic retirement cannot bypass an active worker lease.
+
+Actual product-process fixtures cover failure/cancellation before model-service
+startup, foreign identity and wrong-segment refusal, injected write failure after
+physical exit, rollback, and retry using the same supervisor. Duplicate observation
+adds no event; interrupted dispatch remains uncertain and no assistant reply is
+fabricated. Provider failure is a synthetic reason, not a provider transport test.
+Active model-stream/effect cancellation and main application integration remain open.
+
+Final ledger passes 1/1 in 11.00s; separate planning-engine/worker-model regressions
+pass 2/2 in 63.21s. These are whole-test timings, not IPC-call measurements.
+Native patch 99ec4a215d451a395f14de4beb5dbe02e6e9ae8bf477dbf2b94db13f86a513e6;
+xmind.exe a40c03a1e64ee6f59758c806d8ba5eb23c3c5b52d4e317d21fee8d821b92a093.
+Frozen sets: 2787 project/16 SDK/1870 libraries/30 runtime/18598 dependencies/
+105 binaries. Inventory172; no full-suite claim, paid inference, CPython,
+installation, user task replay or user-profile changes. Initial and final evidence
+retained as process-xmind-root-planning-terminal-*-20261022-*.
+
 ## Shared backend planning catalogue sealing — 2026-10-22
 
 Moved the runner's catalogue sealing into seal_dynamic_tool_catalogue in the

@@ -115,6 +115,21 @@ AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_paused(const std::st
     return {impl_->store.retire_paused_agent_worker(impl_->lease,segment).get(),exit};
 }
 const AgentWorkerLeaseSpec& AgentWorkerSupervisor::lease()const noexcept{return impl_->lease;}
+AgentWorkerTerminalObservation AgentWorkerSupervisor::drain_planning_terminal(RunState outcome,const std::string& reason,const std::string& segment,std::int64_t elapsed,AgentWorkerChannel::Deadline deadline){
+    std::lock_guard lock(impl_->mutex);if(impl_->callers||!impl_->lease_admitted)throw Conflict("Planning terminal drain requires joined callers and an admitted worker");
+    const std::set<std::string> failures{"deadline","provider_failure","worker_exit","dispatch_error"};
+    if(!((outcome==RunState::cancelled&&reason=="cancelled")||(outcome==RunState::failed&&failures.contains(reason))))throw std::invalid_argument("Invalid planning worker terminal intent");
+    const auto saved=impl_->store.agent_worker_lease(impl_->lease.generation).get();if(saved.spec!=impl_->lease)throw Conflict("Planning terminal worker identity changed");
+    if(elapsed<0||impl_->lease.root_run_id!=impl_->lease.owner_run_id)throw Conflict("Planning terminal requires its measured root segment");
+    const auto budget=impl_->store.root_budget(impl_->lease.root_run_id).get();const auto active=impl_->store.dynamic_budget_segment(impl_->lease.root_run_id).get();
+    if(budget.spec.policy_id!="native.dynamic-plan"||active.id!=segment)throw Conflict("Planning terminal segment differs before shutdown");
+    if(saved.state=="active"){
+        (void)impl_->store.read_agent_worker_journal(impl_->lease,{AgentWorkerJournalReadKind::run,impl_->lease.owner_run_id}).get();
+        if(active.state!="open"||!impl_->store.dynamic_capabilities(impl_->lease.root_run_id).get().catalogue_finalized)throw Conflict("Planning terminal has no finalized active root");
+    }else if(saved.state!="retired"||active.state!="closed"||impl_->store.run(impl_->lease.root_run_id).get().state!=outcome)throw Conflict("Planning terminal observation changed before shutdown");
+    impl_->draining=true;if(impl_->control)impl_->control->close();impl_->worker->channel().close();const auto exit=impl_->worker->wait(deadline);
+    return {impl_->store.terminate_dynamic_agent_worker(impl_->lease,outcome,reason,segment,elapsed).get(),exit};
+}
 bool AgentWorkerSupervisor::outcome_unrecorded()const noexcept{return (impl_->owner&&impl_->owner->outcome_unrecorded())||(impl_->coding_owner&&impl_->coding_owner->outcome_unrecorded());}
 bool AgentWorkerSupervisor::alive()const{return impl_->worker&&impl_->worker->alive();}
 bool AgentWorkerSupervisor::admitted()const{std::lock_guard lock(impl_->mutex);return impl_->lease_admitted;}
