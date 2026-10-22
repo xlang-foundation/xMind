@@ -1,0 +1,12 @@
+local_slots              pass         1.014x
+scalar_arithmetic        pass         1.005x
+range_for                pass         0.986x
+function_calls           pass         1.053x
+class_construct          pass         0.993x
+list_append              pass         1.001x
+property_access          pass         0.984x
+deepcopy_memo            pass         0.990x
+json_dumps               pass         0.973x
+gc_traversal             pass         0.961x
+subparsers               pass         0.995x
+Performance check: pass. Report: D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-performance\report.json

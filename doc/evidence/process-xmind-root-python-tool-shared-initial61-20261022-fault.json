@@ -1,0 +1,12 @@
+{
+  "localDump": ".agentflow/runtime-crash-20261022-33376/fatal.dmp",
+  "sha256": "31dc7f129d549c72cbc7761aab7dad3870e7e52b6b599c98d7ce7f1872755971",
+  "bytes": 374043,
+  "thread": 23480,
+  "exception": "0xc0000005",
+  "module": "xlang3_runtime.dll",
+  "offset": "0xf67f5",
+  "access": "read",
+  "invalidAddress": "0x8",
+  "rawDumpCommitted": false
+}

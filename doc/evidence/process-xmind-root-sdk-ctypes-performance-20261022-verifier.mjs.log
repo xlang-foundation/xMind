@@ -1,0 +1,23 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {spawn,execFileSync} from 'node:child_process';
+const repo='D:/CantorAI2026/xMind',source=repo+'/.agentflow/xlang3-ctypes-runtime-fix',release=repo+'/.agentflow/ctypes-runtime-fix-build/build/Release',baseline=repo+'/.agentflow/xlang3-ctypes-baseline',out=repo+'/.agentflow/ctypes-runtime-performance',stdlib='C:/Python/Python314/Lib';
+const sha=b=>createHash('sha256').update(b).digest('hex');
+await fs.mkdir(out);await fs.mkdir(out+'/cache');
+const fixed=JSON.parse(await fs.readFile(repo+'/.agentflow/ctypes-runtime-fix-corrected-build/evidence/gate.json','utf8'));assert.equal(fixed.passed,true);assert.equal(sha(await fs.readFile(release+'/xlang3_runtime.dll')),fixed.candidateSha256);
+await fs.cp(baseline+'/modules',release+'/modules',{recursive:true,errorOnExist:true,force:false});
+async function walk(root,prefix=''){const files=[];for(const item of await fs.readdir(root+'/'+prefix,{withFileTypes:true})){if(item.name==='__pycache__'||item.name==='site-packages')continue;const name=prefix+item.name;if(item.isDirectory())files.push(...await walk(root,name+'/'));else if(item.isFile())files.push(name);}return files.sort();}
+async function map(root,files){const result={};for(let i=0;i<files.length;i+=24)await Promise.all(files.slice(i,i+24).map(async name=>result[name]=sha(await fs.readFile(root+'/'+name))));return result;}
+const projectNames=()=>execFileSync('git',['ls-files','--','CMakeLists.txt','src','sdk','benchmarks','tests/cpp','tests/fixtures'],{cwd:source,encoding:'utf8',windowsHide:true,maxBuffer:16*1024*1024}).trim().split(/\r?\n/).sort();
+const patch=()=>execFileSync('git',['diff','HEAD','--binary'],{cwd:source,windowsHide:true,maxBuffer:16*1024*1024});
+async function snapshot(){return {project:await map(source,projectNames()),stdlib:await map(stdlib,(await walk(stdlib)).filter(n=>n.endsWith('.py'))),baseline:await map(baseline,await walk(baseline)),candidate:await map(release,['xlang3.exe','xlang3_runtime.dll',...(await walk(release+'/modules')).map(n=>'modules/'+n)]),patchSha256:sha(patch()),scriptSha256:sha(await fs.readFile(new URL(import.meta.url)))};}
+const before=await snapshot();await fs.writeFile(out+'/inputs-before.json',JSON.stringify(before,null,2)+'\n',{flag:'wx'});
+const env={...process.env,XLANG3_PYTHON_LIB:stdlib,PYTHONPYCACHEPREFIX:out+'/cache'};
+async function run(name,args){return new Promise((resolve,reject)=>{const startedAt=new Date().toISOString(),child=spawn(release+'/xlang3.exe',args,{cwd:source,windowsHide:true,env,stdio:['ignore','pipe','pipe']});let stdout='',stderr='';child.stdout.on('data',b=>{stdout+=b;if(name==='performance')process.stdout.write(b);});child.stderr.on('data',b=>{stderr+=b;process.stderr.write(b);});child.once('error',reject);child.once('close',async(exitCode,signal)=>{try{await fs.writeFile(out+'/'+name+'.stdout.log',stdout,{flag:'wx'});await fs.writeFile(out+'/'+name+'.stderr.log',stderr,{flag:'wx'});const terminal={pid:child.pid,startedAt,completedAt:new Date().toISOString(),exitCode,signal,stdoutSha256:sha(Buffer.from(stdout)),stderrSha256:sha(Buffer.from(stderr))};await fs.writeFile(out+'/'+name+'-terminal.json',JSON.stringify(terminal,null,2)+'\n',{flag:'wx'});resolve({...terminal,stdout});}catch(error){reject(error);}});});}
+const cases={};for(const name of ['ctypes_pointer_return','ctypes_cast_errcheck_array','ctypes_structure_layout']){const result=await run(name,['-B',source+'/tests/fixtures/core/'+name+'.py']);assert.equal(result.exitCode,0);const expected=await fs.readFile(source+'/tests/fixtures/expected/'+name+'.out','utf8');assert.equal(result.stdout.replace(/\r\n/g,'\n'),expected.replace(/\r\n/g,'\n'));cases[name]={...result,stdout:undefined};console.log(name+': passed');}
+const measured=await run('performance',['-B',source+'/benchmarks/check_regression.py','--baseline',baseline+'/xlang3.exe','--candidate',release+'/xlang3.exe','--output',out+'/report.json']);
+assert.deepEqual(await snapshot(),before);
+const report=JSON.parse(await fs.readFile(out+'/report.json','utf8'));
+const gate={cases,performance:{...measured,stdout:undefined},status:report.status,caseCount:Object.keys(report.cases).length,repeats:report.repeats,warmup:report.warmup,threshold:report.threshold,allInputsFileSetsAndRuntimeBytesUnchanged:true,cpython:false,installed:false,passed:measured.exitCode===0&&report.status==='pass'&&Object.keys(report.cases).length===11&&report.repeats===21&&report.warmup===5&&report.threshold===0.1};
+await fs.writeFile(out+'/gate.json',JSON.stringify(gate,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(gate));assert.equal(gate.passed,true);

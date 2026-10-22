@@ -1,0 +1,43 @@
+
+  Checking File Globs
+  1>Checking Build System
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  bzip2static.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\bzip2static.lib
+  xlang3_ctypes_ffi.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\modules\ctypes\Release\xlang3_ctypes_ffi.lib
+  zlibstatic.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\third_party\zlib\Release\zs.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  ctypes_module.cpp
+  xlang3_system_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_system_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  xlang3_task_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_task_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  xlang3_thread_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_thread_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  Auto build dll exports
+  xlang3_thread_runtime.lib(thread_module.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+     Creating library D:/CantorAI2026/xMind/.agentflow/ctypes-runtime-fix-build/build/Release/xlang3_runtime.lib and object D:/CantorAI2026/xMind/.agentflow/ctypes-runtime-fix-build/build/Release/xlang3_runtime.exp
+  Generating code
+  Finished generating code
+  xlang3_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_runtime.dll
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  xlang3.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3.exe
+
+  Checking File Globs
+  bzip2static.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\bzip2static.lib
+  xlang3_ctypes_ffi.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\modules\ctypes\Release\xlang3_ctypes_ffi.lib
+  zlibstatic.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\third_party\zlib\Release\zs.lib
+  xlang3_system_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_system_runtime.lib
+  xlang3_task_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_task_runtime.lib
+  xlang3_thread_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_thread_runtime.lib
+  Auto build dll exports
+  xlang3_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_runtime.dll
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  runtime_isolation_tests.cpp
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10): warning C4996: 'std::atomic_store_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\xlang3_runtime_isolation_tests.vcxproj]
+  (compiling source file '../../xlang3-ctypes-runtime-fix/tests/cpp/runtime_isolation_tests.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10):
+      the template instantiation context (the oldest one first) is
+          D:\CantorAI2026\xMind\.agentflow\xlang3-ctypes-runtime-fix\sdk\xlang3\cpp\package.h(49,23):
+          see reference to function template instantiation 'void std::atomic_store<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+  
+  xlang3_runtime_isolation_tests.vcxproj -> D:\CantorAI2026\xMind\.agentflow\ctypes-runtime-fix-build\build\Release\xlang3_runtime_isolation_tests.exe

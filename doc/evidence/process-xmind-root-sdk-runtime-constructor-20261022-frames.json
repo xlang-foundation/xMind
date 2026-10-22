@@ -1,0 +1,184 @@
+{
+  "limitations": "Local PE unwind reconstruction without PDB/debugger validation. Nearest export names are ranges, not confirmed source functions. Stack scan candidates are not call frames.",
+  "frames": [
+    {
+      "depth": 0,
+      "rsp": "0xcc133f67b0",
+      "address": "0x7ffef59867f5",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xlang3_runtime.dll",
+      "rva": "0xf67f5",
+      "nearestExport": {
+        "name": "??$_Try_emplace@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@$$V@?$_Hash@V?$_Umap_traits@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@UValue@xlang3@@V?$_Uhash_compare@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@U?$hash@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@U?$equal_to@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@2@V?$allocator@U?$pair@$$CBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@UValue@xlang3@@@std@@@2@$0A@@std@@@std@@IEAA?AU?$pair@PEAU?$_List_node@U?$pair@$$CBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@UValue@xlang3@@@std@@PEAX@std@@_N@1@$$QEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@1@@Z",
+        "offset": "0x75"
+      }
+    },
+    {
+      "depth": 1,
+      "rsp": "0xcc133f6830",
+      "address": "0x7ffef5abf4d4",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xlang3_runtime.dll",
+      "rva": "0x22f4d4",
+      "nearestExport": {
+        "name": "?size@?$array@UValue@xlang3@@$02@std@@QEBA_KXZ",
+        "offset": "0x7a34"
+      }
+    },
+    {
+      "depth": 2,
+      "rsp": "0xcc133f71a0",
+      "address": "0x7ffef5c7689e",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xlang3_runtime.dll",
+      "rva": "0x3e689e",
+      "nearestExport": {
+        "name": "?register_core_builtins@xlang3@@YAXAEAVRuntime@1@@Z",
+        "offset": "0x15e"
+      }
+    },
+    {
+      "depth": 3,
+      "rsp": "0xcc133f71d0",
+      "address": "0x7ffef5ee42d6",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xlang3_runtime.dll",
+      "rva": "0x6542d6",
+      "nearestExport": {
+        "name": "?initialize@Runtime@xlang3@@AEAAXXZ",
+        "offset": "0x566"
+      }
+    },
+    {
+      "depth": 4,
+      "rsp": "0xcc133f73b0",
+      "address": "0x7ffef5ecbcfe",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xlang3_runtime.dll",
+      "rva": "0x63bcfe",
+      "nearestExport": {
+        "name": "??0Runtime@xlang3@@QEAA@AEAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z",
+        "offset": "0x3fe"
+      }
+    },
+    {
+      "depth": 5,
+      "rsp": "0xcc133f73e0",
+      "address": "0x7ff77cea948b",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x28948b"
+    },
+    {
+      "depth": 6,
+      "rsp": "0xcc133f76d0",
+      "address": "0x7ff77cf0f95a",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x2ef95a"
+    },
+    {
+      "depth": 7,
+      "rsp": "0xcc133f7760",
+      "address": "0x7ff77cf14325",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x2f4325"
+    },
+    {
+      "depth": 8,
+      "rsp": "0xcc133f7da0",
+      "address": "0x7ff77cd4c691",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x12c691"
+    },
+    {
+      "depth": 9,
+      "rsp": "0xcc133f8180",
+      "address": "0x7ff77cd4c531",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x12c531"
+    },
+    {
+      "depth": 10,
+      "rsp": "0xcc133f81b0",
+      "address": "0x7ff77cd62852",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x142852"
+    },
+    {
+      "depth": 11,
+      "rsp": "0xcc133f9a10",
+      "address": "0x7ff77cd603d0",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x1403d0"
+    },
+    {
+      "depth": 12,
+      "rsp": "0xcc133fd860",
+      "address": "0x7ff77cd57418",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x137418"
+    },
+    {
+      "depth": 13,
+      "rsp": "0xcc133feb70",
+      "address": "0x7ff77cd5a912",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x13a912"
+    },
+    {
+      "depth": 14,
+      "rsp": "0xcc133febf0",
+      "address": "0x7ff77ce66e66",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x246e66"
+    },
+    {
+      "depth": 15,
+      "rsp": "0xcc133ff830",
+      "address": "0x7ff77ce673bb",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x2473bb"
+    },
+    {
+      "depth": 16,
+      "rsp": "0xcc133ff870",
+      "address": "0x7ff77ce65afd",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x245afd"
+    },
+    {
+      "depth": 17,
+      "rsp": "0xcc133ffa20",
+      "address": "0x7ff77ce631d1",
+      "module": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_agent_worker_model_rpc_contract.exe",
+      "rva": "0x2431d1"
+    },
+    {
+      "depth": 18,
+      "rsp": "0xcc133ffa50",
+      "address": "0x7ffff0b2cd30",
+      "module": "C:\\Windows\\System32\\ucrtbase.dll",
+      "rva": "0x2cd30",
+      "nearestExport": {
+        "name": "wcsrchr",
+        "offset": "0x150"
+      }
+    },
+    {
+      "depth": 19,
+      "rsp": "0xcc133ffa80",
+      "address": "0x7ffff317dda7",
+      "module": "C:\\Windows\\System32\\kernel32.dll",
+      "rva": "0x2dda7",
+      "nearestExport": {
+        "name": "BaseThreadInitThunk",
+        "offset": "0x17"
+      }
+    },
+    {
+      "depth": 20,
+      "rsp": "0xcc133ffab0",
+      "address": "0x7ffff357ee4c",
+      "module": "C:\\Windows\\System32\\ntdll.dll",
+      "rva": "0x7ee4c",
+      "nearestExport": {
+        "name": "RtlUserThreadStart",
+        "offset": "0x2c"
+      }
+    }
+  ]
+}

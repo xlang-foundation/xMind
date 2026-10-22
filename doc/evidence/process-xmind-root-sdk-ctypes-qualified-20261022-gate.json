@@ -1,0 +1,43 @@
+{
+  "configured": {
+    "pid": 26856,
+    "startedAt": "2026-10-22T23:09:26.365Z",
+    "completedAt": "2026-10-22T23:09:26.945Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "9ca4833553b086e331ba764334a03926e2474026d7f3ce7a628c5818bc281861"
+  },
+  "built": {
+    "pid": 32456,
+    "startedAt": "2026-10-22T23:09:26.946Z",
+    "completedAt": "2026-10-22T23:09:59.331Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "d598be0b873b3ac7618bf8b9b0f1e439c53e5e4023a2205493aa0f8a77f086ad"
+  },
+  "isolated": {
+    "pid": 26544,
+    "startedAt": "2026-10-22T23:09:59.552Z",
+    "completedAt": "2026-10-22T23:10:00.017Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c7ae27ec03f8890097e5dbc2d6138dbaee7903776d9342f87b245976dcfd9d01"
+  },
+  "control": {
+    "pid": 16268,
+    "startedAt": "2026-10-22T23:10:00.020Z",
+    "completedAt": "2026-10-22T23:10:00.629Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "51b9f890930ef585821653ae37ef7817c808220e69a18a130c342771a1aa53ee"
+  },
+  "candidateSha256": "e42cb8cbaa75c953298f2ed5db97508a6561881f6d740cacd53824c47c5c8543",
+  "sourcePatchSha256": "db4e62aaa5ee8e0ec2557d6f13e7bd01d163972e31f9de2ad1b41b676604687a",
+  "trackedInputFiles": 1259,
+  "inputsAndSourceFileSetsUnchanged": true,
+  "cpython": false,
+  "installed": false,
+  "originalSdkChanged": false,
+  "performanceValidated": false,
+  "passed": true
+}

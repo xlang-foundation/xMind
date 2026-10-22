@@ -1,0 +1,36 @@
+{
+  "configured": {
+    "pid": 7980,
+    "startedAt": "2026-10-22T23:03:50.123Z",
+    "completedAt": "2026-10-22T23:03:51.662Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "84366939077b533d375749f10b044e6b146a2ae2523aa906630b36bfcad2ffc0"
+  },
+  "built": {
+    "pid": 23024,
+    "startedAt": "2026-10-22T23:03:51.662Z",
+    "completedAt": "2026-10-22T23:03:53.497Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "4c7d9ba903aafcba5f3f82f41739cea9ac1c485d741b6182e0a6b0ba185c14de"
+  },
+  "tested": {
+    "pid": 27500,
+    "startedAt": "2026-10-22T23:03:53.518Z",
+    "completedAt": "2026-10-22T23:03:53.595Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "078becc1c4b48160af87c684a17cb80256f3364ec52fd1b412060be39ad9048e"
+  },
+  "binarySha256": "d3a31429487d0ad369c40a0d0975db333806d721b5b2c56cb1fdd5d1984925b3",
+  "sdkSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "allConsumedInputsAndPendingNativePatchUnchanged": true,
+  "dumps": {},
+  "sqlite": false,
+  "ipc": false,
+  "models": false,
+  "cpython": false,
+  "installed": false,
+  "passed": false
+}

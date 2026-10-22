@@ -1,0 +1,108 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f63c38d7..9a834237 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -471,6 +471,10 @@ endfunction()
+ add_xlang3_cpp_test(xlang3_ipc_native_host_tests tests/cpp/ipc_native_host_tests.cpp)
+ set_tests_properties(xlang3_ipc_native_host_tests PROPERTIES TIMEOUT 30)
+ add_xlang3_cpp_test(xlang3_smoke tests/smoke.cpp)
++add_xlang3_cpp_test(xlang3_runtime_isolation_tests tests/cpp/runtime_isolation_tests.cpp)
++target_compile_features(xlang3_runtime_isolation_tests PRIVATE cxx_std_20)
++target_compile_definitions(xlang3_runtime_isolation_tests PRIVATE
++  XLANG3_RUNTIME_ISOLATION_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/fixtures")
+ add_xlang3_cpp_test(xlang3_abi_ownership tests/cpp/abi_ownership_tests.cpp)
+ add_executable(xlang3_embedded_package_tests tests/cpp/embedded_package_tests.cpp)
+ add_executable(xlang3_static_runtime_shutdown tests/cpp/static_runtime_shutdown.cpp)
+diff --git a/src/runtime/modules/system/ctypes_module.cpp b/src/runtime/modules/system/ctypes_module.cpp
+index 9978d32c..77526ac0 100644
+--- a/src/runtime/modules/system/ctypes_module.cpp
++++ b/src/runtime/modules/system/ctypes_module.cpp
+@@ -31,7 +31,6 @@ namespace {
+ 
+ thread_local int64_t ctypes_errno = 0;
+ thread_local int64_t ctypes_last_error = 0;
+-Value ctypes_array_base;
+ 
+ bool attr(const Value& object, const char* name, Value& out) {
+   std::string ignored;
+@@ -228,7 +227,14 @@ bool ctypes_array_mul(Runtime& runtime, const Value* args, uint32_t argc, Value&
+       {"_length_", args[1]},
+   };
+   std::string name = element_class->name + "_Array_" + std::to_string(args[1].as.i64);
+-  out = Value::class_object(name, std::move(attrs), ctypes_array_base,
++  const auto* module = runtime.find_module("_ctypes");
++  Value array_base;
++  if (module == nullptr || !attr(*module, "Array", array_base) || value_as_class(array_base) == nullptr) {
++    error = "ctypes Array base is unavailable in this runtime";
++    runtime.raise_class_error("RuntimeError", error);
++    return false;
++  }
++  out = Value::class_object(name, std::move(attrs), array_base,
+                             {}, element_class->metaclass);
+   return true;
+ }
+@@ -481,7 +487,7 @@ void register_ctypes_module(Runtime& runtime) {
+   };
+   Value ctypes_meta = Value::class_object("PyCSimpleType", std::move(meta_attrs), type_type, {}, type_type);
+   Value simple = make_base(runtime, "_SimpleCData", ctypes_meta, true);
+-  ctypes_array_base = make_base(runtime, "Array", ctypes_meta);
++  Value ctypes_array_base = make_base(runtime, "Array", ctypes_meta);
+   value_as_class(ctypes_array_base)->attrs["__init__"] =
+       runtime.make_native_function("_ctypes.Array.__init__", ctypes_array_init);
+   value_as_class(ctypes_array_base)->attrs["__len__"] =
+diff --git a/tests/cpp/fixtures/runtime_ctypes_isolation.py b/tests/cpp/fixtures/runtime_ctypes_isolation.py
+new file mode 100644
+index 00000000..a82e8b91
+--- /dev/null
++++ b/tests/cpp/fixtures/runtime_ctypes_isolation.py
+@@ -0,0 +1,9 @@
++import _ctypes
++
++
++class Item(_ctypes._SimpleCData):
++    _type_ = "i"
++
++
++def verify():
++    return 1 if issubclass(Item * 2, _ctypes.Array) else 0
+diff --git a/tests/cpp/runtime_isolation_tests.cpp b/tests/cpp/runtime_isolation_tests.cpp
+new file mode 100644
+index 00000000..27a53f38
+--- /dev/null
++++ b/tests/cpp/runtime_isolation_tests.cpp
+@@ -0,0 +1,35 @@
++#include "xlang3/cpp/runtime.h"
++#include <atomic>
++#include <barrier>
++#include <iostream>
++#include <thread>
++#include <vector>
++#include <stdexcept>
++
++void check(X::Module& module){
++    X::Value result;
++    if(!module["verify"].Call(nullptr,0,result)||!result.IsInt64()||result.ToInt64()!=1)
++        throw std::runtime_error("ctypes array inherited another runtime's base");
++}
++
++int main(){try{
++    {
++        X::Runtime first;first.AddImportRoot(XLANG3_RUNTIME_ISOLATION_FIXTURE);
++        X::Module module(first,"runtime_ctypes_isolation");
++        X::Runtime second;
++        check(module);
++    }
++    std::atomic<unsigned> completed=0,failed=0;
++    std::barrier start(4);
++    std::vector<std::thread> threads;
++    for(unsigned i=0;i<4;++i)threads.emplace_back([&]{for(unsigned round=0;round<20;++round){
++        start.arrive_and_wait();
++        try{X::Runtime runtime;runtime.AddImportRoot(XLANG3_RUNTIME_ISOLATION_FIXTURE);X::Module module(runtime,"runtime_ctypes_isolation");check(module);++completed;}
++        catch(const std::exception& error){++failed;std::cerr<<error.what()<<'\n';}
++        start.arrive_and_wait();
++    }});
++    for(auto& thread:threads)thread.join();
++    if(completed!=80||failed)throw std::runtime_error("Concurrent runtime isolation failed");
++    std::cout<<"Two-live-runtime ctypes inheritance and 80 concurrent runtime lifetimes passed.\n";
++    return 0;
++}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.25)
+project(xmind_ctypes_isolation_baseline LANGUAGES CXX)
+add_executable(ctypes_isolation_baseline
+  "D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/tests/cpp/runtime_isolation_tests.cpp")
+target_compile_features(ctypes_isolation_baseline PRIVATE cxx_std_20)
+target_include_directories(ctypes_isolation_baseline PRIVATE
+  "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/sdk")
+target_compile_definitions(ctypes_isolation_baseline PRIVATE
+  XLANG3_RUNTIME_ISOLATION_FIXTURE="D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/tests/cpp/fixtures")
+target_link_libraries(ctypes_isolation_baseline PRIVATE
+  "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/xlang3_runtime.lib")
+add_custom_command(TARGET ctypes_isolation_baseline POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+  "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/xlang3_runtime.dll"
+  "$<TARGET_FILE_DIR:ctypes_isolation_baseline>")

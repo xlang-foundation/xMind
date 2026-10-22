@@ -13,6 +13,9 @@ int main(int argc,char** argv){
         agentflow::XlangPythonCallable callable(argv[2],argv[3],argv[4],"agent_worker_fixture","transform",argv[1]);
         const auto value=nlohmann::json::parse(callable.invoke_json_worker(R"({"text":"xMind","count":4})"));
         if(value!=nlohmann::json{{"result","worker:xMind"},{"count",5}})throw std::runtime_error("xlang3 worker returned the wrong result");
+        agentflow::XlangPythonCallable echo(argv[2],argv[3],argv[4],"agent_worker_fixture","echo",argv[1]);
+        const auto nested=nlohmann::json::parse(R"({"text":"\u96ea\u0000tail","items":[null,true,false,7,-3,1.25,{"empty":[],"map":{}}]})");
+        if(nlohmann::json::parse(echo.invoke_json_worker(nested.dump()))!=nested)throw std::runtime_error("SDK callable IPC changed nested values, Unicode or embedded NUL text");
         agentflow::XlangPythonCallable reused(argv[2],argv[3],argv[4],"agent_worker_fixture","counter",argv[1]);
         const auto first=nlohmann::json::parse(reused.invoke_json_worker(R"({"value":"first"})"));
         const auto second=nlohmann::json::parse(reused.invoke_json_worker(R"({"value":"second"})"));
@@ -27,6 +30,6 @@ int main(int argc,char** argv){
         try{(void)slow.invoke_json_worker("{}",cancellation.get_token());}catch(const agentflow::XlangPythonCancelled&){cancelled=true;}
         timer.join();
         if(!cancelled||std::chrono::steady_clock::now()-start>std::chrono::seconds(3))throw std::runtime_error("xlang3 worker cancellation did not retire the child promptly");
-        std::cout<<"xlang3 callable ran through the unified xmind process over shared-memory IPC; repeated calls reused one worker and cancellation retired its worker.\n";return 0;
+        std::cout<<"xlang3 callable ran through xmind.PythonTools.Open and SDK object methods with native nested values; repeated calls reused one worker and cancellation retired its worker.\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

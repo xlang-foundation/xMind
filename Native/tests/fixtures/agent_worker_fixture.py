@@ -7,6 +7,10 @@ def transform(arguments):
     return {"result": "worker:" + arguments["text"], "count": arguments["count"] + 1}
 
 
+def echo(arguments):
+    return arguments
+
+
 def counter(arguments):
     global calls, active, max_active
     active += 1

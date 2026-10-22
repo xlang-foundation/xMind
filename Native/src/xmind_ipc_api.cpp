@@ -4,6 +4,7 @@
 #include "agentflow/xmind_ipc_api.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/xmind_ipc_runtime.hpp"
+#include "agentflow/python_tool_ipc_api.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/run_executor.hpp"
 #include "agentflow/local_auth.hpp"
@@ -77,6 +78,7 @@ struct RootApi {
     std::shared_ptr<ApiContext> capture(){std::lock_guard lock(binding);if(!context)throw RunUnavailable("Public backend services are unavailable");return context;}
     BEGIN_PACKAGE(RootApi)
         APISET().AddClass<0,HostApi,RootApi>("Host");
+        APISET().AddClass<0,PythonToolsApi>("PythonTools");
         APISET().AddClass<0,NativeWorkersApi>("Workers");
         APISET().AddClass<0,NativeExecutionsApi>("Executions");
         APISET().AddClass<0,NativeWorkerLinksApi>("WorkerLinks");

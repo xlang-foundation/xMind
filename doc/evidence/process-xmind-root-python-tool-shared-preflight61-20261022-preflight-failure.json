@@ -1,0 +1,7 @@
+{
+  "reason": "AGENTS.md exceeded its 16 KiB limit after SDK guidance update",
+  "observedBytes": 16448,
+  "nativeBuildStarted": false,
+  "nativeTestsStarted": false,
+  "correctedBy": "Shortening only the new SDK guidance paragraph"
+}

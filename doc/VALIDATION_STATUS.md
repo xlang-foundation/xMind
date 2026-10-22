@@ -1,3 +1,56 @@
+## Shared-root callable worker qualified - 2026-10-22
+
+Trusted Python-tool workers use xmind.PythonTools.Open(capability) and bound SDK
+Identity/Invoke methods. The separate worker root, HMAC and sequence protocol are
+removed. Nested SDK values, Unicode/NUL text, worker reuse, serialized concurrency
+and cancellation pass. SDK f809da86 isolates ctypes Array state by runtime.
+
+The complete Native build and 12 focused contracts pass in 103.62 seconds with
+2788 project inputs,16 SDK files,1870 pure-library files,30 runtime inputs,
+18598 Node dependencies and137 native binaries unchanged, including exact file sets.
+Native patch SHA-256: 002b71edbff1a6380e3880dbf023eaea425c6824f392211ca4e33c69e78f88f4.
+xmind.exe: 01c9980e7b6d60da31e26c196526d942ccf0a92fa30049f550aa4aa5cb789231.
+Model RPC passes in 53.68 seconds after the old SDK fault was independently reproduced
+and repaired. The SDK-only correctness and default 11-case performance gates remain
+separate evidence. Initial 11/12, SDK accessor failure and preflight size failure
+are preserved. The current full 172 gate and client/package acceptance are still
+required. No installation, paid inference, CPython or user-task replay.
+
+## Isolated SDK ctypes fix qualified - 2026-10-22
+
+SDK f809da864b582a90f77fef408c5c6a0db200e11e removes the shared mutable ctypes
+Array base. The old SDK crashes during concurrent construction independently of
+IPC, SQLite and models. The corrected candidate passes two-live-runtime array
+inheritance, 80 concurrent runtime/source-module lifetimes, the original unchanged
+constructor control (20 sequential plus 80 concurrent), and three existing ctypes
+fixtures. The complete default performance gate passes all 11 cases with 21 paired
+samples, 5 warmups and the original 10% threshold, driven through xlang3.
+
+The first SDK candidate's module accessor error remains archived separately.
+Qualified DLL SHA-256 is e42cb8cbaa75c953298f2ed5db97508a6561881f6d740cacd53824c47c5c8543.
+The development SDK/CI pin now uses this source. Native integration is being
+requalified; it has no accepted result yet. Installed clients remain unchanged,
+and the earlier failed full gate is not repaired by combining focused results.
+Evidence: process-xmind-root-sdk-ctypes-{initial,qualified,performance}-20261022-*.
+
+## SDK runtime construction fault isolated - 2026-10-22
+
+The pending shared-root Python-tool migration builds, but its focused gate fails
+11/12: model RPC exits with the known SDK AV at offset0xf67f5. The new callable
+SDK-value/reuse/concurrency/cancel regression passes; that does not qualify the
+failed gate. Raw logs and patch are retained under
+process-xmind-root-python-tool-shared-initial61-20261022-*.
+
+The first captured dump remains local, with its hash and fault metadata archived.
+A separate SDK-only constructor probe reproduces the same offset without IPC,
+SQLite or models: 20 sequential constructors pass, then concurrent construction
+crashes. A deterministic two-live-runtime ctypes test also fails on the old SDK:
+array multiplication in one runtime uses another runtime's array base. Exact
+sources, receipts and limits are retained under process-xmind-root-sdk-runtime-*.
+A narrow fix is being built in an isolated checkout; correctness, performance,
+Native requalification and full delivery acceptance are not yet established.
+Original SDK and xlang3 checkout remain unchanged. No CPython or installation.
+
 ## Current policy source full run - 2026-10-22
 
 Source 1c9c015458c8e5c624ad470ae6afb3e8cae22821 completed the full 172-test

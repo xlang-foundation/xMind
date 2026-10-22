@@ -1,0 +1,49 @@
+{
+  "cases": {
+    "ctypes_pointer_return": {
+      "pid": 28952,
+      "startedAt": "2026-10-22T23:12:07.697Z",
+      "completedAt": "2026-10-22T23:12:08.090Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "98577452aefd783bebf40acece0ddac12f3d0aeb9aa41d9eb0b6966b338e6bbd",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ctypes_cast_errcheck_array": {
+      "pid": 28620,
+      "startedAt": "2026-10-22T23:12:08.091Z",
+      "completedAt": "2026-10-22T23:12:08.199Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "873daadd27a58895f1bfdee25ba375d9b4235be5b88485090f700690cc11465b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ctypes_structure_layout": {
+      "pid": 33492,
+      "startedAt": "2026-10-22T23:12:08.200Z",
+      "completedAt": "2026-10-22T23:12:08.311Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "2a44feb38a53149727a882243266422984f8746b329301fd1348cda35ace9f7b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "performance": {
+    "pid": 24968,
+    "startedAt": "2026-10-22T23:12:08.312Z",
+    "completedAt": "2026-10-22T23:13:38.973Z",
+    "exitCode": 0,
+    "signal": null,
+    "stdoutSha256": "e88cfd8dcb091984a0f5ddb9a4873301b6901c808e15b4dbb95124c956d6fba3",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "status": "pass",
+  "caseCount": 11,
+  "repeats": 21,
+  "warmup": 5,
+  "threshold": 0.1,
+  "allInputsFileSetsAndRuntimeBytesUnchanged": true,
+  "cpython": false,
+  "installed": false,
+  "passed": true
+}

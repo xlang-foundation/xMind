@@ -1,0 +1,3 @@
+# Deterministic baseline ctypes isolation failure
+
+With the unchanged pinned SDK, the test opens runtime A and imports a small source fixture, then constructs runtime B. A's ctypes array multiplication now uses B's array base, so issubclass against A's own _ctypes.Array returns false. The native executable exits1 with ctypes array inherited another runtime's base, before reaching its later concurrent phase. This is a separate deterministic ownership failure, not a successful correctness gate. The fixture executes through embedded xlang3; no CPython, models, IPC, SQLite or user data. Original inputs, executable/SDK hashes and logs are retained. An isolated SDK candidate is building and has not yet qualified correctness or performance.

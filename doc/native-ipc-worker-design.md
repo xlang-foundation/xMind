@@ -1,3 +1,35 @@
+## Trusted Python-tool worker uses the shared root - 2026-10-22
+
+Trusted callable workers now register the same process-level xmind root as agent
+workers. PythonTools is a subobject class: Open(private capability) returns a
+bound Callable with Identity() and Invoke(SDK value). Identity binds the actual
+child PID, configured module and function. Arguments and results cross processes
+as normal xlang3 SDK values, including nested containers, Unicode and embedded
+NUL text. The existing JSON callable interface retains local conversion and
+bounded validation; it does not define the IPC wire format.
+
+The separate xmind_agent_worker remote object, per-request HMAC and sequence
+protocol are removed. A private inherited pipe still supplies the child startup
+capability, and the listener port is configured before normal root registration.
+Worker reuse, serialized invocation and cancellation retirement remain native.
+The root contains subobject registrations rather than callable execution logic,
+following the Cantor pattern audited in the dated section below.
+
+The first focused gate failed 11/12 on the existing SDK runtime construction AV.
+Its new callable-value contract passed, but the gate was not accepted. A captured
+dump and standalone SDK-only constructor reproduction led to the isolated ctypes
+Array state fix f809da864b582a90f77fef408c5c6a0db200e11e. That SDK passes scoped
+correctness and the complete default performance comparison. With the same Native
+patch and the fixed SDK, the complete build and 12 focused contracts pass in
+103.62 seconds with all frozen input/file sets and137 native binaries unchanged.
+
+This qualifies the callable migration and its selected integrations, including
+actual root IPC, model RPC, planning, graph callables, ledger and service workers.
+It is not a new full 172 pass, a general SDK concurrency proof or installed/rendered
+client acceptance. Schema-worker and other non-agent bootstrap callers still need
+the broader remaining transport audit; this change does not claim they migrated.
+All initial failures, exact patches and receipts remain under doc/evidence.
+
 ## Active worker transport audit - 2026-10-22
 
 The current agent execution path registers the process root as `xmind` in

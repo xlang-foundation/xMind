@@ -1,0 +1,4 @@
+cast True 42
+array 1 b'serverAuth'
+errcheck-original True
+errcheck-replace ('checked', True, 1)

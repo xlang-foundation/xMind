@@ -1,0 +1,41 @@
+{
+  "configured": {
+    "pid": 28432,
+    "startedAt": "2026-10-22T22:59:14.849Z",
+    "completedAt": "2026-10-22T22:59:17.570Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "dab1309523bf2a1f56fc67b76bf93039f094f55fb3aec1eef7f500eb8516c8a9"
+  },
+  "built": {
+    "pid": 28288,
+    "startedAt": "2026-10-22T22:59:17.570Z",
+    "completedAt": "2026-10-22T22:59:19.679Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2f166bb6c8e131f1b1e306d089fd6694fa131b397b2fcb91a4e5a6c9d5dcc8ca"
+  },
+  "tested": {
+    "pid": 29428,
+    "startedAt": "2026-10-22T22:59:19.698Z",
+    "completedAt": "2026-10-22T22:59:19.977Z",
+    "exitCode": 3221225477,
+    "signal": null,
+    "logSha256": "dbb63f604a3da05a9b0a95d92a8bc2521668b0fe5bc1f75d60d050a29bf7fc98"
+  },
+  "binarySha256": "d07ef602416244431a70a2c2bebf5868bbe9a429cf66282f57821010a0bb9e8a",
+  "sdkSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+  "allConsumedInputsAndPendingNativePatchUnchanged": true,
+  "dumps": {
+    "fixture-29428-12060031-fatal.dmp": {
+      "sha256": "41450cf05b2d510e2bdec1a7a951e0efb447ed25219583eac23a12bcb85906c8",
+      "bytes": 234226
+    }
+  },
+  "sqlite": false,
+  "ipc": false,
+  "models": false,
+  "cpython": false,
+  "installed": false,
+  "passed": false
+}

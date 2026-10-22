@@ -1,0 +1,8 @@
+{
+  "commit": "f809da864b582a90f77fef408c5c6a0db200e11e",
+  "branch": "xmind/ctypes-runtime-isolation",
+  "remote": "https://github.com/CantorAI/xlang3.git",
+  "candidateSha256": "e42cb8cbaa75c953298f2ed5db97508a6561881f6d740cacd53824c47c5c8543",
+  "performancePassed": true,
+  "sourcePatchSha256": "db4e62aaa5ee8e0ec2557d6f13e7bd01d163972e31f9de2ad1b41b676604687a"
+}

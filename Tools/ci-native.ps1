@@ -12,7 +12,7 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne '58a8aab9b40a464e38a741129b4804ac36e27a53'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne 'f809da864b582a90f77fef408c5c6a0db200e11e'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}
@@ -37,7 +37,7 @@ $ciProvenance=@{xmind=(& git -C $ciRoot rev-parse HEAD).Trim();xlang3=$ciRevisio
 $ciProvenance|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'provenance.json')
 $ciRuntimeBuild=Join-Path $ciRuntime 'build'
 Invoke-CiCommand 'runtime-configure' $ciCmake @('-S',$ciRuntime,'-B',$ciRuntimeBuild,'-G',$ciGenerator,'-A','x64','-DXLANG3_BUILD_CPYTHON_BRIDGE=OFF','-DXLANG3_PYTHON314_EXECUTABLE:FILEPATH=OFF')
-$ciRuntimeTargets=@('xlang3','xlang3_ipc_native_host_tests','xlang_json_native_package','xlang_sqlite3_native_package','xlang_yaml_native_package',
+$ciRuntimeTargets=@('xlang3','xlang3_runtime_isolation_tests','xlang3_ipc_native_host_tests','xlang_json_native_package','xlang_sqlite3_native_package','xlang_yaml_native_package',
     'xlang_device_native_package','xlang_net_native_package','xlang_ssl_native_package','xlang_hashlib_native_package',
     'xlang_blake2_native_package','xlang_pydantic_core_native_package','xlang_argon2_cffi_native_package',
     'xlang_cffi_backend_native_package','xlang_httptools_url_native_package','xlang_httptools_parser_native_package',
@@ -52,7 +52,7 @@ $ciRelease=Join-Path $ciRuntimeBuild 'Release'
 $ciInheritedPythonPath=$env:PYTHONPATH
 try {
     $env:PYTHONPATH=$ciStdlib
-    Invoke-CiCommand 'runtime-native-host-ctest' $ciCtest @('--test-dir',$ciRuntimeBuild,'-C','Release','-R','^(xlang3_ipc_native_host_tests|xlang3_cli_unicode_library_path)$','--output-on-failure','--no-tests=error')
+    Invoke-CiCommand 'runtime-native-host-ctest' $ciCtest @('--test-dir',$ciRuntimeBuild,'-C','Release','-R','^(xlang3_runtime_isolation_tests|xlang3_ipc_native_host_tests|xlang3_cli_unicode_library_path)$','--output-on-failure','--no-tests=error')
 } finally { $env:PYTHONPATH=$ciInheritedPythonPath }
 $ciNative=Join-Path $ciRoot 'build/native'
 $ciNode=(Get-Command node -ErrorAction Stop).Source

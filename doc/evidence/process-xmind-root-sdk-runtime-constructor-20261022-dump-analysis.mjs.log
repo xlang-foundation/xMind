@@ -1,0 +1,35 @@
+import fs from 'node:fs/promises';
+const root='D:/CantorAI2026/xMind/.agentflow/runtime-crash-20261022-33376';
+const dump=await fs.readFile(root+'/fatal.dmp'),u32=o=>dump.readUInt32LE(o),u64=o=>dump.readBigUInt64LE(o),hex=n=>'0x'+n.toString(16);
+const streams={};for(let i=0;i<u32(8);i++){const at=u32(12)+i*12;streams[u32(at)]={size:u32(at+4),rva:u32(at+8)};}
+const memory=[];
+if(streams[5]){const at=streams[5].rva;for(let i=0;i<u32(at);i++){const p=at+4+16*i;memory.push({base:u64(p),size:u32(p+8),rva:u32(p+12)});}}
+if(streams[9]){const at=streams[9].rva;let offset=Number(u64(at+8));for(let i=0;i<Number(u64(at));i++){const p=at+16+16*i,size=Number(u64(p+8));memory.push({base:u64(p),size,rva:offset});offset+=size;}}
+function read(address,length){for(const range of memory)if(address>=range.base&&address+BigInt(length)<=range.base+BigInt(range.size))return dump.subarray(range.rva+Number(address-range.base),range.rva+Number(address-range.base)+length);throw Error('Missing dump memory '+hex(address));}
+const modules=[],at=streams[4].rva;
+for(let i=0;i<u32(at);i++){const p=at+4+108*i,n=u32(p+20);modules.push({base:u64(p),size:u32(p+8),name:dump.toString('utf16le',n+4,n+4+u32(n))});}
+async function pe(module){if(module.pe)return module.pe;const b=await fs.readFile(module.name),p=b.readUInt32LE(0x3c),optional=p+24,sections=[];for(let i=0;i<b.readUInt16LE(p+6);i++){const o=optional+b.readUInt16LE(p+20)+40*i;sections.push({rva:b.readUInt32LE(o+12),size:Math.max(b.readUInt32LE(o+8),b.readUInt32LE(o+16)),raw:b.readUInt32LE(o+20)});}
+ const offset=rva=>{const s=sections.find(s=>rva>=s.rva&&rva<s.rva+s.size);if(!s)throw Error('No PE section '+rva.toString(16));return s.raw+rva-s.rva;};
+ const exports=[],directory=b.readUInt32LE(optional+112);if(directory){const e=offset(directory),functions=offset(b.readUInt32LE(e+28)),names=offset(b.readUInt32LE(e+32)),ordinals=offset(b.readUInt32LE(e+36));for(let i=0;i<b.readUInt32LE(e+24);i++){const nameAt=offset(b.readUInt32LE(names+4*i)),end=b.indexOf(0,nameAt),ordinal=b.readUInt16LE(ordinals+2*i);exports.push({rva:b.readUInt32LE(functions+4*ordinal),name:b.toString('ascii',nameAt,end)});}exports.sort((a,b)=>a.rva-b.rva);}
+ const pdata=b.readUInt32LE(optional+112+3*8),pdataSize=b.readUInt32LE(optional+116+3*8),functions=[];if(pdata){const p=offset(pdata);for(let i=0;i<pdataSize/12;i++)functions.push({begin:b.readUInt32LE(p+12*i),end:b.readUInt32LE(p+12*i+4),unwind:b.readUInt32LE(p+12*i+8)});}
+ return module.pe={bytes:b,offset,exports,functions};}
+async function label(address){const module=modules.find(m=>address>=m.base&&address<m.base+BigInt(m.size));if(!module)return {address:hex(address)};const rva=Number(address-module.base);let nearest;try{const p=await pe(module);for(const symbol of p.exports){if(symbol.rva>rva)break;nearest=symbol;}}catch{}return {address:hex(address),module:module.name,rva:hex(rva),nearestExport:nearest?{name:nearest.name,offset:hex(rva-nearest.rva)}:undefined};}
+const ex=streams[6].rva,context=u32(ex+164),registers=[];for(const offset of [120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240])registers.push(u64(context+offset));
+let rip=u64(context+248),rsp=registers[4];
+const candidates=[];for(let i=0;i<256;i++){let value;try{value=read(rsp+BigInt(i*8),8).readBigUInt64LE();}catch{break;}if(modules.some(m=>value>=m.base&&value<m.base+BigInt(m.size)))candidates.push({stackOffset:hex(i*8),...await label(value)});}
+const frames=[];
+for(let depth=0;depth<40&&rip;depth++){
+ frames.push({depth,rsp:hex(rsp),...await label(rip)});
+ try{const module=modules.find(m=>rip>=m.base&&rip<m.base+BigInt(m.size));if(!module)break;const p=await pe(module),rva=Number(rip-module.base),fn=p.functions.find(f=>f.begin<=rva&&rva<f.end);
+ if(fn){let current=fn;for(let chain=0;chain<8;chain++){const o=p.offset(current.unwind),version=p.bytes[o]&7,flags=p.bytes[o]>>3,count=p.bytes[o+2],frame=p.bytes[o+3];if(version!==1)throw Error('Unsupported unwind version '+version);
+ for(let i=0;i<count;i++){const code=p.bytes[o+4+2*i],opcode=p.bytes[o+5+2*i]&15,info=p.bytes[o+5+2*i]>>4;let slots=1,value=0;if(opcode===1){slots=info===0?2:3;value=info===0?p.bytes.readUInt16LE(o+6+2*i)*8:p.bytes.readUInt32LE(o+6+2*i);}else if(opcode===4||opcode===8){slots=2;value=p.bytes.readUInt16LE(o+6+2*i)*(opcode===4?8:16);}else if(opcode===5||opcode===9){slots=3;value=p.bytes.readUInt32LE(o+6+2*i);}
+ if(rva-current.begin>=code){if(opcode===0){registers[info]=read(rsp,8).readBigUInt64LE();rsp+=8n;}else if(opcode===1)rsp+=BigInt(value);else if(opcode===2)rsp+=BigInt(info*8+8);else if(opcode===3)rsp=registers[frame&15]-BigInt((frame>>4)*16);else if(opcode===4||opcode===5)registers[info]=read(rsp+BigInt(value),8).readBigUInt64LE();else if(opcode!==8&&opcode!==9)throw Error('Unsupported unwind opcode '+opcode);}
+ i+=slots-1;}
+ if(!(flags&4))break;const c=o+4+((count+1)&~1)*2;current={begin:p.bytes.readUInt32LE(c),end:p.bytes.readUInt32LE(c+4),unwind:p.bytes.readUInt32LE(c+8)};}
+ }
+ rip=read(rsp,8).readBigUInt64LE();rsp+=8n;registers[4]=rsp;
+ }catch(error){frames.at(-1).unwindStopped=error.message;break;}
+}
+const result={limitations:'Local PE unwind reconstruction without PDB/debugger validation. Nearest export names are ranges, not confirmed source functions. Stack scan candidates are not call frames.',frames,candidates};
+await fs.writeFile(root+'/unwind-analysis.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({limitations:result.limitations,frames},null,2));

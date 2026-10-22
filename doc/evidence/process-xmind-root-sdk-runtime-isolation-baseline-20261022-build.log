@@ -1,0 +1,13 @@
+
+  1>Checking Build System
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/runtime-constructor-diagnostic/isolation/CMakeLists.txt
+  runtime_isolation_tests.cpp
+C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10): warning C4996: 'std::atomic_store_explicit': warning STL4029: std::atomic_*() overloads for shared_ptr are deprecated in C++20. The shared_ptr specialization of std::atomic provides superior functionality. You can define _SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING or _SILENCE_ALL_CXX20_DEPRECATION_WARNINGS to suppress this warning. [D:\CantorAI2026\xMind\.agentflow\runtime-constructor-diagnostic\isolation\build\ctypes_isolation_baseline.vcxproj]
+  (compiling source file '../../../xlang3-ctypes-runtime-fix/tests/cpp/runtime_isolation_tests.cpp')
+      C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\MSVC\14.51.36231\include\memory(3997,10):
+      the template instantiation context (the oldest one first) is
+          D:\CantorAI2026\xMind\.agentflow\xlang3-sdk\sdk\xlang3\cpp\package.h(49,23):
+          see reference to function template instantiation 'void std::atomic_store<X::detail::InstanceEvents>(std::shared_ptr<X::detail::InstanceEvents> *,std::shared_ptr<X::detail::InstanceEvents>)' being compiled
+  
+  ctypes_isolation_baseline.vcxproj -> D:\CantorAI2026\xMind\.agentflow\runtime-constructor-diagnostic\isolation\build\Release\ctypes_isolation_baseline.exe
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/runtime-constructor-diagnostic/isolation/CMakeLists.txt

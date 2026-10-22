@@ -1,0 +1,3 @@
+sequential_runtime_constructors=20
+Native worker fixture fatal exception=0xc0000005 thread=7188 module=D:\CantorAI2026\xMind\.agentflow\runtime-constructor-diagnostic\build\Release\xlang3_runtime.dll offset=0xf67f5
+Native worker fixture diagnostic dump pid=29428 reason=fatal written=1 full_memory=0
