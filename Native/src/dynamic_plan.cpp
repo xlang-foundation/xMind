@@ -8,6 +8,37 @@
 #include <set>
 
 namespace agentflow {
+std::string seal_dynamic_tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const std::string& approval_bindings_json){
+    using Json=nlohmann::json;const auto actual_bindings=Json::parse(approval_bindings_json);
+    if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual external-agent approval bindings are not a native array");
+    std::map<std::string,Json> bindings;
+    for(const auto& binding:actual_bindings){
+        if(!binding.is_object()||!binding.contains("alias")||!binding["alias"].is_string()||
+            !bindings.emplace(binding["alias"].get<std::string>(),binding).second)
+            throw DynamicPlanUnavailable("Actual external-agent approval bindings contain an invalid or duplicate alias");
+    }
+    auto sorted=definitions;std::sort(sorted.begin(),sorted.end(),[](const auto& a,const auto& b){return a.name<b.name;});
+    Json result={{"tools",Json::array()}};std::string previous;std::size_t matched_bindings=0;
+    for(const auto& definition:sorted){
+        if(definition.name.empty()||definition.name==previous)throw DynamicPlanUnavailable("Actual tool catalogue contains duplicate identities");
+        previous=definition.name;
+        // Retain exact schema text, including numeric/escaped-key lexemes.
+        Json captured={{"name",definition.name},{"description",definition.description},{"input_schema_json",definition.input_schema_json}};
+        const auto binding=bindings.find(definition.name);
+        if(binding!=bindings.end()){
+            if(!binding->second.contains("input_schema_json")||binding->second["input_schema_json"]!=definition.input_schema_json)
+                throw DynamicPlanUnavailable("Actual external-agent approval binding differs from its native tool schema");
+            if(binding->second.value("kind",std::string{})=="trusted_xlang3_callable")captured["xlang3_binding"]=binding->second;
+            else if(definition.name.starts_with("mcp_"))captured["mcp_binding"]=binding->second;
+            else if(definition.name.starts_with("a2a_delegate_")&&binding->second.value("kind",std::string{})=="a2a_remote_agent")captured["a2a_binding"]=binding->second;
+            else throw DynamicPlanUnavailable("External-agent binding has an unexpected tool namespace");
+            ++matched_bindings;
+        }else if(definition.name.starts_with("mcp_")||definition.name.starts_with("a2a_delegate_"))throw DynamicPlanUnavailable("External-agent tool has no native approval binding");
+        result["tools"].push_back(std::move(captured));
+    }
+    if(matched_bindings!=bindings.size())throw DynamicPlanUnavailable("Actual MCP approval binding has no discovered native tool");
+    return result.dump();
+}
 namespace {
 using Json=nlohmann::json;
 constexpr std::int64_t safe_integer=9007199254740991;

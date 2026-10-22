@@ -54,6 +54,21 @@ DynamicPlanRecord persisted_candidate_fixture(const DynamicPlanRecord& old,const
 }
 }
 int main(){try{
+    {
+        const std::string exact=R"({"type":"object","properties":{"n":{"const":1.0000000000000001},"\u0061":{"type":"string"}}})";
+        const std::vector<ModelToolDefinition> tools{{"read_file","Native read",exact},{"mcp_fixture","Synthetic discovered tool",exact},{"code_fixture","Trusted callable",exact}};
+        const Json remote={{"alias","mcp_fixture"},{"kind","tool"},{"input_schema_json",exact},{"config_revision",7}};
+        const Json callable={{"alias","code_fixture"},{"kind","trusted_xlang3_callable"},{"input_schema_json",exact},{"execution","worker"}};
+        const auto bindings=Json::array({remote,callable});
+        const auto sealed=Json::parse(seal_dynamic_tool_catalogue(tools,bindings.dump()));
+        require(sealed.at("tools").size()==3&&sealed.at("tools")[0].at("xlang3_binding")==callable&&sealed.at("tools")[1].at("mcp_binding")==remote,"Shared catalogue must retain exact native callable and remote bindings");
+        for(const auto& tool:sealed.at("tools"))require(tool.at("input_schema_json")==exact,"Sealing must preserve numeric and escaped-key schema lexemes");
+        auto duplicate=tools;duplicate.push_back(tools.front());rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(duplicate,bindings.dump());});
+        rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,"[]");});
+        auto altered=bindings;altered[0]["input_schema_json"]="{}";rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,altered.dump());});
+        auto orphan=bindings;orphan.push_back({{"alias","orphan"},{"input_schema_json",exact}});rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,orphan.dump());});
+        auto repeated=bindings;repeated.push_back(remote);rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,repeated.dump());});
+    }
     const auto caps=capabilities();
     require(caps.max_parent_turns==32,"Default planning availability must retain the ordinary coding allowance");
     for(const auto turns:{0,33}){auto invalid=caps;invalid.max_parent_turns=turns;rejects<std::invalid_argument>([&]{dynamic_plan_tool_definitions(invalid);});}

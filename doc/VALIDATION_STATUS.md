@@ -1,3 +1,22 @@
+## Shared backend planning catalogue sealing — 2026-10-22
+
+Moved the runner's catalogue sealing into seal_dynamic_tool_catalogue in the
+native dynamic-plan backend. AgentRunner now uses that shared function for
+actual finalization and child-catalogue verification; the private duplicate is
+removed. Main process composition can call the same canonical assembly instead
+of duplicating MCP/A2A/callable approval-binding rules. No IPC serializer or new
+execution authority was added, and main planning admission remains unchanged.
+
+New pure contract cases retain exact numeric/escaped-key schema text and native
+MCP/callable binding metadata, reject duplicate tools/bindings, missing/orphaned
+bindings and changed schemas. Existing actual production worker ledger, including
+new-generation human resume, passes on the same source. Focused 2/2 in 10.89s;
+patch 48eabeba67ef33de56463a66a8b2adf707249beb79833f443d8681d49015327b;
+xmind.exe 334f09e3adba285226f1ab41806a21c054453b872de74be78c1d587ad57a7409.
+Frozen exact sets/hashes: 2787 project/16 SDK/1870 libraries/30 SDK runtime/
+18598 dependencies/105 binaries. Inventory172, not a full-suite result. No paid
+inference, CPython, user task replay, installation or user-profile changes.
+Evidence: process-xmind-root-shared-planning-catalogue-20261022-*.
 ## Adopted production worker resumes to completion — 2026-10-22
 
 The registered Planning subobject now exposes Pending(), a backend-selected

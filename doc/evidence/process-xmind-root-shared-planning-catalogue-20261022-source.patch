@@ -1,0 +1,139 @@
+diff --git a/Native/include/agentflow/dynamic_plan.hpp b/Native/include/agentflow/dynamic_plan.hpp
+index 62e61785..e7f82521 100644
+--- a/Native/include/agentflow/dynamic_plan.hpp
++++ b/Native/include/agentflow/dynamic_plan.hpp
+@@ -3,6 +3,10 @@
+ #include "agentflow/model_provider.hpp"
+ 
+ namespace agentflow {
++// Canonical backend catalogue assembly shared by local and process owners.
++// Preserves schema text and requires exact discovered approval bindings.
++std::string seal_dynamic_tool_catalogue(const std::vector<ModelToolDefinition>&,
++    const std::string& approval_bindings_json);
+ // These functions validate model data and reduce a repository-owned snapshot.
+ // They grant no execution authority and never claim, settle or replay a child.
+ DynamicPlanChange parse_dynamic_plan_change(const std::string& raw_json,bool initial);
+diff --git a/Native/src/agent_runner.cpp b/Native/src/agent_runner.cpp
+index 23e30f38..cc1f62a5 100644
+--- a/Native/src/agent_runner.cpp
++++ b/Native/src/agent_runner.cpp
+@@ -93,41 +93,11 @@ std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(AgentRunJo
+     }
+     return result;
+ }
+-std::string tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const Json& actual_bindings){
+-    if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual external-agent approval bindings are not a native array");
+-    std::map<std::string,Json> bindings;
+-    for(const auto& binding:actual_bindings){
+-        if(!binding.is_object()||!binding.contains("alias")||!binding["alias"].is_string()||
+-            !bindings.emplace(binding["alias"].get<std::string>(),binding).second)
+-            throw DynamicPlanUnavailable("Actual external-agent approval bindings contain an invalid or duplicate alias");
+-    }
+-    auto sorted=definitions;std::sort(sorted.begin(),sorted.end(),[](const auto& a,const auto& b){return a.name<b.name;});
+-    Json result={{"tools",Json::array()}};std::string previous;std::size_t matched_bindings=0;
+-    for(const auto& definition:sorted){
+-        if(definition.name.empty()||definition.name==previous)throw DynamicPlanUnavailable("Actual tool catalogue contains duplicate identities");
+-        previous=definition.name;
+-        // Retain exact schema text, including numeric/escaped-key lexemes.
+-        Json captured={{"name",definition.name},{"description",definition.description},{"input_schema_json",definition.input_schema_json}};
+-        const auto binding=bindings.find(definition.name);
+-        if(binding!=bindings.end()){
+-            if(!binding->second.contains("input_schema_json")||binding->second["input_schema_json"]!=definition.input_schema_json)
+-                throw DynamicPlanUnavailable("Actual external-agent approval binding differs from its native tool schema");
+-            if(binding->second.value("kind",std::string{})=="trusted_xlang3_callable")captured["xlang3_binding"]=binding->second;
+-            else if(definition.name.starts_with("mcp_"))captured["mcp_binding"]=binding->second;
+-            else if(definition.name.starts_with("a2a_delegate_")&&binding->second.value("kind",std::string{})=="a2a_remote_agent")captured["a2a_binding"]=binding->second;
+-            else throw DynamicPlanUnavailable("External-agent binding has an unexpected tool namespace");
+-            ++matched_bindings;
+-        }else if(definition.name.starts_with("mcp_")||definition.name.starts_with("a2a_delegate_"))throw DynamicPlanUnavailable("External-agent tool has no native approval binding");
+-        result["tools"].push_back(std::move(captured));
+-    }
+-    if(matched_bindings!=bindings.size())throw DynamicPlanUnavailable("Actual MCP approval binding has no discovered native tool");
+-    return result.dump();
+-}
+ void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const Json& bindings,const DynamicPlanCapabilities& caps,const DynamicPresetCapability& preset){
+     const auto sealed=Json::parse(caps.tool_catalog_json);Json expected={{"tools",Json::array()}};
+     const std::set<std::string> allowed(preset.tools.begin(),preset.tools.end());
+     for(const auto& definition:sealed.at("tools"))if(allowed.contains(definition.at("name").get<std::string>()))expected["tools"].push_back(definition);
+-    if(expected["tools"].size()!=allowed.size()||Json::parse(tool_catalogue(actual,bindings))!=expected)
++    if(expected["tools"].size()!=allowed.size()||Json::parse(seal_dynamic_tool_catalogue(actual,bindings.dump()))!=expected)
+         throw DynamicPlanUnavailable("Actual child catalogue differs from its sealed native preset");
+ }
+ }
+@@ -705,7 +675,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
+                     const auto child=dynamic_child_settings(settings_,preset,provider.model);
+                     preset.backend_identity=agent_authority_identity(child,provider.model,root_caps->workspace_identity,backend_catalog_->credential_versions(child));
+                 }
+-                root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,tool_catalogue(request.tools,offered_bindings),std::move(presets)).get();
++                root_caps=journal_.finalize_dynamic_capabilities(id,root_caps->backend_identity,seal_dynamic_tool_catalogue(request.tools,offered_bindings.dump()),std::move(presets)).get();
+             }
+         };
+         auto offer_orchestration=[&]{
+diff --git a/Native/src/dynamic_plan.cpp b/Native/src/dynamic_plan.cpp
+index dce0d78e..ef925be7 100644
+--- a/Native/src/dynamic_plan.cpp
++++ b/Native/src/dynamic_plan.cpp
+@@ -8,6 +8,37 @@
+ #include <set>
+ 
+ namespace agentflow {
++std::string seal_dynamic_tool_catalogue(const std::vector<ModelToolDefinition>& definitions,const std::string& approval_bindings_json){
++    using Json=nlohmann::json;const auto actual_bindings=Json::parse(approval_bindings_json);
++    if(!actual_bindings.is_array())throw DynamicPlanUnavailable("Actual external-agent approval bindings are not a native array");
++    std::map<std::string,Json> bindings;
++    for(const auto& binding:actual_bindings){
++        if(!binding.is_object()||!binding.contains("alias")||!binding["alias"].is_string()||
++            !bindings.emplace(binding["alias"].get<std::string>(),binding).second)
++            throw DynamicPlanUnavailable("Actual external-agent approval bindings contain an invalid or duplicate alias");
++    }
++    auto sorted=definitions;std::sort(sorted.begin(),sorted.end(),[](const auto& a,const auto& b){return a.name<b.name;});
++    Json result={{"tools",Json::array()}};std::string previous;std::size_t matched_bindings=0;
++    for(const auto& definition:sorted){
++        if(definition.name.empty()||definition.name==previous)throw DynamicPlanUnavailable("Actual tool catalogue contains duplicate identities");
++        previous=definition.name;
++        // Retain exact schema text, including numeric/escaped-key lexemes.
++        Json captured={{"name",definition.name},{"description",definition.description},{"input_schema_json",definition.input_schema_json}};
++        const auto binding=bindings.find(definition.name);
++        if(binding!=bindings.end()){
++            if(!binding->second.contains("input_schema_json")||binding->second["input_schema_json"]!=definition.input_schema_json)
++                throw DynamicPlanUnavailable("Actual external-agent approval binding differs from its native tool schema");
++            if(binding->second.value("kind",std::string{})=="trusted_xlang3_callable")captured["xlang3_binding"]=binding->second;
++            else if(definition.name.starts_with("mcp_"))captured["mcp_binding"]=binding->second;
++            else if(definition.name.starts_with("a2a_delegate_")&&binding->second.value("kind",std::string{})=="a2a_remote_agent")captured["a2a_binding"]=binding->second;
++            else throw DynamicPlanUnavailable("External-agent binding has an unexpected tool namespace");
++            ++matched_bindings;
++        }else if(definition.name.starts_with("mcp_")||definition.name.starts_with("a2a_delegate_"))throw DynamicPlanUnavailable("External-agent tool has no native approval binding");
++        result["tools"].push_back(std::move(captured));
++    }
++    if(matched_bindings!=bindings.size())throw DynamicPlanUnavailable("Actual MCP approval binding has no discovered native tool");
++    return result.dump();
++}
+ namespace {
+ using Json=nlohmann::json;
+ constexpr std::int64_t safe_integer=9007199254740991;
+diff --git a/Native/tests/dynamic_plan_contract.cpp b/Native/tests/dynamic_plan_contract.cpp
+index 6dc30a6c..7b5bc4c9 100644
+--- a/Native/tests/dynamic_plan_contract.cpp
++++ b/Native/tests/dynamic_plan_contract.cpp
+@@ -54,6 +54,21 @@ DynamicPlanRecord persisted_candidate_fixture(const DynamicPlanRecord& old,const
+ }
+ }
+ int main(){try{
++    {
++        const std::string exact=R"({"type":"object","properties":{"n":{"const":1.0000000000000001},"\u0061":{"type":"string"}}})";
++        const std::vector<ModelToolDefinition> tools{{"read_file","Native read",exact},{"mcp_fixture","Synthetic discovered tool",exact},{"code_fixture","Trusted callable",exact}};
++        const Json remote={{"alias","mcp_fixture"},{"kind","tool"},{"input_schema_json",exact},{"config_revision",7}};
++        const Json callable={{"alias","code_fixture"},{"kind","trusted_xlang3_callable"},{"input_schema_json",exact},{"execution","worker"}};
++        const auto bindings=Json::array({remote,callable});
++        const auto sealed=Json::parse(seal_dynamic_tool_catalogue(tools,bindings.dump()));
++        require(sealed.at("tools").size()==3&&sealed.at("tools")[0].at("xlang3_binding")==callable&&sealed.at("tools")[1].at("mcp_binding")==remote,"Shared catalogue must retain exact native callable and remote bindings");
++        for(const auto& tool:sealed.at("tools"))require(tool.at("input_schema_json")==exact,"Sealing must preserve numeric and escaped-key schema lexemes");
++        auto duplicate=tools;duplicate.push_back(tools.front());rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(duplicate,bindings.dump());});
++        rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,"[]");});
++        auto altered=bindings;altered[0]["input_schema_json"]="{}";rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,altered.dump());});
++        auto orphan=bindings;orphan.push_back({{"alias","orphan"},{"input_schema_json",exact}});rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,orphan.dump());});
++        auto repeated=bindings;repeated.push_back(remote);rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,repeated.dump());});
++    }
+     const auto caps=capabilities();
+     require(caps.max_parent_turns==32,"Default planning availability must retain the ordinary coding allowance");
+     for(const auto turns:{0,33}){auto invalid=caps;invalid.max_parent_turns=turns;rejects<std::invalid_argument>([&]{dynamic_plan_tool_definitions(invalid);});}

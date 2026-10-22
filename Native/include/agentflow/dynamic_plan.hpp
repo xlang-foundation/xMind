@@ -3,6 +3,10 @@
 #include "agentflow/model_provider.hpp"
 
 namespace agentflow {
+// Canonical backend catalogue assembly shared by local and process owners.
+// Preserves schema text and requires exact discovered approval bindings.
+std::string seal_dynamic_tool_catalogue(const std::vector<ModelToolDefinition>&,
+    const std::string& approval_bindings_json);
 // These functions validate model data and reduce a repository-owned snapshot.
 // They grant no execution authority and never claim, settle or replay a child.
 DynamicPlanChange parse_dynamic_plan_change(const std::string& raw_json,bool initial);
