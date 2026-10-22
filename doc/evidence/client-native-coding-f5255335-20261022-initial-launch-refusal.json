@@ -1,0 +1,7 @@
+{
+  "exitCode": 1,
+  "reason": "Backend configuration cannot be a model workspace",
+  "workspace": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/f5255335/workspace",
+  "modelCalls": 0,
+  "action": "Use dedicated TestProj/xmind-delivery-validation/f5255335 fixture; preserve backend-private workspace guard"
+}

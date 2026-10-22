@@ -1,0 +1,25 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {stageNativeRuntime} from '../extensions/vscode/scripts/package-native-runtime.mjs';
+const repo='D:/CantorAI2026/xMind',root=repo+'/.agentflow/client-delivery-validation/f5255335/package',bundle=root+'/bundle',out=root+'/native-runtime',installed='C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.60/native-runtime';
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const gate=JSON.parse(await fs.readFile(repo+'/doc/evidence/process-xmind-root-process-profile-defaults-qualified-20261022-gate.json'));
+assert.equal(gate.scopePassed,true);
+const revision=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,encoding:'utf8'}).trim();
+const patch=execFileSync('git',['diff',gate.sourceParent,revision,'--binary','--','Native'],{cwd:repo});assert.equal(sha(patch),gate.sourcePatchSha256);
+await fs.mkdir(root);await fs.mkdir(bundle);
+const old=JSON.parse(await fs.readFile(installed+'/native-runtime-manifest.json')),files={};
+for(const [n,hash] of Object.entries(old.files)){
+ if(n.startsWith('stdlib/')||n.startsWith('wheels/')||n==='licenses/Python-STDLIB-LICENSE'||n==='provenance.json')continue;
+ let bytes=await fs.readFile(installed+'/'+n);assert.equal(sha(bytes),hash);
+ if(n==='xmind.exe'){bytes=await fs.readFile(repo+'/build/skill-state-native/Release/xmind.exe');assert.equal(sha(bytes),gate.nativeSha256);}
+ await fs.mkdir(path.dirname(bundle+'/'+n),{recursive:true});await fs.writeFile(bundle+'/'+n,bytes,{flag:'wx'});files[n]=sha(bytes);
+}
+const provenance=Buffer.from(JSON.stringify({sourceRevision:revision,sourceParent:gate.sourceParent,sourcePatchSha256:gate.sourcePatchSha256,nativeSha256:gate.nativeSha256,qualification:'Three focused server/profile contracts passed; preceding broader worker regression failed 7/8 with unresolved runtime access violation. No full-suite acceptance; package rendered checks pending.',modelCalls:0},null,2)+'\n');
+await fs.writeFile(bundle+'/provenance.json',provenance,{flag:'wx'});files['provenance.json']=sha(provenance);
+const manifest=Buffer.from(JSON.stringify({schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:revision,sdkRevision:old.sdkRevision,files},null,2)+'\n');await fs.writeFile(bundle+'/source-manifest.json',manifest,{flag:'wx'});
+const result=await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:bundle+'/source-manifest.json',bundleManifestSha256:sha(manifest),stdlibSource:'C:/Python/Python314/Lib',stdlibLicense:'C:/Python/Python314/LICENSE.txt',out});
+await fs.writeFile(root+'/receipt.json',JSON.stringify({...result,sourceRevision:revision,nativeSha256:gate.nativeSha256},null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(result));

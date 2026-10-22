@@ -1,0 +1,8 @@
+{
+  "backendPid": 10420,
+  "backendExited": true,
+  "helperPid": 24808,
+  "helperExited": true,
+  "reason": "Input pipe was closed; identity-bound test-only idle backend and helper stopped after completed run and retired worker",
+  "userOwnersTouched": false
+}

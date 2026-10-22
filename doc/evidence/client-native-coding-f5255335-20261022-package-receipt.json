@@ -1,0 +1,12 @@
+{
+  "output": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\f5255335\\package\\native-runtime",
+  "manifestSha256": "ec5a2add284f3dfa5fc9d0a3c3ae41c1a232d828f4957a02cd7baafd6d19cb9a",
+  "nativeFiles": 5,
+  "pureSourceFiles": 1869,
+  "files": 2401,
+  "nativeExecuted": false,
+  "configAccessed": false,
+  "installed": false,
+  "sourceRevision": "f525533511395939f0ddf8b0dde62f4baa30e783",
+  "nativeSha256": "63b032149e02f7192272b55310615bdd14730f6ed29ac4380b0015a5954fbebe"
+}

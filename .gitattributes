@@ -216,3 +216,5 @@ doc/evidence/process-xmind-root-*.log -text whitespace=-blank-at-eol,-blank-at-e
 doc/evidence/process-xmind-root-*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
 doc/evidence/process-xmind-root-native-model-*-owned-timeout-worker-before-retirement.json -text whitespace=cr-at-eol
 doc/evidence/process-xmind-root-*-owned-timeout-worker-before-retirement.json -text whitespace=cr-at-eol
+
+doc/evidence/client-native-coding-*.log -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

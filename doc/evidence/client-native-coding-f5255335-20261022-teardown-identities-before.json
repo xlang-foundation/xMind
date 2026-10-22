@@ -1,0 +1,14 @@
+[
+  {
+    "ProcessId": 10420,
+    "ParentProcessId": 24808,
+    "CreationDate": "2026-10-22T13:13:18.342956-07:00",
+    "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\f5255335\\package\\native-runtime\\xmind.exe"
+  },
+  {
+    "ProcessId": 24808,
+    "ParentProcessId": 26400,
+    "CreationDate": "2026-10-22T13:13:18.273185-07:00",
+    "ExecutablePath": "C:\\Program Files\\nodejs\\node.exe"
+  }
+]

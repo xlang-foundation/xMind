@@ -1,0 +1,29 @@
+{
+  "articles": 8,
+  "conversation": {
+    "height": 218.36459350585935,
+    "width": 419.3333435058594,
+    "x": 860.6666870117188,
+    "y": 201.0416717529297
+  },
+  "documentHeight": 720,
+  "footer": {
+    "height": 300.59375,
+    "width": 419.3333435058594,
+    "x": 860.6666870117188,
+    "y": 419.40625
+  },
+  "footerClientHeight": 300,
+  "footerScrollHeight": 399,
+  "send": {
+    "height": 31.479167938232425,
+    "width": 57.75,
+    "x": 1185.25,
+    "y": 745.1979370117188
+  },
+  "skillsExpanded": true,
+  "viewport": {
+    "height": 720,
+    "width": 1280
+  }
+}

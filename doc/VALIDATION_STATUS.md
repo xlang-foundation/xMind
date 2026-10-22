@@ -1,3 +1,50 @@
+## Current client suites and rendered candidate coding — 2026-10-22
+
+Source f525533511395939f0ddf8b0dde62f4baa30e783 passes all 464 extension tests
+and all 162 browser tests, with zero skipped/cancelled/todo tests. Fresh production
+browser assets build successfully. Exact 2783 project inputs, 14908 consumed Node
+dependency files and test-file sets stay unchanged through that gate. This is
+client automated verification, not actual VS Code editor rendering.
+
+A candidate unified native runtime stages 2401 manifest files, manifest
+ ec5a2add284f3dfa5fc9d0a3c3ae41c1a232d828f4957a02cd7baafd6d19cb9a,
+with xmind.exe 63b032149e02f7192272b55310615bdd14730f6ed29ac4380b0015a5954fbebe
+and the unchanged pinned SDK. It is not installed. The initial fixture workspace
+inside .agentflow was correctly refused as backend-private before any model call;
+the execution fixture is D:/CantorAI2026/TestProj/xmind-delivery-validation/f5255335.
+
+Actual hidden IAB on that candidate runs one new coding task through a controlled
+loopback model peer. The UI submits the prompt, displays exact before/after code,
+approves a literal replacement, displays the exact Node argument vector, and
+approves node check-clamp.cjs. Native process receipt records exit 0 and stdout
+'3 clamp checks passed'. File preview shows the corrected clamp expression.
+Root 0de0e089c4e010c4ac63d3e77b124619, session
+5364a14cfcbaaa04263e6874e090e60c complete with eight canonical messages, four
+finished parent model charges and two succeeded operations. Actual SDK worker
+17944 retires completed before test backend10420 stops. NEVER replay this task.
+
+Reload restores the same completed result and enabled Send without a fifth model
+response. At 1280x720, expanded Skills plus a 35-line unsent draft retain a
+218.36-pixel conversation viewport without page overflow. Footer scrolls; keyboard
+focus makes Send visible (bottom678.01). The draft is cleared. This checks that
+one actual browser viewport, not a new full responsive matrix or native VS Code
+pane. Screenshots and DOM/geometry receipts are archived.
+
+Final audit finds 18 generated .xlang3-314.pyc cache files in the executed runtime.
+The initial exact-file-set comparison therefore FAILS; every manifest-covered
+file remains byte-identical. The executed copy and exact additions/hashes are
+retained. A fresh unexecuted delivery copy stages from the same source bundle,
+verifies its complete exact file set/hashes and has the same manifest above.
+Do not label the executed runtime's entire file set unchanged. This audit did
+not rerun coding, delete caches to conceal the change, or modify SDK source.
+
+The helper input pipe was closed, so teardown used verified PID/birth/image and
+parent identities to stop only the idle test backend and its helper after worker
+retirement. Both exits are confirmed; existing user owners/profiles are untouched.
+No visible windows, CPython, paid inference or installation. Native172 full-suite,
+intermittent runtime fault, current CLI coding and actual VS Code editor acceptance
+remain open. Evidence: doc/evidence/client-native-coding-f5255335-20261022-*.
+
 ## Built-in process-profile planning defaults — 2026-10-22
 
 The server now enables bounded planning for eligible workspace-backed built-in

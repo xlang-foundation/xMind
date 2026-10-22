@@ -1,0 +1,25 @@
+{
+  "exactFileSetUnchanged": false,
+  "manifestCoveredFilesUnchanged": true,
+  "additionalFiles": {
+    "stdlib/__pycache__/codecs.xlang3-314.pyc": "f28edab6393e114132804c020cd342215dac3fc7afa040db3a6fe1ae9a0ebcd2",
+    "stdlib/__pycache__/operator.xlang3-314.pyc": "c0a25653ed2c8d2d8299b9b0430a252261799977aabac24d280ff1261a930812",
+    "stdlib/__pycache__/reprlib.xlang3-314.pyc": "7a677c693482a5683f67a48611165cf0d26566212c5e46dfe211114444e9bb91",
+    "stdlib/__pycache__/functools.xlang3-314.pyc": "fa0fd4cd1a83c944132a07d12a132d65bdbb765d8f4e33e35db2206171ba3c49",
+    "stdlib/__pycache__/keyword.xlang3-314.pyc": "74e2617ae527ebc91ada729282e8665232f84fc35536e6f2a23e05e9ce0f32d5",
+    "stdlib/__pycache__/copyreg.xlang3-314.pyc": "d0832dc7b68ff15a433dc2c9abc93eaa9d4bdb7f42218368d1a00a59b35b5e6e",
+    "stdlib/__pycache__/enum.xlang3-314.pyc": "161c1bf7f24f452bd3bc65fa799213c8fa8593af5cce38025a49ea4692abdb5b",
+    "stdlib/collections/__pycache__/__init__.xlang3-314.pyc": "4585fc4dcad23532ee23978002a1c27da057290596168abb928d076c651177b8",
+    "stdlib/__pycache__/types.xlang3-314.pyc": "ff7387e85fc035605ba231bb06f2fb91f131a1f9b5c431554561057bbe7f7eab",
+    "stdlib/json/__pycache__/__init__.xlang3-314.pyc": "df0fab6bf8afae6e0cc753c215b025293f80706bdd7756302edbb04d1c9b43c8",
+    "stdlib/json/__pycache__/decoder.xlang3-314.pyc": "148e41f6e87bf4b9663285bd3db08ad6ed2e2e8c402d84878712d74294a300ea",
+    "stdlib/re/__pycache__/_casefix.xlang3-314.pyc": "f9ee95d43fbb8a603f4e7b957a4de91d4f92304932029a036983f66034b63bcb",
+    "stdlib/json/__pycache__/scanner.xlang3-314.pyc": "72bfe15141012cbcbfecd76e3dc957b8cb150023b7208dab0db6f952668d97e4",
+    "stdlib/json/__pycache__/encoder.xlang3-314.pyc": "bf7cc5cc617c1a656a629bb7539ca73aa0df883186c325890528486cc51569f2",
+    "stdlib/re/__pycache__/_constants.xlang3-314.pyc": "10cff1a862ce65348d02f119e54641999985456ea1b5f87a16560c0cc03d6015",
+    "stdlib/re/__pycache__/_compiler.xlang3-314.pyc": "941b8eae6d165a128c34f4d6abb4cc4ca375bff6b022c2c6061932db680ceb76",
+    "stdlib/re/__pycache__/__init__.xlang3-314.pyc": "1eab3fa584c72ce379c2a1eedfba5ceb1fdc19e8f43bba1bbfca86f113e46593",
+    "stdlib/re/__pycache__/_parser.xlang3-314.pyc": "48e78cacfdf9820a75be9b3656e8015f18c09d344930ed7051f5b2e069621770"
+  },
+  "reason": "Executed candidate/readonly xlang probe generated native xlang bytecode caches; initial exact-file-set audit failed. Executed copy retained; no coding task replayed."
+}

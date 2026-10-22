@@ -1,0 +1,28 @@
+import sys
+assert sys.implementation.name == 'xlang3'
+sys.path.insert(0,'D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/f5255335/package/native-runtime/stdlib')
+import _sqlite3
+import json
+c=_sqlite3.connect('D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/f5255335/browser.sqlite')
+c.execute('PRAGMA query_only=ON')
+root='0de0e089c4e010c4ac63d3e77b124619'
+result={}
+result['runs']=c.execute('SELECT id,session_id,state,parent_run_id FROM runs').fetchall()
+result['history']=c.execute('SELECT m.seq,m.role,m.payload FROM task_messages t JOIN messages m ON m.seq=t.message_seq WHERE t.run_id=? ORDER BY m.seq',(root,)).fetchall()
+result['operations']=c.execute('SELECT id,tool,state,result FROM operations WHERE run_id=?',(root,)).fetchall()
+result['reservations']=c.execute('SELECT role,state FROM agent_model_call_reservations WHERE root_run_id=?',(root,)).fetchall()
+result['leases']=c.execute("SELECT payload FROM information WHERE category='native-agent-worker-leases'").fetchall()
+result['events']=c.execute("SELECT seq,kind,payload FROM events WHERE run_id=? AND kind IN ('worker.lease.admitted','worker.lease.retired','run.completed','budget.segment.opened','budget.segment.closed','process.started','process.exited','budget.model_call.finished') ORDER BY seq",(root,)).fetchall()
+assert len(result['runs'])==1 and result['runs'][0][2]=='completed'
+assert len(result['history'])==8
+assert len(result['reservations'])==4
+for role,state in result['reservations']:
+ assert role=='parent' and state=='finished'
+assert len(result['operations'])==2
+for operation in result['operations']:
+ assert operation[2]=='succeeded'
+assert len(result['leases'])==1
+for lease in result['leases']:
+ assert json.loads(lease[0])['state']=='retired'
+print(json.dumps(result))
+c.close()

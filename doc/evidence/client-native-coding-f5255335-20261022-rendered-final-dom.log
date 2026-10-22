@@ -1,0 +1,145 @@
+- navigation:
+  - strong: xMind
+  - generic: Local node · This computer
+  - generic: Workspace
+  - button "Configure current workspace":
+    - generic "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\f5255335": f5255335
+    - generic: ⌄
+  - button "Configure workspace":
+  - button "Disconnect view":
+- heading "Workspace files" [level=1]
+- paragraph: D:\CantorAI2026\TestProj\xmind-delivery-validation\f5255335 · Files and agent runs use this workspace on this computer.
+- button "Terminal"
+- button "Git status"
+- button "Initialize Git"
+- button "Refresh workspace files": Refresh
+- region "Git diff review":
+  - text: Repository folder
+  - combobox "Repository folder" [disabled]:
+    - option "f5255335 · Primary" [selected]
+  - text: Compare
+  - combobox "Compare":
+    - option "Working tree" [selected]
+    - option "Branch changes"
+    - option "Committed changes"
+  - text: Base
+  - textbox "Base":
+    - /placeholder: Auto-detect when available
+  - button "Review diff"
+  - text: Changed file
+  - combobox "Changed file patch" [disabled]:
+    - option "Run a comparison to list changed files" [selected]
+- navigation "Workspace files":
+  - generic: Project files
+  - search:
+    - searchbox "Find files by name"
+    - button "Find"
+  - list:
+    - strong: f5255335
+    - generic: Primary
+    - generic: D:\CantorAI2026\TestProj\xmind-delivery-validation\f5255335
+    - list:
+      - button "· check-clamp.cjs":
+        - generic: ·
+        - generic: check-clamp.cjs
+      - button "Attach check-clamp.cjs": ＋
+      - button "· clamp.cjs" [active]:
+        - generic: ·
+        - generic: clamp.cjs
+      - button "Attach clamp.cjs": ＋
+- region "File preview":
+  - strong: clamp.cjs
+  - generic: Read-only preview · file changes require approval
+  - generic: module.exports = (value, min, max) => Math.max(min, Math.min(max, value));
+- separator "Resize agent sidebar"
+- complementary "xMind agent sidebar":
+  - combobox "Conversation history":
+    - option "Fix clamp.cjs so values stay between min and max. Run node check-clamp.cjs, then" [selected]
+  - button "New conversation": ＋
+  - button "Refresh history": ↻
+  - button "Settings": ⚙
+  - toolbar "Conversation and workspace tools":
+    - button "Export conversation":
+    - button "Import conversation":
+    - button "Rename conversation":
+    - button "Remove conversation":
+    - button "Open workspace terminal":
+    - button "Workspace Git":
+    - button "Conversation permissions":
+  - status: completed
+  - generic: Run details
+  - combobox "Inspect a recorded run":
+    - option "completed · 0de0e089c4e010c4ac63d3e77b124619" [selected]
+  - main:
+    - article:
+      - heading "You" [level=4]
+      - paragraph: Fix clamp.cjs so values stay between min and max. Run node check-clamp.cjs, then report the observed result.
+      - button "Fork before this message"
+    - article:
+      - heading "xMind" [level=4]
+      - generic "1 tool request(s)"
+      - generic "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.":
+        - generic: Input 7
+        - generic: Output 3
+        - generic: Total 10
+        - generic: client-coding-fixture
+        - generic: First token 0.03s
+        - generic: 0.03s
+      - button "Fork before this message"
+    - article:
+      - heading "tool" [level=4]
+      - generic "Tool result"
+    - article:
+      - heading "xMind" [level=4]
+      - generic "1 tool request(s)"
+      - generic "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.":
+        - generic: Input 7
+        - generic: Output 3
+        - generic: Total 10
+        - generic: client-coding-fixture
+        - generic: First token 0.02s
+        - generic: 0.02s
+      - button "Fork before this message"
+    - article:
+      - heading "tool" [level=4]
+      - generic "Tool result"
+    - article:
+      - heading "xMind" [level=4]
+      - generic "1 tool request(s)"
+      - generic "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.":
+        - generic: Input 7
+        - generic: Output 3
+        - generic: Total 10
+        - generic: client-coding-fixture
+        - generic: First token 0.02s
+        - generic: 0.03s
+      - button "Fork before this message"
+    - article:
+      - heading "tool" [level=4]
+      - generic "Command result · node"
+    - article:
+      - heading "xMind" [level=4]
+      - paragraph: "Fixed clamp.cjs. The actual Node run exited 0: 3 clamp checks passed."
+      - generic "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.":
+        - generic: Input 7
+        - generic: Output 3
+        - generic: Total 10
+        - generic: client-coding-fixture
+        - generic: First token 0.02s
+        - generic: 0.03s
+      - button "Fork before this message"
+    - generic "Tools and changes · 2"
+    - generic "Selected run activity"
+  - generic "Skills"
+  - generic: Agent
+  - combobox "Conversation agent":
+    - option "Agent (default)" [selected]
+  - status: Default agent
+  - textbox "Message xMind":
+    - /placeholder: Ask xMind to work on your project…
+  - button "Attach workspace files": ＋ File
+  - combobox "Model":
+    - option "Choose a model" [disabled]
+    - option "client-coding-fixture" [selected]
+  - button "Send ↑"
+  - paragraph: Enter to send · Shift+Enter for a new line · File changes require approval
