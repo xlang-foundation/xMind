@@ -1,3 +1,30 @@
+## Sealed planning-root effect authority — 2026-10-22
+
+Planning-root file/process/remote/callable invocation authority now requires an
+exact unique tool in the finalized root catalogue, in addition to the running
+root, matching workspace/provider, open segment, current lease and actual latest
+retired model receipt. Existing ordinary/child authority is unchanged. Callable
+registration and coding-turn settlement can retain this root owner; invocation
+still checks the exact sealed name. Read-only turn settlement refuses file calls.
+This is a prerequisite for main process planning composition, not its completion.
+
+New native ledger cases exercise sealed create_file admission, foreign PID and
+unsealed refusal, normal dispatch, required approved/claimed operation binding,
+canonical result/turn settlement, continuation eligibility and duplicate refusal.
+Operation receipts and process identities are synthetic; no filesystem effect is
+claimed by these cases. Existing actual process planning cases run in this same
+ledger. Full root effect execution through SDK coding hosts, process/remote/
+callable root cases, main admission, pause/resume and overflow remain open.
+
+Initial build passed, but fixture preset workspace.code was invalid. Original
+failed source/logs remain; corrected registered workspace.coding passes the full
+ledger contract 1/1 in 9.52 seconds. Native patch
+ e2f13b9d29d02df37263128ea6ffd7ae3b05b5fde0429b52d8eb7348b557479a;
+xmind.exe 74b95863be8473004fc6d53a7444ba658e92615aeada120614965438675560ba.
+Frozen 2787 project, 16 SDK, 1870 library, 30 SDK runtime, 18598 dependencies,
+102 binary files and exact sets remain unchanged. Inventory172; only ledger ran.
+No paid provider calls, CPython, installation, or replay of completed user tasks.
+Evidence: process-xmind-root-planning-effects-*-20261022-* under doc/evidence.
 ## TestProj workspace switch recovery — 2026-10-22 (focused checks passed)
 
 Final exact-source gate passes 5/5 in 25.55 seconds: process configuration,

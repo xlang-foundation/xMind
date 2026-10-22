@@ -1,0 +1,40 @@
+Start testing: Oct 22 02:24 Pacific Daylight Time
+----------------------------------------------------------
+94/172 Testing: native_agent_worker_ledger_contract
+94/172 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_ledger_contract" start time: Oct 22 02:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:59053
+Invalid dynamic registered preset; retained fixture C:\Users\shaw9\AppData\Local\Temp\xmind-worker-ledger-3274533750-4106657486
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:59053',
+  stdout: '',
+  stderr: 'Invalid dynamic registered preset; retained fixture C:\\Users\\shaw9\\AppData\\Local\\Temp\\xmind-worker-ledger-3274533750-4106657486\r\n'
+}
+
+Node.js v22.19.0
+<end of output>
+Test time =   0.45 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_ledger_contract" end time: Oct 22 02:24 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 22 02:24 Pacific Daylight Time
