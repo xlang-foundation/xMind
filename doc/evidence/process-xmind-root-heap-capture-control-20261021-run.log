@@ -1,0 +1,4 @@
+Native worker fixture fatal exception=0xc0000374 thread=38880 module=C:\WINDOWS\System32\KERNELBASE.dll offset=0xc408a
+Native worker fixture diagnostic dump pid=32244 reason=fatal written=1 full_memory=1
+Native worker fixture fatal exception=0xc0000374 thread=38880 module=C:\WINDOWS\System32\KERNELBASE.dll offset=0xc408a
+Native worker fixture diagnostic dump pid=32244 reason=fatal written=1 full_memory=1

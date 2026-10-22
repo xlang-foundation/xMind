@@ -1,0 +1,191 @@
+{
+  "recordedAt": "2026-10-22T01:46:35.726Z",
+  "gate": {
+    "recordedAt": "2026-10-22T01:45:36.109Z",
+    "sourceParent": "1df022865217cbe32cb54dce29bd3f2f8de29efa",
+    "sourcePatchSha256": "457f036db6466edf033d9750882e25aaafd47c3a93328c05a501e5bc1838afc4",
+    "clientSourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uncommittedSource": true,
+    "build": {
+      "pid": 49576,
+      "launchedAt": "2026-10-22T01:42:15.961Z",
+      "completedAt": "2026-10-22T01:43:15.162Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d251ef9471ca2b95be9daccf3663cf1dd1c363d53400b77886d11fe5095fca7c"
+    },
+    "test": {
+      "pid": 43620,
+      "launchedAt": "2026-10-22T01:43:18.031Z",
+      "completedAt": "2026-10-22T01:45:33.238Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0a6a9798d24285a2fd3c4c84104c761cfc7683009310a79a21240ec11053d3ca"
+    },
+    "total": 20,
+    "failed": 0,
+    "passed": 20,
+    "seconds": 135.16,
+    "projectFiles": 2783,
+    "sdkSourceFiles": 16,
+    "sdkSourceScope": "Complete sdk include tree consumed by the imported native SDK; prebuilt DLL, CLI, import library and modules are frozen separately. Runtime engine source is not rebuilt.",
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 76,
+    "nativeBinaries": 138,
+    "nodeDependencyFiles": 18598,
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "nativeSha256": "a5711613c04529eb842015035847ab1197a98a17a47834f142c1b7c638e0f922",
+    "runtimeSha256": "1ff2a8e71980a23773ea4d4ee863a14f59e7e56e8110c641a6b60e587a801cb3",
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic fixtures only; no live model key used",
+    "installed": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "files": [
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-gate.json",
+      "sha256": "966ffc9fc67b43319a7e0b307cbc92285568d208cb999879c077f3ca9f4958ef"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-build.log",
+      "sha256": "d251ef9471ca2b95be9daccf3663cf1dd1c363d53400b77886d11fe5095fca7c"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-build-terminal.json",
+      "sha256": "256e72c0665048348d567dd1226e9a6f2504a11405a2c3c10eb9af9454e23a1d"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-ctest.log",
+      "sha256": "0a6a9798d24285a2fd3c4c84104c761cfc7683009310a79a21240ec11053d3ca"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-ctest-terminal.json",
+      "sha256": "ec46baac3838482c97e09ec2b491c4317d3dace10647b906ff22b391b13bd0ea"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-LastTest.log",
+      "sha256": "6bf94257702fed5787e44c398f79a28cbfdf3396004f66ccdd4f4d74d3f21147"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-native-heap-diagnostics-20261021-source.patch",
+      "sha256": "457f036db6466edf033d9750882e25aaafd47c3a93328c05a501e5bc1838afc4"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-build.log",
+      "sha256": "c967016dac9c2c65cd4cba45f9825ca31482e9b8c2a8d608cfd715b4534ef537"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-check.mjs",
+      "sha256": "2c63aa2a64eab72b30db1439675fd751d12a170863613644aa50314585732c9b"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-CMakeLists.txt",
+      "sha256": "7af9545c058866bb9d9b4994e8f63c9eead5e175cf96b8c166b0103787462415"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-configure.log",
+      "sha256": "74b840f62f3b88db7b514a4949f5c19c80d14a38665fde47419e2ed970b9c1d5"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-inputs.json",
+      "sha256": "ef241cdb8d8ee4bac8ed79de4ac3be74c2f323026ce01a2dced38d49eb311458"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-main.cpp",
+      "sha256": "d57b855632f3c347f1b5353496eebe8441c2a68723305b7169ba18ccd524cd09"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-result.json",
+      "sha256": "d610f2d0773a376d5b8c5237105eeeacd35f11e96f8c6b7b9b41632821281160"
+    },
+    {
+      "path": "doc/evidence/process-xmind-root-heap-capture-control-20261021-run.log",
+      "sha256": "dce120cdbd055625bc72d8bf1fe86bd2b7dd3a181fa83623ee980fb6350a5402"
+    }
+  ],
+  "control": {
+    "startedAt": "2026-10-22T01:46:09.457Z",
+    "completedAt": "2026-10-22T01:46:09.796Z",
+    "pid": 32244,
+    "exitCode": 3221226356,
+    "signal": null,
+    "imageSha256": "c29c7f74375eb1e3a60f2d9fe9e2a6132c1ca468bddf68f11ed006a88e94e2d6",
+    "imageUnchanged": true,
+    "allInputsUnchanged": true,
+    "logSha256": "dce120cdbd055625bc72d8bf1fe86bd2b7dd3a181fa83623ee980fb6350a5402",
+    "dumps": [
+      {
+        "path": "C:/xMindNativeValidation/heap-capture-control-20261021/dumps/fixture-32244-659650187-fatal.dmp",
+        "bytes": 28267944,
+        "sha256": "2349fb86674d9c8bf08065a060f599cfcf85220dfb4509ccbc424912a826295a",
+        "flags": "2234402",
+        "streams": [
+          3,
+          17,
+          4,
+          13,
+          9,
+          16,
+          6,
+          7,
+          15,
+          21,
+          22,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fullMemory": true
+      },
+      {
+        "path": "C:/xMindNativeValidation/heap-capture-control-20261021/dumps/fixture-32244-659650328-fatal.dmp",
+        "bytes": 28337220,
+        "sha256": "07a6ac4f91956ce3d84a3d4d261f002bca50bb84652cc9735b130c5f4d61a6ac",
+        "flags": "2234402",
+        "streams": [
+          3,
+          17,
+          4,
+          14,
+          13,
+          9,
+          16,
+          6,
+          7,
+          15,
+          21,
+          22,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fullMemory": true
+      }
+    ],
+    "scope": "Controlled RaiseException(0xC0000374), not actual heap corruption or product reproduction",
+    "passed": true
+  },
+  "dumps": [
+    {
+      "path": "C:/xMindNativeValidation/process-xmind-native-heap-dumps-20261021/fixture-21836-659566703-slow.dmp",
+      "bytes": 295051,
+      "sha256": "9ce9e98bfc4882e7008315a18db7db39f1a1574d5d9d2695d1dfccf126354512"
+    }
+  ],
+  "change": "Test-only opt-in heap-corruption dumps include full memory/full memory info/unloaded modules; slow observations remain small. Atomic writer guard prevents concurrent/recursive DbgHelp writers. Failure status and assertion/time budgets are unchanged.",
+  "controlledCheck": "Isolated process with restricted environment and error dialogs suppressed raises noncontinuable 0xC0000374. Natural failure exit preserved and both dump headers/streams verify full memory. This is not actual heap corruption or product reproduction.",
+  "binaryComparison": {
+    "changed": [
+      "agentflow_agent_worker_graph_remote_contract.exe",
+      "agentflow_agent_worker_model_rpc_contract.exe"
+    ],
+    "unchangedCount": 136,
+    "productAndSdkUnchanged": true
+  },
+  "remaining": "Actual product heap corruption did not recur in this gate; root cause remains unproven. Native planning production continuation/scheduler/pause integration, legacy fixture cleanup, full current native suite and updated installed acceptance remain unfinished.",
+  "externalClosure": "C:/xMindNativeValidation/process-xmind-native-heap-diagnostics-20261021/inputs-before-build.json",
+  "externalBinaryInventory": "C:/xMindNativeValidation/process-xmind-native-heap-diagnostics-20261021/binaries-before-test.json"
+}

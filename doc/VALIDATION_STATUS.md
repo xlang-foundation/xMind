@@ -1,3 +1,20 @@
+## Heap-failure diagnostics strengthened — 2026-10-21
+
+Test-only opt-in 0xC0000374 dumps now capture full memory, memory information
+and unloaded modules. Slow observations remain small; an atomic guard prevents
+concurrent/recursive DbgHelp writers. Deadlines, assertions and failure exits
+are unchanged. A restricted isolated control raises that exception code: exit
+0xC0000374 is preserved, and both dump headers/streams verify full memory.
+This validates capture only; it is not actual corruption or a product repro.
+
+Frozen compatibility gate passes 20/20 in 135.16s. Only the model-worker and
+graph-remote contract binaries change; product a5711613 and SDK 1ff2a8e7 plus
+136 other observed binaries remain identical. All 2783 source inputs and 138
+binaries remain frozen around the gate. The actual heap failure did not recur.
+Root cause remains open; nothing installed or replayed. Full suite, production
+planning integration and installed product acceptance remain unfinished.
+[Exact gate, controlled capture and limitations](evidence/process-xmind-root-native-heap-diagnostics-checkpoint-20261021.json).
+
 ## SDK concurrency diagnostics — 2026-10-21
 
 Standalone same-process loopback probe failed: 3000/8000 iterations, five SDK

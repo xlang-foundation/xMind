@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.24)
+project(xmind_heap_capture_control LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(heap_capture main.cpp)
+target_include_directories(heap_capture PRIVATE "D:/CantorAI2026/xMind/Native/tests")

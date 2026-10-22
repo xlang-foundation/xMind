@@ -1,0 +1,64 @@
+{
+  "startedAt": "2026-10-22T01:46:09.457Z",
+  "completedAt": "2026-10-22T01:46:09.796Z",
+  "pid": 32244,
+  "exitCode": 3221226356,
+  "signal": null,
+  "imageSha256": "c29c7f74375eb1e3a60f2d9fe9e2a6132c1ca468bddf68f11ed006a88e94e2d6",
+  "imageUnchanged": true,
+  "allInputsUnchanged": true,
+  "logSha256": "dce120cdbd055625bc72d8bf1fe86bd2b7dd3a181fa83623ee980fb6350a5402",
+  "dumps": [
+    {
+      "path": "C:/xMindNativeValidation/heap-capture-control-20261021/dumps/fixture-32244-659650187-fatal.dmp",
+      "bytes": 28267944,
+      "sha256": "2349fb86674d9c8bf08065a060f599cfcf85220dfb4509ccbc424912a826295a",
+      "flags": "2234402",
+      "streams": [
+        3,
+        17,
+        4,
+        13,
+        9,
+        16,
+        6,
+        7,
+        15,
+        21,
+        22,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fullMemory": true
+    },
+    {
+      "path": "C:/xMindNativeValidation/heap-capture-control-20261021/dumps/fixture-32244-659650328-fatal.dmp",
+      "bytes": 28337220,
+      "sha256": "07a6ac4f91956ce3d84a3d4d261f002bca50bb84652cc9735b130c5f4d61a6ac",
+      "flags": "2234402",
+      "streams": [
+        3,
+        17,
+        4,
+        14,
+        13,
+        9,
+        16,
+        6,
+        7,
+        15,
+        21,
+        22,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fullMemory": true
+    }
+  ],
+  "scope": "Controlled RaiseException(0xC0000374), not actual heap corruption or product reproduction",
+  "passed": true
+}
