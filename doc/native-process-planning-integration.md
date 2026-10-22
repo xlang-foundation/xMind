@@ -23,10 +23,12 @@ Retirement invalidates access, cancels/joins work, then releases services.
 
 ## Admission and initial context
 
-AgentWorkerReadContext currently admits ordinary/context/delegation policies;
-AgentWorkerContextWindow additionally admits graph children. OrdinaryJournal
-and execute_workspace_root also reject dynamic roots. These are separate
-checks, not one flag to remove. Introduce a distinct captured planning admission
+AgentWorkerReadContext currently restricts its tool catalogue to read/guidance
+and captured delegation tools; it does not admit planning tools.
+AgentWorkerContextWindow restricts root policies to context/delegation and
+additionally admits graph children. OrdinaryJournal rejects dynamic roots;
+execute_workspace_root assembles an ordinary runner without planning ports.
+These are separate checks, not one flag to remove. Introduce a distinct captured planning admission
 for the exact native.dynamic-plan root. It requires finalized capabilities,
 provider identity, current lease, matching workspace revision and the root's
 active budget segment/backend identity. Child journal admission remains based
