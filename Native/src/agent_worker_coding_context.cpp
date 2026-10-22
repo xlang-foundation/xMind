@@ -93,26 +93,23 @@ AgentWorkerRpcHandler AgentWorkerCodingContext::bind_processes(const AgentWorker
         catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const ProcessOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
     };
 }
+AgentRemoteToolResult AgentWorkerCodingContext::invoke(const AgentRemoteToolInvocation& call,std::stop_token cancel){
+    std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);
+    if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Remote call lacks its actually admitted guidance window");if(!remotes_)throw Conflict("Coding remote capability unavailable");
+    const auto result=remotes_->invoke(call,cancel);if(!result.success){const auto output=nlohmann::json::parse(result.output_json);if(output.contains("error")&&output.at("error").value("code",std::string{})=="remote_catalogue_changed")remote_catalogue_invalidated_=true;}return result;
+}
 AgentWorkerRpcHandler AgentWorkerCodingContext::bind_remotes(const AgentWorkerScope& scope){
     if(!remotes_)return [](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw AgentWorkerRpcRemoteError("unsupported");};
-    auto dispatch=bind_agent_worker_remote_rpc(*remotes_,scope);
-    return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
-        if(method!="remote.invoke")return dispatch(method,payload,std::move(sink),cancel);
-        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);const auto call=AgentRemoteToolInvocation::parse(payload);if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Remote call lacks its actually admitted guidance window");const auto result=dispatch(method,payload,std::move(sink),cancel);const auto value=nlohmann::json::parse(result);if(!value.at("success").get<bool>()){const auto output=nlohmann::json::parse(value.at("output_json").get<std::string>());if(output.contains("error")&&output.at("error").value("code",std::string{})=="remote_catalogue_changed")remote_catalogue_invalidated_=true;}return result;}
-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const nlohmann::json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
-    };
+    return bind_agent_worker_remote_rpc(*this,files_->lease(),scope);
 }
 
-AgentWorkerRpcHandler AgentWorkerCodingContext::bind_callables(const AgentWorkerScope& scope){
-    if(!callables_)return [](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{if(method=="callable.catalogue"&&payload=="{}")return "[]";throw AgentWorkerRpcRemoteError("unsupported");};
-    auto dispatch=bind_agent_worker_callable_rpc(*callables_,scope);return [this,dispatch=std::move(dispatch)](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
-        try{std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);if(method=="callable.invoke"&&AgentCallableInvocation::parse(payload).attempt_id!=reads_.admitted_attempt_)throw Conflict("Callable lacks its actually admitted guidance window");return dispatch(method,payload,std::move(sink),cancel);}
-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
-    };
+AgentCallableToolResult AgentWorkerCodingContext::invoke(const AgentCallableInvocation& call,std::stop_token cancel){
+    std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);
+    if(call.attempt_id!=reads_.admitted_attempt_)throw Conflict("Callable lacks its actually admitted guidance window");if(!callables_)throw Conflict("Coding callable capability unavailable");return callables_->invoke(call,cancel);
 }
+std::vector<std::string> AgentWorkerCodingContext::tool_names(std::stop_token cancel){
+    std::unique_lock lock(reads_.mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Coding workspace is busy");reads_.check(cancel);return callables_?callables_->tool_names(cancel):std::vector<std::string>{};
+}
+AgentWorkerRpcHandler AgentWorkerCodingContext::bind_callables(const AgentWorkerScope& scope){return bind_agent_worker_callable_rpc(*this,files_->lease(),scope);}
 
 }

@@ -1,4 +1,5 @@
 #include "agentflow/agent_worker_remote_rpc.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/mcp_tool_registry.hpp"
 #include "agentflow/a2a_tool_registry.hpp"
@@ -6,8 +7,10 @@
 namespace agentflow {
 using Json=nlohmann::json;
 AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost& host,const AgentWorkerScope& scope){
-    const auto& lease=host.lease();
-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
+    return bind_agent_worker_remote_rpc(host,host.lease(),scope);
+}
+AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Remote RPC channel differs from captured lease");
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
         if(method!="remote.invoke")throw AgentWorkerRpcRemoteError("unsupported");
         try{const auto call=AgentRemoteToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
@@ -27,6 +30,7 @@ AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost& host,c
     };
 }
 AgentRemoteToolResult AgentWorkerRemoteClient::invoke(const AgentRemoteToolInvocation& call,std::stop_token cancel){
+    if(auto native=peer_.native_model())return native->remote_invoke(call,cancel);
     try{const auto bytes=peer_.call("remote.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
         if(value.size()!=2||!value.at("success").is_boolean()||!value.at("output_json").is_string())throw ModelProtocolError("Invalid worker remote result");
         return {value.at("success").get<bool>(),value.at("output_json").get<std::string>()};}

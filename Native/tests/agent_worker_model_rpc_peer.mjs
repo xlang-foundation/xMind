@@ -244,7 +244,11 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 try{
  const result={stdout:""};
  for(const phase of ["transport","production"]){
-  const part=await promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`,phase],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024}).catch(error=>{if(error.stdout)process.stdout.write(error.stdout);if(error.stderr)process.stderr.write(error.stderr);if(failure)throw failure;throw error;});
+  const started=performance.now(),timing=[];
+  const pending=promisify(execFile)(executable,[modules,stdlib,`http://127.0.0.1:${server.address().port}`,phase],{env:{...process.env,XMIND_WORKER_LSP_NODE:process.execPath,XMIND_WORKER_LSP_PEER:fileURLToPath(new URL("./language_server_diagnostics_peer.mjs",import.meta.url))},windowsHide:true,timeout:60000,maxBuffer:2*1024*1024});
+  if(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR)pending.child.stdout.on('data',bytes=>timing.push({elapsedMs:performance.now()-started,text:bytes.toString()}));
+  let part;try{part=await pending.catch(error=>{if(error.stdout)process.stdout.write(error.stdout);if(error.stderr)process.stderr.write(error.stderr);if(failure)throw failure;throw error;});}
+  finally{if(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR)writeFileSync(join(process.env.XMIND_WORKER_FIXTURE_TIMING_DIR,phase+'-'+process.pid+'.json'),JSON.stringify({phase,pid:pending.child.pid,elapsedMs:performance.now()-started,timing},null,2)+'\n',{flag:'wx'});}
   result.stdout+=part.stdout;
  }
  if(failure)throw failure;assert.deepEqual(counts,expected);assert.ok(aborted.has('parent-child-left')&&aborted.has('parent-child-right'));assert.ok(aborted.has("worker_context_count_cancel")&&aborted.has("worker_context_inference_cancel")&&aborted.has("worker_context_compact_cancel"));assert.ok(aborted.has('cancel')&&aborted.has('crash')&&aborted.has('runner_cancel')&&aborted.has('product_supervised_cancel')&&aborted.has('product_factory_profile_cancel'));

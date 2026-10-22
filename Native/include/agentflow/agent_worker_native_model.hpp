@@ -3,6 +3,8 @@
 #include "agentflow/agent_read_tool_host.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
 #include "agentflow/agent_worker_process_service.hpp"
+#include "agentflow/agent_remote_tool_host.hpp"
+#include "agentflow/agent_worker_callable_service.hpp"
 #include "xlang3/xlang3.h"
 #include <memory>
 namespace agentflow {
@@ -11,7 +13,7 @@ struct NativeWorkerModelState;
 struct NativeWorkerModelAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 class NativeWorkerModelBinding final {
 public:
-    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr,AgentWorkerProcessService* processes=nullptr);
+    explicit NativeWorkerModelBinding(AgentWorkerModelHost&,AgentWorkerJournalHost* journal=nullptr,AgentReadToolHost* reads=nullptr,AgentFileToolHost* files=nullptr,AgentWorkerProcessService* processes=nullptr,AgentRemoteToolHost* remotes=nullptr,AgentWorkerCallableService* callables=nullptr);
     ~NativeWorkerModelBinding();
     NativeWorkerModelBinding(const NativeWorkerModelBinding&)=delete;
     NativeWorkerModelBinding& operator=(const NativeWorkerModelBinding&)=delete;
@@ -109,6 +111,26 @@ struct NativeWorkerProcessApi {
         APISET().AddFunc<1>("Join",&NativeWorkerProcessApi::Join);
     END_PACKAGE
 };
+struct NativeWorkerRemoteApi {
+    std::shared_ptr<NativeWorkerModelState> state;
+    NativeWorkerRemoteApi()=default;
+    explicit NativeWorkerRemoteApi(NativeWorkerApi*);
+    X::Value Invoke(X::Value invocation);
+    BEGIN_PACKAGE(NativeWorkerRemoteApi)
+        APISET().AddFunc<1>("Invoke",&NativeWorkerRemoteApi::Invoke,X3_NATIVE_IPC_ARGS_BY_VALUE);
+    END_PACKAGE
+};
+struct NativeWorkerCallableApi {
+    std::shared_ptr<NativeWorkerModelState> state;
+    NativeWorkerCallableApi()=default;
+    explicit NativeWorkerCallableApi(NativeWorkerApi*);
+    X::Value Invoke(X::Value invocation);
+    X::Value Catalogue();
+    BEGIN_PACKAGE(NativeWorkerCallableApi)
+        APISET().AddFunc<1>("Invoke",&NativeWorkerCallableApi::Invoke,X3_NATIVE_IPC_ARGS_BY_VALUE);
+        APISET().AddFunc<0>("Catalogue",&NativeWorkerCallableApi::Catalogue);
+    END_PACKAGE
+};
 struct NativeWorkerApi {
     std::shared_ptr<NativeWorkerModelState> state;
     NativeWorkerApi()=default;
@@ -118,6 +140,8 @@ struct NativeWorkerApi {
     X::Value Reads();
     X::Value Files();
     X::Value Processes();
+    X::Value Remotes();
+    X::Value Callables();
     X::Value Identity();
     BEGIN_PACKAGE(NativeWorkerApi)
         APISET().AddFunc<0>("Identity",&NativeWorkerApi::Identity);
@@ -126,6 +150,8 @@ struct NativeWorkerApi {
         APISET().AddFunc<0>("Reads",&NativeWorkerApi::Reads);
         APISET().AddFunc<0>("Files",&NativeWorkerApi::Files);
         APISET().AddFunc<0>("Processes",&NativeWorkerApi::Processes);
+        APISET().AddFunc<0>("Remotes",&NativeWorkerApi::Remotes);
+        APISET().AddFunc<0>("Callables",&NativeWorkerApi::Callables);
     END_PACKAGE
 };
 struct NativeWorkersApi {
@@ -143,6 +169,9 @@ public:
     ModelRequest prepare_request(std::stop_token={});
     ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
     ModelCompletion complete(const std::string&,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
+    AgentCallableToolResult callable_invoke(const AgentCallableInvocation&,std::stop_token={});
+    std::vector<std::string> callable_names(std::stop_token={});
+    AgentRemoteToolResult remote_invoke(const AgentRemoteToolInvocation&,std::stop_token={});
     AgentProcessToolResult process_invoke(const AgentProcessToolInvocation&,std::stop_token={});
     bool process_join(const std::string& attempt,std::stop_token={});
     AgentFileToolResult file_invoke(const AgentFileToolInvocation&,std::stop_token={});

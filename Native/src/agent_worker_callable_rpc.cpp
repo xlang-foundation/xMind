@@ -1,15 +1,17 @@
 #include "agentflow/agent_worker_callable_rpc.hpp"
+#include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "nlohmann/json.hpp"
 namespace agentflow {
 using Json=nlohmann::json;
 AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& host,const AgentWorkerScope& scope){
-    const auto& lease=host.lease();
-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
+    return bind_agent_worker_callable_rpc(host,host.lease(),scope);
+}
+AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableService& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Callable RPC channel differs from captured lease");
     return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
-        if(method=="callable.catalogue"){if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");return Json(host.tool_names()).dump();}
-        if(method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
-        try{const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+        if(method!="callable.catalogue"&&method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+        try{if(method=="callable.catalogue"){if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");return Json(host.tool_names(cancel)).dump();}const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
         catch(const AgentWorkerCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
         catch(const AgentCallableEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
         catch(const AgentCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
@@ -24,6 +26,7 @@ AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& ho
     };
 }
 AgentCallableToolResult AgentWorkerCallableClient::invoke(const AgentCallableInvocation& call,std::stop_token cancel){
+    if(auto native=peer_.native_model())return native->callable_invoke(call,cancel);
     try{const auto bytes=peer_.call("callable.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
         if(value.size()!=2||!value.at("success").is_boolean()||!value.at("output_json").is_string())throw ModelProtocolError("Invalid worker callable result");
         return {value.at("success").get<bool>(),value.at("output_json").get<std::string>()};}

@@ -1,3 +1,44 @@
+## Native remote/callable SDK checkpoint — 2026-10-21
+
+Product workers use Remotes().Invoke and Callables().Invoke/Catalogue through
+SDK values and native operation objects. Typed coding-context methods retain
+admitted guidance, MCP/A2A registries and catalogue invalidation, callable
+bindings, approvals and durable receipts. All migrated capability packet
+handlers are discarded/refused after native access. Controlled legacy fixtures
+delegate those same typed methods. Execution control and final removal of the
+obsolete packet implementation remain open. Explicit unrecorded/uncertain
+outcomes preserve supervisor recovery and no-replay behavior.
+
+The combined frozen gate passes 18/18 focused checks in 133.56s, with exactly
+219 independent peer requests including callable aliases/arrays/approval/
+cancellation, MCP/A2A effects, catalogue refresh and graph paths. All 2778
+project inputs and 136 native binaries remain frozen with SDK/libraries/
+dependencies. Native executable eed306cc; SDK DLL 1ff2a8e7. Nothing installed.
+
+Earlier remote 17/18 process-limit failures and the separate 1/1 timing
+diagnostic remain preserved below. They were not combined into this pass.
+Timing margin, heap corruption and SDK access violation remain unresolved.
+Full current native and installed product acceptance remain open.
+[Combined gate and limitations](evidence/process-xmind-root-native-remote-callable-checkpoint-20261021.json).
+
+## Native remote SDK migration in progress — 2026-10-21
+
+Uncommitted/uninstalled: Remotes().Invoke delegates typed backend coding context
+through SDK values, retaining admitted guidance, catalogue invalidation, MCP/A2A
+authority and durable effects. Product owners discard/refuse remote packets.
+Unrecorded/uncertain outcomes retain no-replay handling. Event handles resolve
+on demand while event-count/order/delivery checks remain unchanged.
+
+Two frozen 18-check gates each pass 17/18 but hit the unchanged 60-second
+production process limit near final legacy process cases. A timing diagnostic
+passes the full broad contract (1/1), with exactly 219 requests. These results
+are not combined into an 18/18 pass. Production took 59.234s; process exited
+12ms after final output. This observed run points to cumulative execution time,
+with only 766ms margin. No timing fix is established. Gates and traces remain
+preserved. Current migration needs further verification. Prior heap corruption
+and SDK access violation remain open.
+[Raw gates and timing traces](evidence/process-xmind-root-native-remote-migration-20261021.json).
+
 ## Native process SDK method checkpoint — 2026-10-21
 
 Coding workers invoke Processes().Invoke(invocation) and Processes().Join(attempt)
