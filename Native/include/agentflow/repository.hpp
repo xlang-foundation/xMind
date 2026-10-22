@@ -204,6 +204,7 @@ public:
     Run terminate_agent_worker(const AgentWorkerLeaseSpec&,RunState outcome,const std::string& reason);
     AgentWorkerPlanningClaimRecord claim_agent_worker_planning(const AgentWorkerLeaseSpec&,const std::string& attempt,const std::string& call);
     AgentWorkerPlanningClaimRecord agent_worker_planning_claim(const std::string& root,const std::string& attempt);
+    std::string commit_agent_worker_plan_inspection(const AgentWorkerLeaseSpec&,const std::string& attempt);
     AgentWorkerModelClaimRecord claim_agent_worker_model(const AgentWorkerModelClaimSpec&);
     AgentWorkerModelClaimRecord interrupt_agent_worker_model(const AgentWorkerModelClaimSpec&,AgentWorkerModelFailure=AgentWorkerModelFailure::unknown);
     AgentWorkerModelClaimRecord agent_worker_model_claim(const std::string& root,const std::string& attempt);

@@ -1,3 +1,28 @@
+## Worker plan inspection settlement — 2026-10-21
+
+Added a typed backend inspection commit under the exact current worker lease,
+latest retired planning attempt, finalized capabilities and active segment. It
+derives the native plan report, commits canonical assistant/tool history and
+completion/marker events, and changes entered to inspected atomically. Repeated
+observation returns the committed report without new history/events or budget
+changes. Inspected claims are checked against their canonical report/completion
+and satisfy the next-model tool-turn gate; retirement preserves the settlement.
+
+Focused 20/20 passed in 123.96 seconds (ledger 2.36; broad worker 57.08). Serial
+build passed after 1094.51 seconds. Source patch
+e0a66f0e9c09f820f7ff541908d83232d6c05ab7544c411ed8e731744ab6d954; native
+c8550bdb21a91460ddd99307273d02f426e06bef4ead139b321977826172f591.
+Frozen source, SDK, dependency and 138 binary file sets/hashes all verified.
+Evidence: doc/evidence/process-xmind-root-native-planning-inspection-20261021-gate.json.
+
+The new ledger case uses synthetic process/model identities and no-plan report,
+actual embedded-xlang3 SQLite, forced SQL rollback, altered report detection,
+foreign/stale lease refusal and cancelled/expired request checks. This does not
+prove cross-process inspection, a report for an existing plan, production owner
+assembly, token counting/overflow or installed clients. Those remain open. The
+existing SDK/worker contracts passed separately in the same focused gate; full
+169 suite was not rerun and SDK/runtime/installed package remain unchanged.
+
 ## Worker planning context preparation — 2026-10-21
 
 AgentWorkerContextWindow now accepts the exact shared dynamic root budget and

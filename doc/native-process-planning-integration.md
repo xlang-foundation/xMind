@@ -49,6 +49,14 @@ execution commits the signed conversation turn before continuation funding.
 Uncertain or entered calls cannot fund another model. Rejection commits its
 canonical rejected tool turn; it is not an accepted plan reservation.
 
+The backend now has commit_agent_worker_plan_inspection: exact lease/attempt
+authority derives and atomically commits a native report and inspected claim,
+without changing budget holds. Duplicate observation reuses the committed
+report. The no-plan case, rollback and stale/corrupt record refusals are covered
+by the ledger; existing-plan and cross-process inspection coverage and owner
+wiring remain required. This operation must be called by the captured native
+planning owner, never supplied an authoritative report by the worker.
+
 ContextManager already uses ContextOwner.planning_call_id and
 RootExecutionBudget.reserve_continuation for signed planning preparations.
 The shared budget now accepts a backend-only ContinuationReserve function.
