@@ -1,3 +1,36 @@
+## Captured backend planning callbacks — 2026-10-21
+
+Added make_agent_worker_planning_callbacks for the existing native Planning
+service. It retains frozen settings, capabilities, shared budget, guidance and
+executor; revalidates exact lease/segment/deadline and credential metadata
+authority; and resolves actual call/assistant facts from the durable model
+receipt. Inspection uses the typed backend commit. Plan/revise calls delegate
+to the captured DynamicPlanExecution port; bounded rejection commits its
+canonical turn before returning. Resume requires the exact current generation
+and accepted call. Cross-generation human resume remains unassembled.
+
+Focused 20/20 passed in 124.35 seconds (ledger 2.51; broad worker 57.78). A
+distinct SDK child invokes inspection through captured callbacks while passing
+forged tool name/settings/assistant/capabilities to the client adapter. Only
+stored inspection facts reach the backend operation; the native report commits
+with no budget change. Changed backend settings and retired lease are refused.
+A controlled execution port verifies canonical assistant/settings forwarding
+and durable bounded rejection; it does not prove accepted scheduler execution.
+
+Source patch b5ff1986ac8c699ec1de7fe32a5c163c8c247a6d618d979914813617d8e0b367;
+native SHA 1f4071d7d293a52f992943c46b8be2dea33e79278f5aeea40e941c9b4006069d.
+2786 source inputs, SDK, libraries, dependencies and 138 native binary file
+sets/hashes verified unchanged around validation. Evidence:
+doc/evidence/process-xmind-root-native-planning-owner-20261021-gate.json.
+
+This is backend callback implementation and distinct-process inspection with
+synthetic model/lease facts. Main WorkspaceExecutor/supervisor/worker runner
+construction does not yet instantiate these callbacks. Accepted plan execution
+through actual worker children, public planning admission/journal projections,
+token-count/overflow/compaction, human handoff and final client verification
+remain open. No new packet route, SDK change, full 169 suite, installation,
+live provider replay or CPython execution.
+
 ## Worker plan inspection settlement — 2026-10-21
 
 Added a typed backend inspection commit under the exact current worker lease,

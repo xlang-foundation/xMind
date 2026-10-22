@@ -241,6 +241,7 @@ add_library(agentflow_agent STATIC src/agent_worker_journal_host.cpp src/agent_w
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_entry.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp src/agent_worker_coding_owner.cpp src/agent_worker_coding_context.cpp src/agent_worker_context_window.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_control.cpp)
+  target_sources(agentflow_worker_runner PRIVATE src/agent_worker_planning_owner.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_supervisor.cpp)
   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_executor.cpp)
   target_include_directories(agentflow_worker_runner PUBLIC include PRIVATE third_party)

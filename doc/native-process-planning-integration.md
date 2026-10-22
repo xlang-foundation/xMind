@@ -86,8 +86,12 @@ required by AgentRunner's dynamic path. Canonical assistant, tool turn, budget
 and pause facts come from the backend. The native planning client identifies
 facts; it cannot supply authority-bearing capabilities or settings.
 
-Wire NativePlanningCallbacks to the backend DynamicPlanExecutor using captured
-admission. Its agent nodes must dispatch through the existing process supervisor
+make_agent_worker_planning_callbacks now resolves stored model/call facts
+under captured admission and delegates plan/revise execution to the retained
+DynamicPlanExecution port. Its distinct SDK inspection and controlled rejection
+paths are verified. Main owner/runner construction still needs to instantiate
+it with the backend DynamicPlanExecutor. Its agent nodes must dispatch through
+the existing process supervisor
 and capacity owner, not local AgentRunner instances. Deterministic tools continue
 through backend effect/permission owners. A completed durable node does not free
 physical process capacity until its exact process has drained. Cancellation or
