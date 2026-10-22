@@ -1,3 +1,35 @@
+## Standard web UI reopening and saved configuration — 2026-10-22
+
+The user confirmed cleanup is running under C:/xMindNativeValidation and chose
+to continue cleanup/use a separate UI. Browser60/CLI60 temporary data became
+unavailable; no restoration or replay is claimed. A read-only preservation copy
+of 301 remaining user-profile files is under D:/xMindRecovery20261022, with a
+hash manifest. It is not a verified transactional SQLite backup. The proposed
+D:/xMindData directory was not created; the user prefers standard locations
+and no new ad hoc data folders.
+
+The standard browser launcher first refused changed workspace configuration.
+A new --config-mode saved uses recorded profile configuration instead of
+automatically applying workspace YAML/JSON paths. Conflicting explicit paths
+refuse before launch. Default workspace discovery remains unchanged.
+Saved mode exposed a stopped older backend runtime rejecting current launch
+arguments. New --upgrade-backend true forwards the existing native view upgrade
+path; attachment to an external backend cannot request it. Default remains
+false. No native upgrade or ownership protections are bypassed.
+
+The installed60 runtime now serves http://127.0.0.1:60405/ui/ using the existing
+C:/Users/shaw9/.xMind/p profile and LocalAppData/xMind/BrowserView state. Page
+HTTP 200 and authenticated native session-list access pass, returning 16
+sessions. The observer's browser-access session was disconnected afterward.
+Seven launcher/build/lifecycle tests pass. Evidence: browser-saved-config-launcher-20261022-*
+under doc/evidence. This is HTTP/API availability, not rendered external-browser
+acceptance. External browser opening was policy-blocked; Chrome control was
+unavailable. No model inference/task submission occurred.
+
+User preference: routine development uses synthetic fixtures, with live
+OpenAI/Claude calls limited to essential end-to-end checks. This does not limit
+the user's own model usage in the web UI.
+
 ## Production xmind planning parent and children — 2026-10-22
 
 The six scheduler cases now launch the parent through AgentWorkerSupervisor

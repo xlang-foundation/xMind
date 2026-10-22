@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-22T07:56:10.6460697Z",
+  "url": "http://127.0.0.1:60405/ui/",
+  "httpStatus": 200,
+  "authenticated": true,
+  "sessionCount": 16,
+  "scope": "HTTP page and native session-list read through saved standard profile; no rendered external-browser claim",
+  "modelRequests": 0,
+  "profileRoot": "C:/Users/shaw9/.xMind/p",
+  "stateDirectory": "C:\\Users\\shaw9\\AppData\\Local\\xMind\\BrowserView"
+}

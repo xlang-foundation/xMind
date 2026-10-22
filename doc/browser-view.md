@@ -165,6 +165,17 @@ node Tools/start-browser.mjs --runtime D:\path\to\verified\native-runtime --port
 
 The runtime must be verified and contain the same `xmind.exe` as the current native build; the launcher rejects stale packages. It starts `xmind view` with the shared local profile root and a protected native ready file, then attaches the HTML adapter to that profile-aware host. Do not point `--backend` at generic `xmind serve` when workspace selection is expected. To attach the adapter to a view host already running, pass that host's loopback origin with `--backend`.
 
+To reopen an existing profile using its recorded configuration, add
+`--config-mode saved`. This skips automatic discovery of workspace provider,
+language-server, process and MCP configuration files. Explicit replacement
+configuration paths are refused in this mode. The default `workspace` mode
+retains the existing discovery behavior.
+
+To explicitly update the managed backend runtime while retaining that profile,
+add `--upgrade-backend true`. This uses the native owner's existing upgrade and
+busy-owner protections. Merely attaching with `--backend` cannot request an
+upgrade. Normal launches default to `--upgrade-backend false`.
+
 Launching again with the same state and matching asset directory rebuilds the
 generated UI files, then reuses the existing browser host and URL. Reload that
 page to load its new validated snapshot. This does not restart the native

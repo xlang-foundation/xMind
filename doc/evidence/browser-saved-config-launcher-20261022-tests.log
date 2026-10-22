@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: saved browser configuration refuses replacement paths and invalid upgrade requests before launch
+ok 1 - saved browser configuration refuses replacement paths and invalid upgrade requests before launch
+  ---
+  duration_ms: 310.7013
+  type: 'test'
+  ...
+# Subtest: browser launcher serves current workspace actions from freshly built assets
+ok 2 - browser launcher serves current workspace actions from freshly built assets
+  ---
+  duration_ms: 2189.8275
+  type: 'test'
+  ...
+# Subtest: browser host unavailable observation preserves its record instead of declaring it stopped
+ok 3 - browser host unavailable observation preserves its record instead of declaring it stopped
+  ---
+  duration_ms: 57.1035
+  type: 'test'
+  ...
+# Subtest: browser host timeout observation preserves its record instead of declaring it stopped
+ok 4 - browser host timeout observation preserves its record instead of declaring it stopped
+  ---
+  duration_ms: 1219.7938
+  type: 'test'
+  ...
+# Subtest: a closed browser endpoint permits a new attachment without deleting saved metadata
+ok 5 - a closed browser endpoint permits a new attachment without deleting saved metadata
+  ---
+  duration_ms: 9.9238
+  type: 'test'
+  ...
+# Subtest: browser launcher shutdown closes its adapter and owned native view and retires its own local credentials
+ok 6 - browser launcher shutdown closes its adapter and owned native view and retires its own local credentials
+  ---
+  duration_ms: 7.8939
+  type: 'test'
+  ...
+# Subtest: an attached browser adapter shutdown leaves its shared backend and other launch metadata alone
+ok 7 - an attached browser adapter shutdown leaves its shared backend and other launch metadata alone
+  ---
+  duration_ms: 5.0432
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2559.4127

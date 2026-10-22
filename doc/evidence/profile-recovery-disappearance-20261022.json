@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-22T07:48:41.0646589Z",
+  "browserProfileExists": false,
+  "browserDatabaseExists": false,
+  "cli60DirectoryExists": false,
+  "reviewPage": "http://127.0.0.1:50269/ui/",
+  "sourceHead": "47cead8f165d9843846cbbe2a639d610aaded194",
+  "cause": "Unknown; no deletion attributed",
+  "userConfirmedCleanupRunning": true,
+  "userRequestedSeparateUIWhileCleanupContinues": true
+}

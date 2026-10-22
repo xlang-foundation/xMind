@@ -13,10 +13,16 @@ import {createBrowserHostLifecycle,findExistingBrowserHost} from './browser-host
 const root=fileURLToPath(new URL('../',import.meta.url));
 const options=new Map();
 for(let i=2;i<process.argv.length;i+=2){
-  if(!['--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config','--graphs-config','--language-server-config','--process-config','--mcp-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
+  if(!['--upgrade-backend','--config-mode','--backend','--state','--assets','--runtime','--built-server','--workspace','--profile-root','--ready-root','--port','--provider-config','--graphs-config','--language-server-config','--process-config','--mcp-config'].includes(process.argv[i])||!process.argv[i+1]||options.has(process.argv[i]))throw new Error('Invalid browser launcher arguments');
   options.set(process.argv[i],process.argv[i+1]);
 }
 if(options.has('--backend')&&['--runtime','--built-server','--workspace','--profile-root','--ready-root','--provider-config','--graphs-config','--language-server-config','--process-config','--mcp-config'].some(name=>options.has(name)))throw new Error('--backend cannot be combined with native profile launch options');
+const upgradeBackend=options.get('--upgrade-backend')||'false';
+if(!['true','false'].includes(upgradeBackend))throw new Error('--upgrade-backend requires true or false');
+if(options.has('--backend')&&upgradeBackend==='true')throw new Error('Backend attachment cannot upgrade a native profile');
+const configMode=options.get('--config-mode')||'workspace';
+if(!['saved','workspace'].includes(configMode))throw new Error('--config-mode requires saved or workspace');
+if(configMode==='saved'&&['--provider-config','--graphs-config','--language-server-config','--process-config','--mcp-config'].some(name=>options.has(name)))throw new Error('Saved configuration mode cannot replace profile configuration');
 const env=process.env;
 const localAppData=env.LOCALAPPDATA||join(env.USERPROFILE||root,'AppData','Local');
 const state=resolve(options.get('--state')||join(localAppData,'xMind','BrowserView'));
@@ -76,19 +82,20 @@ if(!backend){
   localAccessToken=token;
   const runtimeRoot=verified.runtimeRoot;
   const args=['view','--workspace',workspace,'--profile-root',profileRoot,'--ready-file',readyFile];
+  if(upgradeBackend==='true')args.push('--upgrade-backend');
   let providerConfig=options.get('--provider-config');
-  if(!providerConfig){const candidate=join(root,'.config','providers.yaml');try{if((await stat(candidate)).isFile())providerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(configMode==='workspace'&&!providerConfig){const candidate=join(root,'.config','providers.yaml');try{if((await stat(candidate)).isFile())providerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(providerConfig)args.push('--trusted-provider-config',resolve(providerConfig));
   const graphsConfig=options.get('--graphs-config');
   if(graphsConfig)args.push('--graphs-config',resolve(graphsConfig));
   languageServerConfig=options.get('--language-server-config');
-  if(!languageServerConfig){const candidate=join(root,'.config','language-servers.yaml');try{if((await stat(candidate)).isFile())languageServerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(configMode==='workspace'&&!languageServerConfig){const candidate=join(root,'.config','language-servers.yaml');try{if((await stat(candidate)).isFile())languageServerConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(languageServerConfig){languageServerConfig=resolve(languageServerConfig);args.push('--language-server-config',languageServerConfig);}
   processConfig=options.get('--process-config');
-  if(!processConfig){const candidate=join(root,'.config','processes.yaml');try{if((await stat(candidate)).isFile())processConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(configMode==='workspace'&&!processConfig){const candidate=join(root,'.config','processes.yaml');try{if((await stat(candidate)).isFile())processConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(processConfig){processConfig=resolve(processConfig);args.push('--process-config',processConfig);}
   mcpConfig=options.get('--mcp-config');
-  if(!mcpConfig){const candidate=join(root,'.config','mcp.json');try{if((await stat(candidate)).isFile())mcpConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
+  if(configMode==='workspace'&&!mcpConfig){const candidate=join(root,'.config','mcp.json');try{if((await stat(candidate)).isFile())mcpConfig=candidate;}catch(error){if(error.code!=='ENOENT')throw error;}}
   if(mcpConfig){mcpConfig=resolve(mcpConfig);args.push('--mcp-config',mcpConfig);}
   const childEnv={...env,XMIND_VIEW_TOKEN:token};
   for(const key of Object.keys(childEnv))if(key.startsWith('XMIND_UI_')||key==='XMIND_API_KEY'||key==='XMIND_AUTH_TOKEN')delete childEnv[key];

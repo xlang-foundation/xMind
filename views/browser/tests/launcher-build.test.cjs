@@ -6,6 +6,21 @@ const {mkdtemp,readFile,writeFile,mkdir,rm}=require('node:fs/promises');
 const {tmpdir}=require('node:os');
 const {join,resolve}=require('node:path');
 
+test('saved browser configuration refuses replacement paths and invalid upgrade requests before launch',async()=>{
+  const script=resolve(__dirname,'../../../Tools/start-browser.mjs');
+  for(const [args,message] of [
+    [['--config-mode','saved','--language-server-config','replacement.yaml'],/Saved configuration mode cannot replace profile configuration/],
+    [['--config-mode','invalid'],/--config-mode requires saved or workspace/],
+    [['--upgrade-backend','invalid'],/--upgrade-backend requires true or false/],
+    [['--backend','http://127.0.0.1:1','--upgrade-backend','true'],/Backend attachment cannot upgrade a native profile/]
+  ]){
+    const child=spawn(process.execPath,[script,...args],{windowsHide:true});
+    let stderr='';child.stderr.setEncoding('utf8');child.stderr.on('data',chunk=>stderr+=chunk);
+    const code=await new Promise((resolveClose,reject)=>{child.once('error',reject);child.once('close',resolveClose);});
+    assert.equal(code,1);assert.match(stderr,message);
+  }
+});
+
 test('browser launcher serves current workspace actions from freshly built assets',async t=>{
   const root=resolve(__dirname,'../../..');
   const fixture=await mkdtemp(join(tmpdir(),'xmind-browser-launcher-'));
