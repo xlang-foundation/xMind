@@ -37,9 +37,15 @@ claims atomically with their canonical native records. Journal now exposes
 ReservePlanningContinuation(call,attempt), limited to a signed native turn,
 exact live lease/generation and original active segment. It consumes one held
 charge and records generation-bound funding; start/finish retain that authority.
-Context-managed journals refuse the plain path. Initial/rejected/inspection
-admission, typed context funding, production scheduler binding and pause/resume
-handoff remain required before enabling full product planning assembly.
+Context-managed journals refuse the plain path. Initial, rejected and inspection
+admission, typed context funding, shared production scheduling, and clean
+pause/resume handoff are implemented for eligible main process roots. Both read
+and coding roots can plan and delegate through the same SDK services and root
+budget; built-in workspace profiles enable this composition. Focused contracts
+cover plain and counted context, selected tools, approvals, denial, cancellation
+and service reopen without replay. Nested planning inside dynamic process
+children, broader restart-policy binding and full delivery acceptance remain
+open. See [current validation](VALIDATION_STATUS.md).
 
 
 The October 9 product decision defines three native components: **Agent
@@ -49,8 +55,11 @@ Graph**, YAML/Markdown with optional xlang3 Python or a programming API.
 Planning is optional. Shared backend HTTP/SSE and durable browser/CLI history
 are implemented and have installed live validation. Internal workers run the
 same xmind executable and expose native C++ remote objects and methods through
-the xlang3 SDK's shared-memory IPC. Read-worker placement and native tool-worker
-delivery are implemented; production coding-worker composition remains open.
+the xlang3 SDK's shared-memory IPC. Read and coding process placement and native
+tool-worker delivery are implemented. Current candidate browser and explicit-port
+CLI coding checks cover actual reads, reviewed edits and Node verification with
+scripted providers. The candidate has not replaced the installed runtime; current
+rendered VS Code and managed-profile delivery acceptance remain separate.
 See [the agreed product design and implementation boundaries](runtime-product-design.md).
 
 The installed 0.1.38 checkpoint validates the unified executable with a fresh
