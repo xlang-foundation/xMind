@@ -221,7 +221,13 @@ ProcessResult ForegroundProcess::run(const ProcessConfiguration& config,std::sto
     STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=handles[0];startup.StartupInfo.hStdOutput=handles[1];startup.StartupInfo.hStdError=handles[2];startup.lpAttributeList=attributes.list;
     if(cancel.stop_requested())throw ProcessCancelledBeforeDispatch("Process cancelled before creation");
     PROCESS_INFORMATION created{};
-    if(!CreateProcessW(executable.c_str(),command.data(),nullptr,nullptr,TRUE,EXTENDED_STARTUPINFO_PRESENT|CREATE_SUSPENDED|CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT,env.data(),directory.c_str(),&startup.StartupInfo,&created))fail("Cannot create suspended process");
+    // The verified local image may fit MAX_PATH while loading its adjacent
+    // DLL exceeds the loader's limit. Extend only the OS launch path; retain
+    // the canonical executable binding, literal argv and directory leases.
+    auto launch_image=executable;
+    std::replace(launch_image.begin(),launch_image.end(),L'/',L'\\');
+    launch_image.insert(0,L"\\\\?\\");
+    if(!CreateProcessW(launch_image.c_str(),command.data(),nullptr,nullptr,TRUE,EXTENDED_STARTUPINFO_PRESENT|CREATE_SUSPENDED|CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT,env.data(),directory.c_str(),&startup.StartupInfo,&created))fail("Cannot create suspended process");
     child.process=Handle(created.hProcess);child.thread=Handle(created.hThread);
     if(!AssignProcessToJobObject(child.job.value,child.process.value))fail("Cannot assign process ownership");
     // Reopen the path while all ancestor handles deny rename/delete sharing.

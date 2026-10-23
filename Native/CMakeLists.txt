@@ -784,7 +784,7 @@ if(BUILD_TESTING)
       target_compile_options(agentflow_process_contract PRIVATE /utf-8)
     endif()
     add_test(NAME native_process_adapter_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_contract_peer.mjs"
-      "$<TARGET_FILE:agentflow_process_contract>" "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_peer.mjs")
+      "$<TARGET_FILE:agentflow_process_contract>" "${AGENTFLOW_NODE_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/process_peer.mjs" "$<TARGET_FILE:xmind>" "${AGENTFLOW_XLANG3_SHARED}")
     add_executable(agentflow_pty_sessions_contract tests/pty_sessions_contract.cpp)
     target_link_libraries(agentflow_pty_sessions_contract PRIVATE agentflow_process)
     add_test(NAME native_persistent_pty_sessions_contract COMMAND agentflow_pty_sessions_contract "${CMAKE_CURRENT_BINARY_DIR}/pty-contract-workspace")

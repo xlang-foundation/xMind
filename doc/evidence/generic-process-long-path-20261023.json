@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-23T23:46:17.107Z",
+  "sourceParent": "f2522586864e9242c96393a3acbd68d521595ec2",
+  "sourcePatchSha256": "be2233453806d00b9611e1bd4c9fb608af83434265b0ef6a336a82c04432d912",
+  "build": {
+    "pid": 29680,
+    "launchedAt": "2026-10-23T23:45:49.343Z",
+    "completedAt": "2026-10-23T23:46:07.002Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "edff0bb24ff7c10dee9289af0805a432abb805bfd5643533e5e8a0c2f460cb5d"
+  },
+  "test": {
+    "pid": 11792,
+    "launchedAt": "2026-10-23T23:46:09.734Z",
+    "completedAt": "2026-10-23T23:46:14.421Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "83385bd5e020259823edf974781befcefaad9b20e5b0e8b380e689add5e0c2b8"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 4.65,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "ed576fcdd962dc5e18b0b8b2110114182d296789bc777443aa92aabc79ac8583",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Complete native foreground process-adapter contract, including actual 248-character copied xmind image with adjacent DLL and --help. No model or workspace effect in the new loader case. Model-driven long-path worker enrollment not proven.",
+  "red": {
+    "failed": 1,
+    "seconds": 0.43,
+    "sourcePatchSha256": "af56d49eab69c8943d79f73f4f259ddf09681cc3f9e449d483d7e281e64f79d6",
+    "retainedFixture": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-native-process-YSwWa8",
+    "logSha256": "863601510e14885abb717ae402a6fa9263c1ad1b8297f4903c69826961890933"
+  },
+  "literalArgvAndExecutableIdentityRetained": true,
+  "originalProcessContractChecksRetained": true,
+  "fullGoalComplete": false
+}

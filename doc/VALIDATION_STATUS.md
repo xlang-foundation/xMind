@@ -1,3 +1,20 @@
+## Generic native process loader path fix — 2026-10-23
+
+The complete foreground process adapter contract now copies actual xmind/DLL
+bytes to a248-character image path and invokes --help through ForegroundProcess.
+It fails before the fix (retained fixture and gate), then passes1/1 in4.65s with
+only the OS image path extended at CreateProcessW. Canonical executable identity,
+literal argv, directory leases, suspended creation, owned job, environment and
+output/cancellation semantics remain intact. All existing adapter cases pass.
+
+The complete source/SDK/library/runtime/dependency/binary file sets and bytes
+remain unchanged around the focused gate. Native SHA-256 ised576fcdd962dc5e18b0b8b2110114182d296789bc777443aa92aabc79ac8583.
+This focused result does not prove model-driven worker startup from long paths
+or a new complete172 run. The previous full172 pass remains scoped to c2c7a32e;
+package0.1.63 and installed62 remain unchanged. No paid inference or CPython.
+[Receipt](evidence/generic-process-long-path-20261023.json),
+[CTest log](evidence/generic-process-long-path-20261023-ctest.log).
+
 ## Complete local qualification of managed-owner path fix — 2026-10-23
 
 All native targets build successfully and172/172 contracts pass in1372.88s

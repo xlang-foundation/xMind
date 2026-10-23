@@ -20,10 +20,17 @@ ProcessConfiguration config(char** argv,const std::string& mode,const std::files
 }
 }
 int main(int argc,char** argv) {
-    if(argc!=4)return 2;
-    std::string stage="normal";
+    if(argc!=5)return 2;
+    std::string stage="long-image-loader";
     try {
         const auto directory=std::filesystem::u8path(argv[3]);
+        {
+            ProcessConfiguration loader{argv[4],utf8(directory),ForegroundProcess::directory_identity(utf8(directory)),{"--help"},{},10s,65536};
+            loader.executable_id=ForegroundProcess::executable_identity(loader.executable);
+            const auto result=ForegroundProcess::run(loader);
+            require(result.termination==ProcessTermination::exited&&result.exit_code==0&&result.stdout_bytes.find("xmind")!=std::string::npos,"Long-path native image must load its adjacent runtime DLL and return help");
+        }
+        stage="normal";
         _putenv_s("XMIND_AUTH_TOKEN","synthetic private parent access");_putenv_s("XMIND_API_KEY","synthetic private parent model");_putenv_s("XMIND_PARENT_ONLY","synthetic parent sentinel");
         wchar_t windows_directory[32768]{};const auto windows_length=GetWindowsDirectoryW(windows_directory,static_cast<UINT>(std::size(windows_directory)));
         require(windows_length&&windows_length<std::size(windows_directory),"Actual Windows directory must be available");
