@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <mutex>
 #include <optional>
+#include <memory>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
@@ -25,7 +27,9 @@ struct ConnectionProfileCatalog {
 // enrollment flow, never by this YAML/JSON configuration surface.
 class ConnectionProfiles {
 public:
-    explicit ConnectionProfiles(PersistenceService& store):store_(store){}
+    explicit ConnectionProfiles(PersistenceService& store);
+    std::shared_lock<std::shared_mutex> admit_local(std::int64_t profile_revision);
+    std::string local_server_identity();
     ConnectionProfileCatalog load();
     ConnectionProfileCatalog load_or_initialize();
     ConnectionProfileCatalog apply(const std::string& source,std::int64_t expected_revision);
@@ -34,5 +38,6 @@ private:
     ConnectionProfileCatalog load_unlocked(std::optional<std::string>* encoded=nullptr);
     PersistenceService& store_;
     std::mutex mutex_;
+    std::shared_ptr<std::shared_mutex> admission_;
 };
 }

@@ -1,3 +1,26 @@
+## Captured Local connection service objects - 2026-10-23
+
+Connections.Open captures a Local profile revision, stable persisted server ID
+and backend generation. It returns separate SDK binding/session/run/event objects.
+New admissions hold a shared profile guard through native Create/Start; catalog
+updates take the exclusive guard, while compare-and-swap remains authoritative
+for persisted updates. Profile edits reject stale new admission without changing
+retained session/run/event ownership. Root Local compatibility services remain.
+
+Four focused IPC lifetime/API/catalog/HTTP contracts pass in 2.27 seconds with
+input file sets and hashes unchanged. Actual independent xmind.exe clients create
+and reopen scoped UTF-8 sessions, reject stale admission and preserve server
+identity. SDK lifetime tests cover retained reads after profile edits, retired
+objects, stable identity across rebinding, and cursor rejection for another
+session or database with identical run/session IDs. The catalog fixture verifies
+that a writer waits for an admitted reader and identity survives SQLite reopen.
+Evidence: captured-local-connection-binding-20261023-*.
+
+This is focused acceptance. The complete 172/172 source17be6368 result predates
+these changes. Installed62 remains unchanged. UI/HTTP scoped binding adapters,
+authenticated remote routing/enrollment, nested process planning/recovery and
+rendered VS Code acceptance remain open.
+
 ## Complete native connection API integration - 2026-10-22
 
 Source17be6368 completes all 172 Native contracts with zero failures in

@@ -1,3 +1,5 @@
+#include <random>
+#include <map>
 #include "agentflow/connection_profiles.hpp"
 #include "agentflow/authoring_document.hpp"
 #include "agentflow/mcp_wire.hpp"
@@ -68,6 +70,27 @@ ConnectionProfileCatalog decode_catalog(const Json& value){
 }
 bool same(const ConnectionProfile& left,const ConnectionProfile& right){return left.id==right.id&&left.name==right.name&&left.kind==right.kind&&left.origin==right.origin;}
 }
+namespace {
+std::shared_ptr<std::shared_mutex> connection_admission(PersistenceService* store){
+    static std::mutex mutex;static std::map<PersistenceService*,std::weak_ptr<std::shared_mutex>> owners;std::lock_guard lock(mutex);
+    for(auto it=owners.begin();it!=owners.end();)if(it->second.expired())it=owners.erase(it);else ++it;
+    if(auto current=owners[store].lock())return current;auto created=std::make_shared<std::shared_mutex>();owners[store]=created;return created;
+}
+std::string decode_server_identity(const std::string& raw){
+    const auto value=Json::parse(raw);if(!value.is_object()||value.size()!=2||value.value("version",0)!=1||!value.contains("id")||!value["id"].is_string())throw DatabaseError("Invalid local connection server identity");
+    const auto id=value["id"].get<std::string>();if(id.size()!=70||!id.starts_with("local-")||id.find_first_not_of("0123456789abcdef",6)!=std::string::npos)throw DatabaseError("Invalid local connection server identity");return id;
+}
+}
+ConnectionProfiles::ConnectionProfiles(PersistenceService& store):store_(store),admission_(connection_admission(&store)){}
+std::shared_lock<std::shared_mutex> ConnectionProfiles::admit_local(std::int64_t revision){
+    std::shared_lock admission(*admission_);const auto catalog=load();const auto local=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[](const auto& profile){return profile.id=="local"&&profile.kind==ConnectionKind::local;});
+    if(local==catalog.profiles.end()||revision<1||local->revision!=revision)throw Conflict("Captured connection profile revision changed");return admission;
+}
+std::string ConnectionProfiles::local_server_identity(){
+    try{return decode_server_identity(store_.information("native-connections","server-identity").get());}catch(const NotFound&){}
+    std::random_device random;std::string id="local-";constexpr char hex[]="0123456789abcdef";for(int i=0;i<8;++i){const auto word=static_cast<std::uint32_t>(random());for(int shift=28;shift>=0;shift-=4)id+=hex[(word>>shift)&15];}
+    try{store_.compare_information("native-connections","server-identity",Json{{"version",1},{"id",id}}.dump(),std::nullopt).get();return id;}catch(const Conflict&){return decode_server_identity(store_.information("native-connections","server-identity").get());}
+}
 ConnectionProfileCatalog ConnectionProfiles::load_unlocked(std::optional<std::string>* encoded){
     if(encoded)encoded->reset();
     try{auto raw=store_.information("native-connections","profiles").get();auto result=decode_catalog(Json::parse(raw));if(encoded)*encoded=std::move(raw);return result;}
@@ -75,9 +98,9 @@ ConnectionProfileCatalog ConnectionProfiles::load_unlocked(std::optional<std::st
     catch(const Json::exception&){throw DatabaseError("Stored connection profile catalog is invalid");}
 }
 ConnectionProfileCatalog ConnectionProfiles::load(){std::lock_guard lock(mutex_);return load_unlocked();}
-ConnectionProfileCatalog ConnectionProfiles::load_or_initialize(){std::lock_guard lock(mutex_);auto current=load_unlocked();if(current.revision)return current;auto initial=default_catalog();try{store_.compare_information("native-connections","profiles",encode_catalog(initial).dump(),std::nullopt).get();return initial;}catch(const Conflict&){return load_unlocked();}}
+ConnectionProfileCatalog ConnectionProfiles::load_or_initialize(){std::unique_lock admission(*admission_);std::lock_guard lock(mutex_);auto current=load_unlocked();if(current.revision)return current;auto initial=default_catalog();try{store_.compare_information("native-connections","profiles",encode_catalog(initial).dump(),std::nullopt).get();return initial;}catch(const Conflict&){return load_unlocked();}}
 ConnectionProfileCatalog ConnectionProfiles::apply(const std::string& source,std::int64_t expected_revision){
-    std::lock_guard lock(mutex_);std::optional<std::string> previous_bytes;auto previous=load_unlocked(&previous_bytes);if(expected_revision<0||expected_revision!=previous.revision||expected_revision>revision_limit)throw Conflict("Connection profile catalog revision changed");
+    std::unique_lock admission(*admission_);std::lock_guard lock(mutex_);std::optional<std::string> previous_bytes;auto previous=load_unlocked(&previous_bytes);if(expected_revision<0||expected_revision!=previous.revision||expected_revision>revision_limit)throw Conflict("Connection profile catalog revision changed");
     const auto desired=parse(source);fields(desired,{"profiles"});if(!desired.contains("profiles")||!desired.at("profiles").is_array()||desired.at("profiles").size()>32)throw std::invalid_argument("Connection catalog accepts at most 32 profiles");
     ConnectionProfileCatalog next;next.revision=previous.revision;next.active_id=previous.active_id.empty()?"local":previous.active_id;next.retired_ids=previous.retired_ids;std::set<std::string> ids;
     for(const auto& item:desired.at("profiles")){
@@ -98,7 +121,7 @@ ConnectionProfileCatalog ConnectionProfiles::apply(const std::string& source,std
     store_.compare_information("native-connections","profiles",encode_catalog(next).dump(),std::move(previous_bytes)).get();return next;
 }
 ConnectionProfileCatalog ConnectionProfiles::select(const std::string& id,std::int64_t expected_revision){
-    identity(id);std::lock_guard lock(mutex_);std::optional<std::string> previous_bytes;auto current=load_unlocked(&previous_bytes);if(expected_revision<0||expected_revision!=current.revision||expected_revision>revision_limit)throw Conflict("Connection profile catalog revision changed");
+    identity(id);std::unique_lock admission(*admission_);std::lock_guard lock(mutex_);std::optional<std::string> previous_bytes;auto current=load_unlocked(&previous_bytes);if(expected_revision<0||expected_revision!=current.revision||expected_revision>revision_limit)throw Conflict("Connection profile catalog revision changed");
     const auto selected=std::find_if(current.profiles.begin(),current.profiles.end(),[&](const auto& profile){return profile.id==id;});
     if(selected==current.profiles.end())throw NotFound("Connection profile not found");
     if(selected->kind!=ConnectionKind::local)throw Conflict("Nexus profile is not authenticated; the active connection remains unchanged");

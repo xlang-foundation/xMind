@@ -25,6 +25,14 @@ int run_xmind_ipc_client(int argc,char** argv){
                 if(argc==5&&std::string(argv[4])=="list")result=call(service["List"],{});
                 else if(argc==7&&std::string(argv[4])=="save")result=call(service["Save"],{sdk_values::to_value(runtime.host(),nlohmann::json::parse(argv[6])),revision(argv[5])});
                 else if(argc==7&&std::string(argv[4])=="select")result=call(service["Select"],{text(argv[5]),revision(argv[6])});
+                else if(argc>=7){
+                    auto binding=call(service["Open"],{text(argv[5]),revision(argv[6])});const std::string method=argv[4];
+                    if(method=="open"&&argc==7)result=call(binding["Identity"],{});
+                    else if(method=="session-create"&&argc==9){auto sessions=call(binding["Sessions"],{});result=call(sessions["Create"],{text(argv[7]),text(argv[8])});}
+                    else if(method=="session-open"&&argc==8){auto sessions=call(binding["Sessions"],{});result=call(sessions["Open"],{text(argv[7])});}
+                    else if(method=="events"&&argc==10){auto events=call(binding["Events"],{text(argv[7]),text(argv[8])});const auto input=nlohmann::json::parse(argv[9]);auto cursor=input.is_null()?call(events["Cursor"],{}):sdk_values::to_value(runtime.host(),input);result=call(events["Read"],{cursor});}
+                    else throw std::invalid_argument("Invalid captured connection method or arguments");
+                }
                 else throw std::invalid_argument("Invalid connection IPC method or arguments");
                 output=sdk_values::from_value(result);std::cout<<output.dump()<<std::endl;return 0;
             }

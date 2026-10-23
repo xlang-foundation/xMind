@@ -13,6 +13,8 @@
 #include "agentflow/connection_profiles.hpp"
 #include "agent_worker_sdk_values.hpp"
 #include <optional>
+#include <random>
+#include <algorithm>
 #include <mutex>
 #include "xlang3/xlang3.h"
 #include <stdexcept>
@@ -23,10 +25,11 @@ struct ApiContext {
     RunExecutor* executor;
     std::string token;
     ConnectionProfiles connections;
+    std::string generation=[] {std::random_device random;std::string id;for(int i=0;i<4;++i)id+=std::to_string(random())+"-";return id;}();
     BackendOwnerControl* owner=nullptr;
     mutable std::shared_mutex lifetime;
     bool active=true;
-    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),connections(persistence),owner(control){}
+    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),connections(persistence),owner(control){if(owner)generation=owner->status().generation;}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("unavailable");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
     void authorize(const std::string& supplied)const {
@@ -76,6 +79,48 @@ struct RunsApi {
         APISET().AddFunc<1>("Cancel",&RunsApi::Cancel);
     END_PACKAGE
 };
+struct CapturedConnection {
+    std::shared_ptr<ApiContext> context;std::int64_t revision;std::string server,generation;
+    auto enter()const{auto life=context->enter();if(context->owner&&context->owner->status().generation!=generation)throw Conflict("Captured backend generation changed");return life;}
+    auto admit(){return context->connections.admit_local(revision);}
+    X::Value identity(X3PackageHost* host)const{return sdk_values::to_value(host,nlohmann::json{{"connection_id","local"},{"profile_revision",revision},{"server_id",server},{"backend_generation",generation},{"protocol_version",1},{"kind","local"}});}
+    X::Value wrap(X3PackageHost* host,const char* name,X::Value record)const{auto out=X::Value::Dict(host);set(out,"binding",identity(host));set(out,name,record);return out;}
+};
+struct BoundSessionsApi {
+    std::shared_ptr<CapturedConnection> state;BoundSessionsApi()=default;explicit BoundSessionsApi(std::shared_ptr<CapturedConnection> value):state(std::move(value)){}
+    auto enter(){if(!state)throw RunUnavailable("Unbound connection service");return state->enter();}
+    X::Value Open(std::string id){return api_call([&]{auto life=enter();return state->wrap(Host(),"session",session_value(Host(),state->context->store.session(id).get()));});}
+    X::Value Create(std::string id,std::string title){return api_call([&]{auto life=enter();auto profile=state->admit();auto admission=state->context->admit();return state->wrap(Host(),"session",session_value(Host(),state->context->store.create_session(id,title).get()));});}
+    BEGIN_PACKAGE(BoundSessionsApi) APISET().AddFunc<1>("Open",&BoundSessionsApi::Open);APISET().AddFunc<2>("Create",&BoundSessionsApi::Create); END_PACKAGE
+};
+struct BoundRunsApi {
+    std::shared_ptr<CapturedConnection> state;BoundRunsApi()=default;explicit BoundRunsApi(std::shared_ptr<CapturedConnection> value):state(std::move(value)){}
+    auto enter(){if(!state)throw RunUnavailable("Unbound connection service");return state->enter();}
+    X::Value Open(std::string id){return api_call([&]{auto life=enter();return state->wrap(Host(),"run",run_value(Host(),state->context->store.run(id).get()));});}
+    X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{auto life=enter();auto profile=state->admit();auto admission=state->context->admit();if(!state->context->executor)throw RunUnavailable("Run execution unavailable");return state->wrap(Host(),"run",run_value(Host(),state->context->executor->submit(id,session,prompt)));});}
+    void Cancel(std::string id){api_call([&]{auto life=enter();auto admission=state->context->admit();if(!state->context->executor)throw RunUnavailable("Run execution unavailable");state->context->executor->cancel(id);});}
+    BEGIN_PACKAGE(BoundRunsApi) APISET().AddFunc<1>("Open",&BoundRunsApi::Open);APISET().AddFunc<3>("Start",&BoundRunsApi::Start);APISET().AddFunc<1>("Cancel",&BoundRunsApi::Cancel); END_PACKAGE
+};
+struct BoundEventsApi {
+    std::shared_ptr<CapturedConnection> state;std::string session,root;BoundEventsApi()=default;BoundEventsApi(std::shared_ptr<CapturedConnection> value,std::string session_id,std::string run_id):state(std::move(value)),session(std::move(session_id)),root(std::move(run_id)){}
+    auto enter(){if(!state)throw RunUnavailable("Unbound connection service");return state->enter();}
+    nlohmann::json cursor(std::int64_t after)const{return {{"server_id",state->server},{"connection_id","local"},{"session_id",session},{"run_id",root},{"sequence",after}};}
+    X::Value Cursor(){return api_call([&]{auto life=enter();return sdk_values::to_value(Host(),cursor(0));});}
+    X::Value Read(X::Value position){return api_call([&]{auto life=enter();const auto input=sdk_values::from_value(position);if(!input.is_object()||input.size()!=5||!input.contains("sequence")||!input["sequence"].is_number_integer())throw std::invalid_argument("Invalid connection event cursor");const auto after=input["sequence"].get<std::int64_t>();if(after<0||input!=cursor(after))throw Conflict("Event cursor differs from captured connection/session/run");auto events=nlohmann::json::array();auto next=after;for(const auto& event:state->context->store.tree_events(root,after,256).get()){events.push_back({{"sequence",event.sequence},{"run_id",event.run_id},{"kind",event.kind},{"json",event.json}});next=event.sequence;}return sdk_values::to_value(Host(),nlohmann::json{{"events",std::move(events)},{"cursor",cursor(next)}});});}
+    BEGIN_PACKAGE(BoundEventsApi) APISET().AddFunc<0>("Cursor",&BoundEventsApi::Cursor);APISET().AddFunc<1>("Read",&BoundEventsApi::Read); END_PACKAGE
+};
+struct BoundConnectionApi {
+    std::shared_ptr<CapturedConnection> state;BoundConnectionApi()=default;explicit BoundConnectionApi(std::shared_ptr<CapturedConnection> value):state(std::move(value)){}
+    auto enter(){if(!state)throw RunUnavailable("Unbound connection");return state->enter();}
+    X::Value Identity(){return api_call([&]{auto life=enter();return state->identity(Host());});}
+    X::Value Sessions();X::Value Runs();X::Value Events(std::string session,std::string root);
+    BEGIN_PACKAGE(BoundConnectionApi) APISET().AddFunc<0>("Identity",&BoundConnectionApi::Identity);APISET().AddFunc<0>("Sessions",&BoundConnectionApi::Sessions);APISET().AddFunc<0>("Runs",&BoundConnectionApi::Runs);APISET().AddFunc<2>("Events",&BoundConnectionApi::Events); END_PACKAGE
+};
+struct ConnectionObjects {BEGIN_PACKAGE(ConnectionObjects) APISET().AddClass<0,BoundConnectionApi>("Binding");APISET().AddClass<0,BoundSessionsApi>("Sessions");APISET().AddClass<0,BoundRunsApi>("Runs");APISET().AddClass<0,BoundEventsApi>("Events"); END_PACKAGE};
+ConnectionObjects& connection_objects(){static auto value=[] {auto owner=std::make_shared<ConnectionObjects>();retain_xmind_ipc_service(owner);(void)xmind_ipc_runtime().RegisterPackage("_xmind_connection_objects",*owner);return owner;}();return *value;}
+X::Value BoundConnectionApi::Sessions(){return api_call([&]{auto life=enter();return connection_objects().__xlang3_package_->CreateInstance("Sessions",std::make_shared<BoundSessionsApi>(state));});}
+X::Value BoundConnectionApi::Runs(){return api_call([&]{auto life=enter();return connection_objects().__xlang3_package_->CreateInstance("Runs",std::make_shared<BoundRunsApi>(state));});}
+X::Value BoundConnectionApi::Events(std::string session,std::string root){return api_call([&]{auto life=enter();const auto run=state->context->store.run(root).get();if(run.session_id!=session||!run.parent_id.empty())throw Conflict("Event stream requires its captured root session");return connection_objects().__xlang3_package_->CreateInstance("Events",std::make_shared<BoundEventsApi>(state,session,root));});}
 struct ConnectionsApi {
     std::shared_ptr<ApiContext> context;
     ConnectionsApi(RootApi*,std::string token);
@@ -86,10 +131,12 @@ struct ConnectionsApi {
         }
         auto result=X::Value::Dict(Host());set(result,"revision",X::Value(catalog.revision));set(result,"active_id",X::Value::String(Host(),catalog.active_id));set(result,"profiles",profiles);return result;
     }
+    X::Value Open(std::string id,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();const auto catalog=context->connections.load_or_initialize();const auto selected=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[&](const auto& profile){return profile.id==id;});if(selected==catalog.profiles.end())throw NotFound("Connection profile not found");if(selected->kind!=ConnectionKind::local)throw RunUnavailable("Connection is not authenticated");auto profile=context->connections.admit_local(revision);auto state=std::make_shared<CapturedConnection>(CapturedConnection{context,revision,context->connections.local_server_identity(),context->generation});return connection_objects().__xlang3_package_->CreateInstance("Binding",std::make_shared<BoundConnectionApi>(std::move(state)));});}
     X::Value List(){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.load_or_initialize());});}
     X::Value Save(X::Value profiles,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();if(!profiles.IsList()||profiles.Size()>32)throw std::invalid_argument("Connection profiles require a bounded list");return value(context->connections.apply(nlohmann::json{{"profiles",sdk_values::from_value(profiles)}}.dump(),revision));});}
     X::Value Select(std::string id,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.select(id,revision));});}
     BEGIN_PACKAGE(ConnectionsApi)
+        APISET().AddFunc<2>("Open",&ConnectionsApi::Open);
         APISET().AddFunc<0>("List",&ConnectionsApi::List);
         APISET().AddFunc<2>("Save",&ConnectionsApi::Save);
         APISET().AddFunc<2>("Select",&ConnectionsApi::Select);

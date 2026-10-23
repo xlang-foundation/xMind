@@ -136,3 +136,37 @@ The CLI JSON text is input/output presentation; calls carry SDK lists, dictionar
 and scalars across the process boundary. Separate-process and lifetime contracts
 verify authorization, HTTP agreement, UTF-8 persistence, concurrent updates, stale
 revision rejection, forbidden credential fields and retired-object refusal.
+
+## Captured Local binding
+
+Connections.Open(profile_id, expected_profile_revision) returns a Local binding
+with Identity(), Sessions(), Runs() and Events(session_id, root_run_id). The
+revision is the profile revision, not the overall catalog revision. Open refuses
+unavailable remote profiles; saving an address is not authentication.
+
+Identity returns connection_id, profile_revision, server_id, backend_generation,
+protocol_version and kind. The Local server ID is a random non-secret identity
+persisted once through SQLite/xlang3. It stays stable across profile edits and
+backend rebinding; another database receives another identity. Managed bindings
+use the actual backend-owner generation. Standalone bindings use an ephemeral
+context generation. Captured services fail after their backend retires.
+
+Sessions supports Open/Create and Runs supports Open/Start/Cancel. Records return
+a binding identity plus a session or run field. New Create/Start admissions retain
+a shared profile guard through the native admission operation; catalog writers
+wait for that guard. A profile edit invalidates new admissions through stale
+objects but preserves reads and cancellation for already admitted work. Existing
+root Sessions/Runs remain explicitly Local compatibility APIs.
+
+Events captures one root/session. Cursor() returns server_id, connection_id,
+session_id, run_id and sequence. Read(cursor) rejects mismatched scope and returns
+at most 256 actual root-tree events through the existing repository query, with
+a next cursor. That query also restricts every returned run to the captured
+session. Local event cursors do not grant remote or workspace execution authority.
+
+The native IPC CLI additionally supports connections open ID PROFILE_REV,
+connections session-create ID PROFILE_REV SESSION TITLE, connections session-open
+ID PROFILE_REV SESSION, and connections events ID PROFILE_REV SESSION ROOT
+JSON_CURSOR (null starts from the captured initial cursor). Calls use standard
+SDK service objects and values. UI/HTTP binding adapters and authenticated remote
+connectors remain unfinished.

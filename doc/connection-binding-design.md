@@ -1,6 +1,7 @@
 # Captured connection binding design
 
-Status: proposed implementation sequence, not delivered remote functionality.
+Status: captured Local SDK objects are implemented with focused acceptance;
+remote functionality and client-adapter integration remain proposed.
 The implemented catalog API is documented in connection-profiles.md. This design
 extends that public contract; it does not include private Nexus implementation.
 The installed 0.1.62 checkpoint remains separate from source17be6368 validation.
@@ -10,7 +11,8 @@ The installed 0.1.62 checkpoint remains separate from source17be6368 validation.
 Keep the registered xmind root and its authenticated Connections(owner_token)
 subobject. Add Open(profile_id, expected_profile_revision), returning a captured
 binding object. Root remains a registration surface, not a command dispatcher.
-The binding exposes Identity(), Sessions(), Runs() and Events() as service objects.
+The Local binding exposes Identity(), Sessions(), Runs() and
+Events(session_id, root_run_id) as scoped service objects.
 Use ordinary SDK method calls and SDK list/dictionary values for local IPC.
 Do not add peer.call routes, custom remote-value envelopes or a second serializer.
 

@@ -6,6 +6,8 @@
 #include <atomic>
 #include <barrier>
 #include <thread>
+#include <future>
+#include <chrono>
 using namespace agentflow;
 namespace {
 using Json=nlohmann::json;
@@ -17,7 +19,7 @@ struct TemporaryDatabase{
 };
 }
 int main(int argc,char** argv){if(argc!=3)return 2;try{
-    TemporaryDatabase database;const std::vector<std::string> imports{argv[1],argv[2]};ConnectionProfileCatalog saved;
+    TemporaryDatabase database;const std::vector<std::string> imports{argv[1],argv[2]};ConnectionProfileCatalog saved;std::string server_identity;
     {
         PersistenceService store(database.path.string(),imports);ConnectionProfiles profiles(store);require(profiles.load().revision==0,"Absent connection registry must not be fabricated before explicit initialization");
         {
@@ -52,10 +54,17 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
             require(succeeded==1&&conflicted==7&&failed==0,"Independent connection services must commit exactly one writer per catalog revision");
             saved=profiles.load();require(saved.revision==revision+1,"Concurrent updates must advance the catalog exactly once");
         }
+        server_identity=profiles.local_server_identity();require(server_identity.starts_with("local-"),"Local binding requires a backend-owned server identity");
+        {
+            const auto profile_revision=saved.profiles[0].revision;auto admission=profiles.admit_local(profile_revision);std::promise<void> started;auto ready=started.get_future();
+            auto writer=std::async(std::launch::async,[&]{ConnectionProfiles independent(store);started.set_value();return independent.apply(R"({"profiles":[{"id":"local","name":"Changed after admission","kind":"local"}]})",saved.revision);});
+            ready.wait();const bool blocked=writer.wait_for(std::chrono::milliseconds(50))==std::future_status::timeout;admission.unlock();saved=writer.get();require(blocked,"Profile mutation must wait until captured admission completes");
+            rejects<Conflict>([&]{auto stale=profiles.admit_local(profile_revision);});require(profiles.local_server_identity()==server_identity,"Profile edits must not replace the persisted server identity");
+        }
         store.close();
     }
     {
-        PersistenceService store(database.path.string(),imports);ConnectionProfiles profiles(store);const auto restored=profiles.load();require(restored.revision==saved.revision&&restored.active_id=="local"&&restored.profiles.size()==1&&restored.retired_ids==saved.retired_ids,"SQLite reopen must preserve Local selection and retired remote identities");store.close();
+        PersistenceService store(database.path.string(),imports);ConnectionProfiles profiles(store);const auto restored=profiles.load();require(profiles.local_server_identity()==server_identity,"SQLite reopen must preserve local server identity");require(restored.revision==saved.revision&&restored.active_id=="local"&&restored.profiles.size()==1&&restored.retired_ids==saved.retired_ids,"SQLite reopen must preserve Local selection and retired remote identities");store.close();
     }
     std::cout<<"Native xlang3 connection-profile registry passed first-use Local selection, YAML/JSON idempotence, HTTPS endpoint checks, unknown credential-field rejection, revision conflicts, profile retirement and SQLite reopen. Nexus authentication, command routing, UI selection and remote execution remain unimplemented by this checkpoint.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
