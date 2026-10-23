@@ -1,0 +1,34 @@
+{
+  "diagnosticOnly": true,
+  "sourceRevision": "f809da864b582a90f77fef408c5c6a0db200e11e",
+  "sourceFiles": 14053,
+  "qualifiedSdkFiles": 47,
+  "nativeBinaries": 137,
+  "configured": {
+    "pid": 31272,
+    "startedAt": "2026-10-23T04:22:19.087Z",
+    "endedAt": "2026-10-23T04:22:28.608Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "0f042f2edd1665339565c4414d0814686c7e9c1bf563501c171958a5de4cec21"
+  },
+  "compiled": {
+    "pid": 24184,
+    "startedAt": "2026-10-23T04:22:31.228Z",
+    "endedAt": "2026-10-23T04:23:47.332Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "d8b8da7227f1e00df685cad9f50adac61f519d546b3e80326db0f22d23ff0cc6"
+  },
+  "outputs": {
+    "xlang3_runtime.dll": "e27b1f1195b12b49b60b57cb5be8b54cbb0f65adef08d2fd6b70cff03ccf3262",
+    "xlang3_runtime.lib": "7b8d287c6a82ad5a1e61cba7424d4476b21fbec250e8d2305ceb2ac9b2de8750",
+    "xlang3_runtime.pdb": "1c7748b280ff261871d0bf7b3ee010bdc1d3be635be23f8e3fbfc78ef9e2c72c",
+    "xlang3.exe": "2b86192c6f40a4840063b8d0d0deab9dabb99f8227316a27638d0b3e8d0e0cdd"
+  },
+  "allOriginalInputFileSetsAndBytesUnchanged": true,
+  "cpythonExecuted": false,
+  "runtimeExecuted": false,
+  "releaseAcceptance": false,
+  "passed": true
+}

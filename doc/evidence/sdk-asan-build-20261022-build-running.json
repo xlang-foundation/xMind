@@ -1,0 +1,17 @@
+{
+  "pid": 24184,
+  "startedAt": "2026-10-23T04:22:31.228Z",
+  "program": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+  "args": [
+    "--build",
+    "D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/build",
+    "--config",
+    "Release",
+    "--target",
+    "xlang3_runtime",
+    "xlang3",
+    "--",
+    "/m:1",
+    "/nologo"
+  ]
+}

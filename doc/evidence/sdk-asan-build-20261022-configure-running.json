@@ -1,0 +1,23 @@
+{
+  "pid": 31272,
+  "startedAt": "2026-10-23T04:22:19.087Z",
+  "program": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+  "args": [
+    "-S",
+    "D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix",
+    "-B",
+    "D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/build",
+    "-A",
+    "x64",
+    "-DXLANG3_BUILD_CPYTHON_BRIDGE:BOOL=OFF",
+    "-DXLANG3_PYTHON314_EXECUTABLE:FILEPATH=",
+    "-DPython3_EXECUTABLE:FILEPATH=",
+    "-DCMAKE_DISABLE_FIND_PACKAGE_Python3:BOOL=TRUE",
+    "-DXLANG3_RELEASE_PGO_STAGE:STRING=OFF",
+    "-DCMAKE_TRY_COMPILE_CONFIGURATION:STRING=Release",
+    "-DCMAKE_C_FLAGS:STRING=/DWIN32 /D_WINDOWS /fsanitize=address /Zi",
+    "-DCMAKE_CXX_FLAGS:STRING=/DWIN32 /D_WINDOWS /EHsc /fsanitize=address /Zi",
+    "-DCMAKE_SHARED_LINKER_FLAGS:STRING=/DEBUG /INCREMENTAL:NO",
+    "-DCMAKE_EXE_LINKER_FLAGS:STRING=/DEBUG /INCREMENTAL:NO"
+  ]
+}

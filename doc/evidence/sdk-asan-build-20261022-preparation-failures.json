@@ -1,0 +1,7 @@
+{
+  "preflightRefusal": "Guard saw source-writing shell text; no output directory or build was created. Separate process inspection was clear.",
+  "snapshotFailure": "Wrong protected manifest filename caused ENOENT before configure/build; installed manifest is native-runtime/native-runtime-manifest.json.",
+  "outputDirectoryInspectedEmpty": true,
+  "compilerStarted": false,
+  "correction": "Correct manifest name and allow only the observed empty output directory; nonempty output remains refused."
+}

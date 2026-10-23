@@ -1,0 +1,53 @@
+{
+  "scope": "Retained synthetic graph fixture databases inspected through xlang3 on disposable query-only copies; raw state remains private",
+  "asan": {
+    "queryExit": 0,
+    "preservedFiles": 3,
+    "sourceAndBackupHashesMatched": true,
+    "runStates": [
+      {
+        "state": "cancelled",
+        "parent": false,
+        "node": null
+      },
+      {
+        "state": "cancelled",
+        "parent": true,
+        "node": "remote-one"
+      },
+      {
+        "state": "cancelled",
+        "parent": true,
+        "node": "remote-two"
+      }
+    ],
+    "workerAdmissions": 2,
+    "uncertainModels": 2,
+    "retirements": 2
+  },
+  "original": {
+    "queryExit": 0,
+    "preservedFiles": 5,
+    "sourceAndBackupHashesMatched": true,
+    "runStates": [
+      {
+        "state": "running",
+        "parent": false,
+        "node": null
+      },
+      {
+        "state": "running",
+        "parent": true,
+        "node": "remote-one"
+      },
+      {
+        "state": "queued",
+        "parent": true,
+        "node": "remote-two"
+      }
+    ],
+    "workerAdmissions": 1,
+    "uncertainModels": 0,
+    "retirements": 0
+  }
+}

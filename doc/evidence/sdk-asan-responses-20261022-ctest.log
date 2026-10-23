@@ -1,0 +1,22 @@
+Test project D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/responses-probe
+    Start 1: asan_native_responses_agent_http_contract
+1/1 Test #1: asan_native_responses_agent_http_contract ...***Failed   23.44 sec
+file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:103
+ catch(error){const record=await api('/v1/runs/'+value.id),events=command('events',value.id),children=await api('/v1/runs/'+value.id+'/children');throw new Error('Responses run observation '+JSON.stringify({state:record.state,parentMembership:events.some(event=>event.kind==='agent.workspace_membership'),childStates:children.map(child=>child.run.state),childWorkerAdmissions:(await ownedTree(value.id)).filter(event=>event.kind==='worker.lease.admitted').length}));}
+                                                                                                                                                        ^
+
+Error: Responses run observation {"state":"running","parentMembership":true,"childStates":["running","running"],"childWorkerAdmissions":2}
+    at run (file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:103:153)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs:143:47
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =  23.44 sec
+
+The following tests FAILED:
+	  1 - asan_native_responses_agent_http_contract (Failed)
+Errors while running CTest

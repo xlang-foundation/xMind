@@ -1,0 +1,17 @@
+Test project D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/probes
+    Start 1: asan_runtime_startup
+1/4 Test #1: asan_runtime_startup .............................   Passed    0.59 sec
+    Start 2: asan_native_a2a_agent_registry_contract
+2/4 Test #2: asan_native_a2a_agent_registry_contract ..........   Passed    9.35 sec
+    Start 3: asan_native_agent_worker_graph_remote_contract
+3/4 Test #3: asan_native_agent_worker_graph_remote_contract ...***Failed   18.23 sec
+Graph remote must complete after exact permissions and drain
+
+
+67% tests passed, 1 tests failed out of 3
+
+Total Test time (real) =  28.18 sec
+
+The following tests FAILED:
+	  3 - asan_native_agent_worker_graph_remote_contract (Failed)
+Errors while running CTest

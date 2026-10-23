@@ -1,0 +1,20 @@
+{
+  "scope": "ASan SDK diagnostic with original Native executables and package adapters; not release qualification",
+  "terminal": {
+    "pid": 29356,
+    "startedAt": "2026-10-23T04:31:21.952Z",
+    "endedAt": "2026-10-23T04:31:50.166Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "33d30fd4354e2128ee8fdf36e387f1c0c391c43f02c1127c58676ddd16082290"
+  },
+  "passed": false,
+  "sdkRevision": "f809da864b582a90f77fef408c5c6a0db200e11e",
+  "sanitizedRuntimeSha256": "e27b1f1195b12b49b60b57cb5be8b54cbb0f65adef08d2fd6b70cff03ccf3262",
+  "actualAsanImportConfirmed": true,
+  "allOriginalSourceSdkLibrariesDependenciesProductAndProtectedInstalledBytesUnchanged": true,
+  "stagedRuntimeUnchanged": true,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "installed": false
+}

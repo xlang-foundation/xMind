@@ -1,0 +1,2 @@
+add_test(asan_native_responses_agent_http_contract [==[C:/Program Files/nodejs/node.exe]==] [==[D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/xmind_server.exe]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/xmind_cli.exe]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/modules]==] [==[C:/Python/Python314/Lib]==])
+set_tests_properties(asan_native_responses_agent_http_contract PROPERTIES TIMEOUT 60)

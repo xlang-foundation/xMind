@@ -1,0 +1,42 @@
+[
+  {
+    "pid": 31948,
+    "code": null,
+    "signal": "SIGTERM",
+    "stderrBytes": 0,
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "asanError": false
+  },
+  {
+    "pid": 11568,
+    "code": null,
+    "signal": "SIGTERM",
+    "stderrBytes": 0,
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "asanError": false
+  },
+  {
+    "pid": 31848,
+    "code": null,
+    "signal": "SIGTERM",
+    "stderrBytes": 0,
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "asanError": false
+  },
+  {
+    "pid": 25480,
+    "code": null,
+    "signal": "SIGTERM",
+    "stderrBytes": 0,
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "asanError": false
+  },
+  {
+    "pid": 27044,
+    "code": null,
+    "signal": "SIGTERM",
+    "stderrBytes": 0,
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "asanError": false
+  }
+]

@@ -1,0 +1,221 @@
+
+  Checking File Globs
+  1>Checking Build System
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  blocksort.c
+  huffman.c
+  crctable.c
+  randtable.c
+  compress.c
+  decompress.c
+  bzlib.c
+  Generating Code...
+  bzip2static.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\bzip2static.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/modules/ctypes/CMakeLists.txt
+  Assembling D:\CantorAI2026\xMind\.agentflow\xlang3-ctypes-runtime-fix\modules\cffi\libffi\win64.asm...
+  ctypes_ffi.cpp
+  ffi.c
+  prep_cif.c
+  types.c
+  Generating Code...
+  xlang3_ctypes_ffi.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\modules\ctypes\Release\xlang3_ctypes_ffi.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/third_party/zlib/CMakeLists.txt
+  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+  gzwrite.c
+  inflate.c
+  infback.c
+  inftrees.c
+  inffast.c
+  trees.c
+  uncompr.c
+  zutil.c
+  Generating Code...
+  zlibstatic.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\third_party\zlib\Release\zs.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  abc_module.cpp
+  ast_module.cpp
+  atexit_module.cpp
+  binascii_module.cpp
+  bisect_module.cpp
+  heapq_module.cpp
+  bz2_module.cpp
+  cmath_module.cpp
+  decimal_module.cpp
+  codecs_module.cpp
+  locale_module.cpp
+  multibytecodec_module.cpp
+  collections_module.cpp
+  contextvars_module.cpp
+  asyncio_module.cpp
+  asyncio_future.cpp
+  asyncio_task.cpp
+  csv_module.cpp
+  ctypes_module.cpp
+  errno_module.cpp
+  faulthandler_module.cpp
+  functools_module.cpp
+  gc_module.cpp
+  lsprof_module.cpp
+  coverage_tracer_module.cpp
+  array_module.cpp
+  imp_module.cpp
+  importlib_module.cpp
+  interpreters_module.cpp
+  itertools_module.cpp
+  io_module.cpp
+  json_module.cpp
+  marshal_module.cpp
+  msvcrt_module.cpp
+  multiprocessing_module.cpp
+  opcode_module.cpp
+  operator_module.cpp
+  os_module.cpp
+  overlapped_module.cpp
+  pickle_module.cpp
+  pyexpat_module.cpp
+  queue_module.cpp
+  random_module.cpp
+  signal_module.cpp
+  sha2_module.cpp
+  socket_select_module.cpp
+  sre_module.cpp
+  source_encoding.cpp
+  stat_module.cpp
+  string_module.cpp
+  struct_module.cpp
+  sysconfig_native_module.cpp
+  sys_module.cpp
+  time_module.cpp
+  tokenize_module.cpp
+  typing_module.cpp
+  unicodedata_module.cpp
+  weakref_module.cpp
+  warnings_module.cpp
+  winapi_module.cpp
+  posix_process_module.cpp
+  winreg_module.cpp
+  zlib_module.cpp
+  zip_archive.cpp
+  zipimport_module.cpp
+  xlang3_system_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_system_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  task_module.cpp
+  task_objects.cpp
+  xlang3_task_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_task_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  runtime_lock.cpp
+  thread_module.cpp
+  thread_objects.cpp
+  xlang3_thread_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_thread_runtime.lib
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  builtins.cpp
+  builtin_modules.cpp
+  exception_builtins.cpp
+  functional_builtins.cpp
+  io_builtins.cpp
+  math_module.cpp
+  object_type_builtins.cpp
+  raw_block_builtins.cpp
+  sequence_builtins.cpp
+  ipc_runtime.cpp
+  shared_memory_block_stream.cpp
+  shared_memory_transport.cpp
+  block_stream.cpp
+  ipc_value_marshal.cpp
+  xlang_stream.cpp
+  c_api_bridge.cpp
+  exceptions.cpp
+  expression.cpp
+  functional_iterators.cpp
+  generator.cpp
+  attribute.cpp
+  list_methods.cpp
+  dict_methods.cpp
+  file_methods.cpp
+  int_methods.cpp
+  set_methods.cpp
+  string_methods.cpp
+  tuple_methods.cpp
+  bytes_methods.cpp
+  iterator_methods.cpp
+  property_methods.cpp
+  x3_bucket_allocator.cpp
+  x3_memory.cpp
+  x3_object_pool.cpp
+  x3_page_allocator.cpp
+  x3_runtime_memory.cpp
+  x3_temp_arena.cpp
+  perf_counters.cpp
+  interpreter_events.cpp
+  bigint.cpp
+  value.cpp
+  value_hash.cpp
+  object_model.cpp
+  native_trace_hook.cpp
+  sequence.cpp
+  mapping.cpp
+  set_object.cpp
+  module_object.cpp
+  module_slots.cpp
+  runtime.cpp
+  unicode_data.cpp
+  unicode_names.cpp
+  vfs.cpp
+  source_cursor.cpp
+  lexer.cpp
+  parser.cpp
+  scope_analysis.cpp
+  xlang_module_globals.cpp
+  lower.cpp
+  codec.cpp
+  xlang_interpreter.cpp
+  xlang_vm_attr.cpp
+  xlang_vm_loop.cpp
+  object_table.cpp
+  memory_file_store.cpp
+  shared_memory_transport_win32.cpp
+  debug_session.cpp
+  dap_session.cpp
+  dump.cpp
+  c_api.cpp
+  buffer_api.cpp
+  tensor_storage.cpp
+  tensor_serialization.cpp
+  tensor_graph.cpp
+  tensor_cpu.cpp
+  tensor_module.cpp
+  tensor_api.cpp
+  protocol_api.cpp
+  stream_api.cpp
+  native_serialization_api.cpp
+  ipc_api.cpp
+  value_graph_writer.cpp
+  value_graph_reader.cpp
+  value_graph_lifetime.cpp
+  import_loader.cpp
+  native_package_loader.cpp
+  Auto build dll exports
+  xlang3_thread_runtime.lib(thread_module.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+     Creating library D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/build/Release/xlang3_runtime.lib and object D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/build/Release/xlang3_runtime.exp
+  Generating code
+  Finished generating code
+  xlang3_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_runtime.dll
+
+  Checking File Globs
+  bzip2static.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\bzip2static.lib
+  xlang3_ctypes_ffi.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\modules\ctypes\Release\xlang3_ctypes_ffi.lib
+  zlibstatic.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\third_party\zlib\Release\zs.lib
+  xlang3_system_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_system_runtime.lib
+  xlang3_task_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_task_runtime.lib
+  xlang3_thread_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_thread_runtime.lib
+  Auto build dll exports
+  xlang3_runtime.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3_runtime.dll
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/xlang3-ctypes-runtime-fix/CMakeLists.txt
+  xlang3.cpp
+  xlang3.vcxproj -> D:\CantorAI2026\xMind\.agentflow\xlang3-asan-diagnostic\build\Release\xlang3.exe

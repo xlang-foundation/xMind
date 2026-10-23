@@ -1,3 +1,32 @@
+## Isolated ASan SDK diagnostics - 2026-10-22
+
+An isolated SDK f809da86 build enables MSVC AddressSanitizer and debug information
+with CPython discovery/bridge execution disabled. Runtime/CLI compilation passes
+in 76.10 seconds. All 14053 SDK source files, 47 qualified SDK files, 137 original
+native binaries and the protected installed binary/manifest remain unchanged.
+The diagnostic runtime SHA-256 is e27b1f1195b12b49b60b57cb5be8b54cbb0f65adef08d2fd6b70cff03ccf3262.
+Preparation refusals/errors and corrected build inputs are preserved separately.
+Evidence: sdk-asan-build-20261022-*.
+
+A private runtime copy confirms the ASan DLL import and uses original Native
+executables and package adapters. This is partial instrumentation and cannot
+establish absence of memory errors; see [MSVC limitations](https://learn.microsoft.com/en-us/cpp/sanitizers/asan-known-issues).
+Startup passes in 0.59 seconds and A2A registry passes in 9.35 seconds. The graph
+remote contract fails its unchanged completion check in 18.23 seconds; the run
+stops before Responses. A separate Responses case fails its unchanged observation
+window in 23.44 seconds, with both admitted children still running and the backend
+connection alive. No ASan memory error was printed. These remain failed diagnostics;
+no deadline was relaxed and no ordinary/full-suite acceptance is inferred.
+Evidence: sdk-asan-contracts-20261022-* and sdk-asan-responses-20261022-*.
+
+Private retained graph-state comparison shows the ASan case admitted two workers
+and later cancelled both with two uncertain model claims. The earlier original
+crash left one admitted/running worker and the second queued. The Responses
+capture contains five harness SIGTERM stops, empty stderr and no sanitizer report.
+Raw databases, stderr/state copies, dumps, executables and PDBs remain outside Git.
+The SDK object-binding paths need further concurrency audit; no cause or fix is
+established. Installed 0.1.61 remains unchanged and packaging stays on hold.
+
 ## Ordinary Responses backend exit capture - 2026-10-22
 
 The original Responses CTest fixture now records each directly spawned backend's

@@ -1,0 +1,8 @@
+add_test(asan_runtime_startup [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/xlang3.exe]==] [==[-c]==] [==[print('ASAN_RUNTIME_READY')]==])
+set_tests_properties(asan_runtime_startup PROPERTIES TIMEOUT 15)
+add_test(asan_native_a2a_agent_registry_contract [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/agentflow_a2a_agent_registry_contract.exe]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/modules]==] [==[C:/Python/Python314/Lib]==])
+set_tests_properties(asan_native_a2a_agent_registry_contract PROPERTIES TIMEOUT 60)
+add_test(asan_native_agent_worker_graph_remote_contract [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/agentflow_agent_worker_graph_remote_contract.exe]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/modules]==] [==[C:/Python/Python314/Lib]==])
+set_tests_properties(asan_native_agent_worker_graph_remote_contract PROPERTIES TIMEOUT 60)
+add_test(asan_native_responses_agent_http_contract [==[C:/Program Files/nodejs/node.exe]==] [==[D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/xmind_server.exe]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/xmind_cli.exe]==] [==[D:/CantorAI2026/xMind/.agentflow/xlang3-asan-diagnostic/runtime/modules]==] [==[C:/Python/Python314/Lib]==])
+set_tests_properties(asan_native_responses_agent_http_contract PROPERTIES TIMEOUT 60)
