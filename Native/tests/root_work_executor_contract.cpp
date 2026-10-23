@@ -54,6 +54,23 @@ void releases_retired_action(){
     auto staged=pool.stage([staged_owner](std::stop_token){});staged_owner.reset();pool.close();
     require(staged_observed.expired(),"Closed staged ticket must release its callback without ticket destruction");
 }
+void completion_drains_captures(){
+    RootWorkExecutor pool(1,2);std::promise<void> entered,release;
+    auto released=release.get_future().share();
+    struct Owner {
+        std::promise<void>& entered;std::shared_future<void> released;
+        Owner(std::promise<void>& signal,std::shared_future<void> gate):entered(signal),released(std::move(gate)){}
+        ~Owner(){entered.set_value();released.wait();}
+    };
+    auto owner=std::make_shared<Owner>(entered,released);
+    auto ticket=pool.stage([owner](std::stop_token){});owner.reset();
+    struct Unblock {std::promise<void>& release;~Unblock(){try{release.set_value();}catch(...){}}} unblock{release};
+    ticket->commit();
+    require(entered.get_future().wait_for(5s)==std::future_status::ready,"Captured retirement owner must actually begin destruction");
+    const bool premature=ticket->result().wait_for(0ms)==std::future_status::ready;
+    release.set_value();ready(ticket->result());
+    require(!premature,"Root completion must wait for captured admission ownership to drain");
+}
 void releases_ticket_owner_cycle(){
     RootWorkExecutor pool(1,2);std::promise<void> released;
     struct Owner {
@@ -78,4 +95,4 @@ void detached_service_ownership(){
     rejects([&]{withdrawn.get();});staged.reset();require(calls==0,"A retired service's detached ready ticket must withdraw before any action");
 }
 }
-int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();releases_ticket_owner_cycle();detached_service_ownership();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+int main(){try{staged_order();mixed_utilization();close_and_cancel();capacity_and_failure();releases_retired_action();completion_drains_captures();releases_ticket_owner_cycle();detached_service_ownership();std::cout<<"Shared physical root worker lifecycle passed\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

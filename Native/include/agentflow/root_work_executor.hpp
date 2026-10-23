@@ -137,12 +137,13 @@ private:
             try{action(job->stop.get_token());}catch(...){failure=std::current_exception();}
             {
                 std::lock_guard lock(state->mutex);state->running.remove(job);job->phase=Job::Phase::retired;
-                if(failure)job->promise.set_exception(failure);else job->promise.set_value();
             }
-            // Settle before releasing captures: an owner may destroy its own
-            // ticket here, which must observe physical retirement rather than
-            // wait on the worker currently releasing it. Never hold queue lock.
+            // Mark retirement before releasing captures so a captured owner can
+            // destroy its own ticket without self-waiting. Release outside the
+            // queue lock, then publish completion: service shutdown must also
+            // observe release of captured admission reservations.
             action={};
+            if(failure)job->promise.set_exception(failure);else job->promise.set_value();
             state->changed.notify_all();
         }
     }

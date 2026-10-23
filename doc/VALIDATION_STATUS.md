@@ -1,3 +1,22 @@
+## Shared worker result now waits for captured owner release - 2026-10-23
+
+Completed hosted run39971680844 records166/170 in899.46s; four failures remain
+(graph runner, worker compaction, ledger and service shutdown). SDK4 and30
+isolation processes pass. Entire failed suite/artifact hashes are preserved.
+
+Code inspection finds shared worker promise settled before callback captures
+are released. Service close waiting on that result can return while captured
+admission ownership is still held. Worker now marks retirement under lock,
+releases captures outside the lock, then settles the result. Captured ticket
+owner destruction still observes retired phase and cannot self-wait. New
+deterministic destructor barrier asserts result remains pending until release.
+Root lifecycle and actual agent service contracts each pass3 repetitions,
+2/2 contracts in5.12s, frozen input/binary sets unchanged during validation.
+Existing owner-ticket cycle regression also passes. This is focused acceptance;
+hosted shutdown closure and a new complete build/suite remain required. The
+product executable was not rebuilt by this targeted gate; installed62 unchanged.
+Evidence: hosted-native-full-ac537724 and root-capture-retirement-20261023*.
+
 ## Canonical remote graph passes hosted; suite still incomplete - 2026-10-23
 
 Run39961223200 confirms remote graph correction: actual contract passes18.53s.

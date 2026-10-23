@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "runId": 39971680844,
+  "jobId": 120475706970,
+  "sourceRevision": "ac537724",
+  "conclusion": "failure",
+  "fullNativeSuiteRan": true,
+  "fullNativeAcceptance": false,
+  "total": 170,
+  "passed": 166,
+  "failed": 4,
+  "seconds": 899.46,
+  "failures": [
+    "native_graph_runner_contract",
+    "native_agent_worker_model_rpc_contract",
+    "native_agent_worker_ledger_contract",
+    "native_agent_service_contract"
+  ],
+  "sdkContractsPassed": 4,
+  "runtimeIsolationRepeatedProcessesPassed": 30,
+  "artifactId": 12513372652,
+  "artifactSha256": "2cbc3c76fc08433df156c3544848f1a942f77d5172e6fc7c5459e5f0fd5461d3",
+  "jobLogSha256": "a7849cf71a693039b5ce99a0f224fbce82a8c3dc012312d9571e0052273b805e",
+  "installedChanged": false,
+  "scope": "Hosted 170 contracts exclude optional local Rust semantic contracts. No package qualifies after failed full CTest."
+}
