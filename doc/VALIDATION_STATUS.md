@@ -1,3 +1,21 @@
+## Candidate0.1.63 package assembled and verified — 2026-10-23
+
+The separate candidate VSIX contains2443 entries and a verified2398-file
+distributable runtime, using qualified Native3024124e/9054a6ff and SDK8c7972d1.
+All expected runtime, library and client assets match their staged hashes.
+Client source/dependency file sets and bytes match the accepted470 extension /
+165 browser gate; those unchanged suites were not replayed. The package includes
+licences, pip bootstrap and provenance missing from the development fixture.
+Its manifest SHA-256 is1531056163e4499fae8906dfa881da96cd31c722b08610b8ec2011e07a11768b.
+
+The first assembly check wrongly required demonstration SDK modules already
+excluded by distribution policy; its failed stage is retained. The fresh final
+stage explicitly records three demo-module exclusions and the SDK import library.
+No tests or product code were weakened. Native execution from this package,
+managed discovery and rendered VS Code remain unverified. Installed62 and all
+existing user state remain untouched; release acceptance and the full goal are
+not complete. [Receipt](evidence/candidate-0.1.63-package-3024124e-20261023.json).
+
 ## Fresh qualified candidate browser coding — 2026-10-23
 
 The actual hidden in-app browser completed a fresh ceil-div coding task on
