@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "3024124e94208d330a994bc901c260c100e565c2",
+  "nativeSha256": "9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "version": "0.1.63",
+  "scope": "Actual hidden in-app browser using exact packaged browser adapter/assets and copied distributable runtime; controlled provider, real read/edit/Node effects and scoped approvals. Not an installed editor or real paid-provider test.",
+  "passed": true,
+  "sessionId": "e421c040b5134ee28ec1825610bb20be",
+  "runId": "f07de1b60513420b81245be1b61a7b14",
+  "historyMessages": 8,
+  "historyExactAfterReload": true,
+  "approvedEdit": true,
+  "approvedNodeCommand": true,
+  "nodeChecksPassed": 4,
+  "tabClosed": true,
+  "completedTaskNeverReplay": true,
+  "modelCalls": 4,
+  "operations": [
+    {
+      "id": "77e216fa6a574cfbb63bd56f117d65fa",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "0bb3ed2fbc91e14cf9a3a2847ba376ed",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "scopedApprovalPosts": [
+    {
+      "path": "/v1/connection-bindings/6946670c22055989bb03427a87081747/sessions/e421c040b5134ee28ec1825610bb20be/runs/f07de1b60513420b81245be1b61a7b14/operations/77e216fa6a574cfbb63bd56f117d65fa/decision",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/6946670c22055989bb03427a87081747/sessions/e421c040b5134ee28ec1825610bb20be/runs/f07de1b60513420b81245be1b61a7b14/operations/0bb3ed2fbc91e14cf9a3a2847ba376ed/decision",
+      "status": 200
+    }
+  ],
+  "runtimeManifestSha256": "1531056163e4499fae8906dfa881da96cd31c722b08610b8ec2011e07a11768b",
+  "runtimeFileSetsAndBytesUnchanged": true,
+  "packagedBrowserAssetsAndAdapterBytesUnchanged": true,
+  "ownedBackendExited": true,
+  "gateSha256": "6bffcbf7e97502032b93de4a005cdb41e54b737f9837104a0d2f39a41077b5ef",
+  "screenshotSha256": "e6a8a21b40424ccfa093d5a5b8ddc2a3621a5d21e84e15a6a7ec858188f2e756",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "renderedVSCode": false,
+  "fullGoalComplete": false
+}

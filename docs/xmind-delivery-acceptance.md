@@ -3,7 +3,7 @@
 This audit preserves the full recovered delivery objective; completion remains
 unproven. Installed 0.1.62 still uses Native2f105e11 and SDK499415d0. Its protected
 backup and user state remain separate from candidate qualification. Current
-source is not installed. Candidate0.1.63 is [assembled and byte-verified](../doc/evidence/candidate-0.1.63-package-3024124e-20261023.json); packaged execution and rendered VS Code remain open.
+source is not installed. Candidate0.1.63 is [assembled and byte-verified](../doc/evidence/candidate-0.1.63-package-3024124e-20261023.json); [Packaged CLI coding](../doc/evidence/candidate-0.1.63-cli-coding-20261023.json), [packaged browser coding](../doc/evidence/candidate-0.1.63-browser-coding-20261023.json) and [isolated managed handoff](../doc/evidence/candidate-0.1.63-managed-handoff-20261023.json) pass. Protected installation, rendered VS Code and the retained initial old-owner cold-start failure remain separate open gates.
 
 The [complete local native gate on source3024124e](../doc/evidence/native-delivery-3024124e-full-20261023.json)
 passes172/172 in1352.79 seconds, after all targets rebuilt. Source, SDK8c7972d1,
@@ -60,8 +60,9 @@ qualified binaries/runtime and frozen input closure for the next delivery
 checkpoint; do not rebuild or substitute artifacts without requalification.
 Preserve the previous full failures and all completed coding task IDs.
 
-Current native qualification is distinct from package provenance, protected
-installation, fresh rendered browser coding and rendered VS Code acceptance.
+Current native qualification, byte-verified candidate package, isolated managed
+handoff and packaged browser/CLI coding have separate passing evidence. Protected
+installation and rendered VS Code acceptance remain unverified.
 Finish those delivery gates and the remaining implementation below before
 claiming the overall objective complete. Hosted failures remain separate.
 [Current validation status](../doc/VALIDATION_STATUS.md) retains the full and

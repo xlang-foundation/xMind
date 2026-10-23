@@ -1,3 +1,22 @@
+## Candidate0.1.63 packaged browser coding — 2026-10-23
+
+Actual hidden browser coding passes with the exact packaged browser adapter
+and assets plus a byte-verified copy of the distributable runtime. A fresh
+temperature conversion task reads, proposes an approved edit and runs an
+approved Node command; four checks pass. Both decisions use captured scoped
+session/run operation routes. Four controlled replies produce eight messages;
+all rendered history text and selected IDs are exact after reload. Screenshot
+shows completion and the footer at1280x720. Owned tab13 closed and the verified
+backend26276 exited. Runtime file sets/bytes and packaged browser bytes remain
+unchanged. No paid inference, CPython, visible window or installation.
+
+Sessione421c040b5134ee28ec1825610bb20be / rootf07de1b60513420b81245be1b61a7b14
+are complete; never replay. Candidate package, managed handoff and packaged
+CLI/browser coding now each have evidence. Rendered VS Code, protected install,
+the retained long-path cold-start failure and remaining execution/protocol work
+remain open. [Receipt](evidence/candidate-0.1.63-browser-coding-20261023.json),
+[screenshot](evidence/candidate-0.1.63-browser-coding-20261023.png).
+
 ## Candidate0.1.63 distributable CLI coding — 2026-10-23
 
 The actual distributable runtime completed a new sum-of-odds task through a
