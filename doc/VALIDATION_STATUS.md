@@ -1,3 +1,23 @@
+## Candidate0.1.63 managed runtime handoff — 2026-10-23
+
+Actual isolated managed discovery and upgrade pass from the byte-verified
+0.1.62 Native2f105e11/SDK499 bundle to candidate0.1.63 Native3024124e/SDK8c.
+A real read graph returns seeded bytes. Upgrade during a paused human-input
+graph refuses; its owner/history remain exact. That same graph resumes once,
+completes, and an idle upgrade preserves origin, profile, sessions, history and
+terminal graph state. Repeated discovery attaches to the new owner, which is
+then retired using exact birth/image and observed-exit checks. Runtime payload
+bytes remain exact; clean bundle inventories are unchanged. No model calls.
+
+The original longer-path fixture failed before old-owner readiness with an
+empty native log, admitting no task. It is retained. The fresh shorter-path
+fixture passes; this does not prove a path-length cause or erase that failure.
+The successful fixture is .agentflow/p63, not a user profile or installation.
+Sessione4831264b229cd76873c2db1f25dc242 and roots 3d6dec285a6256bce90714b87ea755c5, abc7951231efb56c40d0a7b2530ffdef
+are complete and must never be replayed. Candidate packaged coding/browser
+and rendered VS Code remain separate; installed62 is unchanged.
+[Receipt](evidence/candidate-0.1.63-managed-handoff-20261023.json).
+
 ## Candidate0.1.63 package assembled and verified — 2026-10-23
 
 The separate candidate VSIX contains2443 entries and a verified2398-file

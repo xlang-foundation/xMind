@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "3024124e94208d330a994bc901c260c100e565c2",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "scope": "Actual isolated managed-profile handoff from byte-verified 0.1.62 Native2f105e11/SDK499 to candidate0.1.63 Native3024124e/SDK8c; real read graph and approval graph, no model calls. Source runtime copies, not installed VS Code.",
+  "sessionId": "e4831264b229cd76873c2db1f25dc242",
+  "completedRootIdsNeverReplay": [
+    "3d6dec285a6256bce90714b87ea755c5",
+    "abc7951231efb56c40d0a7b2530ffdef"
+  ],
+  "completedTaskNeverReplay": true,
+  "priorOwner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:50363",
+    "process_id": 9688,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p63\\profiles\\662b444bf4333125eb0897ec3213ba591bb42be5bfed1b2e5ff785f834759cd9",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff63",
+    "workspace_edits": "approved"
+  },
+  "owner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:50363",
+    "process_id": 29100,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p63\\profiles\\662b444bf4333125eb0897ec3213ba591bb42be5bfed1b2e5ff785f834759cd9",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff63",
+    "workspace_edits": "approved"
+  },
+  "managedDiscovery": true,
+  "activeGraphUpgradeRefused": true,
+  "originalGraphResumedOnce": true,
+  "historyAndProfileExactAfterUpgrade": true,
+  "historyMessages": 4,
+  "packageIntegrity": {
+    "oldExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "oldClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    }
+  },
+  "ownedOwnerRetirementObserved": true,
+  "initialFailure": {
+    "stage": "Old 0.1.62 owner before readiness, no sessions or roots admitted",
+    "stderr": "The owned local backend exited before readiness; its profile and database were preserved",
+    "nativeLogBytes": 0,
+    "imagePathCharacters": 248,
+    "runtimeDllPathCharacters": 257,
+    "retained": true,
+    "cause": "Unknown; fresh shorter repository path succeeds, which does not establish cause or qualify original failed startup"
+  },
+  "modelCalls": 0,
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "renderedVSCode": false,
+  "fullGoalComplete": false,
+  "passed": true
+}
