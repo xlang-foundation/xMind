@@ -200,3 +200,35 @@ parallel nested-plan scheduling and live-provider behavior remain incomplete.
 See [current implementation](native-dynamic-plan.md),
 [broader planning design](native-dynamic-plan-design.md) and
 [OpenCode parity inventory](PARITY.md).
+
+## Process-worker ownership integration
+
+Process placement is still incomplete for nested planning. Repository planning
+claim admission now recognizes an exact live dynamic-agent child through its
+existing lease, parent plan/node claim, preset revision, provider/workspace and
+active ultimate-root segment validation. Inspection commits to that child owner
+and cannot return the parent plan or create a second root budget. Admission
+retains the actual finished provider call and the original worker generation.
+This repository layer does not enroll a child process planning service by itself.
+
+The process runtime still needs a shared child-pool/planning factory, captured
+child settings checked against its signed parent preset, and owner-scoped
+callbacks funded by the existing RootExecutionBudget. Dynamic children currently
+miss planning_root() enrollment; planning-owner/context, continuation adoption
+and terminal-drain guards still impose root-only assumptions. A child failure
+must settle its parent node without independently closing the root segment.
+Nested pause/reopen must retire and re-admit the exact owner chain, preserve
+leaf-role funding and pending-call receipts, and never replay completed model
+or effect work. Keep these gates until the corresponding validated owner
+transitions replace them; deleting one equality guard is insufficient.
+
+Required runtime proof includes an actual parent/child/grandchild xMind process
+chain over the registered xlang3 SDK subobjects, sibling isolation, shared model/
+child/parallel/depth limits, canonical child history, one pending call per owner,
+controller-approved effects, cancellation, human pause and SQLite reopen without
+replay. Existing thread recursion and root process tests remain separate scopes.
+
+The focused repository addition verifies admission and inspection only, including
+leaf funding and child-only canonical history. Acceptance/execution, continuation
+and pause/recovery of child-authored plans still need process-placement proof.
+See evidence/nested-worker-planning-admission-20261023.json for exact scope.

@@ -1,3 +1,25 @@
+## Nested worker planning repository ownership groundwork - 2026-10-23
+
+Planning claim admission now accepts an exact current dynamic-agent child using
+existing signed parent/node/preset/provider/workspace/segment lineage validation.
+Ledger fixture commits a real stored child inspection from its finished model
+receipt: exact root/owner/generation, leaf-role root funding, unchanged parent
+funding/policy/limits/segment, child-only canonical history and no parent-plan
+substitution. Forged owner/root and duplicate admission refuse. Root process
+fixtures continue to pass in the same ledger contract35.46s; complete source/
+SDK/library/dependency/binary closure unchanged. Native44c45a2f, focused only.
+
+Initial fixture failed8.51s because it expected NotFound when root_budget(child)
+correctly throws invalid_argument. Original logs/gate retained privately with
+patch0661ec3653d9926925e922c6c148b4a6b9951b65cca004f22952e7fd3f6f2fbf; corrected assertion preserves existing API
+behavior and adds explicit leaf funding checks. No budget/deadline weakened.
+Repository admission/inspection is groundwork only: dynamic-child runtime
+service enrollment, shared scheduler, nested continuation/terminal ownership and
+pause/recovery remain unfinished. Existing root-only guards outside this layer
+remain; no actual nested planner process or full-suite acceptance claimed.
+Session65824 terminal0; no local validation live, installed62 unchanged. Evidence:
+nested-worker-planning-admission-20261023* and updated recursion contract.
+
 ## CLI captured history through independent SDK processes - 2026-10-23
 
 connections messages ID REV SESSION BEFORE_SEQUENCE COUNT calls the existing

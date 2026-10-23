@@ -1,0 +1,82 @@
+Start testing: Oct 23 13:48 Pacific Daylight Time
+----------------------------------------------------------
+94/172 Testing: native_agent_worker_ledger_contract
+94/172 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_ledger_contract" start time: Oct 23 13:48 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Ledger phase begin planning-admission
+Ledger planning seed case=terminal-failure elapsed_ms=0 remaining_ms=19999
+Ledger planning worker-ready case=terminal-failure elapsed_ms=92 remaining_ms=19907
+Ledger planning model-reserve case=terminal-failure elapsed_ms=92 remaining_ms=19907
+Ledger planning model-start case=terminal-failure elapsed_ms=93 remaining_ms=19906
+Ledger planning seed case=terminal-cancel elapsed_ms=143 remaining_ms=19856
+Ledger planning worker-ready case=terminal-cancel elapsed_ms=211 remaining_ms=19788
+Ledger planning model-reserve case=terminal-cancel elapsed_ms=211 remaining_ms=19788
+Ledger planning model-start case=terminal-cancel elapsed_ms=213 remaining_ms=19786
+Ledger planning seed case=root-plain-funding elapsed_ms=268 remaining_ms=19731
+Ledger planning seed case=root-read-epoch elapsed_ms=289 remaining_ms=19710
+Ledger planning seed case=root-read-catalogue elapsed_ms=297 remaining_ms=19702
+Ledger planning seed case=root-delegation-unsealed elapsed_ms=309 remaining_ms=19690
+Ledger planning seed case=once elapsed_ms=319 remaining_ms=19680
+Ledger planning seed case=unfinished elapsed_ms=333 remaining_ms=19666
+Ledger planning seed case=no-assistant elapsed_ms=343 remaining_ms=19656
+Ledger planning seed case=multiple elapsed_ms=353 remaining_ms=19646
+Ledger planning seed case=ordinary-tool elapsed_ms=363 remaining_ms=19636
+Ledger planning seed case=wrong-call elapsed_ms=375 remaining_ms=19624
+Ledger planning seed case=cancelled elapsed_ms=385 remaining_ms=19614
+Ledger planning seed case=expired elapsed_ms=394 remaining_ms=19605
+Ledger planning seed case=stale-attempt elapsed_ms=403 remaining_ms=19596
+Ledger planning seed case=root-file-unsealed elapsed_ms=414 remaining_ms=19585
+Ledger planning seed case=root-file-sealed elapsed_ms=423 remaining_ms=19576
+Ledger planning seed case=provisional elapsed_ms=446 remaining_ms=19553
+Ledger planning seed case=inspect_plan elapsed_ms=459 remaining_ms=19540
+Ledger planning seed case=revise_plan elapsed_ms=491 remaining_ms=19508
+Ledger planning seed case=owner-inspection elapsed_ms=504 remaining_ms=19495
+Ledger planning seed case=owner-rejection elapsed_ms=670 remaining_ms=19329
+Ledger planning seed case=owner-runner elapsed_ms=685 remaining_ms=19314
+Ledger planning seed case=owner-runner-accepted elapsed_ms=875 remaining_ms=19124
+Ledger planning seed case=owner-runner-counted elapsed_ms=1678 remaining_ms=18321
+Ledger planning seed case=owner-code-approved-plain elapsed_ms=2612 remaining_ms=17387
+Ledger planning seed case=owner-code-approved-counted elapsed_ms=3824 remaining_ms=16175
+Ledger planning seed case=owner-code-denied-plain elapsed_ms=5086 remaining_ms=14913
+Ledger planning seed case=owner-code-denied-counted elapsed_ms=6052 remaining_ms=13947
+Ledger planning seed case=owner-code-human-plain elapsed_ms=7057 remaining_ms=12942
+Ledger planning seed case=owner-code-human-counted elapsed_ms=7552 remaining_ms=12447
+Ledger planning seed case=accepted-atomic elapsed_ms=8084 remaining_ms=11915
+Ledger planning seed case=rejected-atomic elapsed_ms=8125 remaining_ms=11874
+Ledger planning seed case=continuation elapsed_ms=8171 remaining_ms=11828
+Ledger planning seed case=owner-accepted-context elapsed_ms=8423 remaining_ms=11576
+Ledger planning seed case=stale-settlement elapsed_ms=8706 remaining_ms=11293
+Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.
+Ledger phase end planning-admission elapsed_ms=8723
+Ledger phase begin main-process-planning
+Ledger phase end main-process-planning elapsed_ms=4390
+Ledger phase begin main-planning-delegation
+Ledger phase end main-planning-delegation elapsed_ms=14960
+Ledger phase begin planned-read-permissions
+Ledger phase end planned-read-permissions elapsed_ms=2604
+Ledger phase begin restricted-catalogues
+Ledger phase end restricted-catalogues elapsed_ms=3016
+Delegated worker ledger verified queued admission, named provider binding, shared funding, four-turn cap, read-only authority, canonical child history, sibling-independent completion and cancellation without refund; synthetic process identities, no child runner dispatch.
+Graph worker admission boundary verified exact registered node/model, active graph segment, captured membership, sibling isolation, tool-node rejection and no untyped funding; synthetic identities, no graph worker dispatch.
+Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.
+Durable process claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no command dispatch or process RPC.
+Durable remote claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no remote peer dispatch or worker RPC.
+Durable callable claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no callable peer dispatch or worker RPC.
+Durable process control ledger binds wait and stop to one captured service with distinct call receipts, no duplicate control, exact canonical observations and read-only rejection. Synthetic job facts; no native process control or RPC.
+Mixed workspace turns preserve exact ordered read/file/process/remote/callable results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.
+Atomic online worker terminal boundary: rollback, exact identity, queued cancellation, interrupted reservations and retained charges verified.
+Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; planning uses actual SDK child processes and controlled synthetic inference.
+Independent peer observed exactly one native model request; rejected duplicates caused no extra HTTP.
+<end of output>
+Test time =  35.45 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_ledger_contract" end time: Oct 23 13:49 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:35
+----------------------------------------------------------
+
+End testing: Oct 23 13:49 Pacific Daylight Time

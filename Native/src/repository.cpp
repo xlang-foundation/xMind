@@ -3649,7 +3649,7 @@ Event Repository::agent_worker_model_event(const AgentWorkerLeaseSpec& lease,con
 AgentWorkerPlanningClaimRecord Repository::claim_agent_worker_planning(const AgentWorkerLeaseSpec& lease,const std::string& attempt,const std::string& call){
     bounded_identity(attempt);bounded_identity(call,256);auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,lease);
     const auto root=run(lease.root_run_id);const auto budget=root_budget(root.id);
-    if(lease.owner_run_id!=root.id||root.graph_root||!root.parent_id.empty()||lease.workspace_id=="workspace:none"||budget.spec.policy_id!="native.dynamic-plan"||budget.spec.policy_revision!=1)throw Conflict("Worker planning requires its captured dynamic root");
+    if((lease.owner_run_id!=root.id&&!worker_dynamic_owner(*this,lease))||root.graph_root||!root.parent_id.empty()||lease.workspace_id=="workspace:none"||budget.spec.policy_id!="native.dynamic-plan"||budget.spec.policy_revision!=1)throw Conflict("Worker planning requires its exact captured dynamic owner");
     const auto caps=dynamic_capabilities(root.id);const auto segment=dynamic_budget_segment(root.id);
     if(!caps.catalogue_finalized||caps.workspace_identity!=lease.workspace_id||Json::parse(caps.provider_identity_json)!=Json::parse(lease.provider_identity_json)||segment.state!="open")throw Conflict("Worker planning lacks finalized native capabilities and an active segment");
     const auto model=read_worker_claim(db,root.id,attempt);
