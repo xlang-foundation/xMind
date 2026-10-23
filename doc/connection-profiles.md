@@ -170,3 +170,37 @@ ID PROFILE_REV SESSION, and connections events ID PROFILE_REV SESSION ROOT
 JSON_CURSOR (null starts from the captured initial cursor). Calls use standard
 SDK service objects and values. UI/HTTP binding adapters and authenticated remote
 connectors remain unfinished.
+
+## HTTP captured-binding adapter
+
+The SDK and HTTP adapters now call the same native LocalConnectionBindings
+service. The server injects the SDK owner's native service into its HTTP adapter,
+so identity/generation and admission/cursor behavior are shared. Neither adapter
+implements execution or persistence.
+
+POST /v1/connection-bindings accepts id and expected_profile_revision and returns
+binding_id plus identity. Authenticated requests use /v1/connection-bindings/ID:
+
+| Method/path | Body or result |
+| --- | --- |
+| GET /identity | Captured public identity |
+| DELETE base path | Release this HTTP handle; admitted work is retained |
+| POST /sessions | id, title; returns binding/session |
+| GET /sessions/SESSION | Captured binding/session record |
+| POST /runs | id, session_id, prompt; returns binding/run |
+| GET /runs/RUN | Captured binding/run record |
+| POST /runs/RUN/cancel | Empty object; cancel through native execution |
+| POST /events | session_id, run_id, optional cursor; returns bounded events/next cursor |
+
+These routes require the existing backend authentication. A view handle is bound
+to the creating authenticated view and origin; another view cannot acquire it.
+The local owner retains administrative access. Registry entries expire after
+15 minutes idle, refresh on use and are limited to 128. Releasing or expiring a
+handle does not cancel work or reinterpret its ownership. Cursor boundaries must
+actually belong to the captured stream, not only contain matching labels.
+
+The initial run-start surface carries only id/session_id/prompt. Existing UI run
+options, provider/workspace/attachment admission and other operations still use
+their current routes until the scoped adapter supports their complete contract.
+The browser proxy/client integration and authenticated remote binding remain open;
+this native HTTP API is not a claim of those completed product flows.

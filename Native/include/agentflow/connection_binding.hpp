@@ -1,0 +1,57 @@
+#pragma once
+#include "agentflow/records.hpp"
+#include <memory>
+namespace agentflow {
+class PersistenceService;class RunExecutor;class BackendOwnerControl;struct LocalConnectionContext;
+struct ConnectionBindingIdentity {
+    std::string connection_id,server_id,backend_generation;
+    std::int64_t profile_revision=0,protocol_version=1;
+};
+struct ConnectionEventCursor {
+    std::string server_id,connection_id,session_id,run_id;
+    std::int64_t sequence=0;
+    bool operator==(const ConnectionEventCursor&)const=default;
+};
+struct ConnectionEventPage {std::vector<Event> events;ConnectionEventCursor cursor;};
+struct BoundConnectionSession {ConnectionBindingIdentity binding;Session session;};
+struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
+class ConnectionEventStream {
+public:
+    ConnectionEventCursor cursor()const;
+    ConnectionEventPage read(ConnectionEventCursor cursor)const;
+private:
+    friend class CapturedLocalConnection;
+    ConnectionEventStream()=default;
+    std::shared_ptr<LocalConnectionContext> context_;
+    ConnectionBindingIdentity identity_;
+    std::string session_,root_;
+};
+class CapturedLocalConnection {
+public:
+    ConnectionBindingIdentity identity()const;
+    BoundConnectionSession open_session(std::string id)const;
+    BoundConnectionSession create_session(std::string id,std::string title)const;
+    BoundConnectionRun open_run(std::string id)const;
+    BoundConnectionRun start_run(std::string id,std::string session,std::string prompt)const;
+    void cancel_run(const std::string& id)const;
+    std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;
+private:
+    friend class LocalConnectionBindings;
+    CapturedLocalConnection()=default;
+    std::shared_ptr<LocalConnectionContext> context_;
+    ConnectionBindingIdentity identity_;
+};
+// Native owner facade. Returned objects retain state, but close fences all of
+// them before the backend's borrowed persistence/executor/control are destroyed.
+class LocalConnectionBindings {
+public:
+    LocalConnectionBindings(PersistenceService&,RunExecutor*,BackendOwnerControl* = nullptr);
+    ~LocalConnectionBindings();
+    LocalConnectionBindings(const LocalConnectionBindings&)=delete;
+    LocalConnectionBindings& operator=(const LocalConnectionBindings&)=delete;
+    std::shared_ptr<CapturedLocalConnection> open(std::string id,std::int64_t profile_revision);
+    void close();
+private:
+    std::shared_ptr<LocalConnectionContext> context_;
+};
+}

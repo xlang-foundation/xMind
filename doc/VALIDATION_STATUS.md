@@ -1,3 +1,23 @@
+## Shared native binding service and HTTP adapter - 2026-10-23
+
+Captured Local binding logic moves into a transport-neutral C++ service used by
+SDK service objects and HTTP. The unified backend shares one service owner across
+both adapters. HTTP now exposes authenticated captured handles, scoped session/run
+operations and bounded event pages; registry entries are view/origin-bound, idle
+expiring and capacity limited. Closing a view handle does not cancel admitted work.
+
+Four focused IPC lifetime/API/catalog/HTTP contracts pass in 2.71 seconds with
+2813 source inputs and all other recorded closures/file sets unchanged. Separate
+xmind.exe SDK clients and HTTP observe identical binding/session values. Tests
+verify wrong-view handle rejection, stale admissions after profile edits, retained
+reads, cursor scope/actual boundary checks and non-cancelling handle release.
+Evidence: captured-http-connection-binding-20261023-*.
+
+This is focused acceptance; source17be6368's full172 result predates the captured
+binding changes. Browser proxy/client adoption, full run-option/operation binding,
+remote authentication/enrollment, nested process planning/recovery and rendered
+VS Code acceptance remain open. Installed62 is unchanged.
+
 ## Captured Local connection service objects - 2026-10-23
 
 Connections.Open captures a Local profile revision, stable persisted server ID

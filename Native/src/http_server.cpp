@@ -8,6 +8,8 @@
 #include "agentflow/provider_yaml_config.hpp"
 #if defined(_WIN32)
 #include "agentflow/connection_profiles.hpp"
+#include "agentflow/connection_binding.hpp"
+#include "connection_binding_values.hpp"
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/context_records.hpp"
 #endif
@@ -356,6 +358,13 @@ struct HttpServer::Impl {
     PersistenceService& persistence;
 #if defined(_WIN32)
     ConnectionProfiles connection_profiles;
+    std::unique_ptr<LocalConnectionBindings> owned_connection_bindings;
+    LocalConnectionBindings* connection_binding_service=nullptr;
+    struct ConnectionHandle {std::string actor;std::shared_ptr<CapturedLocalConnection> value;std::chrono::steady_clock::time_point touched;};
+    std::mutex connection_handles_mutex;
+    std::map<std::string,ConnectionHandle> connection_handles;
+    std::string connection_actor(const Request& request)const{return context_digest(request.get_header_value("Authorization")+"|"+request.get_header_value("X-XMind-View-Origin"));}
+    std::shared_ptr<CapturedLocalConnection> connection_handle(const Request& request){std::lock_guard lock(connection_handles_mutex);const auto found=connection_handles.find(request.matches[1]);if(found==connection_handles.end()||std::chrono::steady_clock::now()-found->second.touched>std::chrono::minutes(15)||(!equal_token(request.get_header_value("Authorization"),authorization)&&found->second.actor!=connection_actor(request)))throw NotFound("Connection binding not found");found->second.touched=std::chrono::steady_clock::now();return found->second.value;}
     A2aRemoteAgentRegistry remote_agents;
 #endif
     RunExecutor* executor;
@@ -517,7 +526,7 @@ struct HttpServer::Impl {
             return false;
         });
     }
-    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* pty,McpResourceCatalog* resources):persistence(store),
+    Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* pty,McpResourceCatalog* resources,LocalConnectionBindings* bindings):persistence(store),
 #if defined(_WIN32)
         connection_profiles(store),
         remote_agents(store),
@@ -529,6 +538,7 @@ struct HttpServer::Impl {
 #endif
 #if defined(_WIN32)
         view_sessions=std::make_unique<ViewSessions>(store,token);
+        if(bindings)connection_binding_service=bindings;else{owned_connection_bindings=std::make_unique<LocalConnectionBindings>(store,execution,owner);connection_binding_service=owned_connection_bindings.get();}
 #endif
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -547,7 +557,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|connection-bindings(/[0-9a-f]{32}(/(identity|sessions(/[A-Za-z0-9_-]+)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
             static const std::regex view_session_delete_route(R"(^/v1/sessions/[A-Za-z0-9_-]+$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(membership|skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
@@ -562,9 +572,10 @@ struct HttpServer::Impl {
             static const std::regex nested_graph_input_route(R"(^/v1/graph-runs/[A-Za-z0-9_-]+/invocations/[A-Za-z0-9_-]+/human/[A-Za-z0-9_.-]+$)");
             const bool nested_graph_input=request.method=="POST"&&std::regex_match(request.path,nested_graph_input_route);
             const bool mcp_authorized=(request.method=="GET"&&std::regex_match(request.path,mcp_auth_read))||(request.method=="POST"&&std::regex_match(request.path,mcp_auth_write));
+            const bool view_binding_delete=request.method=="DELETE"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}$)"));
             const bool view_session_delete=request.method=="DELETE"&&std::regex_match(request.path,view_session_delete_route);
             const bool view_session_fork=request.method=="POST"&&std::regex_match(request.path,session_fork_route);
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||nested_graph_input||(stream&&request.method=="GET")||view_session_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||nested_graph_input||(stream&&request.method=="GET")||view_session_delete||view_binding_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -761,6 +772,21 @@ struct HttpServer::Impl {
             const auto revision=expected_connection_revision(input);
             reply(response,connection_metadata(connection_profiles.select(id,revision)));
         }));
+        const auto connection_request=[](const Request& request){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>262144)throw std::invalid_argument("Invalid connection binding request");};
+        server.Post("/v1/connection-bindings",guard_errors([this,connection_request](const Request& request,Response& response){
+            connection_request(request);const auto input=body(request,{"id","expected_profile_revision"});if(!input.contains("expected_profile_revision")||!input["expected_profile_revision"].is_number_integer()||input["expected_profile_revision"]<1||input["expected_profile_revision"]>9007199254740991LL)throw std::invalid_argument("Invalid connection profile revision");
+            auto captured=connection_binding_service->open(string_field(input,"id",64),input["expected_profile_revision"].get<std::int64_t>());const auto identity=connection_values::identity(captured->identity());std::lock_guard lock(connection_handles_mutex);const auto now=std::chrono::steady_clock::now();for(auto it=connection_handles.begin();it!=connection_handles.end();)if(now-it->second.touched>std::chrono::minutes(15))it=connection_handles.erase(it);else ++it;
+            if(connection_handles.size()>=128)throw PersistenceBusy("Connection binding capacity is busy");const auto id=new_id();if(!connection_handles.emplace(id,ConnectionHandle{connection_actor(request),std::move(captured),now}).second)throw Conflict("Connection binding identity collision");reply(response,{{"binding_id",id},{"identity",identity}},201);
+        }));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/identity)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);reply(response,connection_values::identity(connection_handle(request)->identity()));}));
+        server.Delete(R"(/v1/connection-bindings/([0-9a-f]{32}))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);(void)connection_handle(request);std::lock_guard lock(connection_handles_mutex);connection_handles.erase(request.matches[1]);reply(response,{{"closed",true}});}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"id","title"});const auto result=connection_handle(request)->create_session(identifier(string_field(input,"id",128)),string_field(input,"title",4096));reply(response,connection_values::bound(result),201);}));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto result=connection_handle(request)->open_session(identifier(request.matches[2]));reply(response,connection_values::bound(result));}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/runs)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"id","session_id","prompt"});const auto result=connection_handle(request)->start_run(identifier(string_field(input,"id",128)),identifier(string_field(input,"session_id",128)),string_field(input,"prompt",65536));reply(response,connection_values::bound(result),202);}));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/runs/([A-Za-z0-9_-]+))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto result=connection_handle(request)->open_run(identifier(request.matches[2]));reply(response,connection_values::bound(result));}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/runs/([A-Za-z0-9_-]+)/cancel)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);(void)body(request,{});connection_handle(request)->cancel_run(identifier(request.matches[2]));reply(response,{{"cancel_requested",true}});}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/events)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"session_id","run_id","cursor"});auto stream=connection_handle(request)->events(identifier(string_field(input,"session_id",128)),identifier(string_field(input,"run_id",128)));const auto cursor=!input.contains("cursor")||input["cursor"].is_null()?stream->cursor():connection_values::cursor(input["cursor"]);reply(response,connection_values::page(stream->read(cursor)));}));
+
 #endif
         server.Get("/v1/agents",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent catalogue does not accept query parameters");
@@ -1643,7 +1669,7 @@ struct HttpServer::Impl {
         start_queued_session_dispatcher();
     }
 };
-HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* terminals,McpResourceCatalog* resources):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth,terminals,resources)) {}
+HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* terminals,McpResourceCatalog* resources,LocalConnectionBindings* bindings):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth,terminals,resources,bindings)) {}
 HttpServer::~HttpServer(){stop();}
 int HttpServer::bind(int port) {
     if(port<0 || port>65535 || impl_->port!=-1) throw std::invalid_argument("Invalid bind request");

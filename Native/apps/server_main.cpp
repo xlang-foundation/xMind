@@ -434,7 +434,7 @@ int run_server(int argc,char** argv) {
 #endif
             ,agentflow::AgentInstructionMetadata{instruction_policy.revision,instruction_policy.instructions.size()},provider_setup,graph_execution,provider_profiles
 #if defined(_WIN32)
-            ,owner_control.get(),mcp_oauth.get(),terminals.get(),mcp_resources.get()
+            ,owner_control.get(),mcp_oauth.get(),terminals.get(),mcp_resources.get(),&ipc_api.connection_bindings()
 #endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)

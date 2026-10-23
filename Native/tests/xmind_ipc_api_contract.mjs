@@ -32,10 +32,15 @@ try{
     assert.deepEqual(await client(['connections','select','local','3']),current);assert.deepEqual(await httpCatalog(),current);
     const identity=await client(['connections','open','local','1']);assert.equal(identity.connection_id,'local');assert.match(identity.server_id,/^local-[0-9a-f]{64}$/);assert.equal(identity.protocol_version,1);
     const bound=await client(['connections','session-create','local','1','bound-ipc-session','Captured 雪']);assert.deepEqual(bound.binding,identity);assert.equal(bound.session.title,'Captured 雪');assert.deepEqual(await client(['connections','session-open','local','1','bound-ipc-session']),bound);
+    const httpOpen=await fetch(origin+'/v1/connection-bindings',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({id:'local',expected_profile_revision:1})});assert.equal(httpOpen.status,201);const httpBinding=await httpOpen.json();assert.deepEqual(httpBinding.identity,identity);const httpBase=origin+'/v1/connection-bindings/'+httpBinding.binding_id;
+    const httpSession=await fetch(httpBase+'/sessions/bound-ipc-session',{headers:{Authorization:'Bearer '+token}});assert.equal(httpSession.status,200);assert.deepEqual(await httpSession.json(),bound);
+
     await assert.rejects(client(['connections','open','company','1']));await assert.rejects(client(['connections','open','local','0']));
     const renamed=profiles.map(p=>p.id==='local'?{...p,name:'Renamed Local'}:p);const renamedCatalog=await client(['connections','save','3',JSON.stringify(renamed)]);assert.equal(renamedCatalog.profiles[0].revision,2);
     await assert.rejects(client(['connections','session-create','local','1','rejected-stale-binding','must not exist']));await assert.rejects(client(['session','open','rejected-stale-binding']));
     const fresh=await client(['connections','session-open','local','2','bound-ipc-session']);assert.equal(fresh.binding.server_id,identity.server_id);assert.equal(fresh.binding.profile_revision,2);assert.equal(fresh.session.title,'Captured 雪');assert.deepEqual(await httpCatalog(),renamedCatalog);
+    const httpStale=await fetch(httpBase+'/sessions',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({id:'http-stale-after-sdk-edit',title:'must not exist'})});assert.equal(httpStale.status,409);const httpRetained=await fetch(httpBase+'/sessions/bound-ipc-session',{headers:{Authorization:'Bearer '+token}});assert.equal(httpRetained.status,200);assert.deepEqual(await httpRetained.json(),bound);assert.equal((await fetch(httpBase,{method:'DELETE',headers:{Authorization:'Bearer '+token}})).status,200);
+
 
 
     assert.deepEqual(await client(['session','create','integration-session','Native API 雪']),{id:'integration-session',title:'Native API 雪',parent_id:''});
