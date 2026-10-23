@@ -1,0 +1,196 @@
+{
+  "recordedAt": "2026-10-23T02:43:52.096Z",
+  "source": "4d178c3e5f3086e76756bed74a8f073e4b69ba50",
+  "scope": "Static dependency audit, no new runtime acceptance",
+  "adapters": [
+    {
+      "file": "Native/src/agent_worker_callable_rpc.cpp",
+      "sha256": "7ce40d1437b0fcad8cb734df7b741dd5378a7ae4edd5d2f543fc15937de51d6f",
+      "calls": [
+        {
+          "line": 9,
+          "methods": [
+            "callable.invoke"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_file_rpc.cpp",
+      "sha256": "b8a8c2e56feb064cc518ba2854a5394eb81381527b03b3d9df6e1e3966f8dd9a",
+      "calls": [
+        {
+          "line": 9,
+          "methods": [
+            "file.invoke"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_journal_rpc.cpp",
+      "sha256": "fc01785b3800cabc43f0628c3e13ce78b848c34eba782630ad81c89869876e1f",
+      "calls": [
+        {
+          "line": 13,
+          "methods": [
+            "journal.workspace_mode"
+          ]
+        },
+        {
+          "line": 18,
+          "methods": [
+            "journal.execution_window"
+          ]
+        },
+        {
+          "line": 22,
+          "methods": [
+            "journal.begin_run"
+          ]
+        },
+        {
+          "line": 26,
+          "methods": [
+            "journal.model_event"
+          ]
+        },
+        {
+          "line": 30,
+          "methods": [
+            "journal.tool_event"
+          ]
+        },
+        {
+          "line": 34,
+          "methods": [
+            "journal.workspace_tool_event"
+          ]
+        },
+        {
+          "line": 42,
+          "methods": [
+            "journal.commit_read_turn"
+          ]
+        },
+        {
+          "line": 46,
+          "methods": [
+            "journal.commit_workspace_turn"
+          ]
+        },
+        {
+          "line": 50,
+          "methods": [
+            "journal.complete_run"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_journal_rpc_values.hpp",
+      "sha256": "713f72295881ed97e37999b30196f6aefab4dff1166351d039cc0c58dc7840fc",
+      "calls": [
+        {
+          "line": 48,
+          "methods": []
+        },
+        {
+          "line": 53,
+          "methods": [
+            "journal.reserve_planning_continuation",
+            "journal.reserve_model",
+            "journal.start_model"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_model_rpc.cpp",
+      "sha256": "10a7fbc5ead20167dddd027eb8d02530399a2c2a76230e68d8f965aa294baec3",
+      "calls": [
+        {
+          "line": 5,
+          "methods": [
+            "model.admission"
+          ]
+        },
+        {
+          "line": 12,
+          "methods": [
+            "model.prepare_request"
+          ]
+        },
+        {
+          "line": 19,
+          "methods": [
+            "model.rebuild_request"
+          ]
+        },
+        {
+          "line": 27,
+          "methods": [
+            "model.complete"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_process_rpc.cpp",
+      "sha256": "c4b5e74f5e2f1e0b8acb56513ffd8a347d1775850e1c8d17093e93f23bddaed8",
+      "calls": [
+        {
+          "line": 10,
+          "methods": [
+            "process.invoke"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_read_rpc.cpp",
+      "sha256": "566dbe2fbbe1ce86bb12e99553c96701561625242f704c0f92ec5d058d258293",
+      "calls": [
+        {
+          "line": 12,
+          "methods": [
+            "read.invoke"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_read_workspace.cpp",
+      "sha256": "756f994684667071db0c5aa9cbfb7af44cb10dcc91d7b9cce52d31483c32fcff",
+      "calls": [
+        {
+          "line": 61,
+          "methods": [
+            "callable.catalogue"
+          ]
+        },
+        {
+          "line": 64,
+          "methods": [
+            "process.join"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "Native/src/agent_worker_remote_rpc.cpp",
+      "sha256": "554cadefcce7c5fb8bb04b633977ec4ef33693f1dd50c1d773fb0268bc2c4c64",
+      "calls": [
+        {
+          "line": 11,
+          "methods": [
+            "remote.invoke"
+          ]
+        }
+      ]
+    }
+  ],
+  "contextSha256": "c2fa493a729543860d8aaaac9a63f732b1b7f780ddd23fc7171d7f9fe4aab2fe",
+  "conclusion": "Product NativeWorkerContext requires a non-null SDK client, but the shared context still exposes generic call and adapters retain packet fallback code. Cleanup is incomplete.",
+  "requiredChange": "Replace the shared transport-shaped context with typed service contracts; SDK-backed product implementations and test-only packet fixture implementations must satisfy the same contracts. Preserve owner/budget/acknowledgement validation in shared domain code."
+}
