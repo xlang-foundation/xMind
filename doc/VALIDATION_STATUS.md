@@ -1,3 +1,23 @@
+## Native SDK host-guard integration - 2026-10-22
+
+SDK 499415d03dba6536355ac3ef19522e335f03f95c fixes demonstrated package-host
+runtime access outside the execution guard. Five selected SDK contracts and the
+complete default 11-case performance gate pass. The unchanged-source baseline
+probe demonstrates four host operations bypassing a held runtime mutex; the new
+regression requires them to wait. This does not establish every earlier crash's cause.
+
+The complete xMind Native suite passes 172/172 in 1327.03 seconds. All 2810
+project inputs, 16 SDK files, 1870 pure-library files, 30 SDK runtime files,
+18598 dependencies and 137 Native binaries retain their file sets and hashes
+around validation. Runtime DLL SHA-256 is 68eb1f2ed9445bb7c91e9323c7796c5e71a220c34b5fd104b566f5d1bccce253;
+xmind.exe is e04b3cb67cfa9c0926923ba6c0145c7f5195abe80784b46db7adb1788b89a5a6.
+Evidence: sdk-host-guard-full-native-20261022-* and sdk-native-host-guard-*.
+
+Installed 0.1.61 remains Native854957f3/SDKf809. Fresh package and browser/CLI
+coding verification, rendered VS Code acceptance, generic connection binding
+and nested process planning/recovery remain open. No CPython, paid inference,
+user-task replay or installed-runtime modification occurred.
+
 ## Isolated ASan SDK diagnostics - 2026-10-22
 
 An isolated SDK f809da86 build enables MSVC AddressSanitizer and debug information
