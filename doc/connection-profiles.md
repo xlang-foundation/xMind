@@ -240,6 +240,9 @@ binding_id plus identity. Authenticated requests use /v1/connection-bindings/ID:
 | GET /runs/RUN | Captured binding/run record |
 | POST /runs/RUN/cancel | Empty object; cancel through native execution |
 | POST /events | session_id, run_id, optional cursor; returns bounded events/next cursor |
+| GET /sessions/SESSION/runs/RUN/operations | Captured binding/session/run and operation list |
+| GET /sessions/SESSION/runs/RUN/operations/OPERATION | Captured binding/operation |
+| POST /sessions/SESSION/runs/RUN/operations/OPERATION/decision | decision: allow or deny; captured binding/operation |
 
 These routes require the existing backend authentication. A view handle is bound
 to the creating authenticated view and origin; another view cannot acquire it.
@@ -268,3 +271,9 @@ This version scopes session creation and regular prompt runs. Graph admission,
 commands, queued-input creation, general read/event/approval/model adapters and
 authenticated remote binding remain to be integrated. Unit/native contracts do
 not establish actual rendered verification of this new client source.
+
+The captured operation HTTP routes delegate to the same native run-scoped service
+as SDK Operations. They retain origin-bound handle authentication, reject query
+parameters and caller actors, and preserve exact argument bytes. Health advertises
+local_connection_operations=1. Browser/extension approval routing is still pending;
+these routes alone do not establish rendered approval acceptance.

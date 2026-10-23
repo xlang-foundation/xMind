@@ -1,3 +1,16 @@
+## Captured HTTP operation routes - 2026-10-23
+
+HTTP now delegates operation List/Open/Decide to the existing native captured
+run-scoped service used by SDK subobjects. Origin-bound handles, persisted
+session/run checks, exact argument bytes, backend-owned actor, malformed input
+rejection, cross-run refusal, duplicate-decision protection, metadata retention
+and closed-handle fencing pass the HTTP contract. Four focused native contracts
+pass3.81s; frozen source/SDK/library/dependency/binary sets and bytes unchanged.
+Health advertises local_connection_operations=1. Browser/extension approval
+routing and rendered verification remain pending; no full-suite or installation
+claim for this patch. Hosted40010370205 remains in progress; no duplicate run.
+Evidence: http-operation-scope-20261023.json and matching ctest log.
+
 ## Captured SDK operation scopes and actual CLI decisions - 2026-10-23
 
 Binding.Operations(session,run) exposes List/Open/Decide through standard SDK
