@@ -1,3 +1,29 @@
+## Child planning callback slot through SDK IPC — 2026-10-23
+
+Captured native planning owners may bind the exact backend pool slot of their
+child job. Mutating/resumed planning calls yield that slot around execution and
+reacquire before returning a non-paused result or recording a typed rejection.
+Inspection retains its slot. Root owners cannot adopt a child slot; the optional
+backend argument does not alter the registered SDK API or serialize authority.
+
+A separate SDK fixture process calls the existing Planning object for a
+synthetic admitted child. Its controlled executor dispatches a synthetic pool
+probe while the owner holds the sole root allowance; yielding admits the probe
+on the second pool worker. A typed rejection then restores the owner slot and
+commits once before the SDK call returns. Parent-job retirement releases exactly
+one slot. The probe creates no plan/task admission, model call or effect. This
+is not automatic accepted-plan execution or a production xmind grandchild.
+
+The initial ledger run correctly refused a fixture that used a root-only model
+helper for the child. It is retained; the fixture now uses typed leaf worker
+reservation/start/response/finish. Final build and **4/4 context repository,
+context engine, child-pool and worker ledger contracts pass in44.59 seconds**;
+frozen source/SDK/library/runtime/dependency/binary sets and bytes unchanged.
+No paid inference, CPython, install or visible windows. Accepted nested plans,
+automatic enrollment, multi-root starvation handling, pause and recovery remain
+open. [Receipt](evidence/planning-owner-slot-ipc-20261023.json),
+[CTest log](evidence/planning-owner-slot-ipc-20261023-ctest.log).
+
 ## Transferable native child slot and saturated stop — 2026-10-23
 
 Native child work can bind a backend-only slot lease after its actual root slot

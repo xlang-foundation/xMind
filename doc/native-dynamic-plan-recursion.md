@@ -322,3 +322,12 @@ all64 queued plus8 executing closures; snapshot capacity is corrected to72.
 These are native pool/thread fixtures. Planning callback integration, automatic
 nested process enrollment, multi-root starvation handling and recovery remain
 unqualified. [Receipt](evidence/transferable-child-slot-20261023.json).
+
+### Planning owner slot through IPC (2026-10-23)
+
+A captured child planning owner may bind its native pool slot. Mutation/resume
+yields around native execution; non-paused completion/rejection reacquires
+before returning. Inspection keeps its slot. A distinct SDK fixture process
+verifies rejection restoration while a synthetic pool probe occupies the yielded
+allowance. This does not qualify accepted automatic nested execution, pause or
+recovery. [Receipt](evidence/planning-owner-slot-ipc-20261023.json).

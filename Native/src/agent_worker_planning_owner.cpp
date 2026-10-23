@@ -5,6 +5,7 @@
 #include "agentflow/agent_worker_context_window.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
+#include "agentflow/native_child_executor.hpp"
 
 namespace agentflow {
 namespace {
@@ -19,11 +20,18 @@ struct Owner {
     AgentWorkerChannel::Deadline deadline;
     std::stop_token cancel;
     DynamicInstructionPrecondition guidance;
+    std::shared_ptr<NativeChildSlot> slot;
+    template<class Action> DynamicExecutionResult execute_with_slot(Action action,std::stop_token stop){
+        if(!slot)return action();
+        if(!slot->yield())throw DynamicOutcomeUnrecorded("Planning owner lost its exact child slot");
+        DynamicExecutionResult result;try{result=action();}catch(...){const auto failure=std::current_exception();slot->reacquire(stop);std::rethrow_exception(failure);}
+        if(!result.paused)slot->reacquire(stop);return result;
+    }
 
     void check(std::stop_token stop={})const{
         if(cancel.stop_requested()||stop.stop_requested())throw TransportCancelled("Planning owner cancelled");
         if(std::chrono::steady_clock::now()>=deadline)throw TransportTimeout("Planning owner expired");
-        if(!execution||!budget||!settings.planning||!settings.workspace||budget->root_id()!=lease.root_run_id||budget->deadline()!=deadline||!budget->segment_open())throw DynamicPlanUnavailable("Planning requires its captured dynamic owner");
+        if((slot&&lease.root_run_id==lease.owner_run_id)||!execution||!budget||!settings.planning||!settings.workspace||budget->root_id()!=lease.root_run_id||budget->deadline()!=deadline||!budget->segment_open())throw DynamicPlanUnavailable("Planning requires its captured dynamic owner");
         budget->check(stop);
         (void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
         const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
@@ -57,7 +65,7 @@ struct Owner {
                 const auto report=store.commit_agent_worker_plan_inspection(lease,attempt,deadline,cancel,linked.get_token()).get();
                 return {store.run(lease.owner_run_id).get(),{},report,false};
             }
-            return execution->invoke(lease.owner_run_id,{claim.call_id,claim.tool_name,claim.arguments_json},model.actual_assistant_json,attempt,settings,capabilities,budget,linked.get_token(),guidance);
+            return execute_with_slot([&]{return execution->invoke(lease.owner_run_id,{claim.call_id,claim.tool_name,claim.arguments_json},model.actual_assistant_json,attempt,settings,capabilities,budget,linked.get_token(),guidance);},linked.get_token());
         }catch(const DynamicPlanRejected& error){
             try{store.record_rejected_dynamic_tool_turn(lease.owner_run_id,attempt,model.actual_assistant_json,error.code).get();}
             catch(...){throw DynamicOutcomeUnrecorded("Planning rejection was not durably committed");}
@@ -71,7 +79,7 @@ struct Owner {
         if(accepted.root_run_id!=lease.root_run_id||accepted.owner_run_id!=lease.owner_run_id||claim.state!="accepted"||claim.native_call_id!=call)throw DynamicPlanUnavailable("Planning resume differs from its captured accepted call");
         if(claim.model.generation!=lease.generation)claim=store.adopt_agent_worker_planning(lease,call).get();
         else if(claim.segment_id!=budget->segment_id())throw DynamicPlanUnavailable("Planning resume lost its original segment");
-        return execution->resume(lease.owner_run_id,call,settings,capabilities,budget,linked.get_token(),guidance);
+        return execute_with_slot([&]{return execution->resume(lease.owner_run_id,call,settings,capabilities,budget,linked.get_token(),guidance);},linked.get_token());
     }
 };
 NativePlanningCallbacks callbacks_for(std::shared_ptr<Owner> owner){
@@ -86,8 +94,8 @@ NativePlanningCallbacks callbacks_for(std::shared_ptr<Owner> owner){
 }
 NativePlanningCallbacks make_agent_worker_planning_callbacks(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentSettings settings,
     std::shared_ptr<DynamicPlanExecution> execution,std::shared_ptr<RootExecutionBudget> budget,
-    AgentWorkerChannel::Deadline deadline,std::stop_token cancel,DynamicInstructionPrecondition guidance){
-    auto owner=std::make_shared<Owner>(Owner{store,std::move(lease),std::move(settings),{},std::move(execution),std::move(budget),deadline,cancel,std::move(guidance)});
+    AgentWorkerChannel::Deadline deadline,std::stop_token cancel,DynamicInstructionPrecondition guidance,std::shared_ptr<NativeChildSlot> slot){
+    auto owner=std::make_shared<Owner>(Owner{store,std::move(lease),std::move(settings),{},std::move(execution),std::move(budget),deadline,cancel,std::move(guidance),std::move(slot)});
     owner->capabilities=store.dynamic_capabilities(owner->lease.root_run_id).get();owner->check();
     return callbacks_for(std::move(owner));
 }

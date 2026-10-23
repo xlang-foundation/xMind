@@ -6,6 +6,7 @@ class PersistenceService;
 struct AgentWorkerLeaseSpec;
 struct AgentSettings;
 class AgentWorkerContextWindow;
+class NativeChildSlot;
 struct AgentWorkerPlanningServices {
     NativePlanningCallbacks callbacks;
     std::shared_ptr<RootExecutionBudget> budget;
@@ -15,7 +16,7 @@ struct AgentWorkerPlanningServices {
 NativePlanningCallbacks make_agent_worker_planning_callbacks(
     PersistenceService&,AgentWorkerLeaseSpec,AgentSettings,
     std::shared_ptr<DynamicPlanExecution>,std::shared_ptr<RootExecutionBudget>,
-    AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},DynamicInstructionPrecondition={});
+    AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},DynamicInstructionPrecondition={},std::shared_ptr<NativeChildSlot> slot={});
 NativePlanningCallbacks bind_agent_worker_planning_context(NativePlanningCallbacks,
     PersistenceService&,AgentWorkerLeaseSpec,AgentWorkerContextWindow*,DynamicInstructionPrecondition={});
 }
