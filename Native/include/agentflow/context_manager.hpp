@@ -24,6 +24,8 @@ struct ContextOwner {
     std::string root_run_id,owner_run_id;
     ModelCallRole role=ModelCallRole::parent;
     std::optional<std::string> planning_call_id;
+    // Backend-only lease authority; counters, leaf slots and clocks stay shared.
+    RootExecutionBudget::ContinuationReserve planning_reserve;
 };
 struct PreparedModelContext {
     ModelRequest request;

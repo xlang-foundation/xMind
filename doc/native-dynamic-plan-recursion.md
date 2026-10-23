@@ -301,3 +301,13 @@ reservations. The compacted held child inference now returns and commits an
 actual inspect_plan turn before a newly funded final inference and independent
 SDK completion. Automatic nested enrollment, shared scheduling and recovery
 remain unfinished. [Receipt](evidence/worker-post-compaction-planning-20261023.json).
+
+### Shared root budget with exact lease authority (2026-10-23)
+
+The context owner carries its native lease-bound continuation callback; the
+root budget retains common counters, scheduling slots, clock and pause state.
+Uncounted read/coding hooks also use their actual lease. The obsolete wrapper
+was removed. A ledger regression proves a parent callback refuses the child
+while that child context succeeds with its own lease. Automatic nested runtime
+enrollment, transferable slot ownership and recovery remain pending.
+[Receipt](evidence/worker-shared-budget-authority-20261023.json).

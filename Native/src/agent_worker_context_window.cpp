@@ -34,6 +34,7 @@ AgentWorkerContextWindow::AgentWorkerContextWindow(PersistenceService& store,Age
     const auto run=store.run(lease_.owner_run_id).get();owner_.scope={leaf?ContextScopeKind::execution:ContextScopeKind::session,leaf?run.id:run.session_id};
     owner_.root_run_id=lease_.root_run_id;owner_.owner_run_id=lease_.owner_run_id;
     owner_.role=leaf?ModelCallRole::leaf:ModelCallRole::parent;owner_.binding=policy_.binding;
+    owner_.planning_reserve=[this](const std::string& call,const std::string& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease_,call,attempt,deadline_,owner_cancel_,stop).get();};
 }
 void AgentWorkerContextWindow::check(std::stop_token cancel){
     if(cancel.stop_requested()||owner_cancel_.stop_requested())throw AgentWorkerAuthorityCancelled("Context owner cancelled");

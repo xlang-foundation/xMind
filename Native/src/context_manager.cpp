@@ -284,7 +284,7 @@ public:
             }catch(...){throw ContextOutcomeUnrecorded("Manual context request retirement could not be recorded");}
             throw ContextCapacityExceeded("There is no complete reclaimable context prefix");
         }
-        if(budget&&owner.planning_call_id&&!failed)held=budget->reserve_continuation(*owner.planning_call_id,cancel);
+        if(budget&&owner.planning_call_id&&!failed)held=budget->reserve_continuation(*owner.planning_call_id,cancel,owner.planning_reserve);
         std::string step_id=failed?failed->inference_step_id:(held?
             (held->inference_step_id.empty()?context_digest("native.context.held-step.v1:"+owner.root_run_id+":"+*owner.planning_call_id):held->inference_step_id):identity());
         owned_step_id=step_id;

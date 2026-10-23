@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-10-23T21:52:52.655Z",
+  "sourceParent": "98de836a2355d04dac6965d5b5dcd7386db522f5",
+  "sourcePatchSha256": "5ad1f0b7ef64f08d3b76430fd4a931deffb5b05d46f874ccc001849abf789d5f",
+  "build": {
+    "pid": 30904,
+    "launchedAt": "2026-10-23T21:48:20.471Z",
+    "completedAt": "2026-10-23T21:52:02.639Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "770e42ab54ac28f9be538ddc3eaa0296b9706f0c34e43aabb0d4aa5f9b08e347"
+  },
+  "test": {
+    "pid": 22936,
+    "launchedAt": "2026-10-23T21:52:05.119Z",
+    "completedAt": "2026-10-23T21:52:50.196Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "e6492b0f445c2599115804d41afe43da80f07e9b050cfc8188afd7feb0dc44c7"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 45.04,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "c64aceb9cb2c6b310bb2eb3c4a5e10b04a1bb5ee156108d2be319b105ab3d248",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Native continuation authority is scoped to the captured worker lease without replacing the shared root budget object. Context owner carries backend-only reservation authority; read/coding journal hooks capture their actual lease. Parent callback refuses the child call while child context succeeds through its own lease. Existing pool/context/compaction/SDK completion assertions remain enabled. Automatic nested runtime scheduling remains unqualified.",
+  "selectorCorrection": {
+    "initialDirectory": ".agentflow/workspace-switch-validation/native/worker-shared-budget-authority",
+    "selected": 3,
+    "passed": 3,
+    "expected": 4,
+    "gateAccepted": false,
+    "reason": "Initial regex used native_native_child_executor instead of native_child_executor. Corrected four-contract gate passed; obsolete worker-continuation wrapper was then removed and final clean source revalidated."
+  }
+}

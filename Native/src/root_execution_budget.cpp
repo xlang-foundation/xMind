@@ -61,18 +61,15 @@ std::string RootExecutionBudget::finish(const ModelCallReservation& reservation,
     catch(const AgentTerminalHandoff&){throw;}
     catch(...){throw BudgetOutcomeUnrecorded("Model call retirement could not be recorded; stop execution and recover ownership");}
 }
-ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string& call,std::stop_token cancel){
+ModelCallReservation RootExecutionBudget::reserve_continuation(const std::string& call,std::stop_token cancel,ContinuationReserve owner_reserve){
     check(cancel);
     if(!segment_||policy_!="native.dynamic-plan")throw Conflict("A planning continuation requires its active root segment");
     const auto accepted=journal_.dynamic_plan_call(call).get();
     if(accepted.root_run_id!=root_)throw Conflict("Planning call belongs to another root budget");
     // A repeated native wake can inspect the old binding, never mint an attempt.
     const auto attempt=accepted.continuation_attempt_id.empty()?attempt_id():accepted.continuation_attempt_id;
+    if(owner_reserve)return owner_reserve(call,attempt,cancel);
     return continuation_reserve_?continuation_reserve_(call,attempt,cancel):journal_.reserve_dynamic_continuation(call,attempt).get();
-}
-ModelCallReservation RootExecutionBudget::reserve_worker_continuation(const std::string& call,std::stop_token cancel){
-    if(!continuation_reserve_)throw Conflict("Worker continuation requires its captured lease-bound reservation");
-    return reserve_continuation(call,cancel);
 }
 void RootExecutionBudget::pin_context(const ContextSnapshot& snapshot){
     check();const auto root=journal_.run(root_).get();

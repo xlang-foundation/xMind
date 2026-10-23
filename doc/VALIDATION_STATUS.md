@@ -1,3 +1,27 @@
+## Lease-specific continuation authority on shared root budget — 2026-10-23
+
+Counted worker context now carries a backend-only reservation callback bound to
+its actual lease. ContextManager uses that callback through the existing root
+budget; counters, leaf slots, clocks and pause state stay on that shared object.
+Uncounted read/coding journal hooks likewise authorize with their own captured
+lease. The unused worker-continuation wrapper was removed rather than retained
+as a second route. No callback is serialized or chosen by a worker.
+
+The child ledger deliberately supplies a root budget with the parent's callback.
+That callback refuses the child call; the child context authorizes its exact
+continuation through its own lease, preserving counted/compacted funding and
+independent SDK completion checks. Existing child-pool regression also passes.
+Initial selection omitted that pool test and the gate correctly rejected three
+passes against expected four. After correcting selection and removing the old
+wrapper, the clean build and **4/4 contracts pass in 45.04 seconds**. Frozen
+source, SDK, libraries, runtime, dependencies and binary sets/bytes unchanged.
+
+No paid inference, CPython, installation or visible windows. This removes the
+need for child budget clones; automatic nested worker enrollment, transferable
+slot ownership/scheduling and recovery are still unfinished.
+[Receipt](evidence/worker-shared-budget-authority-20261023.json),
+[CTest log](evidence/worker-shared-budget-authority-20261023-ctest.log).
+
 ## Hosted a6bb3573 full gate terminal failure — 2026-10-23
 
 Official native run `40019092149` is terminal: **166/170 pass in 921.22 seconds**.
