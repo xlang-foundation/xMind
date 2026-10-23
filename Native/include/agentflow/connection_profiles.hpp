@@ -2,6 +2,7 @@
 #include "agentflow/persistence_service.hpp"
 #include <cstdint>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,7 +31,7 @@ public:
     ConnectionProfileCatalog apply(const std::string& source,std::int64_t expected_revision);
     ConnectionProfileCatalog select(const std::string& id,std::int64_t expected_revision);
 private:
-    ConnectionProfileCatalog load_unlocked();
+    ConnectionProfileCatalog load_unlocked(std::optional<std::string>* encoded=nullptr);
     PersistenceService& store_;
     std::mutex mutex_;
 };

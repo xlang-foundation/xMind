@@ -1,3 +1,21 @@
+## Connection catalog concurrent ownership - 2026-10-22
+
+The baseline multi-instance regression fails: per-object mutexes plus unconditional
+persistence writes permit independent catalog services to commit the same revision.
+Catalog initialization and updates now use the existing xlang3-backed persistence
+compare-and-swap against the exact bytes read. Concurrent first use converges on
+one Local record; competing updates fail with Conflict rather than overwriting
+another client. No shared/server binding is advertised by this correction.
+
+The updated regression verifies eight initializers and eight rounds of eight
+independent writers, exactly one committed writer per revision, seven conflicts,
+and persisted reopen. Both catalog/HTTP contracts pass in 0.69 seconds with
+input file sets and hashes unchanged. Baseline failure and corrected receipts:
+connection-catalog-concurrent-{baseline,fixed}-20261022-*. This is focused
+acceptance; installed62 remains unchanged and a fresh full native gate is pending
+for these source changes. Shared binding/authentication/enrollment, nested process
+planning/recovery and rendered VS Code acceptance remain open.
+
 ## Native connection selection boundary - 2026-10-22
 
 The native catalog service now rejects Nexus selection until an authenticated

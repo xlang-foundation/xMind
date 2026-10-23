@@ -1,0 +1,15 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 164: native_connection_profiles_contract
+1/2 Test #164: native_connection_profiles_contract ........***Failed    0.19 sec
+Independent connection services must commit exactly one writer per catalog revision
+
+    Start 165: native_connection_profiles_http_contract
+2/2 Test #165: native_connection_profiles_http_contract ...   Passed    0.37 sec
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) =   0.57 sec
+
+The following tests FAILED:
+	164 - native_connection_profiles_contract (Failed)
+Errors while running CTest
