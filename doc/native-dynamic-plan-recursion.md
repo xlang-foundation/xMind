@@ -331,3 +331,13 @@ before returning. Inspection keeps its slot. A distinct SDK fixture process
 verifies rejection restoration while a synthetic pool probe occupies the yielded
 allowance. This does not qualify accepted automatic nested execution, pause or
 recovery. [Receipt](evidence/planning-owner-slot-ipc-20261023.json).
+
+### Accepted native read plan through SDK (2026-10-23)
+
+A distinct SDK fixture client now invokes the slot-bound child planning owner
+with a real native scheduler. The child-owned deterministic read plan returns
+actual workspace bytes, settles its node, commits its tool turn and completes
+a controlled signed leaf continuation while its ultimate root stays running.
+The model receipts/lease metadata are synthetic; automatic production nested
+worker enrollment, multi-root scheduling and pause/recovery remain open.
+[Receipt](evidence/accepted-planning-slot-ipc-20261023.json).

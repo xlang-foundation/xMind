@@ -1,3 +1,31 @@
+## Accepted child-owned native read plan through SDK IPC — 2026-10-23
+
+The slot-bound planning fixture now includes a successful real scheduler path
+as well as rejection. An independent SDK fixture process calls the child
+Planning service. The real DynamicPlanExecutor accepts a child-owned plan,
+admits its deterministic read node, executes native read_file on seeded
+workspace bytes, settles the node and returns the actual report through SDK.
+The two-worker pool shares a root with max_parallel1, so successful dispatch
+requires yielding/reacquiring the captured parent-job slot.
+
+The fixture then commits the child tool turn, reserves its signed leaf
+continuation, supplies a controlled final inference receipt and completes the
+child plan. Assertions retain the ultimate root running with its segment open.
+This is real native read/scheduler/IPC evidence with synthetic model receipts
+and lease metadata; it does not prove automatic production nested xmind worker
+enrollment or a model-driven grandchild process.
+
+The first run rejected the fixture's missing sealed input schema; the next
+build caught a missing catalogue approval-bindings argument. Both are retained.
+The successful fixture seals the actual native workspace read definition with
+explicit empty approval bindings. Production code required no further change.
+Final build and **4/4 contracts pass in45.19 seconds**, frozen source/SDK/
+library/runtime/dependency/binary sets and bytes unchanged. No paid inference,
+CPython, installation or visible windows. Automatic enrollment/shared scheduling
+across roots, pause/recovery and full candidate/rendered acceptance stay open.
+[Receipt](evidence/accepted-planning-slot-ipc-20261023.json),
+[CTest log](evidence/accepted-planning-slot-ipc-20261023-ctest.log).
+
 ## Child planning callback slot through SDK IPC — 2026-10-23
 
 Captured native planning owners may bind the exact backend pool slot of their

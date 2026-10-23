@@ -1,0 +1,88 @@
+{
+  "recordedAt": "2026-10-23T22:21:43.591Z",
+  "sourceParent": "73cbc8030158a0e64ff40b447ed6ffb717978829",
+  "sourcePatchSha256": "d39bf930f165c388a6a1b2db70e3de202627e089e40fbd4566be184a360fa6f6",
+  "build": {
+    "pid": 38320,
+    "launchedAt": "2026-10-23T22:20:00.447Z",
+    "completedAt": "2026-10-23T22:20:53.308Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "22ccd75f2c713244b0936be960505c8570874dff0e726bb3dded2f01318bd1be"
+  },
+  "test": {
+    "pid": 35368,
+    "launchedAt": "2026-10-23T22:20:55.846Z",
+    "completedAt": "2026-10-23T22:21:41.074Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "79eccb77772634002e66179afef5ecadf2e5997063b001a24b9403bb4bb898ef"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 45.19,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Separate SDK fixture process invokes a captured child planning owner; real DynamicPlanExecutor accepts and schedules a child-owned deterministic read through the shared two-worker pool at root parallelism1. Actual workspace bytes return in the report; signed leaf continuation and child completion preserve ultimate root state/segment. Model receipts and lease metadata are synthetic; no automatic production nested worker enrollment or model-driven grandchild process claim.",
+  "priorFailures": [
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/accepted-planning-slot-ipc",
+      "reason": "Fixture sealed only a tool name; deterministic native planning correctly refused missing input schema.",
+      "recordedAt": "2026-10-23T22:17:11.059Z",
+      "sourceParent": "73cbc8030158a0e64ff40b447ed6ffb717978829",
+      "sourcePatchSha256": "9511c089de9e28b019938cadaed77c5903bad0912ae89a33c9fb6823620b6945",
+      "build": {
+        "pid": 35368,
+        "launchedAt": "2026-10-23T22:15:44.110Z",
+        "completedAt": "2026-10-23T22:16:37.039Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "22ccd75f2c713244b0936be960505c8570874dff0e726bb3dded2f01318bd1be"
+      },
+      "test": {
+        "pid": 25040,
+        "launchedAt": "2026-10-23T22:16:39.752Z",
+        "completedAt": "2026-10-23T22:17:08.614Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "7e28ee88856e39742c0d0ecb220bdee18d99f6bb7fb96b6e5d85a2d1113f920f"
+      },
+      "total": 4,
+      "failed": 1,
+      "passed": 3,
+      "seconds": 28.82,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": false
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/accepted-planning-slot-ipc-qualified",
+      "reason": "Fixture catalogue assembly omitted required approval-bindings argument; corrected to explicit empty array for local read.",
+      "buildLogSha256": "5c3b9742bf0586888081713ff314223eb9c06afc4ed9daaf3f1fe39f3165eab6"
+    }
+  ]
+}
