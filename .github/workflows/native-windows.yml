@@ -14,7 +14,10 @@ concurrency:
 jobs:
   contracts:
     runs-on: windows-2025
-    timeout-minutes: 60
+    # Clean SDK/native builds take about 48 minutes on this runner; leave time
+    # for the complete serial contract set and diagnostic publication. Individual
+    # CTest and product process deadlines remain unchanged.
+    timeout-minutes: 90
     defaults:
       run:
         shell: pwsh

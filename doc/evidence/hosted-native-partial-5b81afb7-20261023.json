@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "runId": 39961223200,
+  "jobId": 120439412794,
+  "sourceRevision": "5b81afb7cf6c222b1aec191770c2cfdcffee49cc",
+  "conclusion": "cancelled",
+  "fullNativeAcceptance": false,
+  "reportedContracts": 144,
+  "expectedContracts": 170,
+  "failures": [
+    "native_graph_runner_contract",
+    "native_agent_worker_model_rpc_contract",
+    "native_agent_worker_ledger_contract",
+    "native_agent_service_contract",
+    "native_agent_runner_contract"
+  ],
+  "remoteGraph": {
+    "passed": true,
+    "seconds": 18.53
+  },
+  "logSha256": "5e5fdfb1e3144719379105950222c6e13c8a86376b19d1470cef2359619eed63",
+  "workflowCorrection": "Overall job allowance 60 to 90 minutes; individual CTest and product process deadlines unchanged. Clean build took approximately 48 minutes before full serial CTest.",
+  "installedChanged": false
+}

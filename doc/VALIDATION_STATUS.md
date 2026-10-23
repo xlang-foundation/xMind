@@ -1,3 +1,15 @@
+## Canonical remote graph passes hosted; suite still incomplete - 2026-10-23
+
+Run39961223200 confirms remote graph correction: actual contract passes18.53s.
+Full CTest reports144/170 before the60-minute job allowance cancels it. Five
+failures: graph runner, worker model RPC, worker ledger, agent service shutdown
+and agent runner. Earlier compaction assertion repeats; no root cause claimed.
+Clean builds consume approximately48 minutes before the full serial suite.
+Overall CI job allowance becomes90 minutes so contracts and diagnostics can
+finish; individual CTest/product process deadlines and exact inventory stay
+unchanged. This does not qualify any failure or establish full acceptance.
+Installed62 unchanged. Evidence: hosted-native-partial-5b81afb7-20261023.json.
+
 ## Remote graph fixture canonical membership - 2026-10-23
 
 Fixture now constructs WorkspaceToolSet membership with WorkspaceTools.root_path()
