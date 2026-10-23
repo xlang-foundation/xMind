@@ -1,3 +1,14 @@
+## Worker ledger phase diagnostics - 2026-10-23
+
+Added begin/end elapsed markers around five planning fixture groups without
+changing execution, assertions or45-second wrapper deadline. Actual fresh local
+ledger contract passes36.72s: planning admission8.678s, main process planning
+4.624s, delegation15.335s, planned read2.877s, restricted catalogues3.353s.
+This exposes where the hosted45-second timeout occurs; no cause or fix is
+claimed from local timing. Exact source/SDK/library/dependency/binary closures
+remain unchanged during validation. No paid inference or CPython; installation
+unchanged. Evidence: worker-ledger-phase-diagnostic-20261023*.
+
 ## Compaction fixture canonical authority correction - 2026-10-23
 
 Hosted run39993237099 completes167/170 in915.52s. Graph runner, worker model RPC
