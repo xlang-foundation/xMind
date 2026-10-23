@@ -31,6 +31,13 @@ std::shared_ptr<CapturedLocalConnection> LocalConnectionBindings::open(std::stri
 }
 ConnectionBindingIdentity CapturedLocalConnection::identity()const{auto life=context_->enter();return identity_;}
 BoundConnectionSession CapturedLocalConnection::open_session(std::string id)const{auto life=context_->enter();return {identity_,context_->store.session(id).get()};}
+BoundConnectionMessages CapturedLocalConnection::messages(std::string session,std::int64_t before,std::int64_t count)const{
+    auto life=context_->enter();
+    if(before<0||before>9007199254740991LL||count<1||count>1000)throw std::invalid_argument("Invalid captured message page");
+    (void)context_->store.session(session).get();
+    if(before)(void)context_->store.message(session,before).get();
+    return {identity_,session,context_->store.history_page(session,before?std::optional<std::int64_t>(before):std::nullopt,static_cast<std::size_t>(count)).get()};
+}
 BoundConnectionSession CapturedLocalConnection::create_session(std::string id,std::string title)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();return {identity_,context_->store.create_session(id,title).get()};}
 BoundConnectionRun CapturedLocalConnection::open_run(std::string id)const{auto life=context_->enter();return {identity_,context_->store.run(id).get()};}
 Run submit_local_connection_run(RunExecutor& executor,ConnectionRunRequest request){

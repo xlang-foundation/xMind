@@ -1,3 +1,18 @@
+## Captured native session message paging - 2026-10-23
+
+Sessions.Messages(session,before_sequence,count) now uses native captured binding
+lifetime/generation and persistence paging.0 selects latest;1..1000 messages per
+page; positive cursors must identify a message in that session. SDK owns value
+serialization; SDK/HTTP share binding/session/message DTOs. HTTP uses scoped
+POST and advertises local_connection_history=1. Tests cover chronological paging
+without duplicate records, foreign-session cursor refusal, bounds, origin-bound
+view handle access, retained reads after metadata changes and retired backend
+refusal. Four focused native contracts pass4.23s; complete frozen source/SDK/
+library/dependency/binary sets/bytes unchanged. No new complete native pass,
+client routing, rendered history acceptance or installation claim. Rust full-run
+failure and hosted failures remain open. Session11221 terminal0; no local work live.
+Evidence: captured-session-history-20261023.json and matching ctest log.
+
 ## Rust semantic wire diagnostic remains separate - 2026-10-23
 
 Existing byte-forwarding proxy reruns the real native semantic fixture and

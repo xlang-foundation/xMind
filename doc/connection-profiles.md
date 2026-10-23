@@ -284,3 +284,12 @@ identity and run receipts are checked without legacy retry on failure. Backends
 that omit the capability retain the previous Local routes. Session permission
 grants, process output/reconciliation and A2A controls remain separate APIs.
 Client unit verification does not establish actual rendered approval acceptance.
+
+Captured Sessions.Messages(session_id, before_sequence, count) returns binding,
+session_id, messages, has_more and next_before. Use before_sequence=0 for the
+latest page; otherwise supply an observed message sequence from that session.
+Count is 1..1000. Native checks reject foreign-session cursor sequences and
+fence retained objects on backend retirement. Message values use normal SDK
+serialization. HTTP exposes POST /connection-bindings/ID/sessions/SESSION/messages
+under /v1 with before_sequence and count; health local_connection_history=1.
+Client integration and rendered verification of this API remain pending.

@@ -1,0 +1,67 @@
+Start testing: Oct 23 13:24 Pacific Daylight Time
+----------------------------------------------------------
+28/172 Testing: native_xmind_ipc_lifetime_contract
+28/172 Test: native_xmind_ipc_lifetime_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_xmind_ipc_lifetime_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_lifetime_contract" start time: Oct 23 13:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process root registration passed concurrent initialization, unbound service refusal, one listener, exclusive public ownership, stale object/token refusal, rebinding without re-registration, persisted data and refusal after backend destruction. Same-process SDK lifecycle fixture; separate xmind.exe calls are covered independently.
+<end of output>
+Test time =   0.46 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_lifetime_contract" end time: Oct 23 13:25 Pacific Daylight Time
+"native_xmind_ipc_lifetime_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/172 Testing: native_xmind_ipc_api_contract
+29/172 Test: native_xmind_ipc_api_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/xmind_ipc_api_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_api_contract" start time: Oct 23 13:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"backendPid":20780,"clientPids":[3292,38792,22672,40940,41352,34364,36936,39764,13360,41640,37744,23404,36896,4544,38996,39188,37464,31948,36792,11864,36224,30300,1280,11028,28172,28548,8300,38248,13032,7980,32216,12760,35100,30452,39720,39064,33052,38296,8612,39812],"apiVersion":1,"transport":"xlang3-lrpc","actualUnifiedExecutable":true,"verified":["Root registered at backend startup","Native Host/Connections/Sessions/Runs subobjects","Distinct xmind.exe clients call SDK methods directly","Exact UTF-8 persisted session survives independent clients","Duplicate create and wrong authentication rejected","No unauthorized session created","Unknown run rejected","Captured run start/open/events and live cancellation use actual SDK service subobjects","Wrong-token and stale captured run admissions dispatch no model","SDK value catalog agrees with HTTP and persists UTF-8 metadata","Independent clients race one catalog revision; exactly one succeeds","Unauthenticated selection, wrong token, stale revision and credential fields rejected"],"limitations":["No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate","No live provider or rendering acceptance"],"passed":true}
+<end of output>
+Test time =   1.84 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_api_contract" end time: Oct 23 13:25 Pacific Daylight Time
+"native_xmind_ipc_api_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+154/172 Testing: native_operation_repository_contract
+154/172 Test: native_operation_repository_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_operation_repository_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_operation_repository_contract" start time: Oct 23 13:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native operation journal contracts passed: exact approvals, one-shot claims, expiry, atomic faults, concurrent decisions, real fixture effect and uncertain recovery. Production effect tools are not integrated.
+<end of output>
+Test time =   0.78 sec
+----------------------------------------------------------
+Test Passed.
+"native_operation_repository_contract" end time: Oct 23 13:25 Pacific Daylight Time
+"native_operation_repository_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+165/172 Testing: native_connection_profiles_http_contract
+165/172 Test: native_connection_profiles_http_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_connection_profiles_http_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_connection_profiles_http_contract" start time: Oct 23 13:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native HTTP connection profile contract passed owner authentication, origin-bound view access, Local initialization, Nexus configuration disclosure, credential rejection, fail-closed remote selection, revision checks and SQLite restart persistence. Nexus authentication and command/event routing remain unimplemented.
+<end of output>
+Test time =   1.13 sec
+----------------------------------------------------------
+Test Passed.
+"native_connection_profiles_http_contract" end time: Oct 23 13:25 Pacific Daylight Time
+"native_connection_profiles_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 23 13:25 Pacific Daylight Time

@@ -87,7 +87,8 @@ struct BoundSessionsApi {
     void check()const{if(!state)throw RunUnavailable("Unbound connection service");}
     X::Value Open(std::string id){return api_call([&]{check();return bound_value(Host(),state->open_session(id));});}
     X::Value Create(std::string id,std::string title){return api_call([&]{check();return bound_value(Host(),state->create_session(id,title));});}
-    BEGIN_PACKAGE(BoundSessionsApi) APISET().AddFunc<1>("Open",&BoundSessionsApi::Open);APISET().AddFunc<2>("Create",&BoundSessionsApi::Create); END_PACKAGE
+    X::Value Messages(std::string id,std::int64_t before,std::int64_t count){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::bound(state->messages(id,before,count)));});}
+    BEGIN_PACKAGE(BoundSessionsApi) APISET().AddFunc<1>("Open",&BoundSessionsApi::Open);APISET().AddFunc<2>("Create",&BoundSessionsApi::Create);APISET().AddFunc<3>("Messages",&BoundSessionsApi::Messages); END_PACKAGE
 };
 struct BoundRunsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundRunsApi()=default;explicit BoundRunsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
