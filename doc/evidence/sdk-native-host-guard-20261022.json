@@ -1,0 +1,147 @@
+{
+  "sdkCommit": "499415d03dba6536355ac3ef19522e335f03f95c",
+  "problem": "Native C++ package callbacks suspend the runtime execution mutex; package-host class/module/exception operations must reacquire it before runtime access.",
+  "baseline": {
+    "scope": "Package-host VM exclusion boundary observation; not proof of prior crash cause or release acceptance",
+    "runtimeLinkage": "static; unchanged SDK source",
+    "sdkRevision": "f809da864b582a90f77fef408c5c6a0db200e11e",
+    "sdkRuntimeSha256": "e42cb8cbaa75c953298f2ed5db97508a6561881f6d740cacd53824c47c5c8543",
+    "test": {
+      "pid": 3324,
+      "startedAt": "2026-10-23T05:00:51.299Z",
+      "endedAt": "2026-10-23T05:00:51.851Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "206881ed1891c5f3d8902ef9d8a5e825fbe8b319dcae63b7de4b0d4dcc34d5b9"
+    },
+    "observations": [
+      {
+        "name": "c_api_set_attr",
+        "serialized": true,
+        "status": 0
+      },
+      {
+        "name": "host_create_class",
+        "serialized": false,
+        "status": 0
+      },
+      {
+        "name": "host_class_add_value",
+        "serialized": false,
+        "status": 0
+      },
+      {
+        "name": "host_value_instance",
+        "serialized": false,
+        "status": 0
+      },
+      {
+        "name": "host_module_add_value",
+        "serialized": false,
+        "status": 0
+      }
+    ],
+    "controlSerialized": true,
+    "bypassingOperations": [
+      "host_create_class",
+      "host_class_add_value",
+      "host_value_instance",
+      "host_module_add_value"
+    ],
+    "contractPassed": false,
+    "allSdkAndProbeInputsUnchanged": true
+  },
+  "correctness": {
+    "sdkCandidate": true,
+    "sourcePatchSha256": "4d955101eaa9359c91b00c133cc773ccb722f53a4dbb606c54d5a19fddfb3c29",
+    "sourceRevision": "f809da864b582a90f77fef408c5c6a0db200e11e",
+    "sourceFiles": 14054,
+    "qualifiedSdkFiles": 47,
+    "nativeBinaries": 137,
+    "configured": {
+      "pid": 14684,
+      "startedAt": "2026-10-23T05:19:51.166Z",
+      "endedAt": "2026-10-23T05:19:51.753Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "91e0634782ab99570c12ab0f54a849bcadc8549a59f2f30665f78237fb9779c8"
+    },
+    "compiled": {
+      "pid": 25336,
+      "startedAt": "2026-10-23T05:19:54.385Z",
+      "endedAt": "2026-10-23T05:20:42.983Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "30370254b1f717cc676abf329f8d7ffb05f394a17f9ac432b8360f0432e8f274"
+    },
+    "tested": {
+      "pid": 28380,
+      "startedAt": "2026-10-23T05:20:45.425Z",
+      "endedAt": "2026-10-23T05:20:47.815Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "61bdfcb2e86dd6858c4a62cb709a3cf3d26046f8a4e34d665a014d39958bbeb9"
+    },
+    "outputs": {
+      "xlang3_runtime.dll": "68eb1f2ed9445bb7c91e9323c7796c5e71a220c34b5fd104b566f5d1bccce253",
+      "xlang3_runtime.lib": "5c3b83a87597df78f6b90cdb095409f97d57f8ed88dcd5323f32779f902944ab",
+      "xlang3.exe": "449fbd0f331c31d1393482d130bc6841202f31b46aee00788a3ab1ebbe90f32d"
+    },
+    "allOriginalInputFileSetsAndBytesUnchanged": true,
+    "cpythonExecuted": false,
+    "runtimeExecuted": true,
+    "releaseAcceptance": false,
+    "passed": true
+  },
+  "performance": {
+    "cases": {
+      "ctypes_pointer_return": {
+        "pid": 32712,
+        "startedAt": "2026-10-23T05:21:13.950Z",
+        "completedAt": "2026-10-23T05:21:14.079Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "98577452aefd783bebf40acece0ddac12f3d0aeb9aa41d9eb0b6966b338e6bbd",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_cast_errcheck_array": {
+        "pid": 20500,
+        "startedAt": "2026-10-23T05:21:14.080Z",
+        "completedAt": "2026-10-23T05:21:14.182Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "873daadd27a58895f1bfdee25ba375d9b4235be5b88485090f700690cc11465b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_structure_layout": {
+        "pid": 33432,
+        "startedAt": "2026-10-23T05:21:14.183Z",
+        "completedAt": "2026-10-23T05:21:14.289Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "2a44feb38a53149727a882243266422984f8746b329301fd1348cda35ace9f7b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "performance": {
+      "pid": 22748,
+      "startedAt": "2026-10-23T05:21:14.289Z",
+      "completedAt": "2026-10-23T05:22:38.563Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "3a30d817d4436884d9a5ad3db69c4d90652b2efbf7ba84564b1a551d7fbcec2b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "status": "pass",
+    "caseCount": 11,
+    "repeats": 21,
+    "warmup": 5,
+    "threshold": 0.1,
+    "allInputsFileSetsAndRuntimeBytesUnchanged": true,
+    "cpython": false,
+    "installed": false,
+    "passed": true
+  },
+  "scope": "Selected SDK correctness and complete default performance only. Full xMind integration and delivered client verification remain pending.",
+  "originalInstalledPackageModified": false
+}
