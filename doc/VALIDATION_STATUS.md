@@ -1,3 +1,28 @@
+## Complete local candidate qualification at3024124e — 2026-10-23
+
+All native targets rebuilt, then **172/172 registered contracts passed in
+1352.79 seconds**. Wrapper session6718 and CTest41444 are terminal zero. The
+frozen2815 project files,16 SDK source files,1870 pure-library files,30 runtime
+files,18598 dependencies and137 native binaries retain identical sets and bytes.
+Native xmind SHA-256 is9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835;
+SDK source8c7972d1/runtime provenance is unchanged. Native patch was empty on
+exact source3024124e94208d330a994bc901c260c100e565c2.
+
+Graph runner12.15s, Rust analyzer9.49s, production worker RPC54.30s, expanded
+ledger37.03s and agent runner9.95s pass within unchanged budgets. Local profile
+passes578.55s within600s; local view145.82s and provider-config65.55s also pass.
+The earlier fcd97b06 full failure and hosted a6bb3573 failure remain retained.
+This Rust pass does not prove the cause of its earlier intermittent failure.
+
+No CPython, paid inference, visible window or installation. Installed62,
+backups and completed user task IDs remain separate preservation scopes. The
+acceptance audit now distinguishes current full native acceptance from older
+browser/CLI receipts, package/install and unverified rendered VS Code coding.
+Automatic nested process enrollment, multi-root scheduling, pause/recovery and
+generic authenticated remote ownership remain unfinished; the goal is active.
+[Receipt](evidence/native-delivery-3024124e-full-20261023.json),
+[complete CTest log](evidence/native-delivery-3024124e-full-20261023-ctest.log).
+
 ## Accepted child-owned native read plan through SDK IPC — 2026-10-23
 
 The slot-bound planning fixture now includes a successful real scheduler path

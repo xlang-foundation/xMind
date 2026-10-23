@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-23T22:52:27.800Z",
+  "sourceParent": "3024124e94208d330a994bc901c260c100e565c2",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 37928,
+    "launchedAt": "2026-10-23T22:23:24.484Z",
+    "completedAt": "2026-10-23T22:29:09.127Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "fa5f57d77761cc90664fe8d61758095450a026e0fd1e7686c10fb3c0fa4ffe7d"
+  },
+  "test": {
+    "pid": 41444,
+    "launchedAt": "2026-10-23T22:29:11.813Z",
+    "completedAt": "2026-10-23T22:51:44.634Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "ced442fb8b722c1f1606a48b1efe5ded417e005e3164ada1a4bdbd736466724d"
+  },
+  "total": 172,
+  "failed": 0,
+  "passed": 172,
+  "seconds": 1352.79,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Complete current-source local native candidate gate: all172 registered contracts with all targets rebuilt. Synthetic model/peer fixtures, native C++/embedded xlang3/SQLite, real owned processes and native SDK IPC; no paid-provider or rendered IDE claim. Installed62 unchanged.",
+  "selectedDurationsSeconds": {
+    "graphRunner": 12.15,
+    "rustAnalyzer": 9.49,
+    "workerRpc": 54.3,
+    "workerLedger": 37.03,
+    "agentRunner": 9.95,
+    "localProfile": 578.55,
+    "localView": 145.82,
+    "localViewProviderConfig": 65.55
+  },
+  "scopeLimits": [
+    "Earlier fcd97b06 full failure and hosted a6bb3573 failure remain retained.",
+    "Rust passes this complete run; the earlier intermittent failure cause is not established.",
+    "Existing browser/CLI rendered coding receipts remain on their recorded sources.",
+    "Automatic production nested worker enrollment, multi-root scheduling, pause/recovery and authenticated generic remote protocol remain incomplete.",
+    "No package/install or rendered VS Code coding acceptance is claimed."
+  ]
+}
