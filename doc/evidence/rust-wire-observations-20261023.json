@@ -1,0 +1,194 @@
+{
+  "diagnosticOnly": true,
+  "sharedCauseOfPriorFailureProven": false,
+  "observations": [
+    {
+      "file": "rust-1449549526.log.client.lsp",
+      "definitionResponses": [
+        {
+          "id": "xmind-4",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 0
+        },
+        {
+          "id": "xmind-5",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-6",
+          "isNull": false,
+          "resultKind": "undefined"
+        },
+        {
+          "id": "xmind-7",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        }
+      ],
+      "serverRequests": [
+        "workspace/diagnostic/refresh"
+      ],
+      "serverNotifications": []
+    },
+    {
+      "file": "rust-2868280891.log.client.lsp",
+      "definitionResponses": [
+        {
+          "id": "xmind-3",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 0
+        },
+        {
+          "id": "xmind-4",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-5",
+          "isNull": false,
+          "resultKind": "undefined"
+        },
+        {
+          "id": "xmind-6",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        },
+        {
+          "id": "xmind-11",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        }
+      ],
+      "serverRequests": [],
+      "serverNotifications": []
+    },
+    {
+      "file": "rust-3387843847.log.client.lsp",
+      "definitionResponses": [
+        {
+          "id": "xmind-4",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 0
+        },
+        {
+          "id": "xmind-5",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-6",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-7",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        }
+      ],
+      "serverRequests": [
+        "workspace/diagnostic/refresh"
+      ],
+      "serverNotifications": []
+    },
+    {
+      "file": "rust-3685361041.log.client.lsp",
+      "definitionResponses": [
+        {
+          "id": "xmind-3",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 0
+        },
+        {
+          "id": "xmind-4",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-5",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        },
+        {
+          "id": "xmind-10",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        }
+      ],
+      "serverRequests": [],
+      "serverNotifications": []
+    },
+    {
+      "file": "rust-698438183.log.client.lsp",
+      "definitionResponses": [
+        {
+          "id": "xmind-4",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 0
+        },
+        {
+          "id": "xmind-5",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-6",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-7",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        }
+      ],
+      "serverRequests": [
+        "workspace/diagnostic/refresh"
+      ],
+      "serverNotifications": []
+    },
+    {
+      "file": "rust-821934638.log.client.lsp",
+      "definitionResponses": [
+        {
+          "id": "xmind-3",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 0
+        },
+        {
+          "id": "xmind-4",
+          "isNull": true,
+          "resultKind": "object"
+        },
+        {
+          "id": "xmind-5",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        },
+        {
+          "id": "xmind-10",
+          "isNull": false,
+          "resultKind": "array",
+          "count": 1
+        }
+      ],
+      "serverRequests": [],
+      "serverNotifications": []
+    }
+  ]
+}

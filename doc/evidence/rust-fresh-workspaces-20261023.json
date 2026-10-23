@@ -1,0 +1,31 @@
+{
+  "startedAt": "2026-10-23T11:11:16.927Z",
+  "endedAt": "2026-10-23T11:11:44.269Z",
+  "pid": 6360,
+  "exitCode": 0,
+  "signal": null,
+  "cases": 3,
+  "expectedTests": 6,
+  "nativeSha256": "654b4817f3ea462c70c13165f98501fe259153eec1034b2ac43412c3aae7e116",
+  "allOriginalProjectToolsAndFixtureBytesUnchanged": true,
+  "diagnosticOnly": true,
+  "fullAcceptance": false,
+  "paidInference": false,
+  "cpython": false,
+  "logSha256": "8d65a572e5b4109f8d09f0fa96efe6c4aa3786aca318ae22056f5fa7f618f252",
+  "rustLogs": {
+    "rust-1502012361.log": "e7e29ed6d563765fb0ffc9698c06f39d63b788ecc616cfdfbdbf9cd99a17f482",
+    "rust-111735593.log": "b45b915d57dd796962ff31a9b8b2e921432be21087b8136850486edf5bbaf8bb",
+    "rust-1458537418.log": "6987cbb02a70580468fd78721056ec1d1a287ec7083903467c9c370f69a0253e",
+    "rust-2276664958.log": "60317c2b140a0571b6ae4f7f7db462dd943cf289de591cef727574cf72173390",
+    "rust-2039739582.log": "36c21d7e005b6aa8c24c6ab4e6980e50ac302d365a9e1819989e72401d780ff2",
+    "rust-2285122160.log": "e283ea68c192b89f652b8925ab216478c4226fdb2819660c7c8d4d1e2656cbe0",
+    "rust-4019760948.log": "f36db0b6652f6921e7a03637426bd35a1f9fa977b90b9df4cb471b2ea1c80282",
+    "rust-3409684676.log": "f3831f38c861f4f4589ddde8b8ce15c34fdf22cf02a6034d9593007014922de7",
+    "rust-1928732607.log": "a030e5b4bfcb41b363e4f98b22e76dac969145319c839f28d491fe377d6d6c08",
+    "rust-831805669.log": "e14ca8aecf2831663cd322debde6391641181ad07a1c57ad95c2ba87cd94eeff",
+    "rust-3605064964.log": "33346f1ebd2fa5890249e0edab8fa5fa69e3a302ed9b80cfe3c8c3364a85d3bb",
+    "rust-96422516.log": "a31df51e43b5f824d79238de7c41296b691f514ef112451770554e6a49a7f7fc"
+  },
+  "passed": true
+}

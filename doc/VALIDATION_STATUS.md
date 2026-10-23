@@ -1,3 +1,23 @@
+## Rust cold-workspace and wire diagnostics - 2026-10-23
+
+Three fresh TestProj fixtures pass actual Cargo setup and unchanged native Rust
+contract:6/6 in27.02s. Initial diagnostic workspaces under.agentflow were correctly
+rejected as backend configuration; protection was retained and controlled model
+fixtures moved under established TestProj/xmind-delivery-validation.
+
+A temporary RA_LOG lsp_server trace filter produces no actual wire messages;
+that ineffective source edit is removed and original test fixture rebuilt.
+A separate private exact-child byte-forwarding proxy then captures complete
+client/server LSP frames without production changes. Three further fresh
+workspaces pass6/6 in27.45s; all source/tool/fixture bytes stay unchanged during
+each diagnostic. Six native/HTTP definition exchanges show startup empty/null/
+content-modified responses followed by actual nonempty definition arrays. This
+does not explain the earlier60s null result or establish a production fix.
+Raw wire records stay private; summaries and complete test output are retained.
+Full new-SDK acceptance remains unresolved and installed62 is unchanged.
+Evidence: rust-fresh-workspaces/rust-wire-proxy/rust-wire-observations and
+rust-diagnostic-scope-20261023*. No CPython, paid inference or visible UI.
+
 ## SDK lifetime guard and xMind requalification result - 2026-10-23
 
 Isolated SDK8c7972d1 serializes C API runtime creation/destruction across complete

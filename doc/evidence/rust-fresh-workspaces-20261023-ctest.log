@@ -1,0 +1,17 @@
+Test project D:/CantorAI2026/xMind/.agentflow/rust-analyzer-fresh-testproj-workspaces
+    Start 1: fresh_rust_1_check
+1/6 Test #1: fresh_rust_1_check ...............   Passed    0.18 sec
+    Start 2: fresh_rust_1_query
+2/6 Test #2: fresh_rust_1_query ...............   Passed    9.02 sec
+    Start 3: fresh_rust_2_check
+3/6 Test #3: fresh_rust_2_check ...............   Passed    0.14 sec
+    Start 4: fresh_rust_2_query
+4/6 Test #4: fresh_rust_2_query ...............   Passed    8.83 sec
+    Start 5: fresh_rust_3_check
+5/6 Test #5: fresh_rust_3_check ...............   Passed    0.17 sec
+    Start 6: fresh_rust_3_query
+6/6 Test #6: fresh_rust_3_query ...............   Passed    8.66 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =  27.02 sec

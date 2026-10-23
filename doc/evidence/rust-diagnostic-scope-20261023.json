@@ -1,0 +1,33 @@
+{
+  "initialPrivateWorkspaceDiagnostic": {
+    "startedAt": "2026-10-23T11:10:52.592Z",
+    "endedAt": "2026-10-23T11:10:53.750Z",
+    "pid": 34488,
+    "exitCode": 8,
+    "signal": null,
+    "cases": 3,
+    "expectedTests": 6,
+    "nativeSha256": "654b4817f3ea462c70c13165f98501fe259153eec1034b2ac43412c3aae7e116",
+    "allOriginalProjectToolsAndFixtureBytesUnchanged": true,
+    "diagnosticOnly": true,
+    "fullAcceptance": false,
+    "paidInference": false,
+    "cpython": false,
+    "logSha256": "0cf8991a42d9bb398b8b3afd569a63de54228435ae99d0064869ddd54fb9ca8a",
+    "rustLogs": {},
+    "passed": false
+  },
+  "initialRejection": "Backend configuration cannot be a model workspace; controls retained; fresh fixtures moved under established TestProj delivery-validation directory",
+  "coldWorkspaceCases": 3,
+  "coldSetupAndQueryTestsPassed": 6,
+  "wireProxyWorkspaceCases": 3,
+  "wireSetupAndQueryTestsPassed": 6,
+  "wireCaptureValidFrames": true,
+  "observedProfileDefinitionExchanges": 6,
+  "wireObservations": "Startup responses include empty arrays, null and content-modified errors, then nonempty definition arrays. This does not establish why the original full run remained null.",
+  "ineffectiveDiagnosticLogFilter": "lsp_server=trace emitted no wire messages; source probe removed and original fixture rebuilt",
+  "productionSourceChanged": false,
+  "priorFullFailureResolved": false,
+  "fullAcceptance": false,
+  "rawWireCapturesPrivate": true
+}
