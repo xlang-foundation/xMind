@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed61 Native854957f3/c6794eb0, SDKf809/footerb95:172/464/162 checks;2442 installed/2398 runtime. Settings/profiles unchanged;60 backup2492 retained. Smoke sessionc339a2392a9b82abfd66020c0d4f180c/root4cbbb8353dd546085f4e45e40ed628f7 completed read, NEVER replay. Owner exited. Code rendering unverified. See doc/VALIDATION_STATUS.md.
+- Installed62 Native2f105e11/e04b3cb6, SDK499415d0/footerb95:172 Native;2442 installed/2398 runtime exact. Five protected user-state roots unchanged;61 backup2442 retained. Fixture smoke sessionf42800bb4c53401c9c5c83ddba9a0bfb/rootc4772be63e5a5f9a607d71ea35666ace completed read, NEVER replay. Owner exited; Code rendering unverified. Prior61 receipts: doc/VALIDATION_STATUS.md.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 

@@ -1,0 +1,81 @@
+{
+  "installation": {
+    "recordedAt": "2026-10-23T06:10:17.953Z",
+    "passed": true,
+    "installedVersion": "0.1.62",
+    "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.62",
+    "vsixSha256": "4efe4dc649255ab97527779eeb4cad7e769e7ad7077b57d5b1e086a2ec3c46e2",
+    "installedPayloadFilesVerified": 2440,
+    "packageJsonMatchesExceptInstallerMetadata": true,
+    "runtimeFilesVerified": 2398,
+    "runtimeManifestSha256": "3fa2fcd78f3df21371ee22bb979903a6deb62ae754cf0ac0a22f38a1e1b64d0b",
+    "nativeSha256": "e04b3cb67cfa9c0926923ba6c0145c7f5195abe80784b46db7adb1788b89a5a6",
+    "otherExtensionRegistryEntriesUnchanged": true,
+    "preservedRoots": [
+      "C:/Users/shaw9/.xMind",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+      "D:/CantorAI2026/xMind/.config"
+    ],
+    "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+    "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "exactOldInstallationBackup": 2442,
+    "visibleWindowRequested": false,
+    "installedNativeExecuted": false,
+    "userProfileBackendStarted": false,
+    "paidInference": false,
+    "renderedVSCode": false
+  },
+  "smoke": {
+    "passed": true,
+    "installedNativeSha256": "e04b3cb67cfa9c0926923ba6c0145c7f5195abe80784b46db7adb1788b89a5a6",
+    "managedDiscoveryAndReuse": true,
+    "sessionId": "f42800bb4c53401c9c5c83ddba9a0bfb",
+    "completedRoot": "c4772be63e5a5f9a607d71ea35666ace",
+    "history": [
+      {
+        "data": {
+          "content": "Read the installed fixture marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph installed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.62 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000034fa0b0000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000034fa0b0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "installed.read",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Observed installed 0.1.62 native read.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000034fa0b0000000000",
+                "path": "installed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000034fa0b0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "observedOutput": "Observed installed 0.1.62 native read.\n",
+    "modelCalls": 0,
+    "userProfileRootUsed": false,
+    "ownedBackendIdentityVerifiedAndExitObserved": true,
+    "visibleWindowOpened": false,
+    "renderedVSCode": false
+  },
+  "runtimeFilesRecheckedAfterSmoke": 2398,
+  "privateSnapshotInventoriesPublished": false
+}

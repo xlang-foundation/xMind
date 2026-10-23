@@ -1,3 +1,26 @@
+## Installed 0.1.62 protected checkpoint - 2026-10-22
+
+VS Code CLI installs verified 0.1.62 successfully with no visible window.
+2440 payload files match the VSIX; package metadata matches apart from Code's
+installer metadata. All 2398 runtime files and the manifest match the candidate.
+Other extension registry entries remain exact. Five protected roots retain
+identical file sets and hashes, including settings, profiles, history, extension
+global storage and repository configuration. Private snapshot inventories stay
+out of Git. The exact previous 0.1.61 installation backup contains 2442 files
+under .agentflow/installation-backups/0.1.61-before-2f105e11/extension.
+
+Installed native execution passes managed fixture-profile discovery/reuse and
+one real read graph, with two history messages preserved on repeated reads.
+Session f42800bb4c53401c9c5c83ddba9a0bfb / root
+c4772be63e5a5f9a607d71ea35666ace completed; NEVER replay it. No model calls
+or user profile access occur. Only the fixture owner is identity-verified and
+stopped, with exit observed. All 2398 installed runtime hashes are rechecked
+after this smoke. Evidence: installed-0.1.62-2f105e11-20261022.json.
+
+This proves installation and installed native execution, not rendered VS Code
+coding/editor context. Generic connection binding/enrollment and nested process
+planning/recovery remain open.
+
 ## Packaged 0.1.62 CLI coding - 2026-10-22
 
 A fresh task starts through the packaged native CLI against an isolated loopback
