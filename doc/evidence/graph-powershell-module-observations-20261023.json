@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "runId": 39982730682,
+  "sourceRevision": "c1628b171c1ada7b99ce40f8320de1806fe90888",
+  "scope": "Read-only exact-owned graph contract descendant observations; no environment or command-line collection.",
+  "rawSha256": "aa5ce699aa9e4ce0f75c1f87461674509e2c5b68919f459511634c2f81bc0f04",
+  "samples": [
+    {
+      "pid": 4488,
+      "createdUtc": "2026-10-23T16:54:28.0526010Z",
+      "ageMs": 2118,
+      "cpuMs": 437.5,
+      "modulePresence": {
+        "automation": true,
+        "management": false,
+        "stateRepository": true,
+        "utility": false,
+        "amsi": true
+      },
+      "highestThreadCpuMs": 125
+    },
+    {
+      "pid": 4488,
+      "createdUtc": "2026-10-23T16:54:28.0526010Z",
+      "ageMs": 12917,
+      "cpuMs": 1125,
+      "modulePresence": {
+        "automation": true,
+        "management": false,
+        "stateRepository": true,
+        "utility": false,
+        "amsi": true
+      },
+      "highestThreadCpuMs": 734.375
+    },
+    {
+      "pid": 4488,
+      "createdUtc": "2026-10-23T16:54:28.0526010Z",
+      "ageMs": 23553,
+      "cpuMs": 11703.125,
+      "modulePresence": {
+        "automation": true,
+        "management": false,
+        "stateRepository": true,
+        "utility": false,
+        "amsi": true
+      },
+      "highestThreadCpuMs": 11312.5
+    }
+  ],
+  "observation": "Utility and Management module presence remain false in all three actual samples; Automation and StateRepository remain true. One thread accumulated CPU while the script had not emitted delay_completed.",
+  "inference": "Investigate command discovery/module loading before assuming the six-second delay itself exceeded its budget.",
+  "limits": "Module snapshots and CPU do not identify the executing managed frame, prove a deadlock, or justify changing the deadline. Full graph contract remains failed.",
+  "installedChanged": false
+}
