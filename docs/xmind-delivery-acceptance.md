@@ -7,8 +7,9 @@ shared worker retirement ordering, captured connection adapters and scoped CLI
 run commands. SDK Runs.Submit and captured operation APIs have focused
 acceptance. Browser/extension operation and run-control adapters are implemented;
 actual scoped browser approval proof is recorded separately below. The earlier
-full172 receipts remain scoped to b133a0ee; a complete current-source run is live
-and must reach terminal before being counted. Current source is not installed.
+full172 receipts remain scoped to b133a0ee. Current full sourcefcd97b06 finishes
+168/172: three integration caller/lifetime fixtures now pass focused repair;
+Rust semantic navigation remains unresolved. Current source is not installed.
 
 The [last complete hosted run](../doc/evidence/hosted-native-full-dd238817-20261023.json)
 passes167/170 in909.68 seconds. All four counted context cases, including
@@ -48,8 +49,9 @@ these older runtime results retain their original scope. [Current SDK8c browser 
 ## Next implementation sequence
 
 The b133a0ee frozen source/runtime complete local qualification passes172.
-Current adapter source is undergoing a new complete run; do not count it until
-its live validation handle reaches terminal and its closure checks pass.
+Current adapter source full run records168/172 with unchanged closures. Three
+integration fixture repairs pass focused3/3; Rust definition failure remains.
+These results do not combine into a complete pass.
 Diagnose hosted failures and verify current-runtime client delivery before
 claiming a qualified delivery package. SDK8c lifetime serialization passes SDK5,
 100 repeated isolation processes and default performance11. Hosted SDK guards

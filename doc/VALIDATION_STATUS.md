@@ -1,3 +1,22 @@
+## Complete current run and repaired client integration fixtures - 2026-10-23
+
+Full sourcefcd97b06 completes168/172 in1299.02s. Actual source/SDK/libraries/
+dependencies/native binary file sets and bytes remain unchanged. Failures:
+delegation HTTP and coding-server callers omit newly required operation session;
+local-view fixture reuses a closed client after controller disposal; Rust Analyzer
+definition remains null after its existing60s wait. Graph12.22s, workerRPC55.51s
+and ledger36.07s pass locally. Full failed logs retained; no full-pass claim.
+
+Three integration fixtures now pass explicit observed session/run and create a
+fresh client when reattaching a view. Focused3/3 pass69.56s with complete frozen
+closures unchanged; Native binary1a0f856f unchanged. No scopes/permissions or
+assertions were weakened. Rust semantic failure remains unresolved and earlier
+b133 full172 remains distinct. Full session95155 and focused40818 are terminal;
+no local validation is live. Installed62 read-only check verifies2398 runtime
+payload files plus exact manifest unchanged; no installation or user-state claim.
+Evidence: captured-http-fcd97b06-full-native, captured-client-caller-fixes and
+installed62-runtime-preservation-20261023*.
+
 ## Current complete native qualification started - 2026-10-23
 
 Sourcefcd97b06 is frozen for a new complete172-contract qualification using

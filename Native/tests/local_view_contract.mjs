@@ -112,15 +112,17 @@ try{
   assert.deepEqual(await client(attached).graph(waiting.id),pausedBefore);
   assert.deepEqual(await client(attached).history(streamSession.id),historyBeforeAttach);
  }finally{settings.providerConfigPath='';attachment.dispose();}
- const feeds=[],actualEvents=[],browserClient=new BrowserSessionClient(browserOrigin,{fetchImpl:(url,options)=>fetch(url,{...options,headers:{...options.headers,Cookie:cookie,'Sec-Fetch-Site':'same-origin',Origin:browserOrigin}})}),observedClient=browserClient,originalEventStream=browserClient.eventStream.bind(browserClient);
- observedClient.eventStream=(id,options)=>{const feed={id,signal:options.signal,after:options.after,observed:false};feeds.push(feed);return originalEventStream(id,{...options,onObservation:async value=>{await options.onObservation?.(value);feed.observed=true;},onEvent:async event=>{actualEvents.push(event);await options.onEvent(event);}});};
+ const feeds=[],actualEvents=[];
+ const observedClientForView=()=>{const client=new BrowserSessionClient(browserOrigin,{fetchImpl:(url,options)=>fetch(url,{...options,headers:{...options.headers,Cookie:cookie,'Sec-Fetch-Site':'same-origin',Origin:browserOrigin}})}),originalEventStream=client.eventStream.bind(client);
+  client.eventStream=(id,options)=>{const feed={id,signal:options.signal,after:options.after,observed:false};feeds.push(feed);return originalEventStream(id,{...options,onObservation:async value=>{await options.onObservation?.(value);feed.observed=true;},onEvent:async event=>{actualEvents.push(event);await options.onEvent(event);}});};return client;};
+ const observedClient=observedClientForView();
  const firstMessages=[],firstView=new BrowserController(observedClient,message=>firstMessages.push(message));
  try{await firstView.initialize({session:streamSession.id,run:waiting.id});const pausedEvents=await native.graphEvents(waiting.id,0);await waitFor(()=>firstView.subscription?.cursor===pausedEvents.at(-1).seq,'actual paused feed delivery');assert.equal(feeds.length,1);assert.equal((await native.graph(waiting.id)).run.state,'paused');
   const port=Number(new URL(browserOrigin).port);await browser.close();browser=await createBrowserServer({backend:owner.origin,assetRoot:path.join(base,'browser-assets')});assert.equal(await browser.listen(port),browserOrigin);await waitFor(()=>feeds.length>=2&&feeds.at(-1).observed&&firstView.subscription?.cursor===pausedEvents.at(-1).seq&&!feeds.at(-1).signal.aborted,'actual gateway restart scoped replay');assert.equal(feeds.at(-1).after,pausedEvents.at(-1).seq);assert.equal(firstView.session,streamSession.id);assert.equal(firstView.runId,waiting.id);assert.equal((await native.graph(waiting.id)).run.state,'paused');
   firstView.dispose();assert.equal(feeds.at(-1).signal.aborted,true);assert.equal((await native.graph(waiting.id)).run.state,'paused');assert.equal((await native.graphChildren(waiting.id)).length,0);}
  finally{firstView.dispose();}
  const detachedFeedCount=feeds.length;
- const resumedMessages=[],resumedView=new BrowserController(observedClient,message=>resumedMessages.push(message));
+ const resumedMessages=[],resumedView=new BrowserController(observedClientForView(),message=>resumedMessages.push(message));
  try{await resumedView.initialize({session:streamSession.id,run:waiting.id});await waitFor(()=>feeds.length===detachedFeedCount+1,'reattached native browser feed');const before=await native.graphEvents(waiting.id,0);await waitFor(()=>resumedView.subscription?.cursor===before.at(-1).seq,'reattached paused feed replay');
   await resumedView.handle({type:'graph-input',root:waiting.id,owner:waiting.id,node:'gate',input_json:'{"continue":true}',revision:resumedView.graph.checkpoint_revision});
   assert.deepEqual(resumedMessages.filter(message=>message.type==='error'),[],'The displayed root-owned human answer must be accepted before waiting for its tool');

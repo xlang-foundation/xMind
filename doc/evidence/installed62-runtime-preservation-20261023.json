@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-10-23T20:05:41.694Z",
+  "scope": "Read-only installed62 native runtime payload and manifest verification; no user state or full extension payload claim",
+  "passed": true,
+  "runtimeFiles": 2398,
+  "nativeSha256": "e04b3cb67cfa9c0926923ba6c0145c7f5195abe80784b46db7adb1788b89a5a6",
+  "manifestSha256": "3fa2fcd78f3df21371ee22bb979903a6deb62ae754cf0ac0a22f38a1e1b64d0b",
+  "installedRuntimeFilesAndBytesUnchanged": true,
+  "nativeExecuted": false
+}

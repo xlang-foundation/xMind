@@ -1,0 +1,51 @@
+Start testing: Oct 23 13:15 Pacific Daylight Time
+----------------------------------------------------------
+55/172 Testing: native_delegation_http_contract
+55/172 Test: native_delegation_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/delegation_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_delegation_http_contract" start time: Oct 23 13:15 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native delegation HTTP/CLI/shared-browser contract passed actual parent/leaf tool loop, independent real file reads, observed join, controller-approved native create, read-only child authority, private metrics/history, scoped native/view child reads, tree cursor replay and model-free reopen without child replay. Provider replies are synthetic; no live provider or rendered IDE claim.
+<end of output>
+Test time =   1.73 sec
+----------------------------------------------------------
+Test Passed.
+"native_delegation_http_contract" end time: Oct 23 13:15 Pacific Daylight Time
+"native_delegation_http_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+93/172 Testing: native_agent_worker_coding_server_contract
+93/172 Test: native_agent_worker_coding_server_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_coding_server_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_coding_server_contract" start time: Oct 23 13:15 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Unified process-code server verified actual child AgentRunner, authenticated public approval, one native creation, mixed canonical history and two controlled model windows.
+<end of output>
+Test time =   1.07 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_coding_server_contract" end time: Oct 23 13:15 Pacific Daylight Time
+"native_agent_worker_coding_server_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+147/172 Testing: native_local_view_contract
+147/172 Test: native_local_view_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/xlang3_runtime.dll" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_local_view_contract" start time: Oct 23 13:15 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualProductionExtensionController":true,"actualNativeSidebarSubscription":true,"actualSidebarDetachReattach":true,"retiredSidebarCannotSubmitInput":true,"actualSidebarHumanToolCompletion":true,"installedIde":false,"renderedIde":false,"providerRequests":0,"actualSidebarProposalComparison":true,"retiredSidebarCannotApprove":true,"actualSidebarApprovedCreation":true,"actualCreationReceiptMatchesDisk":true,"actualNativeView":true,"unsafeRendezvousRejectedBeforeBackendStartup":true,"actualProductionEditorHostAdapter":true,"actualSharedConsoleBackend":true,"actualToolGraph":true,"browserCookieAccess":true,"actualBrowserControllerStreaming":true,"actualGatewayRestartScopedReplay":true,"actualPausedFeedDetachAndReattach":true,"actualHumanResumeIncrementalEvents":true,"actualStreamCapacityAndCommandFairness":true,"actualStreamReauthenticationAfterViewExit":true,"actualNativeBrowserWorkspaceRegistration":true,"actualBrowserMembershipSelectionAndRevocation":true,"backendTokenNeverExported":true,"ownerControlRejected":true,"duplicateGrantRejected":true,"processBoundViewRevokedAfterExit":true,"sameProfileAndHistoryAcrossHostReload":true,"renderedUi":false}
+<end of output>
+Test time =  66.75 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_view_contract" end time: Oct 23 13:16 Pacific Daylight Time
+"native_local_view_contract" time elapsed: 00:01:06
+----------------------------------------------------------
+
+End testing: Oct 23 13:16 Pacific Daylight Time
