@@ -1,0 +1,5 @@
+# Schema-SDK candidate package at 6f65f5ac
+
+The source-bound runtime stages 2398 manifest-covered files and SDK f809da86. Its executable matches the accepted 12-contract schema SDK integration build and the active full run's frozen binary set. The actual VSIX ZIP has 2443 entries; every expected runtime, client/browser asset and required renderer/sanitizer library matches its SHA-256. The 64 unchanged frontend sources match the prior accepted 464-extension/162-browser client gate. Those unit suites were not rerun or described as rendered acceptance.
+
+The runtime stage remains unexecuted and clean. No configuration, profiles, model requests or installation were accessed. The full schema-source run is still active. Next native acceptance uses separate execution copies: real managed package discovery/protected upgrade without provider requests, plus a controlled loopback coding backend for actual shared CLI/browser history and rendering. Managed profiles currently bind fixed provider routes, so the controlled coding test will not be represented as managed-provider inference. Existing user credentials/settings and completed tasks remain untouched.
