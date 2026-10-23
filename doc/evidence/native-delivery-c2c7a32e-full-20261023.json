@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-23T23:43:21.170Z",
+  "sourceParent": "c2c7a32e10744e3dbd37aaf1e007d7b080d92407",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 1124,
+    "launchedAt": "2026-10-23T23:19:50.081Z",
+    "completedAt": "2026-10-23T23:20:22.837Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "02ea3d03ccbcf7bfac3085ee7d3df436d026b6c19102d37d7c9643b62df866c5"
+  },
+  "test": {
+    "pid": 37124,
+    "launchedAt": "2026-10-23T23:20:25.579Z",
+    "completedAt": "2026-10-23T23:43:18.449Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "a300468b927980df00736d4e70fa789fdd1e403e6b0dec416d01d6fcc90e9f27"
+  },
+  "total": 172,
+  "failed": 0,
+  "passed": 172,
+  "seconds": 1372.88,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "1d9e636095bfb91dd303ba74fee8066237d8cbd7555660d667e970d6f33d4aa5",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Complete actual local native172 inventory on exact committed managed-owner path fix c2c7a32e, including longer-path profile contract. Not rendered VS Code, package/install or generic long-path worker execution acceptance.",
+  "criticalContracts": {
+    "graphRunnerSeconds": 12.25,
+    "rustAnalyzerSeconds": 47.28,
+    "workerModelRpcSeconds": 54.73,
+    "workerLedgerSeconds": 38.41,
+    "agentRunnerSeconds": 10.12,
+    "localProfileSeconds": 548.12,
+    "localViewSeconds": 149.71,
+    "providerConfigSeconds": 67.32
+  },
+  "qualifiedPackage063Unchanged": true,
+  "installed62Unchanged": true,
+  "fullGoalComplete": false
+}

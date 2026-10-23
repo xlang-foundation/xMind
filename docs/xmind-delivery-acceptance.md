@@ -5,7 +5,9 @@ unproven. Installed 0.1.62 still uses Native2f105e11 and SDK499415d0. Its protec
 backup and user state remain separate from candidate qualification. Current
 source is not installed. Candidate0.1.63 is [assembled and byte-verified](../doc/evidence/candidate-0.1.63-package-3024124e-20261023.json); [Packaged CLI coding](../doc/evidence/candidate-0.1.63-cli-coding-20261023.json), [packaged browser coding](../doc/evidence/candidate-0.1.63-browser-coding-20261023.json) and [isolated managed handoff](../doc/evidence/candidate-0.1.63-managed-handoff-20261023.json) pass. Protected installation, rendered VS Code and the retained initial old-owner cold-start failure remain separate open gates.
 
-The [complete local native gate on source3024124e](../doc/evidence/native-delivery-3024124e-full-20261023.json)
+The current [complete native gate on sourcec2c7a32e](../doc/evidence/native-delivery-c2c7a32e-full-20261023.json) passes172/172 in1372.88 seconds, including managed-owner extended-path startup and handoff. Generic process-worker long-path launch remains separately unverified. Candidate0.1.63 still packages the earlier3024124e binary.
+
+The earlier [complete local native gate on source3024124e](../doc/evidence/native-delivery-3024124e-full-20261023.json)
 passes172/172 in1352.79 seconds, after all targets rebuilt. Source, SDK8c7972d1,
 pure libraries, dependencies, native binaries and their file sets remained
 unchanged across validation. This qualifies that local native candidate, not an

@@ -1,3 +1,25 @@
+## Complete local qualification of managed-owner path fix — 2026-10-23
+
+All native targets build successfully and172/172 contracts pass in1372.88s
+on committed sourcec2c7a32e. Wrapper98581 and CTest37124 are terminal zero;
+post-test verification confirms all2815 project,16 SDK source,1870 pure-library,
+30 runtime,18598 dependency and137 native binary sets and bytes unchanged.
+Native SHA-256 is1d9e636095bfb91dd303ba74fee8066237d8cbd7555660d667e970d6f33d4aa5.
+The Native patch is empty on exact sourcec2c7a32e10744e3dbd37aaf1e007d7b080d92407.
+
+Longer-path local profile passes548.12s within600; local view149.71s, provider
+configuration67.32s, worker RPC54.73s and ledger38.41s pass unchanged budgets.
+Rust analyzer47.28s passes; the cause of earlier intermittent failures remains
+unproven. Hosted failures retain their separate source/runtime scope.
+
+This qualifies the managed-owner startup/path fix, not automatic nested worker
+enrollment, generic long-path coding worker launch, rendered VS Code or a new
+installation. Candidate0.1.63 still contains the preceding3024124e binary;
+installed62 is unchanged. The next targeted check addresses generic process
+launch at the reproduced loader boundary. No paid inference, CPython or visible
+window. [Receipt](evidence/native-delivery-c2c7a32e-full-20261023.json),
+[complete CTest log](evidence/native-delivery-c2c7a32e-full-20261023-ctest.log).
+
 ## Hosted source2909572f failure audit — 2026-10-23
 
 Official completed run40028091741/job120669235469 records167/170 in924.67s.
