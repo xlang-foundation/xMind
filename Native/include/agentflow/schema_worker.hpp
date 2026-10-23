@@ -10,7 +10,8 @@ struct SchemaWorkerExecutable {
     std::vector<std::string> arguments;
 };
 // Private native IPC adapter, not an MCP server or model/view command route.
-// The default executable is the product's adjacent xmind_schema_worker.exe.
+// Unified xmind uses its schema-worker mode; other launchers use the adjacent
+// xmind_schema_worker.exe. Methods use the common xmind.Schemas SDK subobject.
 // Each evaluation gets a fresh owned child: 128 MiB committed memory, two
 // seconds user CPU, one process, and an independent two-second wall deadline.
 // Overrides belong to trusted backend/test configuration only.

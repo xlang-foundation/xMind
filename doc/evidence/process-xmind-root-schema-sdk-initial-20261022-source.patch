@@ -1,0 +1,418 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 3ab43a66..8d51dca4 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -115,7 +115,7 @@ target_link_libraries(agentflow_json_schema PRIVATE agentflow_mcp_wire)
+ target_link_libraries(agentflow_core PRIVATE agentflow_json_schema)
+ add_executable(xmind_schema_worker apps/schema_worker_main.cpp)
+ target_include_directories(xmind_schema_worker PRIVATE third_party)
+-target_link_libraries(xmind_schema_worker PRIVATE agentflow_json_schema agentflow_mcp_wire)
++target_link_libraries(xmind_schema_worker PRIVATE agentflow_json_schema)
+ add_library(agentflow_permission_grants STATIC src/agent_permission_grants.cpp)
+ target_include_directories(agentflow_permission_grants PUBLIC include PRIVATE third_party)
+ target_link_libraries(agentflow_permission_grants PUBLIC agentflow_core)
+@@ -168,7 +168,6 @@ if(WIN32)
+   add_library(agentflow_schema_worker STATIC src/schema_worker.cpp)
+   target_include_directories(agentflow_schema_worker PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_schema_worker PRIVATE agentflow_mcp_stdio)
+-  add_dependencies(agentflow_schema_worker xmind_schema_worker)
+   add_library(agentflow_provider_transport STATIC src/winhttp_stream_transport.cpp)
+   target_include_directories(agentflow_provider_transport PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_provider_transport PRIVATE agentflow_secrets agentflow_mcp_wire winhttp)
+@@ -279,10 +278,15 @@ if(WIN32)
+   add_library(agentflow_backend_owner_control STATIC src/backend_owner_control.cpp)
+   target_include_directories(agentflow_backend_owner_control PUBLIC include)
+   target_link_libraries(agentflow_backend_owner_control PRIVATE agentflow_runtime_generation agentflow_core agentflow_workspace)
+-  add_library(agentflow_ipc_api STATIC src/xmind_ipc_api.cpp src/agent_worker_native_model.cpp src/agent_worker_native_model_client.cpp src/agent_worker_native_execution.cpp src/agent_worker_native_planning.cpp)
++  add_library(agentflow_ipc_api STATIC src/xmind_ipc_api.cpp src/agent_worker_native_model.cpp src/agent_worker_native_model_client.cpp src/agent_worker_native_execution.cpp src/agent_worker_native_planning.cpp src/schema_worker_service.cpp)
+   target_include_directories(agentflow_ipc_api PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_ipc_api PUBLIC agentflow_ipc_runtime PRIVATE agentflow_worker_channel agentflow_core agentflow_secrets agentflow_backend_owner_control agentflow_agent agentflow_models bcrypt)
+   target_link_libraries(agentflow_xlang_worker PRIVATE agentflow_ipc_api)
++  target_link_libraries(agentflow_schema_worker PRIVATE agentflow_ipc_api bcrypt)
++  target_link_libraries(agentflow_ipc_api PRIVATE agentflow_json_schema)
++  target_link_libraries(xmind_schema_worker PRIVATE agentflow_ipc_api)
++  add_custom_command(TARGET xmind_schema_worker POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
++    "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind_schema_worker>")
+   target_link_libraries(agentflow_http PRIVATE agentflow_backend_owner_control agentflow_mcp_configuration)
+   target_link_libraries(agentflow_http PRIVATE agentflow_vcs)
+   target_link_libraries(agentflow_http PRIVATE ws2_32 crypt32)
+@@ -819,9 +823,10 @@ if(BUILD_TESTING)
+     endif()
+     add_executable(agentflow_schema_budget_fixture tests/schema_budget_fixture.cpp)
+     target_include_directories(agentflow_schema_budget_fixture PRIVATE third_party)
++    target_link_libraries(agentflow_schema_budget_fixture PRIVATE agentflow_ipc_api)
+     add_executable(agentflow_schema_worker_contract tests/schema_worker_contract.cpp)
+     target_include_directories(agentflow_schema_worker_contract PRIVATE third_party)
+-    target_link_libraries(agentflow_schema_worker_contract PRIVATE agentflow_schema_worker)
++    target_link_libraries(agentflow_schema_worker_contract PRIVATE agentflow_schema_worker agentflow_ipc_api)
+     add_test(NAME native_schema_worker_contract COMMAND agentflow_schema_worker_contract "$<TARGET_FILE:agentflow_schema_budget_fixture>")
+     set_tests_properties(native_schema_worker_contract PROPERTIES TIMEOUT 30)
+     add_executable(agentflow_mcp_stdio_contract tests/mcp_stdio_contract.cpp)
+@@ -1571,3 +1576,15 @@ if(BUILD_TESTING)
+     set_tests_properties(encrypted_credential_repository_contract PROPERTIES TIMEOUT 60)
+   endif()
+ endif()
++
++# The common SDK root links backend libraries, including the parent schema adapter.
++# Keep the helper prerequisite on consumers, not on that static library cycle.
++if(WIN32)
++  get_property(schema_consumers DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
++  foreach(schema_consumer IN LISTS schema_consumers)
++    get_target_property(schema_consumer_type ${schema_consumer} TYPE)
++    if(schema_consumer_type STREQUAL "EXECUTABLE" AND NOT schema_consumer STREQUAL "xmind_schema_worker")
++      add_dependencies(${schema_consumer} xmind_schema_worker)
++    endif()
++  endforeach()
++endif()
+diff --git a/Native/apps/schema_worker_main.cpp b/Native/apps/schema_worker_main.cpp
+index 8afe1d60..65844dba 100644
+--- a/Native/apps/schema_worker_main.cpp
++++ b/Native/apps/schema_worker_main.cpp
+@@ -1,34 +1,21 @@
+ #include "agentflow/json_schema.hpp"
+-#include "agentflow/mcp_wire.hpp"
+-#include "nlohmann/json.hpp"
+-#include <iostream>
+-#include <optional>
+ #if defined(_WIN32)
++#include "agentflow/schema_worker_service.hpp"
+ #include <windows.h>
+ #endif
+ int run_schema_worker(int argc,char**) {
+ #if defined(_WIN32)
+     SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+-#endif
+     if(argc!=1)return 2;
+-    using namespace agentflow;using Json=nlohmann::json;
+-    try {
+-        std::string bytes;char value;
+-        while(std::cin.get(value)) {if(value=='\n')break;if(bytes.size()>=1024*1024)return 2;bytes.push_back(value);}
+-        if(!std::cin || bytes.empty())return 2;
+-        std::optional<McpWireMessage> request;McpLineStream wire([&](const auto& message){if(request)throw McpProtocolError("Duplicate private schema request");request=message;});wire.feed(bytes+"\n");wire.finish();
+-        if(!request || request->kind!=McpMessageKind::request || request->method!="schema/validate")return 2;
+-        const auto args=Json::parse(request->payload_json);
+-        if(!args.contains("schema_json") || !args["schema_json"].is_string() || (args.contains("instance_json") && !args["instance_json"].is_string()) || args.size()!=(args.contains("instance_json")?2:1))return 2;
+-        Json reply{{"jsonrpc","2.0"},{"id",Json::parse(request->id_json)}};
+-        try {
+-            JsonSchema schema(args["schema_json"].get<std::string>());
+-            if(args.contains("instance_json"))schema.validate_object(args["instance_json"].get<std::string>());
+-            reply["result"]={{"schema_valid",true},{"instance_valid",args.contains("instance_json")?Json(true):Json(nullptr)}};
+-        }catch(const SchemaInvalid&){reply["error"]={{"code",-32602},{"message","Schema document rejected"},{"data",{{"kind","schema_invalid"}}}};}
+-        catch(const SchemaArgumentsInvalid&){reply["error"]={{"code",-32602},{"message","Schema arguments rejected"},{"data",{{"kind","arguments_invalid"}}}};}
+-        std::cout<<reply.dump()<<'\n';std::cout.flush();return std::cout?0:2;
+-    }catch(...){return 2;}
++    try{return agentflow::run_schema_worker_host([](const std::string& text,bool present,const std::string& instance){
++        using namespace agentflow;
++        try{JsonSchema schema(text);if(present)schema.validate_object(instance);return SchemaWorkerVerdict::valid;}
++        catch(const SchemaInvalid&){return SchemaWorkerVerdict::schema_invalid;}
++        catch(const SchemaArgumentsInvalid&){return SchemaWorkerVerdict::arguments_invalid;}
++    });}catch(...){return 2;}
++#else
++    return 2;
++#endif
+ }
+ #if !defined(XMIND_UNIFIED_EXECUTABLE)
+ int main(int argc,char** argv){return run_schema_worker(argc,argv);}
+diff --git a/Native/include/agentflow/schema_worker.hpp b/Native/include/agentflow/schema_worker.hpp
+index 4d9e76f6..2a5b9f7c 100644
+--- a/Native/include/agentflow/schema_worker.hpp
++++ b/Native/include/agentflow/schema_worker.hpp
+@@ -10,7 +10,8 @@ struct SchemaWorkerExecutable {
+     std::vector<std::string> arguments;
+ };
+ // Private native IPC adapter, not an MCP server or model/view command route.
+-// The default executable is the product's adjacent xmind_schema_worker.exe.
++// Unified xmind uses its schema-worker mode; other launchers use the adjacent
++// xmind_schema_worker.exe. Methods use the common xmind.Schemas SDK subobject.
+ // Each evaluation gets a fresh owned child: 128 MiB committed memory, two
+ // seconds user CPU, one process, and an independent two-second wall deadline.
+ // Overrides belong to trusted backend/test configuration only.
+diff --git a/Native/include/agentflow/schema_worker_service.hpp b/Native/include/agentflow/schema_worker_service.hpp
+new file mode 100644
+index 00000000..29263b2f
+--- /dev/null
++++ b/Native/include/agentflow/schema_worker_service.hpp
+@@ -0,0 +1,15 @@
++#pragma once
++#include "xlang3/xlang3.h"
++#include <functional>
++#include <string>
++namespace agentflow {
++enum class SchemaWorkerVerdict : std::int64_t {valid=0,schema_invalid=1,arguments_invalid=2};
++using SchemaWorkerEvaluator=std::function<SchemaWorkerVerdict(const std::string&,bool,const std::string&)>;
++int run_schema_worker_host(SchemaWorkerEvaluator);
++struct SchemasApi {
++    X::Value Open(std::string capability);
++    BEGIN_PACKAGE(SchemasApi)
++        APISET().AddFunc<1>("Open",&SchemasApi::Open);
++    END_PACKAGE
++};
++}
+diff --git a/Native/src/schema_worker.cpp b/Native/src/schema_worker.cpp
+index 624f2719..c858c318 100644
+--- a/Native/src/schema_worker.cpp
++++ b/Native/src/schema_worker.cpp
+@@ -1,14 +1,20 @@
+ #include "agentflow/schema_worker.hpp"
+-#include "agentflow/mcp_requests.hpp"
+-#include "nlohmann/json.hpp"
++#include "agentflow/schema_worker_service.hpp"
++#include "xlang3/cpp/runtime.h"
++#include "xlang3/abi/xapi.h"
++#include <array>
++#include <atomic>
++#include <charconv>
++#include <exception>
++#include <thread>
+ #define NOMINMAX
+ #include <windows.h>
++#include <bcrypt.h>
+ #include <filesystem>
+ #include <algorithm>
+ 
+ namespace agentflow {
+ namespace {
+-using Json=nlohmann::json;
+ SchemaWorkerExecutable adjacent_worker() {
+     std::wstring path(32768,L'\0');const auto count=GetModuleFileNameW(nullptr,path.data(),static_cast<DWORD>(path.size()));
+     if(!count || count>=path.size())throw SchemaEvaluationFailure("Cannot locate the native schema worker");path.resize(count);
+@@ -25,29 +31,51 @@ SchemaWorkerExecutable adjacent_worker() {
+ }
+ SchemaWorker::SchemaWorker(std::optional<SchemaWorkerExecutable> executable):executable_(executable?std::move(*executable):adjacent_worker()) {}
+ void SchemaWorker::evaluate(const std::string& schema,std::optional<std::string> instance,McpStdioProcess::Deadline requested,std::stop_token cancel) const {
+-    if(schema.empty() || schema.size()>256*1024)throw SchemaInvalid("MCP schema exceeds byte limits");
+-    if(instance && (instance->empty() || instance->size()>65536))throw SchemaArgumentsInvalid("MCP arguments exceed byte limits");
++    if(schema.empty()||schema.size()>256*1024)throw SchemaInvalid("MCP schema exceeds byte limits");
++    if(instance&&(instance->empty()||instance->size()>65536))throw SchemaArgumentsInvalid("MCP arguments exceed byte limits");
+     if(cancel.stop_requested())throw SchemaEvaluationCancelled("Native schema evaluation cancelled before launch");
+     const auto deadline=std::min(requested,std::chrono::steady_clock::now()+std::chrono::seconds(2));
+     if(std::chrono::steady_clock::now()>=deadline)throw SchemaEvaluationFailure("Native schema evaluation deadline expired");
+     try {
+         McpStdioConfiguration configuration{executable_.executable,executable_.working_directory,executable_.arguments,{}};
+         configuration.stdout_buffer_limit=8192;configuration.process_memory_limit=128*1024*1024;configuration.process_cpu_limit=std::chrono::seconds(2);configuration.active_process_limit=1;
+-        McpStdioProcess process(configuration);McpRequestTracker requests(1);std::optional<McpCorrelatedReply> reply;
+-        McpLineStream wire([&](const auto& message){if(reply)throw McpProtocolError("Duplicate native schema reply");reply=requests.receive(message);});
+-        Json params{{"schema_json",schema}};if(instance)params["instance_json"]=*instance;
+-        const auto request=requests.prepare("schema/validate",params.dump(),McpWireEra::legacy);process.write(request.frame,deadline,cancel);
+-        while(!reply){const auto bytes=process.read(deadline,cancel);if(!bytes){wire.finish();throw SchemaEvaluationFailure("Native schema worker exited without an outcome");}wire.feed(*bytes);}
+-        process.shutdown();if(process.status().exit_code!=0)throw SchemaEvaluationFailure("Native schema worker did not exit cleanly");
+-        const auto value=Json::parse(reply->response.payload_json);
+-        if(reply->response.kind==McpMessageKind::error) {
+-            if(value.value("code",0)!=-32602 || !value.contains("data") || !value["data"].is_object())throw SchemaEvaluationFailure("Invalid native schema error outcome");
+-            const auto kind=value["data"].value("kind",std::string{});
+-            if(kind=="schema_invalid")throw SchemaInvalid("Invalid JSON Schema 2020-12 document");
+-            if(kind=="arguments_invalid" && instance)throw SchemaArgumentsInvalid("Arguments do not match the MCP schema");
+-            throw SchemaEvaluationFailure("Invalid native schema outcome kind");
+-        }
+-        if(reply->response.kind!=McpMessageKind::result || value!=Json{{"schema_valid",true},{"instance_valid",instance?Json(true):Json(nullptr)}})throw SchemaEvaluationFailure("Invalid native schema success outcome");
++        McpStdioProcess process(configuration);const auto pid=process.status().pid;
++        std::array<unsigned char,32> secret{};
++        if(BCryptGenRandom(nullptr,secret.data(),static_cast<ULONG>(secret.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw SchemaEvaluationFailure("Schema capability entropy unavailable");
++        std::string capability;static constexpr char digits[]="0123456789abcdef";for(auto byte:secret){capability+=digits[byte>>4];capability+=digits[byte&15];}
++        process.write(std::string_view(reinterpret_cast<const char*>(secret.data()),secret.size()),deadline,cancel);SecureZeroMemory(secret.data(),secret.size());
++        std::string endpoint;
++        while(endpoint.find('\n')==std::string::npos){const auto bytes=process.read(deadline,cancel);if(!bytes||endpoint.size()+bytes->size()>32)throw SchemaEvaluationFailure("Invalid schema endpoint bootstrap");endpoint+=*bytes;}
++        if(!endpoint.ends_with("\n")||!endpoint.starts_with("lrpc:"))throw SchemaEvaluationFailure("Invalid schema endpoint bootstrap");endpoint.pop_back();
++        std::uint32_t port=0;const auto parsed=std::from_chars(endpoint.data()+5,endpoint.data()+endpoint.size(),port);if(parsed.ec!=std::errc{}||parsed.ptr!=endpoint.data()+endpoint.size()||!port||port>65535)throw SchemaEvaluationFailure("Invalid schema endpoint port");
++        std::atomic<bool> done=false;std::exception_ptr failure;std::int64_t verdict=-1;
++        std::thread invocation([&]{try{
++            X::Runtime runtime;X3LrpcEndpointInfo info{};info.size=sizeof(info);
++            if(x3_runtime_probe_remote(runtime.get(),endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=pid)throw SchemaEvaluationFailure("Schema endpoint PID differs");
++            const auto call=[](const X::Value& method,std::vector<X::Value> args={}){X::Value value;if(!method.Call(args,value))throw SchemaEvaluationFailure("Schema SDK method failed; no replay authorized");return value;};
++            auto root=runtime.ImportRemote("xmind",endpoint.c_str());auto services=call(root["Schemas"]);
++            auto validator=call(services["Open"],{X::Value(runtime,capability)});
++            const auto identity=call(validator["Identity"]);
++            if(!identity.IsDict()||identity.Size()!=2||!identity["pid"].IsInt64()||identity["pid"].ToInt64()!=pid||!identity["version"].IsInt64()||identity["version"].ToInt64()!=1)throw SchemaEvaluationFailure("Schema validator identity differs");
++            const auto value=call(validator["Validate"],{X::Value(runtime,schema),X::Value(runtime,instance.has_value()),X::Value(runtime,instance.value_or(""))});
++            if(!value.IsInt64())throw SchemaEvaluationFailure("Invalid typed schema verdict");verdict=value.ToInt64();
++        }catch(...){failure=std::current_exception();}done.store(true,std::memory_order_release);});
++        try{
++            while(!done.load(std::memory_order_acquire)){
++                if(cancel.stop_requested())throw SchemaEvaluationCancelled("Native schema evaluation cancelled");
++                if(std::chrono::steady_clock::now()>=deadline||process.status().exit_code)throw SchemaEvaluationFailure("Native schema worker failed or exceeded its budget");
++                std::this_thread::sleep_for(std::chrono::milliseconds(2));
++            }
++            invocation.join();
++            if(std::chrono::steady_clock::now()>=deadline)throw SchemaEvaluationFailure("Native schema evaluation deadline expired");
++            process.shutdown();
++        }catch(...){process.shutdown();if(invocation.joinable())invocation.join();throw;}
++        SecureZeroMemory(capability.data(),capability.size());
++        if(failure)std::rethrow_exception(failure);
++        if(process.status().exit_code!=0)throw SchemaEvaluationFailure("Native schema worker did not exit cleanly");
++        if(verdict==static_cast<std::int64_t>(SchemaWorkerVerdict::schema_invalid))throw SchemaInvalid("Invalid JSON Schema 2020-12 document");
++        if(verdict==static_cast<std::int64_t>(SchemaWorkerVerdict::arguments_invalid)&&instance)throw SchemaArgumentsInvalid("Arguments do not match the MCP schema");
++        if(verdict!=static_cast<std::int64_t>(SchemaWorkerVerdict::valid))throw SchemaEvaluationFailure("Invalid native schema outcome kind");
+     }catch(const SchemaInvalid&){throw;}catch(const SchemaArgumentsInvalid&){throw;}catch(const SchemaEvaluationFailure&){throw;}
+     catch(const McpTransportCancelled&){throw SchemaEvaluationCancelled("Native schema evaluation cancelled");}
+     catch(...){throw SchemaEvaluationFailure("Native schema worker failed or exceeded its budget");}
+diff --git a/Native/src/schema_worker_service.cpp b/Native/src/schema_worker_service.cpp
+new file mode 100644
+index 00000000..bc515287
+--- /dev/null
++++ b/Native/src/schema_worker_service.cpp
+@@ -0,0 +1,55 @@
++#include "agentflow/schema_worker_service.hpp"
++#include "agentflow/xmind_ipc_api.hpp"
++#include "agentflow/xmind_ipc_runtime.hpp"
++#include <array>
++#include <atomic>
++#include <iostream>
++#include <memory>
++#include <mutex>
++#include <stdexcept>
++#define NOMINMAX
++#include <windows.h>
++namespace agentflow {
++namespace {
++struct State {
++    std::array<unsigned char,32> capability{};
++    SchemaWorkerEvaluator evaluate;
++    std::atomic<bool> started=false;
++    ~State(){SecureZeroMemory(capability.data(),capability.size());}
++};
++std::mutex binding_mutex;
++std::shared_ptr<State> binding;
++std::string key(const std::array<unsigned char,32>& bytes){static constexpr char digits[]="0123456789abcdef";std::string result;for(auto b:bytes){result+=digits[b>>4];result+=digits[b&15];}return result;}
++struct Validator {
++    std::shared_ptr<State> state;
++    Validator()=default;
++    explicit Validator(std::shared_ptr<State> value):state(std::move(value)){}
++    X::Value Identity(){if(!state)throw std::runtime_error("Unbound schema validator");auto value=X::Value::Dict(Host());value.Set("pid",X::Value(static_cast<std::int64_t>(GetCurrentProcessId())));value.Set("version",X::Value(1));return value;}
++    std::int64_t Validate(std::string schema,bool has_instance,std::string instance){
++        if(!state||schema.empty()||schema.size()>256*1024||(has_instance?(instance.empty()||instance.size()>65536):!instance.empty()))throw std::invalid_argument("Invalid schema validation input");
++        if(state->started.exchange(true))throw std::runtime_error("Schema validation cannot be replayed");
++        return static_cast<std::int64_t>(state->evaluate(schema,has_instance,instance));
++    }
++    BEGIN_PACKAGE(Validator)
++        APISET().AddFunc<0>("Identity",&Validator::Identity);
++        APISET().AddFunc<3>("Validate",&Validator::Validate);
++    END_PACKAGE
++};
++struct Objects {BEGIN_PACKAGE(Objects) APISET().AddClass<0,Validator>("Validator"); END_PACKAGE};
++Objects& objects(){static auto value=[] {auto owner=std::make_shared<Objects>();retain_xmind_ipc_service(owner);(void)xmind_ipc_runtime().RegisterPackage("_xmind_schema_objects",*owner);return owner;}();return *value;}
++}
++X::Value SchemasApi::Open(std::string capability){std::shared_ptr<State> owner;{std::lock_guard lock(binding_mutex);owner=binding;}if(!owner||capability.size()!=64||capability!=key(owner->capability))throw std::invalid_argument("Schema capability unavailable");return objects().__xlang3_package_->CreateInstance("Validator",std::make_shared<Validator>(std::move(owner)));}
++int run_schema_worker_host(SchemaWorkerEvaluator evaluate){
++    if(!evaluate)return 2;
++    auto owner=std::make_shared<State>();owner->evaluate=std::move(evaluate);
++    const auto input=GetStdHandle(STD_INPUT_HANDLE);std::size_t offset=0;
++    while(offset<owner->capability.size()){DWORD count=0;if(!ReadFile(input,owner->capability.data()+offset,static_cast<DWORD>(owner->capability.size()-offset),&count,nullptr)||!count)return 2;offset+=count;}
++    {std::lock_guard lock(binding_mutex);if(binding)return 2;binding=owner;}
++    (void)objects();ensure_xmind_ipc_api();
++    std::cout<<"lrpc:"<<xmind_ipc_port()<<'\n';std::cout.flush();if(!std::cout)return 2;
++    // Pipe is startup capability/endpoint and parent lifetime only.
++    unsigned char extra=0;DWORD count=0;
++    const auto ended=!ReadFile(input,&extra,1,&count,nullptr)||count==0;
++    return ended?0:2;
++}
++}
+diff --git a/Native/src/xmind_ipc_api.cpp b/Native/src/xmind_ipc_api.cpp
+index 8cbc2a86..d200a262 100644
+--- a/Native/src/xmind_ipc_api.cpp
++++ b/Native/src/xmind_ipc_api.cpp
+@@ -5,6 +5,7 @@
+ #include "agentflow/agent_worker_native_model.hpp"
+ #include "agentflow/xmind_ipc_runtime.hpp"
+ #include "agentflow/python_tool_ipc_api.hpp"
++#include "agentflow/schema_worker_service.hpp"
+ #include "agentflow/persistence_service.hpp"
+ #include "agentflow/run_executor.hpp"
+ #include "agentflow/local_auth.hpp"
+@@ -79,6 +80,7 @@ struct RootApi {
+     BEGIN_PACKAGE(RootApi)
+         APISET().AddClass<0,HostApi,RootApi>("Host");
+         APISET().AddClass<0,PythonToolsApi>("PythonTools");
++        APISET().AddClass<0,SchemasApi>("Schemas");
+         APISET().AddClass<0,NativeWorkersApi>("Workers");
+         APISET().AddClass<0,NativeExecutionsApi>("Executions");
+         APISET().AddClass<0,NativeWorkerLinksApi>("WorkerLinks");
+diff --git a/Native/tests/schema_budget_fixture.cpp b/Native/tests/schema_budget_fixture.cpp
+index cf95db3a..30f73e9b 100644
+--- a/Native/tests/schema_budget_fixture.cpp
++++ b/Native/tests/schema_budget_fixture.cpp
+@@ -3,6 +3,7 @@
+ #define NOMINMAX
+ #include <windows.h>
+ #include "nlohmann/json.hpp"
++#include "agentflow/schema_worker_service.hpp"
+ #include <atomic>
+ #include <fstream>
+ #include <iostream>
+@@ -10,12 +11,15 @@
+ int main(int argc,char** argv){
+     SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+     if(argc<2)return 2;
+-    using Json=nlohmann::json;std::string line;std::getline(std::cin,line);const auto request=Json::parse(line);
++    using Json=nlohmann::json;
+     const std::string mode=argv[1];
+-    if(mode=="hang"){
+-        if(argc==3){std::ofstream marker(argv[2]);marker<<"actual native child entered evaluation fixture";marker.close();}
++    if(mode=="hang")return agentflow::run_schema_worker_host([&](const std::string&,bool,const std::string&)->agentflow::SchemaWorkerVerdict{
++        if(argc==3){std::ofstream marker(argv[2]);marker<<"actual SDK schema Validate entered";marker.close();}
+         std::atomic<std::uint64_t> work=0;for(;;)work.fetch_add(1,std::memory_order_relaxed);
+-    }
++    });
++    if(mode=="bad-verdict")return agentflow::run_schema_worker_host([](const std::string&,bool,const std::string&){return static_cast<agentflow::SchemaWorkerVerdict>(9);});
++    if(mode=="sdk-success")return agentflow::run_schema_worker_host([](const std::string&,bool,const std::string&){return agentflow::SchemaWorkerVerdict::valid;});
++    std::string line;std::getline(std::cin,line);const auto request=Json::parse(line);
+     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+     if(!QueryInformationJobObject(nullptr,JobObjectExtendedLimitInformation,&limits,sizeof(limits),nullptr))return 3;
+     Json result{{"flags",limits.BasicLimitInformation.LimitFlags},{"memory_limit",limits.ProcessMemoryLimit},{"cpu_ticks",limits.BasicLimitInformation.PerProcessUserTimeLimit.QuadPart},{"process_limit",limits.BasicLimitInformation.ActiveProcessLimit}};
+diff --git a/Native/tests/schema_worker_contract.cpp b/Native/tests/schema_worker_contract.cpp
+index 25e254e2..9afca965 100644
+--- a/Native/tests/schema_worker_contract.cpp
++++ b/Native/tests/schema_worker_contract.cpp
+@@ -1,6 +1,8 @@
+ #include "agentflow/schema_worker.hpp"
+ #include "agentflow/mcp_requests.hpp"
+ #include "nlohmann/json.hpp"
++#include "xlang3/cpp/runtime.h"
++#include <array>
+ #define NOMINMAX
+ #include <windows.h>
+ #include <filesystem>
+@@ -18,6 +20,28 @@ struct Directory {
+     Directory(){require(std::filesystem::create_directory(path),"Budget fixture directory must be newly created");}
+     ~Directory(){if(path.parent_path()==parent && path.filename().string().starts_with("xmind-schema-budget-")){std::error_code ignored;std::filesystem::remove_all(path,ignored);}}
+ };
++void sdk_contract(const std::string& executable){
++    McpStdioConfiguration config{executable,std::filesystem::path(executable).parent_path().string(),{"sdk-success"},{}};
++    config.process_memory_limit=128*1024*1024;config.process_cpu_limit=2s;config.active_process_limit=1;
++    McpStdioProcess process(config);std::array<char,32> secret{};secret.fill('K');
++    const auto deadline=std::chrono::steady_clock::now()+2s;process.write(std::string_view(secret.data(),secret.size()),deadline);
++    std::string endpoint;while(endpoint.find('\n')==std::string::npos){const auto bytes=process.read(deadline);require(bool(bytes),"SDK schema fixture must publish its endpoint");endpoint+=*bytes;}
++    endpoint.pop_back();
++    {
++        X::Runtime runtime;auto root=runtime.ImportRemote("xmind",endpoint.c_str());
++        const auto call=[](const X::Value& method,std::vector<X::Value> args={}){X::Value result;require(method.Call(args,result),"Actual schema SDK method failed");return result;};
++        auto schemas=call(root["Schemas"]);X::Value ignored;
++        require(!schemas["Open"].Call(std::vector<X::Value>{X::Value(runtime,std::string(64,'0'))},ignored),"Wrong schema capability must reject before validation");
++        std::string capability;for(unsigned i=0;i<32;++i)capability+="4b";
++        auto validator=call(schemas["Open"],{X::Value(runtime,capability)});
++        const auto identity=call(validator["Identity"]);require(identity.IsDict()&&identity["pid"].ToInt64()==process.status().pid&&identity["version"].ToInt64()==1,"Schema SDK object must belong to the actual child");
++        const std::vector<X::Value> args{X::Value(runtime,"{}"),X::Value(runtime,false),X::Value(runtime,"")};
++        const auto result=call(validator["Validate"],args);require(result.IsInt64()&&result.ToInt64()==0,"Schema validation must return its typed SDK verdict");
++        require(!validator["Validate"].Call(args,ignored),"A schema object must reject duplicate evaluation");
++        auto second=call(schemas["Open"],{X::Value(runtime,capability)});require(!second["Validate"].Call(args,ignored),"Another SDK handle must not replay the child evaluation");
++    }
++    process.shutdown();require(process.status().exit_code==0,"Schema SDK fixture must exit cleanly after parent EOF");
++}
+ void budgets(const std::string& executable,const std::string& mode) {
+     McpStdioConfiguration configuration{executable,std::filesystem::path(executable).parent_path().string(),{mode},{}};
+     configuration.process_memory_limit=32*1024*1024;configuration.process_cpu_limit=1500ms;configuration.active_process_limit=1;
+@@ -35,6 +59,7 @@ void budgets(const std::string& executable,const std::string& mode) {
+ int main(int argc,char** argv){
+     if(argc!=2)return 2;
+     try {
++        sdk_contract(argv[1]);
+         SchemaWorker production;const std::string schema=R"({"type":"object","properties":{"n":{"type":"integer","minimum":1}},"required":["n"],"additionalProperties":false})";
+         production.evaluate(schema,{},std::chrono::steady_clock::now()+5s);production.evaluate(schema,R"({"n":1})",std::chrono::steady_clock::now()+5s);
+         rejects<SchemaArgumentsInvalid>([&]{production.evaluate(schema,R"({"n":0})",std::chrono::steady_clock::now()+5s);});
+@@ -48,6 +73,7 @@ int main(int argc,char** argv){
+         require(refused && std::chrono::steady_clock::now()-started<4s,"Expensive real regex schema evaluation must not stall the owning backend");
+         budgets(argv[1],"limits");budgets(argv[1],"allocate");
+         const auto root=std::filesystem::path(argv[1]).parent_path().string();SchemaWorker stalled(SchemaWorkerExecutable{argv[1],root,{"hang"}});
++        SchemaWorker malformed(SchemaWorkerExecutable{argv[1],root,{"bad-verdict"}});rejects<SchemaEvaluationFailure>([&]{malformed.evaluate("{}","{}",std::chrono::steady_clock::now()+5s);});
+         const auto wall=std::chrono::steady_clock::now();rejects<SchemaEvaluationFailure>([&]{stalled.evaluate("{}","{}",wall+150ms);});require(std::chrono::steady_clock::now()-wall<3s,"Actual nonresponsive child must be retired after its wall deadline");
+         Directory directory;const auto marker=(directory.path/"entered.marker").string();SchemaWorker cancellable(SchemaWorkerExecutable{argv[1],root,{"hang",marker}});
+         std::stop_source cancel;auto pending=std::async(std::launch::async,[&]{cancellable.evaluate("{}","{}",std::chrono::steady_clock::now()+5s,cancel.get_token());});

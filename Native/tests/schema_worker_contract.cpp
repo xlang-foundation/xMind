@@ -1,6 +1,8 @@
 #include "agentflow/schema_worker.hpp"
 #include "agentflow/mcp_requests.hpp"
 #include "nlohmann/json.hpp"
+#include "xlang3/cpp/runtime.h"
+#include <array>
 #define NOMINMAX
 #include <windows.h>
 #include <filesystem>
@@ -18,6 +20,29 @@ struct Directory {
     Directory(){require(std::filesystem::create_directory(path),"Budget fixture directory must be newly created");}
     ~Directory(){if(path.parent_path()==parent && path.filename().string().starts_with("xmind-schema-budget-")){std::error_code ignored;std::filesystem::remove_all(path,ignored);}}
 };
+void sdk_contract(const std::string& executable){
+    McpStdioConfiguration config{executable,std::filesystem::path(executable).parent_path().string(),{"sdk-success"},{}};
+    config.process_memory_limit=128*1024*1024;config.process_cpu_limit=2s;config.active_process_limit=1;
+    McpStdioProcess process(config);std::array<char,32> secret{};secret.fill('K');
+    const auto deadline=std::chrono::steady_clock::now()+2s;process.write(std::string_view(secret.data(),secret.size()),deadline);
+    std::string endpoint;while(endpoint.find('\n')==std::string::npos){const auto bytes=process.read(deadline);require(bool(bytes),"SDK schema fixture must publish its endpoint");endpoint+=*bytes;}
+    endpoint.pop_back();
+    if(!endpoint.empty()&&endpoint.back()=='\r')endpoint.pop_back();
+    {
+        X::Runtime runtime;auto root=runtime.ImportRemote("xmind",endpoint.c_str());
+        const auto call=[](const X::Value& method,std::vector<X::Value> args={}){X::Value result;require(method.Call(args,result),"Actual schema SDK method failed");return result;};
+        auto schemas=call(root["Schemas"]);X::Value ignored;
+        require(!schemas["Open"].Call(std::vector<X::Value>{X::Value(runtime,std::string(64,'0'))},ignored),"Wrong schema capability must reject before validation");
+        std::string capability;for(unsigned i=0;i<32;++i)capability+="4b";
+        auto validator=call(schemas["Open"],{X::Value(runtime,capability)});
+        const auto identity=call(validator["Identity"]);require(identity.IsDict()&&identity["pid"].ToInt64()==process.status().pid&&identity["version"].ToInt64()==1,"Schema SDK object must belong to the actual child");
+        const std::vector<X::Value> args{X::Value(runtime,"{}"),X::Value(runtime,false),X::Value(runtime,"")};
+        const auto result=call(validator["Validate"],args);require(result.IsInt64()&&result.ToInt64()==0,"Schema validation must return its typed SDK verdict");
+        require(!validator["Validate"].Call(args,ignored),"A schema object must reject duplicate evaluation");
+        auto second=call(schemas["Open"],{X::Value(runtime,capability)});require(!second["Validate"].Call(args,ignored),"Another SDK handle must not replay the child evaluation");
+    }
+    process.shutdown();require(process.status().exit_code==0,"Schema SDK fixture must exit cleanly after parent EOF");
+}
 void budgets(const std::string& executable,const std::string& mode) {
     McpStdioConfiguration configuration{executable,std::filesystem::path(executable).parent_path().string(),{mode},{}};
     configuration.process_memory_limit=32*1024*1024;configuration.process_cpu_limit=1500ms;configuration.active_process_limit=1;
@@ -35,6 +60,7 @@ void budgets(const std::string& executable,const std::string& mode) {
 int main(int argc,char** argv){
     if(argc!=2)return 2;
     try {
+        sdk_contract(argv[1]);
         SchemaWorker production;const std::string schema=R"({"type":"object","properties":{"n":{"type":"integer","minimum":1}},"required":["n"],"additionalProperties":false})";
         production.evaluate(schema,{},std::chrono::steady_clock::now()+5s);production.evaluate(schema,R"({"n":1})",std::chrono::steady_clock::now()+5s);
         rejects<SchemaArgumentsInvalid>([&]{production.evaluate(schema,R"({"n":0})",std::chrono::steady_clock::now()+5s);});
@@ -48,6 +74,7 @@ int main(int argc,char** argv){
         require(refused && std::chrono::steady_clock::now()-started<4s,"Expensive real regex schema evaluation must not stall the owning backend");
         budgets(argv[1],"limits");budgets(argv[1],"allocate");
         const auto root=std::filesystem::path(argv[1]).parent_path().string();SchemaWorker stalled(SchemaWorkerExecutable{argv[1],root,{"hang"}});
+        SchemaWorker malformed(SchemaWorkerExecutable{argv[1],root,{"bad-verdict"}});rejects<SchemaEvaluationFailure>([&]{malformed.evaluate("{}","{}",std::chrono::steady_clock::now()+5s);});
         const auto wall=std::chrono::steady_clock::now();rejects<SchemaEvaluationFailure>([&]{stalled.evaluate("{}","{}",wall+150ms);});require(std::chrono::steady_clock::now()-wall<3s,"Actual nonresponsive child must be retired after its wall deadline");
         Directory directory;const auto marker=(directory.path/"entered.marker").string();SchemaWorker cancellable(SchemaWorkerExecutable{argv[1],root,{"hang",marker}});
         std::stop_source cancel;auto pending=std::async(std::launch::async,[&]{cancellable.evaluate("{}","{}",std::chrono::steady_clock::now()+5s,cancel.get_token());});

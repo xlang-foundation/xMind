@@ -1,0 +1,29 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+      Start  4: native_json_schema_contract
+ 1/12 Test  #4: native_json_schema_contract ..............   Passed    0.03 sec
+      Start 29: native_xmind_ipc_api_contract
+ 2/12 Test #29: native_xmind_ipc_api_contract ............   Passed    0.66 sec
+      Start 60: native_process_configuration_contract
+ 3/12 Test #60: native_process_configuration_contract ....   Passed    0.38 sec
+      Start 73: native_schema_worker_contract
+ 4/12 Test #73: native_schema_worker_contract ............   Passed    3.02 sec
+      Start 74: native_mcp_stdio_contract
+ 5/12 Test #74: native_mcp_stdio_contract ................   Passed    3.16 sec
+      Start 75: native_mcp_handshake_contract
+ 6/12 Test #75: native_mcp_handshake_contract ............   Passed    0.81 sec
+      Start 76: native_mcp_client_contract
+ 7/12 Test #76: native_mcp_client_contract ...............   Passed    1.35 sec
+      Start 84: native_mcp_effect_contract
+ 8/12 Test #84: native_mcp_effect_contract ...............   Passed   22.69 sec
+      Start 85: native_mcp_input_contract
+ 9/12 Test #85: native_mcp_input_contract ................   Passed    0.60 sec
+      Start 88: native_agent_worker_model_rpc_contract
+10/12 Test #88: native_agent_worker_model_rpc_contract ...   Passed   53.77 sec
+      Start 97: native_agent_service_contract
+11/12 Test #97: native_agent_service_contract ............   Passed    1.63 sec
+      Start 98: native_agent_runner_contract
+12/12 Test #98: native_agent_runner_contract .............   Passed    9.98 sec
+
+100% tests passed, 0 tests failed out of 12
+
+Total Test time (real) =  98.12 sec

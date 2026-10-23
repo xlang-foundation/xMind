@@ -1,3 +1,34 @@
+## Schema worker uses the shared SDK root - 2026-10-22
+
+The Windows schema worker now exposes xmind.Schemas.Open(private capability),
+returning a Validator with Identity and Validate methods. SDK serialization carries
+typed string/bool arguments and integer verdicts. The schema and instance remain
+original JSON domain text so duplicate-key rejection is preserved. The private
+schema/validate JSON-RPC envelope, request tracker and line dispatcher are removed.
+The owned pipe carries only startup capability/endpoint and parent lifetime.
+
+The parent retains the original fresh-child limits: 128 MiB, 2 seconds user CPU,
+one process and a caller-clamped independent 2-second wall deadline. It monitors
+an owned SDK invocation thread, retires the child and joins on timeout/cancel,
+and requires clean exit after the SDK reply. The common root implementation is
+shared by the unified mode and adjacent helper. Executable helper prerequisites
+now live on consumers, avoiding the old static-library/executable dependency cycle.
+The internal adapter and its SDK transport remain Windows-specific.
+
+The actual schema contract verifies wrong capability refusal, child PID/version,
+typed verdicts, duplicate evaluation rejection across handles, clean EOF exit,
+original valid/invalid/duplicate-key/no-fetch cases, expensive regex containment,
+OS job limits, actual allocation refusal, stall timeout, cancellation after actual
+SDK Validate entry and subsequent healthy evaluation. It also refuses an invalid
+typed verdict. The complete build and 12 selected contracts pass in 98.12 seconds;
+all frozen source, SDK, libraries, Node dependencies and 137 native binaries match.
+
+The initial 8/12 run is retained. Windows text output produced CRLF; both endpoint
+readers originally removed LF only. The correction accepts one optional CR while
+preserving strict numeric parsing. No resource budget or deadline changed.
+This focused result does not replace a new full-source gate or current-package
+rendered/installed acceptance. Earlier design notes below are historical.
+
 ## Remaining schema-worker SDK migration design - 2026-10-22
 
 The schema worker remains an active private JSON-RPC/stdio route. Its parent uses

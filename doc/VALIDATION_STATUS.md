@@ -1,3 +1,23 @@
+## Schema worker SDK integration qualified - 2026-10-22
+
+The active private schema route now uses the common xmind.Schemas SDK object and
+bound Validator methods. No private schema/validate JSON-RPC dispatcher remains.
+Original JSON text, duplicate-key handling, invalid-schema/argument distinctions,
+128 MiB/2-second CPU/one-process/2-second wall limits and cancellation are retained.
+The SDK fixture checks authorization, identity, one-time evaluation and clean exit.
+
+The complete build and 12 focused contracts pass in 98.12 seconds with unchanged
+2790 project inputs, 16 SDK files, 1870 pure libraries, 30 runtime inputs,
+18598 Node dependencies and all 137 native binaries/file sets.
+Native patch SHA-256: fb27698bb2e4dc9eb57deada2dd788add95fdcff02a1a0d18bbca8412b384af4.
+xmind.exe: fa07695e1b830dda47ecc33a69bac492f0897fe078f572b49b5e91df8366bc99.
+Initial 8/12 failure is preserved, followed by the CRLF endpoint correction.
+Evidence: process-xmind-root-schema-sdk-{initial,qualified}-20261022-*.
+
+The accepted 172/172 result below predates this schema change. A fresh complete
+source gate and rebuilt package/client acceptance are still required. Installed
+clients, settings and history remain unchanged; no paid inference or CPython.
+
 ## Full shared-root and fixed-SDK Native qualification - 2026-10-22
 
 Native source 32a24adbe8bda1dbc668d07d7325498882a20336 with SDK f809da86 passes the
