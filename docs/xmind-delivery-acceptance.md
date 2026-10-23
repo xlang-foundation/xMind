@@ -38,8 +38,10 @@ The source17be6368 complete native result is recorded and passes.
 Complete remaining client routing after the source57c05580 full172 acceptance.
 Corrected frontend CI succeeds on56820015. Native hosted validation fails its
 SDK concurrent runtime-isolation prerequisite; local repeated execution also
-fails with heap corruption. See doc/VALIDATION_STATUS.md. SDK diagnosis and
-requalification are required before a new delivery.
+fails with heap corruption. See doc/VALIDATION_STATUS.md. SDK8c7972d1 lifetime serialization passes SDK5,100 repeated isolation processes
+and default performance11. Fresh xMind requalification is171/172 with an
+unresolved Rust Analyzer definition failure; diagnostics pass3 unchanged
+invocations and do not replace full acceptance. New runtime delivery remains pending.
 Fresh qualified-runtime CLI read/edit/Node4/watch/history passes; preserve its
 completed IDs in doc/VALIDATION_STATUS.md.
 Fresh rendered browser coding on source00f25996 passes; preserve its completed

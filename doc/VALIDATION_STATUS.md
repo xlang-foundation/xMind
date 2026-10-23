@@ -1,3 +1,32 @@
+## SDK lifetime guard and xMind requalification result - 2026-10-23
+
+Isolated SDK8c7972d1 serializes C API runtime creation/destruction across complete
+new/delete ownership. The retained static499 probe has execution-guard control
+blocked=1, but create/destroy blocked=0. Candidate checks both blocked=1.
+SDK5 pass;100 isolation processes pass8000 concurrent runtime lifetimes;ctypes3
+pass;complete default performance11 passes21 pairs/5 warmups/original10% threshold
+against the fixed Release baseline. Original499 Release is separately retained.
+SDK source patch3602ccef and runtime DLL7e72cedf. SDK branch is pushed to CantorAI.
+No original SDK checkout/main or installed xMind runtime changed.
+
+The new exact SDK stage produces native58bb2671. Complete xMind172 finishes
+171 passed/1 failed in1394.02s; sole failure is actual Rust Analyzer call-site
+definition still null after its unchanged120x500ms observation loop. All recorded
+source/SDK/library/runtime/dependency/binary sets/hashes remain unchanged.
+Full failure log and inventory are preserved; this is not full acceptance.
+
+Unchanged Rust diagnostic invokes the actual contract3 times:24.31/8.93/8.96s,
+all pass. CTest also runs its required fixture setup3 times. Diagnostic wrapper
+incorrectly expected total1 instead of2 and exits1 after actual CTest exit0;
+its original failed gate is preserved. This establishes neither a Rust fix nor
+a replacement full pass. No deadline, assertion or read-only query was weakened.
+
+CI pins SDK8c7972d1, includes host lifetime guard checks and30 runtime-isolation
+process repetitions. Hosted terminal acceptance remains pending. Installed62
+and all completed coding tasks remain unchanged; new runtime is not installed.
+Evidence: sdk-lifetime-guard-qualification-20261023.json, performance JSON and
+full-initial/rust-diagnostic raw gates/logs/inventory.
+
 ## Hosted SDK isolation failure and local reproduction - 2026-10-23
 
 Hosted native39930037400 on56820015 now passes the SDK revision guard, then

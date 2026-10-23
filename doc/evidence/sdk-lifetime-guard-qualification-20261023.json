@@ -1,0 +1,166 @@
+{
+  "sdkCommit": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "baseline": {
+    "exitCode": 1,
+    "stdout": "execution_guard blocked=1\r\nruntime_create blocked=0\r\nruntime_destroy blocked=0\r\n",
+    "stderr": "",
+    "sdkRevision": "499415d03dba6536355ac3ef19522e335f03f95c",
+    "preservedReleaseDllSha256": "68eb1f2ed9445bb7c91e9323c7796c5e71a220c34b5fd104b566f5d1bccce253"
+  },
+  "candidate": {
+    "sdkCandidate": true,
+    "sourcePatchSha256": "3602ccefd6f2c703feb1069f1e0d516090140331aaa3eebee437aaf11d007a31",
+    "sourceRevision": "499415d03dba6536355ac3ef19522e335f03f95c",
+    "sourceFiles": 14055,
+    "qualifiedSdkFiles": 47,
+    "nativeBinaries": 137,
+    "configured": {
+      "pid": 29180,
+      "startedAt": "2026-10-23T09:59:18.481Z",
+      "endedAt": "2026-10-23T09:59:20.052Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8b1205f4f21ad2073dc9045eca67ce6860a85764dc4a4f86c140ea24f447a259"
+    },
+    "compiled": {
+      "pid": 33800,
+      "startedAt": "2026-10-23T09:59:22.889Z",
+      "endedAt": "2026-10-23T10:00:26.685Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "02a112d37f6df0c459e1718ba52191c0f3176ae999695c6ff0f8b95138e31213"
+    },
+    "tested": {
+      "pid": 28016,
+      "startedAt": "2026-10-23T10:00:29.243Z",
+      "endedAt": "2026-10-23T10:00:32.211Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "7e2cf97980edda8693342618059053dcc609f460d19531f96bdd7f7025e58c6c"
+    },
+    "outputs": {
+      "xlang3_runtime.dll": "7e72cedf81b937145e802ff8e9471e6df47bcaa9855270b866f41df8e1603bdb",
+      "xlang3_runtime.lib": "5c3b83a87597df78f6b90cdb095409f97d57f8ed88dcd5323f32779f902944ab",
+      "xlang3.exe": "449fbd0f331c31d1393482d130bc6841202f31b46aee00788a3ab1ebbe90f32d"
+    },
+    "allOriginalInputFileSetsAndBytesUnchanged": true,
+    "cpythonExecuted": false,
+    "runtimeExecuted": true,
+    "releaseAcceptance": false,
+    "passed": true
+  },
+  "repeat": {
+    "revision": "499415d03dba6536355ac3ef19522e335f03f95c",
+    "startedAt": "2026-10-23T10:09:59.112Z",
+    "endedAt": "2026-10-23T10:11:05.700Z",
+    "pid": 13428,
+    "exitCode": 0,
+    "signal": null,
+    "sourceFiles": 14055,
+    "binaries": 31,
+    "inputSetsAndHashesUnchanged": true,
+    "requestedRepeatedProcessLifetimes": 100,
+    "hostedFailureReproduced": false,
+    "scope": "Diagnostic repeat of the unchanged qualified SDK runtime-isolation test; no xMind task replay, CPython or paid inference",
+    "logSha256": "8fb37143ce2d89c82aa5effbfcd5ae86a7a2e8aa49f708c1227ff2fe164f506a"
+  },
+  "performance": {
+    "cases": {
+      "ctypes_pointer_return": {
+        "pid": 34144,
+        "startedAt": "2026-10-23T10:11:17.331Z",
+        "completedAt": "2026-10-23T10:11:17.962Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "98577452aefd783bebf40acece0ddac12f3d0aeb9aa41d9eb0b6966b338e6bbd",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_cast_errcheck_array": {
+        "pid": 22324,
+        "startedAt": "2026-10-23T10:11:17.963Z",
+        "completedAt": "2026-10-23T10:11:18.101Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "873daadd27a58895f1bfdee25ba375d9b4235be5b88485090f700690cc11465b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_structure_layout": {
+        "pid": 30016,
+        "startedAt": "2026-10-23T10:11:18.102Z",
+        "completedAt": "2026-10-23T10:11:18.217Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "2a44feb38a53149727a882243266422984f8746b329301fd1348cda35ace9f7b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "performance": {
+      "pid": 29272,
+      "startedAt": "2026-10-23T10:11:18.218Z",
+      "completedAt": "2026-10-23T10:12:44.746Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "828d5774b7ad18a73c5688d1b27e32cd0d4f0e92ec4aae8e455a9f53409b122b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "status": "pass",
+    "caseCount": 11,
+    "repeats": 21,
+    "warmup": 5,
+    "threshold": 0.1,
+    "allInputsFileSetsAndRuntimeBytesUnchanged": true,
+    "cpython": false,
+    "installed": false,
+    "passed": true
+  },
+  "nativeRequalification": {
+    "total": 172,
+    "passed": 171,
+    "failed": 1,
+    "scopePassed": false,
+    "failedContract": "native_language_server_rust_analyzer_contract"
+  },
+  "rustDiagnostic": {
+    "recordedAt": "2026-10-23T10:57:10.627Z",
+    "sourceParent": "974d9fd8241434a4f593a931aa628e17398bc581",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 23292,
+      "launchedAt": "2026-10-23T10:55:59.301Z",
+      "completedAt": "2026-10-23T10:56:22.849Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2280c4fd003979d7b2b3db932577d4f5b9e14e6b8f685b29c63bd77048d697fb"
+    },
+    "test": {
+      "pid": 23192,
+      "launchedAt": "2026-10-23T10:56:25.543Z",
+      "completedAt": "2026-10-23T10:57:07.997Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "96fd7842c56688b8f59a5babb8605347d530925b8523b0c991558b85a7742554"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 42.42,
+    "projectFiles": 2813,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "58bb26712d1294fb1a4c03e08b0e1b46ede9e4e4edafa5c4adb2de9b5debd8fd",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "rustDiagnosticRepetitions": 3,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false,
+    "harnessScopeCountError": "Wrapper expected1; CTest correctly added required Rust fixture setup for total2. Raw wrapper gate remains failed.",
+    "observedActualContractExecutions": 3,
+    "fullAcceptance": false
+  },
+  "installed": false
+}
