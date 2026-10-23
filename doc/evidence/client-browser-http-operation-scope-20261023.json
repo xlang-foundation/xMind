@@ -1,0 +1,87 @@
+{
+  "recordedAt": "2026-10-23T19:48:15.041Z",
+  "sourceClient": "f0a5450665347dbd057e230f0f898394541e595b",
+  "sourceNative": "b02718712d2e876e596230c357841e72554a4afa",
+  "nativeQualification": {
+    "focusedPassed": 4,
+    "focusedFailed": 0,
+    "productBinaryUnchanged": true
+  },
+  "fullNativeAcceptance": false,
+  "nativeSha256": "1a0f856fd74c3f5a01495775a32e45f742a819971723235dd5249c99ed0464e0",
+  "sessionId": "a736485ec2714063ab4b0f8069195648",
+  "runId": "8e3b1d02d69147ffb6b72ea652fb15da",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "operations": [
+    {
+      "id": "b32e2f31eb2b21d5afc9adf6ac35c817",
+      "run_id": "8e3b1d02d69147ffb6b72ea652fb15da",
+      "tool": "replace_file",
+      "state": "succeeded",
+      "decision_actor": "local-owner"
+    },
+    {
+      "id": "3f003b6a430154f4907eb08095ba6196",
+      "run_id": "8e3b1d02d69147ffb6b72ea652fb15da",
+      "tool": "run_process",
+      "state": "succeeded",
+      "decision_actor": "local-owner"
+    }
+  ],
+  "approvalRoutes": [
+    {
+      "path": "/v1/connection-bindings/416b71878da566a7f64893339f07b5d0/sessions/a736485ec2714063ab4b0f8069195648/runs/8e3b1d02d69147ffb6b72ea652fb15da/operations/b32e2f31eb2b21d5afc9adf6ac35c817/decision",
+      "method": "POST",
+      "status": 200,
+      "actor": "local-owner",
+      "binding": {
+        "backend_generation": "2820092912-1800310593-2685093380-3078816700-",
+        "connection_id": "local",
+        "kind": "local",
+        "profile_revision": 1,
+        "protocol_version": 1,
+        "server_id": "local-d5af04dbf20cbb469b0e708d32d1b01b030af8456c73a7ef76c63be036f0d4fe"
+      }
+    },
+    {
+      "path": "/v1/connection-bindings/416b71878da566a7f64893339f07b5d0/sessions/a736485ec2714063ab4b0f8069195648/runs/8e3b1d02d69147ffb6b72ea652fb15da/operations/3f003b6a430154f4907eb08095ba6196/decision",
+      "method": "POST",
+      "status": 200,
+      "actor": "local-owner",
+      "binding": {
+        "backend_generation": "2820092912-1800310593-2685093380-3078816700-",
+        "connection_id": "local",
+        "kind": "local",
+        "profile_revision": 1,
+        "protocol_version": 1,
+        "server_id": "local-d5af04dbf20cbb469b0e708d32d1b01b030af8456c73a7ef76c63be036f0d4fe"
+      }
+    }
+  ],
+  "renderedProof": {
+    "passed": true,
+    "sessionId": "a736485ec2714063ab4b0f8069195648",
+    "runId": "8e3b1d02d69147ffb6b72ea652fb15da",
+    "messages": 8,
+    "reloadedHistoryExact": true,
+    "sendVisible": true,
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    },
+    "completedText": "Fixed clamp.cjs. The actual Node run exited 0: 4 clamp checks passed.",
+    "browser": "Actual hidden IAB tab 10",
+    "screenshot": "rendered.png"
+  },
+  "frontendFiles": 19,
+  "frontendMatchesTrackedClientAndServer": true,
+  "frontendUnchangedAcrossReload": true,
+  "runtimeBytesAndSetsUnchanged": true,
+  "ownedBackendExited": true,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false,
+  "scope": "Actual hidden browser coding: read, two scoped approvals, real edit and Node checks, exact history reload; focused native qualification only",
+  "screenshotSha256": "5b5f23a351d42a3321783909158580de4995f5f01ecd4395dd963d719eb89084"
+}

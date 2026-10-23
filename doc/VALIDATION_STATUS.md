@@ -1,3 +1,19 @@
+## Actual browser captured operation approvals - 2026-10-23
+
+Fresh hidden IAB10 coding task completes read, reviewed file edit, reviewed Node
+command and4 actual clamp checks through current native1a0f856f/SDK8c. Both
+approval POSTs use one captured handle and the exact session/run operation
+routes, returning backend local-owner receipts; no legacy decision POST. Four
+controlled model calls,8 messages,2 successful operations and1 SDK worker
+retirement verified. Reload restores exact history HTML and ownership; Send
+visible at1280x720.19 frontend files match current sources and remain unchanged
+across reload;1901 runtime payload files plus manifest remain unchanged. Exact
+owned backend birth/image verified and exit observed; owned tab closed.
+Sessiona736485ec2714063ab4b0f8069195648/root8e3b1d02d69147ffb6b72ea652fb15da
+completed, NEVER replay. Native source has4 focused contracts; this is no new
+complete suite or actual Code pane proof. Installed62 unchanged; no paid calls.
+Evidence: client-browser-http-operation-scope-20261023.json/png.
+
 ## Browser/extension captured operation routing - 2026-10-23
 
 Shared client negotiates local_connection_operations=1 and routes operation
