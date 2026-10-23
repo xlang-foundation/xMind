@@ -73,6 +73,7 @@ class BackendClient {
   #workspaceGuard;
   #connectionAdmissionSupported=false;
   #connectionOperationsSupported=false;
+  #connectionHistorySupported=false;
   #connectionCapture;
   #connectionClosed=false;
   #connectionClosing;
@@ -112,6 +113,8 @@ class BackendClient {
     else if(this.#connectionCapture)throw new Error('The backend connection protocol changed. Reconnect before admitting new work.');
     if(health&&Object.hasOwn(health,'local_connection_operations')){if(health.local_connection_operations!==1||!this.#connectionAdmissionSupported)throw new Error('Unsupported captured operation protocol.');this.#connectionOperationsSupported=true;}
     else if(this.#connectionOperationsSupported)throw new Error('The backend operation protocol changed. Reconnect before deciding work.');
+    if(health&&Object.hasOwn(health,'local_connection_history')){if(health.local_connection_history!==1||!this.#connectionAdmissionSupported)throw new Error('Unsupported captured history protocol.');this.#connectionHistorySupported=true;}
+    else if(this.#connectionHistorySupported)throw new Error('The backend history protocol changed. Reconnect before reading history.');
     return health;
   }
   async #captureConnection(){
@@ -377,9 +380,16 @@ class BackendClient {
   history(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/history`); }
   async historyPage(id,limit=40,before) {
     executionIdentity(id);if(!Number.isSafeInteger(limit)||limit<1||limit>1000)throw new Error('Invalid session history page size');
-    if(before!==undefined&&(typeof before!=='string'||!/^msg_[1-9][0-9]*$/.test(before)))throw new Error('Invalid session history cursor');
+    if(before!==undefined&&(typeof before!=='string'||!/^msg_[1-9][0-9]*$/.test(before)||!Number.isSafeInteger(Number(before.slice(4)))))throw new Error('Invalid session history cursor');
     const query=new URLSearchParams({limit:String(limit)});if(before!==undefined)query.set('before',before);
-    const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/messages?${query}`);
+    let value;
+    if(this.#connectionHistorySupported){
+      const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured history connection changed.');
+      const receipt=await this.request('/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(id)+'/messages',{before_sequence:before===undefined?0:Number(before.slice(4)),count:limit});
+      exactFields(receipt,['binding','session_id','messages','has_more','next_before']);validateConnectionBindingIdentity(receipt.binding);
+      if(Object.keys(capture.identity).some(key=>receipt.binding[key]!==capture.identity[key])||receipt.session_id!==id)throw new Error('History receipt belongs to another connection or conversation.');
+      value={messages:receipt.messages,has_more:receipt.has_more,next_before:receipt.next_before};
+    }else value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/messages?${query}`);
     if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).sort().join(',')!=='has_more,messages,next_before'||!Array.isArray(value.messages)||value.messages.length>limit||typeof value.has_more!=='boolean'||(value.next_before!==null&&(typeof value.next_before!=='string'||!/^msg_[1-9][0-9]*$/.test(value.next_before)))||value.has_more!==(value.next_before!==null)||(value.has_more&&(!value.messages.length||value.next_before!==value.messages[0].id)))throw new Error('Invalid session history page');
     let prior=0;for(const item of value.messages){if(!item||typeof item!=='object'||!Number.isSafeInteger(item.seq)||item.seq<=prior||item.id!==`msg_${item.seq}`||typeof item.role!=='string'||!item.data||typeof item.data!=='object'||Array.isArray(item.data))throw new Error('Invalid session history message');prior=item.seq;}
     return value;

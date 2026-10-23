@@ -238,3 +238,7 @@ test('captured operation proxy routes restrict methods and scope shape',async()=
  for(const path of [base,base+'/operation']){assert.equal(allowedApiRoute(path,'GET'),true);assert.equal(allowedApiRoute(path,'POST'),false);assert.equal(allowedApiRoute(path,'DELETE'),false);}
  assert.equal(allowedApiRoute(base+'/operation/decision','POST'),true);assert.equal(allowedApiRoute(base+'/operation/decision','GET'),false);assert.equal(allowedApiRoute(base+'/operation/actor','POST'),false);
 });
+
+test('captured history proxy permits only scoped message POST',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');const path='/v1/connection-bindings/'+'a'.repeat(32)+'/sessions/session/messages';assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','DELETE','PUT'])assert.equal(allowedApiRoute(path,method),false);assert.equal(allowedApiRoute(path+'/foreign','POST'),false);
+});

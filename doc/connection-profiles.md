@@ -293,3 +293,9 @@ fence retained objects on backend retirement. Message values use normal SDK
 serialization. HTTP exposes POST /connection-bindings/ID/sessions/SESSION/messages
 under /v1 with before_sequence and count; health local_connection_history=1.
 Client integration and rendered verification of this API remain pending.
+
+Browser and extension transcript paging now negotiates the history capability,
+uses this captured page service, and validates binding/session receipts before
+merging records. Legacy full-history, individual-message and export APIs remain
+separate.470 extension/165 browser unit tests and the actual native-backed view
+contract pass; no new rendered or complete native qualification is inferred.

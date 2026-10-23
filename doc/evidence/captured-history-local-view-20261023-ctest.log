@@ -1,0 +1,19 @@
+Start testing: Oct 23 13:27 Pacific Daylight Time
+----------------------------------------------------------
+147/172 Testing: native_local_view_contract
+147/172 Test: native_local_view_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/local_view_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/xlang3_runtime.dll" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_local_view_contract" start time: Oct 23 13:27 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualProductionExtensionController":true,"actualNativeSidebarSubscription":true,"actualSidebarDetachReattach":true,"retiredSidebarCannotSubmitInput":true,"actualSidebarHumanToolCompletion":true,"installedIde":false,"renderedIde":false,"providerRequests":0,"actualSidebarProposalComparison":true,"retiredSidebarCannotApprove":true,"actualSidebarApprovedCreation":true,"actualCreationReceiptMatchesDisk":true,"actualNativeView":true,"unsafeRendezvousRejectedBeforeBackendStartup":true,"actualProductionEditorHostAdapter":true,"actualSharedConsoleBackend":true,"actualToolGraph":true,"browserCookieAccess":true,"actualBrowserControllerStreaming":true,"actualGatewayRestartScopedReplay":true,"actualPausedFeedDetachAndReattach":true,"actualHumanResumeIncrementalEvents":true,"actualStreamCapacityAndCommandFairness":true,"actualStreamReauthenticationAfterViewExit":true,"actualNativeBrowserWorkspaceRegistration":true,"actualBrowserMembershipSelectionAndRevocation":true,"backendTokenNeverExported":true,"ownerControlRejected":true,"duplicateGrantRejected":true,"processBoundViewRevokedAfterExit":true,"sameProfileAndHistoryAcrossHostReload":true,"renderedUi":false}
+<end of output>
+Test time =  65.49 sec
+----------------------------------------------------------
+Test Passed.
+"native_local_view_contract" end time: Oct 23 13:28 Pacific Daylight Time
+"native_local_view_contract" time elapsed: 00:01:05
+----------------------------------------------------------
+
+End testing: Oct 23 13:28 Pacific Daylight Time

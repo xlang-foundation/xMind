@@ -1,3 +1,19 @@
+## Captured browser/extension history paging integration - 2026-10-23
+
+Shared client negotiates local_connection_history=1 and uses the captured
+session message-page route for transcript paging. Returned server/generation/
+profile/session identity, page shape and safe cursor inputs are checked; mismatch,
+protocol downgrade or closed binding cannot retry on legacy routes. Older
+backends keep the previously advertised Local path. Browser proxy permits only
+scoped message POST. Complete470 extension/165 browser units pass with tracked
+source file sets/bytes unchanged. Actual native-backed local-view contract also
+passes65.50s with complete source/SDK/library/dependency/binary closure unchanged;
+this is controller/HTTP proof, not a new rendered IAB/Code or full-suite claim.
+Session13066 terminal0. Native9276c5a5 unchanged. Rust full failure remains open;
+installed62 unchanged. Full history/session-message/export and other adapters
+retain separate existing APIs. Evidence: captured-history-client and
+captured-history-local-view-20261023*.
+
 ## Captured native session message paging - 2026-10-23
 
 Sessions.Messages(session,before_sequence,count) now uses native captured binding

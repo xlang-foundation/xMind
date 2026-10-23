@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-23T20:26:51.104Z",
+  "sourceParent": "a6bb35730088195e11a70f438d731ae990151cdd",
+  "sourcePatchSha256": "7553a6e331228ac7b34cd55d97aab1ae7460487df0a91db4db38d7b20551cd57",
+  "sourceFiles": 64,
+  "sourceFilesAndBytesUnchanged": true,
+  "results": [
+    {
+      "label": "extension",
+      "exitCode": 0,
+      "tests": 470,
+      "passed": 470,
+      "failed": 0,
+      "logSha256": "4af5c56d76ac4b468bed91b7deb4086260400c8854c95e9db692432422be97c2"
+    },
+    {
+      "label": "browser",
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "logSha256": "8252d6864c3a9cbf8f7b6eaabfa00d8dd3a7caafa6d2798a76ab3e185df48f15"
+    }
+  ],
+  "scope": "Client/controller/proxy units only; captured paginated history with session/binding checks, cursor limits, protocol downgrade and closed-handle checks. No new rendered or full native acceptance.",
+  "installed": false
+}
