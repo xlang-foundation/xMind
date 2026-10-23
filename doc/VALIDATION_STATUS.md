@@ -1,3 +1,20 @@
+## Packaged 0.1.62 CLI coding - 2026-10-22
+
+A fresh task starts through the packaged native CLI against an isolated loopback
+backend using process-code execution. It reads sum-to.cjs, reviews/approves its
+replacement, approves a literal Node test command and completes four actual
+inclusive-sum checks. Four controlled model calls, two successful operations,
+eight messages, one completed SDK worker retirement and one closed budget segment
+are verified. CLI watch and a second history read preserve the same result.
+All packaged runtime file sets and hashes remain exact. Backend identity is
+checked before its owned child handle is stopped; the harness exits zero.
+
+Session 4e7389391777e8c64f5652c0a30382c8 / root
+26fa83034c013399385a030c5f64721a completed; NEVER replay this task. Evidence:
+client-packaged-cli-2f105e11-20261022.json. No CPython, paid inference or installed
+package change. Actual rendered VS Code and protected candidate installation,
+generic connection binding and nested process planning/recovery remain open.
+
 ## Packaged 0.1.62 browser coding - 2026-10-22
 
 Candidate Native2f105e11/SDK499415d0 packages 2398 runtime files and 2443 VSIX
