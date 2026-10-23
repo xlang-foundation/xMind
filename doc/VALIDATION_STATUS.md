@@ -1,3 +1,20 @@
+## Complete native connection API integration - 2026-10-22
+
+Source17be6368 completes all 172 Native contracts with zero failures in
+1368.50 seconds. Native selection rejection, atomic catalog revisions and the
+Connections SDK subobject are included. All 2810 project inputs, 16 SDK files,
+1870 pure-library files, 30 runtime files, 18598 dependencies and 137 native
+binaries retain their actual file sets and hashes around validation. Native
+xmind.exe SHA-256: 02ecd36194212c0d3a509b2b154e451bcfd28984021af7e41f2d503e31873de1.
+Evidence: connection-catalog-sdk-full-20261022-*. Earlier focused/baseline failure
+receipts remain preserved. No CPython, paid provider inference or user-task replay.
+
+Installed62 remains the separately verified Native2f105e11/SDK499415d0 package.
+Captured connection bindings, authenticated remote routing/enrollment, nested
+process planning/recovery and rendered VS Code coding/context remain open. See
+connection-binding-design.md and ../docs/xmind-delivery-acceptance.md. This full
+native pass does not declare those remaining requirements complete.
+
 ## Native SDK connection catalog API - 2026-10-22
 
 The registered xMind root now exposes Connections(owner_token), with List, Save
