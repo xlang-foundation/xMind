@@ -1,3 +1,15 @@
+## Production worker RPC after loader fixes — 2026-10-23
+
+The complete native_agent_worker_model_rpc_contract passes1/1 in52.60s on
+committed2e0418eb/Native15431644. Actual xmind worker processes use the supported
+SDK IPC with controlled inference peers; the full frozen source/SDK/library/
+runtime/dependency/binary sets and bytes remain unchanged. No code changes
+followed the channel regression. This validates existing production worker
+behavior at the fixture paths; it is not a model-driven long-path coding check
+or a new complete172 pass. Candidate0.1.63 and installed62 remain unchanged.
+[Receipt](evidence/worker-loader-production-rpc-20261023.json),
+[CTest log](evidence/worker-loader-production-rpc-20261023-ctest.log).
+
 ## Separate SDK worker-channel loader path fix — 2026-10-23
 
 The channel contract now repeats its complete process/SDK checks using a copied

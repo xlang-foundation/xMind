@@ -1,0 +1,41 @@
+{
+  "recordedAt": "2026-10-23T23:51:32.610Z",
+  "sourceParent": "2e0418ebf11fb084173ccb08ce051779b2a3814c",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 37392,
+    "launchedAt": "2026-10-23T23:50:18.859Z",
+    "completedAt": "2026-10-23T23:50:34.649Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "7d86d5957d8f71bc2bf5ca600253cd68599b7e617eafc3ee2c1aae49a9908f5c"
+  },
+  "test": {
+    "pid": 26984,
+    "launchedAt": "2026-10-23T23:50:37.372Z",
+    "completedAt": "2026-10-23T23:51:30.000Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2cbaa7f218e8cc11eb913b301709c73a304199c285276a6247a07a804ab4068f"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 52.6,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "15431644cb1b09f819c4c51721b04547a7f19ad7261cd55a3d566b9a8d52272e",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Complete production model-worker RPC contract on committed 2e0418eb with real native xmind worker processes and controlled inference peers. Standard fixture paths; actual model-driven long-path coding remains separate.",
+  "fullGoalComplete": false
+}
