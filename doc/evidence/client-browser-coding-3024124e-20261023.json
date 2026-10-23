@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "3024124e94208d330a994bc901c260c100e565c2",
+  "nativeSha256": "9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "fullNativeContractsPassed": 172,
+  "scope": "Actual hidden in-app browser using the qualified development runtime; controlled provider, real native read/edit/Node execution, scoped captured-operation approval and exact eight-message reload. Rendered VS Code and packaged installation are separate unfinished gates.",
+  "passed": true,
+  "sessionId": "f46b3d3183c04ee2bf7ce33313eafe0c",
+  "runId": "5a964b61d2694f588b175ed80e95b735",
+  "historyMessages": 8,
+  "historyExactAfterReload": true,
+  "approvedEdit": true,
+  "approvedNodeCommand": true,
+  "nodeChecksPassed": 4,
+  "tabClosed": true,
+  "completedTaskNeverReplay": true,
+  "modelCalls": 4,
+  "operations": [
+    {
+      "id": "5daea84f05864bcbdbe923f0f48b202c",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "d94bcf8bc7aebd42cc9e85334b3a4220",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "scopedApprovalPosts": [
+    {
+      "path": "/v1/connection-bindings/41e5642599c5d7145f63555b0726724f/sessions/f46b3d3183c04ee2bf7ce33313eafe0c/runs/5a964b61d2694f588b175ed80e95b735/operations/5daea84f05864bcbdbe923f0f48b202c/decision",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/41e5642599c5d7145f63555b0726724f/sessions/f46b3d3183c04ee2bf7ce33313eafe0c/runs/5a964b61d2694f588b175ed80e95b735/operations/d94bcf8bc7aebd42cc9e85334b3a4220/decision",
+      "status": 200
+    }
+  ],
+  "runtimeFileSetsAndBytesUnchanged": true,
+  "ownedBackendExited": true,
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "fullGoalComplete": false,
+  "gateSha256": "6edcaf776971f0c2da3e76100deec3fd13cc095535be1955f25268818c2b086c",
+  "screenshotSha256": "d17a87bc11df50b5b674d84ed6dfddbebade4f38df1830ff70228b1f137cdfa6"
+}

@@ -1,3 +1,22 @@
+## Fresh qualified candidate browser coding — 2026-10-23
+
+The actual hidden in-app browser completed a fresh ceil-div coding task on
+qualified Native3024124e/9054a6ff: read, reviewed file correction and reviewed
+Node execution, with four assertions passing. Both approvals used captured
+session/run operation routes. Four controlled provider replies produced eight
+canonical messages; all rendered history text and selected session/run IDs
+were identical after reload. The screenshot shows completion and the composer
+footer at1280x720. The owned tab closed and identity-verified backend35460
+exited; the runtime manifest, file sets and all payload bytes remain exact.
+
+Sessionf46b3d3183c04ee2bf7ce33313eafe0c / root5a964b61d2694f588b175ed80e95b735
+are complete: never replay. No paid inference, CPython, visible window or
+installation. This closes current candidate browser coding verification;
+rendered VS Code, package/install, automatic nested process scheduling and
+remaining generic remote protocol requirements are still open.
+[Receipt](evidence/client-browser-coding-3024124e-20261023.json),
+[screenshot](evidence/client-browser-coding-3024124e-20261023.png).
+
 ## Fresh qualified candidate CLI coding — 2026-10-23
 
 The exact 3024124e native binary (9054a6ff) completed a fresh sum-cubes
