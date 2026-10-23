@@ -1,3 +1,19 @@
+## Captured CLI run commands through SDK subobjects - 2026-10-23
+
+Added connections run-start/run-open/run-cancel to the native IPC CLI using
+existing Binding.Runs() SDK methods. Help now lists scoped sessions/runs/events.
+Actual independent xmind clients start and complete a controlled run, read its
+scoped events, cancel a second actual live provider stream and observe cancelled
+state. Binding/server/generation identity is checked; wrong-token and stale
+admissions create no run or inference. Exactly2 local synthetic provider calls.
+Initial fixture incorrectly inspected the first historical user message and
+completed the cancellation run; preserved failed receipt, corrected to latest
+user message, then used a fresh fixture. Qualified contract passes1/1 in1.66s,
+with source/SDK/library/dependency/binary file sets unchanged during validation.
+No paid provider or CPython. Default run options only; complete SDK option API
+and other delivery requirements remain open. Installed62 unchanged.
+Evidence: captured-cli-runs-20261023* and initial-failure receipt.
+
 ## Worker ledger phase diagnostics - 2026-10-23
 
 Added begin/end elapsed markers around five planning fixture groups without

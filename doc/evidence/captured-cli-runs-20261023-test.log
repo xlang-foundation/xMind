@@ -1,0 +1,19 @@
+Start testing: Oct 23 11:32 Pacific Daylight Time
+----------------------------------------------------------
+29/172 Testing: native_xmind_ipc_api_contract
+29/172 Test: native_xmind_ipc_api_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/xmind_ipc_api_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_api_contract" start time: Oct 23 11:32 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"backendPid":28196,"clientPids":[29652,6548,13560,34804,27840,30636,24840,32524,31756,26268,19596,31480,27456,7528,28280,33644,32168,7268,29788,25332,27792,29352,27464,8464,35324,33564,29688,16136,15104,9496,9588,3296,33508,27508,34572,14568,28284,35516,16416],"apiVersion":1,"transport":"xlang3-lrpc","actualUnifiedExecutable":true,"verified":["Root registered at backend startup","Native Host/Connections/Sessions/Runs subobjects","Distinct xmind.exe clients call SDK methods directly","Exact UTF-8 persisted session survives independent clients","Duplicate create and wrong authentication rejected","No unauthorized session created","Unknown run rejected","Captured run start/open/events and live cancellation use actual SDK service subobjects","Wrong-token and stale captured run admissions dispatch no model","SDK value catalog agrees with HTTP and persists UTF-8 metadata","Independent clients race one catalog revision; exactly one succeeds","Unauthenticated selection, wrong token, stale revision and credential fields rejected"],"limitations":["No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate","No live provider or rendering acceptance"],"passed":true}
+<end of output>
+Test time =   1.65 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_api_contract" end time: Oct 23 11:32 Pacific Daylight Time
+"native_xmind_ipc_api_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 23 11:32 Pacific Daylight Time

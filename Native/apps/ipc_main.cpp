@@ -10,7 +10,7 @@
 namespace agentflow {
 int run_xmind_ipc_client(int argc,char** argv){
     try{
-        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
+        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-cancel ID REV RUN | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
         const std::string endpoint=argv[2];if(!endpoint.starts_with("lrpc:"))throw std::invalid_argument("xMind IPC requires an xlang3 LRPC endpoint");
         X::Runtime runtime;auto root=runtime.ImportRemote("xmind",endpoint.c_str());
         auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;if(!method.Call(args,result))throw std::runtime_error("xMind IPC call failed: "+runtime.LastError());return result;};
@@ -30,6 +30,9 @@ int run_xmind_ipc_client(int argc,char** argv){
                     if(method=="open"&&argc==7)result=call(binding["Identity"],{});
                     else if(method=="session-create"&&argc==9){auto sessions=call(binding["Sessions"],{});result=call(sessions["Create"],{text(argv[7]),text(argv[8])});}
                     else if(method=="session-open"&&argc==8){auto sessions=call(binding["Sessions"],{});result=call(sessions["Open"],{text(argv[7])});}
+                    else if(method=="run-open"&&argc==8){auto runs=call(binding["Runs"],{});result=call(runs["Open"],{text(argv[7])});}
+                    else if(method=="run-start"&&argc==10){auto runs=call(binding["Runs"],{});result=call(runs["Start"],{text(argv[7]),text(argv[8]),text(argv[9])});}
+                    else if(method=="run-cancel"&&argc==8){auto runs=call(binding["Runs"],{});call(runs["Cancel"],{text(argv[7])});result=runtime.Dict();result.Set("binding",call(binding["Identity"],{}));result.Set("run_id",text(argv[7]));result.Set("cancel_requested",X::Value(true));}
                     else if(method=="events"&&argc==10){auto events=call(binding["Events"],{text(argv[7]),text(argv[8])});const auto input=nlohmann::json::parse(argv[9]);auto cursor=input.is_null()?call(events["Cursor"],{}):sdk_values::to_value(runtime.host(),input);result=call(events["Read"],{cursor});}
                     else throw std::invalid_argument("Invalid captured connection method or arguments");
                 }

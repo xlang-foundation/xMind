@@ -164,12 +164,24 @@ at most 256 actual root-tree events through the existing repository query, with
 a next cursor. That query also restricts every returned run to the captured
 session. Local event cursors do not grant remote or workspace execution authority.
 
-The native IPC CLI additionally supports connections open ID PROFILE_REV,
-connections session-create ID PROFILE_REV SESSION TITLE, connections session-open
-ID PROFILE_REV SESSION, and connections events ID PROFILE_REV SESSION ROOT
-JSON_CURSOR (null starts from the captured initial cursor). Calls use standard
-SDK service objects and values. UI/HTTP binding adapters and authenticated remote
-connectors remain unfinished.
+The native IPC CLI supports these captured service commands after
+`xmind ipc --endpoint lrpc:PORT` (authentication comes from XMIND_AUTH_TOKEN):
+
+- `connections open ID PROFILE_REV`
+- `connections session-create ID PROFILE_REV SESSION TITLE`
+- `connections session-open ID PROFILE_REV SESSION`
+- `connections run-start ID PROFILE_REV RUN SESSION PROMPT`
+- `connections run-open ID PROFILE_REV RUN`
+- `connections run-cancel ID PROFILE_REV RUN`
+- `connections events ID PROFILE_REV SESSION ROOT JSON_CURSOR`
+
+A null JSON cursor starts from the captured initial cursor. Run start/open return
+native binding/run receipts; cancellation returns the captured identity, run ID
+and acknowledgement. Cancellation requests the existing run's stop; inspect its
+terminal state separately. Commands use the existing SDK service objects and
+values. Start currently accepts the default run options only. Browser/extension
+prompt admission uses the shared native HTTP adapter; other client operations
+and authenticated remote connectors still require integration.
 
 ## HTTP captured-binding adapter
 
