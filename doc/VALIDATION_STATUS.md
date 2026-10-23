@@ -1,3 +1,18 @@
+## Current complete native qualification started - 2026-10-23
+
+Sourcefcd97b06 is frozen for a new complete172-contract qualification using
+SDK8c, pure library1870 and recorded dependency/runtime/source closures. Driver
+.agentflow/verify-captured-http-fcd97b06-full.mjs writes under
+.agentflow/workspace-switch-validation/native/captured-http-fcd97b06-full.
+Live unified session95155; build cmake32140 born2026-10-23T19:51:21.148Z and
+MSBuild12696 born19:51:21.214Z were observed with exact ALL_BUILD command lines.
+Follow this same handle to terminal; do not restart or overlap native builds.
+There is no new full-suite acceptance yet. Hosted40010370205 is independently
+live at its native build/test step. Source/SDK/runtime/dependencies must remain
+unchanged until the local closure verifies. Installed62 and completed tasks stay
+preserved. Acceptance audit now links actual scoped browser proof and current
+469/164 client units while retaining distinct full/focused scopes.
+
 ## Captured client run inspection and cancellation - 2026-10-23
 
 Shared browser/extension client now uses the original captured handle for status

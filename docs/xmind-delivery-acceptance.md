@@ -4,9 +4,11 @@ This audit preserves the complete recovered delivery objective; completion remai
 unproven. Installed 0.1.62 uses Native2f105e11 and SDK499415d0, with its protected
 backup and user state retained. Current source adds SDK8c7972d1 lifetime guards,
 shared worker retirement ordering, captured connection adapters and scoped CLI
-run commands. The subsequent SDK Runs.Submit option API has focused acceptance
-and shares HTTP validation; the earlier full172/browser/CLI receipts remain
-scoped to b133a0ee. Current source is not installed.
+run commands. SDK Runs.Submit and captured operation APIs have focused
+acceptance. Browser/extension operation and run-control adapters are implemented;
+actual scoped browser approval proof is recorded separately below. The earlier
+full172 receipts remain scoped to b133a0ee; a complete current-source run is live
+and must reach terminal before being counted. Current source is not installed.
 
 The [last complete hosted run](../doc/evidence/hosted-native-full-dd238817-20261023.json)
 passes167/170 in909.68 seconds. All four counted context cases, including
@@ -17,7 +19,7 @@ hosted failures, even though [Complete local requalification on sourceb133a0ee](
 passes all172 in1324.08s, including Rust semantic checks absent from the hosted
 inventory. Source/SDK/library/dependency/binary file sets and bytes are frozen
 and verified. Earlier SDK8c full-run Rust failure remains historical evidence;
-this complete pass qualifies the current local source/runtime, without proving
+this complete pass qualifies that b133a0ee source/runtime, without proving
 the cause of that earlier failure.
 
 Historical SDK499 [source57c05580 full native acceptance](../doc/evidence/captured-local-admission-full-qualified-20261023.json)
@@ -30,7 +32,7 @@ these older runtime results retain their original scope. [Current SDK8c browser 
 | --- | --- | --- |
 | Shared native C++ backend, embedded xlang3 and SQLite | [Current SDK8c full172](../doc/evidence/captured-cli-b133a0ee-full-native-20261023.json); complete input closures and binary file sets verified unchanged. | SDK8c/current-source complete local172 now passes. Resolve hosted failures and verify current-runtime client delivery; historical SDK499 passes retain their original scope. |
 | Standard xlang3 root/subobjects and process workers | [Actual separate-process Connections API and lifetime tests](../doc/evidence/connection-catalog-sdk-api-20261022.json); SDK owns value/reference transfer. | [Scoped CLI run services](../doc/evidence/captured-cli-runs-20261023.json) pass actual separate-process completion/cancellation. SDK full run options now pass focused same-process/lifetime and separate-process tests; authenticated remote binding remains incomplete. |
-| Browser coding | [Current SDK8c browser coding](../doc/evidence/client-browser-captured-b133a0ee-20261023.json): actual UI Send, edit/command approvals, Node4, identical eight-message rendered history after reload and matching CLI records. | Preserve the completed task. This runtime fixture is not installed; rendered VS Code and other remaining delivery areas stay separate. |
+| Browser coding | [Captured operation browser proof](../doc/evidence/client-browser-http-operation-scope-20261023.json): actual Send, two scoped approvals, edit/Node4, identical eight-message rendered history after reload. Native source has focused4 acceptance; earlier b133 full172 proof retains its scope. | Preserve both completed tasks. Latest run-control routing has unit acceptance; no installed/current complete-suite claim. Rendered VS Code remains separate. |
 | CLI coding | [Current SDK8c CLI coding](../doc/evidence/client-cli-coding-b133a0ee-20261023.json): real read/edit/Node4, two approvals, physical SDK worker retirement, exact history/watch and owned backend exit. | Preserve the completed task. Explicit loopback CLI attachment is proven; current managed installation and rendered VS Code remain separate. |
 | VS Code extension | [Protected installed62](../doc/evidence/installed-0.1.62-2f105e11-20261022.json): package/runtime bytes and installed native managed discovery/read smoke pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. Keep visible Code closed unless requested. |
 | Conversation/footer layout | [Current rendered browser screenshot](../doc/evidence/client-packaged-browser-2f105e11-20261022.png); packaged frontend bytes match the accepted client gate. | Existing expanded-skills/long-draft fixture is bounded evidence, not a complete viewport/accessibility matrix. |
@@ -38,14 +40,16 @@ these older runtime results retain their original scope. [Current SDK8c browser 
 | Single/graph agents, planning and delegation | Native graph, dynamic-plan, delegation, budget, context and worker contracts occur in the complete native inventory. | Nested planning in dynamic process children and its recovery/budget binding remain incomplete. |
 | Providers, MCP and A2A | Complete native inventory includes provider wire/history/profile, MCP SDK/network/OAuth and A2A/task/stream contracts using controlled peers. | These establish tested protocol scopes, not universal compatibility with every external deployment. No paid-provider inference is required for development. |
 | Coding tools | Native inventory covers approved file edits/patch/restore, process execution, persistent terminals, VCS, repository instructions, skills and language-server integration. | Rendered VS Code actions/context remain separate from native fixtures. |
-| Connection catalog | [Atomic catalog revisions](../doc/evidence/connection-catalog-concurrent-fixed-20261022.json) and [SDK API](../doc/evidence/connection-catalog-sdk-api-20261022.json). HTTP and SDK observe one native persisted catalog. | [Captured Local SDK/HTTP binding](../doc/evidence/captured-http-connection-binding-20261023.json), scoped event cursors and [session/prompt admission](../doc/evidence/captured-connection-run-options-qualified-20261023.json) pass focused contracts. Shared clients pass 467 extension/163 browser tests. Historical SDK499 full172 and rendered browser coding pass. Current SDK8c/source complete local172 passes; hosted acceptance and rendered VS Code remain separate; current-runtime browser coding passes. Graph/command/read/approval adapters and authenticated remote routing remain unfinished. |
+| Connection catalog | [Atomic catalog revisions](../doc/evidence/connection-catalog-concurrent-fixed-20261022.json) and [SDK API](../doc/evidence/connection-catalog-sdk-api-20261022.json). HTTP and SDK observe one native persisted catalog. | [Captured Local SDK/HTTP binding](../doc/evidence/captured-http-connection-binding-20261023.json), scoped event cursors and [session/prompt admission](../doc/evidence/captured-connection-run-options-qualified-20261023.json) pass focused contracts. Shared clients now pass469 extension/164 browser tests, including captured operation inspection/decision and run status/cancellation. Historical SDK499 full172 and rendered browser coding pass. Current SDK8c/source complete local172 passes; hosted acceptance and rendered VS Code remain separate; current-runtime browser coding passes. Graph/command/general read/stream adapters and authenticated remote routing remain unfinished. Basic operation approvals now have actual browser proof; saved permission grants and other controls retain separate APIs. |
 | Enrollment and distributed ownership | Catalog metadata and Local execution do not authorize distributed work. | Explicit workspace/effect authorization, expiring fenced leases, duplicate delivery, revocation, lost reply and receipt reconciliation need implementation and acceptance. Private Nexus server/database/scheduler stay excluded. |
 | Recovery and preservation | [Installed62 preservation/smoke](../doc/evidence/installed-0.1.62-2f105e11-20261022.json), owner/handoff contracts and historical managed upgrade receipts. | No claim of universal unattended/in-flight or nested-process recovery. Preserve original owner identity and reconcile effects before retry. |
 | Delivery checkpoint | Installed62 payload/runtime verified; exact previous61 backup retained; settings/profile/history/configuration file sets and hashes unchanged. | Do not replace installed62 until the actual candidate passes its complete required gates. |
 
 ## Next implementation sequence
 
-The current frozen source/runtime complete local qualification passes172.
+The b133a0ee frozen source/runtime complete local qualification passes172.
+Current adapter source is undergoing a new complete run; do not count it until
+its live validation handle reaches terminal and its closure checks pass.
 Diagnose hosted failures and verify current-runtime client delivery before
 claiming a qualified delivery package. SDK8c lifetime serialization passes SDK5,
 100 repeated isolation processes and default performance11. Hosted SDK guards
@@ -60,7 +64,9 @@ completed IDs in doc/VALIDATION_STATUS.md. Historical SDK499 receipts are retain
 Earlier SDK499 rendered browser coding on source00f25996 passes; preserve its completed
 session/root in doc/VALIDATION_STATUS.md.
 Captured Local identity, SDK/HTTP services, scoped event cursors and shared-client
-session/prompt admission exist; complete graph/command/read/approval routing next.
+session/prompt admission exist. Basic captured operation approvals have actual
+browser/CLI proof; current run inspection/cancellation routing has unit evidence.
+Complete graph/command/general read/stream and remaining permission routing next.
 Remote authentication/negotiation must precede remote activation;
 workspace enrollment needs separate authorization. Verify unavailable/expired/
 incompatible connections and cross-profile rejection before advertising routing.
