@@ -759,11 +759,6 @@ struct HttpServer::Impl {
             const auto input=body(request,{"id","expected_revision"});
             const auto id=string_field(input,"id",64);
             const auto revision=expected_connection_revision(input);
-            const auto catalog=connection_profiles.load_or_initialize();
-            const auto selected=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[&](const auto& profile){return profile.id==id;});
-            if(selected==catalog.profiles.end())throw NotFound("Connection profile not found");
-            if(selected->kind==ConnectionKind::nexus)
-                throw Conflict("Nexus profile is not authenticated; the active connection remains unchanged");
             reply(response,connection_metadata(connection_profiles.select(id,revision)));
         }));
 #endif

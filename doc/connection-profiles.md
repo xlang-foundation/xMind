@@ -3,7 +3,8 @@
 This is the target connection contract. The native SQLite catalog is exposed
 through the authenticated local backend at `GET /v1/connections` and
 `POST /v1/connections`; it stores Local/Nexus profile metadata and active
-selection. Local selection is revision-checked. A configured Nexus endpoint is
+selection. Selection is revision-checked in the native catalog service, which
+rejects unauthenticated Nexus activation before changing persisted state. A configured Nexus endpoint is
 reported as `not_connected`, and selection fails closed until authentication
 and remote command/event routing exist. The native CLI can list, save and remove
 connection metadata and select an available profile; it cannot activate an

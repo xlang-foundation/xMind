@@ -98,6 +98,9 @@ ConnectionProfileCatalog ConnectionProfiles::apply(const std::string& source,std
 }
 ConnectionProfileCatalog ConnectionProfiles::select(const std::string& id,std::int64_t expected_revision){
     identity(id);std::lock_guard lock(mutex_);auto current=load_unlocked();if(expected_revision<0||expected_revision!=current.revision||expected_revision>revision_limit)throw Conflict("Connection profile catalog revision changed");
-    if(std::none_of(current.profiles.begin(),current.profiles.end(),[&](const auto& profile){return profile.id==id;}))throw NotFound("Connection profile not found");if(current.active_id==id)return current;if(current.revision>=revision_limit)throw Conflict("Connection profile catalog revision exhausted");current.active_id=id;++current.revision;store_.put_information("native-connections","profiles",encode_catalog(current).dump()).get();return current;
+    const auto selected=std::find_if(current.profiles.begin(),current.profiles.end(),[&](const auto& profile){return profile.id==id;});
+    if(selected==current.profiles.end())throw NotFound("Connection profile not found");
+    if(selected->kind!=ConnectionKind::local)throw Conflict("Nexus profile is not authenticated; the active connection remains unchanged");
+    if(current.active_id==id)return current;if(current.revision>=revision_limit)throw Conflict("Connection profile catalog revision exhausted");current.active_id=id;++current.revision;store_.put_information("native-connections","profiles",encode_catalog(current).dump()).get();return current;
 }
 }

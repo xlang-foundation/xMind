@@ -1,3 +1,18 @@
+## Native connection selection boundary - 2026-10-22
+
+The native catalog service now rejects Nexus selection until an authenticated
+binding exists. Previously only HTTP enforced this rejection while direct native
+selection could persist a remote active ID. HTTP now uses the domain boundary
+without a duplicate profile lookup/check. Rejection of stale, missing and
+unauthenticated selections preserves persisted bytes; Local selection is
+idempotent and remote metadata editing does not authenticate a profile.
+
+Two focused native catalog/HTTP contracts pass in 0.81 seconds with frozen input
+file sets and hashes. Evidence: connection-selection-native-boundary-20261022-*.
+This is focused acceptance; the complete 172/172 gate below predates this change.
+Installed62 stays unchanged. Shared binding, authenticated routing/enrollment,
+nested process planning/recovery and rendered VS Code acceptance remain open.
+
 ## Installed 0.1.62 protected checkpoint - 2026-10-22
 
 VS Code CLI installs verified 0.1.62 successfully with no visible window.

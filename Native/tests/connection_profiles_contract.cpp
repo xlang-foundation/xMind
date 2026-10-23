@@ -26,12 +26,17 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
             auto invalid=Json{{"profiles",Json::array({{{"id","local"},{"name","Local"},{"kind","local"}},{{"id","bad"},{"name","Bad"},{"kind","nexus"},{"origin",value}}})}}.dump();rejects<std::invalid_argument>([&]{profiles.apply(invalid,2);});
         }
         auto secret_field=Json{{"profiles",Json::array({{{"id","local"},{"name","Local"},{"kind","local"}},{{"id","company"},{"name","CantorAI Nexus"},{"kind","nexus"},{"origin","https://nexus.example.com/xmind"},{"access_token","must-not-be-accepted"}}})}}.dump();rejects<std::invalid_argument>([&]{profiles.apply(secret_field,2);});
-        rejects<Conflict>([&]{profiles.select("company",1);});current=profiles.select("company",2);require(current.active_id=="company"&&current.revision==3,"Profile selection must be a revision-checked persistent change");
-        auto changed=yaml;const auto at=changed.find("CantorAI Nexus");changed.replace(at,14,"Engineering Nexus");current=profiles.apply(changed,3);require(current.revision==4&&current.profiles[1].revision==2,"Profile metadata changes must rotate profile and catalog revisions");
-        rejects<Conflict>([&]{profiles.apply(R"({"profiles":[{"id":"local","name":"Local","kind":"local"}]})",4);});
-        current=profiles.select("local",4);require(current.revision==5,"Returning to Local must use the same registry");
-        current=profiles.apply(R"({"profiles":[{"id":"local","name":"Local","kind":"local"}]})",5);require(current.revision==6&&current.retired_ids==std::vector<std::string>{"company"},"Removed Nexus IDs must be retired");
-        rejects<Conflict>([&]{profiles.apply(yaml,6);});const auto encoded=store.information("native-connections","profiles").get();require(encoded.find("must-not-be-accepted")==std::string::npos,"Connection metadata must not persist client-supplied credentials");saved=current;store.close();
+        const auto before_selection=store.information("native-connections","profiles").get();
+        rejects<Conflict>([&]{profiles.select("company",1);});
+        rejects<Conflict>([&]{profiles.select("company",2);});
+        rejects<NotFound>([&]{profiles.select("missing",2);});
+        require(store.information("native-connections","profiles").get()==before_selection,"Unauthenticated or missing connection selection must not change persisted metadata");
+        current=profiles.select("local",2);require(current.active_id=="local"&&current.revision==2,"Selecting current Local must remain idempotent");
+        auto changed=yaml;const auto at=changed.find("CantorAI Nexus");changed.replace(at,14,"Engineering Nexus");current=profiles.apply(changed,2);require(current.revision==3&&current.profiles[1].revision==2,"Profile metadata changes must rotate profile and catalog revisions");
+        rejects<Conflict>([&]{profiles.select("company",3);});
+        require(profiles.load().active_id=="local"&&profiles.load().revision==3,"Remote metadata edits must not authenticate or select a connection");
+        current=profiles.apply(R"({"profiles":[{"id":"local","name":"Local","kind":"local"}]})",3);require(current.revision==4&&current.retired_ids==std::vector<std::string>{"company"},"Removed Nexus IDs must be retired");
+        rejects<Conflict>([&]{profiles.apply(yaml,4);});const auto encoded=store.information("native-connections","profiles").get();require(encoded.find("must-not-be-accepted")==std::string::npos,"Connection metadata must not persist client-supplied credentials");saved=current;store.close();
     }
     {
         PersistenceService store(database.path.string(),imports);ConnectionProfiles profiles(store);const auto restored=profiles.load();require(restored.revision==saved.revision&&restored.active_id=="local"&&restored.profiles.size()==1&&restored.retired_ids==saved.retired_ids,"SQLite reopen must preserve Local selection and retired remote identities");store.close();
