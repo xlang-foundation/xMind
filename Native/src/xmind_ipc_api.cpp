@@ -10,6 +10,8 @@
 #include "agentflow/run_executor.hpp"
 #include "agentflow/local_auth.hpp"
 #include "agentflow/backend_owner_control.hpp"
+#include "agentflow/connection_profiles.hpp"
+#include "agent_worker_sdk_values.hpp"
 #include <optional>
 #include <mutex>
 #include "xlang3/xlang3.h"
@@ -20,10 +22,11 @@ struct ApiContext {
     PersistenceService& store;
     RunExecutor* executor;
     std::string token;
+    ConnectionProfiles connections;
     BackendOwnerControl* owner=nullptr;
     mutable std::shared_mutex lifetime;
     bool active=true;
-    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),owner(control){}
+    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),connections(persistence),owner(control){}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("unavailable");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
     void authorize(const std::string& supplied)const {
@@ -73,6 +76,25 @@ struct RunsApi {
         APISET().AddFunc<1>("Cancel",&RunsApi::Cancel);
     END_PACKAGE
 };
+struct ConnectionsApi {
+    std::shared_ptr<ApiContext> context;
+    ConnectionsApi(RootApi*,std::string token);
+    X::Value value(const ConnectionProfileCatalog& catalog){
+        auto profiles=X::Value::List(Host());
+        for(const auto& profile:catalog.profiles){const bool local=profile.kind==ConnectionKind::local;auto entry=X::Value::Dict(Host());
+            set(entry,"id",X::Value::String(Host(),profile.id));set(entry,"name",X::Value::String(Host(),profile.name));set(entry,"kind",X::Value::String(Host(),local?"local":"nexus"));set(entry,"origin",X::Value::String(Host(),profile.origin));set(entry,"revision",X::Value(profile.revision));set(entry,"status",X::Value::String(Host(),local?"connected":"not_connected"));set(entry,"command_routing",X::Value(local));set(entry,"authenticated",X::Value(local));if(!profiles.Append(entry))throw Conflict("Cannot construct connection catalog");
+        }
+        auto result=X::Value::Dict(Host());set(result,"revision",X::Value(catalog.revision));set(result,"active_id",X::Value::String(Host(),catalog.active_id));set(result,"profiles",profiles);return result;
+    }
+    X::Value List(){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.load_or_initialize());});}
+    X::Value Save(X::Value profiles,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();if(!profiles.IsList()||profiles.Size()>32)throw std::invalid_argument("Connection profiles require a bounded list");return value(context->connections.apply(nlohmann::json{{"profiles",sdk_values::from_value(profiles)}}.dump(),revision));});}
+    X::Value Select(std::string id,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.select(id,revision));});}
+    BEGIN_PACKAGE(ConnectionsApi)
+        APISET().AddFunc<0>("List",&ConnectionsApi::List);
+        APISET().AddFunc<2>("Save",&ConnectionsApi::Save);
+        APISET().AddFunc<2>("Select",&ConnectionsApi::Select);
+    END_PACKAGE
+};
 struct RootApi {
     std::mutex binding;
     std::shared_ptr<ApiContext> context;
@@ -85,10 +107,12 @@ struct RootApi {
         APISET().AddClass<0,NativeExecutionsApi>("Executions");
         APISET().AddClass<0,NativeWorkerLinksApi>("WorkerLinks");
         APISET().AddClass<0,NativePlanningApi>("Planning");
+        APISET().AddClass<1,ConnectionsApi,RootApi>("Connections");
         APISET().AddClass<1,SessionsApi,RootApi>("Sessions");
         APISET().AddClass<1,RunsApi,RootApi>("Runs");
     END_PACKAGE
 };
+ConnectionsApi::ConnectionsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
 SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
 RunsApi::RunsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
 RootApi& api_root(){

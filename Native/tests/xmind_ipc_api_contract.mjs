@@ -16,6 +16,21 @@ async function client(args,auth=token){const child=run(binary,['ipc','--endpoint
 try{
     const deadline=Date.now()+15000;while(!endpoint||!stdout.includes('xMind Server listening on')){assert(Date.now()<deadline,'Root API startup timed out');assert.equal(backend.exitCode,null,'Backend exited during startup');await new Promise(resolve=>setTimeout(resolve,25));}
     assert.deepEqual(await client(['host']),{api_version:1,transport:'xlang3-lrpc'});
+    await assert.rejects(client(['connections','list'],'0'.repeat(64)));
+    const local=await client(['connections','list']);assert.equal(local.revision,1);assert.equal(local.active_id,'local');assert.equal(local.profiles.length,1);
+    const profiles=[{id:'local',name:'Local',kind:'local',origin:''},{id:'company',name:'Company 雪',kind:'nexus',origin:'https://nexus.example.test/xmind'}];
+    const saved=await client(['connections','save','1',JSON.stringify(profiles)]);assert.equal(saved.revision,2);assert.equal(saved.profiles[1].name,'Company 雪');assert.equal(saved.profiles[1].authenticated,false);
+    const origin=stdout.match(/xMind Server listening on (http:\/\/127\.0\.0\.1:\d+)/)?.[1];assert(origin);
+    async function httpCatalog(){const response=await fetch(origin+'/v1/connections',{headers:{Authorization:'Bearer '+token}});assert.equal(response.status,200);return response.json();}
+    assert.deepEqual(await httpCatalog(),saved);
+    const changed=name=>JSON.stringify(profiles.map(p=>p.id==='company'?{...p,name}:p));
+    const concurrent=await Promise.allSettled([client(['connections','save','2',changed('First')]),client(['connections','save','2',changed('Second')])]);assert.equal(concurrent.filter(r=>r.status==='fulfilled').length,1);assert.equal(concurrent.filter(r=>r.status==='rejected').length,1);
+    const current=await client(['connections','list']);assert.equal(current.revision,3);assert.equal(current.active_id,'local');assert.deepEqual(await httpCatalog(),current);
+    await assert.rejects(client(['connections','select','company','3']));await assert.rejects(client(['connections','select','missing','3']));
+    await assert.rejects(client(['connections','save','3',JSON.stringify([{...profiles[0],access_token:'must-not-persist'}])]));
+    await assert.rejects(client(['connections','save','2',JSON.stringify(profiles)]));
+    assert.deepEqual(await client(['connections','select','local','3']),current);assert.deepEqual(await httpCatalog(),current);
+
     assert.deepEqual(await client(['session','create','integration-session','Native API 雪']),{id:'integration-session',title:'Native API 雪',parent_id:''});
     const opened=await Promise.all([client(['session','open','integration-session']),client(['session','open','integration-session'])]);assert(opened.every(s=>s.title==='Native API 雪'));
     await assert.rejects(client(['session','create','integration-session','duplicate']));
@@ -24,5 +39,5 @@ try{
     await assert.rejects(client(['run','open','absent-run']));
     assert.equal((await client(['session','open','integration-session'])).title,'Native API 雪');
     assert(clients.every(pid=>pid&&pid!==backend.pid));assert(!stdout.includes(token)&&!stderr.includes(token));
-    passed=true;console.log(JSON.stringify({backendPid:backend.pid,clientPids:clients,apiVersion:1,transport:'xlang3-lrpc',actualUnifiedExecutable:true,verified:['Root registered at backend startup','Native Host/Sessions/Runs subobjects','Distinct xmind.exe clients call SDK methods directly','Exact UTF-8 persisted session survives independent clients','Duplicate create and wrong authentication rejected','No unauthorized session created','Unknown run rejected'],limitations:['No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate','No live provider or rendering acceptance'],passed}));
+    passed=true;console.log(JSON.stringify({backendPid:backend.pid,clientPids:clients,apiVersion:1,transport:'xlang3-lrpc',actualUnifiedExecutable:true,verified:['Root registered at backend startup','Native Host/Connections/Sessions/Runs subobjects','Distinct xmind.exe clients call SDK methods directly','Exact UTF-8 persisted session survives independent clients','Duplicate create and wrong authentication rejected','No unauthorized session created','Unknown run rejected','SDK value catalog agrees with HTTP and persists UTF-8 metadata','Independent clients race one catalog revision; exactly one succeeds','Unauthenticated selection, wrong token, stale revision and credential fields rejected'],limitations:['No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate','No live provider or rendering acceptance'],passed}));
 }finally{backend.kill();await exited;if(passed)await rm(root,{recursive:true,force:true});else console.error('Retained root API fixture: '+root+'; backend output: '+stdout+'; '+stderr);}

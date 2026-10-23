@@ -98,3 +98,41 @@ The private server owns team policy, PostgreSQL and scheduling. Cantor Cluster
 will attach behind that private scheduler/worker boundary. It must preserve
 workspace authorization and ownership guarantees; clients continue using their
 Nexus profile and the xMind execution engine remains reusable.
+
+## Native xlang3 integration API
+
+The registered xMind root exposes an authenticated Connections subobject:
+
+```cpp
+auto connections = root["Connections"](owner_token);
+auto catalog = connections["List"]();
+auto selected = connections["Select"]("local", catalog["revision"]);
+// desired_profiles is an SDK list of dictionaries with id/name/kind/origin.
+auto updated = connections["Save"](desired_profiles, catalog["revision"]);
+```
+
+List returns revision, active_id and profiles. Each profile contains id, name,
+kind, origin, revision, status, command_routing and authenticated. Save accepts
+only desired public configuration fields (id/name/kind/origin), not the read-only
+status fields returned by List. Credentials never belong in this catalog. SDK
+values are serialized/transferred by xlang3; there is no separate IPC envelope.
+
+The existing local owner token authorizes the subobject. It retains the captured
+backend generation and rejects calls after that owner retires, including after
+a replacement backend binds the same root. Save and Select obey native admission
+and atomic persisted revision checks. Nexus activation remains unavailable until
+an authenticated binding is implemented. This API does not grant worker authority.
+
+The unified executable can exercise these same SDK methods from another process:
+
+```text
+xmind ipc --endpoint lrpc:PORT connections list
+xmind ipc --endpoint lrpc:PORT connections save REV JSON_ARRAY
+xmind ipc --endpoint lrpc:PORT connections select local REV
+```
+
+XMIND_AUTH_TOKEN supplies the existing local-owner token through the environment.
+The CLI JSON text is input/output presentation; calls carry SDK lists, dictionaries
+and scalars across the process boundary. Separate-process and lifetime contracts
+verify authorization, HTTP agreement, UTF-8 persistence, concurrent updates, stale
+revision rejection, forbidden credential fields and retired-object refusal.

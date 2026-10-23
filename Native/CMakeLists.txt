@@ -280,7 +280,7 @@ if(WIN32)
   target_link_libraries(agentflow_ipc_api PUBLIC agentflow_ipc_runtime PRIVATE agentflow_worker_channel agentflow_core agentflow_secrets agentflow_backend_owner_control agentflow_agent agentflow_models bcrypt)
   target_link_libraries(agentflow_xlang_worker PRIVATE agentflow_ipc_api)
   target_link_libraries(agentflow_schema_worker PRIVATE agentflow_ipc_api bcrypt)
-  target_link_libraries(agentflow_ipc_api PRIVATE agentflow_json_schema)
+  target_link_libraries(agentflow_ipc_api PRIVATE agentflow_json_schema agentflow_connection_profiles)
   target_link_libraries(xmind_schema_worker PRIVATE agentflow_ipc_api)
   add_custom_command(TARGET xmind_schema_worker POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind_schema_worker>")

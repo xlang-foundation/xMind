@@ -19,18 +19,19 @@ int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path folder;
     auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value out;check(method.Call(args,out),"Native API method failed");return out;};
     auto refused=[&](const X::Value& method,std::vector<X::Value> args){X::Value out;check(!method.Call(args,out),"Closed or unauthorized service unexpectedly accepted a call");};
     auto host=call(root["Host"],{});check(call(host["ApiVersion"],{}).ToInt64()==1,"Process root must exist before public service binding");
-    const std::string token_one(64,'a'),token_two(64,'b');refused(root["Sessions"],{text(token_one)});X::Value stale;
+    const std::string token_one(64,'a'),token_two(64,'b');refused(root["Sessions"],{text(token_one)});X::Value stale,stale_connections;
     {
         XMindIpcServer owner(*store,nullptr,token_one);check(owner.endpoint()==endpoint,"Public binding must reuse the registered process listener");
+        stale_connections=call(root["Connections"],{text(token_one)});check(call(stale_connections["List"],{})["active_id"].ToString()=="local","Connection catalog must bind the actual backend");
         stale=call(root["Sessions"],{text(token_one)});auto created=call(stale["Create"],{text("persisted"),text("Scoped native API")});check(created["id"].ToString()=="persisted","Native session creation must use the bound persistence owner");
         bool conflict=false;try{XMindIpcServer duplicate(*store,nullptr,token_two);}catch(const Conflict&){conflict=true;}check(conflict,"Concurrent public binding must not replace the existing owner");
     }
-    refused(stale["Open"],{text("persisted")});refused(root["Sessions"],{text(token_one)});X::Value replacement;
+    refused(stale_connections["List"],{});refused(stale["Open"],{text("persisted")});refused(root["Sessions"],{text(token_one)});X::Value replacement;
     {
         XMindIpcServer owner(*store,nullptr,token_two);check(owner.endpoint()==endpoint,"Replacement binding must preserve the original root and listener");refused(root["Sessions"],{text(token_one)});refused(stale["Open"],{text("persisted")});
         replacement=call(root["Sessions"],{text(token_two)});check(call(replacement["Open"],{text("persisted")})["title"].ToString()=="Scoped native API","Replacement owner must retain actual persisted session data");
     }
-    store->close();store.reset();refused(stale["Open"],{text("persisted")});refused(replacement["Open"],{text("persisted")});
+    store->close();store.reset();refused(stale_connections["List"],{});refused(stale["Open"],{text("persisted")});refused(replacement["Open"],{text("persisted")});
     check(std::filesystem::weakly_canonical(folder).parent_path()==std::filesystem::weakly_canonical(std::filesystem::temp_directory_path())&&folder.filename().string().starts_with("xmind-api-lifetime-"),"Refusing fixture cleanup outside its known temporary directory");std::filesystem::remove_all(folder);
     std::cout<<"Native process root registration passed concurrent initialization, unbound service refusal, one listener, exclusive public ownership, stale object/token refusal, rebinding without re-registration, persisted data and refusal after backend destruction. Same-process SDK lifecycle fixture; separate xmind.exe calls are covered independently."<<std::endl;return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<"; retained fixture "<<folder.string()<<std::endl;return 1;}}

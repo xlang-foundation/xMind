@@ -22,7 +22,7 @@ namespace {
 void help(){
     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
         "Usage:\n"
-        "  xmind ipc --endpoint lrpc:PORT host | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID\n"
+        "  xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID\n"
         "  xmind serve --db FILE --modules DIR --stdlib DIR [--agent-execution thread|process-read|process-code] [server options]\n"
         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [--mcp-config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"

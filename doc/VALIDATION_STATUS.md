@@ -1,3 +1,19 @@
+## Native SDK connection catalog API - 2026-10-22
+
+The registered xMind root now exposes Connections(owner_token), with List, Save
+and Select methods on that subobject. SDK values carry public catalog data; native
+services retain persistence, admission, authorization and revision checks. Separate
+xmind.exe clients prove UTF-8 persistence, HTTP/SDK catalog agreement, exactly one
+concurrent update, wrong-token/stale-revision/credential-field rejection and
+unauthenticated remote-selection refusal. Lifetime checks reject captured objects
+after owner retirement and backend destruction.
+
+Four focused IPC/catalog/HTTP contracts pass in 1.91 seconds with input file sets
+and hashes unchanged. Evidence: connection-catalog-sdk-api-20261022-*. This is an
+actual public SDK catalog API, not authenticated remote command binding or worker
+enrollment. Full-suite validation of the new source, rendered VS Code acceptance
+and nested process planning/recovery remain open. Installed62 is unchanged.
+
 ## Connection catalog concurrent ownership - 2026-10-22
 
 The baseline multi-instance regression fails: per-object mutexes plus unconditional
