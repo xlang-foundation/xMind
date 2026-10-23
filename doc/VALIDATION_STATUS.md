@@ -1,3 +1,25 @@
+## Planning tool admission after child compaction — 2026-10-23
+
+Worker planning, inspection and ordinary tool admission now select the latest
+inference reservation rather than the latest physical reservation. Exact root
+and owner filters remain; later maintenance cannot make the earlier funded
+inference stale. Existing stale-attempt and canonical tool-turn guards remain.
+
+The forced-compaction ledger path now makes its original held inference return
+`inspect_plan`, claims and commits that stored tool turn, then funds a new counted
+final inference and completes through an independent xlang3 SDK process. The
+read-only uncompacted path remains enabled, as do root preservation checks.
+This proves planning inspection after compaction; no additional file/process
+effect acceptance is claimed for this specific new scenario.
+
+Build and **3/3 context repository, context engine and worker ledger contracts
+pass in 45.22 seconds**, frozen source/SDK/library/runtime/dependency/binary
+file sets and bytes unchanged. No paid inference, CPython, install or visible
+window. Automatic nested worker enrollment/shared scheduling and recovery,
+full candidate qualification and remaining rendered client acceptance stay open.
+[Receipt](evidence/worker-post-compaction-planning-20261023.json),
+[CTest log](evidence/worker-post-compaction-planning-20261023-ctest.log).
+
 ## Counted child compaction and final completion — 2026-10-23
 
 Planning compaction now derives parent/leaf role from the exact signed owner in

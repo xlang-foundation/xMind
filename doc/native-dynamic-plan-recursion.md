@@ -293,3 +293,11 @@ all reservations to finish. The ledger verifies SDK child completion preserves
 the root. Further planning calls after compaction, runtime enrollment/scheduling
 and recovery remain unqualified.
 [Receipt](evidence/nested-worker-counted-compaction-20261023.json).
+
+### Planning inspection after compaction (2026-10-23)
+
+Worker tool admission selects the latest inference, excluding later maintenance
+reservations. The compacted held child inference now returns and commits an
+actual inspect_plan turn before a newly funded final inference and independent
+SDK completion. Automatic nested enrollment, shared scheduling and recovery
+remain unfinished. [Receipt](evidence/worker-post-compaction-planning-20261023.json).

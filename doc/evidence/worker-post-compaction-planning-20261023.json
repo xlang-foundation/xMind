@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-23T21:36:52.714Z",
+  "sourceParent": "edc7d35ab62e691c41c7756bc22c00cfc4afddcb",
+  "sourcePatchSha256": "0ca0dc041001613b2f00b2928d38eb463e95ebfd48fde28464d32e61af707779",
+  "build": {
+    "pid": 35680,
+    "launchedAt": "2026-10-23T21:34:59.590Z",
+    "completedAt": "2026-10-23T21:36:02.294Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c54f9d1250432254b60afc9ecf042a365a084206c94f778ec3a64b63a19091e8"
+  },
+  "test": {
+    "pid": 33948,
+    "launchedAt": "2026-10-23T21:36:04.928Z",
+    "completedAt": "2026-10-23T21:36:50.189Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "d3f1cdcce6176e8d82f84d3f2e7a30e6844b1c599db7a1709269a0a6748da2f4"
+  },
+  "total": 3,
+  "failed": 0,
+  "passed": 3,
+  "seconds": 45.22,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "e231643f8dae5c35f1126a604340a27baf257cde9fcb3d844824869616467ff2",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Worker planning, inspection and ordinary tool claims select the latest inference reservation, excluding maintenance while retaining exact root/owner filters. The child held inference returns inspect_plan after native compaction, commits that exact stored tool turn, then funds and finishes a new counted final inference and completes through an independent SDK process. No automatic nested scheduling/recovery claim."
+}
