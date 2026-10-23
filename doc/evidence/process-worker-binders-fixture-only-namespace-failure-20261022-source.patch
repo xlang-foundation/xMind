@@ -1,0 +1,892 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index 13616e8e..dc376bdc 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -341,7 +341,7 @@ if(WIN32)
+ endif()
+ if(BUILD_TESTING)
+   if(WIN32)
+-    add_library(agentflow_worker_rpc_fixture STATIC tests/agent_worker_rpc_fixture.cpp tests/agent_worker_retirement_fixture.cpp)
++    add_library(agentflow_worker_rpc_fixture STATIC tests/agent_worker_rpc_fixture.cpp tests/agent_worker_retirement_fixture.cpp tests/agent_worker_model_rpc_binder_fixture.cpp tests/agent_worker_journal_rpc_binder_fixture.cpp tests/agent_worker_read_rpc_binder_fixture.cpp tests/agent_worker_file_rpc_binder_fixture.cpp tests/agent_worker_process_rpc_binder_fixture.cpp tests/agent_worker_remote_rpc_binder_fixture.cpp tests/agent_worker_callable_rpc_binder_fixture.cpp)
+     target_include_directories(agentflow_worker_rpc_fixture PUBLIC include tests PRIVATE third_party)
+     target_link_libraries(agentflow_worker_rpc_fixture PUBLIC agentflow_worker_channel agentflow_worker_journal_rpc PRIVATE Threads::Threads agentflow_ipc_api)
+   endif()
+@@ -1131,7 +1131,7 @@ if(BUILD_TESTING)
+     set_tests_properties(native_restore_executor_contract PROPERTIES TIMEOUT 60)
+     add_executable(agentflow_agent_remote_tool_host_contract tests/agent_remote_tool_host_contract.cpp)
+     target_include_directories(agentflow_agent_remote_tool_host_contract PRIVATE third_party)
+-    target_link_libraries(agentflow_agent_remote_tool_host_contract PRIVATE agentflow_agent agentflow_worker_model_rpc)
++    target_link_libraries(agentflow_agent_remote_tool_host_contract PRIVATE agentflow_agent agentflow_worker_model_rpc agentflow_worker_rpc_fixture)
+     if(MSVC)
+       target_compile_options(agentflow_agent_remote_tool_host_contract PRIVATE /utf-8)
+     endif()
+diff --git a/Native/include/agentflow/agent_worker_callable_rpc.hpp b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+index e3865723..1c639755 100644
+--- a/Native/include/agentflow/agent_worker_callable_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+@@ -8,8 +8,5 @@ public:
+     AgentCallableToolResult invoke(const AgentCallableInvocation&,std::stop_token={})override;
+ private:AgentWorkerClientContext& peer_;
+ };
+-// Only the durable backend host can bind this endpoint. A local callable host or
+-// worker-selected lease cannot bypass per-call and per-operation admission.
+-AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost&,const AgentWorkerScope&);
+-AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableService&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++
+ }
+diff --git a/Native/include/agentflow/agent_worker_client_context.hpp b/Native/include/agentflow/agent_worker_client_context.hpp
+index 6b4d9046..93ed630e 100644
+--- a/Native/include/agentflow/agent_worker_client_context.hpp
++++ b/Native/include/agentflow/agent_worker_client_context.hpp
+@@ -16,7 +16,6 @@ public:
+ private:std::string code_,detail_;
+ };
+ using AgentWorkerRpcSink=std::function<void(const std::string&)>;
+-using AgentWorkerRpcHandler=std::function<std::string(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)>;
+ // Captured worker services used by runner adapters. Product instances own only
+ // native SDK clients; transport fixtures implement call() for fault injection.
+ class AgentWorkerClientContext {
+diff --git a/Native/include/agentflow/agent_worker_file_rpc.hpp b/Native/include/agentflow/agent_worker_file_rpc.hpp
+index 9b6125bb..6612f88a 100644
+--- a/Native/include/agentflow/agent_worker_file_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_file_rpc.hpp
+@@ -8,8 +8,5 @@ public:
+     AgentFileToolResult invoke(const AgentFileToolInvocation&,std::stop_token={})override;
+ private:AgentWorkerClientContext& peer_;
+ };
+-// Only the durable backend host can bind this endpoint. A local file host or
+-// worker-selected lease cannot bypass per-call and per-operation admission.
+-AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost&,const AgentWorkerScope&);
+-AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentFileToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++
+ }
+diff --git a/Native/include/agentflow/agent_worker_journal_rpc.hpp b/Native/include/agentflow/agent_worker_journal_rpc.hpp
+index 5ffb6c54..1debda57 100644
+--- a/Native/include/agentflow/agent_worker_journal_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_journal_rpc.hpp
+@@ -33,14 +33,5 @@ public:
+     Run complete_run(const std::string& final_attempt);
+ private:AgentWorkerClientContext& peer_;
+ };
+-// Bind only this captured backend lease to its exact authenticated channel.
+-// Completion uses backend-captured model facts, never a supplied assistant.
+-// Read-turn commit uses backend model/read facts; no supplied history or tool
+-// output is accepted. Permissions, generic writes and SQL remain closed.
+-AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService&,AgentWorkerLeaseSpec,
+-    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
+-// Coding admission requires an actual durable native file owner. No child
+-// payload or flag can promote the read-only journal to this capability.
+-AgentWorkerRpcHandler bind_agent_worker_workspace_journal_rpc(PersistenceService&,AgentWorkerFileHost&,
+-    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
++
+ }
+diff --git a/Native/include/agentflow/agent_worker_model_rpc.hpp b/Native/include/agentflow/agent_worker_model_rpc.hpp
+index cdea03f0..da3bd150 100644
+--- a/Native/include/agentflow/agent_worker_model_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_model_rpc.hpp
+@@ -12,7 +12,5 @@ public:
+     AgentWorkerModelAdmission admission(std::stop_token={});
+ private:AgentWorkerClientContext& peer_;
+ };
+-// Bind this one authorized inference host to its exact authenticated channel.
+-// No dynamic service lookup, provider config, credentials or SQL is exposed.
+-AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost&,const AgentWorkerScope&);
++
+ }
+diff --git a/Native/include/agentflow/agent_worker_process_rpc.hpp b/Native/include/agentflow/agent_worker_process_rpc.hpp
+index 91f3aeeb..baa21cf2 100644
+--- a/Native/include/agentflow/agent_worker_process_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_process_rpc.hpp
+@@ -8,8 +8,5 @@ public:
+     AgentProcessToolResult invoke(const AgentProcessToolInvocation&,std::stop_token={})override;
+ private:AgentWorkerClientContext& peer_;
+ };
+-// Only the durable backend host can bind this endpoint. A local process host or
+-// worker-selected lease cannot bypass per-call and per-operation admission.
+-AgentWorkerRpcHandler bind_agent_worker_process_rpc(AgentWorkerProcessHost&,const AgentWorkerScope&);
+-AgentWorkerRpcHandler bind_agent_worker_process_rpc(AgentProcessOwnerHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++
+ }
+diff --git a/Native/include/agentflow/agent_worker_read_rpc.hpp b/Native/include/agentflow/agent_worker_read_rpc.hpp
+index 3bae12f2..c09e1c5e 100644
+--- a/Native/include/agentflow/agent_worker_read_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_read_rpc.hpp
+@@ -8,6 +8,5 @@ public:
+     AgentReadToolResult invoke(const AgentWorkspaceInvocation&,std::stop_token={})override;
+ private:AgentWorkerClientContext& peer_;
+ };
+-AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost&,const AgentWorkerScope&);
+-AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++
+ }
+diff --git a/Native/include/agentflow/agent_worker_remote_rpc.hpp b/Native/include/agentflow/agent_worker_remote_rpc.hpp
+index 02a7808d..4234c05b 100644
+--- a/Native/include/agentflow/agent_worker_remote_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_remote_rpc.hpp
+@@ -8,8 +8,5 @@ public:
+     AgentRemoteToolResult invoke(const AgentRemoteToolInvocation&,std::stop_token={})override;
+ private:AgentWorkerClientContext& peer_;
+ };
+-// Only the durable backend host can bind this endpoint. A local remote host or
+-// worker-selected lease cannot bypass per-call and per-operation admission.
+-AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost&,const AgentWorkerScope&);
+-AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++
+ }
+diff --git a/Native/src/agent_worker_callable_rpc.cpp b/Native/src/agent_worker_callable_rpc.cpp
+index 042617da..92536fc3 100644
+--- a/Native/src/agent_worker_callable_rpc.cpp
++++ b/Native/src/agent_worker_callable_rpc.cpp
+@@ -4,27 +4,6 @@
+ #include "nlohmann/json.hpp"
+ namespace agentflow {
+ using Json=nlohmann::json;
+-AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& host,const AgentWorkerScope& scope){
+-    return bind_agent_worker_callable_rpc(host,host.lease(),scope);
+-}
+-AgentWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableService& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Callable RPC channel differs from captured lease");
+-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+-        if(method!="callable.catalogue"&&method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+-        try{if(method=="callable.catalogue"){if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");return Json(host.tool_names(cancel)).dump();}const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+-        catch(const AgentWorkerCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const AgentCallableEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
+-        catch(const AgentCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+ AgentCallableToolResult AgentWorkerCallableClient::invoke(const AgentCallableInvocation& call,std::stop_token cancel){
+     if(auto native=peer_.native_model())return native->callable_invoke(call,cancel);
+     try{const auto bytes=peer_.call("callable.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
+diff --git a/Native/src/agent_worker_file_rpc.cpp b/Native/src/agent_worker_file_rpc.cpp
+index 8a5f3c57..8fa07cb2 100644
+--- a/Native/src/agent_worker_file_rpc.cpp
++++ b/Native/src/agent_worker_file_rpc.cpp
+@@ -4,25 +4,6 @@
+ #include "nlohmann/json.hpp"
+ namespace agentflow {
+ using Json=nlohmann::json;
+-AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost& host,const AgentWorkerScope& scope){
+-    return bind_agent_worker_file_rpc(host,host.lease(),scope);
+-}
+-AgentWorkerRpcHandler bind_agent_worker_file_rpc(AgentFileToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("File RPC channel differs from captured lease");
+-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+-        if(method!="file.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+-        try{const auto call=AgentFileToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+-        catch(const AgentFileToolOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+ AgentFileToolResult AgentWorkerFileClient::invoke(const AgentFileToolInvocation& call,std::stop_token cancel){
+     if(auto native=peer_.native_model())return native->file_invoke(call,cancel);
+     try{const auto bytes=peer_.call("file.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
+diff --git a/Native/src/agent_worker_journal_rpc.cpp b/Native/src/agent_worker_journal_rpc.cpp
+index 87d5aa0c..d1da005a 100644
+--- a/Native/src/agent_worker_journal_rpc.cpp
++++ b/Native/src/agent_worker_journal_rpc.cpp
+@@ -1,69 +1,5 @@
+-#include "agentflow/agent_worker_journal_rpc.hpp"
+-#include "agentflow/agent_worker_journal_values.hpp"
+-#include "agentflow/agent_worker_native_model.hpp"
+-#include "agentflow/persistence_service.hpp"
+-#include "agentflow/agent_worker_file_host.hpp"
+-#include "nlohmann/json.hpp"
+-#include <limits>
+-#include <algorithm>
+-#include <set>
+-#include <type_traits>
+-
++#include "agent_worker_journal_rpc_values.hpp"
+ namespace agentflow {
+-namespace {
+-using Json=nlohmann::json;
+-// Leave room for the enclosing RPC string and its escaping. Never truncate an
+-// admitted history or event list to make it fit; larger windows need paging.
+-constexpr std::size_t max_value_bytes=AgentWorkerChannel::max_message_bytes/2-1024,max_rows=4096;
+-[[noreturn]] void invalid(){throw AgentWorkerProtocolError("Invalid owned worker journal values");}
+-Json parse(const std::string& bytes){
+-    if(bytes.empty()||bytes.size()>max_value_bytes)invalid();std::vector<std::set<std::string>> keys;
+-    return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)invalid();if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))invalid();if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});
+-}
+-void object(const Json& v,std::size_t n){if(!v.is_object()||v.size()!=n)invalid();}
+-std::int64_t integer(const Json& v){if(!v.is_number_integer()||(v.is_number_unsigned()&&v.get<std::uint64_t>()>static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max())))invalid();return v.get<std::int64_t>();}
+-std::string text(const Json& v){return v.get<std::string>();}
+-void rows(const Json& v){if(!v.is_array()||v.size()>max_rows)invalid();}
+-RunState state(const std::string& v){for(const auto s:{RunState::queued,RunState::running,RunState::paused,RunState::completed,RunState::failed,RunState::cancelled})if(v==to_string(s))return s;invalid();}
+-AgentWorkerJournalReadKind kind(const std::string& method){
+-    if(method=="journal.run")return AgentWorkerJournalReadKind::run;if(method=="journal.session")return AgentWorkerJournalReadKind::session;
+-    if(method=="journal.history")return AgentWorkerJournalReadKind::history;if(method=="journal.events")return AgentWorkerJournalReadKind::events;
+-    if(method=="journal.child_admission")return AgentWorkerJournalReadKind::child_admission;
+-    if(method=="journal.root_budget")return AgentWorkerJournalReadKind::root_budget;throw AgentWorkerRpcRemoteError("unsupported");
+-}
+-AgentWorkerJournalValue decode(AgentWorkerJournalReadKind k,const std::string& bytes){
+-    try{const auto v=parse(bytes);
+-        switch(k){
+-        case AgentWorkerJournalReadKind::run:object(v,7);return Run{text(v.at("id")),text(v.at("session_id")),state(text(v.at("state"))),text(v.at("parent_id")),text(v.at("node_id")),v.at("graph_root").get<bool>(),text(v.at("provider_context_json"))};
+-        case AgentWorkerJournalReadKind::session:{object(v,5);Session s{text(v.at("id")),text(v.at("title")),text(v.at("parent_id")),{},text(v.at("fork_boundary_type"))};if(!v.at("fork_boundary_sequence").is_null())s.fork_boundary_sequence=integer(v.at("fork_boundary_sequence"));return s;}
+-        case AgentWorkerJournalReadKind::history:{rows(v);std::vector<Message> result;for(const auto& m:v){object(m,3);const auto seq=integer(m.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(m.at("role")),text(m.at("json"))});}return result;}
+-        case AgentWorkerJournalReadKind::events:{rows(v);std::vector<Event> result;for(const auto& e:v){object(e,4);const auto seq=integer(e.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(e.at("run_id")),text(e.at("kind")),text(e.at("json"))});}return result;}
+-        case AgentWorkerJournalReadKind::child_admission:{if(text(v.at("kind"))=="dynamic_agent"){object(v,9);ChildAdmissionRecord result;result.kind=ChildAdmissionKind::dynamic_agent;result.root_run_id=text(v.at("root_run_id"));result.plan_id=text(v.at("plan_id"));result.node_label=text(v.at("node_label"));result.claim_id=text(v.at("claim_id"));result.definition_revision=integer(v.at("definition_revision"));result.claim_revision=integer(v.at("claim_revision"));result.preset_id=text(v.at("preset_id"));result.preset_revision=integer(v.at("preset_revision"));if(result.root_run_id.empty()||result.plan_id.empty()||result.node_label.empty()||result.claim_id.empty()||result.definition_revision<1||result.claim_revision<1||result.preset_revision!=1||(result.preset_id!="workspace.inspect"&&result.preset_id!="workspace.coding"))invalid();return result;}if(text(v.at("kind"))=="graph_agent"){object(v,3);const auto path=text(v.at("graph_node_path"));if(text(v.at("root_run_id")).empty()||path.empty()||path.size()>259||path.front()=='/'||path.back()=='/'||path.find("//")!=std::string::npos||path.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-/")!=std::string::npos||std::count(path.begin(),path.end(),'/')>3)invalid();ChildAdmissionRecord result;result.kind=ChildAdmissionKind::graph_agent;result.root_run_id=text(v.at("root_run_id"));result.graph_node_path=path;return result;}object(v,5);if(text(v.at("kind"))!="delegated_leaf"||text(v.at("preset_id"))!="workspace.inspect"||integer(v.at("preset_revision"))!=1||text(v.at("root_run_id")).empty()||text(v.at("batch_id")).empty())invalid();return ChildAdmissionRecord{ChildAdmissionKind::delegated_leaf,text(v.at("root_run_id")),text(v.at("batch_id")),"workspace.inspect",1};}
+-        case AgentWorkerJournalReadKind::root_budget:{object(v,8);const auto& s=v.at("spec");object(s,8);return RootBudgetRecord{text(v.at("root_run_id")),{text(s.at("policy_id")),integer(s.at("policy_revision")),text(s.at("workspace_identity")),text(s.at("provider_identity_json")),integer(s.at("max_children")),integer(s.at("max_parallel")),integer(s.at("max_model_calls")),integer(s.at("wall_limit_ms"))},integer(v.at("children_admitted")),integer(v.at("model_calls_reserved")),integer(v.at("parent_calls_held")),integer(v.at("revision")),integer(v.at("planned_children_reserved")),integer(v.at("parent_model_calls_reserved"))};}
+-        }invalid();
+-    }catch(const Json::exception&){invalid();}
+-}
+-AgentWorkerJournalValue call(AgentWorkerClientContext& peer,const std::string& method,const std::string& target,std::int64_t after=0){
+-    try{std::string bytes;if(auto native=peer.native_model()){switch(kind(method)){case AgentWorkerJournalReadKind::run:bytes=native->journal_run(target);break;case AgentWorkerJournalReadKind::session:bytes=native->journal_session(target);break;case AgentWorkerJournalReadKind::history:bytes=native->journal_history(target);break;case AgentWorkerJournalReadKind::events:bytes=native->journal_events(target,after);break;case AgentWorkerJournalReadKind::root_budget:bytes=native->journal_root_budget(target);break;case AgentWorkerJournalReadKind::child_admission:bytes=native->journal_child_admission(target);break;}}else bytes=peer.call(method,Json{{"target",target},{"after",after}}.dump());return decode(kind(method),bytes);}
+-    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker journal read rejected");if(error.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker journal owner cancelled");if(error.code()=="timeout")throw AgentWorkerRpcTimeout("Worker journal deadline elapsed");throw;}
+-}
+-std::string attempt_id(const Json& v){auto id=text(v);if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)invalid();return id;}
+-ModelCallReservation attempt_call(AgentWorkerClientContext& peer,const std::string& method,const std::string& attempt,const std::string& expected_state,const std::string& planning_call={}){
+-    try{const auto v=parse((peer.native_model()?(method=="journal.reserve_planning_continuation"?peer.native_model()->journal_reserve_planning_continuation(planning_call,attempt):method=="journal.reserve_model"?peer.native_model()->journal_reserve_model(attempt):method=="journal.start_model"?peer.native_model()->journal_start_model(attempt):peer.native_model()->journal_finish_model(attempt)):peer.call(method,Json{{"attempt_id",attempt}}.dump())));object(v,8);const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
+-        if(text(v.at("root_run_id"))!=scope.root_id||text(v.at("owner_run_id"))!=scope.run_id||(attempt_id(v.at("attempt_id"))!=attempt&&method!="journal.reserve_model"&&method!="journal.reserve_planning_continuation")||text(v.at("role"))!=(role==ModelCallRole::parent?"parent":"leaf")||text(v.at("state"))!=expected_state||text(v.at("purpose"))!="inference")invalid();
+-        const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(scope.root_id==scope.run_id){if(budget.spec.policy_id=="native.dynamic-plan"){if(!peer.native_model()||budget.spec.max_children<1||budget.spec.max_children>32||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id=="native.delegation"){if(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else{const auto child=AgentWorkerJournalClient(peer).child_admission(scope.run_id);if(budget.spec.policy_id=="native.graph-context"){if(child.kind!=ChildAdmissionKind::graph_agent||budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)invalid();}else if(budget.spec.policy_id=="native.dynamic-plan"){if(!peer.native_model()||(child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))invalid();}else if(budget.spec.policy_id!="native.delegation"||child.kind!=ChildAdmissionKind::delegated_leaf)invalid();}}else if(attempt_id(v.at("attempt_id"))!=attempt&&!(method=="journal.reserve_planning_continuation"&&attempt.empty()))invalid();
+-        const auto assistant=text(v.at("actual_assistant_json"));if((expected_state=="finished")==assistant.empty())invalid();return {scope.root_id,attempt_id(v.at("attempt_id")),scope.run_id,role,expected_state,ModelCallPurpose::inference,step,assistant};
+-    }catch(const Json::exception&){invalid();}
+-    catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker model funding rejected");if(e.code()=="budget_exhausted")throw RootBudgetExhausted("Worker root model allowance exhausted");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker model funding cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker funding deadline elapsed");throw;}
+-}
+-void digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)invalid();}
+-AgentWorkerToolTurnRecord decode_turn(const AgentWorkerScope& scope,const std::string& attempt,const std::string& bytes){
+-    try{const auto v=parse(bytes);object(v,3);const auto& m=v.at("model");object(m,5);AgentWorkerToolTurnRecord turn{{text(m.at("generation")),text(m.at("root_run_id")),text(m.at("owner_run_id")),attempt_id(m.at("attempt_id")),text(m.at("request_binding"))},{},text(v.at("messages_binding"))};
+-        if(turn.model.generation!=scope.generation||turn.model.root_run_id!=scope.root_id||turn.model.owner_run_id!=scope.run_id||turn.model.attempt_id!=attempt)invalid();digest(turn.model.request_binding);digest(turn.messages_binding);
+-        const auto& sequences=v.at("message_sequences");if(!sequences.is_array()||sequences.size()<2||sequences.size()>65)invalid();std::int64_t previous=0;for(const auto& s:sequences){const auto n=integer(s);if(n<=previous||n>9007199254740991LL)invalid();turn.message_sequences.push_back(n);previous=n;}return turn;
+-    }catch(const Json::exception&){invalid();}
+-}
+-}
+ Run AgentWorkerJournalClient::run(const std::string& id){return std::get<Run>(call(peer_,"journal.run",id));}
+ Session AgentWorkerJournalClient::session(const std::string& id){return std::get<Session>(call(peer_,"journal.session",id));}
+ std::vector<Message> AgentWorkerJournalClient::run_history(const std::string& id){return std::get<std::vector<Message>>(call(peer_,"journal.history",id));}
+@@ -114,30 +50,4 @@ Run AgentWorkerJournalClient::complete_run(const std::string& attempt){
+     try{const auto value=std::get<Run>(decode(AgentWorkerJournalReadKind::run,(peer_.native_model()?peer_.native_model()->journal_complete(attempt):peer_.call("journal.complete_run",Json{{"attempt_id",attempt}}.dump()))));if(value.id!=peer_.scope().run_id||value.state!=RunState::completed)invalid();return value;}
+     catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker completion rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker completion cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker completion deadline elapsed");throw;}
+ }
+-static AgentWorkerRpcHandler bind_journal_rpc(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token owner_cancel,AgentWorkerFileHost* files,AgentWorkerJournalModelHooks hooks){
+-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Journal channel differs from captured lease");
+-    const bool workspace=files!=nullptr;
+-    auto host=files?std::make_shared<AgentWorkerJournalHost>(store,*files,deadline,owner_cancel,std::move(hooks)):std::make_shared<AgentWorkerJournalHost>(store,std::move(lease),deadline,owner_cancel,std::move(hooks));
+-    return [host=std::move(host),deadline,owner_cancel,workspace](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+-        try{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");const auto v=parse(payload);
+-            if(method=="journal.workspace_mode"){object(v,0);return Json{{"coding",host->coding_workspace_admitted(cancel)}}.dump();}
+-            if(method=="journal.execution_window"){object(v,0);return Json{{"remaining_ms",host->remaining_ms(cancel)}}.dump();}
+-            if(method=="journal.begin_run"){object(v,0);return encode_worker_journal_value(host->begin_run(cancel));}
+-            if(method=="journal.model_event"){object(v,4);return encode_worker_journal_value(std::vector<Event>{host->model_event(attempt_id(v.at("attempt_id")),integer(v.at("ordinal")),text(v.at("kind")),text(v.at("json")),cancel)});}
+-            if(method=="journal.tool_event"||(workspace&&method=="journal.workspace_tool_event")){object(v,3);const auto phase=text(v.at("phase"));if(phase!="started"&&phase!="returned")invalid();const auto id=attempt_id(v.at("attempt_id"));const auto ordinal=integer(v.at("ordinal"));return encode_worker_journal_value(std::vector<Event>{method=="journal.tool_event"?host->tool_event(id,ordinal,phase=="returned",cancel):host->workspace_tool_event(id,ordinal,phase=="returned",cancel)});}
+-            if(method=="journal.commit_read_turn"||(workspace&&method=="journal.commit_workspace_turn")){object(v,1);const auto id=attempt_id(v.at("attempt_id"));return encode_worker_tool_turn(method=="journal.commit_read_turn"?host->commit_read_turn(id,cancel):host->commit_workspace_turn(id,cancel));}
+-            if(method=="journal.reserve_model"||method=="journal.start_model"||method=="journal.finish_model"||method=="journal.complete_run"){object(v,1);const auto id=attempt_id(v.at("attempt_id"));if(method=="journal.complete_run")return encode_worker_journal_value(host->complete_run(id,cancel));return encode_worker_model_reservation(method=="journal.reserve_model"?host->reserve_model(id,cancel):method=="journal.start_model"?host->start_model(id,cancel):host->finish_model(id,cancel));}
+-            const auto k=kind(method);object(v,2);const auto target=text(v.at("target"));const auto after=integer(v.at("after"));if(k!=AgentWorkerJournalReadKind::events&&after!=0)invalid();
+-            switch(k){case AgentWorkerJournalReadKind::run:return encode_worker_journal_value(host->run(target,cancel));case AgentWorkerJournalReadKind::session:return encode_worker_journal_value(host->session(target,cancel));case AgentWorkerJournalReadKind::history:return encode_worker_journal_value(host->history(target,cancel));case AgentWorkerJournalReadKind::events:return encode_worker_journal_value(host->events(target,after,cancel));case AgentWorkerJournalReadKind::child_admission:return encode_worker_journal_value(host->child_admission(target,cancel));case AgentWorkerJournalReadKind::root_budget:return encode_worker_journal_value(host->root_budget(target,cancel));}invalid();}
+-        catch(const AgentWorkerRpcRemoteError&){throw;}
+-        catch(const AgentWorkerJournalCapacity&){throw AgentWorkerRpcRemoteError("capacity");}
+-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const RootBudgetExhausted&){throw AgentWorkerRpcRemoteError("budget_exhausted");}
+-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const AgentWorkerProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+-AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,AgentWorkerJournalModelHooks hooks){return bind_journal_rpc(store,std::move(lease),scope,deadline,cancel,nullptr,std::move(hooks));}
+-AgentWorkerRpcHandler bind_agent_worker_workspace_journal_rpc(PersistenceService& store,AgentWorkerFileHost& files,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,AgentWorkerJournalModelHooks hooks){return bind_journal_rpc(store,files.lease(),scope,deadline,cancel,&files,std::move(hooks));}
+-
+ }
+diff --git a/Native/src/agent_worker_journal_rpc_values.hpp b/Native/src/agent_worker_journal_rpc_values.hpp
+new file mode 100644
+index 00000000..fcfe7fe8
+--- /dev/null
++++ b/Native/src/agent_worker_journal_rpc_values.hpp
+@@ -0,0 +1,68 @@
++#pragma once
++#include "agentflow/agent_worker_journal_rpc.hpp"
++#include "agentflow/agent_worker_journal_values.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/persistence_service.hpp"
++#include "agentflow/agent_worker_file_host.hpp"
++#include "nlohmann/json.hpp"
++#include <limits>
++#include <algorithm>
++#include <set>
++#include <type_traits>
++
++namespace agentflow {
++namespace {
++using Json=nlohmann::json;
++// Leave room for the enclosing RPC string and its escaping. Never truncate an
++// admitted history or event list to make it fit; larger windows need paging.
++constexpr std::size_t max_value_bytes=AgentWorkerChannel::max_message_bytes/2-1024,max_rows=4096;
++[[noreturn]] void invalid(){throw AgentWorkerProtocolError("Invalid owned worker journal values");}
++Json parse(const std::string& bytes){
++    if(bytes.empty()||bytes.size()>max_value_bytes)invalid();std::vector<std::set<std::string>> keys;
++    return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)invalid();if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))invalid();if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});
++}
++void object(const Json& v,std::size_t n){if(!v.is_object()||v.size()!=n)invalid();}
++std::int64_t integer(const Json& v){if(!v.is_number_integer()||(v.is_number_unsigned()&&v.get<std::uint64_t>()>static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max())))invalid();return v.get<std::int64_t>();}
++std::string text(const Json& v){return v.get<std::string>();}
++void rows(const Json& v){if(!v.is_array()||v.size()>max_rows)invalid();}
++RunState state(const std::string& v){for(const auto s:{RunState::queued,RunState::running,RunState::paused,RunState::completed,RunState::failed,RunState::cancelled})if(v==to_string(s))return s;invalid();}
++AgentWorkerJournalReadKind kind(const std::string& method){
++    if(method=="journal.run")return AgentWorkerJournalReadKind::run;if(method=="journal.session")return AgentWorkerJournalReadKind::session;
++    if(method=="journal.history")return AgentWorkerJournalReadKind::history;if(method=="journal.events")return AgentWorkerJournalReadKind::events;
++    if(method=="journal.child_admission")return AgentWorkerJournalReadKind::child_admission;
++    if(method=="journal.root_budget")return AgentWorkerJournalReadKind::root_budget;throw AgentWorkerRpcRemoteError("unsupported");
++}
++AgentWorkerJournalValue decode(AgentWorkerJournalReadKind k,const std::string& bytes){
++    try{const auto v=parse(bytes);
++        switch(k){
++        case AgentWorkerJournalReadKind::run:object(v,7);return Run{text(v.at("id")),text(v.at("session_id")),state(text(v.at("state"))),text(v.at("parent_id")),text(v.at("node_id")),v.at("graph_root").get<bool>(),text(v.at("provider_context_json"))};
++        case AgentWorkerJournalReadKind::session:{object(v,5);Session s{text(v.at("id")),text(v.at("title")),text(v.at("parent_id")),{},text(v.at("fork_boundary_type"))};if(!v.at("fork_boundary_sequence").is_null())s.fork_boundary_sequence=integer(v.at("fork_boundary_sequence"));return s;}
++        case AgentWorkerJournalReadKind::history:{rows(v);std::vector<Message> result;for(const auto& m:v){object(m,3);const auto seq=integer(m.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(m.at("role")),text(m.at("json"))});}return result;}
++        case AgentWorkerJournalReadKind::events:{rows(v);std::vector<Event> result;for(const auto& e:v){object(e,4);const auto seq=integer(e.at("sequence"));if(seq<=0||(!result.empty()&&seq<=result.back().sequence))invalid();result.push_back({seq,text(e.at("run_id")),text(e.at("kind")),text(e.at("json"))});}return result;}
++        case AgentWorkerJournalReadKind::child_admission:{if(text(v.at("kind"))=="dynamic_agent"){object(v,9);ChildAdmissionRecord result;result.kind=ChildAdmissionKind::dynamic_agent;result.root_run_id=text(v.at("root_run_id"));result.plan_id=text(v.at("plan_id"));result.node_label=text(v.at("node_label"));result.claim_id=text(v.at("claim_id"));result.definition_revision=integer(v.at("definition_revision"));result.claim_revision=integer(v.at("claim_revision"));result.preset_id=text(v.at("preset_id"));result.preset_revision=integer(v.at("preset_revision"));if(result.root_run_id.empty()||result.plan_id.empty()||result.node_label.empty()||result.claim_id.empty()||result.definition_revision<1||result.claim_revision<1||result.preset_revision!=1||(result.preset_id!="workspace.inspect"&&result.preset_id!="workspace.coding"))invalid();return result;}if(text(v.at("kind"))=="graph_agent"){object(v,3);const auto path=text(v.at("graph_node_path"));if(text(v.at("root_run_id")).empty()||path.empty()||path.size()>259||path.front()=='/'||path.back()=='/'||path.find("//")!=std::string::npos||path.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-/")!=std::string::npos||std::count(path.begin(),path.end(),'/')>3)invalid();ChildAdmissionRecord result;result.kind=ChildAdmissionKind::graph_agent;result.root_run_id=text(v.at("root_run_id"));result.graph_node_path=path;return result;}object(v,5);if(text(v.at("kind"))!="delegated_leaf"||text(v.at("preset_id"))!="workspace.inspect"||integer(v.at("preset_revision"))!=1||text(v.at("root_run_id")).empty()||text(v.at("batch_id")).empty())invalid();return ChildAdmissionRecord{ChildAdmissionKind::delegated_leaf,text(v.at("root_run_id")),text(v.at("batch_id")),"workspace.inspect",1};}
++        case AgentWorkerJournalReadKind::root_budget:{object(v,8);const auto& s=v.at("spec");object(s,8);return RootBudgetRecord{text(v.at("root_run_id")),{text(s.at("policy_id")),integer(s.at("policy_revision")),text(s.at("workspace_identity")),text(s.at("provider_identity_json")),integer(s.at("max_children")),integer(s.at("max_parallel")),integer(s.at("max_model_calls")),integer(s.at("wall_limit_ms"))},integer(v.at("children_admitted")),integer(v.at("model_calls_reserved")),integer(v.at("parent_calls_held")),integer(v.at("revision")),integer(v.at("planned_children_reserved")),integer(v.at("parent_model_calls_reserved"))};}
++        }invalid();
++    }catch(const Json::exception&){invalid();}
++}
++AgentWorkerJournalValue call(AgentWorkerClientContext& peer,const std::string& method,const std::string& target,std::int64_t after=0){
++    try{std::string bytes;if(auto native=peer.native_model()){switch(kind(method)){case AgentWorkerJournalReadKind::run:bytes=native->journal_run(target);break;case AgentWorkerJournalReadKind::session:bytes=native->journal_session(target);break;case AgentWorkerJournalReadKind::history:bytes=native->journal_history(target);break;case AgentWorkerJournalReadKind::events:bytes=native->journal_events(target,after);break;case AgentWorkerJournalReadKind::root_budget:bytes=native->journal_root_budget(target);break;case AgentWorkerJournalReadKind::child_admission:bytes=native->journal_child_admission(target);break;}}else bytes=peer.call(method,Json{{"target",target},{"after",after}}.dump());return decode(kind(method),bytes);}
++    catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="rejected")throw Conflict("Worker journal read rejected");if(error.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker journal owner cancelled");if(error.code()=="timeout")throw AgentWorkerRpcTimeout("Worker journal deadline elapsed");throw;}
++}
++std::string attempt_id(const Json& v){auto id=text(v);if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)invalid();return id;}
++ModelCallReservation attempt_call(AgentWorkerClientContext& peer,const std::string& method,const std::string& attempt,const std::string& expected_state,const std::string& planning_call={}){
++    try{const auto v=parse((peer.native_model()?(method=="journal.reserve_planning_continuation"?peer.native_model()->journal_reserve_planning_continuation(planning_call,attempt):method=="journal.reserve_model"?peer.native_model()->journal_reserve_model(attempt):method=="journal.start_model"?peer.native_model()->journal_start_model(attempt):peer.native_model()->journal_finish_model(attempt)):peer.call(method,Json{{"attempt_id",attempt}}.dump())));object(v,8);const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
++        if(text(v.at("root_run_id"))!=scope.root_id||text(v.at("owner_run_id"))!=scope.run_id||(attempt_id(v.at("attempt_id"))!=attempt&&method!="journal.reserve_model"&&method!="journal.reserve_planning_continuation")||text(v.at("role"))!=(role==ModelCallRole::parent?"parent":"leaf")||text(v.at("state"))!=expected_state||text(v.at("purpose"))!="inference")invalid();
++        const auto step=text(v.at("inference_step_id"));if(!step.empty()){(void)attempt_id(v.at("inference_step_id"));const auto budget=std::get<RootBudgetRecord>(call(peer,"journal.root_budget",scope.root_id));if(scope.root_id==scope.run_id){if(budget.spec.policy_id=="native.dynamic-plan"){if(!peer.native_model()||budget.spec.max_children<1||budget.spec.max_children>32||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id=="native.delegation"){if(budget.spec.max_children<1||budget.spec.max_children>8||budget.spec.max_parallel<1||budget.spec.max_parallel>2)invalid();}else if(budget.spec.policy_id!="native.context"||budget.spec.max_children!=0||budget.spec.max_parallel!=0)invalid();}else{const auto child=AgentWorkerJournalClient(peer).child_admission(scope.run_id);if(budget.spec.policy_id=="native.graph-context"){if(child.kind!=ChildAdmissionKind::graph_agent||budget.spec.max_children!=8||budget.spec.max_parallel<1||budget.spec.max_parallel>2||budget.spec.max_model_calls!=32)invalid();}else if(budget.spec.policy_id=="native.dynamic-plan"){if(!peer.native_model()||(child.kind!=ChildAdmissionKind::dynamic_agent&&child.kind!=ChildAdmissionKind::delegated_leaf))invalid();}else if(budget.spec.policy_id!="native.delegation"||child.kind!=ChildAdmissionKind::delegated_leaf)invalid();}}else if(attempt_id(v.at("attempt_id"))!=attempt&&!(method=="journal.reserve_planning_continuation"&&attempt.empty()))invalid();
++        const auto assistant=text(v.at("actual_assistant_json"));if((expected_state=="finished")==assistant.empty())invalid();return {scope.root_id,attempt_id(v.at("attempt_id")),scope.run_id,role,expected_state,ModelCallPurpose::inference,step,assistant};
++    }catch(const Json::exception&){invalid();}
++    catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker model funding rejected");if(e.code()=="budget_exhausted")throw RootBudgetExhausted("Worker root model allowance exhausted");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker model funding cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker funding deadline elapsed");throw;}
++}
++void digest(const std::string& value){if(value.size()!=64||value.find_first_not_of("0123456789abcdef")!=std::string::npos)invalid();}
++AgentWorkerToolTurnRecord decode_turn(const AgentWorkerScope& scope,const std::string& attempt,const std::string& bytes){
++    try{const auto v=parse(bytes);object(v,3);const auto& m=v.at("model");object(m,5);AgentWorkerToolTurnRecord turn{{text(m.at("generation")),text(m.at("root_run_id")),text(m.at("owner_run_id")),attempt_id(m.at("attempt_id")),text(m.at("request_binding"))},{},text(v.at("messages_binding"))};
++        if(turn.model.generation!=scope.generation||turn.model.root_run_id!=scope.root_id||turn.model.owner_run_id!=scope.run_id||turn.model.attempt_id!=attempt)invalid();digest(turn.model.request_binding);digest(turn.messages_binding);
++        const auto& sequences=v.at("message_sequences");if(!sequences.is_array()||sequences.size()<2||sequences.size()>65)invalid();std::int64_t previous=0;for(const auto& s:sequences){const auto n=integer(s);if(n<=previous||n>9007199254740991LL)invalid();turn.message_sequences.push_back(n);previous=n;}return turn;
++    }catch(const Json::exception&){invalid();}
++}
++}
++}
+diff --git a/Native/src/agent_worker_model_rpc.cpp b/Native/src/agent_worker_model_rpc.cpp
+index 76caccbf..61f40662 100644
+--- a/Native/src/agent_worker_model_rpc.cpp
++++ b/Native/src/agent_worker_model_rpc.cpp
+@@ -1,49 +1,5 @@
+-#include "agentflow/agent_worker_model_rpc.hpp"
+-#include "agentflow/agent_worker_native_model.hpp"
+-#include "agentflow/agent_model_values.hpp"
+-#include "agentflow/records.hpp"
+-#include "nlohmann/json.hpp"
+-#include <set>
+-
++#include "agent_worker_model_rpc_values.hpp"
+ namespace agentflow {
+-using Json=nlohmann::json;
+-namespace {
+-Json request_envelope(const std::string& bytes){if(bytes.empty()||bytes.size()>AgentWorkerChannel::max_message_bytes)throw AgentWorkerRpcRemoteError("rejected");std::vector<std::set<std::string>> keys;return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});}
+-ProviderHttpError provider_failure(const std::string& bytes){
+-    try{
+-        const auto value=request_envelope(bytes);
+-        if(!value.is_object()||value.size()!=2||!value.at("status").is_number_integer()||!value.at("code").is_string()||value.at("status")<100||value.at("status")>599)throw ModelProtocolError("Invalid worker provider failure");
+-        ProviderHttpError result(value.at("status").get<int>());result.code=value.at("code").get<std::string>();
+-        if(!result.code.empty()&&(result.status!=400||result.code!="context_length_exceeded"))throw ModelProtocolError("Invalid worker provider failure");
+-        return result;
+-    }catch(const Json::exception&){throw ModelProtocolError("Invalid worker provider failure");}
+-     catch(const AgentWorkerRpcRemoteError&){throw ModelProtocolError("Invalid worker provider failure");}
+-}
+-}
+-AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
+-    const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");
+-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+-        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission"&&method!="model.rebuild_request")throw AgentWorkerRpcRemoteError("unsupported");
+-        try{const auto value=request_envelope(payload);
+-            if(method=="model.admission"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");return encode_agent_worker_model_admission(host.admission(cancel));}
+-            if(method=="model.prepare_request"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");const auto bytes=encode_agent_model_request(host.prepare_request(cancel));if(bytes.size()>AgentWorkerChannel::max_message_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}
+-            if(!value.is_object()||value.size()!=2||!value.at("attempt_id").is_string()||!value.at("request").is_string())throw AgentWorkerRpcRemoteError("rejected");const auto attempt=value.at("attempt_id").get<std::string>();if(attempt.empty()||attempt.size()>128||attempt.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw AgentWorkerRpcRemoteError("rejected");
+-            const auto request=decode_agent_model_request(value.at("request").get<std::string>());if(method=="model.rebuild_request"){const auto bytes=encode_agent_model_request(host.rebuild_request(attempt,request,cancel));if(bytes.size()>AgentWorkerChannel::max_message_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
+-        }catch(const AgentWorkerRpcRemoteError&){throw;}
+-         catch(const AgentWorkerModelOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-         catch(const AgentWorkerRpcCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-         catch(const TransportCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-         catch(const TransportTimeout&){throw AgentWorkerRpcRemoteError("timeout");}
+-         catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-         catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-         catch(const ProviderHttpError& error){throw AgentWorkerRpcRemoteError("provider_http",Json{{"status",error.status},{"code",error.status==400&&error.code=="context_length_exceeded"?error.code:std::string{}}}.dump());}
+-         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+-         catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-         catch(const ModelProtocolError&){throw AgentWorkerRpcRemoteError("model_protocol");}
+-         catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+-         catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+ AgentWorkerModelAdmission AgentWorkerModelClient::admission(std::stop_token cancel){
+     if(auto native=peer_.native_model())return native->admission(cancel);
+     try{return decode_agent_worker_model_admission(peer_.call("model.admission","{}",{},cancel));}
+diff --git a/Native/src/agent_worker_model_rpc_values.hpp b/Native/src/agent_worker_model_rpc_values.hpp
+new file mode 100644
+index 00000000..b8c89f9e
+--- /dev/null
++++ b/Native/src/agent_worker_model_rpc_values.hpp
+@@ -0,0 +1,24 @@
++#pragma once
++#include "agentflow/agent_worker_model_rpc.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/agent_model_values.hpp"
++#include "agentflow/records.hpp"
++#include "nlohmann/json.hpp"
++#include <set>
++
++namespace agentflow {
++using Json=nlohmann::json;
++namespace {
++Json request_envelope(const std::string& bytes){if(bytes.empty()||bytes.size()>AgentWorkerChannel::max_message_bytes)throw AgentWorkerRpcRemoteError("rejected");std::vector<std::set<std::string>> keys;return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});}
++ProviderHttpError provider_failure(const std::string& bytes){
++    try{
++        const auto value=request_envelope(bytes);
++        if(!value.is_object()||value.size()!=2||!value.at("status").is_number_integer()||!value.at("code").is_string()||value.at("status")<100||value.at("status")>599)throw ModelProtocolError("Invalid worker provider failure");
++        ProviderHttpError result(value.at("status").get<int>());result.code=value.at("code").get<std::string>();
++        if(!result.code.empty()&&(result.status!=400||result.code!="context_length_exceeded"))throw ModelProtocolError("Invalid worker provider failure");
++        return result;
++    }catch(const Json::exception&){throw ModelProtocolError("Invalid worker provider failure");}
++     catch(const AgentWorkerRpcRemoteError&){throw ModelProtocolError("Invalid worker provider failure");}
++}
++}
++}
+diff --git a/Native/src/agent_worker_process_rpc.cpp b/Native/src/agent_worker_process_rpc.cpp
+index e6b0eeac..1f26a262 100644
+--- a/Native/src/agent_worker_process_rpc.cpp
++++ b/Native/src/agent_worker_process_rpc.cpp
+@@ -5,26 +5,6 @@
+ #include "nlohmann/json.hpp"
+ namespace agentflow {
+ using Json=nlohmann::json;
+-AgentWorkerRpcHandler bind_agent_worker_process_rpc(AgentWorkerProcessHost& host,const AgentWorkerScope& scope){
+-    return bind_agent_worker_process_rpc(host,host.lease(),scope);
+-}
+-AgentWorkerRpcHandler bind_agent_worker_process_rpc(AgentProcessOwnerHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
+-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+-        if(method!="process.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+-        try{const auto call=AgentProcessToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+-        catch(const ProcessOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const ProcessEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
+-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+ AgentProcessToolResult AgentWorkerProcessClient::invoke(const AgentProcessToolInvocation& call,std::stop_token cancel){
+     if(auto native=peer_.native_model())return native->process_invoke(call,cancel);
+     try{const auto bytes=peer_.call("process.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
+diff --git a/Native/src/agent_worker_read_rpc.cpp b/Native/src/agent_worker_read_rpc.cpp
+index 5fd03e09..1c479f0d 100644
+--- a/Native/src/agent_worker_read_rpc.cpp
++++ b/Native/src/agent_worker_read_rpc.cpp
+@@ -7,30 +7,6 @@
+ #include "nlohmann/json.hpp"
+ namespace agentflow {
+ using Json=nlohmann::json;
+-AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost& host,const AgentWorkerScope& scope){
+-    return bind_agent_worker_read_rpc(host,host.lease(),scope);
+-}
+-AgentWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Read RPC channel differs from captured lease");
+-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+-        if(method!="read.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+-        try{const auto call=AgentWorkspaceInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+-        catch(const AgentWorkerReadOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const PermissionCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const PermissionExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const PermissionDenied&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const AgentPermissionDenied&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const ToolAccessDenied&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+ AgentReadToolResult AgentWorkerReadClient::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){
+     if(auto native=peer_.native_model())return native->read_invoke(call,cancel);
+     try{const auto bytes=peer_.call("read.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
+diff --git a/Native/src/agent_worker_remote_rpc.cpp b/Native/src/agent_worker_remote_rpc.cpp
+index bcabec66..e051d6f8 100644
+--- a/Native/src/agent_worker_remote_rpc.cpp
++++ b/Native/src/agent_worker_remote_rpc.cpp
+@@ -6,29 +6,6 @@
+ #include "nlohmann/json.hpp"
+ namespace agentflow {
+ using Json=nlohmann::json;
+-AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost& host,const AgentWorkerScope& scope){
+-    return bind_agent_worker_remote_rpc(host,host.lease(),scope);
+-}
+-AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
+-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Remote RPC channel differs from captured lease");
+-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
+-        if(method!="remote.invoke")throw AgentWorkerRpcRemoteError("unsupported");
+-        try{const auto call=AgentRemoteToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
+-        catch(const AgentWorkerRemoteOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const McpEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
+-        catch(const A2aEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
+-        catch(const McpOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const A2aOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
+-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
+-        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
+-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
+-        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
+-    };
+-}
+ AgentRemoteToolResult AgentWorkerRemoteClient::invoke(const AgentRemoteToolInvocation& call,std::stop_token cancel){
+     if(auto native=peer_.native_model())return native->remote_invoke(call,cancel);
+     try{const auto bytes=peer_.call("remote.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));
+diff --git a/Native/tests/agent_worker_callable_host_fixture.hpp b/Native/tests/agent_worker_callable_host_fixture.hpp
+index 3e52ac21..fa2b881f 100644
+--- a/Native/tests/agent_worker_callable_host_fixture.hpp
++++ b/Native/tests/agent_worker_callable_host_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_callable_rpc.hpp"
+ #include "agentflow/xlang_python.hpp"
+ #include "agentflow/agent_model_values.hpp"
+@@ -5,9 +6,9 @@
+ // Real controller approvals and actual embedded xlang3 effects; model/lease identities
+ // are controlled backend fixtures. Actual-child IPC is a separate contract.
+ class CallableRpcFixture final:public AgentCallableToolHost {
+-    AgentWorkerRpcHandler handler_;
++    FixtureWorkerRpcHandler handler_;
+ public:
+-    explicit CallableRpcFixture(AgentWorkerRpcHandler handler):handler_(std::move(handler)){}
++    explicit CallableRpcFixture(FixtureWorkerRpcHandler handler):handler_(std::move(handler)){}
+     AgentCallableToolResult invoke(const AgentCallableInvocation& call,std::stop_token stop)override{const auto result=Json::parse(handler_("callable.invoke",call.serialize(),{},stop));return {result.at("success").get<bool>(),result.at("output_json").get<std::string>()};}
+ };
+ struct CallableTask {
+diff --git a/Native/tests/agent_worker_callable_rpc_binder_fixture.cpp b/Native/tests/agent_worker_callable_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..b051dcd3
+--- /dev/null
++++ b/Native/tests/agent_worker_callable_rpc_binder_fixture.cpp
+@@ -0,0 +1,29 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "agentflow/agent_worker_callable_rpc.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++FixtureWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost& host,const AgentWorkerScope& scope){
++    return bind_agent_worker_callable_rpc(host,host.lease(),scope);
++}
++FixtureWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableService& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Callable RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="callable.catalogue"&&method!="callable.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{if(method=="callable.catalogue"){if(payload!="{}")throw AgentWorkerRpcRemoteError("rejected");return Json(host.tool_names(cancel)).dump();}const auto call=AgentCallableInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const AgentWorkerCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentCallableEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
++        catch(const AgentCallableOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++}
+diff --git a/Native/tests/agent_worker_file_rpc_binder_fixture.cpp b/Native/tests/agent_worker_file_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..aefdbc98
+--- /dev/null
++++ b/Native/tests/agent_worker_file_rpc_binder_fixture.cpp
+@@ -0,0 +1,27 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "agentflow/agent_worker_file_rpc.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++FixtureWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost& host,const AgentWorkerScope& scope){
++    return bind_agent_worker_file_rpc(host,host.lease(),scope);
++}
++FixtureWorkerRpcHandler bind_agent_worker_file_rpc(AgentFileToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("File RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="file.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto call=AgentFileToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const AgentFileToolOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++}
+diff --git a/Native/tests/agent_worker_graph_admission_fixture.hpp b/Native/tests/agent_worker_graph_admission_fixture.hpp
+index 49691eb4..7d6a0e9f 100644
+--- a/Native/tests/agent_worker_graph_admission_fixture.hpp
++++ b/Native/tests/agent_worker_graph_admission_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #pragma once
+ // Repository boundary only: synthetic process identities, no process launch.
+ void graph_worker_admission(PersistenceService& store){
+diff --git a/Native/tests/agent_worker_journal_rpc_binder_fixture.cpp b/Native/tests/agent_worker_journal_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..953c9f71
+--- /dev/null
++++ b/Native/tests/agent_worker_journal_rpc_binder_fixture.cpp
+@@ -0,0 +1,30 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "../src/agent_worker_journal_rpc_values.hpp"
++namespace agentflow {
++static FixtureWorkerRpcHandler bind_journal_rpc(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token owner_cancel,AgentWorkerFileHost* files,AgentWorkerJournalModelHooks hooks){
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Journal channel differs from captured lease");
++    const bool workspace=files!=nullptr;
++    auto host=files?std::make_shared<AgentWorkerJournalHost>(store,*files,deadline,owner_cancel,std::move(hooks)):std::make_shared<AgentWorkerJournalHost>(store,std::move(lease),deadline,owner_cancel,std::move(hooks));
++    return [host=std::move(host),deadline,owner_cancel,workspace](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        try{if(cancel.stop_requested()||owner_cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");if(std::chrono::steady_clock::now()>=deadline)throw AgentWorkerRpcRemoteError("timeout");const auto v=parse(payload);
++            if(method=="journal.workspace_mode"){object(v,0);return Json{{"coding",host->coding_workspace_admitted(cancel)}}.dump();}
++            if(method=="journal.execution_window"){object(v,0);return Json{{"remaining_ms",host->remaining_ms(cancel)}}.dump();}
++            if(method=="journal.begin_run"){object(v,0);return encode_worker_journal_value(host->begin_run(cancel));}
++            if(method=="journal.model_event"){object(v,4);return encode_worker_journal_value(std::vector<Event>{host->model_event(attempt_id(v.at("attempt_id")),integer(v.at("ordinal")),text(v.at("kind")),text(v.at("json")),cancel)});}
++            if(method=="journal.tool_event"||(workspace&&method=="journal.workspace_tool_event")){object(v,3);const auto phase=text(v.at("phase"));if(phase!="started"&&phase!="returned")invalid();const auto id=attempt_id(v.at("attempt_id"));const auto ordinal=integer(v.at("ordinal"));return encode_worker_journal_value(std::vector<Event>{method=="journal.tool_event"?host->tool_event(id,ordinal,phase=="returned",cancel):host->workspace_tool_event(id,ordinal,phase=="returned",cancel)});}
++            if(method=="journal.commit_read_turn"||(workspace&&method=="journal.commit_workspace_turn")){object(v,1);const auto id=attempt_id(v.at("attempt_id"));return encode_worker_tool_turn(method=="journal.commit_read_turn"?host->commit_read_turn(id,cancel):host->commit_workspace_turn(id,cancel));}
++            if(method=="journal.reserve_model"||method=="journal.start_model"||method=="journal.finish_model"||method=="journal.complete_run"){object(v,1);const auto id=attempt_id(v.at("attempt_id"));if(method=="journal.complete_run")return encode_worker_journal_value(host->complete_run(id,cancel));return encode_worker_model_reservation(method=="journal.reserve_model"?host->reserve_model(id,cancel):method=="journal.start_model"?host->start_model(id,cancel):host->finish_model(id,cancel));}
++            const auto k=kind(method);object(v,2);const auto target=text(v.at("target"));const auto after=integer(v.at("after"));if(k!=AgentWorkerJournalReadKind::events&&after!=0)invalid();
++            switch(k){case AgentWorkerJournalReadKind::run:return encode_worker_journal_value(host->run(target,cancel));case AgentWorkerJournalReadKind::session:return encode_worker_journal_value(host->session(target,cancel));case AgentWorkerJournalReadKind::history:return encode_worker_journal_value(host->history(target,cancel));case AgentWorkerJournalReadKind::events:return encode_worker_journal_value(host->events(target,after,cancel));case AgentWorkerJournalReadKind::child_admission:return encode_worker_journal_value(host->child_admission(target,cancel));case AgentWorkerJournalReadKind::root_budget:return encode_worker_journal_value(host->root_budget(target,cancel));}invalid();}
++        catch(const AgentWorkerRpcRemoteError&){throw;}
++        catch(const AgentWorkerJournalCapacity&){throw AgentWorkerRpcRemoteError("capacity");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const RootBudgetExhausted&){throw AgentWorkerRpcRemoteError("budget_exhausted");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const AgentWorkerProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++FixtureWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,AgentWorkerJournalModelHooks hooks){return bind_journal_rpc(store,std::move(lease),scope,deadline,cancel,nullptr,std::move(hooks));}
++FixtureWorkerRpcHandler bind_agent_worker_workspace_journal_rpc(PersistenceService& store,AgentWorkerFileHost& files,const AgentWorkerScope& scope,AgentWorkerChannel::Deadline deadline,std::stop_token cancel,AgentWorkerJournalModelHooks hooks){return bind_journal_rpc(store,files.lease(),scope,deadline,cancel,&files,std::move(hooks));}
++
++}
+diff --git a/Native/tests/agent_worker_model_rpc_binder_fixture.cpp b/Native/tests/agent_worker_model_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..3a95dac3
+--- /dev/null
++++ b/Native/tests/agent_worker_model_rpc_binder_fixture.cpp
+@@ -0,0 +1,28 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "../src/agent_worker_model_rpc_values.hpp"
++namespace agentflow {
++FixtureWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
++    const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++        if(method!="model.complete"&&method!="model.prepare_request"&&method!="model.admission"&&method!="model.rebuild_request")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto value=request_envelope(payload);
++            if(method=="model.admission"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");return encode_agent_worker_model_admission(host.admission(cancel));}
++            if(method=="model.prepare_request"){if(!value.is_object()||!value.empty())throw AgentWorkerRpcRemoteError("rejected");const auto bytes=encode_agent_model_request(host.prepare_request(cancel));if(bytes.size()>AgentWorkerChannel::max_message_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}
++            if(!value.is_object()||value.size()!=2||!value.at("attempt_id").is_string()||!value.at("request").is_string())throw AgentWorkerRpcRemoteError("rejected");const auto attempt=value.at("attempt_id").get<std::string>();if(attempt.empty()||attempt.size()>128||attempt.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:-")!=std::string::npos)throw AgentWorkerRpcRemoteError("rejected");
++            const auto request=decode_agent_model_request(value.at("request").get<std::string>());if(method=="model.rebuild_request"){const auto bytes=encode_agent_model_request(host.rebuild_request(attempt,request,cancel));if(bytes.size()>AgentWorkerChannel::max_message_bytes/2-1024)throw AgentWorkerRpcRemoteError("capacity");return bytes;}return encode_agent_model_completion(host.complete(attempt,request,[&](const ModelEvent& event){sink(encode_agent_model_event(event));},cancel));
++        }catch(const AgentWorkerRpcRemoteError&){throw;}
++         catch(const AgentWorkerModelOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++         catch(const AgentWorkerRpcCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++         catch(const TransportCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++         catch(const TransportTimeout&){throw AgentWorkerRpcRemoteError("timeout");}
++         catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++         catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++         catch(const ProviderHttpError& error){throw AgentWorkerRpcRemoteError("provider_http",Json{{"status",error.status},{"code",error.status==400&&error.code=="context_length_exceeded"?error.code:std::string{}}}.dump());}
++         catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++         catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++         catch(const ModelProtocolError&){throw AgentWorkerRpcRemoteError("model_protocol");}
++         catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++         catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++}
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index a6d9911e..494ef9ce 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -188,7 +188,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
+     rejects<Conflict>([&]{bind_agent_worker_journal_rpc(store,lease,foreign,deadline);});auto forged_lease=lease;++forged_lease.pid;rejects<Conflict>([&]{store.read_agent_worker_journal(forged_lease,{AgentWorkerJournalReadKind::run,id}).get();});
+     auto journal_dispatch=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
+     std::atomic<bool> rollback_observed=false,provider_failure_observed=false,runner_stream_seen=false;std::promise<void> runner_streaming;auto runner_stream_ready=runner_streaming.get_future();
+-    AgentWorkerRpcHandler journal_invoke=[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{try{return journal_dispatch(method,payload,std::move(sink),cancel);}catch(const DatabaseError& error){if(mode=="completion_rollback"&&std::string(error.what()).find("fixture_worker_completion_abort")!=std::string::npos)rollback_observed=true;throw;}};
++    FixtureWorkerRpcHandler journal_invoke=[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{try{return journal_dispatch(method,payload,std::move(sink),cancel);}catch(const DatabaseError& error){if(mode=="completion_rollback"&&std::string(error.what()).find("fixture_worker_completion_abort")!=std::string::npos)rollback_observed=true;throw;}};
+     for(unsigned field=0;field<5;++field){auto changed=lease;if(field==0)++changed.workspace_revision;if(field==1)changed.workspace_id="foreign-workspace";if(field==2)changed.creation_time="1";if(field==3)changed.executable_identity="foreign-image";if(field==4)changed.provider_identity_json=R"({"wire":"chat-completions","model_id":"foreign-model"})";rejects<Conflict>([&]{store.read_agent_worker_journal(changed,{AgentWorkerJournalReadKind::run,id}).get();});}
+     auto expired=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),Clock::now()-1ms);try{expired("journal.run",Json{{"target",id},{"after",0}}.dump(),{},{});throw std::runtime_error("Expired journal read unexpectedly passed");}catch(const AgentWorkerRpcRemoteError& e){require(e.code()=="timeout","Captured journal deadline must not reset per call");}
+     std::stop_source owner_cancel;auto cancelled_read=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline,owner_cancel.get_token());owner_cancel.request_stop();try{cancelled_read("journal.run",Json{{"target",id},{"after",0}}.dump(),{},{});throw std::runtime_error("Cancelled journal read unexpectedly passed");}catch(const AgentWorkerRpcRemoteError& e){require(e.code()=="cancelled","Journal read must honor backend owner cancellation");}
+diff --git a/Native/tests/agent_worker_process_rpc_binder_fixture.cpp b/Native/tests/agent_worker_process_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..21759314
+--- /dev/null
++++ b/Native/tests/agent_worker_process_rpc_binder_fixture.cpp
+@@ -0,0 +1,29 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "agentflow/agent_worker_process_rpc.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "agentflow/process_executor.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++FixtureWorkerRpcHandler bind_agent_worker_process_rpc(AgentWorkerProcessHost& host,const AgentWorkerScope& scope){
++    return bind_agent_worker_process_rpc(host,host.lease(),scope);
++}
++FixtureWorkerRpcHandler bind_agent_worker_process_rpc(AgentProcessOwnerHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Process RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="process.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto call=AgentProcessToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const ProcessOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const ProcessEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++}
+diff --git a/Native/tests/agent_worker_read_rpc_binder_fixture.cpp b/Native/tests/agent_worker_read_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..6b874373
+--- /dev/null
++++ b/Native/tests/agent_worker_read_rpc_binder_fixture.cpp
+@@ -0,0 +1,35 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "agentflow/agent_worker_read_rpc.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/permission_waiter.hpp"
++#include "agentflow/agent_permissions.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "agentflow/records.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++FixtureWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost& host,const AgentWorkerScope& scope){
++    return bind_agent_worker_read_rpc(host,host.lease(),scope);
++}
++FixtureWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Read RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="read.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto call=AgentWorkspaceInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const AgentWorkerReadOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const PermissionCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const PermissionExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const PermissionDenied&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const AgentPermissionDenied&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const ToolAccessDenied&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++}
+diff --git a/Native/tests/agent_worker_remote_rpc_binder_fixture.cpp b/Native/tests/agent_worker_remote_rpc_binder_fixture.cpp
+new file mode 100644
+index 00000000..4cc3f12a
+--- /dev/null
++++ b/Native/tests/agent_worker_remote_rpc_binder_fixture.cpp
+@@ -0,0 +1,33 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "agentflow/agent_worker_remote_rpc.hpp"
++#include "agentflow/agent_worker_native_model.hpp"
++#include "agentflow/mcp_wire.hpp"
++#include "agentflow/mcp_tool_registry.hpp"
++#include "agentflow/a2a_tool_registry.hpp"
++#include "nlohmann/json.hpp"
++namespace agentflow {
++using Json=nlohmann::json;
++FixtureWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost& host,const AgentWorkerScope& scope){
++    return bind_agent_worker_remote_rpc(host,host.lease(),scope);
++}
++FixtureWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
++    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Remote RPC channel differs from captured lease");
++    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
++        if(method!="remote.invoke")throw AgentWorkerRpcRemoteError("unsupported");
++        try{const auto call=AgentRemoteToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
++        catch(const AgentWorkerRemoteOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const McpEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
++        catch(const A2aEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
++        catch(const McpOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const A2aOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
++        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
++        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
++        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
++        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
++    };
++}
++}
+diff --git a/Native/tests/agent_worker_rpc_fixture.hpp b/Native/tests/agent_worker_rpc_fixture.hpp
+index 006a088b..992f723a 100644
+--- a/Native/tests/agent_worker_rpc_fixture.hpp
++++ b/Native/tests/agent_worker_rpc_fixture.hpp
+@@ -43,3 +43,29 @@ namespace agentflow {
+ AgentWorkerTerminalObservation drain_and_terminate_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,RunState,const std::string&,AgentWorkerChannel::Deadline);
+ AgentWorkerTerminalObservation drain_completed_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline);
+ }
++
++// Packet callback binders exist only for failure-injection fixtures.
++#include "agentflow/agent_worker_model_rpc.hpp"
++#include "agentflow/agent_worker_journal_rpc.hpp"
++#include "agentflow/agent_worker_read_rpc.hpp"
++#include "agentflow/agent_worker_file_rpc.hpp"
++#include "agentflow/agent_worker_process_rpc.hpp"
++#include "agentflow/agent_worker_remote_rpc.hpp"
++#include "agentflow/agent_worker_callable_rpc.hpp"
++namespace agentflow {
++FixtureWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService&,AgentWorkerLeaseSpec,
++    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
++FixtureWorkerRpcHandler bind_agent_worker_workspace_journal_rpc(PersistenceService&,AgentWorkerFileHost&,
++    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
++FixtureWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_file_rpc(AgentFileToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_process_rpc(AgentWorkerProcessHost&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_process_rpc(AgentProcessOwnerHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost&,const AgentWorkerScope&);
++FixtureWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableService&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
++}

@@ -43,3 +43,29 @@ namespace agentflow {
 AgentWorkerTerminalObservation drain_and_terminate_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,RunState,const std::string&,AgentWorkerChannel::Deadline);
 AgentWorkerTerminalObservation drain_completed_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline);
 }
+
+// Packet callback binders exist only for failure-injection fixtures.
+#include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_worker_journal_rpc.hpp"
+#include "agentflow/agent_worker_read_rpc.hpp"
+#include "agentflow/agent_worker_file_rpc.hpp"
+#include "agentflow/agent_worker_process_rpc.hpp"
+#include "agentflow/agent_worker_remote_rpc.hpp"
+#include "agentflow/agent_worker_callable_rpc.hpp"
+namespace agentflow {
+FixtureWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService&,AgentWorkerLeaseSpec,
+    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
+FixtureWorkerRpcHandler bind_agent_worker_workspace_journal_rpc(PersistenceService&,AgentWorkerFileHost&,
+    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
+FixtureWorkerRpcHandler bind_agent_worker_read_rpc(AgentWorkerReadHost&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_read_rpc(AgentReadToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_file_rpc(AgentWorkerFileHost&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_file_rpc(AgentFileToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_process_rpc(AgentWorkerProcessHost&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_process_rpc(AgentProcessOwnerHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableHost&,const AgentWorkerScope&);
+FixtureWorkerRpcHandler bind_agent_worker_callable_rpc(AgentWorkerCallableService&,const AgentWorkerLeaseSpec&,const AgentWorkerScope&);
+}

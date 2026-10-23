@@ -1,0 +1,5 @@
+{
+  "phase": "build",
+  "testsExecuted": false,
+  "reason": "Ledger includes its graph fixture inside an anonymous namespace; the new binder declarations must be included globally. Ledger also needs an explicit test binder-library dependency."
+}

@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 // Native xlang3/SQLite and controlled HTTP peer. Process identities in this
 // ledger fixture are synthetic; actual child/channel lifecycles are separate.
 #ifndef NOMINMAX

@@ -33,14 +33,5 @@ public:
     Run complete_run(const std::string& final_attempt);
 private:AgentWorkerClientContext& peer_;
 };
-// Bind only this captured backend lease to its exact authenticated channel.
-// Completion uses backend-captured model facts, never a supplied assistant.
-// Read-turn commit uses backend model/read facts; no supplied history or tool
-// output is accepted. Permissions, generic writes and SQL remain closed.
-AgentWorkerRpcHandler bind_agent_worker_journal_rpc(PersistenceService&,AgentWorkerLeaseSpec,
-    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
-// Coding admission requires an actual durable native file owner. No child
-// payload or flag can promote the read-only journal to this capability.
-AgentWorkerRpcHandler bind_agent_worker_workspace_journal_rpc(PersistenceService&,AgentWorkerFileHost&,
-    const AgentWorkerScope&,AgentWorkerChannel::Deadline,std::stop_token owner_cancel={},AgentWorkerJournalModelHooks={});
+
 }

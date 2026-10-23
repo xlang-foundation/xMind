@@ -16,7 +16,6 @@ public:
 private:std::string code_,detail_;
 };
 using AgentWorkerRpcSink=std::function<void(const std::string&)>;
-using AgentWorkerRpcHandler=std::function<std::string(const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)>;
 // Captured worker services used by runner adapters. Product instances own only
 // native SDK clients; transport fixtures implement call() for fault injection.
 class AgentWorkerClientContext {

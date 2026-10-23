@@ -1,3 +1,29 @@
+## Packet callback binders confined to tests - 2026-10-22
+
+Model, journal, read, file, process, remote and callable callback binder bodies
+and declarations now live only in Native/tests and the BUILD_TESTING fixture
+library. The production handler alias is removed. Internal shared value helpers
+remain for existing client decoding; this does not remove client string fallbacks.
+No production source/header declares the packet peer, handler alias or binders.
+All six product executable link inputs exclude the test packet/binder library.
+
+The first build caught fixture-local old alias names and a missing callable-host
+test link. The next caught ledger fixture declarations included inside an anonymous
+namespace and its missing explicit fixture link. Both failures and exact inputs
+are preserved. The corrected complete build and 25 focused contracts pass in
+170.52 seconds, including model/SDK context cases, worker graphs, ledger, native
+execution/lifetimes, callable/remote host effects, shared memory, schema/MCP and
+unified entry. No test deadline changes or pass union. Exact 2801 project /16 SDK /
+1870 pure-library /30 runtime /18598 dependency /137 binary sets and hashes remain
+unchanged. Native patch a45611db9e44b9883167813b752417b3513c5abbb92b9bc57c05a60d02d71160;
+xmind.exe c6794eb0fe7009681bd8c09250628b599c1f3494f7a2a00157710eb80524c837.
+Evidence: process-worker-binders-fixture-only-{initial,namespace-failure,qualified}-20261022-*.
+
+A new complete Native gate is required. Client-side string fallbacks used by
+fixtures remain; current package refresh, protected installation and rendered
+VS Code acceptance also remain open. Installed/runtime history is untouched; no
+paid inference, CPython or completed-task replay.
+
 ## Read-owner dispatcher removed; context fixtures use SDK - 2026-10-22
 
 AgentWorkerReadOwner no longer declares or implements string-method dispatch,

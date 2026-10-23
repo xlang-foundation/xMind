@@ -6,29 +6,6 @@
 #include "nlohmann/json.hpp"
 namespace agentflow {
 using Json=nlohmann::json;
-AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentWorkerRemoteHost& host,const AgentWorkerScope& scope){
-    return bind_agent_worker_remote_rpc(host,host.lease(),scope);
-}
-AgentWorkerRpcHandler bind_agent_worker_remote_rpc(AgentRemoteToolHost& host,const AgentWorkerLeaseSpec& lease,const AgentWorkerScope& scope){
-    if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Remote RPC channel differs from captured lease");
-    return [&host](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token cancel)->std::string{
-        if(method!="remote.invoke")throw AgentWorkerRpcRemoteError("unsupported");
-        try{const auto call=AgentRemoteToolInvocation::parse(payload);const auto result=host.invoke(call,cancel);return Json{{"success",result.success},{"output_json",result.output_json}}.dump();}
-        catch(const AgentWorkerRemoteOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
-        catch(const McpEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
-        catch(const A2aEffectUncertain&){throw AgentWorkerRpcRemoteError("effect_uncertain");}
-        catch(const McpOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
-        catch(const A2aOutcomeUnrecorded&){throw AgentWorkerRpcRemoteError("outcome_unrecorded");}
-        catch(const AgentWorkerAuthorityCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
-        catch(const AgentWorkerAuthorityExpired&){throw AgentWorkerRpcRemoteError("timeout");}
-        catch(const ToolCancelled&){throw AgentWorkerRpcRemoteError("cancelled");}
-        catch(const Conflict&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const NotFound&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const std::invalid_argument&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const McpProtocolError&){throw AgentWorkerRpcRemoteError("rejected");}
-        catch(const Json::exception&){throw AgentWorkerRpcRemoteError("rejected");}
-    };
-}
 AgentRemoteToolResult AgentWorkerRemoteClient::invoke(const AgentRemoteToolInvocation& call,std::stop_token cancel){
     if(auto native=peer_.native_model())return native->remote_invoke(call,cancel);
     try{const auto bytes=peer_.call("remote.invoke",call.serialize(),{},cancel);const auto value=Json::parse(mcp_compact_object(bytes));

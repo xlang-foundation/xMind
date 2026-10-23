@@ -12,7 +12,5 @@ public:
     AgentWorkerModelAdmission admission(std::stop_token={});
 private:AgentWorkerClientContext& peer_;
 };
-// Bind this one authorized inference host to its exact authenticated channel.
-// No dynamic service lookup, provider config, credentials or SQL is exposed.
-AgentWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost&,const AgentWorkerScope&);
+
 }

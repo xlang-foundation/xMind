@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 #pragma once
 // Repository boundary only: synthetic process identities, no process launch.
 void graph_worker_admission(PersistenceService& store){

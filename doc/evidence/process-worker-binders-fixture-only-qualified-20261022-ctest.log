@@ -1,0 +1,55 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+      Start   4: native_json_schema_contract
+ 1/25 Test   #4: native_json_schema_contract .....................   Passed    0.03 sec
+      Start  27: native_agent_worker_native_execution_contract
+ 2/25 Test  #27: native_agent_worker_native_execution_contract ...   Passed    0.29 sec
+      Start  28: native_xmind_ipc_lifetime_contract
+ 3/25 Test  #28: native_xmind_ipc_lifetime_contract ..............   Passed    0.13 sec
+      Start  29: native_xmind_ipc_api_contract
+ 4/25 Test  #29: native_xmind_ipc_api_contract ...................   Passed    0.61 sec
+      Start  60: native_process_configuration_contract
+ 5/25 Test  #60: native_process_configuration_contract ...........   Passed    0.34 sec
+      Start  73: native_schema_worker_contract
+ 6/25 Test  #73: native_schema_worker_contract ...................   Passed    2.86 sec
+      Start  74: native_mcp_stdio_contract
+ 7/25 Test  #74: native_mcp_stdio_contract .......................   Passed    3.16 sec
+      Start  75: native_mcp_handshake_contract
+ 8/25 Test  #75: native_mcp_handshake_contract ...................   Passed    0.82 sec
+      Start  76: native_mcp_client_contract
+ 9/25 Test  #76: native_mcp_client_contract ......................   Passed    1.39 sec
+      Start  84: native_mcp_effect_contract
+10/25 Test  #84: native_mcp_effect_contract ......................   Passed   22.80 sec
+      Start  85: native_mcp_input_contract
+11/25 Test  #85: native_mcp_input_contract .......................   Passed    0.52 sec
+      Start  87: native_agent_worker_native_planning_contract
+12/25 Test  #87: native_agent_worker_native_planning_contract ....   Passed    0.21 sec
+      Start  88: native_agent_worker_model_rpc_contract
+13/25 Test  #88: native_agent_worker_model_rpc_contract ..........   Passed   55.52 sec
+      Start  89: native_agent_worker_graph_no_context_contract
+14/25 Test  #89: native_agent_worker_graph_no_context_contract ...   Passed    5.33 sec
+      Start  90: native_agent_worker_graph_callable_contract
+15/25 Test  #90: native_agent_worker_graph_callable_contract .....   Passed    5.34 sec
+      Start  91: native_agent_worker_graph_remote_contract
+16/25 Test  #91: native_agent_worker_graph_remote_contract .......   Passed   11.22 sec
+      Start  92: native_agent_worker_server_contract
+17/25 Test  #92: native_agent_worker_server_contract .............   Passed    1.79 sec
+      Start  93: native_agent_worker_coding_server_contract
+18/25 Test  #93: native_agent_worker_coding_server_contract ......   Passed    1.02 sec
+      Start  94: native_agent_worker_ledger_contract
+19/25 Test  #94: native_agent_worker_ledger_contract .............   Passed   37.24 sec
+      Start  95: native_agent_worker_channel_contract
+20/25 Test  #95: native_agent_worker_channel_contract ............   Passed    0.84 sec
+      Start  96: native_xlang3_shared_memory_worker_contract
+21/25 Test  #96: native_xlang3_shared_memory_worker_contract .....   Passed    1.33 sec
+      Start  97: native_agent_service_contract
+22/25 Test  #97: native_agent_service_contract ...................   Passed    1.58 sec
+      Start  98: native_agent_runner_contract
+23/25 Test  #98: native_agent_runner_contract ....................   Passed    9.85 sec
+      Start 110: native_agent_remote_tool_host_contract
+24/25 Test #110: native_agent_remote_tool_host_contract ..........   Passed    4.68 sec
+      Start 141: native_unified_program_contract
+25/25 Test #141: native_unified_program_contract .................   Passed    1.58 sec
+
+100% tests passed, 0 tests failed out of 25
+
+Total Test time (real) = 170.52 sec

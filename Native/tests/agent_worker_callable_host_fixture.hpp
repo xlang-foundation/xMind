@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_callable_rpc.hpp"
 #include "agentflow/xlang_python.hpp"
 #include "agentflow/agent_model_values.hpp"
@@ -5,9 +6,9 @@
 // Real controller approvals and actual embedded xlang3 effects; model/lease identities
 // are controlled backend fixtures. Actual-child IPC is a separate contract.
 class CallableRpcFixture final:public AgentCallableToolHost {
-    AgentWorkerRpcHandler handler_;
+    FixtureWorkerRpcHandler handler_;
 public:
-    explicit CallableRpcFixture(AgentWorkerRpcHandler handler):handler_(std::move(handler)){}
+    explicit CallableRpcFixture(FixtureWorkerRpcHandler handler):handler_(std::move(handler)){}
     AgentCallableToolResult invoke(const AgentCallableInvocation& call,std::stop_token stop)override{const auto result=Json::parse(handler_("callable.invoke",call.serialize(),{},stop));return {result.at("success").get<bool>(),result.at("output_json").get<std::string>()};}
 };
 struct CallableTask {

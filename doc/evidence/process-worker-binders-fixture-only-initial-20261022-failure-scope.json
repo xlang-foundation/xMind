@@ -1,0 +1,6 @@
+{
+  "phase": "build",
+  "testsExecuted": false,
+  "reason": "Three fixture-local variables still used the removed production handler alias; the callable host contract also needs an explicit test binder-library dependency.",
+  "repair": "Rename fixture-local types and link the affected contract to the test-only target; include that contract in the focused gate."
+}
