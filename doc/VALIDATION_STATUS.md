@@ -1,3 +1,15 @@
+## Hosted SDK repeat passes; native inventory gate corrected - 2026-10-23
+
+Hosted run39942792825 passes SDK4/4,30 runtime-isolation processes and the early
+Local view contract. Full native build finishes, but exact inventory rejects an
+obsolete planning_rpc expected name and two actual native execution/planning
+contracts. The complete native suite never starts; this is not a Rust test result.
+Corrected expected names match all170 recorded hosted contracts exactly; syntax
+parses and mismatches now retain explicit details. No test or threshold removed.
+Hosted inventory omits optional Rust semantic tests, so local Rust acceptance
+remains unresolved. Installed62 unchanged. Public inventory and failure receipt:
+hosted-native-inventory-8ebe88ed-20261023*.json.
+
 ## Actual separate-process xlang3 call timing - 2026-10-23
 
 Standard C++ SDK client29496 calls native xMind backend32516 over its actual

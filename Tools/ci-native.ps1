@@ -221,7 +221,8 @@ $ciExpected+='native_agent_worker_model_rpc_contract'
 $ciExpected+='native_agent_worker_graph_no_context_contract'
 $ciExpected+='native_agent_worker_graph_callable_contract'
 $ciExpected+='native_agent_worker_graph_remote_contract'
-$ciExpected+='native_agent_worker_planning_rpc_contract'
+$ciExpected+='native_agent_worker_native_execution_contract'
+$ciExpected+='native_agent_worker_native_planning_contract'
 $ciExpected+='native_xmind_ipc_api_contract'
 $ciExpected+='native_xmind_ipc_lifetime_contract'
 $ciExpected+='native_nested_context_graph_engine_contract'
@@ -229,7 +230,11 @@ $ciExpected+='native_cli_output_contract'
 $ciExpected+='native_agent_worker_server_contract'
 $ciExpected+='native_agent_worker_coding_server_contract'
 $ciActual=($ciTests|ConvertFrom-Json).tests.name
-if(@($ciActual).Count -ne $ciExpected.Count -or (Compare-Object ($ciActual|Sort-Object) ($ciExpected|Sort-Object))){throw 'The complete expected native contract set was not registered; refusing a partial green build.'}
+$ciInventoryDifference=Compare-Object ($ciExpected|Sort-Object) ($ciActual|Sort-Object)
+if(@($ciActual).Count -ne $ciExpected.Count -or $ciInventoryDifference){
+    $ciInventoryDifference|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'contract-inventory-difference.json')
+    throw ('The complete expected native contract set was not registered; refusing a partial green build. Expected '+$ciExpected.Count+', actual '+@($ciActual).Count+'. See contract-inventory-difference.json.')
+}
 Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')
 # Publish the complete successful gate only after CTest returns zero. Packaging
 # binds this receipt to the exact registered set, test log and source revision.

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "runId": 39942792825,
+  "jobId": 120378066208,
+  "sourceRevision": "8ebe88edd201301d2e90d250b31bce5ba3010d36",
+  "conclusion": "failure",
+  "failureStage": "exact native contract inventory before full CTest",
+  "registeredContracts": 170,
+  "missingExpected": [
+    "native_agent_worker_planning_rpc_contract"
+  ],
+  "unexpectedRegistered": [
+    "native_agent_worker_native_execution_contract",
+    "native_agent_worker_native_planning_contract"
+  ],
+  "sdkContractsPassed": 4,
+  "runtimeIsolationRepeatedProcessesPassed": 30,
+  "earlyLocalViewPassed": true,
+  "fullNativeSuiteRan": false,
+  "fullNativeAcceptance": false,
+  "installedChanged": false,
+  "artifactId": 12499202268,
+  "artifactSha256": "5bd91efb7ed77e29dbb7f2af3421177dbfc6fb46871952edcbea0138109f8288",
+  "inventorySha256": "e045f0dd67dc930387ee349447042dd0149b3e12fdfe4cde43ef6baf12e6cde5",
+  "correction": "Replace obsolete worker planning RPC name with both actual native worker contract names; retain exact-set validation and write mismatch details.",
+  "localValidation": "PowerShell AST parse; exact corrected 170-name set equals downloaded hosted inventory.",
+  "scope": "Hosted inventory has no optional Rust semantic contracts; it does not resolve the earlier local Rust definition failure."
+}
