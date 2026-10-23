@@ -282,3 +282,14 @@ step without another model charge. Two ledger paths retain the canonical
 completion receipt and preserve root ownership. Nested compaction, automatic
 worker enrollment/scheduling and recovery remain unfinished.
 [Receipt](evidence/nested-worker-counted-continuation-20261023.json).
+
+### Counted child compaction-to-final checkpoint (2026-10-23)
+
+Planning maintenance retains the exact child owner and leaf role. Native
+compaction with controlled count/response facts preserves the held inference
+and charges one separate maintenance call. Final worker completion selects the
+latest inference rather than a later maintenance reservation, while requiring
+all reservations to finish. The ledger verifies SDK child completion preserves
+the root. Further planning calls after compaction, runtime enrollment/scheduling
+and recovery remain unqualified.
+[Receipt](evidence/nested-worker-counted-compaction-20261023.json).

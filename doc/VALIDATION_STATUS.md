@@ -1,3 +1,31 @@
+## Counted child compaction and final completion — 2026-10-23
+
+Planning compaction now derives parent/leaf role from the exact signed owner in
+its admission and live-owner checks. It requires the original reserved inference
+attempt and exact call owner, retaining all context authority and source fences.
+The new forced-compaction case exposed another bug: final worker completion
+selected the latest physical reservation, which was maintenance reserved after
+the held inference. It now selects the latest inference reservation and still
+requires every physical reservation to be finished.
+
+The ledger uses independently supplied synthetic capacity and token counts to
+force native compaction for one child; another stays uncompacted. It verifies
+one maintenance call, no inference replay, one extra physical root charge, the
+original signed leaf attempt and execution scope, and successful independent SDK
+child completion with root ownership preserved. Initial runs failed at a
+remaining root-only live-owner check, then at final journal completion. Stage
+markers and child error propagation isolated the second failure. All three
+failed runs and their logs remain retained and are referenced in the receipt.
+
+Final build and **3/3 context repository, context engine and worker ledger
+contracts pass in 45.06 seconds**, with frozen source/SDK/library/runtime/
+dependency/binary file sets and bytes unchanged. No paid inference, CPython,
+installation or visible windows. This qualifies the compaction-to-final path;
+subsequent planning tool claims after compaction, automatic nested enrollment/
+scheduling and recovery remain to verify.
+[Receipt](evidence/nested-worker-counted-compaction-20261023.json),
+[CTest log](evidence/nested-worker-counted-compaction-20261023-ctest.log).
+
 ## Counted child signed continuation — 2026-10-23
 
 Context preparation now checks the signed call's exact root/owner/committed
