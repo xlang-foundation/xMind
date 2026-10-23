@@ -1,0 +1,16 @@
+{
+  "program": "C:/Program Files/Microsoft Visual Studio/18/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe",
+  "args": [
+    "--build",
+    "D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-build",
+    "--config",
+    "Release",
+    "--",
+    "/m:1",
+    "/nologo"
+  ],
+  "startedAt": "2026-10-23T04:02:18.779Z",
+  "endedAt": "2026-10-23T04:02:21.236Z",
+  "status": 0,
+  "signal": null
+}

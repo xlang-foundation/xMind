@@ -1,0 +1,17 @@
+{
+  "failure": "native_responses_agent_http_contract lost backend connection at terminal-opaque two-child delegation case, ECONNREFUSED 127.0.0.1:53821",
+  "windowsCrashEventObserved": false,
+  "rootCause": "unknown",
+  "sourceFinding": "Fixture captures backend stderr only in local start closure and removes private fixture root in finally; post-start loss omits backend exit diagnostics.",
+  "preparedLauncherSource": ".agentflow/native-dump-launcher.cpp",
+  "launcherSourceSha256": "7220414bd70aea64bd83f53f4b2c539757c2b72d955f3f67199799c322c3727d",
+  "preparedCMake": ".agentflow/native-dump-launcher-source/CMakeLists.txt",
+  "compiled": false,
+  "executed": false,
+  "next": "After current full-suite terminal, build helper separately. Verify normal and fatal exit preservation using owned diagnostic fixtures. Run isolated copied Responses fixture through helper with private dumps/logs; preserve original source and deadlines. Never claim debugger-run acceptance as ordinary full-suite acceptance.",
+  "activeFullSuite": {
+    "pid": 29372,
+    "birthLocal": "2026-10-22 20:38:39",
+    "session": 49872
+  }
+}

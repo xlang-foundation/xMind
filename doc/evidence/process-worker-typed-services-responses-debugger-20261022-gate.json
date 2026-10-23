@@ -1,0 +1,37 @@
+{
+  "sourceParent": "e49d694ce54aa4e236de4acb1b5c4e0c7c22edfe",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "Debugger-observed copy of synthetic Responses fixture; not ordinary CTest or full-suite acceptance",
+  "command": {
+    "pid": 23136,
+    "launchedAt": "2026-10-23T04:04:16.048Z",
+    "completedAt": "2026-10-23T04:04:30.312Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "472d4268611b0d05b9aedc498a7f91c53ee19d554f80649f419145dca9bc1567"
+  },
+  "passed": true,
+  "diagnosticInputs": {
+    ".agentflow/native-dump-launcher.cpp": "b4cfeef3d6377c7bb7d1790f714a2d404c4903b891ae5975dbc003f643469158",
+    ".agentflow/native-dump-probe.cpp": "491976c651f1e8623868398872c96b87f40192b7b658737117af4d675174b85b",
+    ".agentflow/native-dump-launcher-build/Release/xmind_native_dump_launcher.exe": "e77e4e943b0a5fab306222d4a9d09f3a400220bbc9ff4e830fc7c775b524d698",
+    ".agentflow/native-dump-launcher-source/CMakeLists.txt": "ffa163abfcd56d193340e57a67ce49e06ec186f9deda49635946ac0981db77b6",
+    ".agentflow/responses-native-dump-diagnostic.mjs": "a9bb0316490bce206cf6e827c96d4678a9f17c2d3e9a1d3c106d5534a7c2611a"
+  },
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "nativeSha256": "90675a3050568180fd506584af3ac0e541aa0b8086db3fcdf60b9663b2fcab96",
+  "privateCrashDumps": [],
+  "privateBackendLogs": [
+    "backend-0.json",
+    "backend-1.json",
+    "backend-2.json",
+    "backend-3.json",
+    "backend-4.json",
+    "backend-5.json",
+    "backend-6.json"
+  ],
+  "originalDeadlinesAndAssertionsRetained": true,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "installed": false
+}

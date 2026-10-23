@@ -1,3 +1,35 @@
+## Current complete gate: Responses backend loss - 2026-10-22
+
+Source e49d694c complete Native run finishes 171/172 in 1301.76 seconds.
+All 2810 project /16 SDK /1870 pure-library /30 runtime /18598 dependency /
+137 native binary sets and hashes remain unchanged. Native remains 90675a30.
+This is a failed complete run. A2A registry and graph remote pass this time,
+but that does not establish the causes of their earlier intermittent failures.
+
+The Responses HTTP contract fails during terminal-opaque two-leaf delegation:
+its backend connection is refused. No matching Windows crash event or opt-in
+fixture dump was observed. The original fixture discarded its isolated state
+and did not preserve post-start backend exit/stderr diagnostics. Evidence:
+process-worker-typed-services-full-diagnostic-failed-20261022-*.
+
+A separate test-only debugger launcher preserves normal exit37 and fatal
+c0000005; its controlled fatal probe produces a dump with the same exception.
+Its own source and both product runtime hashes remain unchanged during that
+verification. Sources, build/command receipts and verification are preserved as
+native-dump-launcher-20261022-*. Raw dumps remain private and outside Git.
+
+A copied Responses fixture uses that explicit launcher, retains original
+assertions and deadlines, verifies worker PID against the actual backend PID,
+and preserves backend logs/state privately. It passes in 14.26 seconds with
+all project/SDK/library/dependency/runtime/binary inputs unchanged. Seven backend
+logs, private fixture state and no crash dumps were captured. This is debugger
+observation, not ordinary CTest or complete-suite acceptance. Evidence:
+process-worker-typed-services-responses-debugger-20261022-*.
+
+Underlying intermittent failures remain unresolved. Packaging is on hold;
+installed 0.1.61, its settings and histories remain unchanged. No CPython or paid
+inference was used. Broader OSS delivery requirements remain open.
+
 ## Ordered failure diagnostic and A2A error reporting - 2026-10-22
 
 A dump-enabled run of the first 91 contracts in complete-suite order passes

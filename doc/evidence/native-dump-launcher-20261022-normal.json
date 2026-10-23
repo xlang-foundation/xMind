@@ -1,0 +1,16 @@
+{
+  "program": "D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-build/Release/xmind_native_dump_launcher.exe",
+  "args": [
+    "--dump-dir",
+    "D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-verification-start/private-dumps",
+    "--",
+    "D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-build/Release/xmind_native_dump_probe.exe",
+    "--roundtrip",
+    "",
+    "spaces \"quote\" backslash\\ α"
+  ],
+  "startedAt": "2026-10-23T04:02:21.237Z",
+  "endedAt": "2026-10-23T04:02:21.295Z",
+  "status": 37,
+  "signal": null
+}

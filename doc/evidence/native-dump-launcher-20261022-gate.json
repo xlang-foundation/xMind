@@ -1,0 +1,18 @@
+{
+  "scope": "Owned diagnostic helper only; no product or release acceptance",
+  "passed": true,
+  "inputs": {
+    ".agentflow/native-dump-launcher.cpp": "b4cfeef3d6377c7bb7d1790f714a2d404c4903b891ae5975dbc003f643469158",
+    ".agentflow/native-dump-probe.cpp": "491976c651f1e8623868398872c96b87f40192b7b658737117af4d675174b85b",
+    ".agentflow/native-dump-launcher-source/CMakeLists.txt": "ffa163abfcd56d193340e57a67ce49e06ec186f9deda49635946ac0981db77b6"
+  },
+  "normalExit": 37,
+  "fatalExit": 3221225477,
+  "dumpException": 3221225477,
+  "privateDumpCount": 1,
+  "launcherSha256": "e77e4e943b0a5fab306222d4a9d09f3a400220bbc9ff4e830fc7c775b524d698",
+  "probeSha256": "843d8307b32dc8c6315cd841dcaeb874a352f3ec40974c58838d8f8047da8ff6",
+  "nativeRuntimeBytesUnchanged": true,
+  "originalTestDeadlinesChanged": false,
+  "cpythonExecuted": false
+}

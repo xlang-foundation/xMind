@@ -1,0 +1,8 @@
+
+  1>Checking Build System
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-source/CMakeLists.txt
+  native-dump-launcher.cpp
+  xmind_native_dump_launcher.vcxproj -> D:\CantorAI2026\xMind\.agentflow\native-dump-launcher-build\Release\xmind_native_dump_launcher.exe
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-source/CMakeLists.txt
+  xmind_native_dump_probe.vcxproj -> D:\CantorAI2026\xMind\.agentflow\native-dump-launcher-build\Release\xmind_native_dump_probe.exe
+  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/native-dump-launcher-source/CMakeLists.txt

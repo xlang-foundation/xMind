@@ -1,0 +1,70 @@
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <DbgHelp.h>
+#include <cstdio>
+#include <filesystem>
+#include <map>
+#include <string>
+#include <vector>
+// Test-only debugger launcher. References:
+// https://learn.microsoft.com/en-us/windows/win32/api/debugapi/nf-debugapi-waitfordebugevent
+// https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump
+// Never handle a fatal exception or turn it into a successful exit.
+std::wstring quote(const std::wstring& value){
+    std::wstring out=L"\"";size_t slashes=0;
+    for(const auto c:value){if(c==L'\\'){++slashes;continue;}
+        out.append(c==L'"'?slashes*2+1:slashes,L'\\');out+=c;slashes=0;}
+    out.append(slashes*2,L'\\');out+=L'"';return out;
+}
+void dump(HANDLE process,HANDLE thread,const DEBUG_EVENT& event,const std::filesystem::path& directory){
+    CONTEXT context{};context.ContextFlags=CONTEXT_ALL;
+    if(!thread||!GetThreadContext(thread,&context)){std::fprintf(stderr,"Diagnostic context unavailable error=%lu\n",GetLastError());return;}
+    EXCEPTION_RECORD record=event.u.Exception.ExceptionRecord;
+    EXCEPTION_POINTERS pointers{&record,&context};
+    MINIDUMP_EXCEPTION_INFORMATION info{event.dwThreadId,&pointers,FALSE};
+    const auto name=L"native-"+std::to_wstring(event.dwProcessId)+L"-"+std::to_wstring(GetTickCount64())+L".dmp";
+    const auto target=directory/name;const auto file=CreateFileW(target.c_str(),GENERIC_WRITE,0,nullptr,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,nullptr);
+    if(file==INVALID_HANDLE_VALUE){std::fprintf(stderr,"Diagnostic dump create failed error=%lu\n",GetLastError());return;}
+    const auto flags=static_cast<MINIDUMP_TYPE>(MiniDumpWithThreadInfo|MiniDumpWithFullMemoryInfo|MiniDumpWithUnloadedModules);
+    const auto ok=MiniDumpWriteDump(process,event.dwProcessId,file,flags,&info,nullptr,nullptr);const auto error=GetLastError();CloseHandle(file);
+    std::fprintf(stderr,"Diagnostic fatal pid=%lu tid=%lu exception=0x%08lx first_chance=%lu dump_written=%d error=%lu\n",event.dwProcessId,event.dwThreadId,record.ExceptionCode,event.u.Exception.dwFirstChance,ok,ok?0:error);std::fflush(stderr);
+}
+int wmain(int argc,wchar_t** argv){
+    if(argc<5||std::wstring(argv[1])!=L"--dump-dir"||std::wstring(argv[3])!=L"--")return 125;
+    const auto directory=std::filesystem::absolute(argv[2]);
+    if(!std::filesystem::is_directory(directory))return 125;
+    std::wstring command;for(int i=4;i<argc;++i){if(!command.empty())command+=L' ';command+=quote(argv[i]);}
+    std::vector<wchar_t> mutable_command(command.begin(),command.end());mutable_command.push_back(0);
+    STARTUPINFOW startup{};startup.cb=sizeof(startup);startup.dwFlags=STARTF_USESTDHANDLES;
+    startup.hStdInput=GetStdHandle(STD_INPUT_HANDLE);startup.hStdOutput=GetStdHandle(STD_OUTPUT_HANDLE);startup.hStdError=GetStdHandle(STD_ERROR_HANDLE);
+    PROCESS_INFORMATION created{};
+    SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+    if(!CreateProcessW(argv[4],mutable_command.data(),nullptr,nullptr,TRUE,DEBUG_ONLY_THIS_PROCESS|CREATE_NO_WINDOW,nullptr,nullptr,&startup,&created)){
+        std::fprintf(stderr,"Diagnostic launch failed error=%lu\n",GetLastError());return 125;}
+    DebugSetProcessKillOnExit(TRUE);HANDLE process=nullptr;std::map<DWORD,HANDLE> threads;bool first_breakpoint=true,dumped=false;
+    for(;;){DEBUG_EVENT event{};if(!WaitForDebugEvent(&event,INFINITE)){std::fprintf(stderr,"Diagnostic wait failed error=%lu\n",GetLastError());return 125;}
+        DWORD disposition=DBG_CONTINUE;
+        switch(event.dwDebugEventCode){
+        case CREATE_PROCESS_DEBUG_EVENT:
+            process=event.u.CreateProcessInfo.hProcess;threads[event.dwThreadId]=event.u.CreateProcessInfo.hThread;
+            std::fprintf(stderr,"Diagnostic native start pid=%lu\n",event.dwProcessId);std::fflush(stderr);
+            if(created.hProcess!=process)CloseHandle(created.hProcess);created.hProcess=nullptr;
+            if(created.hThread!=event.u.CreateProcessInfo.hThread)CloseHandle(created.hThread);created.hThread=nullptr;
+            if(event.u.CreateProcessInfo.hFile)CloseHandle(event.u.CreateProcessInfo.hFile);break;
+        case CREATE_THREAD_DEBUG_EVENT:threads[event.dwThreadId]=event.u.CreateThread.hThread;break;
+        case EXIT_THREAD_DEBUG_EVENT:threads.erase(event.dwThreadId);break;
+        case LOAD_DLL_DEBUG_EVENT:if(event.u.LoadDll.hFile)CloseHandle(event.u.LoadDll.hFile);break;
+        case EXCEPTION_DEBUG_EVENT:{const auto code=event.u.Exception.ExceptionRecord.ExceptionCode;
+            if(first_breakpoint&&code==EXCEPTION_BREAKPOINT&&event.u.Exception.dwFirstChance){first_breakpoint=false;break;}
+            disposition=DBG_EXCEPTION_NOT_HANDLED;
+            if(!dumped&&(!event.u.Exception.dwFirstChance||code==0xC0000409||code==0xC0000374)){
+                dumped=true;const auto found=threads.find(event.dwThreadId);dump(process,found==threads.end()?nullptr:found->second,event,directory);}
+            break;}
+        case EXIT_PROCESS_DEBUG_EVENT:{const auto result=event.u.ExitProcess.dwExitCode;
+            std::fprintf(stderr,"Diagnostic native exit pid=%lu code=0x%08lx\n",event.dwProcessId,result);std::fflush(stderr);
+            ContinueDebugEvent(event.dwProcessId,event.dwThreadId,DBG_CONTINUE);return static_cast<int>(result);}
+        default:break;
+        }
+        if(!ContinueDebugEvent(event.dwProcessId,event.dwThreadId,disposition)){std::fprintf(stderr,"Diagnostic continue failed error=%lu\n",GetLastError());return 125;}
+    }
+}

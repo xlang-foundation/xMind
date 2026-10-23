@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.24)
+project(xmind_native_dump_launcher LANGUAGES CXX)
+add_executable(xmind_native_dump_launcher ../native-dump-launcher.cpp)
+target_compile_features(xmind_native_dump_launcher PRIVATE cxx_std_20)
+target_compile_definitions(xmind_native_dump_launcher PRIVATE UNICODE _UNICODE)
+target_link_libraries(xmind_native_dump_launcher PRIVATE dbghelp)
+add_executable(xmind_native_dump_probe ../native-dump-probe.cpp)

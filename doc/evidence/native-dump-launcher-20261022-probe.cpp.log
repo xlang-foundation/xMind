@@ -1,0 +1,11 @@
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <string>
+// Owned launcher verification fixture, never a model/tool task.
+int wmain(int argc,wchar_t** argv){
+    if(argc==2&&std::wstring(argv[1])==L"--fault"){
+        RaiseException(EXCEPTION_ACCESS_VIOLATION,EXCEPTION_NONCONTINUABLE,0,nullptr);return 124;
+    }
+    if(argc==4&&std::wstring(argv[1])==L"--roundtrip"&&std::wstring(argv[2]).empty()&&std::wstring(argv[3])==L"spaces \"quote\" backslash\\ \u03b1")return 37;
+    return 124;
+}
