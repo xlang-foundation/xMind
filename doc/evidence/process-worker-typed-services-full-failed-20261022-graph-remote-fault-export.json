@@ -1,0 +1,15 @@
+{
+  "dll": ".agentflow/xlang3-sdk/Release/xlang3_runtime.dll",
+  "sha256": "e42cb8cbaa75c953298f2ed5db97508a6561881f6d740cacd53824c47c5c8543",
+  "faultRva": "0x9a29f",
+  "nearestExport": {
+    "rva": "0x9a130",
+    "name": "??$_Emplace_reallocate@AEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@std@@AEAAPEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@1@QEAV21@AEBV21@@Z",
+    "delta": "0x16f"
+  },
+  "nextExport": {
+    "rva": 631616,
+    "name": "??$_Uninitialized_copy@PEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEAV12@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@std@@YAPEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@0@PEAV10@00AEAV?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@0@@Z"
+  },
+  "scope": "Static PE export lookup only; no stack or causality claim"
+}

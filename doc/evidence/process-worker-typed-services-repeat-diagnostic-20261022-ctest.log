@@ -1,0 +1,45 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.68 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.76 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.43 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.74 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.62 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.70 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.86 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.57 sec
+    Start 11: native_a2a_agent_registry_contract
+    Test #11: native_a2a_agent_registry_contract ..........   Passed    2.93 sec
+    Start 11: native_a2a_agent_registry_contract
+1/2 Test #11: native_a2a_agent_registry_contract ..........   Passed    2.84 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.21 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   10.99 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.13 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   10.91 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.12 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.05 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.10 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.04 sec
+    Start 91: native_agent_worker_graph_remote_contract
+    Test #91: native_agent_worker_graph_remote_contract ...   Passed   10.93 sec
+    Start 91: native_agent_worker_graph_remote_contract
+2/2 Test #91: native_agent_worker_graph_remote_contract ...   Passed   11.08 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) = 137.70 sec

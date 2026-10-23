@@ -1,0 +1,433 @@
+Start testing: Oct 22 20:23 Pacific Daylight Time
+----------------------------------------------------------
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-58cfba695448f6d0a52d46e4d6c54491\",\"operation_id\":\"58cfba695448f6d0a52d46e4d6c54491\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.68 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-34e1a579e6420cb422584d464e87cbe0\",\"operation_id\":\"34e1a579e6420cb422584d464e87cbe0\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.76 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-665fe5294c43f9034151e7a9dd069f37\",\"operation_id\":\"665fe5294c43f9034151e7a9dd069f37\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.43 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-004d39245da929b9a5620afd4d5951ba\",\"operation_id\":\"004d39245da929b9a5620afd4d5951ba\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.74 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-637cdc3aef4b2189826605a35a9f5933\",\"operation_id\":\"637cdc3aef4b2189826605a35a9f5933\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.62 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-257b4c4e62d786f05bc38ea77c9b8421\",\"operation_id\":\"257b4c4e62d786f05bc38ea77c9b8421\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.70 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-7771ad5fc5832ae68acf198c81bdbe34\",\"operation_id\":\"7771ad5fc5832ae68acf198c81bdbe34\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.86 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-a651763490910f19d1abcdacb7789b7b\",\"operation_id\":\"a651763490910f19d1abcdacb7789b7b\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.57 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-cb50391df97acada5bcd426fb2fac166\",\"operation_id\":\"cb50391df97acada5bcd426fb2fac166\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.93 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+11/172 Testing: native_a2a_agent_registry_contract
+11/172 Test: native_a2a_agent_registry_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_a2a_agent_registry_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_a2a_agent_registry_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+A2A backend authority rejected approved streaming and ordinary sends before peer dispatch.
+[a2a-agent-guidance] {"case":"before","model_calls":2,"operations":[],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"approval","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"reason\":\"repository_instructions_changed_before_a2a_dispatch\"}","state":"failed"}],"peer_effect_exists":false,"remote_sends":0,"run_state":"completed","updated_guidance_seen":true}
+[a2a-agent-guidance] {"case":"fresh","model_calls":2,"operations":[{"has_instruction_binding":true,"result_json":"{\"acknowledged_by_peer\":true,\"agent_id\":\"research.guidance\",\"agent_revision\":1,\"context_id\":\"context-fresh\",\"independently_verified\":false,\"message_id\":\"xmind-9c3a0b3e4c8d62926a68f836d4f4593d\",\"operation_id\":\"9c3a0b3e4c8d62926a68f836d4f4593d\",\"response_json\":\"{\\\"task\\\":{\\\"contextId\\\":\\\"context-fresh\\\",\\\"id\\\":\\\"remote-fresh\\\",\\\"status\\\":{\\\"state\\\":\\\"TASK_STATE_COMPLETED\\\"}}}\",\"task_id\":\"remote-fresh\"}","state":"succeeded"}],"peer_effect_exists":true,"remote_sends":1,"run_state":"completed","updated_guidance_seen":false}
+Native A2A contracts passed xlang3 SQLite persistence, owner HTTP registry, encrypted peer credentials, approved task dispatch, stable message IDs, denial without dispatch, live revision recheck, uncertain-effect quarantine and actual AgentRunner repository-guidance checks. Model and remote responses are synthetic; full live model-driven cross-client execution remains open.
+<end of output>
+Test time =   2.84 sec
+----------------------------------------------------------
+Test Passed.
+"native_a2a_agent_registry_contract" end time: Oct 22 20:23 Pacific Daylight Time
+"native_a2a_agent_registry_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:23 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:24 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  10.99 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:24 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.13 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:24 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  10.91 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:24 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.12 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:24 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:24 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.05 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:25 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:25 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.04 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:25 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  10.93 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:25 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+91/172 Testing: native_agent_worker_graph_remote_contract
+91/172 Test: native_agent_worker_graph_remote_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_graph_remote_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_graph_remote_contract" start time: Oct 22 20:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Production graph remote graph-remote-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-remote-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-uncounted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-approved verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+Production graph remote graph-a2a-counted-denied verified two actual SDK IPC xmind workers, exact approvals or inherited denial, actual HTTP peer method effects, durable canonical receipts and four shared charges.
+<end of output>
+Test time =  11.08 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_graph_remote_contract" end time: Oct 22 20:25 Pacific Daylight Time
+"native_agent_worker_graph_remote_contract" time elapsed: 00:00:11
+----------------------------------------------------------
+
+End testing: Oct 22 20:25 Pacific Daylight Time

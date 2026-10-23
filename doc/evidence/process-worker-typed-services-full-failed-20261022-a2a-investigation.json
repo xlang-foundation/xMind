@@ -1,0 +1,13 @@
+{
+  "status": "diagnosis pending; full suite still active",
+  "failure": "native_a2a_agent_registry_contract exited c0000409; Windows fatal app exit subcode7 ucrtbase.dll+a527e",
+  "sourceObservation": "a2a_agent_registry_contract.cpp line72 creates std::thread invoke_success, then approval/assertion/decision calls may throw before invoke_success.join(); thread destruction during unwinding can terminate and hide the original error.",
+  "hypothesisOnly": true,
+  "next": "After exact full-suite process reaches terminal, preserve complete failure then make fixture thread cleanup exception-safe without changing its five-second deadlines or assertions; diagnose original error and qualify corrected behavior.",
+  "preservedFixture": "C:/Users/shaw9/AppData/Local/Temp/xmind-a2a-registry-3431287741-2685672386",
+  "fullSuiteProcess": {
+    "pid": 31652,
+    "createdLocal": "2026-10-22 19:58:15"
+  },
+  "toolSession": 79783
+}

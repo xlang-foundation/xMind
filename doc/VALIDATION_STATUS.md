@@ -1,3 +1,29 @@
+## Full worker cleanup gate failed; diagnosis continues - 2026-10-22
+
+Source 6642314d full Native run finished 170/172 in 1362.86 seconds. The
+2810 project /16 SDK /1870 pure-library /30 runtime /18598 dependency /137 binary
+file sets and hashes remained unchanged. This is a failed complete run, not
+qualification. Installed 0.1.61 remains unchanged; packaging is on hold.
+
+Failures: A2A agent registry terminated with c0000409 in ucrtbase.dll; graph
+remote worker faulted c0000005 in SDK e42cb8cb at RVA 9a29f. Static export lookup
+places that RVA near string-vector reallocation, but gives no stack or cause.
+Original output, Windows events, complete input inventories and failure receipts
+are preserved as process-worker-typed-services-full-failed-20261022-*.
+
+The A2A fixture has five invocation threads whose exceptional unwinding could
+terminate before reporting the original error. Candidate changes these finite
+invocations to jthread while retaining explicit joins, assertions and deadlines.
+A first two-contract dump-enabled diagnostic passes 2/2 in 14.37 seconds; neither
+failure reproduced. This does not establish a fix or replace the full failure.
+A separate bounded until-fail diagnostic completed ten executions of each
+contract, all passing in 137.70 seconds with unchanged deadlines and frozen
+inputs. Neither failure reproduced; the underlying causes remain unresolved. Private dumps and the preserved failed A2A
+fixture database remain outside Git. Query-only xlang3 inspection of a disposable
+copy confirms success and denial operations completed, while the uncertain-send
+run has no proposal. The original exception remains unknown. No paid inference
+or CPython was used.
+
 ## Typed worker ports replace client packet fallbacks - 2026-10-22
 
 Candidate Native code removes all 22 generic peer.call sites from the nine

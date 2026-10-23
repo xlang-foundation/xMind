@@ -1,0 +1,30 @@
+{
+  "interpreter": "xlang3",
+  "disposableCopy": true,
+  "queryOnly": true,
+  "originalFailedFixtureBackupPreserved": true,
+  "observedOperations": [
+    {
+      "id": "a2a-authority-stream-operation",
+      "state": "failed"
+    },
+    {
+      "id": "a2a-authority-message-operation",
+      "state": "failed"
+    },
+    {
+      "id": "a2a-effect-success-operation",
+      "state": "succeeded"
+    },
+    {
+      "id": "a2a-effect-denied-operation",
+      "state": "denied"
+    }
+  ],
+  "uncertainRun": [
+    "a2a-effect-uncertain",
+    "running"
+  ],
+  "uncertainOperationPresent": false,
+  "conclusion": "Success and denial cases finished before the fatal exit. Uncertain-send run exists but no uncertain operation proposal was recorded. Original exception and SDK fault cause remain unknown."
+}
