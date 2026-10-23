@@ -1,3 +1,20 @@
+## Browser/extension captured operation routing - 2026-10-23
+
+Shared client negotiates local_connection_operations=1 and routes operation
+list/inspection/decisions through the existing captured handle with explicit
+observed session/run context. Browser, extension and owned-child observation
+pass that context; proxy permits only the scoped GET/decision POST routes.
+Identity/run mismatch, missing scope, protocol downgrade and closed handles
+fail without legacy retry. Older backends retain their advertised legacy path.
+Session permission grants/replies, output, reconciliation and A2A controls remain
+separate existing APIs. Complete client units:468 extension and164 browser pass;
+64 tracked client sources unchanged around verification. Initial browser test
+expected the old two-argument decision call; updated fixture now asserts actual
+session/run context. Initial failed log retained privately. No new rendered
+browser/Code acceptance, full-native claim or installation change. Next: actual
+fresh browser approval using these routes; preserve completed task IDs.
+Evidence: captured-operation-client-20261023.json.
+
 ## Captured HTTP operation routes - 2026-10-23
 
 HTTP now delegates operation List/Open/Decide to the existing native captured

@@ -523,3 +523,14 @@ test('stale or mismatched captured admission never retries through a new or lega
 test('older Local backend health keeps the existing session path without a binding request',async()=>{
  const {client,requests}=capturedAdmissionFixture({supported:false});await client.health();assert.deepEqual(await client.createSession('Existing Local flow'),{id:'legacy-session',title:'Existing Local flow'});assert.deepEqual(requests.map(r=>r.path),['/v1/health','/v1/sessions']);
 });
+
+test('captured operations require explicit scope and reject mismatched receipts without legacy retry',async()=>{
+ const {client,requests,identity,handle}=capturedAdmissionFixture();const baseFetch=client.fetch;let mismatch=false,missing=false;
+ client.fetch=async(url,options)=>{const path=new URL(url).pathname;if(path==='/v1/health')return {ok:true,status:200,json:async()=>missing?{local_connection_admission:1}:{local_connection_admission:1,local_connection_operations:1}};
+ if(path.includes('/operations')){requests.push({path,method:options.method,input:options.body?JSON.parse(options.body):undefined});const operation={id:'operation',run_id:mismatch?'foreign':'run',arguments_json:'{"x": 1}',state:options.body?'ready':'awaiting_approval'};return {ok:true,status:200,json:async()=>path.endsWith('/operations')?{binding:identity,session_id:'session',run_id:'run',operations:[operation]}:{binding:identity,operation}};}return baseFetch(url,options);};
+ await client.health();assert.equal((await client.operations('run','session')).length,1);assert.equal((await client.operation('operation',{session_id:'session',run_id:'run'})).arguments_json,'{"x": 1}');assert.equal((await client.decide('operation','allow',{session_id:'session',run_id:'run'})).state,'ready');
+ const decision=requests.find(r=>r.path.endsWith('/decision'));assert.equal(decision.path,'/v1/connection-bindings/'+handle+'/sessions/session/runs/run/operations/operation/decision');assert.deepEqual(decision.input,{decision:'allow'});
+ const before=requests.length;await assert.rejects(client.operation('operation'),/identity/i);assert.equal(requests.length,before);
+ mismatch=true;await assert.rejects(client.operations('run','session'),/another run/);await assert.rejects(client.decide('operation','deny',{session_id:'session',run_id:'run'}),/another run/);assert.equal(requests.some(r=>r.path==='/v1/operations/operation/decision'),false);
+ missing=true;await assert.rejects(client.health(),/protocol changed/);await client.closeConnection();await assert.rejects(client.operations('run','session'),/closed/);
+});

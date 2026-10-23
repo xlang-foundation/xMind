@@ -244,7 +244,7 @@ async function activate(context) {
     if(version!==generation||!panel)return;const owned=new Map(children.map(c=>[c.id,c]));
     for(const event of events)if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Event does not belong to the observed graph.');
     for(const child of children){if(snapshot.definitions.get(child.id)?.type!=='agent')continue;const history=await client.graphChildHistory(child.parent_id,child.id);if(version!==generation||!panel)return;childHistory.set(child.id,{state:child.state,history});}
-    const operations=[];for(const child of children){operations.push(...await client.operations(child.id));if(version!==generation||!panel)return;}
+    const operations=[];for(const child of children){operations.push(...await client.operations(child.id,sessionId));if(version!==generation||!panel)return;}
     graphSnapshot=root;graphChildren=owned;graphPaths=snapshot.paths;graphOwners=new Map([[root.run.id,root],...snapshot.graphs.map(value=>[value.record.run.id,value.record])]);
     post({type:'graph',record:root,children,graphs:snapshot.graphs,treeInput:health?.graph_tree_human_input===true,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});
     for(const event of events){if(event.seq<=cursor)continue;post({type:event.run_id===id?'event':'graph-event',event,node_id:snapshot.paths.get(event.run_id)?.join('/')});cursor=event.seq;}
@@ -288,7 +288,7 @@ async function activate(context) {
       if(version!==generation) return;
       sessionRuns=runs;presentRuns();
       post({ type: 'status', text: run.state });
-      const operations = await client.operations(id);
+      const operations = await client.operations(id,sessionId);
       if (version !== generation) return;
       publishOperations(operations);
       await readMcpInputs(id,version);if(version!==generation)return;
@@ -901,7 +901,7 @@ async function activate(context) {
         } else if(message.type==='restore-operation'&&typeof message.id==='string') {
           const proposal=reviewed.get(message.id);
           if(!proposal||!observedOperation(proposal.run_id))throw new Error('Select a successful file change in the selected conversation.');
-          const version=generation,target=client,current=await target.operation(proposal.id);
+          const version=generation,target=client,current=await target.operation(proposal.id,{session_id:sessionId,run_id:proposal.run_id});
           if(panel!==view||version!==generation||client!==target)return;
           for(const field of ['id','run_id','workspace_id','tool','arguments_json','result_json','expires_unix_ms','state'])if(current[field]!==proposal[field])throw new Error('Operation changed. Refresh it before restoring.');
           if(!canRestoreFileOperation(current))throw new Error('Only a successful saved file change in this conversation can be restored.');
@@ -966,7 +966,7 @@ async function activate(context) {
           const proposal = reviewed.get(message.id),sessionApproval=sessionPermissionRequests.has(message.id);
           if (!proposal || (!observedOperation(proposal.run_id)&&!(sessionApproval&&['decide','review'].includes(message.type))) || proposal.state !== 'awaiting_approval') throw new Error('Inspect a pending operation in the selected conversation before deciding.');
           const version = generation;
-          const current = await client.operation(message.id);
+          const current = await client.operation(message.id,{session_id:sessionId,run_id:proposal.run_id});
           if (panel !== view || version !== generation) return;
           if (current.id !== proposal.id || current.state !== 'awaiting_approval' || current.run_id !== proposal.run_id || current.workspace_id !== proposal.workspace_id || current.tool !== proposal.tool || current.arguments_json !== proposal.arguments_json || current.expires_unix_ms !== proposal.expires_unix_ms) {
             await poll();
@@ -976,7 +976,7 @@ async function activate(context) {
           if(message.decision==='allow'&&current.tool==='patch_file')patchReview(current);
           const sessionScopedApproval=sessionApproval&&!observedOperation(proposal.run_id),grantResource=message.grantResource===true;
           if(message.grantResource!==undefined&&typeof message.grantResource!=='boolean')throw new Error('Invalid saved permission choice.');
-          let decided;if(grantResource)decided=await client.replySessionPermission(sessionId,message.id,message.decision,true);else if(sessionScopedApproval)decided=await client.replySessionPermission(sessionId,message.id,message.decision);else decided=await client.decide(message.id, message.decision);
+          let decided;if(grantResource)decided=await client.replySessionPermission(sessionId,message.id,message.decision,true);else if(sessionScopedApproval)decided=await client.replySessionPermission(sessionId,message.id,message.decision);else decided=await client.decide(message.id, message.decision,{session_id:sessionId,run_id:current.run_id});
           if (panel !== view || version !== generation) return;
           reviewed.set(decided.id, decided);
           if(sessionApproval){sessionPermissionRequests.delete(decided.id);publishOperations();await refreshSessionPermissions(client,sessionId,version);}else publishOperations();

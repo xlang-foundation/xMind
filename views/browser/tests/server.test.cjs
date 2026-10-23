@@ -232,3 +232,9 @@ test('captured connection proxy routes are explicit about handle shape and HTTP 
  for(const [path,method]of [['/v1/connection-bindings','POST'],[base,'DELETE'],[base+'/identity','GET'],[base+'/sessions','POST'],[base+'/sessions/session','GET'],[base+'/runs','POST'],[base+'/runs/run','GET'],[base+'/runs/run/cancel','POST'],[base+'/events','POST']])assert.equal(allowedApiRoute(path,method),true,path+' '+method);
  for(const [path,method]of [['/v1/connection-bindings','GET'],[base,'POST'],[base+'/identity','POST'],[base+'/events','GET'],[base+'/sessions/session','DELETE'],[base+'/owner','GET'],['/v1/connection-bindings/not-a-handle/identity','GET']])assert.equal(allowedApiRoute(path,method),false,path+' '+method);
 });
+
+test('captured operation proxy routes restrict methods and scope shape',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');const base='/v1/connection-bindings/'+'a'.repeat(32)+'/sessions/session/runs/run/operations';
+ for(const path of [base,base+'/operation']){assert.equal(allowedApiRoute(path,'GET'),true);assert.equal(allowedApiRoute(path,'POST'),false);assert.equal(allowedApiRoute(path,'DELETE'),false);}
+ assert.equal(allowedApiRoute(base+'/operation/decision','POST'),true);assert.equal(allowedApiRoute(base+'/operation/decision','GET'),false);assert.equal(allowedApiRoute(base+'/operation/actor','POST'),false);
+});

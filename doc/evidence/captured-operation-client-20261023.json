@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-23T19:45:22.398Z",
+  "sourceParent": "7dae8fb1d989fb54d5b5900dd43de72aeab4ceb6",
+  "sourcePatchSha256": "5ef09bf508273b1e2f35644949d15781d20095257f8941e5c1e5d71aa80fd06d",
+  "sourceFiles": 64,
+  "sourceFilesAndBytesUnchanged": true,
+  "results": [
+    {
+      "label": "extension",
+      "exitCode": 0,
+      "tests": 468,
+      "passed": 468,
+      "failed": 0,
+      "logSha256": "f6a3f37ecd9286afc3c043784f276c46d912a1c21cfcfcaa5833c9bcfb8784c7"
+    },
+    {
+      "label": "browser",
+      "exitCode": 0,
+      "tests": 164,
+      "passed": 164,
+      "failed": 0,
+      "logSha256": "51ced45787a70a4c0053c551adf8bc89a0ecb59d9bfe241fe8d5e4660d5a5a09"
+    }
+  ],
+  "scope": "Client transport/controller and browser proxy unit contracts only; actual rendered browser/VS Code approval remains unverified",
+  "installed": false
+}

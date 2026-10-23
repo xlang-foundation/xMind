@@ -72,6 +72,7 @@ class BackendClient {
   #tokenProvider;
   #workspaceGuard;
   #connectionAdmissionSupported=false;
+  #connectionOperationsSupported=false;
   #connectionCapture;
   #connectionClosed=false;
   #connectionClosing;
@@ -109,6 +110,8 @@ class BackendClient {
     const health=await this.request('/v1/health');
     if(health&&Object.hasOwn(health,'local_connection_admission')){if(health.local_connection_admission!==1)throw new Error('Unsupported captured Local admission protocol. Reconnect to a compatible backend.');this.#connectionAdmissionSupported=true;}
     else if(this.#connectionCapture)throw new Error('The backend connection protocol changed. Reconnect before admitting new work.');
+    if(health&&Object.hasOwn(health,'local_connection_operations')){if(health.local_connection_operations!==1||!this.#connectionAdmissionSupported)throw new Error('Unsupported captured operation protocol.');this.#connectionOperationsSupported=true;}
+    else if(this.#connectionOperationsSupported)throw new Error('The backend operation protocol changed. Reconnect before deciding work.');
     return health;
   }
   async #captureConnection(){
@@ -427,8 +430,18 @@ class BackendClient {
   treeEvents(id,after=0) { if(!Number.isSafeInteger(after)||after<0)throw new Error('Invalid tree event cursor');return this.request(`/v1/runs/${encodeURIComponent(id)}/tree-events?after=${after}`); }
   status(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}`); }
   cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
-  operations(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
-  operation(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}`); }
+  async #scopedOperations(run,session,id,decision){
+    executionIdentity(run);executionIdentity(session);if(id!==undefined)executionIdentity(id);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured operation connection changed.');
+    const path='/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(session)+'/runs/'+encodeURIComponent(run)+'/operations'+(id===undefined?'':'/'+encodeURIComponent(id))+(decision===undefined?'':'/decision');
+    const value=await this.request(path,decision===undefined?undefined:{decision});
+    exactFields(value,id===undefined?['binding','session_id','run_id','operations']:['binding','operation']);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Operation receipt belongs to another connection context.');
+    if(id===undefined){if(value.session_id!==session||value.run_id!==run||!Array.isArray(value.operations)||value.operations.some(op=>!op||op.run_id!==run))throw new Error('Operation collection belongs to another run.');return value.operations;}
+    const operation=value.operation;if(!operation||operation.id!==id||operation.run_id!==run)throw new Error('Operation receipt belongs to another run.');return operation;
+  }
+  operations(id,session) { return this.#connectionOperationsSupported?this.#scopedOperations(id,session):this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
+  operation(id,scope) { return this.#connectionOperationsSupported?this.#scopedOperations(scope?.run_id,scope?.session_id,id):this.request(`/v1/operations/${encodeURIComponent(id)}`); }
   async sessionPermissions(id) {
     executionIdentity(id);const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/permissions`);
     if(!value||value.session_id!==id||!Array.isArray(value.requests)||value.requests.length>256||value.requests.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.run_id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.run_id)||typeof item.workspace_id!=='string'||!item.workspace_id||item.workspace_id.length>32768||typeof item.tool!=='string'||!item.tool||item.tool.length>128||typeof item.arguments_json!=='string'||typeof item.expires_unix_ms!=='number'||!Number.isSafeInteger(item.expires_unix_ms)||item.state!=='awaiting_approval'))throw new Error('Invalid pending session permission requests.');
@@ -475,9 +488,9 @@ class BackendClient {
     executionIdentity(id);if(!Number.isSafeInteger(sequence)||sequence<1||sequence>64||typeof message!=='string'||!message.trim()||message.length>32768||message.includes('\0'))throw new Error('Invalid A2A follow-up message');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/follow-up`,{sequence,message},45000);
   }
-  decide(id, decision) {
+  decide(id, decision, scope) {
     if (decision !== 'allow' && decision !== 'deny') throw new Error('Decision must be allow or deny.');
-    return this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
+    return this.#connectionOperationsSupported?this.#scopedOperations(scope?.run_id,scope?.session_id,id,decision):this.request(`/v1/operations/${encodeURIComponent(id)}/decision`, { decision });
   }
 }
 
@@ -615,7 +628,7 @@ async function observeOwnedRun(client,run,session,after){
   for(const event of events)if(!owned.has(event.run_id))throw new Error('Unowned tree event');
   const histories={},operations=[];
   for(const child of children){const history=await client.ownedChildHistory(run.id,child.run.id);if(!Array.isArray(history))throw new Error('Invalid owned child history');histories[child.run.id]=history;}
-  for(const id of owned){const batch=await client.operations(id);if(!Array.isArray(batch)||batch.some(value=>!value||value.run_id!==id))throw new Error('Owned operation identity changed');operations.push(...batch);}
+  for(const id of owned){const batch=await client.operations(id,session);if(!Array.isArray(batch)||batch.some(value=>!value||value.run_id!==id))throw new Error('Owned operation identity changed');operations.push(...batch);}
   return {children,histories,events,operations,cursor,caughtUp};
 }
 

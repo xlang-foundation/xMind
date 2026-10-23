@@ -482,8 +482,8 @@ test('browser patch comparison revalidates owned snapshots and never submits app
 test('browser approval shows the exact reviewed patch and clears it when the selected run changes',async()=>{
  const plan={patch_id:'current-patch',patch_index:0,patch_file_count:1,action:'update',path:'current.cpp',parent_id:'current-parent',file_id:'current-file',before_exists:true,after_exists:true,before_content:'old',after_content:'new',before_sha256:'b'.repeat(64),after_sha256:'c'.repeat(64)};
  let current={id:'current-patch-0',run_id:'current-run',workspace_id:'current-workspace',tool:'patch_file',arguments_json:JSON.stringify(plan),state:'awaiting_approval',expires_unix_ms:Date.now()+60000};const reviews=[],decisions=[],clears=[],view=new BrowserController({operation:async()=>current,decide:async(...args)=>decisions.push(args)},()=>{},{review:value=>reviews.push(value),clearReview:()=>clears.push(true)});
- view.runId='current-run';view.operations.set(current.id,{...current});view.poll=async()=>{};
- try{await view.handle({type:'decide',id:current.id,decision:'allow'});assert.deepEqual(reviews,[plan]);assert.deepEqual(decisions,[[current.id,'allow']]);view.stop();assert.deepEqual(clears,[true]);}
+ view.session='current-session';view.runId='current-run';view.operations.set(current.id,{...current});view.poll=async()=>{};
+ try{await view.handle({type:'decide',id:current.id,decision:'allow'});assert.deepEqual(reviews,[plan]);assert.deepEqual(decisions,[[current.id,'allow',{session_id:'current-session',run_id:'current-run'}]]);view.stop();assert.deepEqual(clears,[true]);}
  finally{view.dispose();}
 });
 test('browser cannot compare malformed patch absence and missing batch manifest',async()=>{

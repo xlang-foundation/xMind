@@ -277,3 +277,10 @@ as SDK Operations. They retain origin-bound handle authentication, reject query
 parameters and caller actors, and preserve exact argument bytes. Health advertises
 local_connection_operations=1. Browser/extension approval routing is still pending;
 these routes alone do not establish rendered approval acceptance.
+
+Shared browser/extension clients negotiate the operation capability and pass the
+observed session/run to scoped operation list, inspection and decisions. Binding
+identity and run receipts are checked without legacy retry on failure. Backends
+that omit the capability retain the previous Local routes. Session permission
+grants, process output/reconciliation and A2A controls remain separate APIs.
+Client unit verification does not establish actual rendered approval acceptance.
