@@ -1,3 +1,17 @@
+## Shutdown correction passes hosted; compaction diagnostics added - 2026-10-23
+
+Run39982730682 completes166/170 in975.50s. Agent service shutdown passes2.54s;
+graph process, worker model RPC, worker ledger and AgentRunner process fail.
+SDK4 and30 isolation repetitions pass. No full acceptance or package installation.
+Compaction still reports a missing/invalid canonical projection. Fixture now
+computes bounded diagnostic metadata for expected/stored authority/provider
+digests, head revision and checkpoint presence, plus observed response size;
+prints only on failure and preserves the original assertion. No model content,
+credential or reusable authentication value is printed. Actual local worker RPC
+contract passes54.31s with frozen closure unchanged. This validates diagnostic
+execution, not the hosted failure cause. Evidence: hosted-native-full-c1628b17
+and worker-compaction-head-diagnostic-20261023*.
+
 ## Shared worker result now waits for captured owner release - 2026-10-23
 
 Completed hosted run39971680844 records166/170 in899.46s; four failures remain

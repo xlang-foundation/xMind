@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "runId": 39982730682,
+  "jobId": 120513934397,
+  "sourceRevision": "c1628b171c1ada7b99ce40f8320de1806fe90888",
+  "conclusion": "failure",
+  "fullNativeSuiteRan": true,
+  "fullNativeAcceptance": false,
+  "total": 170,
+  "passed": 166,
+  "failed": 4,
+  "seconds": 975.5,
+  "failures": [
+    "native_graph_runner_contract",
+    "native_agent_worker_model_rpc_contract",
+    "native_agent_worker_ledger_contract",
+    "native_agent_runner_contract"
+  ],
+  "agentService": {
+    "passed": true,
+    "seconds": 2.54
+  },
+  "sdkContractsPassed": 4,
+  "runtimeIsolationRepeatedProcessesPassed": 30,
+  "artifactId": 12519340035,
+  "artifactSha256": "351a70d1563dfc8f09ef9adcfcac4226ef481686944e698fd15e6b83ec6f6b5b",
+  "jobLogSha256": "3301199f81c2d5893d687487d15a8f13ce269d1530e9a75afd23193fbae6c028",
+  "installedChanged": false
+}
