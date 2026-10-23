@@ -1,0 +1,142 @@
+{
+  "runId": 40019092149,
+  "jobId": 120639866694,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40019092149",
+  "sourceRevision": "a6bb35730088195e11a70f438d731ae990151cdd",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "conclusion": "failure",
+  "total": 170,
+  "passed": 166,
+  "failed": 4,
+  "seconds": 921.22,
+  "artifact": {
+    "id": 12533761590,
+    "bytes": 118366,
+    "sha256": "d9bb1907e541ecf687f7f1997b5d842cd46419b6131b80fffb10f1e8354d1cbe"
+  },
+  "officialJobLogSha256": "38e5c07042beab2f4b763ed40be6eaf1c6d1d787af1cd991aaa92a22fe7c7144",
+  "ctestLogSha256": "a59b0305e141ee093f3a4d4a75a4af602f0a7342e3534366a525d14c9dcf9f26",
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 39.5,
+      "reason": "PowerShell operation timed out after 30039ms at its unchanged 30000ms budget; only script_entered; uncertain result and process tree retired."
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "seconds": 72.74,
+      "reason": "Existing 70000ms Node wrapper terminated the fixture; killed=true, SIGTERM, slow diagnostic dump. Captured stdout is truncated; later cases are not inferred complete."
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "seconds": 45.15,
+      "reason": "Existing 45000ms Node wrapper terminated the fixture; killed=true, SIGTERM. planning-admission completed in19524ms, main-process-planning in9114ms, then main-planning-delegation began."
+    },
+    {
+      "test": "native_agent_runner_contract",
+      "seconds": 34.73,
+      "reason": "PowerShell operation timed out after30070ms at unchanged30000ms; zero stdout/stderr, uncertain result and process tree retired."
+    }
+  ],
+  "earlyNativeLocalView": {
+    "passed": 1,
+    "total": 1,
+    "seconds": 68.98,
+    "renderedAcceptance": false
+  },
+  "processObservations": [
+    {
+      "scope": "agent-runner-b80536cd-a70f-4a9b-b4bb-ac5cab5db521",
+      "sha256": "8064eb34763d7922943b8841374ccbb571ddfb7dbcb7c54c6e76e63775802e63",
+      "samples": [
+        {
+          "pid": 7380,
+          "createdUtc": "2026-10-23T21:29:36.4261970Z",
+          "processAgeMs": 701,
+          "cpuMs": 781.25,
+          "modulePresence": {
+            "amsi": true,
+            "stateRepository": true,
+            "management": false,
+            "utility": false,
+            "automation": true
+          }
+        },
+        {
+          "pid": 7380,
+          "createdUtc": "2026-10-23T21:29:36.4261970Z",
+          "processAgeMs": 11360,
+          "cpuMs": 11390.625,
+          "modulePresence": {
+            "amsi": true,
+            "stateRepository": true,
+            "management": false,
+            "utility": false,
+            "automation": true
+          }
+        },
+        {
+          "pid": 7380,
+          "createdUtc": "2026-10-23T21:29:36.4261970Z",
+          "processAgeMs": 21982,
+          "cpuMs": 19328.125,
+          "modulePresence": {
+            "amsi": true,
+            "stateRepository": true,
+            "management": false,
+            "utility": false,
+            "automation": true
+          }
+        }
+      ]
+    },
+    {
+      "scope": "graph-runner-53055e45-30ca-4e68-ab54-b333db9efc6e",
+      "sha256": "793364a458851ee7d567aaf73230185df9b5936e4fc4ad2b8a3e54f4e28d1230",
+      "samples": [
+        {
+          "pid": 2844,
+          "createdUtc": "2026-10-23T21:23:40.7145820Z",
+          "processAgeMs": 448,
+          "cpuMs": 359.375,
+          "modulePresence": {
+            "stateRepository": true,
+            "automation": true,
+            "amsi": true,
+            "management": false,
+            "utility": false
+          }
+        },
+        {
+          "pid": 2844,
+          "createdUtc": "2026-10-23T21:23:40.7145820Z",
+          "processAgeMs": 11110,
+          "cpuMs": 4140.625,
+          "modulePresence": {
+            "stateRepository": true,
+            "automation": true,
+            "amsi": true,
+            "management": false,
+            "utility": false
+          }
+        },
+        {
+          "pid": 2844,
+          "createdUtc": "2026-10-23T21:23:40.7145820Z",
+          "processAgeMs": 21774,
+          "cpuMs": 14703.125,
+          "modulePresence": {
+            "stateRepository": true,
+            "automation": true,
+            "amsi": true,
+            "management": false,
+            "utility": false
+          }
+        }
+      ]
+    }
+  ],
+  "interpretation": "PowerShell samples show automation/stateRepository loaded while utility/management remain absent; this does not establish the physical cause. No deadline change, replay, local rerun or installation was performed for this audit.",
+  "fullCurrentSourceAcceptance": false,
+  "cpythonExecuted": false
+}

@@ -1,3 +1,24 @@
+## Hosted a6bb3573 full gate terminal failure — 2026-10-23
+
+Official native run `40019092149` is terminal: **166/170 pass in 921.22 seconds**.
+Graph and agent-runner PowerShell operations exceeded unchanged 30-second tool
+budgets; both retain uncertain receipts and retired process trees. RPC reached
+its existing 70-second Node wrapper (slow dump, SIGTERM); its stdout is truncated,
+so later cases are not inferred complete. Ledger reached its existing 45-second
+wrapper after planning admission completed in 19.524s and main-process planning
+in 9.114s; delegation began but did not report completion. This differs from
+the previous run's model-start deadline failure. Source predates the current
+ledger stage diagnostics and child planning changes.
+
+Official artifact `12533761590` was downloaded and its published SHA-256 checked;
+raw job log, archive, test logs, slow dump and process observations are retained.
+PowerShell module observations remain evidence of a stage, not a physical cause.
+No deadline was increased, effect replayed, CI rerun requested or candidate
+installed. Early local-view contract passes 1/1 in 68.98s; it is not rendered
+acceptance. Full current-source acceptance remains open.
+[Receipt](evidence/hosted-native-full-a6bb3573-20261023.json),
+[official CTest log](evidence/hosted-native-full-a6bb3573-20261023-ctest.log).
+
 ## Planning tool admission after child compaction — 2026-10-23
 
 Worker planning, inspection and ordinary tool admission now select the latest
