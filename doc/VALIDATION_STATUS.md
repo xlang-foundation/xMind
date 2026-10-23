@@ -1,3 +1,16 @@
+## Captured-history client CI inventory corrected — 2026-10-23
+
+Hosted views run `40019560782` failed its exact inventory gate despite all
+470 extension and 165 browser tests passing: expected counts were still
+467/163. Updated only the expected counts and their coverage comment. A guarded
+local execution of the complete CI runner passes 470/470 and 165/165 with zero
+skips, cancellations or failures. All 15,010 source/dependency file names and
+bytes remained unchanged across validation; the runner also froze source and
+asset bytes. No native backend, provider request, CPython or visible window was
+used. This is client contract evidence, not rendered or native acceptance.
+Native run `40019092149` was still active; no duplicate or replacement was started.
+[Receipt](evidence/views-ci-history-inventory-20261023.json).
+
 ## Child-owned planning continuation and nested worker lineage - 2026-10-23
 
 Same-generation signed planning continuations now authorize exact dynamic-child

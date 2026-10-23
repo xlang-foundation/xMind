@@ -1,0 +1,46 @@
+{
+  "sourceRevision": "e0bc314a1c176b9d707061cd8eba93fceff2e61e",
+  "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+  "sourceFiles": 71,
+  "trackedSourceFiles": 66,
+  "vendorFiles": 5,
+  "browserAssets": 18,
+  "sourceAndAssetBytesUnchanged": true,
+  "expectedTests": {
+    "extension": 470,
+    "browser": 165
+  },
+  "extension": {
+    "exitCode": 0,
+    "tests": 470,
+    "passed": 470,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "browser": {
+    "exitCode": 0,
+    "tests": 165,
+    "passed": 165,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "providerRequests": 0,
+  "nativeExecuted": false,
+  "cpythonExecuted": false,
+  "passed": true,
+  "localGuardedValidation": true,
+  "dependencyAndSourceSetsUnchanged": true,
+  "frozenFiles": 15010,
+  "ciRunnerSha256": "cf9dec389a4250107cc090314d8b80dbe640c60fd11e046a461cca8b38e4a4a5",
+  "sourcePatchSha256": "9f4aceec6d7ebb96818269f5bb71ac57b809dabad64250f22115ed0bbbfb973a",
+  "hostedFailure": {
+    "runId": 40019560782,
+    "jobId": 120640271923,
+    "source": "70f2c6354b923f163fdb686d3ded8d9d80356710",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/40019560782",
+    "cause": "Exact expected inventory remained 467 extension / 163 browser while all 470 extension / 165 browser tests passed; source and assets unchanged.",
+    "officialJobLogSha256": "4ff24c908a338f401a000db2ae92d574e07cf2c9f42d95ba63eaea28cd7ccfb4"
+  }
+}
