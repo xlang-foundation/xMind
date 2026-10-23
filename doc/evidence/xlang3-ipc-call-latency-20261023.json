@@ -1,0 +1,38 @@
+{
+  "client_pid": 29496,
+  "cold_binding_ms": 11.8277,
+  "api_version": {
+    "samples": 1000,
+    "warmups": 100,
+    "mean_ms": 0.081158,
+    "median_ms": 0.0784,
+    "p95_ms": 0.0946,
+    "p99_ms": 0.1158,
+    "max_ms": 0.1778
+  },
+  "captured_identity": {
+    "samples": 1000,
+    "warmups": 100,
+    "mean_ms": 0.096555,
+    "median_ms": 0.091,
+    "p95_ms": 0.116,
+    "p99_ms": 0.1726,
+    "max_ms": 0.5889
+  },
+  "sdkCommit": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "nativeSha256": "58bb26712d1294fb1a4c03e08b0e1b46ede9e4e4edafa5c4adb2de9b5debd8fd",
+  "backendPid": 32516,
+  "separateClientAndServerProcesses": true,
+  "transport": "Standard xlang3 SDK LRPC remote method calls",
+  "sourceAndRuntimeBytesUnchanged": true,
+  "ownedBackendExitObserved": true,
+  "ownerBirthAndImageVerified": true,
+  "createdSessions": 0,
+  "modelCalls": 0,
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "under10msP95": true,
+  "scope": "Single existing connection;100 warmups then1000 sequential calls per method. Includes remote method execution and SDK value transfer; excludes method lookup, process startup and cold binding. Not concurrent-worker/load or model/tool-effect latency.",
+  "fullNativeAcceptance": false
+}

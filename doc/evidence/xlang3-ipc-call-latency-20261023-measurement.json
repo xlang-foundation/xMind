@@ -1,0 +1,24 @@
+{
+  "client_pid": 29496,
+  "cold_binding_ms": 11.8277,
+  "api_version": {
+    "samples": 1000,
+    "warmups": 100,
+    "mean_ms": 0.081158,
+    "median_ms": 0.0784,
+    "p95_ms": 0.0946,
+    "p99_ms": 0.1158,
+    "max_ms": 0.1778
+  },
+  "captured_identity": {
+    "samples": 1000,
+    "warmups": 100,
+    "mean_ms": 0.096555,
+    "median_ms": 0.091,
+    "p95_ms": 0.116,
+    "p99_ms": 0.1726,
+    "max_ms": 0.5889
+  },
+  "backend_pid": 32516,
+  "backendStartupMs": 142
+}

@@ -1,3 +1,16 @@
+## Actual separate-process xlang3 call timing - 2026-10-23
+
+Standard C++ SDK client29496 calls native xMind backend32516 over its actual
+xlang3 LRPC endpoint.100 warmups then1000 calls per method: Host.ApiVersion
+median0.0784ms/p950.0946ms;captured Identity median0.091ms/p950.116ms.
+Maximum0.1778/0.5889ms;every scalar/identity response verified. Cold runtime/
+import/binding11.8277ms is measured separately. No session/model call is created;
+exact owned backend birth/image checked, exit observed, source/runtime hashes
+unchanged. See doc/ipc-call-latency.md and raw xlang3-ipc-call-latency receipts.
+Scope is small sequential remote reads on one established connection; no whole
+task/startup/concurrent-load or new delivery acceptance claim. Installed62 is
+unchanged and the prior full Rust failure remains unresolved.
+
 ## Rust cold-workspace and wire diagnostics - 2026-10-23
 
 Three fresh TestProj fixtures pass actual Cargo setup and unchanged native Rust
