@@ -1,15 +1,17 @@
 # Captured connection binding design
 
-Status: captured Local SDK objects are implemented with focused acceptance;
-remote functionality and client-adapter integration remain proposed.
+Status: captured Local SDK objects, the shared native HTTP adapter and browser/
+extension prompt admission are implemented. Authenticated remote functionality
+and the remaining client operations are proposed.
 The implemented catalog API is documented in connection-profiles.md. This design
 extends that public contract; it does not include private Nexus implementation.
-The installed 0.1.62 checkpoint remains separate from source17be6368 validation.
+The installed 0.1.62 checkpoint remains separate from source validation. Current
+evidence and its limitations are recorded in VALIDATION_STATUS.md.
 
 ## Public native objects
 
 Keep the registered xmind root and its authenticated Connections(owner_token)
-subobject. Add Open(profile_id, expected_profile_revision), returning a captured
+subobject. Open(profile_id, expected_profile_revision) returns a captured
 binding object. Root remains a registration surface, not a command dispatcher.
 The Local binding exposes Identity(), Sessions(), Runs() and
 Events(session_id, root_run_id) as scoped service objects.
@@ -49,7 +51,7 @@ services. They must not begin following global selection implicitly. New clients
 use the binding service objects and carry their captured context throughout.
 
 A session/run identifier is meaningful only within its captured connection and
-server identity. Event cursors bind server, connection, session and sequence.
+server identity. Event cursors bind server, connection, session, root run and sequence.
 Resuming a cursor against another binding must fail before events are read.
 Remote shared records remain server-owned; Local SQLite stores Local records,
 connection/authentication metadata and local effect receipts. No direct remote
@@ -75,6 +77,26 @@ and reconciliation against the authoritative connection before retry. The SDK's
 internal call correlation and value serialization need no application replacement.
 
 ## Delivery sequence and proof
+
+The Local service and HTTP adapter share native binding lifetime, revision and
+admission checks. HTTP run requests support model/provider, workspace revision,
+file attachments and queued inbox options. The scoped SDK Runs.Start currently
+accepts only id, session and prompt; exposing those additional options through
+ordinary SDK dictionary arguments remains work. SDK value serialization stays
+inside xlang3.
+
+Browser and extension clients negotiate Local admission support, capture a
+binding for session creation and prompt submission, and validate returned
+identity and ownership. CLI scoped session/event reads use SDK subobjects.
+Approval, model, graph and other client operations still use Local compatibility
+routes. Actual browser and CLI coding receipts exist; actual rendered VS Code
+coding remains unverified. These results do not establish remote execution.
+
+The latest SDK lifetime fix passed SDK contracts, repeated runtime isolation and
+the required performance gate. Its complete local xMind run passed 171/172 with
+an unresolved Rust definition failure. Later focused cold-workspace checks
+passed, but do not replace that failed full run. Hosted validation is tracked
+separately; no new package is qualified by these focused results.
 
 1. Add captured Local binding and scoped service objects to the registered root.
    Exercise actual independent SDK processes, HTTP/SDK agreement, wrong token,
