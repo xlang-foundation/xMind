@@ -1,0 +1,7 @@
+{
+  "cleanManifestMatchesReceipt": true,
+  "cleanExactFileSet": true,
+  "coveredFiles": 2398,
+  "executionCoveredBytesUnchanged": true,
+  "executionAddedFiles": []
+}

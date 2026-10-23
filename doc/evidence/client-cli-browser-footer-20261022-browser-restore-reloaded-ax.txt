@@ -1,0 +1,165 @@
+Browser tab: 3, Title: "xMind · Browser", URL: "http://127.0.0.1:56035/ui/".
+1 AXWebArea xMind · Browser, URL: 127.0.0.1:56035/ui/
+	2 container
+		3 text xMind Local node · This computer
+		4 container workspace-control
+			5 text Workspace
+			6 button Description: Configure current workspace, Help: Switch workspace or manage folders, ID: workspace-label-open
+				7 text shared-cli-browser-01439743
+			8 button Description: Configure workspace, ID: workspace-config-open
+		69 button Description: Disconnect view, ID: disconnect-view
+	10 container
+		11 heading Workspace files, Value: 1
+			12 text Workspace files
+		70 text D:\CantorAI2026\TestProj\xmind-delivery-validation\shared-cli-browser-01439743 · Files and agent runs use this workspace on this computer.
+		14 button Terminal, ID: workspace-terminal-toggle
+		15 button Git status, ID: workspace-vcs-status
+		16 button Initialize Git, ID: workspace-vcs-init
+		17 button Description: Refresh workspace files, ID: workspace-refresh
+		18 container Git diff review
+			19 container
+				20 text Repository folder
+				21 pop up button (disabled, collapsed, settable) Repository folder, Value: shared-cli-browser-01439743 · Primary, ID: workspace-vcs-folder, Secondary Actions: Expand
+					22 menu
+						71 (disabled) shared-cli-browser-01439743 · Primary
+			24 container
+				25 text Compare
+				26 pop up button (collapsed, settable) Compare, Value: Working tree, ID: workspace-vcs-mode, Secondary Actions: Expand
+					27 menu
+						28 (disabled) Working tree
+						29 (disabled) Branch changes
+						30 (disabled) Committed changes
+			31 container
+				32 text Base
+				33 text field (settable) Base, ID: workspace-vcs-base
+			34 button Review diff, ID: workspace-vcs-diff
+			35 container
+				36 text Changed file
+				37 pop up button (disabled, collapsed, settable) Description: Changed file patch, Value: Run a comparison to list changed files, ID: workspace-vcs-files, Secondary Actions: Expand
+					38 menu
+						39 (disabled) Run a comparison to list changed files
+		72 container workspace-canvas
+			73 container Workspace files
+				74 text PROJECT FILES
+				75 container workspace-find-form
+					76 search text field (settable) Description: Find files by name, ID: workspace-find-query
+					77 button Find, ID: workspace-find-submit
+				78 content list workspace-files
+					79 container
+						80 text shared-cli-browser-01439743 PRIMARY D:\CantorAI2026\TestProj\xmind-delivery-validation\shared-cli-browser-01439743
+						81 content list
+							82 container
+								83 button · check-mean.cjs, Help: check-mean.cjs
+									84 text ·
+									85 text check-mean.cjs
+								86 checkbox Description: Attach check-mean.cjs, Help: Attach check-mean.cjs to the next message, Value: 0
+							87 container
+								88 button · mean.cjs, Help: mean.cjs
+									89 text ·
+									90 text mean.cjs
+								91 checkbox Description: Attach mean.cjs, Help: Attach mean.cjs to the next message, Value: 0
+			92 container File preview
+				93 container
+					94 text Select a file
+					95 text Files are read from the selected workspace folders.
+				96 text Choose a file from the workspace tree to preview it here.
+	40 splitter Description: Resize agent sidebar, Value: 420, ID: sidebar-divider
+	41 container Description: xMind agent sidebar, ID: agent-sidebar
+		42 container
+			43 pop up button (collapsed, settable) Description: Conversation history, Value: CLI mean coding validation, ID: sessions, Secondary Actions: Expand
+				97 menu
+					98 (selected) CLI mean coding validation
+			44 button Description: New conversation, ID: new
+			45 button Description: Refresh history, ID: refresh
+			46 button Description: Settings, ID: settings
+			47 toolbar Conversation and workspace tools
+				48 button Description: Export conversation, ID: session-export
+				49 button Description: Import conversation, ID: session-import
+				99 button Description: Rename conversation, ID: rename
+				100 button Description: Remove conversation, ID: delete-session
+				50 button Description: Open workspace terminal, ID: terminal
+				51 button Description: Workspace Git, ID: git
+				52 button Description: Conversation permissions, ID: permission-grants
+		101 text completed
+		102 container run-picker
+			103 text Run details
+			104 pop up button (collapsed, settable) Description: Inspect a recorded run, Value: completed · 968f939eda7e7579ee7fa8d792e7d243, ID: runs, Secondary Actions: Expand
+				105 menu
+					106 (selected) completed · 968f939eda7e7579ee7fa8d792e7d243
+		54 container scroll
+			107 container history
+				108 container
+					109 heading YOU, Value: 4
+						110 text YOU
+					111 text Fix mean.cjs for nonempty inputs. Run node check-mean.cjs and report only the observed result.
+					112 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				113 container
+					114 heading XMIND, Value: 4
+						115 text XMIND
+					116 button (collapsed) 1 tool request(s), Secondary Actions: Expand
+						117 text 1 tool request(s)
+					118 container Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.
+						119 text Input 7 Output 3 Total 10 cli-coding-fixture First token 0.03s 0.04s
+					120 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				121 container
+					122 heading TOOL, Value: 4
+						123 text TOOL
+					124 button (collapsed) Tool result, Secondary Actions: Expand
+						125 text Tool result
+				126 container
+					127 heading XMIND, Value: 4
+						128 text XMIND
+					129 button (collapsed) 1 tool request(s), Secondary Actions: Expand
+						130 text 1 tool request(s)
+					131 container Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.
+						132 text Input 7 Output 3 Total 10 cli-coding-fixture First token 0.02s 0.03s
+					133 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				134 container
+					135 heading TOOL, Value: 4
+						136 text TOOL
+					137 button (collapsed) Tool result, Secondary Actions: Expand
+						138 text Tool result
+				139 container
+					140 heading XMIND, Value: 4
+						141 text XMIND
+					142 button (collapsed) 1 tool request(s), Secondary Actions: Expand
+						143 text 1 tool request(s)
+					144 container Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.
+						145 text Input 7 Output 3 Total 10 cli-coding-fixture First token 0.02s 0.02s
+					146 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				147 container
+					148 heading TOOL, Value: 4
+						149 text TOOL
+					150 button (collapsed) Command result · node, Secondary Actions: Expand
+						151 text Command result · node
+				152 container
+					153 heading XMIND, Value: 4
+						154 text XMIND
+					155 text Fixed mean.cjs. Actual Node result: 3 mean checks passed; exit 0.
+					156 container Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.
+						157 text Input 7 Output 3 Total 10 cli-coding-fixture First token 0.02s 0.02s
+					158 button Fork before this message, Help: Create a new conversation ending immediately before this message
+			159 button (collapsed) Tools and changes · 2, ID: operation-activity-summary, Secondary Actions: Expand
+				160 text Tools and changes · 2
+			59 button (collapsed) Selected run activity, Secondary Actions: Expand
+				60 text Selected run activity
+		61 container
+			161 button (collapsed) Skills, ID: skills-summary, Secondary Actions: Expand
+				162 text Skills
+			163 container agent-picker
+				164 text Agent
+				165 pop up button (collapsed, settable) Description: Conversation agent, Help: Select a reusable named agent for this conversation, Value: Agent (default), ID: agent, Secondary Actions: Expand
+					166 menu
+						167 (selected) Agent (default)
+				168 text Default agent
+			62 text entry area (settable) Description: Message xMind, ID: prompt
+			63 button Description: Attach workspace files, Help: Attach files from the current xMind workspace, ID: attach-files
+			64 pop up button (collapsed, settable) Description: Model, Help: Choose a discovered model, Value: cli-coding-fixture, ID: model, Secondary Actions: Expand
+				65 menu
+					169 (disabled) Choose a model
+					170 (selected) cli-coding-fixture
+			67 button Send ↑, Help: Send · Enter, ID: send
+			68 text Enter to send · Shift+Enter for a new line 
+			171 text · File changes require approval
+
+The focused UI element is 1 AXWebArea xMind · Browser, URL: 127.0.0.1:56035/ui/

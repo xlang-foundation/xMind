@@ -1,3 +1,32 @@
+## Shared CLI/browser history and footer correction - 2026-10-22
+
+The actual 01439743 packaged CLI completed a fresh mean.cjs edit and real Node
+command: three checks pass, two approved effects, four synthetic model calls,
+eight history messages and one completed SDK worker retirement. Session
+f4adcf8d43ba6f33b2b7dd4a397c2d2b / root 968f939eda7e7579ee7fa8d792e7d243
+MUST NEVER be replayed. The first harness then failed on a Windows dynamic-import
+path; that failure and its completed task receipts are preserved. A separate
+read-only driver reopened the same SQLite history and actual hidden IAB restored
+the completed root and observed Node exit/stdout. Reload preserves the exact eight
+messages; restoration performs zero model calls.
+
+Actual 1280x720 rendering found Send below the viewport (bottom 759px) with Skills
+expanded and a 35-line draft. The shared footer CSS now uses a flex composer so
+the draft shrinks before its action bar, while expanded controls scroll within
+the bounded footer. Rebuilt source-browser rendering retains 218px history and
+places Send bottom at 678px. The unsent draft was cleared; actual reload and
+read-only history equality pass with zero inference. Both owned tabs/backends
+were closed after verification. The original package clean file set and 2398
+covered bytes remain exact; execution additions are listed in the integrity receipt.
+
+All 464 extension and 162 browser tests plus the source browser build pass with
+2786 project inputs and 14908 extension dependency file sets/hashes unchanged.
+This client gate is separate from the accepted 172-test Native run; Native code
+and executable are unchanged. Evidence: client-cli-browser-footer-20261022-*.
+The prior VSIX predates the CSS fix; it has not been rebuilt or installed. Actual
+managed workspace switching, current rendered VS Code and generic RPC cleanup
+remain open. No CPython or paid inference.
+
 ## Qualified runtime package and managed handoff - 2026-10-22
 
 Source 01439743 is staged as an uninstalled 0.1.61 candidate: 2398 runtime files,

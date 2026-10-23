@@ -1,0 +1,35 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "draftLines": 35,
+  "skillsExpanded": true,
+  "geometry": {
+    "prompt": {
+      "bottom": 719.8646240234375,
+      "height": 180,
+      "top": 539.8646240234375,
+      "visibleWithinViewport": true
+    },
+    "scroll": {
+      "bottom": 419.40626525878906,
+      "height": 218.36459350585935,
+      "top": 201.0416717529297,
+      "visibleWithinViewport": true
+    },
+    "send": {
+      "bottom": 759.3437919616699,
+      "height": 31.479167938232425,
+      "top": 727.8646240234375,
+      "visibleWithinViewport": false
+    },
+    "skills-view": {
+      "bottom": 490.8645935058594,
+      "height": 78.125,
+      "top": 412.7395935058594,
+      "visibleWithinViewport": true
+    }
+  },
+  "passed": false
+}

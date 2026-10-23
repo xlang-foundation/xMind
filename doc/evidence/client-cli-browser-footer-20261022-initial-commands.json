@@ -1,0 +1,285 @@
+[
+  {
+    "args": [
+      "health"
+    ],
+    "exitCode": 0,
+    "stdout": "01-health-stdout.log",
+    "stderr": "01-health-stderr.log"
+  },
+  {
+    "args": [
+      "create-session",
+      "CLI mean coding validation"
+    ],
+    "exitCode": 0,
+    "stdout": "02-create-session-stdout.log",
+    "stderr": "02-create-session-stderr.log"
+  },
+  {
+    "args": [
+      "run",
+      "f4adcf8d43ba6f33b2b7dd4a397c2d2b",
+      "Fix mean.cjs for nonempty inputs. Run node check-mean.cjs and report only the observed result.",
+      "--model",
+      "cli-coding-fixture"
+    ],
+    "exitCode": 0,
+    "stdout": "03-run-stdout.log",
+    "stderr": "03-run-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "04-status-stdout.log",
+    "stderr": "04-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "05-operations-stdout.log",
+    "stderr": "05-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "06-status-stdout.log",
+    "stderr": "06-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "07-operations-stdout.log",
+    "stderr": "07-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "08-status-stdout.log",
+    "stderr": "08-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "09-operations-stdout.log",
+    "stderr": "09-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "10-status-stdout.log",
+    "stderr": "10-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "11-operations-stdout.log",
+    "stderr": "11-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "12-status-stdout.log",
+    "stderr": "12-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "13-operations-stdout.log",
+    "stderr": "13-operations-stderr.log"
+  },
+  {
+    "args": [
+      "operation",
+      "7159c3db2254061e542128caf1a3f3f5"
+    ],
+    "exitCode": 0,
+    "stdout": "14-operation-stdout.log",
+    "stderr": "14-operation-stderr.log"
+  },
+  {
+    "args": [
+      "decide",
+      "7159c3db2254061e542128caf1a3f3f5",
+      "allow"
+    ],
+    "exitCode": 0,
+    "stdout": "15-decide-stdout.log",
+    "stderr": "15-decide-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "16-status-stdout.log",
+    "stderr": "16-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "17-operations-stdout.log",
+    "stderr": "17-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "18-status-stdout.log",
+    "stderr": "18-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "19-operations-stdout.log",
+    "stderr": "19-operations-stderr.log"
+  },
+  {
+    "args": [
+      "operation",
+      "7cb025641efb34d5951caa9aefeeb560"
+    ],
+    "exitCode": 0,
+    "stdout": "20-operation-stdout.log",
+    "stderr": "20-operation-stderr.log"
+  },
+  {
+    "args": [
+      "decide",
+      "7cb025641efb34d5951caa9aefeeb560",
+      "allow"
+    ],
+    "exitCode": 0,
+    "stdout": "21-decide-stdout.log",
+    "stderr": "21-decide-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "22-status-stdout.log",
+    "stderr": "22-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "23-operations-stdout.log",
+    "stderr": "23-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "24-status-stdout.log",
+    "stderr": "24-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "25-operations-stdout.log",
+    "stderr": "25-operations-stderr.log"
+  },
+  {
+    "args": [
+      "status",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "26-status-stdout.log",
+    "stderr": "26-status-stderr.log"
+  },
+  {
+    "args": [
+      "operations",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "27-operations-stdout.log",
+    "stderr": "27-operations-stderr.log"
+  },
+  {
+    "args": [
+      "history",
+      "f4adcf8d43ba6f33b2b7dd4a397c2d2b"
+    ],
+    "exitCode": 0,
+    "stdout": "28-history-stdout.log",
+    "stderr": "28-history-stderr.log"
+  },
+  {
+    "args": [
+      "events",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "29-events-stdout.log",
+    "stderr": "29-events-stderr.log"
+  },
+  {
+    "args": [
+      "watch",
+      "968f939eda7e7579ee7fa8d792e7d243"
+    ],
+    "exitCode": 0,
+    "stdout": "30-watch-stdout.log",
+    "stderr": "30-watch-stderr.log"
+  },
+  {
+    "args": [
+      "history",
+      "f4adcf8d43ba6f33b2b7dd4a397c2d2b"
+    ],
+    "exitCode": 0,
+    "stdout": "31-history-stdout.log",
+    "stderr": "31-history-stderr.log"
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "phase": "Browser host import after completed CLI coding task",
+  "error": "ERR_UNSUPPORTED_ESM_URL_SCHEME: Windows absolute path needs pathToFileURL for dynamic import",
+  "codingTaskReplayAllowed": false,
+  "backendExited": true,
+  "fullAcceptance": false
+}

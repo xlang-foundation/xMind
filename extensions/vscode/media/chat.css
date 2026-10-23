@@ -15,9 +15,13 @@ input{font:inherit;color:var(--vscode-input-foreground);background:var(--vscode-
 #plan-view h3{font-size:13px;overflow-wrap:anywhere}.plan-summary,.plan-call{padding:6px 0}.plan-ledger{font-size:11px}.plan-ledger pre,.plan-node pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto}.plan-objective{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}.plan-dependencies{display:flex;flex-wrap:wrap;gap:4px;font-size:11px;margin:8px 0}.plan-edge{font-size:11px;padding:3px 6px}.plan-input textarea{display:block;width:100%;min-height:80px;box-sizing:border-box;background:var(--vscode-input-background);border:1px solid var(--vscode-input-border,var(--vscode-panel-border));padding:6px;margin:6px 0}.plan-input-error{color:var(--vscode-errorForeground);font-size:11px}.plan-node .inspection-note,.plan-summary .inspection-note,.plan-call .inspection-note{font-size:11px;color:var(--vscode-descriptionForeground);overflow-wrap:anywhere}#plan-resume{margin:8px 0}
 .composer-bar #footer-provider{min-width:0;max-width:34%;flex:1;border:0;font-size:11px;padding:4px;background:transparent}.composer-bar #footer-provider:not([hidden])+#model{max-width:42%;flex:1}
 .prompt-files{display:flex;flex-wrap:wrap;gap:5px;padding:3px 8px}.prompt-files[hidden]{display:none}.prompt-file{display:inline-flex;align-items:center;gap:5px;max-width:100%;border:1px solid var(--vscode-panel-border);border-radius:12px;padding:2px 5px 2px 8px;font-size:11px;overflow-wrap:anywhere}.prompt-file button{border:0;padding:0 3px;background:transparent;color:var(--vscode-descriptionForeground)}
-/* Bound expanded controls at every panel height so history stays readable.
-   The footer scrolls as a unit, keeping all controls keyboard-accessible. */
-footer{flex:0 1 auto;min-height:96px;max-height:45%;overflow:auto}
+/* Keep history readable and shrink the draft before moving its action bar.
+   Expanded controls retain their own scrolling within the bounded footer. */
+footer{display:flex;flex-direction:column;flex:0 1 auto;min-height:96px;max-height:45%;overflow:auto}
+footer>.composer{display:flex;flex-direction:column;flex:0 1 auto;min-height:0}
+footer>.composer textarea{flex:1 1 auto;min-height:40px}
+footer .composer-bar,footer>.hint{flex:none}
+footer>details{flex:0 1 auto;min-height:24px;overflow:auto}
 /* Reserve a usable history viewport in short browser/IDE panels. Expanded
    context controls and long drafts scroll inside the footer instead of taking
    all the space from responses. Keep the same controls and keyboard behavior. */

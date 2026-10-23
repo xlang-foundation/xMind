@@ -1,0 +1,26 @@
+{
+  "prompt": {
+    "bottom": 638.3541717529297,
+    "height": 107.10417175292967,
+    "top": 531.25,
+    "visibleWithinViewport": true
+  },
+  "scroll": {
+    "bottom": 419.40626525878906,
+    "height": 218.36459350585935,
+    "top": 201.0416717529297,
+    "visibleWithinViewport": true
+  },
+  "send": {
+    "bottom": 677.8333549499512,
+    "height": 31.479167938232425,
+    "top": 646.3541870117188,
+    "visibleWithinViewport": true
+  },
+  "skills-view": {
+    "bottom": 482.2500228881836,
+    "height": 52.17708587646485,
+    "top": 430.0729370117187,
+    "visibleWithinViewport": true
+  }
+}

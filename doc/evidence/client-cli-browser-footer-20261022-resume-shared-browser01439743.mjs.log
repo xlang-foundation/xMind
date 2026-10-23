@@ -1,0 +1,36 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {spawn,execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {createServer} from 'node:http';
+import {randomBytes,createHash} from 'node:crypto';
+import {pathToFileURL} from 'node:url';
+import {setTimeout as delay} from 'node:timers/promises';
+const base='D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743',source=base+'/shared-cli-browser',out=source+'/browser-restore',runtime=source+'/runtime';
+const read=async p=>JSON.parse(await fs.readFile(p,'utf8')),execute=promisify(execFile);
+const originalOwner=await read(source+'/owner.json'),run=await read(source+'/32-status-stdout.log'),history=await read(source+'/31-history-stdout.log'),operations=await read(source+'/27-operations-stdout.log'),events=await read(source+'/29-events-stdout.log'),models=await read(source+'/model-observations.json');
+assert.equal(run.state,'completed');assert.equal(history.length,8);assert.equal(models.length,4);assert.equal(operations.length,2);assert.ok(operations.every(o=>o.state==='succeeded'));assert.equal(events.filter(e=>e.kind==='budget.model_call.finished').length,4);assert.equal(events.filter(e=>e.kind==='worker.lease.retired'&&e.data.reason==='completed').length,1);
+await fs.mkdir(out);
+const token=randomBytes(32).toString('hex');let calls=0,view,stdout='',stderr='',port;
+const peer=createServer((request,response)=>{++calls;request.resume();response.writeHead(500);response.end('No model request is permitted during history restoration');});
+await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
+const child=spawn(runtime+'/xmind.exe',['serve','--db',source+'/state.sqlite','--modules',runtime+'/modules','--stdlib',runtime+'/stdlib','--port','0','--workspace',originalOwner.workspace,'--workspace-edits','approved','--agent-execution','process-code','--process-config',source+'/processes.yaml','--model','cli-coding-fixture','--model-endpoint','http://127.0.0.1:'+peer.address().port,'--model-tools','supported','--model-stream-usage','supported','--workers','1'],{windowsHide:true,env:{...process.env,XMIND_AUTH_TOKEN:token,XMIND_API_KEY:'restore-local-fixture-key'}});
+const closed=new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',(code,signal)=>resolve({code,signal}));});
+child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);
+async function cli(...args){const result=await execute(runtime+'/xmind.exe',['--port',String(port),...args],{windowsHide:true,env:{...process.env,XMIND_AUTH_TOKEN:token},timeout:15000,maxBuffer:4*1024*1024});return JSON.parse(result.stdout);}
+try{
+ const deadline=Date.now()+15000;while(Date.now()<deadline&&!port){assert.equal(child.exitCode,null,stderr);const match=/listening on http:\/\/127\.0\.0\.1:(\d+)/.exec(stdout);if(match)port=Number(match[1]);else await delay(20);}assert.ok(port,stderr);
+ assert.deepEqual(await cli('history',run.session_id),history);assert.equal((await cli('status',run.id)).state,'completed');
+ const identity=await execute(runtime+'/xmind.exe',['admin','inspect-owner-process',String(child.pid)],{windowsHide:true,timeout:15000});await fs.writeFile(out+'/owner-identity.json',identity.stdout,{flag:'wx'});
+ const {createBrowserServer}=await import(pathToFileURL(base+'/package/extension/browser-runtime/server.mjs').href);
+ view=await createBrowserServer({backend:'http://127.0.0.1:'+port,assetRoot:base+'/package/extension/browser-runtime/assets',localAccessToken:token});
+ const browser=(await view.listen(0))+'/ui/';await fs.writeFile(out+'/expected.json',JSON.stringify({browser,sessionId:run.session_id,runId:run.id,history,modelCallsBeforeRestart:4,restoreModelCalls:0},null,2)+'\n',{flag:'wx'});
+ console.log(JSON.stringify({ready:true,browser,sessionId:run.session_id,runId:run.id,pid:child.pid}));
+ const until=Date.now()+300000;let proof;while(Date.now()<until){try{proof=await read(out+'/rendered-proof.json');break;}catch(error){if(error.code!=='ENOENT')throw error;}await delay(100);}
+ assert.ok(proof,'Rendered proof missing; preserve completed task and do not replay');assert.equal(proof.sessionId,run.session_id);assert.equal(proof.runId,run.id);assert.equal(proof.historyMessages,8);assert.equal(proof.reloaded,true);assert.equal(proof.passed,true);
+ assert.deepEqual(await cli('history',run.session_id),history);assert.equal((await cli('status',run.id)).state,'completed');assert.equal(calls,0);
+ await fs.writeFile(out+'/gate.json',JSON.stringify({passed:true,sessionId:run.session_id,runId:run.id,originalCodingModelCalls:4,restorationModelCalls:calls,historyExact:true,historyMessages:8,actualOperations:operations,renderedProof:proof,initialHarnessFailurePreserved:true,completedTaskReplayed:false,nativeSha256:createHash('sha256').update(await fs.readFile(runtime+'/xmind.exe')).digest('hex'),scope:'Actual packaged CLI coding followed by backend restart and actual rendered browser history restoration; no new coding task submitted. Managed workspace switching and VS Code remain separate.',installed:false,paidInference:false},null,2)+'\n',{flag:'wx'});
+ console.log(JSON.stringify({passed:true,sessionId:run.session_id,restorationModelCalls:0}));
+}finally{
+ if(view)await view.close();if(child.exitCode===null)child.kill();await closed;await new Promise(resolve=>peer.close(resolve));await fs.writeFile(out+'/backend-stdout.log',stdout,{flag:'wx'});await fs.writeFile(out+'/backend-stderr.log',stderr,{flag:'wx'});
+}
