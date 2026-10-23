@@ -58,16 +58,8 @@ public:
     std::unique_ptr<AgentProcessOwnerHost> process_host()override{return std::make_unique<AgentWorkerProcessClient>(peer_);}
     std::unique_ptr<AgentRemoteToolHost> remote_host()override{return std::make_unique<AgentWorkerRemoteClient>(peer_);}
     std::unique_ptr<AgentCallableToolHost> callable_host()override{return std::make_unique<AgentWorkerCallableClient>(peer_);}
-    std::vector<std::string> callable_tool_names()override{if(auto native=peer_.native_model())return native->callable_names();const auto result=nlohmann::json::parse(peer_.call("callable.catalogue","{}"));if(!result.is_array()||result.size()>64)throw ModelProtocolError("Invalid worker callable catalogue");std::vector<std::string> names;for(const auto& entry:result){if(!entry.is_string())throw ModelProtocolError("Invalid worker callable alias");const auto name=entry.get<std::string>();if(name.empty()||name.size()>128||name.find('\0')!=std::string::npos||std::find(names.begin(),names.end(),name)!=names.end())throw ModelProtocolError("Invalid worker callable alias");names.push_back(name);}return names;}
-    bool join_background(const std::string& attempt,std::stop_token cancel)override{
-        if(auto native=peer_.native_model())return native->process_join(attempt,cancel);
-        try{const auto value=nlohmann::json::parse(peer_.call("process.join",nlohmann::json{{"attempt_id",attempt}}.dump(),{},cancel));
-            if(!value.is_object()||value.size()!=1||!value.at("joined").is_boolean())throw ModelProtocolError("Invalid worker process join result");return value.at("joined").get<bool>();}
-        catch(const AgentWorkerRpcCancelled&){throw ToolCancelled("Worker process join cancelled");}
-        catch(const AgentWorkerRpcTimeout&){throw ToolCancelled("Worker process join deadline elapsed");}
-        catch(const AgentWorkerRpcRemoteError& error){if(error.code()=="cancelled"||error.code()=="timeout")throw ToolCancelled("Worker process join cancelled or expired");if(error.code()=="rejected")throw Conflict("Worker process join rejected its captured attempt");if(error.code()=="outcome_unrecorded")throw ProcessOutcomeUnrecorded("Worker process join observation is unrecorded; no retry is authorized");throw ModelProtocolError("Worker process join failed");}
-        catch(const nlohmann::json::exception&){throw ModelProtocolError("Invalid worker process join result");}
-    }
+    std::vector<std::string> callable_tool_names()override{return peer_.services().callable_names();}
+    bool join_background(const std::string& attempt,std::stop_token cancel)override{return peer_.services().process_join(attempt,cancel);}
 };
 }
 std::shared_ptr<AgentRunnerCodingWorkspace> make_agent_worker_coding_workspace(AgentWorkerClientContext& peer,std::shared_ptr<AgentWorkerOrdinaryJournal> journal){return std::make_shared<WorkerCodingWorkspace>(peer,std::move(journal));}

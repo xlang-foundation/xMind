@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/agent_worker_services.hpp"
 #include "agentflow/agent_worker_model_host.hpp"
 #include "agentflow/agent_read_tool_host.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
@@ -169,43 +170,43 @@ struct NativeWorkersApi {
     END_PACKAGE
 };
 // Native SDK client, independent of the old worker packet/RPC implementation.
-class NativeWorkerModelClient final {
+class NativeWorkerModelClient final:public AgentWorkerServices {
 public:
     NativeWorkerModelClient(NativeWorkerModelAccess,std::string root,std::string owner,std::string workspace,std::string generation,std::int64_t revision);
     ~NativeWorkerModelClient();
     NativeWorkerModelClient(const NativeWorkerModelClient&)=delete;
     NativeWorkerModelClient& operator=(const NativeWorkerModelClient&)=delete;
     std::shared_ptr<DynamicPlanExecution> planning(std::chrono::steady_clock::time_point);
-    AgentWorkerModelAdmission admission(std::stop_token={});
-    ModelRequest prepare_request(std::stop_token={});
-    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={});
-    ModelCompletion complete(const std::string&,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={});
-    AgentCallableToolResult callable_invoke(const AgentCallableInvocation&,std::stop_token={});
-    std::vector<std::string> callable_names(std::stop_token={});
-    AgentRemoteToolResult remote_invoke(const AgentRemoteToolInvocation&,std::stop_token={});
-    AgentProcessToolResult process_invoke(const AgentProcessToolInvocation&,std::stop_token={});
-    bool process_join(const std::string& attempt,std::stop_token={});
-    AgentFileToolResult file_invoke(const AgentFileToolInvocation&,std::stop_token={});
-    AgentReadToolResult read_invoke(const AgentWorkspaceInvocation&,std::stop_token={});
-    std::string journal_run(std::string id);
-    std::string journal_session(std::string id);
-    std::string journal_history(std::string id);
-    std::string journal_events(std::string id,std::int64_t after);
-    std::string journal_root_budget(std::string id);
-    std::string journal_child_admission(std::string id);
-    std::string journal_workspace_mode();
-    std::string journal_execution_window();
-    std::string journal_begin();
-    std::string journal_reserve_model(std::string attempt);
-    std::string journal_reserve_planning_continuation(std::string call,std::string attempt);
-    std::string journal_start_model(std::string attempt);
-    std::string journal_finish_model(std::string attempt);
-    std::string journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json);
-    std::string journal_tool_event(std::string attempt,std::int64_t ordinal,bool returned);
-    std::string journal_workspace_tool_event(std::string attempt,std::int64_t ordinal,bool returned);
-    std::string journal_commit_read_turn(std::string attempt);
-    std::string journal_commit_workspace_turn(std::string attempt);
-    std::string journal_complete(std::string attempt);
+    AgentWorkerModelAdmission admission(std::stop_token={}) override;
+    ModelRequest prepare_request(std::stop_token={}) override;
+    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={}) override;
+    ModelCompletion complete(const std::string&,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={}) override;
+    AgentCallableToolResult callable_invoke(const AgentCallableInvocation&,std::stop_token={}) override;
+    std::vector<std::string> callable_names(std::stop_token={}) override;
+    AgentRemoteToolResult remote_invoke(const AgentRemoteToolInvocation&,std::stop_token={}) override;
+    AgentProcessToolResult process_invoke(const AgentProcessToolInvocation&,std::stop_token={}) override;
+    bool process_join(const std::string& attempt,std::stop_token={}) override;
+    AgentFileToolResult file_invoke(const AgentFileToolInvocation&,std::stop_token={}) override;
+    AgentReadToolResult read_invoke(const AgentWorkspaceInvocation&,std::stop_token={}) override;
+    std::string journal_run(std::string id) override;
+    std::string journal_session(std::string id) override;
+    std::string journal_history(std::string id) override;
+    std::string journal_events(std::string id,std::int64_t after) override;
+    std::string journal_root_budget(std::string id) override;
+    std::string journal_child_admission(std::string id) override;
+    std::string journal_workspace_mode() override;
+    std::string journal_execution_window() override;
+    std::string journal_begin() override;
+    std::string journal_reserve_model(std::string attempt) override;
+    std::string journal_reserve_planning_continuation(std::string call,std::string attempt) override;
+    std::string journal_start_model(std::string attempt) override;
+    std::string journal_finish_model(std::string attempt) override;
+    std::string journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json) override;
+    std::string journal_tool_event(std::string attempt,std::int64_t ordinal,bool returned) override;
+    std::string journal_workspace_tool_event(std::string attempt,std::int64_t ordinal,bool returned) override;
+    std::string journal_commit_read_turn(std::string attempt) override;
+    std::string journal_commit_workspace_turn(std::string attempt) override;
+    std::string journal_complete(std::string attempt) override;
 private:struct Impl;std::shared_ptr<Impl> impl_;
 };
 }

@@ -1,5 +1,5 @@
 #include "agent_worker_rpc_fixture.hpp"
-#include "../src/agent_worker_model_rpc_values.hpp"
+#include "agent_worker_model_rpc_values_fixture.hpp"
 namespace agentflow {
 FixtureWorkerRpcHandler bind_agent_worker_model_rpc(AgentWorkerModelHost& host,const AgentWorkerScope& scope){
     const auto& lease=host.lease();if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Model RPC channel differs from captured lease");

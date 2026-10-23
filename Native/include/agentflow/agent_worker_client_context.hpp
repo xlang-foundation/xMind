@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_worker_channel.hpp"
 #include <functional>
+#include "agentflow/agent_worker_services.hpp"
 
 namespace agentflow {
 class NativeWorkerModelClient;
@@ -17,13 +18,13 @@ private:std::string code_,detail_;
 };
 using AgentWorkerRpcSink=std::function<void(const std::string&)>;
 // Captured worker services used by runner adapters. Product instances own only
-// native SDK clients; transport fixtures implement call() for fault injection.
+// native SDK clients; transport fixtures implement typed ports for fault injection.
 class AgentWorkerClientContext {
 public:
     virtual ~AgentWorkerClientContext()=default;
     virtual const AgentWorkerScope& scope()const noexcept=0;
     virtual std::shared_ptr<NativeWorkerModelClient> native_model()const=0;
-    virtual std::string call(const std::string&,const std::string&,AgentWorkerRpcSink={},std::stop_token={})=0;
+    virtual AgentWorkerServices& services()=0;
 };
 class NativeWorkerContext final:public AgentWorkerClientContext {
 public:
@@ -33,9 +34,7 @@ public:
     }
     const AgentWorkerScope& scope()const noexcept override{return scope_;}
     std::shared_ptr<NativeWorkerModelClient> native_model()const override{return client_;}
-    std::string call(const std::string&,const std::string&,AgentWorkerRpcSink={},std::stop_token={})override{
-        throw AgentWorkerRpcRemoteError("unsupported");
-    }
+    AgentWorkerServices& services()override;
 private:AgentWorkerScope scope_;std::shared_ptr<NativeWorkerModelClient> client_;
 };
 }

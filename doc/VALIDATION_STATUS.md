@@ -1,3 +1,28 @@
+## Typed worker ports replace client packet fallbacks - 2026-10-22
+
+Candidate Native code removes all 22 generic peer.call sites from the nine
+production worker adapter files and removes generic call from the shared context.
+AgentWorkerServices supplies typed model/journal/tool ports; NativeWorkerModelClient
+implements them through the existing SDK objects. NativeWorkerContext still
+requires a non-null SDK client. Packet invocation, result parsing and transport
+error translation now live in BUILD_TESTING fixture implementations. Scope,
+budget, sequence and acknowledgement validation remains shared. SDK-backed
+fixtures select their captured SDK services rather than packet implementations.
+
+The corrected focused gate passes all 25 contracts in 169.30 seconds, with
+2810 project /16 SDK /1870 pure-library /30 runtime /18598 dependency /137 binary
+file sets and hashes unchanged. Native SHA-256:
+90675a3050568180fd506584af3ac0e541aa0b8086db3fcdf60b9663b2fcab96.
+The initial gate passed 24/25: three moved empty-request fixtures encoded null
+instead of an empty object. Receiver rejection was retained; fixtures restored
+the original object payload. Both complete focused attempts are preserved as
+process-worker-typed-services-{initial,qualified}-20261022-*.
+
+This is focused acceptance, not a new complete Native suite or installed-package
+claim. Installed 0.1.61 remains unchanged. Full 172-test acceptance and subsequent
+package/coding qualification are still required. Actual VS Code rendering,
+generic connection binding and nested planning/recovery remain open.
+
 ## Installed 0.1.61 checkpoint - 2026-10-22
 
 The qualified source 854957f3 runtime is now installed as agentflow-local.agentflow

@@ -1,0 +1,43 @@
+{
+  "productionWorkerPeerCallSites": [],
+  "contextGenericCallRemoved": true,
+  "typedServiceHeaderSha256": "9baedbd8748fcac142f0caf865a7ef8d0450f9a3fba7aaa782ffdcf1c62a4a39",
+  "productLinks": [
+    {
+      "target": "xmind",
+      "path": "build/skill-state-native/xmind.vcxproj",
+      "sha256": "59f6e65e1c71a32c29ee54d4cc1fc844383316f242bf337f549a7bc6cd3280de",
+      "packetFixtureLinked": false
+    },
+    {
+      "target": "xmind_server",
+      "path": "build/skill-state-native/xmind_server.vcxproj",
+      "sha256": "a381d3d6864eed35a0f65fb0a7110fb2874a8b9bc78831ede21b9beead205551",
+      "packetFixtureLinked": false
+    },
+    {
+      "target": "xmind_cli",
+      "path": "build/skill-state-native/xmind_cli.vcxproj",
+      "sha256": "b54a92b411cb78b9e02e1a33b574bed40cab8f2c3736ddec7a072cd3f1cfe227",
+      "packetFixtureLinked": false
+    },
+    {
+      "target": "xmind_admin",
+      "path": "build/skill-state-native/xmind_admin.vcxproj",
+      "sha256": "152a0c25ff72538e880c6853188347485356198c76e1276293273da03d7b2e76",
+      "packetFixtureLinked": false
+    },
+    {
+      "target": "xmind_schema_worker",
+      "path": "build/skill-state-native/xmind_schema_worker.vcxproj",
+      "sha256": "c417785c75c408778446e5cba2f0df5c2e09335bdfe383c6c6006462f07ac4c8",
+      "packetFixtureLinked": false
+    },
+    {
+      "target": "xmind_persistence_demo",
+      "path": "build/skill-state-native/xmind_persistence_demo.vcxproj",
+      "sha256": "fe6fe2402a651ed66f32cd0d5a83924771676f5d954860cb5013170cf20376bf",
+      "packetFixtureLinked": false
+    }
+  ]
+}

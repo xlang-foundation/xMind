@@ -12,7 +12,7 @@ using FixtureWorkerRpcHandler=std::function<std::string(const std::string& metho
 // every method against captured admission and honor cancellation/deadlines.
 // This object exclusively owns channel I/O. Owner calls stop(), then joins its
 // caller threads before destruction; stop must not run inside a handler/sink.
-class FixtureWorkerRpcPeer:public AgentWorkerClientContext {
+class FixtureWorkerRpcPeer:public AgentWorkerClientContext,private AgentWorkerServices {
 public:
     FixtureWorkerRpcPeer(AgentWorkerChannel&,FixtureWorkerRpcHandler,AgentWorkerChannel::Deadline,std::shared_ptr<NativeWorkerModelClient> sdk_services={});
     ~FixtureWorkerRpcPeer()override;
@@ -25,7 +25,7 @@ public:
     void bind_native_execution(std::shared_ptr<NativeExecutionClient>);
     std::shared_ptr<NativeExecutionClient> native_execution()const;
     AgentWorkerChannel::Deadline execution_deadline()const noexcept;
-    std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={})override;
+    std::string call(const std::string& method,const std::string& payload,AgentWorkerRpcSink={},std::stop_token={});
     bool alive()const;
     void wait_closed();
     void stop();
@@ -34,7 +34,39 @@ public:
     // A wait timeout retains process ownership and never kills or restarts it.
     std::uint32_t drain(AgentWorkerProcess&,AgentWorkerChannel::Deadline);
     const AgentWorkerScope& scope()const noexcept override;
-private:struct Impl;std::unique_ptr<Impl> impl_;
+    AgentWorkerServices& services()override;
+private:
+    AgentWorkerModelAdmission admission(std::stop_token={}) override;
+    ModelRequest prepare_request(std::stop_token={}) override;
+    ModelRequest rebuild_request(const std::string&,const ModelRequest&,std::stop_token={}) override;
+    ModelCompletion complete(const std::string&,const ModelRequest&,ChatCompletionStream::Sink,std::stop_token={}) override;
+    AgentCallableToolResult callable_invoke(const AgentCallableInvocation&,std::stop_token={}) override;
+    std::vector<std::string> callable_names(std::stop_token={}) override;
+    AgentRemoteToolResult remote_invoke(const AgentRemoteToolInvocation&,std::stop_token={}) override;
+    AgentProcessToolResult process_invoke(const AgentProcessToolInvocation&,std::stop_token={}) override;
+    bool process_join(const std::string& attempt,std::stop_token={}) override;
+    AgentFileToolResult file_invoke(const AgentFileToolInvocation&,std::stop_token={}) override;
+    AgentReadToolResult read_invoke(const AgentWorkspaceInvocation&,std::stop_token={}) override;
+    std::string journal_run(std::string id) override;
+    std::string journal_session(std::string id) override;
+    std::string journal_history(std::string id) override;
+    std::string journal_events(std::string id,std::int64_t after) override;
+    std::string journal_root_budget(std::string id) override;
+    std::string journal_child_admission(std::string id) override;
+    std::string journal_workspace_mode() override;
+    std::string journal_execution_window() override;
+    std::string journal_begin() override;
+    std::string journal_reserve_model(std::string attempt) override;
+    std::string journal_reserve_planning_continuation(std::string call,std::string attempt) override;
+    std::string journal_start_model(std::string attempt) override;
+    std::string journal_finish_model(std::string attempt) override;
+    std::string journal_model_event(std::string attempt,std::int64_t ordinal,std::string kind,std::string json) override;
+    std::string journal_tool_event(std::string attempt,std::int64_t ordinal,bool returned) override;
+    std::string journal_workspace_tool_event(std::string attempt,std::int64_t ordinal,bool returned) override;
+    std::string journal_commit_read_turn(std::string attempt) override;
+    std::string journal_commit_workspace_turn(std::string attempt) override;
+    std::string journal_complete(std::string attempt) override;
+struct Impl;std::unique_ptr<Impl> impl_;
 };
 }
 

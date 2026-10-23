@@ -1,3 +1,6 @@
+Current candidate implements the typed boundary below; focused 25/25 passes.
+Full-suite and package qualification remain pending. See [validation status](VALIDATION_STATUS.md).
+
 # Remaining worker client transport cleanup
 
 The installed 0.1.61 runtime uses xlang3 SDK remote objects. It does not use the
