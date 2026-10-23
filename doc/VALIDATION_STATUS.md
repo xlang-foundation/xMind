@@ -1,3 +1,24 @@
+## Rendered captured paging and hosted terminal diagnostics - 2026-10-23
+
+Fresh hidden IAB11 loads120 synthetic primary messages in40/80/120 pages with
+exact order and no duplicate IDs; second conversation retains only its5 records.
+Returning/reloading primary restores exact latest40 HTML and session; footer
+visible1280x720. Seven actual captured history POSTs, unchanged authoritative
+history, zero runs/model calls. Native9276c5a5 has focused4 qualification only.
+Runtime/assets sets and bytes unchanged; exact owned backend birth/image checked
+and exit observed; owned tab closed. Evidence: rendered-captured-history-20261023.
+
+Hosted40010370205/source39a8c874 is terminal167/170 in939.97s. Graph PowerShell
+budget and aggregate workerRPC70s wrapper still fail. RPC last success is
+coding_skills_denied; this run does not establish later context-case completion.
+Ledger phase diagnostic changes next action: first planning-admission fails its
+worker-start deadline (exit1, not killed), rather than previous45s wrapper timeout.
+Official artifact12529224446/logs and normal slow dump retained privately with
+hashes. No local full pass, crash cause, installation or goal completion inferred.
+Evidence: hosted-native-full-39a8c874-20261023.json and original ctest log.
+No local validation live; rendered session87207 terminal0. Pending hosted source
+runs remain separate and must not be duplicated.
+
 ## Captured browser/extension history paging integration - 2026-10-23
 
 Shared client negotiates local_connection_history=1 and uses the captured

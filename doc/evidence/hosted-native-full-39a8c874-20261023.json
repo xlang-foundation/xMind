@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-10-23T20:34:19.576Z",
+  "run": 40010370205,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40010370205",
+  "source": "39a8c874323725e8ba8435649e629848b1b6cd61",
+  "job": 120609554281,
+  "conclusion": "failure",
+  "total": 170,
+  "passed": 167,
+  "failed": 3,
+  "seconds": 939.97,
+  "failures": [
+    {
+      "name": "native_graph_runner_contract",
+      "seconds": 40.6,
+      "detail": "PowerShell graph process remains uncertain after unchanged30s tool deadline; script_entered observed."
+    },
+    {
+      "name": "native_agent_worker_model_rpc_contract",
+      "seconds": 72.85,
+      "detail": "Node unchanged70s wrapper kills process with SIGTERM. Last explicit successful production fixture coding_skills_denied; later context cases are not established in this run. Normal slow diagnostic dump retained, not crash proof."
+    },
+    {
+      "name": "native_agent_worker_ledger_contract",
+      "seconds": 20.46,
+      "detail": "First planning-admission phase fails Worker start deadline elapsed; exit1, killed false, no signal. This differs from prior aggregate45s timeout."
+    }
+  ],
+  "artifact": {
+    "id": 12529224446,
+    "bytes": 105933,
+    "sha256": "f36303a960f8f5b1aa35534d576458e8b920e8f3405da9242c547a5d1ae94974"
+  },
+  "jobLogSha256": "5afb32a1cf70d607b2ce1d5f23ad9ce6138b7383a427e7bef47362ad1a3b2ae9",
+  "originalLogsRetained": true,
+  "currentSourceAcceptance": false,
+  "installed": false
+}

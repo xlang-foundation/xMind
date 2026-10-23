@@ -1,0 +1,39 @@
+{
+  "recordedAt": "2026-10-23T20:33:06.591Z",
+  "passed": true,
+  "sourceClient": "70f2c635",
+  "nativeSha256": "9276c5a53dc71ac5132e3f69fc21c5f5c40be8f655516cbc1987958854243011",
+  "nativeQualification": "Focused4 only; no complete suite claim",
+  "renderedProof": {
+    "passed": true,
+    "browser": "Hidden IAB tab 11",
+    "primarySession": "history-primary",
+    "secondarySession": "history-secondary",
+    "pageSizes": [
+      40,
+      80,
+      120
+    ],
+    "allPrimaryMarkersInOrder": true,
+    "uniquePrimaryMarkers": 120,
+    "secondaryMessages": 5,
+    "secondaryIsolated": true,
+    "reloadedNewestPageExact": true,
+    "footerVisible": true,
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    },
+    "modelRuns": 0,
+    "screenshot": "rendered.png"
+  },
+  "primaryMessages": 120,
+  "secondaryMessages": 5,
+  "capturedHistoryRequests": 7,
+  "runtimeAndAssetSetsAndBytesUnchanged": true,
+  "ownedBackendExited": true,
+  "modelRuns": 0,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false
+}
