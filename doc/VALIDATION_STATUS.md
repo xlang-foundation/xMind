@@ -1,3 +1,22 @@
+## Model-driven coding from248-character runtime path — 2026-10-23
+
+Actual Native15431644/source2e0418eb process-code execution completes a new
+rectangle-perimeter task from a248-character runtime image path. Four controlled
+HTTP/SSE replies drive an SDK worker through native read, reviewed edit and
+reviewed Node execution; four checks pass. Two operations succeed, eight
+canonical messages restore exactly through history/watch, four charges finish
+and the budget segment closes. Worker10144 is absent after lease retirement;
+identity-verified backend34872 exited. Runtime file sets and bytes are exact.
+The short-path CLI client has the identical native image hash.
+
+Sessiond11c1b30004a612dbb058f59b0d24105 / rootc202783c0fee49ae2ff12968c924caae
+are complete; never replay. The initial harness incorrectly constructed the
+Windows prefix and failed before any backend/task; it is retained separately.
+The fresh final fixture uses path.toNamespacedPath. No paid inference, CPython,
+visible window or installation. New full-suite qualification and delivery of
+these loader fixes remain open; candidate0.1.63 and installed62 are unchanged.
+[Receipt](evidence/long-runtime-coding-2e0418eb-20261023.json).
+
 ## Production worker RPC after loader fixes — 2026-10-23
 
 The complete native_agent_worker_model_rpc_contract passes1/1 in52.60s on

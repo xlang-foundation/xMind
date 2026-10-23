@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "2e0418ebf11fb084173ccb08ce051779b2a3814c",
+  "nativeSha256": "15431644cb1b09f819c4c51721b04547a7f19ad7261cd55a3d566b9a8d52272e",
+  "scope": "Actual model-driven native process-code task from 248-character runtime image, with a hash-identical short-path CLI attached by explicit loopback port. Controlled HTTP/SSE provider; real SDK worker, reviewed file/process effects, Node assertions and canonical history. Not managed auto-discovery, rendered UI or a release install.",
+  "executablePathCharacters": 248,
+  "sessionId": "d11c1b30004a612dbb058f59b0d24105",
+  "rootRunId": "c202783c0fee49ae2ff12968c924caae",
+  "completedTaskNeverReplay": true,
+  "state": "completed",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "historyAndWatchExact": true,
+  "approvals": 2,
+  "nodeChecksPassed": 4,
+  "operations": [
+    {
+      "id": "7f331c507c104ff77b41bd3a45bb1f54",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "0883a104479cfbf732a7b19e7c683ce5",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "workerExit": {
+    "generation": "a741e7252ca33b479e0b314eff8b76b1",
+    "pid": 10144,
+    "root_run_id": "c202783c0fee49ae2ff12968c924caae",
+    "observedAbsent": true,
+    "observedAt": "2026-10-23T23:54:20.735Z"
+  },
+  "ownedBackendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 34872,
+    "birthAndImageVerified": true
+  },
+  "runtimeFileSetsAndBytesUnchanged": true,
+  "gateSha256": "3b64a110b0321c465467dc01cb0aa904d841f1e97e06630e9e1bab462511adb9",
+  "harnessFailureRetained": "Initial malformed extended-path string caused ENOENT before backend startup, sessions or tasks. Fresh final fixture uses Node path.toNamespacedPath; no completed work replayed.",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "fullGoalComplete": false,
+  "passed": true
+}
