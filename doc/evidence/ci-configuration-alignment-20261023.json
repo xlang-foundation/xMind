@@ -1,0 +1,26 @@
+{
+  "sdkPin": "499415d03dba6536355ac3ef19522e335f03f95c",
+  "workflowHelperAndQualifiedSdkMatch": true,
+  "exactCounts": {
+    "extension": 467,
+    "browser": 163
+  },
+  "powerShellSyntaxParsed": true,
+  "nodeSyntaxChecked": true,
+  "originalHostedFailures": [
+    {
+      "run": 39924615848,
+      "job": 120317836032,
+      "reason": "Helper required f809da864b582a90f77fef408c5c6a0db200e11e while workflow checked out SDK499415d0",
+      "logSha256": "b03076ca77ca264c0e963d3e23325c417c7219c79ba2446991538355d57da4df"
+    },
+    {
+      "run": 39920349011,
+      "job": 120303809874,
+      "reason": "All467/163 tests passed; gate expected464/161",
+      "logSha256": "fcb905fab80f2857a33de6a03827039ca32b0ac5858f133cc1612c61b4c3e2a3"
+    }
+  ],
+  "hostedRerunAccepted": false,
+  "installed": false
+}

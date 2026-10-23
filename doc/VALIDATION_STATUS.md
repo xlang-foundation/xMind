@@ -1,3 +1,24 @@
+## Complete captured Local native acceptance and CI alignment - 2026-10-23
+
+Source57c05580 passes all172 native contracts in1315.99s, including the corrected
+local-view observer. Actual source2813/SDK16/purelib1870/runtime30/dependencies18598/
+binaries137 file sets and hashes remain unchanged. Native e4719ea8/SDK499415d0;
+controlled peers only, no paid inference or CPython. Evidence: captured-local-
+admission-full-qualified-20261023.json, raw CTest log and complete inventory.
+The earlier171/172 failure remains preserved and is not overwritten.
+
+Hosted57c05580 native failed before building: Tools/ci-native.ps1 still required
+SDKf809 while its workflow checked out499. Hosted00f25996 frontend ran all467/163
+tests successfully but its exact-count gate expected464/161. Helper pin and exact
+counts are corrected without weakening gates. Both scripts parse; independent
+complete frontend467/163 and asset build pass with frozen inputs. Evidence:
+client-ci-alignment-20261023.json and ci-configuration-alignment-20261023.json.
+The corrected hosted run remains unverified until its own terminal result.
+
+Installed62 is unchanged. Current rendered browser coding is recorded below;
+remaining client routing, nested process planning/recovery and actual VS Code
+coding remain open.
+
 ## Current-source full result and rendered browser check - 2026-10-23
 
 Source00f25996 complete native validation finishes 171/172 in1270.96s.
