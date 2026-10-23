@@ -1,3 +1,19 @@
+## Fresh qualified-runtime CLI coding and hosted frontend - 2026-10-23
+
+The source57c05580 qualified native binary e4719ea8 completes fresh CLI coding:
+read sum-to.cjs, explicit edit approval, explicit Node command approval, actual
+Node4 checks,8 history messages,4 controlled model calls,2 succeeded operations,
+SDK worker retirement and one closed budget segment. CLI watch/repeated history
+agree; every runtime file set/hash remains unchanged. Exact spawned owner birth
+and executable path are verified before retirement and its exit is observed.
+Session5134c118482849f58db8ef0a83817f72/root9c516973686b2af6282a99cfed32c8f7
+completed: NEVER replay. No paid inference, installation or CPython execution.
+Evidence: client-cli-coding-57c05580-20261023.json and exit receipt.
+
+Hosted browser/extension run39930037384 succeeds on56820015 after the exact-count
+correction. Native hosted run39930037400 remains pending; frontend CI does not
+establish rendered VS Code coding. Evidence: hosted-frontend-56820015-20261023.json.
+
 ## Complete captured Local native acceptance and CI alignment - 2026-10-23
 
 Source57c05580 passes all172 native contracts in1315.99s, including the corrected
