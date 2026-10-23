@@ -1,3 +1,22 @@
+## Ordered failure diagnostic and A2A error reporting - 2026-10-22
+
+A dump-enabled run of the first 91 contracts in complete-suite order passes
+91/91 in 311.38 seconds, with all 2810 project /16 SDK /1870 pure-library /
+30 runtime /18598 dependency /137 binary file sets and hashes unchanged.
+It produced no crash dumps. This does not resolve or replace the earlier full
+170/172 failure. Evidence: process-worker-typed-services-prefix-diagnostic-20261022-*.
+
+A2A approval observation now joins its finite invocation on observation failure
+and surfaces the captured invocation exception, if present, before propagating
+the approval failure. Reading the exception occurs only after join. Explicit
+joins, all five-second deadlines, assertions and effect-count checks remain.
+The two affected contracts pass 2/2 in 13.80 seconds with frozen inputs; this
+qualifies compilation and those contracts, not a reproduced original crash.
+Evidence: process-worker-typed-services-worker-error-focused-20261022-*.
+Native runtime remains 90675a30; installed 0.1.61 remains unchanged. A complete
+current-source run with dump capture is next. Packaging remains on hold and both
+underlying intermittent failures remain unresolved.
+
 ## Full worker cleanup gate failed; diagnosis continues - 2026-10-22
 
 Source 6642314d full Native run finished 170/172 in 1362.86 seconds. The
