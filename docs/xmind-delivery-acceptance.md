@@ -4,7 +4,15 @@ This audit preserves the recovered delivery objective. It is not a completion
 claim. Installed 0.1.62 uses Native2f105e11 and SDK499415d0. Source17be6368 adds
 native connection rejection, atomic catalog revisions and the SDK Connections
 subobject; its complete native run passes 172/172 in 1368.50 seconds. Focused tests cannot substitute
-for that full result. No paid inference or completed acceptance task is replayed.
+for that full result. Source00f25996 adds captured Local SDK/HTTP services and
+shared-client session/prompt admission. Its [full 172-test run](../doc/evidence/captured-local-admission-full-initial-20261023.json)
+finishes 171 passed/1 failed in 1270.96 seconds: the local-view observer uses a
+prototype clone without the client private fields. The [focused observer fix](../doc/evidence/captured-local-view-observer-fixed-20261023.json)
+passes1/1. [Fresh rendered browser coding](../doc/evidence/client-browser-captured-local-00f25996-20261023.json)
+passes actual edit/Node4/reload with the unchanged product binary; fresh full
+acceptance remains pending;
+[focused native and client evidence](../doc/evidence/client-captured-local-admission-20261023.json)
+is recorded separately. No paid inference or completed acceptance task is replayed.
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
@@ -18,7 +26,7 @@ for that full result. No paid inference or completed acceptance task is replayed
 | Single/graph agents, planning and delegation | Native graph, dynamic-plan, delegation, budget, context and worker contracts occur in the complete native inventory. | Nested planning in dynamic process children and its recovery/budget binding remain incomplete. |
 | Providers, MCP and A2A | Complete native inventory includes provider wire/history/profile, MCP SDK/network/OAuth and A2A/task/stream contracts using controlled peers. | These establish tested protocol scopes, not universal compatibility with every external deployment. No paid-provider inference is required for development. |
 | Coding tools | Native inventory covers approved file edits/patch/restore, process execution, persistent terminals, VCS, repository instructions, skills and language-server integration. | Rendered VS Code actions/context remain separate from native fixtures. |
-| Connection catalog | [Atomic catalog revisions](../doc/evidence/connection-catalog-concurrent-fixed-20261022.json) and [SDK API](../doc/evidence/connection-catalog-sdk-api-20261022.json). HTTP and SDK observe one native persisted catalog. | Authenticated shared binding, connection-scoped admission/event cursors and routing remain unfinished. |
+| Connection catalog | [Atomic catalog revisions](../doc/evidence/connection-catalog-concurrent-fixed-20261022.json) and [SDK API](../doc/evidence/connection-catalog-sdk-api-20261022.json). HTTP and SDK observe one native persisted catalog. | [Captured Local SDK/HTTP binding](../doc/evidence/captured-http-connection-binding-20261023.json), scoped event cursors and [session/prompt admission](../doc/evidence/captured-connection-run-options-qualified-20261023.json) pass focused contracts. Shared clients pass 467 extension/163 browser tests. Current-source full native and rendered verification remain pending; graph/command/read/approval adapters and authenticated remote routing remain unfinished. |
 | Enrollment and distributed ownership | Catalog metadata and Local execution do not authorize distributed work. | Explicit workspace/effect authorization, expiring fenced leases, duplicate delivery, revocation, lost reply and receipt reconciliation need implementation and acceptance. Private Nexus server/database/scheduler stay excluded. |
 | Recovery and preservation | [Installed62 preservation/smoke](../doc/evidence/installed-0.1.62-2f105e11-20261022.json), owner/handoff contracts and historical managed upgrade receipts. | No claim of universal unattended/in-flight or nested-process recovery. Preserve original owner identity and reconcile effects before retry. |
 | Delivery checkpoint | Installed62 payload/runtime verified; exact previous61 backup retained; settings/profile/history/configuration file sets and hashes unchanged. | Do not replace installed62 with source17be6368 based only on focused results. |
@@ -26,8 +34,12 @@ for that full result. No paid inference or completed acceptance task is replayed
 ## Next implementation sequence
 
 The source17be6368 complete native result is recorded and passes.
-Continue the shared binding with an immutable captured connection identity and
-scoped command/event ownership. Authentication/negotiation must precede activation;
+Complete fresh full native acceptance after the local-view observer correction.
+Fresh rendered browser coding on source00f25996 passes; preserve its completed
+session/root in doc/VALIDATION_STATUS.md.
+Captured Local identity, SDK/HTTP services, scoped event cursors and shared-client
+session/prompt admission exist; complete graph/command/read/approval routing next.
+Remote authentication/negotiation must precede remote activation;
 workspace enrollment needs separate authorization. Verify unavailable/expired/
 incompatible connections and cross-profile rejection before advertising routing.
 Then complete nested dynamic-process planning and recovery against the shared

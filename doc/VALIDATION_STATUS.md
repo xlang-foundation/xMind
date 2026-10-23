@@ -1,3 +1,27 @@
+## Current-source full result and rendered browser check - 2026-10-23
+
+Source00f25996 complete native validation finishes 171/172 in1270.96s.
+The sole failure is local-view observation through Object.create(browserClient),
+which lacks private client fields. All source/SDK/library/dependency/binary
+file sets and hashes remain unchanged. Original full gate, raw CTest output and
+all172 inventory: captured-local-admission-full-initial-20261023*.
+
+The observer now retains the initialized client and its bound original stream
+method. Focused local-view passes1/1 in154.26s; native product binary remains
+e4719ea8. This focused correction does not establish a new full-suite pass.
+Evidence: captured-local-view-observer-fixed-20261023*.
+
+Fresh actual browser Send, reviewed edit, approved Node command and reload pass
+on the hash-verified current runtime/frontend. Real Node4 checks pass;8 messages
+restore byte-for-byte as rendered history; CLI status/history/operations/events
+agree;2 operations succeed and one SDK worker retires. Controlled peer4 calls,
+no paid inference. Session2a60922dde0b4218b36ffb71f2e06d34/root
+b01131bcc842486bab056f68af1110d1 completed: NEVER replay. Exact owned backend
+35588 was birth/image checked before retirement and exit observed; tab8 closed.
+Evidence: client-browser-captured-local-00f25996-20261023.json/png.
+Installed62 remains unchanged; actual VS Code coding and fresh complete native
+acceptance, remaining routing and nested planning/recovery stay open.
+
 ## Captured Local prompt admission in shared clients - 2026-10-23
 
 The native captured run route preserves model selection, provider revision,
