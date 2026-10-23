@@ -1,3 +1,32 @@
+## Packet transport removed from product targets - 2026-10-22
+
+The obsolete packet peer header/source and peer-based retirement overloads are
+removed from production. The still-used crash/cancellation fault fixture lives
+under Native/tests as FixtureWorkerRpcPeer and a BUILD_TESTING-only library.
+Production adapter headers depend on AgentWorkerClientContext; production model
+and journal libraries link the SDK channel instead of the packet transport.
+All six product executable link inputs exclude both packet-peer and fixture
+libraries in every generated configuration. The unused model-binding shim is
+deleted. SDK and fixture retirement share the unchanged internal identity and
+completed-admission checks, avoiding divergent ownership validation.
+
+The first build failed because the local handler callback alias was declared in
+the removed header. That failure and exact inputs remain preserved. After moving
+the alias to the client context, the complete build and 24 focused Native
+contracts pass in 166.90 seconds, including actual SDK execution/lifetime, model
+RPC and its fault fixtures, graph workers, coding server, ledger, shared-memory
+channel, schema/MCP and unified entry. All 2792 project /16 SDK /1870 pure-library /
+30 runtime /18598 dependency /137 binary sets and hashes stay unchanged.
+Native patch aa18eb6e326c7fa93c787e5b63dcfc95d5538d554d5978baeff7888a21254b06;
+xmind.exe 895ce33b437e7d63ca5a328b4706c4a5743c05fce1b18588d1b55d8a4a31aa1a.
+Evidence: process-worker-packet-fixture-only-{initial,qualified}-20261022-*.
+
+This is focused acceptance only; the earlier 172/172 full result predates this
+Native change. Eight adapters still retain string-method fixture fallbacks and
+local callback dispatch glue; their removal remains separate work. The packaged
+b95abba9 runtime and installed clients are unchanged. No new installation, paid
+inference, CPython or task replay.
+
 ## Packaged managed workspace switching rendered - 2026-10-22
 
 Client b95abba9 includes the footer correction, packaged with the unchanged

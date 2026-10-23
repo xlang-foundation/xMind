@@ -4,23 +4,23 @@
 
 namespace agentflow {
 class NativeExecutionClient;
-using AgentWorkerRpcHandler=std::function<std::string(const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)>;
+using FixtureWorkerRpcHandler=std::function<std::string(const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)>;
+// Test-only packet fault fixture. Product workers use the xmind SDK root.
 // Multiplexed owned-value transport, not method authorization. One bounded
 // reader routes replies/events; handlers run separately, so a streaming callback
 // may make a nested synchronous journal call. Backend handlers must authorize
 // every method against captured admission and honor cancellation/deadlines.
 // This object exclusively owns channel I/O. Owner calls stop(), then joins its
 // caller threads before destruction; stop must not run inside a handler/sink.
-class AgentWorkerRpcPeer:public AgentWorkerClientContext {
+class FixtureWorkerRpcPeer:public AgentWorkerClientContext {
 public:
-    AgentWorkerRpcPeer(AgentWorkerChannel&,AgentWorkerRpcHandler,AgentWorkerChannel::Deadline);
-    ~AgentWorkerRpcPeer()override;
-    AgentWorkerRpcPeer(const AgentWorkerRpcPeer&)=delete;
-    AgentWorkerRpcPeer& operator=(const AgentWorkerRpcPeer&)=delete;
+    FixtureWorkerRpcPeer(AgentWorkerChannel&,FixtureWorkerRpcHandler,AgentWorkerChannel::Deadline);
+    ~FixtureWorkerRpcPeer()override;
+    FixtureWorkerRpcPeer(const FixtureWorkerRpcPeer&)=delete;
+    FixtureWorkerRpcPeer& operator=(const FixtureWorkerRpcPeer&)=delete;
     // Start only after handler dependencies (including nested-call adapters)
     // are fully constructed. Start once; a closed session cannot restart.
     void start();
-    void bind_native_model(std::shared_ptr<NativeWorkerModelClient>);
     std::shared_ptr<NativeWorkerModelClient> native_model()const override;
     void bind_native_execution(std::shared_ptr<NativeExecutionClient>);
     std::shared_ptr<NativeExecutionClient> native_execution()const;
@@ -36,4 +36,10 @@ public:
     const AgentWorkerScope& scope()const noexcept override;
 private:struct Impl;std::unique_ptr<Impl> impl_;
 };
+}
+
+#include "agentflow/agent_worker_retirement.hpp"
+namespace agentflow {
+AgentWorkerTerminalObservation drain_and_terminate_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,RunState,const std::string&,AgentWorkerChannel::Deadline);
+AgentWorkerTerminalObservation drain_completed_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline);
 }

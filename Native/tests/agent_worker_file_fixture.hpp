@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/create_executor.hpp"
 #include "agentflow/repository_instruction_context.hpp"
@@ -9,7 +10,7 @@ inline void check(bool value,const char* message){if(!value)throw std::runtime_e
 template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected actual child file RPC rejection");}
 inline std::string read(const std::filesystem::path& path){std::ifstream input(path,std::ios::binary);check(bool(input),"Actual native RPC file missing");return {std::istreambuf_iterator<char>(input),{}};}
 inline AgentFileToolInvocation invocation(const AgentWorkerScope& scope,const ModelToolCall& tool){AgentFileToolInvocation call;call.run_id=scope.run_id;call.attempt_id="file-attempt";call.call_id=tool.id;call.workspace_id=scope.workspace_id;call.workspace_revision=scope.workspace_revision;call.folder_id=Json::parse(tool.arguments_json).value("folder_id",scope.workspace_id);call.tool_name=tool.name;call.arguments_json=tool.arguments_json;return call;}
-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
+inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
     AgentWorkerFileClient files(peer);AgentWorkerJournalClient journal(peer);
     if(method=="fixture.stale"){AgentFileToolInvocation stale;stale.run_id=peer.scope().run_id;stale.attempt_id="file-attempt";stale.call_id="actual-file";stale.workspace_id=peer.scope().workspace_id;stale.folder_id=stale.workspace_id;stale.workspace_revision=peer.scope().workspace_revision;stale.tool_name="create_file";stale.arguments_json=R"({"path":"actual.txt","content":"never replay"})";rejects<Conflict>([&]{files.invoke(stale);});return "stale-file-rejected";}
     const auto input=decode_agent_model_request(peer.call("fixture.file_input",""));journal.reserve_model_call("file-attempt");journal.start_model_call("file-attempt");AgentWorkerModelClient model(peer);const auto response=model.complete("file-attempt",input,[](const ModelEvent&){});
@@ -47,7 +48,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     ModelRequest input;input.include_usage=true;input.messages.push_back({MessageRole::user,"Native child file RPC "+mode+". "+marker});input.tools={CreateExecutor::definition()};ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
     AgentWorkerModelHost model(store,lease,config,input.tools,AgentWorkerModelPolicy{true,{}},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),deadline);auto model_rpc=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_rpc=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
     const auto claim=[&]{return store.agent_worker_file_claim(id,"file-attempt","actual-file").get();};std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();
-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
         if(method=="fixture.file_input")return encode_agent_model_request(input);
         if(method=="fixture.rebuild_file_host"){host=std::make_unique<AgentWorkerFileHost>(store,lease,owner,deadline);dispatch=bind_agent_worker_file_rpc(*host,worker->channel().scope());return "rebuilt";}
         if(method=="fixture.await_file_pending"||method=="fixture.await_file_cancelled"){const auto until=Clock::now()+5s;while(Clock::now()<until&&!cancel.stop_requested()){const auto operations=store.operations(id).get();if(method=="fixture.await_file_pending"&&operations.size()==1&&operations[0].state==OperationState::awaiting_approval)return "pending";if(method=="fixture.await_file_cancelled"&&operations.size()==1&&operations[0].state==OperationState::cancelled&&claim().state=="returned")return "cancelled";std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual file RPC approval/cancellation deadline");}
@@ -58,7 +59,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     },deadline);
     std::unique_ptr<XlangSqlite> sql;if(mode=="file_unrecorded"){sql=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);sql->execute("CREATE TRIGGER fixture_file_rpc_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-file-claims' AND json_extract(NEW.payload,'$.state')='returned' AND json_extract(NEW.payload,'$.model.owner_run_id')='rpc-file_unrecorded' BEGIN SELECT RAISE(ABORT,'fixture_file_rpc_result_abort'); END");}
     worker->channel().send({"fixture.boot",mode},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});
-    struct Cleanup{AgentWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
+    struct Cleanup{FixtureWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
     if(mode!="file_denied"&&mode!="file_cancel"){
         const auto until=Clock::now()+5s;std::optional<Operation> pending;
         while(Clock::now()<until){for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval)pending=op;if(pending)break;if(task.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Actual file child returned before approval: "+task.get());std::this_thread::sleep_for(5ms);}

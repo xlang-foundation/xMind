@@ -1,0 +1,6 @@
+{
+  "phase": "build",
+  "testsExecuted": false,
+  "reason": "Handler callback alias was declared with the removed packet-peer header, while existing adapters still use that callback type.",
+  "codeChangeRequired": "Declare the local callback type in the client-context interface; keep packet peer test-only."
+}

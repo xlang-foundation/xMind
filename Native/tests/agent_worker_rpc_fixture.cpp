@@ -1,4 +1,4 @@
-#include "agentflow/agent_worker_rpc.hpp"
+#include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_native_execution.hpp"
 #include "nlohmann/json.hpp"
 #include <atomic>
@@ -25,18 +25,17 @@ Json parse(const std::string& bytes){
 }
 std::uint64_t envelope_id(const Json& value,std::size_t fields){if(!value.is_object()||value.size()!=fields||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("id").is_number_unsigned())throw AgentWorkerProtocolError("Invalid native RPC envelope");const auto id=value.at("id").get<std::uint64_t>();if(!id||id>max_id)throw AgentWorkerProtocolError("Invalid native RPC identity");return id;}
 }
-struct AgentWorkerRpcPeer::Impl {
+struct FixtureWorkerRpcPeer::Impl {
     struct Pending {std::deque<std::string> events;bool done=false,local_failure=false;std::string result,code;};
     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
     struct Flight {std::shared_ptr<Incoming> owner;std::jthread thread;};
-    std::shared_ptr<NativeWorkerModelClient> native_model;
     std::shared_ptr<NativeExecutionClient> native_execution;
-    AgentWorkerChannel& channel;AgentWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
+    AgentWorkerChannel& channel;FixtureWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
     std::mutex state,writer,request_order;std::condition_variable changed;bool closed=false,started=false;
     std::uint64_t outgoing=1,incoming=1;std::size_t queued=0;
     std::map<std::uint64_t,std::shared_ptr<Pending>> pending;std::map<std::uint64_t,std::shared_ptr<Incoming>> active;
     std::vector<Flight> flights;std::stop_source session_stop;std::jthread reader;
-    Impl(AgentWorkerChannel& channel,AgentWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline):channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
+    Impl(AgentWorkerChannel& channel,FixtureWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline):channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
     void start(){std::lock_guard lock(state);if(started||closed)throw AgentWorkerRpcClosed("Native worker RPC cannot restart");started=true;reader=std::jthread([this]{read();});}
     void fail(const std::string& reason){
         std::vector<std::stop_source> stops;{std::lock_guard lock(state);if(closed)return;closed=true;for(auto& [id,call]:pending)if(!call->done){call->done=true;call->local_failure=true;call->code=reason;}for(const auto& [id,owner]:active)stops.push_back(owner->stop);}
@@ -81,21 +80,20 @@ struct AgentWorkerRpcPeer::Impl {
     }
     void stop(){if(native_execution)native_execution->close();fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
 };
-AgentWorkerRpcPeer::AgentWorkerRpcPeer(AgentWorkerChannel& channel,AgentWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
-AgentWorkerRpcPeer::~AgentWorkerRpcPeer(){impl_->stop();}
-void AgentWorkerRpcPeer::bind_native_model(std::shared_ptr<NativeWorkerModelClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_model||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native model binding requires fresh worker");impl_->native_model=std::move(client);}
-std::shared_ptr<NativeWorkerModelClient> AgentWorkerRpcPeer::native_model()const{std::lock_guard lock(impl_->state);return impl_->native_model;}
-void AgentWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
-std::shared_ptr<NativeExecutionClient> AgentWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
-AgentWorkerChannel::Deadline AgentWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}
-void AgentWorkerRpcPeer::start(){impl_->start();}
-std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(native_execution())throw AgentWorkerRpcRemoteError("unsupported");return impl_->call(method,payload,std::move(sink),cancel);}
-bool AgentWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
-void AgentWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
-void AgentWorkerRpcPeer::stop(){impl_->stop();}
-std::uint32_t AgentWorkerRpcPeer::drain(AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline){
+FixtureWorkerRpcPeer::FixtureWorkerRpcPeer(AgentWorkerChannel& channel,FixtureWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
+FixtureWorkerRpcPeer::~FixtureWorkerRpcPeer(){impl_->stop();}
+std::shared_ptr<NativeWorkerModelClient> FixtureWorkerRpcPeer::native_model()const{return {};}
+void FixtureWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
+std::shared_ptr<NativeExecutionClient> FixtureWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
+AgentWorkerChannel::Deadline FixtureWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}
+void FixtureWorkerRpcPeer::start(){impl_->start();}
+std::string FixtureWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(native_execution())throw AgentWorkerRpcRemoteError("unsupported");return impl_->call(method,payload,std::move(sink),cancel);}
+bool FixtureWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
+void FixtureWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
+void FixtureWorkerRpcPeer::stop(){impl_->stop();}
+std::uint32_t FixtureWorkerRpcPeer::drain(AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline){
     if(&impl_->channel!=&worker.channel())throw std::invalid_argument("RPC drain requires its exact owned child channel");
     stop();impl_->channel.close();return worker.wait(deadline);
 }
-const AgentWorkerScope& AgentWorkerRpcPeer::scope()const noexcept{return impl_->channel.scope();}
+const AgentWorkerScope& FixtureWorkerRpcPeer::scope()const noexcept{return impl_->channel.scope();}
 }

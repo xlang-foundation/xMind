@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 // Real authenticated SDK IPC with deliberately synthetic journal replies.
 // This proves client scope/role decoding, not repository child admission.
 #pragma once
@@ -12,7 +13,7 @@ using Json=nlohmann::json;
 using Clock=std::chrono::steady_clock;
 using namespace std::chrono_literals;
 inline void check(bool value,const char* message){if(!value){std::cerr<<message<<std::endl;throw std::runtime_error(message);}}
-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& method){
+inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& method){
     if(method!="fixture.run")throw AgentWorkerRpcRemoteError("unsupported");
     const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
     AgentWorkerJournalClient journal(peer);unsigned rejected=0;const bool graph=scope.root_id=="journal-graph-root";
@@ -36,7 +37,7 @@ inline void parent(std::shared_ptr<const BoundProcessExecutable> image){
         AgentWorkerScope scope{graph?"journal-graph-root":"journal-role-root",leaf?"journal-role-leaf":"journal-role-root","workspace:none",leaf?"journal-leaf-generation":"journal-parent-generation",1};
         auto worker=AgentWorkerProcess::launch(image,scope,deadline);
         unsigned calls=0;std::string active_attempt;
-        AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
+        FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
             if(graph&&method=="journal.workspace_mode")return R"({"coding":false})";
             if(graph&&method=="journal.run")return Json{{"id",scope.run_id},{"session_id","synthetic-graph-session"},{"state","queued"},{"parent_id","nested-graph-invocation"},{"node_id","reader"},{"graph_root",false},{"provider_context_json",""}}.dump();
             if(graph&&method=="journal.root_budget")return Json{{"root_run_id",scope.root_id},{"spec",{{"policy_id","native.graph-context"},{"policy_revision",1},{"workspace_identity","workspace:none"},{"provider_identity_json",R"({"wire":"responses","model_id":"synthetic-graph-model"})"},{"max_children",8},{"max_parallel",2},{"max_model_calls",32},{"wall_limit_ms",20000}}},{"children_admitted",1},{"model_calls_reserved",0},{"parent_calls_held",0},{"revision",1},{"planned_children_reserved",0},{"parent_model_calls_reserved",0}}.dump();

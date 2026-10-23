@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 #pragma once
 // Instrumentation and adversarial probes around native worker components.
 // Process entry and product placement remain separate from this fixture.
@@ -23,7 +24,7 @@ template<class T,class F> std::future<T> ready(F f){std::promise<T> p;auto resul
 // the production adapter. The direct client remains for adversarial RPC probes.
 class ChildJournal:public AgentWorkerOrdinaryJournal {
 public:
-    explicit ChildJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
+    explicit ChildJournal(FixtureWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
     bool bound_to(const AgentWorkerClientContext& peer)const noexcept override{return native->bound_to(peer);}
     AgentWorkerJournalProgress progress()const override{return native->progress();}
     void own(const std::string& id){if(id!=peer.scope().run_id)throw Conflict("Child journal owner differs");}
@@ -74,7 +75,7 @@ public:
     std::future<Operation> cancel_operation(std::string id,OperationSpec actual)override{return native->cancel_operation(std::move(id),std::move(actual));}
     std::future<Operation> expire_operation(std::string id)override{return native->expire_operation(std::move(id));}
     std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},std::string inbox_id={})override{return native->start_prompt_run(std::move(id),std::move(session_id),std::move(prompt_json),std::move(budget),std::move(dynamic),std::move(inbox_id));}
-    AgentWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::shared_ptr<AgentWorkerOrdinaryJournal> native;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
+    FixtureWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::shared_ptr<AgentWorkerOrdinaryJournal> native;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
 };
 class ChildModel final:public AgentModelGateway {
 public:
@@ -111,7 +112,7 @@ inline void verify_closed_ports(AgentWorkerClosedPorts& closed){
     denied([&]{closed.runtime->a2a_catalog();});
 }
 struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
-inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
+inline Outcome execute(FixtureWorkerRpcPeer& peer,std::stop_token cancel={}){
     rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
     ChildJournal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();verify_closed_ports(closed);
     std::stop_source assembly_stop;assembly_stop.request_stop();rejects<TransportCancelled>([&]{execute_agent_worker_read_root(peer,assembly_stop.get_token());});

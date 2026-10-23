@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 // The actual shared AgentRunner loop in the child, through owned request/read
 // capabilities and authenticated journal facts. No local workspace is opened.
 namespace worker_read_runner_fixture {
@@ -25,7 +26,7 @@ public:
     ResponsesCompactionResult compact_context(const ChatProviderConfig& config,const ModelRequest& request,std::stop_token cancel)override{return native->compact_context(config,request,cancel);}
     Journal& journal;std::shared_ptr<AgentModelGateway> native;std::int64_t calls=0;
 };
-inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
+inline std::string execute(FixtureWorkerRpcPeer& peer,std::stop_token cancel={}){
     Journal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();worker_runner_fixture::verify_closed_ports(closed);auto model=std::make_shared<Model>(journal);auto workspace=make_agent_worker_read_workspace(peer,journal.native);
     const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Read admission metadata must omit backend destinations, credentials and deadlines");
     for(const auto* payload:{R"({"include_usage":false})",R"({"deadline_ms":999999})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});

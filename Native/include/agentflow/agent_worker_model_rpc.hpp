@@ -1,5 +1,5 @@
 #pragma once
-#include "agentflow/agent_worker_rpc.hpp"
+#include "agentflow/agent_worker_client_context.hpp"
 #include "agentflow/agent_worker_model_host.hpp"
 
 namespace agentflow {

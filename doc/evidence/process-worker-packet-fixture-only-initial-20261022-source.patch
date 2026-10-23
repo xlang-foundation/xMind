@@ -1,0 +1,732 @@
+diff --git a/Native/CMakeLists.txt b/Native/CMakeLists.txt
+index f8db2b5b..13616e8e 100644
+--- a/Native/CMakeLists.txt
++++ b/Native/CMakeLists.txt
+@@ -139,9 +139,6 @@ if(WIN32)
+   target_link_libraries(agentflow_ipc_runtime PUBLIC agentflow_xlang3)
+   add_library(agentflow_worker_channel STATIC src/agent_worker_channel.cpp)
+   target_link_libraries(agentflow_worker_channel PRIVATE agentflow_ipc_runtime agentflow_ipc_api)
+-  add_library(agentflow_worker_rpc STATIC src/agent_worker_rpc.cpp)
+-  target_include_directories(agentflow_worker_rpc PUBLIC include PRIVATE third_party)
+-  target_link_libraries(agentflow_worker_rpc PUBLIC agentflow_worker_channel PRIVATE Threads::Threads agentflow_ipc_api)
+   target_include_directories(agentflow_worker_channel PUBLIC include PRIVATE third_party)
+   target_link_libraries(agentflow_worker_channel PUBLIC agentflow_process agentflow_secrets PRIVATE bcrypt agentflow_xlang3)
+   add_library(agentflow_process_effects STATIC src/process_executor.cpp)
+@@ -231,12 +228,12 @@ add_library(agentflow_agent STATIC src/agent_worker_journal_host.cpp src/agent_w
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_file_rpc.cpp)
+   target_sources(agentflow_worker_model_rpc PRIVATE src/agent_worker_process_rpc.cpp src/agent_worker_remote_rpc.cpp src/agent_worker_callable_rpc.cpp)
+   target_include_directories(agentflow_worker_model_rpc PUBLIC include PRIVATE third_party)
+-  target_link_libraries(agentflow_worker_model_rpc PUBLIC agentflow_worker_rpc agentflow_agent agentflow_models agentflow_ipc_api)
++  target_link_libraries(agentflow_worker_model_rpc PUBLIC agentflow_worker_channel agentflow_agent agentflow_models agentflow_ipc_api)
+   add_library(agentflow_worker_journal_rpc STATIC src/agent_worker_journal_rpc.cpp)
+   target_sources(agentflow_worker_journal_rpc PRIVATE src/agent_worker_run_journal.cpp)
+   target_sources(agentflow_worker_journal_rpc PRIVATE src/agent_worker_retirement.cpp)
+   target_include_directories(agentflow_worker_journal_rpc PUBLIC include PRIVATE third_party)
+-  target_link_libraries(agentflow_worker_journal_rpc PUBLIC agentflow_worker_rpc agentflow_core agentflow_models agentflow_agent agentflow_ipc_api)
++  target_link_libraries(agentflow_worker_journal_rpc PUBLIC agentflow_worker_channel agentflow_core agentflow_models agentflow_agent agentflow_ipc_api)
+   add_library(agentflow_worker_runner STATIC src/agent_worker_runner.cpp)
+   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_entry.cpp)
+   target_sources(agentflow_worker_runner PRIVATE src/agent_worker_read_owner.cpp src/agent_worker_coding_owner.cpp src/agent_worker_coding_context.cpp src/agent_worker_context_window.cpp)
+@@ -343,6 +340,11 @@ if(WIN32)
+     "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:xmind_persistence_demo>")
+ endif()
+ if(BUILD_TESTING)
++  if(WIN32)
++    add_library(agentflow_worker_rpc_fixture STATIC tests/agent_worker_rpc_fixture.cpp tests/agent_worker_retirement_fixture.cpp)
++    target_include_directories(agentflow_worker_rpc_fixture PUBLIC include tests PRIVATE third_party)
++    target_link_libraries(agentflow_worker_rpc_fixture PUBLIC agentflow_worker_channel agentflow_worker_journal_rpc PRIVATE Threads::Threads agentflow_ipc_api)
++  endif()
+     add_executable(agentflow_root_work_executor_contract tests/root_work_executor_contract.cpp)
+     target_include_directories(agentflow_root_work_executor_contract PRIVATE include)
+     add_test(NAME native_root_work_executor_contract COMMAND agentflow_root_work_executor_contract)
+@@ -531,7 +533,7 @@ if(BUILD_TESTING)
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_context_control_contract>")
+     add_executable(agentflow_agent_worker_native_execution_contract tests/agent_worker_native_execution_contract.cpp)
+     target_include_directories(agentflow_agent_worker_native_execution_contract PRIVATE third_party)
+-    target_link_libraries(agentflow_agent_worker_native_execution_contract PRIVATE agentflow_ipc_api agentflow_worker_rpc)
++    target_link_libraries(agentflow_agent_worker_native_execution_contract PRIVATE agentflow_ipc_api agentflow_worker_channel)
+     add_custom_command(TARGET agentflow_agent_worker_native_execution_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_native_execution_contract>")
+     add_test(NAME native_agent_worker_native_execution_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_native_execution_contract>")
+     set_tests_properties(native_agent_worker_native_execution_contract PROPERTIES TIMEOUT 30)
+@@ -941,7 +943,7 @@ if(BUILD_TESTING)
+     add_executable(agentflow_agent_worker_model_rpc_contract tests/agent_worker_model_rpc_contract.cpp)
+     target_include_directories(agentflow_agent_worker_model_rpc_contract PRIVATE third_party third_party/cpp-httplib)
+     target_compile_definitions(agentflow_agent_worker_model_rpc_contract PRIVATE WIN32_LEAN_AND_MEAN)
+-    target_link_libraries(agentflow_agent_worker_model_rpc_contract PRIVATE agentflow_worker_runner agentflow_runtime)
++    target_link_libraries(agentflow_agent_worker_model_rpc_contract PRIVATE agentflow_worker_runner agentflow_runtime agentflow_worker_rpc_fixture)
+     add_dependencies(agentflow_agent_worker_model_rpc_contract xmind)
+     add_custom_command(TARGET agentflow_agent_worker_model_rpc_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_agent_worker_model_rpc_contract>")
+diff --git a/Native/include/agentflow/agent_worker_callable_rpc.hpp b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+index 88bdf3c3..e3865723 100644
+--- a/Native/include/agentflow/agent_worker_callable_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_callable_rpc.hpp
+@@ -1,5 +1,5 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_callable_host.hpp"
+ namespace agentflow {
+ class AgentWorkerCallableClient final:public AgentCallableToolHost {
+diff --git a/Native/include/agentflow/agent_worker_file_rpc.hpp b/Native/include/agentflow/agent_worker_file_rpc.hpp
+index bb61e419..9b6125bb 100644
+--- a/Native/include/agentflow/agent_worker_file_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_file_rpc.hpp
+@@ -1,5 +1,5 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_file_host.hpp"
+ namespace agentflow {
+ class AgentWorkerFileClient final:public AgentFileToolHost {
+diff --git a/Native/include/agentflow/agent_worker_journal_rpc.hpp b/Native/include/agentflow/agent_worker_journal_rpc.hpp
+index ad3f4aeb..5ffb6c54 100644
+--- a/Native/include/agentflow/agent_worker_journal_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_journal_rpc.hpp
+@@ -1,6 +1,6 @@
+ #pragma once
+ #include "agentflow/agent_worker_journal_host.hpp"
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_records.hpp"
+ 
+ namespace agentflow {
+diff --git a/Native/include/agentflow/agent_worker_model_rpc.hpp b/Native/include/agentflow/agent_worker_model_rpc.hpp
+index 00dbebca..cdea03f0 100644
+--- a/Native/include/agentflow/agent_worker_model_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_model_rpc.hpp
+@@ -1,5 +1,5 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_model_host.hpp"
+ 
+ namespace agentflow {
+diff --git a/Native/include/agentflow/agent_worker_process_rpc.hpp b/Native/include/agentflow/agent_worker_process_rpc.hpp
+index e8d4a9b9..91f3aeeb 100644
+--- a/Native/include/agentflow/agent_worker_process_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_process_rpc.hpp
+@@ -1,5 +1,5 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_process_host.hpp"
+ namespace agentflow {
+ class AgentWorkerProcessClient final:public AgentProcessOwnerHost {
+diff --git a/Native/include/agentflow/agent_worker_read_rpc.hpp b/Native/include/agentflow/agent_worker_read_rpc.hpp
+index 9ec7bc74..3bae12f2 100644
+--- a/Native/include/agentflow/agent_worker_read_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_read_rpc.hpp
+@@ -1,5 +1,5 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_read_host.hpp"
+ namespace agentflow {
+ class AgentWorkerReadClient final:public AgentReadToolHost {
+diff --git a/Native/include/agentflow/agent_worker_remote_rpc.hpp b/Native/include/agentflow/agent_worker_remote_rpc.hpp
+index 533da8d2..02a7808d 100644
+--- a/Native/include/agentflow/agent_worker_remote_rpc.hpp
++++ b/Native/include/agentflow/agent_worker_remote_rpc.hpp
+@@ -1,5 +1,5 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_remote_host.hpp"
+ namespace agentflow {
+ class AgentWorkerRemoteClient final:public AgentRemoteToolHost {
+diff --git a/Native/include/agentflow/agent_worker_retirement.hpp b/Native/include/agentflow/agent_worker_retirement.hpp
+index d7444406..06c34d11 100644
+--- a/Native/include/agentflow/agent_worker_retirement.hpp
++++ b/Native/include/agentflow/agent_worker_retirement.hpp
+@@ -1,26 +1,14 @@
+ #pragma once
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agentflow/agent_worker_client_context.hpp"
+ #include "agentflow/agent_worker_records.hpp"
+ #include "agentflow/records.hpp"
+ 
+ namespace agentflow {
+ class PersistenceService;
++class NativeExecutionClient;
+ struct AgentWorkerTerminalObservation {Run run;std::uint32_t exit_code=0;};
+-// Backend owner only; never call in an RPC handler/sink. External call threads
+-// must already have joined. Captured process identity and the exact channel
+-// are checked before shutdown. Retains ownership on timeout or recording error;
+-// the caller may observe the same process again, never infer death or retry work.
+-AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
+-    PersistenceService&,AgentWorkerProcess&,AgentWorkerRpcPeer&,
+-    const AgentWorkerLeaseSpec&,RunState,const std::string& reason,
+-    AgentWorkerChannel::Deadline observation_deadline);
+-// Completion already committed atomically with lease retirement. Observe and
+-// drain that exact child without another terminal write, even if its reply was
+-// lost or it exited nonzero. Reobservation is read-only; timeout retains the
+-// same process/peer ownership. External call threads must already have joined.
+-AgentWorkerTerminalObservation drain_completed_agent_worker(
+-    PersistenceService&,AgentWorkerProcess&,AgentWorkerRpcPeer&,
+-    const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline observation_deadline);
++// Owner-only SDK drain validates exact process/lease identity and preserves
++// ownership on observation timeout; it never restarts or replays work.
+ // Product path: native SDK execution control, no packet peer.
+ AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
+     PersistenceService&,AgentWorkerProcess&,NativeExecutionClient&,
+diff --git a/Native/src/agent_worker_retirement.cpp b/Native/src/agent_worker_retirement.cpp
+index d2ccb413..dbb443a3 100644
+--- a/Native/src/agent_worker_retirement.cpp
++++ b/Native/src/agent_worker_retirement.cpp
+@@ -1,50 +1,8 @@
+ #include "agentflow/agent_worker_retirement.hpp"
+-#include "agentflow/persistence_service.hpp"
+-#include <set>
+-#include <algorithm>
++#include "agent_worker_retirement_checks.hpp"
+ #include "agentflow/agent_worker_native_execution.hpp"
+-
+ namespace agentflow {
+-namespace {
+-void process_identity(AgentWorkerProcess& worker,const AgentWorkerScope& scope,const AgentWorkerLeaseSpec& lease){
+-    const AgentWorkerScope expected{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision};
+-    if(worker.pid()!=lease.pid||std::to_string(worker.creation_time())!=lease.creation_time||worker.executable_identity()!=lease.executable_identity||
+-       worker.channel().scope()!=expected||scope!=expected)
+-        throw Conflict("Worker drain differs from its captured process and channel");
+-}
+-bool dynamic_completed(PersistenceService& store,const AgentWorkerLeaseSpec& lease,const Run& run,const ChildAdmissionRecord& child){
+-    if(child.kind!=ChildAdmissionKind::dynamic_agent||store.root_budget(lease.root_run_id).get().spec.policy_id!="native.dynamic-plan")return false;const auto plan=store.dynamic_plan(child.plan_id).get();const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& n){return n.child_run_id==run.id;});const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});return plan.root_run_id==lease.root_run_id&&run.parent_id==plan.owner_run_id&&node!=plan.nodes.end()&&preset!=plan.capabilities.presets.end()&&(node->state==DynamicNodeState::claimed||node->state==DynamicNodeState::settled)&&node->claim_id==child.claim_id&&node->definition_revision==child.definition_revision&&node->claim_revision==child.claim_revision&&node->definition.label==child.node_label&&node->definition.preset_id==preset->id&&node->definition.preset_revision==preset->revision&&child.backend_identity==preset->backend_identity;
+-}
+-Run completed(PersistenceService& store,const AgentWorkerLeaseSpec& lease){
+-    const auto captured=store.agent_worker_lease(lease.generation).get();
+-    const auto run=store.run(lease.owner_run_id).get();
+-    if(captured.spec!=lease||captured.state!="retired"||captured.retirement_reason!="completed"||
+-       run.id!=lease.owner_run_id||run.state!=RunState::completed||run.graph_root||(lease.root_run_id==lease.owner_run_id?!run.parent_id.empty():(run.parent_id.empty()||store.child_admission(run.id).get().root_run_id!=lease.root_run_id)))
+-        throw Conflict("Worker drain has no captured canonical completion");
+-    if(lease.root_run_id!=lease.owner_run_id){const auto child=store.child_admission(run.id).get();if(child.root_run_id!=lease.root_run_id||!((child.kind==ChildAdmissionKind::delegated_leaf&&child.preset_id=="workspace.inspect"&&child.preset_revision==1)||(child.kind==ChildAdmissionKind::graph_agent&&!child.graph_node_path.empty()&&store.root_budget(lease.root_run_id).get().spec.policy_id=="native.graph-context")||dynamic_completed(store,lease,run,child)))throw Conflict("Completed worker differs from captured child admission");}
+-    return run;
+-}
+-}
+-AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
+-    PersistenceService& store,AgentWorkerProcess& worker,AgentWorkerRpcPeer& peer,
+-    const AgentWorkerLeaseSpec& lease,RunState outcome,const std::string& reason,
+-    AgentWorkerChannel::Deadline deadline){
+-    const std::set<std::string> failures{"deadline","provider_failure","worker_exit","dispatch_error"};
+-    if(!((outcome==RunState::cancelled&&reason=="cancelled")||(outcome==RunState::failed&&failures.contains(reason))))
+-        throw std::invalid_argument("Invalid worker terminal observation");
+-    process_identity(worker,peer.scope(),lease);
+-    // Revalidate current durable authority before shutting down the captured
+-    // process. The terminal transaction repeats ownership validation after drain.
+-    store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
+-    const auto exit=peer.drain(worker,deadline);
+-    return {store.terminate_agent_worker(lease,outcome,reason).get(),exit};
+-}
+-AgentWorkerTerminalObservation drain_completed_agent_worker(PersistenceService& store,AgentWorkerProcess& worker,
+-    AgentWorkerRpcPeer& peer,const AgentWorkerLeaseSpec& lease,AgentWorkerChannel::Deadline deadline){
+-    process_identity(worker,peer.scope(),lease);(void)completed(store,lease);
+-    const auto exit=peer.drain(worker,deadline);
+-    return {completed(store,lease),exit};
+-}
++using namespace worker_retirement_detail;
+ AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
+     PersistenceService& store,AgentWorkerProcess& worker,NativeExecutionClient& control,
+     const AgentWorkerLeaseSpec& lease,RunState outcome,const std::string& reason,AgentWorkerChannel::Deadline deadline){
+diff --git a/Native/src/agent_worker_retirement_checks.hpp b/Native/src/agent_worker_retirement_checks.hpp
+new file mode 100644
+index 00000000..d60a846d
+--- /dev/null
++++ b/Native/src/agent_worker_retirement_checks.hpp
+@@ -0,0 +1,25 @@
++#pragma once
++#include "agentflow/agent_worker_retirement.hpp"
++#include "agentflow/persistence_service.hpp"
++#include <set>
++#include <algorithm>
++namespace agentflow::worker_retirement_detail {
++inline void process_identity(AgentWorkerProcess& worker,const AgentWorkerScope& scope,const AgentWorkerLeaseSpec& lease){
++    const AgentWorkerScope expected{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision};
++    if(worker.pid()!=lease.pid||std::to_string(worker.creation_time())!=lease.creation_time||worker.executable_identity()!=lease.executable_identity||
++       worker.channel().scope()!=expected||scope!=expected)
++        throw Conflict("Worker drain differs from its captured process and channel");
++}
++inline bool dynamic_completed(PersistenceService& store,const AgentWorkerLeaseSpec& lease,const Run& run,const ChildAdmissionRecord& child){
++    if(child.kind!=ChildAdmissionKind::dynamic_agent||store.root_budget(lease.root_run_id).get().spec.policy_id!="native.dynamic-plan")return false;const auto plan=store.dynamic_plan(child.plan_id).get();const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& n){return n.child_run_id==run.id;});const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});return plan.root_run_id==lease.root_run_id&&run.parent_id==plan.owner_run_id&&node!=plan.nodes.end()&&preset!=plan.capabilities.presets.end()&&(node->state==DynamicNodeState::claimed||node->state==DynamicNodeState::settled)&&node->claim_id==child.claim_id&&node->definition_revision==child.definition_revision&&node->claim_revision==child.claim_revision&&node->definition.label==child.node_label&&node->definition.preset_id==preset->id&&node->definition.preset_revision==preset->revision&&child.backend_identity==preset->backend_identity;
++}
++inline Run completed(PersistenceService& store,const AgentWorkerLeaseSpec& lease){
++    const auto captured=store.agent_worker_lease(lease.generation).get();
++    const auto run=store.run(lease.owner_run_id).get();
++    if(captured.spec!=lease||captured.state!="retired"||captured.retirement_reason!="completed"||
++       run.id!=lease.owner_run_id||run.state!=RunState::completed||run.graph_root||(lease.root_run_id==lease.owner_run_id?!run.parent_id.empty():(run.parent_id.empty()||store.child_admission(run.id).get().root_run_id!=lease.root_run_id)))
++        throw Conflict("Worker drain has no captured canonical completion");
++    if(lease.root_run_id!=lease.owner_run_id){const auto child=store.child_admission(run.id).get();if(child.root_run_id!=lease.root_run_id||!((child.kind==ChildAdmissionKind::delegated_leaf&&child.preset_id=="workspace.inspect"&&child.preset_revision==1)||(child.kind==ChildAdmissionKind::graph_agent&&!child.graph_node_path.empty()&&store.root_budget(lease.root_run_id).get().spec.policy_id=="native.graph-context")||dynamic_completed(store,lease,run,child)))throw Conflict("Completed worker differs from captured child admission");}
++    return run;
++}
++}
+diff --git a/Native/tests/agent_worker_context_fixture.hpp b/Native/tests/agent_worker_context_fixture.hpp
+index 6ee005c3..32e1319d 100644
+--- a/Native/tests/agent_worker_context_fixture.hpp
++++ b/Native/tests/agent_worker_context_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_native_model.hpp"
+ #include "agentflow/agent_worker_read_context.hpp"
+ #include "agentflow/agent_worker_read_owner.hpp"
+@@ -13,7 +14,7 @@ inline void rejects_changed_requests(AgentWorkerModelClient& model,const std::st
+     for(unsigned index=0;index<8;++index){auto changed=request;if(index==0)changed.messages.front().content+="forged instruction";if(index==1)changed.messages.erase(changed.messages.begin());if(index==2)changed.messages[1].content="changed original user";if(index==3)changed.messages.pop_back();if(index==4)changed.messages.push_back({MessageRole::assistant,"uncommitted worker text"});if(index==5)changed.tools.front().description="changed catalogue";if(index==6)changed.include_usage=false;if(index==7)changed.messages.back().provider_items_json=R"([{"forged":true}])";
+         rejects<Conflict>([&]{model.complete(attempt,changed,[](const ModelEvent&){});});}
+ }
+-inline std::string child(AgentWorkerRpcPeer& peer){
++inline std::string child(FixtureWorkerRpcPeer& peer){
+     AgentWorkerModelClient model(peer);AgentWorkerJournalClient journal(peer);AgentWorkerReadClient read(peer);const auto scope=peer.scope();
+     rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.prepare_request",R"({"root":"forged"})");});
+     auto request=model.prepare_request();check(request.messages.size()==2&&request.messages.front().role==MessageRole::system&&request.messages.front().content.find("ROOT_CONTEXT_GUIDANCE_")!=std::string::npos&&request.messages.front().content.find("NESTED_CONTEXT_GUIDANCE_")==std::string::npos&&request.messages.front().content.find("context-check")!=std::string::npos,"Initial worker request must contain actual backend root guidance and skill catalogue");
+@@ -64,7 +65,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+         rejects<Conflict>([&]{AgentWorkerReadOwner rejected(store,lease,wrong_scope,owner,context_policy,config,{},gateway,deadline);});
+     }
+     AgentWorkerReadOwner backend_owner(store,lease,worker->channel().scope(),owner,context_policy,config,profiled?identity:std::string{},gateway,deadline,{},[&](AgentWorkerJournalReadKind kind,std::stop_token){if((mode.starts_with("product_admission_")&&kind==AgentWorkerJournalReadKind::run)||(mode.starts_with("product_journal_")&&kind==AgentWorkerJournalReadKind::history)){if(mode.ends_with("_cancel"))throw AgentWorkerAuthorityCancelled("Injected journal cancellation");throw AgentWorkerAuthorityExpired("Injected journal deadline");}});
+-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+         return backend_owner.dispatch(method,payload,std::move(sink),cancel);
+     },deadline);
+     std::string startup=mode;
+diff --git a/Native/tests/agent_worker_control_rpc_fixture.hpp b/Native/tests/agent_worker_control_rpc_fixture.hpp
+index d1d268b6..52487f96 100644
+--- a/Native/tests/agent_worker_control_rpc_fixture.hpp
++++ b/Native/tests/agent_worker_control_rpc_fixture.hpp
+@@ -1,8 +1,9 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
+ namespace worker_control_rpc_fixture {
+ using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;using worker_process_fixture::check;using worker_process_fixture::rejects;
+-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& method){
++inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& method){
+     const auto calls=Json::parse(peer.call("fixture.control_input","{}"));check(calls.is_array()&&calls.size()==2,"Control child requires exactly its captured wait and stop");const auto index=method=="fixture.wait"?0:1;check(method=="fixture.wait"||method=="fixture.stop","Control fixture method is closed");AgentWorkerProcessClient client(peer);const auto call=AgentProcessToolInvocation::parse(calls.at(index).get<std::string>());auto forged=Json::parse(call.serialize());forged["operation_id"]="forged";rejects<AgentWorkerRpcRemoteError>([&]{peer.call("process.invoke",forged.dump());});const auto result=client.invoke(call);rejects<Conflict>([&]{client.invoke(call);});return Json{{"pid",GetCurrentProcessId()},{"success",result.success},{"output_json",result.output_json}}.dump();
+ }
+ inline void parent(const std::shared_ptr<const BoundProcessExecutable>& image,const std::filesystem::path& folder,const std::vector<std::string>& imports){
+@@ -14,7 +15,7 @@ inline void parent(const std::shared_ptr<const BoundProcessExecutable>& image,co
+     std::stop_source stop;struct SeedStop{std::stop_source& value;~SeedStop(){value.request_stop();}} seed_stop{stop};auto started=std::async(std::launch::async,[&]{return local->invoke(seed,stop.get_token());});std::optional<Operation> pending;const auto until=Clock::now()+5s;while(Clock::now()<until&&!pending){for(const auto& op:store.operations("run").get())if(op.state==OperationState::awaiting_approval)pending=op;if(!pending)std::this_thread::sleep_for(5ms);}check(pending.has_value(),"Actual service requires controller approval");store.decide_operation(pending->id,OperationDecision::allow,"fixture-controller").get();check(started.get().success,"Actual service must start");const auto ready=Clock::now()+5s;while(!std::filesystem::exists(directory/"ready.txt")&&Clock::now()<ready)std::this_thread::sleep_for(5ms);check(std::filesystem::exists(directory/"ready.txt"),"Actual service must enter before control RPC");
+     std::vector<AgentProcessToolInvocation> calls;Json input=Json::array();ModelCompletion response{"","","tool_calls","{}",{},"[]"};for(const auto* name:{"wait_process","stop_process"}){auto call=seed;call.attempt_id="control-model";call.call_id=name;call.tool_name=name;Json args={{"job_id",pending->id}};if(call.tool_name=="wait_process")args["timeout_ms"]=1;call.arguments_json=args.dump();calls.push_back(call);input.push_back(call.serialize());response.tool_calls.push_back({call.call_id,call.tool_name,call.arguments_json});}
+     store.reserve_agent_worker_model(lease,"control-model",deadline).get();store.start_agent_worker_model(lease,"control-model",deadline).get();AgentWorkerModelClaimSpec model{lease.generation,"run","run","control-model",context_digest("synthetic captured control RPC input")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-process-fixture",23,5)).get();store.finish_agent_worker_model(lease,"control-model",deadline).get();
+-    owner.allow_background=false;AgentWorkerProcessHost host(store,lease,owner,deadline);auto dispatch=bind_agent_worker_process_rpc(host,worker->channel().scope());AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(method=="fixture.control_input")return input.dump();return dispatch(method,payload,std::move(sink),cancel);},deadline);worker->channel().send({"fixture.boot","control_rpc"},deadline);peer.start();
++    owner.allow_background=false;AgentWorkerProcessHost host(store,lease,owner,deadline);auto dispatch=bind_agent_worker_process_rpc(host,worker->channel().scope());FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(method=="fixture.control_input")return input.dump();return dispatch(method,payload,std::move(sink),cancel);},deadline);worker->channel().send({"fixture.boot","control_rpc"},deadline);peer.start();
+     const auto wait=Json::parse(peer.call("fixture.wait","{}"));check(wait.at("pid")==worker->pid()&&wait.at("success")==true&&Json::parse(wait.at("output_json").get<std::string>()).at("state")=="running"&&store.operation(pending->id).get().state==OperationState::executing,"Actual distinct child must observe its service without inventing exit");const auto stopped=Json::parse(peer.call("fixture.stop","{}"));check(stopped.at("pid")==worker->pid()&&stopped.at("success")==true&&Json::parse(stopped.at("output_json").get<std::string>()).at("state")=="succeeded"&&Json::parse(store.operation(pending->id).get().result_json).at("service_stopped")==true,"Actual child stop must retain confirmed native service retirement");
+     for(const auto& call:calls){const auto saved=store.agent_worker_process_claim("run",call.attempt_id,call.call_id).get();check(saved.state=="returned"&&saved.success&&saved.operation_ids==std::vector<std::string>{pending->id},"Control RPC must persist each exact result before delivery");}const auto turn=store.commit_agent_worker_workspace_turn(lease,"control-model",deadline).get();check(turn.message_sequences.size()==3&&store.operations("run").get().size()==1,"Control RPC cannot replay or create another process");peer.stop();check(worker->wait(Clock::now()+5s)==0,"Control RPC child must physically drain");store.retire_agent_worker(lease.generation,"cancelled").get();store.transition("run",RunState::running,RunState::cancelled).get();
+     std::cout<<"Actual child wait/stop RPC verified xlang3 service readiness, exact running observation, intentional native stop, durable canonical results, duplicate rejection and physical child drain. Synthetic model receipt; no provider request."<<std::endl;
+diff --git a/Native/tests/agent_worker_file_fixture.hpp b/Native/tests/agent_worker_file_fixture.hpp
+index 61efbcef..2333536b 100644
+--- a/Native/tests/agent_worker_file_fixture.hpp
++++ b/Native/tests/agent_worker_file_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_file_rpc.hpp"
+ #include "agentflow/create_executor.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+@@ -9,7 +10,7 @@ inline void check(bool value,const char* message){if(!value)throw std::runtime_e
+ template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected actual child file RPC rejection");}
+ inline std::string read(const std::filesystem::path& path){std::ifstream input(path,std::ios::binary);check(bool(input),"Actual native RPC file missing");return {std::istreambuf_iterator<char>(input),{}};}
+ inline AgentFileToolInvocation invocation(const AgentWorkerScope& scope,const ModelToolCall& tool){AgentFileToolInvocation call;call.run_id=scope.run_id;call.attempt_id="file-attempt";call.call_id=tool.id;call.workspace_id=scope.workspace_id;call.workspace_revision=scope.workspace_revision;call.folder_id=Json::parse(tool.arguments_json).value("folder_id",scope.workspace_id);call.tool_name=tool.name;call.arguments_json=tool.arguments_json;return call;}
+-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
++inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
+     AgentWorkerFileClient files(peer);AgentWorkerJournalClient journal(peer);
+     if(method=="fixture.stale"){AgentFileToolInvocation stale;stale.run_id=peer.scope().run_id;stale.attempt_id="file-attempt";stale.call_id="actual-file";stale.workspace_id=peer.scope().workspace_id;stale.folder_id=stale.workspace_id;stale.workspace_revision=peer.scope().workspace_revision;stale.tool_name="create_file";stale.arguments_json=R"({"path":"actual.txt","content":"never replay"})";rejects<Conflict>([&]{files.invoke(stale);});return "stale-file-rejected";}
+     const auto input=decode_agent_model_request(peer.call("fixture.file_input",""));journal.reserve_model_call("file-attempt");journal.start_model_call("file-attempt");AgentWorkerModelClient model(peer);const auto response=model.complete("file-attempt",input,[](const ModelEvent&){});
+@@ -47,7 +48,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     ModelRequest input;input.include_usage=true;input.messages.push_back({MessageRole::user,"Native child file RPC "+mode+". "+marker});input.tools={CreateExecutor::definition()};ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
+     AgentWorkerModelHost model(store,lease,config,input.tools,AgentWorkerModelPolicy{true,{}},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),deadline);auto model_rpc=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_rpc=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
+     const auto claim=[&]{return store.agent_worker_file_claim(id,"file-attempt","actual-file").get();};std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();
+-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+         if(method=="fixture.file_input")return encode_agent_model_request(input);
+         if(method=="fixture.rebuild_file_host"){host=std::make_unique<AgentWorkerFileHost>(store,lease,owner,deadline);dispatch=bind_agent_worker_file_rpc(*host,worker->channel().scope());return "rebuilt";}
+         if(method=="fixture.await_file_pending"||method=="fixture.await_file_cancelled"){const auto until=Clock::now()+5s;while(Clock::now()<until&&!cancel.stop_requested()){const auto operations=store.operations(id).get();if(method=="fixture.await_file_pending"&&operations.size()==1&&operations[0].state==OperationState::awaiting_approval)return "pending";if(method=="fixture.await_file_cancelled"&&operations.size()==1&&operations[0].state==OperationState::cancelled&&claim().state=="returned")return "cancelled";std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual file RPC approval/cancellation deadline");}
+@@ -58,7 +59,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     },deadline);
+     std::unique_ptr<XlangSqlite> sql;if(mode=="file_unrecorded"){sql=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);sql->execute("CREATE TRIGGER fixture_file_rpc_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-file-claims' AND json_extract(NEW.payload,'$.state')='returned' AND json_extract(NEW.payload,'$.model.owner_run_id')='rpc-file_unrecorded' BEGIN SELECT RAISE(ABORT,'fixture_file_rpc_result_abort'); END");}
+     worker->channel().send({"fixture.boot",mode},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});
+-    struct Cleanup{AgentWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
++    struct Cleanup{FixtureWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
+     if(mode!="file_denied"&&mode!="file_cancel"){
+         const auto until=Clock::now()+5s;std::optional<Operation> pending;
+         while(Clock::now()<until){for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval)pending=op;if(pending)break;if(task.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Actual file child returned before approval: "+task.get());std::this_thread::sleep_for(5ms);}
+diff --git a/Native/tests/agent_worker_journal_role_fixture.hpp b/Native/tests/agent_worker_journal_role_fixture.hpp
+index 69bad512..2ac32fa7 100644
+--- a/Native/tests/agent_worker_journal_role_fixture.hpp
++++ b/Native/tests/agent_worker_journal_role_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ // Real authenticated SDK IPC with deliberately synthetic journal replies.
+ // This proves client scope/role decoding, not repository child admission.
+ #pragma once
+@@ -12,7 +13,7 @@ using Json=nlohmann::json;
+ using Clock=std::chrono::steady_clock;
+ using namespace std::chrono_literals;
+ inline void check(bool value,const char* message){if(!value){std::cerr<<message<<std::endl;throw std::runtime_error(message);}}
+-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& method){
++inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& method){
+     if(method!="fixture.run")throw AgentWorkerRpcRemoteError("unsupported");
+     const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
+     AgentWorkerJournalClient journal(peer);unsigned rejected=0;const bool graph=scope.root_id=="journal-graph-root";
+@@ -36,7 +37,7 @@ inline void parent(std::shared_ptr<const BoundProcessExecutable> image){
+         AgentWorkerScope scope{graph?"journal-graph-root":"journal-role-root",leaf?"journal-role-leaf":"journal-role-root","workspace:none",leaf?"journal-leaf-generation":"journal-parent-generation",1};
+         auto worker=AgentWorkerProcess::launch(image,scope,deadline);
+         unsigned calls=0;std::string active_attempt;
+-        AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
++        FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
+             if(graph&&method=="journal.workspace_mode")return R"({"coding":false})";
+             if(graph&&method=="journal.run")return Json{{"id",scope.run_id},{"session_id","synthetic-graph-session"},{"state","queued"},{"parent_id","nested-graph-invocation"},{"node_id","reader"},{"graph_root",false},{"provider_context_json",""}}.dump();
+             if(graph&&method=="journal.root_budget")return Json{{"root_run_id",scope.root_id},{"spec",{{"policy_id","native.graph-context"},{"policy_revision",1},{"workspace_identity","workspace:none"},{"provider_identity_json",R"({"wire":"responses","model_id":"synthetic-graph-model"})"},{"max_children",8},{"max_parallel",2},{"max_model_calls",32},{"wall_limit_ms",20000}}},{"children_admitted",1},{"model_calls_reserved",0},{"parent_calls_held",0},{"revision",1},{"planned_children_reserved",0},{"parent_model_calls_reserved",0}}.dump();
+diff --git a/Native/tests/agent_worker_model_rpc_contract.cpp b/Native/tests/agent_worker_model_rpc_contract.cpp
+index ff99e8e4..3db0c2c0 100644
+--- a/Native/tests/agent_worker_model_rpc_contract.cpp
++++ b/Native/tests/agent_worker_model_rpc_contract.cpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ // Actual private child/channel and native HTTP/SSE, controlled provider data.
+ // Model and native read proxies plus a plain AgentRunner fixture; product
+ // worker placement and an actual child coding AgentRunner remain open.
+@@ -89,8 +90,8 @@ int child(int argc,char** argv){
+     if(mode=="duplicate"){
+         const auto frame=Json{{"version",1},{"id",1},{"method","fixture.ping"},{"payload",""}}.dump();channel->send({"rpc.request",frame},Clock::now()+5s);const auto response=channel->receive(Clock::now()+5s);require(response.operation=="rpc.response","First raw RPC must be admitted");channel->send({"rpc.request",frame},Clock::now()+5s);rejects<AgentWorkerProtocolError>([&]{channel->receive(Clock::now()+5s);});return 0;
+     }
+-    AgentWorkerRpcPeer* self=nullptr;std::stop_source runner_stop;
+-    AgentWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token handler_cancel)->std::string{
++    FixtureWorkerRpcPeer* self=nullptr;std::stop_source runner_stop;
++    FixtureWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token handler_cancel)->std::string{
+         if(mode=="journal_role")return worker_journal_role_fixture::child(*self,method);
+         if(mode=="control_rpc")return worker_control_rpc_fixture::child(*self,method);
+         if(mode=="remote_rpc")return worker_remote_rpc_fixture::child(*self,method);
+@@ -155,7 +156,7 @@ int child(int argc,char** argv){
+     },Clock::now()+20s);self=&peer;peer.start();peer.wait_closed();peer.stop();if(held_exit.value)require(WaitForSingleObject(held_exit.value,10000)==WAIT_OBJECT_0,"Completed child waits for explicit physical release");return 0;
+ }
+ void duplicate_rpc(const std::shared_ptr<const BoundProcessExecutable>& image){
+-    auto worker=AgentWorkerProcess::launch(image,{"rpc-protocol","rpc-protocol","rpc-workspace","rpc-protocol-generation",7},Clock::now()+5s);worker->channel().send({"fixture.boot","duplicate"},Clock::now()+5s);std::atomic<unsigned> accepted=0;AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string&,AgentWorkerRpcSink,std::stop_token){require(method=="fixture.ping","Unexpected replay fixture method");++accepted;return std::string("pong");},Clock::now()+10s);peer.start();peer.wait_closed();peer.stop();require(accepted==1&&worker->wait(Clock::now()+5s)==0,"New authenticated frame with replayed RPC ID must not redispatch its handler");
++    auto worker=AgentWorkerProcess::launch(image,{"rpc-protocol","rpc-protocol","rpc-workspace","rpc-protocol-generation",7},Clock::now()+5s);worker->channel().send({"fixture.boot","duplicate"},Clock::now()+5s);std::atomic<unsigned> accepted=0;FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string&,AgentWorkerRpcSink,std::stop_token){require(method=="fixture.ping","Unexpected replay fixture method");++accepted;return std::string("pong");},Clock::now()+10s);peer.start();peer.wait_closed();peer.stop();require(accepted==1&&worker->wait(Clock::now()+5s)==0,"New authenticated frame with replayed RPC ID must not redispatch its handler");
+ }
+ void root(PersistenceService& store,const std::string& id,const std::string& identity){
+     const bool runner=id=="rpc-runner"||id=="rpc-runner_error"||id=="rpc-runner_cancel";store.create_session(id,"Controlled cross-process model RPC").get();RootBudgetSpec budget{"native.direct-agent",1,runner?"workspace:none":"rpc-workspace",identity,0,0,8,600000};
+@@ -170,7 +171,7 @@ void drain_timeout(PersistenceService& store,const std::shared_ptr<const BoundPr
+     auto worker=AgentWorkerProcess::launch(image,{id,id,"rpc-workspace",generation,7},Clock::now()+5s);const auto pid=worker->pid();const auto birth=worker->creation_time();const auto lease=store.admit_agent_worker({generation,id,id,"rpc-workspace",7,pid,std::to_string(birth),worker->executable_identity(),identity}).get().spec;
+     store.reserve_model_call(id,id,"held-without-dispatch",ModelCallRole::parent).get();
+     worker->channel().send({"fixture.boot","drain_wait"},Clock::now()+5s);worker->channel().send({"fixture.wait_control",std::string(name.begin(),name.end())},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="fixture.waiting","Child must acknowledge its explicit blocked exit boundary");
+-    AgentWorkerRpcPeer peer(worker->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw std::runtime_error("Unexpected drain-only RPC");},Clock::now()+10s);peer.start();const auto events=store.events(id).get().size();
++    FixtureWorkerRpcPeer peer(worker->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw std::runtime_error("Unexpected drain-only RPC");},Clock::now()+10s);peer.start();const auto events=store.events(id).get().size();
+     rejects<AgentWorkerChannelTimeout>([&]{drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::cancelled,"cancelled",Clock::now()-1ms);});
+     require(worker->alive()&&!peer.alive()&&worker->pid()==pid&&worker->creation_time()==birth&&store.run(id).get().state==RunState::running&&store.agent_worker_lease(generation).get().state=="active"&&store.events(id).get().size()==events&&store.root_budget(id).get().model_calls_reserved==1,"Observation timeout must retain the exact live child and durable ownership without terminal commit or charge reset");
+     require(SetEvent(release.value)!=0,"Only explicit owner release may unblock the child");const auto terminal=drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::cancelled,"cancelled",Clock::now()+5s);
+@@ -193,7 +194,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
+     const auto before_rejected_mutation=store.root_budget(id).get().model_calls_reserved;
+     for(auto* handler:{&expired,&cancelled_read})for(const auto* method:{"journal.reserve_model","journal.start_model","journal.finish_model","journal.complete_run"})rejects<AgentWorkerRpcRemoteError>([&]{(*handler)(method,R"({"attempt_id":"expired-or-cancelled"})",{},{});});
+     auto wrong_process=lease;++wrong_process.pid;rejects<Conflict>([&]{store.reserve_agent_worker_model(wrong_process,"wrong-process",deadline).get();});require(store.root_budget(id).get().model_calls_reserved==before_rejected_mutation,"Rejected deadline/cancelled/foreign-process mutations must leave allowance unchanged");
+-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+         // Fixture-only malformed authenticated replies exercise the child decoder;
+         // they never enter production dispatch or claim an inference attempt.
+         if(mode=="normal"&&method=="journal.commit_read_turn"){
+@@ -243,7 +244,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
+         if(mode=="cancel"||mode=="overflow"||mode=="other_error"){
+             auto wrong=lease;++wrong.pid;rejects<Conflict>([&]{drain_and_terminate_agent_worker(store,*worker,peer,wrong,RunState::cancelled,"cancelled",Clock::now()+5s);});require(worker->alive()&&peer.alive(),"Identity mismatch must not stop the actual owned worker or RPC");
+             if(mode=="cancel"){
+-                auto other=AgentWorkerProcess::launch(image,worker->channel().scope(),Clock::now()+5s);AgentWorkerRpcPeer alien(other->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token){return std::string{};},Clock::now()+5s);
++                auto other=AgentWorkerProcess::launch(image,worker->channel().scope(),Clock::now()+5s);FixtureWorkerRpcPeer alien(other->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token){return std::string{};},Clock::now()+5s);
+                 rejects<std::invalid_argument>([&]{drain_and_terminate_agent_worker(store,*worker,alien,lease,RunState::cancelled,"cancelled",Clock::now()+5s);});require(worker->alive()&&peer.alive()&&other->alive(),"Matching scope alone cannot authorize stopping another channel");other->terminate();require(other->wait(Clock::now()+5s)==1,"Only the explicitly owned unused fixture child may be retired");
+             }
+             if(mode=="other_error"){
+diff --git a/Native/tests/agent_worker_process_fixture.hpp b/Native/tests/agent_worker_process_fixture.hpp
+index 79ded55b..f5c7ec72 100644
+--- a/Native/tests/agent_worker_process_fixture.hpp
++++ b/Native/tests/agent_worker_process_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_process_rpc.hpp"
+ #include "agentflow/process_executor.hpp"
+ #include "agentflow/repository_instruction_context.hpp"
+@@ -9,7 +10,7 @@ inline void check(bool value,const char* message){if(!value)throw std::runtime_e
+ template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected actual child process RPC rejection");}
+ inline std::string read(const std::filesystem::path& path){std::ifstream input(path,std::ios::binary);check(bool(input),"Actual native RPC process missing");return {std::istreambuf_iterator<char>(input),{}};}
+ inline AgentProcessToolInvocation invocation(const AgentWorkerScope& scope,const ModelToolCall& tool){AgentProcessToolInvocation call;call.run_id=scope.run_id;call.attempt_id="process-attempt";call.call_id=tool.id;call.workspace_id=scope.workspace_id;call.workspace_revision=scope.workspace_revision;call.folder_id=Json::parse(tool.arguments_json).value("folder_id",scope.workspace_id);call.tool_name=tool.name;call.arguments_json=tool.arguments_json;return call;}
+-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
++inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
+     AgentWorkerProcessClient commands(peer);AgentWorkerJournalClient journal(peer);
+     if(method=="fixture.stale"){AgentProcessToolInvocation stale;stale.run_id=peer.scope().run_id;stale.attempt_id="process-attempt";stale.call_id="actual-process";stale.workspace_id=peer.scope().workspace_id;stale.folder_id=stale.workspace_id;stale.workspace_revision=peer.scope().workspace_revision;stale.tool_name="run_process";stale.arguments_json=R"({"path":"actual.txt","content":"never replay"})";rejects<Conflict>([&]{commands.invoke(stale);});return "stale-process-rejected";}
+     const auto input=decode_agent_model_request(peer.call("fixture.process_input",""));journal.reserve_model_call("process-attempt");journal.start_model_call("process-attempt");AgentWorkerModelClient model(peer);const auto response=model.complete("process-attempt",input,[](const ModelEvent&){});
+@@ -47,7 +48,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     ModelRequest input;input.include_usage=true;input.messages.push_back({MessageRole::user,"Native child process RPC "+mode+". "+marker});input.tools={executor.definition()};ChatProviderConfig config{endpoint+"/"+mode,"worker-rpc-fixture",Capability::supported,Capability::supported};config.deadline=10s;config.idle_timeout=10s;
+     AgentWorkerModelHost model(store,lease,config,input.tools,AgentWorkerModelPolicy{true,{}},make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"}),deadline);auto model_rpc=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_rpc=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
+     const auto claim=[&]{return store.agent_worker_process_claim(id,"process-attempt","actual-process").get();};std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();
+-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+         if(method=="fixture.process_input")return encode_agent_model_request(input);
+         if(method=="fixture.rebuild_process_host"){host=std::make_unique<AgentWorkerProcessHost>(store,lease,owner,deadline);dispatch=bind_agent_worker_process_rpc(*host,worker->channel().scope());return "rebuilt";}
+         if(method=="fixture.await_process_pending"||method=="fixture.await_process_cancelled"){const auto until=Clock::now()+5s;while(Clock::now()<until&&!cancel.stop_requested()){const auto operations=store.operations(id).get();if(method=="fixture.await_process_pending"&&operations.size()==1&&operations[0].state==OperationState::awaiting_approval)return "pending";if(method=="fixture.await_process_cancelled"&&operations.size()==1&&operations[0].state==OperationState::cancelled&&claim().state=="returned")return "cancelled";std::this_thread::sleep_for(5ms);}throw std::runtime_error("Actual process RPC approval/cancellation deadline");}
+@@ -58,7 +59,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     },deadline);
+     std::unique_ptr<XlangSqlite> sql;if(mode=="process_unrecorded"){sql=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);sql->execute("CREATE TRIGGER fixture_process_rpc_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-process-claims' AND json_extract(NEW.payload,'$.state')='returned' AND json_extract(NEW.payload,'$.model.owner_run_id')='rpc-process_unrecorded' BEGIN SELECT RAISE(ABORT,'fixture_process_rpc_result_abort'); END");}
+     worker->channel().send({"fixture.boot",mode},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});
+-    struct Cleanup{AgentWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
++    struct Cleanup{FixtureWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
+     if(mode!="process_denied"&&mode!="process_cancel"){
+         const auto until=Clock::now()+5s;std::optional<Operation> pending;
+         while(Clock::now()<until){for(const auto& op:store.operations(id).get())if(op.state==OperationState::awaiting_approval)pending=op;if(pending)break;if(task.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Actual process child returned before approval: "+task.get());std::this_thread::sleep_for(5ms);}
+diff --git a/Native/tests/agent_worker_read_fixture.hpp b/Native/tests/agent_worker_read_fixture.hpp
+index 946e20b6..9fac0c28 100644
+--- a/Native/tests/agent_worker_read_fixture.hpp
++++ b/Native/tests/agent_worker_read_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ // Controlled actual child read RPC. The backend owns real workspace/guidance
+ // handles and obtains the tool call from the independent native HTTP peer.
+ #include "agentflow/agent_worker_read_rpc.hpp"
+@@ -9,12 +10,12 @@ using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::ste
+ inline void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+ template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected child read rejection");}
+ inline void write(const std::filesystem::path& path,const std::string& text){std::ofstream output(path,std::ios::binary);output<<text;output.close();check(bool(output),"Cannot write owned read fixture");}
+-inline std::vector<Message> commit(AgentWorkerRpcPeer& peer,AgentWorkerJournalClient& journal,const std::string& attempt){
++inline std::vector<Message> commit(FixtureWorkerRpcPeer& peer,AgentWorkerJournalClient& journal,const std::string& attempt){
+     for(const auto* field:{"assistant_json","tool_json"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("journal.commit_read_turn",Json{{"attempt_id",attempt},{field,"forged history"}}.dump());});
+     const auto receipt=journal.commit_read_turn(attempt);const auto count=journal.events(peer.scope().run_id).size();const auto replay=journal.commit_read_turn(attempt);const auto history=journal.run_history(peer.scope().run_id);
+     check(receipt.message_sequences==replay.message_sequences&&receipt.messages_binding==replay.messages_binding&&journal.events(peer.scope().run_id).size()==count&&history.size()==3&&history[1].sequence==receipt.message_sequences.at(0)&&history[2].sequence==receipt.message_sequences.at(1)&&history[1].role=="assistant"&&history[2].role=="tool","Read turn acknowledgement must bind one canonical persisted turn without duplicate history/events");return history;
+ }
+-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
++inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
+     const auto scope=peer.scope();AgentWorkerReadClient reads(peer);AgentWorkerJournalClient journal(peer);
+     AgentWorkspaceInvocation call;call.run_id=scope.run_id;call.attempt_id="read-attempt";call.call_id="actual-read";call.workspace_id=scope.workspace_id;call.workspace_revision=scope.workspace_revision;call.folder_id=scope.workspace_id;call.tool_name="read_file";call.arguments_json=R"({"path":"same.txt"})";
+     if(method=="fixture.stale"){rejects<Conflict>([&]{reads.invoke(call);});return "stale-read-rejected";}
+@@ -63,7 +64,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
+     auto model_dispatch=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_dispatch=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
+     std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();
+     std::atomic_bool rollback_observed=false;
+-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
++    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+         if(method=="fixture.read_input")return encode_agent_model_request(input);
+         if(method=="fixture.await_pending"){const auto until=Clock::now()+5s;while(Clock::now()<until&&!cancel.stop_requested()){for(const auto& operation:store.operations(id).get())if(operation.state==OperationState::awaiting_approval)return "pending";std::this_thread::sleep_for(5ms);}throw std::runtime_error("Read fixture approval was not observed");}
+         if(method=="fixture.rebuild_read_host"){write(directory/"same.txt","Changed after the actual read; never redispatch.\n");host=std::make_unique<AgentWorkerReadHost>(store,store,lease,owner);dispatch=bind_agent_worker_read_rpc(*host,worker->channel().scope());return "rebuilt";}
+diff --git a/Native/tests/agent_worker_read_runner_fixture.hpp b/Native/tests/agent_worker_read_runner_fixture.hpp
+index f49172a7..1b616376 100644
+--- a/Native/tests/agent_worker_read_runner_fixture.hpp
++++ b/Native/tests/agent_worker_read_runner_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ // The actual shared AgentRunner loop in the child, through owned request/read
+ // capabilities and authenticated journal facts. No local workspace is opened.
+ namespace worker_read_runner_fixture {
+@@ -25,7 +26,7 @@ public:
+     ResponsesCompactionResult compact_context(const ChatProviderConfig& config,const ModelRequest& request,std::stop_token cancel)override{return native->compact_context(config,request,cancel);}
+     Journal& journal;std::shared_ptr<AgentModelGateway> native;std::int64_t calls=0;
+ };
+-inline std::string execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
++inline std::string execute(FixtureWorkerRpcPeer& peer,std::stop_token cancel={}){
+     Journal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();worker_runner_fixture::verify_closed_ports(closed);auto model=std::make_shared<Model>(journal);auto workspace=make_agent_worker_read_workspace(peer,journal.native);
+     const auto public_metadata=encode_agent_worker_model_admission(AgentWorkerModelClient(peer).admission());check(public_metadata.find("127.0.0.1")==std::string::npos&&public_metadata.find("synthetic-model-rpc-not-live")==std::string::npos&&public_metadata.find("deadline")==std::string::npos,"Read admission metadata must omit backend destinations, credentials and deadlines");
+     for(const auto* payload:{R"({"include_usage":false})",R"({"deadline_ms":999999})"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.admission",payload);});
+diff --git a/Native/tests/agent_worker_remote_rpc_fixture.hpp b/Native/tests/agent_worker_remote_rpc_fixture.hpp
+index 155ce841..c80b9063 100644
+--- a/Native/tests/agent_worker_remote_rpc_fixture.hpp
++++ b/Native/tests/agent_worker_remote_rpc_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_remote_rpc.hpp"
+ #include "agentflow/mcp_tool_registry.hpp"
+ namespace worker_remote_rpc_fixture {
+@@ -11,7 +12,7 @@ public:
+ private:
+     McpToolReply call_tool(const std::string& name,std::string_view args,Deadline,std::stop_token,const McpInputFulfillment&)override{check(name=="record"&&++sends==1,"Worker remote RPC must send the peer effect once");std::ofstream file(effect,std::ios::binary);file<<Json::parse(args).at("text").get<std::string>();file.close();check(bool(file),"Peer effect must actually write");return {"rpc-peer-reply",R"({"jsonrpc":"2.0","id":"rpc-peer-reply","result":{"content":[{"type":"text","text":"recorded"}]}})",R"({"content":[{"type":"text","text":"recorded"}]})",false,{}};}
+ };
+-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& method){
++inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& method){
+     check(method=="fixture.run","Remote RPC fixture has one closed entry");const auto input=Json::parse(peer.call("fixture.remote_input","{}"));const auto call=AgentRemoteToolInvocation::parse(input.at("call").get<std::string>());AgentWorkerRemoteClient client(peer);
+     for(const auto* field:{"endpoint","credential","operation_id","permission"}){auto forged=Json::parse(call.serialize());forged[field]="forged";rejects<AgentWorkerRpcRemoteError>([&]{peer.call("remote.invoke",forged.dump());});}
+     auto changed=call;changed.arguments_json=R"({"text":"forged"})";rejects<Conflict>([&]{client.invoke(changed);});changed=call;changed.tool_index=1;rejects<Conflict>([&]{client.invoke(changed);});
+@@ -26,9 +27,9 @@ inline void parent(const std::shared_ptr<const BoundProcessExecutable>& image,co
+         Peer remote(directory/"actual.txt");McpToolRegistry registry(remote,store,workspace,"worker-rpc-peer",1,deadline);AgentRemoteToolInvocation call;call.run_id="run";call.attempt_id="remote-model";call.call_id="actual-remote";call.workspace_id=workspace.identity();call.workspace_revision=1;call.tool_name=registry.definitions().at(0).name;call.arguments_json=R"({"text":"actual remote RPC effect"})";
+         ModelCompletion response{"","","tool_calls","{}",{{call.call_id,call.tool_name,call.arguments_json}},"[]"};store.reserve_agent_worker_model(lease,call.attempt_id,deadline).get();store.start_agent_worker_model(lease,call.attempt_id,deadline).get();AgentWorkerModelClaimSpec model{generation,"run","run",call.attempt_id,context_digest("synthetic captured remote RPC window")};store.claim_agent_worker_model(model).get();store.record_agent_worker_model_response(model,encode_agent_model_completion(response),format_agent_model_assistant(response,"worker-remote-fixture",23,5)).get();store.finish_agent_worker_model(lease,call.attempt_id,deadline).get();
+         AgentRemoteToolOwnerContext owner;owner.run_id="run";owner.primary_workspace=&workspace;owner.repository_context=&guidance;owner.offered_tool=[&](const std::string& name){return name==call.tool_name;};owner.mcp_registry=[&](const std::string& name){return name==call.tool_name?&registry:nullptr;};owner.a2a_registry=[](const std::string&)->A2aAgentToolRegistry*{return nullptr;};owner.deadline=deadline;AgentWorkerRemoteHost host(store,lease,owner,deadline);auto dispatch=bind_agent_worker_remote_rpc(host,worker->channel().scope());auto foreign=worker->channel().scope();foreign.generation="foreign";rejects<Conflict>([&]{bind_agent_worker_remote_rpc(host,foreign);});
+-        std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(method=="fixture.remote_input")return Json{{"call",call.serialize()},{"mode",mode}}.dump();const auto result=dispatch(method,payload,std::move(sink),cancel);if(mode=="delivery"){captured.set_value();while(released.wait_for(10ms)!=std::future_status::ready)if(cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");}return result;},deadline);
++        std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(method=="fixture.remote_input")return Json{{"call",call.serialize()},{"mode",mode}}.dump();const auto result=dispatch(method,payload,std::move(sink),cancel);if(mode=="delivery"){captured.set_value();while(released.wait_for(10ms)!=std::future_status::ready)if(cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");}return result;},deadline);
+         std::unique_ptr<XlangSqlite> fault;if(mode=="unrecorded"){fault=std::make_unique<XlangSqlite>(database,imports);fault->execute("CREATE TRIGGER fixture_remote_rpc_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-remote-claims' AND json_extract(NEW.payload,'$.state')='returned' BEGIN SELECT RAISE(ABORT,'fixture_remote_rpc_abort'); END");}
+-        worker->channel().send({"fixture.boot","remote_rpc"},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});struct Cleanup{AgentWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}}cleanup{peer,release};
++        worker->channel().send({"fixture.boot","remote_rpc"},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});struct Cleanup{FixtureWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}}cleanup{peer,release};
+         std::optional<Operation> proposal;const auto until=Clock::now()+5s;while(Clock::now()<until&&!proposal){for(const auto& op:store.operations("run").get())if(op.state==OperationState::awaiting_approval)proposal=op;if(!proposal&&task.wait_for(0ms)==std::future_status::ready)throw std::runtime_error("Remote child returned before approval: "+task.get());if(!proposal)std::this_thread::sleep_for(5ms);}check(proposal.has_value()&&remote.sends==0&&!std::filesystem::exists(remote.effect),"Actual child must await actual controller approval");store.decide_operation(proposal->id,OperationDecision::allow,"remote-rpc-controller").get();
+         if(mode=="delivery"){check(ready.wait_for(5s)==std::future_status::ready,"Remote acknowledgement must be durable before lost delivery");const auto saved=store.agent_worker_remote_claim("run",call.attempt_id,call.call_id).get();check(saved.success&&saved.state=="returned","Lost delivery must retain actual remote success");worker->terminate();release.set_value();rejects<AgentWorkerRpcClosed>([&]{task.get();});peer.stop();check(worker->wait(Clock::now()+5s)==1,"Lost remote delivery must physically retire the owned child");}
+         else{const auto result=Json::parse(task.get());check(result.at("pid")==worker->pid(),"Remote result must originate from the exact admitted child");if(mode=="unrecorded")check(result.at("unrecorded")==true,"Unrecorded remote result requires explicit fail-stop");else check(result.at("success")==true&&result.at("output_json")==store.agent_worker_remote_claim("run",call.attempt_id,call.call_id).get().actual_output_json,"Actual child must receive the exact durable native result");peer.stop();check(worker->wait(Clock::now()+5s)==0,"Remote RPC child must physically drain");}
+diff --git a/Native/tests/agent_worker_retirement_fixture.cpp b/Native/tests/agent_worker_retirement_fixture.cpp
+new file mode 100644
+index 00000000..63f4682b
+--- /dev/null
++++ b/Native/tests/agent_worker_retirement_fixture.cpp
+@@ -0,0 +1,25 @@
++#include "agent_worker_rpc_fixture.hpp"
++#include "../src/agent_worker_retirement_checks.hpp"
++namespace agentflow {
++using namespace worker_retirement_detail;
++AgentWorkerTerminalObservation drain_and_terminate_agent_worker(
++    PersistenceService& store,AgentWorkerProcess& worker,FixtureWorkerRpcPeer& peer,
++    const AgentWorkerLeaseSpec& lease,RunState outcome,const std::string& reason,
++    AgentWorkerChannel::Deadline deadline){
++    const std::set<std::string> failures{"deadline","provider_failure","worker_exit","dispatch_error"};
++    if(!((outcome==RunState::cancelled&&reason=="cancelled")||(outcome==RunState::failed&&failures.contains(reason))))
++        throw std::invalid_argument("Invalid worker terminal observation");
++    process_identity(worker,peer.scope(),lease);
++    // Revalidate current durable authority before shutting down the captured
++    // process. The terminal transaction repeats ownership validation after drain.
++    store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
++    const auto exit=peer.drain(worker,deadline);
++    return {store.terminate_agent_worker(lease,outcome,reason).get(),exit};
++}
++AgentWorkerTerminalObservation drain_completed_agent_worker(PersistenceService& store,AgentWorkerProcess& worker,
++    FixtureWorkerRpcPeer& peer,const AgentWorkerLeaseSpec& lease,AgentWorkerChannel::Deadline deadline){
++    process_identity(worker,peer.scope(),lease);(void)completed(store,lease);
++    const auto exit=peer.drain(worker,deadline);
++    return {completed(store,lease),exit};
++}
++}
+diff --git a/Native/src/agent_worker_rpc.cpp b/Native/tests/agent_worker_rpc_fixture.cpp
+similarity index 78%
+rename from Native/src/agent_worker_rpc.cpp
+rename to Native/tests/agent_worker_rpc_fixture.cpp
+index b12d8588..a7db318e 100644
+--- a/Native/src/agent_worker_rpc.cpp
++++ b/Native/tests/agent_worker_rpc_fixture.cpp
+@@ -1,4 +1,4 @@
+-#include "agentflow/agent_worker_rpc.hpp"
++#include "agent_worker_rpc_fixture.hpp"
+ #include "agentflow/agent_worker_native_execution.hpp"
+ #include "nlohmann/json.hpp"
+ #include <atomic>
+@@ -25,18 +25,17 @@ Json parse(const std::string& bytes){
+ }
+ std::uint64_t envelope_id(const Json& value,std::size_t fields){if(!value.is_object()||value.size()!=fields||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("id").is_number_unsigned())throw AgentWorkerProtocolError("Invalid native RPC envelope");const auto id=value.at("id").get<std::uint64_t>();if(!id||id>max_id)throw AgentWorkerProtocolError("Invalid native RPC identity");return id;}
+ }
+-struct AgentWorkerRpcPeer::Impl {
++struct FixtureWorkerRpcPeer::Impl {
+     struct Pending {std::deque<std::string> events;bool done=false,local_failure=false;std::string result,code;};
+     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
+     struct Flight {std::shared_ptr<Incoming> owner;std::jthread thread;};
+-    std::shared_ptr<NativeWorkerModelClient> native_model;
+     std::shared_ptr<NativeExecutionClient> native_execution;
+-    AgentWorkerChannel& channel;AgentWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
++    AgentWorkerChannel& channel;FixtureWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
+     std::mutex state,writer,request_order;std::condition_variable changed;bool closed=false,started=false;
+     std::uint64_t outgoing=1,incoming=1;std::size_t queued=0;
+     std::map<std::uint64_t,std::shared_ptr<Pending>> pending;std::map<std::uint64_t,std::shared_ptr<Incoming>> active;
+     std::vector<Flight> flights;std::stop_source session_stop;std::jthread reader;
+-    Impl(AgentWorkerChannel& channel,AgentWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline):channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
++    Impl(AgentWorkerChannel& channel,FixtureWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline):channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
+     void start(){std::lock_guard lock(state);if(started||closed)throw AgentWorkerRpcClosed("Native worker RPC cannot restart");started=true;reader=std::jthread([this]{read();});}
+     void fail(const std::string& reason){
+         std::vector<std::stop_source> stops;{std::lock_guard lock(state);if(closed)return;closed=true;for(auto& [id,call]:pending)if(!call->done){call->done=true;call->local_failure=true;call->code=reason;}for(const auto& [id,owner]:active)stops.push_back(owner->stop);}
+@@ -81,21 +80,20 @@ struct AgentWorkerRpcPeer::Impl {
+     }
+     void stop(){if(native_execution)native_execution->close();fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
+ };
+-AgentWorkerRpcPeer::AgentWorkerRpcPeer(AgentWorkerChannel& channel,AgentWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
+-AgentWorkerRpcPeer::~AgentWorkerRpcPeer(){impl_->stop();}
+-void AgentWorkerRpcPeer::bind_native_model(std::shared_ptr<NativeWorkerModelClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_model||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native model binding requires fresh worker");impl_->native_model=std::move(client);}
+-std::shared_ptr<NativeWorkerModelClient> AgentWorkerRpcPeer::native_model()const{std::lock_guard lock(impl_->state);return impl_->native_model;}
+-void AgentWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
+-std::shared_ptr<NativeExecutionClient> AgentWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
+-AgentWorkerChannel::Deadline AgentWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}
+-void AgentWorkerRpcPeer::start(){impl_->start();}
+-std::string AgentWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(native_execution())throw AgentWorkerRpcRemoteError("unsupported");return impl_->call(method,payload,std::move(sink),cancel);}
+-bool AgentWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
+-void AgentWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
+-void AgentWorkerRpcPeer::stop(){impl_->stop();}
+-std::uint32_t AgentWorkerRpcPeer::drain(AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline){
++FixtureWorkerRpcPeer::FixtureWorkerRpcPeer(AgentWorkerChannel& channel,FixtureWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
++FixtureWorkerRpcPeer::~FixtureWorkerRpcPeer(){impl_->stop();}
++std::shared_ptr<NativeWorkerModelClient> FixtureWorkerRpcPeer::native_model()const{return {};}
++void FixtureWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
++std::shared_ptr<NativeExecutionClient> FixtureWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
++AgentWorkerChannel::Deadline FixtureWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}
++void FixtureWorkerRpcPeer::start(){impl_->start();}
++std::string FixtureWorkerRpcPeer::call(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){if(native_execution())throw AgentWorkerRpcRemoteError("unsupported");return impl_->call(method,payload,std::move(sink),cancel);}
++bool FixtureWorkerRpcPeer::alive()const{std::lock_guard lock(impl_->state);return impl_->started&&!impl_->closed;}
++void FixtureWorkerRpcPeer::wait_closed(){std::unique_lock lock(impl_->state);if(!impl_->started)throw AgentWorkerRpcClosed("Native worker RPC has not started");impl_->changed.wait(lock,[&]{return impl_->closed;});}
++void FixtureWorkerRpcPeer::stop(){impl_->stop();}
++std::uint32_t FixtureWorkerRpcPeer::drain(AgentWorkerProcess& worker,AgentWorkerChannel::Deadline deadline){
+     if(&impl_->channel!=&worker.channel())throw std::invalid_argument("RPC drain requires its exact owned child channel");
+     stop();impl_->channel.close();return worker.wait(deadline);
+ }
+-const AgentWorkerScope& AgentWorkerRpcPeer::scope()const noexcept{return impl_->channel.scope();}
++const AgentWorkerScope& FixtureWorkerRpcPeer::scope()const noexcept{return impl_->channel.scope();}
+ }
+diff --git a/Native/include/agentflow/agent_worker_rpc.hpp b/Native/tests/agent_worker_rpc_fixture.hpp
+similarity index 62%
+rename from Native/include/agentflow/agent_worker_rpc.hpp
+rename to Native/tests/agent_worker_rpc_fixture.hpp
+index 168ed790..d23fc65a 100644
+--- a/Native/include/agentflow/agent_worker_rpc.hpp
++++ b/Native/tests/agent_worker_rpc_fixture.hpp
+@@ -4,23 +4,23 @@
+ 
+ namespace agentflow {
+ class NativeExecutionClient;
+-using AgentWorkerRpcHandler=std::function<std::string(const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)>;
++using FixtureWorkerRpcHandler=std::function<std::string(const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)>;
++// Test-only packet fault fixture. Product workers use the xmind SDK root.
+ // Multiplexed owned-value transport, not method authorization. One bounded
+ // reader routes replies/events; handlers run separately, so a streaming callback
+ // may make a nested synchronous journal call. Backend handlers must authorize
+ // every method against captured admission and honor cancellation/deadlines.
+ // This object exclusively owns channel I/O. Owner calls stop(), then joins its
+ // caller threads before destruction; stop must not run inside a handler/sink.
+-class AgentWorkerRpcPeer:public AgentWorkerClientContext {
++class FixtureWorkerRpcPeer:public AgentWorkerClientContext {
+ public:
+-    AgentWorkerRpcPeer(AgentWorkerChannel&,AgentWorkerRpcHandler,AgentWorkerChannel::Deadline);
+-    ~AgentWorkerRpcPeer()override;
+-    AgentWorkerRpcPeer(const AgentWorkerRpcPeer&)=delete;
+-    AgentWorkerRpcPeer& operator=(const AgentWorkerRpcPeer&)=delete;
++    FixtureWorkerRpcPeer(AgentWorkerChannel&,FixtureWorkerRpcHandler,AgentWorkerChannel::Deadline);
++    ~FixtureWorkerRpcPeer()override;
++    FixtureWorkerRpcPeer(const FixtureWorkerRpcPeer&)=delete;
++    FixtureWorkerRpcPeer& operator=(const FixtureWorkerRpcPeer&)=delete;
+     // Start only after handler dependencies (including nested-call adapters)
+     // are fully constructed. Start once; a closed session cannot restart.
+     void start();
+-    void bind_native_model(std::shared_ptr<NativeWorkerModelClient>);
+     std::shared_ptr<NativeWorkerModelClient> native_model()const override;
+     void bind_native_execution(std::shared_ptr<NativeExecutionClient>);
+     std::shared_ptr<NativeExecutionClient> native_execution()const;
+@@ -37,3 +37,9 @@ public:
+ private:struct Impl;std::unique_ptr<Impl> impl_;
+ };
+ }
++
++#include "agentflow/agent_worker_retirement.hpp"
++namespace agentflow {
++AgentWorkerTerminalObservation drain_and_terminate_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,RunState,const std::string&,AgentWorkerChannel::Deadline);
++AgentWorkerTerminalObservation drain_completed_agent_worker(PersistenceService&,AgentWorkerProcess&,FixtureWorkerRpcPeer&,const AgentWorkerLeaseSpec&,AgentWorkerChannel::Deadline);
++}
+diff --git a/Native/tests/agent_worker_runner_fixture.hpp b/Native/tests/agent_worker_runner_fixture.hpp
+index 744a99a8..121dba15 100644
+--- a/Native/tests/agent_worker_runner_fixture.hpp
++++ b/Native/tests/agent_worker_runner_fixture.hpp
+@@ -1,3 +1,4 @@
++#include "agent_worker_rpc_fixture.hpp"
+ #pragma once
+ // Instrumentation and adversarial probes around native worker components.
+ // Process entry and product placement remain separate from this fixture.
+@@ -23,7 +24,7 @@ template<class T,class F> std::future<T> ready(F f){std::promise<T> p;auto resul
+ // the production adapter. The direct client remains for adversarial RPC probes.
+ class ChildJournal:public AgentWorkerOrdinaryJournal {
+ public:
+-    explicit ChildJournal(AgentWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
++    explicit ChildJournal(FixtureWorkerRpcPeer& peer,std::stop_token cancel={}):peer(peer),client(peer),native(make_agent_worker_ordinary_journal(peer,cancel)){}
+     bool bound_to(const AgentWorkerClientContext& peer)const noexcept override{return native->bound_to(peer);}
+     AgentWorkerJournalProgress progress()const override{return native->progress();}
+     void own(const std::string& id){if(id!=peer.scope().run_id)throw Conflict("Child journal owner differs");}
+@@ -74,7 +75,7 @@ public:
+     std::future<Operation> cancel_operation(std::string id,OperationSpec actual)override{return native->cancel_operation(std::move(id),std::move(actual));}
+     std::future<Operation> expire_operation(std::string id)override{return native->expire_operation(std::move(id));}
+     std::future<Run> start_prompt_run(std::string id,std::string session_id,std::string prompt_json,std::optional<RootBudgetSpec> budget={},std::optional<DynamicPlanCapabilities> dynamic={},std::string inbox_id={})override{return native->start_prompt_run(std::move(id),std::move(session_id),std::move(prompt_json),std::move(budget),std::move(dynamic),std::move(inbox_id));}
+-    AgentWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::shared_ptr<AgentWorkerOrdinaryJournal> native;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
++    FixtureWorkerRpcPeer& peer;AgentWorkerJournalClient client;std::shared_ptr<AgentWorkerOrdinaryJournal> native;std::string current_attempt,canonical,model_diagnostic;std::int64_t ordinal=0;
+ };
+ class ChildModel final:public AgentModelGateway {
+ public:
+@@ -111,7 +112,7 @@ inline void verify_closed_ports(AgentWorkerClosedPorts& closed){
+     denied([&]{closed.runtime->a2a_catalog();});
+ }
+ struct Outcome {Run run;std::string attempt,assistant;std::int64_t events;};
+-inline Outcome execute(AgentWorkerRpcPeer& peer,std::stop_token cancel={}){
++inline Outcome execute(FixtureWorkerRpcPeer& peer,std::stop_token cancel={}){
+     rejects<std::invalid_argument>([]{AgentTerminalHandoff invalid(RunState::completed);});
+     ChildJournal journal(peer,cancel);auto closed=make_agent_worker_closed_ports();verify_closed_ports(closed);
+     std::stop_source assembly_stop;assembly_stop.request_stop();rejects<TransportCancelled>([&]{execute_agent_worker_read_root(peer,assembly_stop.get_token());});

@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/agent_worker_read_context.hpp"
 #include "agentflow/agent_worker_read_owner.hpp"
@@ -13,7 +14,7 @@ inline void rejects_changed_requests(AgentWorkerModelClient& model,const std::st
     for(unsigned index=0;index<8;++index){auto changed=request;if(index==0)changed.messages.front().content+="forged instruction";if(index==1)changed.messages.erase(changed.messages.begin());if(index==2)changed.messages[1].content="changed original user";if(index==3)changed.messages.pop_back();if(index==4)changed.messages.push_back({MessageRole::assistant,"uncommitted worker text"});if(index==5)changed.tools.front().description="changed catalogue";if(index==6)changed.include_usage=false;if(index==7)changed.messages.back().provider_items_json=R"([{"forged":true}])";
         rejects<Conflict>([&]{model.complete(attempt,changed,[](const ModelEvent&){});});}
 }
-inline std::string child(AgentWorkerRpcPeer& peer){
+inline std::string child(FixtureWorkerRpcPeer& peer){
     AgentWorkerModelClient model(peer);AgentWorkerJournalClient journal(peer);AgentWorkerReadClient read(peer);const auto scope=peer.scope();
     rejects<AgentWorkerRpcRemoteError>([&]{peer.call("model.prepare_request",R"({"root":"forged"})");});
     auto request=model.prepare_request();check(request.messages.size()==2&&request.messages.front().role==MessageRole::system&&request.messages.front().content.find("ROOT_CONTEXT_GUIDANCE_")!=std::string::npos&&request.messages.front().content.find("NESTED_CONTEXT_GUIDANCE_")==std::string::npos&&request.messages.front().content.find("context-check")!=std::string::npos,"Initial worker request must contain actual backend root guidance and skill catalogue");
@@ -64,7 +65,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         rejects<Conflict>([&]{AgentWorkerReadOwner rejected(store,lease,wrong_scope,owner,context_policy,config,{},gateway,deadline);});
     }
     AgentWorkerReadOwner backend_owner(store,lease,worker->channel().scope(),owner,context_policy,config,profiled?identity:std::string{},gateway,deadline,{},[&](AgentWorkerJournalReadKind kind,std::stop_token){if((mode.starts_with("product_admission_")&&kind==AgentWorkerJournalReadKind::run)||(mode.starts_with("product_journal_")&&kind==AgentWorkerJournalReadKind::history)){if(mode.ends_with("_cancel"))throw AgentWorkerAuthorityCancelled("Injected journal cancellation");throw AgentWorkerAuthorityExpired("Injected journal deadline");}});
-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
         return backend_owner.dispatch(method,payload,std::move(sink),cancel);
     },deadline);
     std::string startup=mode;

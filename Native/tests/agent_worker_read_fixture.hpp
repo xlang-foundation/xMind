@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 // Controlled actual child read RPC. The backend owns real workspace/guidance
 // handles and obtains the tool call from the independent native HTTP peer.
 #include "agentflow/agent_worker_read_rpc.hpp"
@@ -9,12 +10,12 @@ using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::ste
 inline void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
 template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected child read rejection");}
 inline void write(const std::filesystem::path& path,const std::string& text){std::ofstream output(path,std::ios::binary);output<<text;output.close();check(bool(output),"Cannot write owned read fixture");}
-inline std::vector<Message> commit(AgentWorkerRpcPeer& peer,AgentWorkerJournalClient& journal,const std::string& attempt){
+inline std::vector<Message> commit(FixtureWorkerRpcPeer& peer,AgentWorkerJournalClient& journal,const std::string& attempt){
     for(const auto* field:{"assistant_json","tool_json"})rejects<AgentWorkerRpcRemoteError>([&]{peer.call("journal.commit_read_turn",Json{{"attempt_id",attempt},{field,"forged history"}}.dump());});
     const auto receipt=journal.commit_read_turn(attempt);const auto count=journal.events(peer.scope().run_id).size();const auto replay=journal.commit_read_turn(attempt);const auto history=journal.run_history(peer.scope().run_id);
     check(receipt.message_sequences==replay.message_sequences&&receipt.messages_binding==replay.messages_binding&&journal.events(peer.scope().run_id).size()==count&&history.size()==3&&history[1].sequence==receipt.message_sequences.at(0)&&history[2].sequence==receipt.message_sequences.at(1)&&history[1].role=="assistant"&&history[2].role=="tool","Read turn acknowledgement must bind one canonical persisted turn without duplicate history/events");return history;
 }
-inline std::string child(AgentWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
+inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& mode,const std::string& method){
     const auto scope=peer.scope();AgentWorkerReadClient reads(peer);AgentWorkerJournalClient journal(peer);
     AgentWorkspaceInvocation call;call.run_id=scope.run_id;call.attempt_id="read-attempt";call.call_id="actual-read";call.workspace_id=scope.workspace_id;call.workspace_revision=scope.workspace_revision;call.folder_id=scope.workspace_id;call.tool_name="read_file";call.arguments_json=R"({"path":"same.txt"})";
     if(method=="fixture.stale"){rejects<Conflict>([&]{reads.invoke(call);});return "stale-read-rejected";}
@@ -63,7 +64,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     auto model_dispatch=bind_agent_worker_model_rpc(model,worker->channel().scope());auto journal_dispatch=bind_agent_worker_journal_rpc(store,lease,worker->channel().scope(),deadline);
     std::promise<void> captured,release;auto ready=captured.get_future();auto released=release.get_future().share();
     std::atomic_bool rollback_observed=false;
-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
         if(method=="fixture.read_input")return encode_agent_model_request(input);
         if(method=="fixture.await_pending"){const auto until=Clock::now()+5s;while(Clock::now()<until&&!cancel.stop_requested()){for(const auto& operation:store.operations(id).get())if(operation.state==OperationState::awaiting_approval)return "pending";std::this_thread::sleep_for(5ms);}throw std::runtime_error("Read fixture approval was not observed");}
         if(method=="fixture.rebuild_read_host"){write(directory/"same.txt","Changed after the actual read; never redispatch.\n");host=std::make_unique<AgentWorkerReadHost>(store,store,lease,owner);dispatch=bind_agent_worker_read_rpc(*host,worker->channel().scope());return "rebuilt";}

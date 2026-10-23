@@ -1,3 +1,4 @@
+#include "agent_worker_rpc_fixture.hpp"
 // Actual private child/channel and native HTTP/SSE, controlled provider data.
 // Model and native read proxies plus a plain AgentRunner fixture; product
 // worker placement and an actual child coding AgentRunner remain open.
@@ -89,8 +90,8 @@ int child(int argc,char** argv){
     if(mode=="duplicate"){
         const auto frame=Json{{"version",1},{"id",1},{"method","fixture.ping"},{"payload",""}}.dump();channel->send({"rpc.request",frame},Clock::now()+5s);const auto response=channel->receive(Clock::now()+5s);require(response.operation=="rpc.response","First raw RPC must be admitted");channel->send({"rpc.request",frame},Clock::now()+5s);rejects<AgentWorkerProtocolError>([&]{channel->receive(Clock::now()+5s);});return 0;
     }
-    AgentWorkerRpcPeer* self=nullptr;std::stop_source runner_stop;
-    AgentWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token handler_cancel)->std::string{
+    FixtureWorkerRpcPeer* self=nullptr;std::stop_source runner_stop;
+    FixtureWorkerRpcPeer peer(*channel,[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token handler_cancel)->std::string{
         if(mode=="journal_role")return worker_journal_role_fixture::child(*self,method);
         if(mode=="control_rpc")return worker_control_rpc_fixture::child(*self,method);
         if(mode=="remote_rpc")return worker_remote_rpc_fixture::child(*self,method);
@@ -155,7 +156,7 @@ int child(int argc,char** argv){
     },Clock::now()+20s);self=&peer;peer.start();peer.wait_closed();peer.stop();if(held_exit.value)require(WaitForSingleObject(held_exit.value,10000)==WAIT_OBJECT_0,"Completed child waits for explicit physical release");return 0;
 }
 void duplicate_rpc(const std::shared_ptr<const BoundProcessExecutable>& image){
-    auto worker=AgentWorkerProcess::launch(image,{"rpc-protocol","rpc-protocol","rpc-workspace","rpc-protocol-generation",7},Clock::now()+5s);worker->channel().send({"fixture.boot","duplicate"},Clock::now()+5s);std::atomic<unsigned> accepted=0;AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string&,AgentWorkerRpcSink,std::stop_token){require(method=="fixture.ping","Unexpected replay fixture method");++accepted;return std::string("pong");},Clock::now()+10s);peer.start();peer.wait_closed();peer.stop();require(accepted==1&&worker->wait(Clock::now()+5s)==0,"New authenticated frame with replayed RPC ID must not redispatch its handler");
+    auto worker=AgentWorkerProcess::launch(image,{"rpc-protocol","rpc-protocol","rpc-workspace","rpc-protocol-generation",7},Clock::now()+5s);worker->channel().send({"fixture.boot","duplicate"},Clock::now()+5s);std::atomic<unsigned> accepted=0;FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string&,AgentWorkerRpcSink,std::stop_token){require(method=="fixture.ping","Unexpected replay fixture method");++accepted;return std::string("pong");},Clock::now()+10s);peer.start();peer.wait_closed();peer.stop();require(accepted==1&&worker->wait(Clock::now()+5s)==0,"New authenticated frame with replayed RPC ID must not redispatch its handler");
 }
 void root(PersistenceService& store,const std::string& id,const std::string& identity){
     const bool runner=id=="rpc-runner"||id=="rpc-runner_error"||id=="rpc-runner_cancel";store.create_session(id,"Controlled cross-process model RPC").get();RootBudgetSpec budget{"native.direct-agent",1,runner?"workspace:none":"rpc-workspace",identity,0,0,8,600000};
@@ -170,7 +171,7 @@ void drain_timeout(PersistenceService& store,const std::shared_ptr<const BoundPr
     auto worker=AgentWorkerProcess::launch(image,{id,id,"rpc-workspace",generation,7},Clock::now()+5s);const auto pid=worker->pid();const auto birth=worker->creation_time();const auto lease=store.admit_agent_worker({generation,id,id,"rpc-workspace",7,pid,std::to_string(birth),worker->executable_identity(),identity}).get().spec;
     store.reserve_model_call(id,id,"held-without-dispatch",ModelCallRole::parent).get();
     worker->channel().send({"fixture.boot","drain_wait"},Clock::now()+5s);worker->channel().send({"fixture.wait_control",std::string(name.begin(),name.end())},Clock::now()+5s);require(worker->channel().receive(Clock::now()+5s).operation=="fixture.waiting","Child must acknowledge its explicit blocked exit boundary");
-    AgentWorkerRpcPeer peer(worker->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw std::runtime_error("Unexpected drain-only RPC");},Clock::now()+10s);peer.start();const auto events=store.events(id).get().size();
+    FixtureWorkerRpcPeer peer(worker->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token)->std::string{throw std::runtime_error("Unexpected drain-only RPC");},Clock::now()+10s);peer.start();const auto events=store.events(id).get().size();
     rejects<AgentWorkerChannelTimeout>([&]{drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::cancelled,"cancelled",Clock::now()-1ms);});
     require(worker->alive()&&!peer.alive()&&worker->pid()==pid&&worker->creation_time()==birth&&store.run(id).get().state==RunState::running&&store.agent_worker_lease(generation).get().state=="active"&&store.events(id).get().size()==events&&store.root_budget(id).get().model_calls_reserved==1,"Observation timeout must retain the exact live child and durable ownership without terminal commit or charge reset");
     require(SetEvent(release.value)!=0,"Only explicit owner release may unblock the child");const auto terminal=drain_and_terminate_agent_worker(store,*worker,peer,lease,RunState::cancelled,"cancelled",Clock::now()+5s);
@@ -193,7 +194,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
     const auto before_rejected_mutation=store.root_budget(id).get().model_calls_reserved;
     for(auto* handler:{&expired,&cancelled_read})for(const auto* method:{"journal.reserve_model","journal.start_model","journal.finish_model","journal.complete_run"})rejects<AgentWorkerRpcRemoteError>([&]{(*handler)(method,R"({"attempt_id":"expired-or-cancelled"})",{},{});});
     auto wrong_process=lease;++wrong_process.pid;rejects<Conflict>([&]{store.reserve_agent_worker_model(wrong_process,"wrong-process",deadline).get();});require(store.root_budget(id).get().model_calls_reserved==before_rejected_mutation,"Rejected deadline/cancelled/foreign-process mutations must leave allowance unchanged");
-    AgentWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
+    FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
         // Fixture-only malformed authenticated replies exercise the child decoder;
         // they never enter production dispatch or claim an inference attempt.
         if(mode=="normal"&&method=="journal.commit_read_turn"){
@@ -243,7 +244,7 @@ void model_case(PersistenceService& store,const std::shared_ptr<const BoundProce
         if(mode=="cancel"||mode=="overflow"||mode=="other_error"){
             auto wrong=lease;++wrong.pid;rejects<Conflict>([&]{drain_and_terminate_agent_worker(store,*worker,peer,wrong,RunState::cancelled,"cancelled",Clock::now()+5s);});require(worker->alive()&&peer.alive(),"Identity mismatch must not stop the actual owned worker or RPC");
             if(mode=="cancel"){
-                auto other=AgentWorkerProcess::launch(image,worker->channel().scope(),Clock::now()+5s);AgentWorkerRpcPeer alien(other->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token){return std::string{};},Clock::now()+5s);
+                auto other=AgentWorkerProcess::launch(image,worker->channel().scope(),Clock::now()+5s);FixtureWorkerRpcPeer alien(other->channel(),[](const std::string&,const std::string&,AgentWorkerRpcSink,std::stop_token){return std::string{};},Clock::now()+5s);
                 rejects<std::invalid_argument>([&]{drain_and_terminate_agent_worker(store,*worker,alien,lease,RunState::cancelled,"cancelled",Clock::now()+5s);});require(worker->alive()&&peer.alive()&&other->alive(),"Matching scope alone cannot authorize stopping another channel");other->terminate();require(other->wait(Clock::now()+5s)==1,"Only the explicitly owned unused fixture child may be retired");
             }
             if(mode=="other_error"){
