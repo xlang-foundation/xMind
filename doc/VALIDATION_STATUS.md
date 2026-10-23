@@ -1,3 +1,27 @@
+## Child-owned planning continuation and nested worker lineage - 2026-10-23
+
+Same-generation signed planning continuations now authorize exact dynamic-child
+owners as well as roots. Root funding retains leaf role, existing aggregate
+holds and turn limits. Dynamic worker repository/supervisor validation now uses
+the actual durable layout: run.parent_id is the ultimate budget root; immediate
+plan ownership comes from the signed plan/node claim. All other lineage/preset/
+workspace/provider/generation checks remain. Ledger exercises child plan claim/
+acceptance, inner-child admission, supervisor preflight without launch, canonical
+inner result, once-only child tool turn and continuation dispatch/completion.
+Forged owner, unscoped funding, too-early continuation and different/repeated
+reservation identities reject or remain exact idempotent observations. One held
+root allowance is consumed; parent turns are not charged for child inference.
+
+Focused ledger passes35.35s with complete source/SDK/library/dependency/binary
+sets/bytes unchanged. Initial8.68s failure exposed the real run-parent/plan-owner
+mismatch; next8.65s failure caught a missing tool.started in the synthetic fixture.
+Both original gates/logs retained privately; production canonical-order guard is
+unchanged. Native23ba51ab, no full-suite or actual nested planner-process claim.
+Runtime enrollment/shared scheduler, ancestor recovery/adoption, pauses, counted
+context and physical nested process chain remain unfinished. No deadlines or
+budgets weakened; installed62 unchanged. Session84741 terminal0, no local work
+live. Evidence: nested-worker-planning-continuation-20261023*.
+
 ## Nested worker planning repository ownership groundwork - 2026-10-23
 
 Planning claim admission now accepts an exact current dynamic-agent child using

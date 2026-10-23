@@ -3279,7 +3279,7 @@ void worker_planning_continuation_authority(Repository& repository,XlangSqlite& 
     const auto rows=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_planning_category),worker_claim_key(call.root_run_id,call.origin_attempt_id)}).rows;
     if(!worker){if(!rows.empty())throw Conflict("Worker planning requires its captured continuation lease");return;}
     worker_current_scope(repository,db,*worker);
-    if(worker->root_run_id!=call.root_run_id||worker->owner_run_id!=call.owner_run_id||worker->root_run_id!=worker->owner_run_id||repository.root_budget(call.root_run_id).spec.policy_id!="native.dynamic-plan")throw Conflict("Worker continuation differs from native planning owner");
+    if(worker->root_run_id!=call.root_run_id||worker->owner_run_id!=call.owner_run_id||(worker->root_run_id!=worker->owner_run_id&&!worker_dynamic_owner(repository,*worker))||repository.root_budget(call.root_run_id).spec.policy_id!="native.dynamic-plan")throw Conflict("Worker continuation differs from native planning owner");
     const auto record=read_worker_planning(db,call.root_run_id,call.origin_attempt_id);
     if(record.state!="accepted"||record.native_call_id!=call.id||record.model.owner_run_id!=worker->owner_run_id||record.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Worker continuation lacks exact accepted planning authority");
     const auto segment=repository.dynamic_budget_segment(call.root_run_id);if(record.model.generation==worker->generation){if(segment.state!="open"||segment.id!=record.segment_id)throw Conflict("Worker planning continuation lost its admitted active segment");}
@@ -3287,7 +3287,7 @@ void worker_planning_continuation_authority(Repository& repository,XlangSqlite& 
     worker_require_tool_turns(repository,db,*worker);
 }
 bool worker_planning_attempt(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const std::string& attempt){
-    if(lease.root_run_id!=lease.owner_run_id||repository.root_budget(lease.root_run_id).spec.policy_id!="native.dynamic-plan")return false;
+    if((lease.root_run_id!=lease.owner_run_id&&!worker_dynamic_owner(repository,lease))||repository.root_budget(lease.root_run_id).spec.policy_id!="native.dynamic-plan")return false;
     const auto rows=db.execute("SELECT id FROM dynamic_plan_calls WHERE root_run_id=? AND owner_run_id=? AND continuation_attempt_id=? AND state='turn_committed' AND conversation_commit_seq IS NOT NULL",{lease.root_run_id,lease.owner_run_id,attempt}).rows;if(rows.size()!=1)return false;
     const auto call=repository.dynamic_plan_call(text(rows[0][0]));worker_planning_continuation_authority(repository,db,call,&lease);return worker_attempt_generation(db,lease.root_run_id,lease.owner_run_id,attempt)==std::optional<std::string>{lease.generation};
 }
@@ -3540,7 +3540,7 @@ bool worker_dynamic_owner(Repository& repository,const AgentWorkerLeaseSpec& lea
     if(lease.owner_run_id==lease.root_run_id)return false;const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);const auto budget=repository.root_budget(root.id);
     if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.session_id!=root.session_id||budget.spec.policy_id!="native.dynamic-plan"||budget.spec.policy_revision!=1)return false;
     const auto admitted=repository.child_admission(owner.id);if(admitted.kind!=ChildAdmissionKind::dynamic_agent||admitted.root_run_id!=root.id)return false;const auto plan=repository.dynamic_plan(admitted.plan_id);
-    if(plan.root_run_id!=root.id||plan.state!="active"||owner.parent_id!=plan.owner_run_id||repository.run(plan.owner_run_id).state!=RunState::running||!plan.capabilities.catalogue_finalized||plan.capabilities.workspace_identity!=lease.workspace_id||Json::parse(plan.capabilities.provider_identity_json)!=Json::parse(lease.provider_identity_json))return false;
+    if(plan.root_run_id!=root.id||plan.state!="active"||owner.parent_id!=root.id||repository.run(plan.owner_run_id).state!=RunState::running||!plan.capabilities.catalogue_finalized||plan.capabilities.workspace_identity!=lease.workspace_id||Json::parse(plan.capabilities.provider_identity_json)!=Json::parse(lease.provider_identity_json))return false;
     const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& n){return n.child_run_id==owner.id;});const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==admitted.preset_id&&p.revision==admitted.preset_revision;});
     if(node==plan.nodes.end()||preset==plan.capabilities.presets.end()||node->state!=DynamicNodeState::claimed||node->claim_id!=admitted.claim_id||node->definition_revision!=admitted.definition_revision||node->claim_revision!=admitted.claim_revision||node->definition.label!=admitted.node_label||node->definition.preset_id!=preset->id||node->definition.preset_revision!=preset->revision||admitted.backend_identity!=preset->backend_identity||(effects&&preset->readonly))return false;
     const auto segment=repository.dynamic_budget_segment(root.id);return segment.state=="open";

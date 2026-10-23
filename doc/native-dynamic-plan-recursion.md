@@ -232,3 +232,13 @@ The focused repository addition verifies admission and inspection only, includin
 leaf funding and child-only canonical history. Acceptance/execution, continuation
 and pause/recovery of child-authored plans still need process-placement proof.
 See evidence/nested-worker-planning-admission-20261023.json for exact scope.
+
+Same-generation worker continuation funding now recognizes exact dynamic-child
+owners and retains leaf role, root holds, signed call identity and canonical
+report requirements. The ledger proves nested acceptance/result/continuation
+using synthetic stored model receipts and validates an inner worker preflight
+without launching it. Run parent_id points to the ultimate root for budget
+ownership; immediate orchestration lineage is stored in the plan/node admission.
+Worker validation now respects that distinction. Runtime service enrollment,
+shared scheduler, counted context, typed pause/adoption/recovery and an actual
+parent/child/grandchild planning-process chain remain unqualified.
