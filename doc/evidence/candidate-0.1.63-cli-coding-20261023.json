@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "3024124e94208d330a994bc901c260c100e565c2",
+  "nativeSha256": "9054a6ff5dfa22f157d7b886b538bf851de1e4226f6a88f3b3103f3db6fe6835",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "runtimeManifestSha256": "1531056163e4499fae8906dfa881da96cd31c722b08610b8ec2011e07a11768b",
+  "packageVersion": "0.1.63",
+  "scope": "Actual byte-verified distributable candidate CLI attached by explicit loopback port; synthetic provider, real native read/edit/Node command and SDK process owner. Managed profile auto-discovery not covered.",
+  "sessionId": "0b6cee3be13fe25861ede7350569a69f",
+  "rootRunId": "fde650ad763822ec699b7de42dfaf71f",
+  "completedTaskNeverReplay": true,
+  "state": "completed",
+  "modelCalls": 4,
+  "approvals": 2,
+  "nodeChecksPassed": 4,
+  "historyMessages": 8,
+  "historyAndWatchExact": true,
+  "operations": [
+    {
+      "id": "f8ea67a5086dad16487bb7e9987788fe",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "b11fe3b56d90f923e88d086f5378a2f4",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "workerExit": {
+    "pid": 29284,
+    "generation": "5ba23e75ef4a7f1eb0b071e32c6a4bd9",
+    "observedAbsent": true,
+    "observedAt": "2026-10-23T23:08:59.513Z"
+  },
+  "ownedBackendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 27756,
+    "birthAndImageVerified": true
+  },
+  "runtimeFilesAndBytesUnchanged": true,
+  "gateSha256": "6c06b0a076c9e595476ae5d3e490a4ee1f43ac577055517448a789351b26097a",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "renderedVSCode": false,
+  "fullGoalComplete": false,
+  "passed": true
+}

@@ -1,3 +1,20 @@
+## Candidate0.1.63 distributable CLI coding — 2026-10-23
+
+The actual distributable runtime completed a new sum-of-odds task through a
+native SDK worker: read, reviewed file replacement and reviewed Node command,
+with four checks passing. Four controlled replies produce eight canonical
+messages; history/watch are exact, two operations succeeded, all four model
+charges finished and the budget segment closed. Worker29284 is absent and
+identity-verified backend27756 exited. The entire runtime file set and payload
+bytes remain unchanged, including manifest15310561.
+
+Session0b6cee3be13fe25861ede7350569a69f / rootfde650ad763822ec699b7de42dfaf71f
+are complete and must never be replayed. This is explicit loopback CLI coding
+from the release-shaped stage; managed handoff has a separate receipt. No paid
+inference, CPython, visible window or installation. Packaged browser coding,
+rendered VS Code and remaining implementation gates remain open.
+[Receipt](evidence/candidate-0.1.63-cli-coding-20261023.json).
+
 ## Candidate0.1.63 managed runtime handoff — 2026-10-23
 
 Actual isolated managed discovery and upgrade pass from the byte-verified
