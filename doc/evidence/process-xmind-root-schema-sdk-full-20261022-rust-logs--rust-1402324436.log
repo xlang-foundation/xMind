@@ -1,0 +1,156 @@
+2026-10-22T17:15:03.7895598-07:00  INFO server version 1.98.1 (48a229ce 2026-09-01) will start
+2026-10-22T17:15:03.7898679-07:00  INFO InitializeParams: {"capabilities":{"textDocument":{"definition":{"linkSupport":true},"diagnostic":{"dynamicRegistration":false,"relatedDocumentSupport":false},"documentSymbol":{"hierarchicalDocumentSymbolSupport":true},"formatting":{"dynamicRegistration":false},"hover":{"contentFormat":["plaintext","markdown"]},"publishDiagnostics":{"versionSupport":true},"references":{"dynamicRegistration":false}}},"clientInfo":{"name":"xMind","version":"native"},"processId":null,"rootUri":"file:///D:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust","workspaceFolders":[{"name":"lsp-rust","uri":"file:///D:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust"}]}
+2026-10-22T17:15:03.7899323-07:00  INFO Client 'xMind' native
+2026-10-22T17:15:03.7904632-07:00  INFO discovered projects: [CargoToml(ManifestPath { file: AbsPathBuf("D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml") })]
+2026-10-22T17:15:03.7919993-07:00  INFO initial config: Config {
+    discovered_projects_from_filesystem: [
+        CargoToml(
+            ManifestPath {
+                file: AbsPathBuf(
+                    "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml",
+                ),
+            },
+        ),
+    ],
+    discovered_projects_from_command: [],
+    workspace_roots: [
+        AbsPathBuf(
+            "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust",
+        ),
+    ],
+    caps: ClientCapabilities(
+        ClientCapabilities {
+            workspace: None,
+            text_document: Some(
+                TextDocumentClientCapabilities {
+                    synchronization: None,
+                    completion: None,
+                    hover: Some(
+                        HoverClientCapabilities {
+                            dynamic_registration: None,
+                            content_format: Some(
+                                [
+                                    PlainText,
+                                    Markdown,
+                                ],
+                            ),
+                        },
+                    ),
+                    signature_help: None,
+                    references: Some(
+                        DynamicRegistrationClientCapabilities {
+                            dynamic_registration: Some(
+                                false,
+                            ),
+                        },
+                    ),
+                    document_highlight: None,
+                    document_symbol: Some(
+                        DocumentSymbolClientCapabilities {
+                            dynamic_registration: None,
+                            symbol_kind: None,
+                            hierarchical_document_symbol_support: Some(
+                                true,
+                            ),
+                            tag_support: None,
+                        },
+                    ),
+                    formatting: Some(
+                        DynamicRegistrationClientCapabilities {
+                            dynamic_registration: Some(
+                                false,
+                            ),
+                        },
+                    ),
+                    range_formatting: None,
+                    on_type_formatting: None,
+                    declaration: None,
+                    definition: Some(
+                        GotoCapability {
+                            dynamic_registration: None,
+                            link_support: Some(
+                                true,
+                            ),
+                        },
+                    ),
+                    type_definition: None,
+                    implementation: None,
+                    code_action: None,
+                    code_lens: None,
+                    document_link: None,
+                    color_provider: None,
+                    rename: None,
+                    publish_diagnostics: Some(
+                        PublishDiagnosticsClientCapabilities {
+                            related_information: None,
+                            tag_support: None,
+                            version_support: Some(
+                                true,
+                            ),
+                            code_description_support: None,
+                            data_support: None,
+                        },
+                    ),
+                    folding_range: None,
+                    selection_range: None,
+                    linked_editing_range: None,
+                    call_hierarchy: None,
+                    semantic_tokens: None,
+                    moniker: None,
+                    type_hierarchy: None,
+                    inline_value: None,
+                    inlay_hint: None,
+                    diagnostic: Some(
+                        DiagnosticClientCapabilities {
+                            dynamic_registration: Some(
+                                false,
+                            ),
+                            related_document_support: Some(
+                                false,
+                            ),
+                        },
+                    ),
+                    inline_completion: None,
+                },
+            ),
+            window: None,
+            general: None,
+            offset_encoding: None,
+            experimental: None,
+        },
+    ),
+    root_path: AbsPathBuf(
+        "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust",
+    ),
+    snippets: [],
+    client_info: Some(
+        ClientInfo {
+            name: "xMind",
+            version: None,
+        },
+    ),
+    client_config: (
+        FullConfigInput {
+            global: GlobalConfigInput,
+            workspace: WorkspaceConfigInput,
+            local: LocalConfigInput,
+            client: ClientConfigInput,
+        },
+        ConfigErrors(
+            [],
+        ),
+    ),
+    user_config: None,
+    ratoml_file: {},
+    source_root_parent_map: {},
+    validation_errors: ConfigErrors(
+        [],
+    ),
+    detached_files: [],
+}
+2026-10-22T17:15:03.7937356-07:00  INFO will fetch workspaces cause=startup
+2026-10-22T17:15:03.7940063-07:00 DEBUG Discovering sysroot by "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin\\rustc.exe" "--print" "sysroot"
+2026-10-22T17:15:03.8163642-07:00 DEBUG checking sysroot library: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library
+2026-10-22T17:15:03.8531407-07:00  INFO Using sysroot workspace=D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.toml src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc"))
+2026-10-22T17:15:03.8532858-07:00 DEBUG Discovering cargo config by "C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "-Z" "unstable-options" "config" "get" "--format" "toml" "--show-origin"
+2026-10-22T17:15:03.8758415-07:00  INFO server did shut down

@@ -1,0 +1,3 @@
+# Unified schema SDK fixture qualification
+
+The unified executable test now invokes the real C++ SchemaWorker adapter against xmind schema-worker. It checks schema-only validation, a Unicode string instance, invalid-instance rejection and refusal of the removed JSON-RPC input. The same test retains actual backend/CLI/SQLite/graph restoration checks. Thirteen related tests pass in 100.83 seconds with frozen input and binary sets. The production executable remains fa07695e1b830dda47ecc33a69bac492f0897fe078f572b49b5e91df8366bc99. This focused gate does not replace the preserved failed 171/172 full gate or prove rendered client/package acceptance.

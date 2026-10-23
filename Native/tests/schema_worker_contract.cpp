@@ -58,6 +58,14 @@ void budgets(const std::string& executable,const std::string& mode) {
 }
 }
 int main(int argc,char** argv){
+    if(argc==3&&std::string(argv[1])=="--unified-sdk"){try{
+        SchemaWorker unified(SchemaWorkerExecutable{argv[2],std::filesystem::path(argv[2]).parent_path().string(),{"schema-worker"}});
+        const std::string schema=R"({"type":"object","properties":{"value":{"type":"string"}},"required":["value"],"additionalProperties":false})";
+        unified.evaluate(schema,{},std::chrono::steady_clock::now()+5s);
+        unified.evaluate(schema,R"({"value":"\u96ea"})",std::chrono::steady_clock::now()+5s);
+        rejects<SchemaArgumentsInvalid>([&]{unified.evaluate(schema,R"({"value":1})",std::chrono::steady_clock::now()+5s);});
+        std::cout<<Json{{"schema_valid",true},{"unicode_instance_valid",true},{"invalid_instance_rejected",true},{"transport","xlang3-sdk"}}.dump()<<"\n";return 0;
+    }catch(const std::exception& error){std::cerr<<error.what()<<"\n";return 1;}}
     if(argc!=2)return 2;
     try {
         sdk_contract(argv[1]);

@@ -1343,7 +1343,7 @@ if(BUILD_TESTING)
     if(WIN32)
       add_test(NAME native_unified_program_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/unified_program_contract.mjs" "$<TARGET_FILE:xmind>"
-        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "$<TARGET_FILE:agentflow_schema_worker_contract>")
       add_test(NAME native_unified_patch_http_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_patch_http_contract.mjs" "$<TARGET_FILE:xmind>" "$<TARGET_FILE:xmind>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" "unified")
