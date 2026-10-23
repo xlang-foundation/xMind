@@ -1,0 +1,694 @@
+{
+  "sourceRevision": "b133a0eeb7d2f2d6a031d09d05356388cf9187c5",
+  "inventorySha256": "d29c887586780af2b17f683e19382f97d306cc9d028f193887babb3bc830e168",
+  "contracts": [
+    {
+      "name": "native_root_work_executor_contract",
+      "commandSha256": "0b2df06ae7188e0fd473a533880b4f7b8164a9ae7e9348089e5a6c7da19aec46"
+    },
+    {
+      "name": "embedded_xlang_python_callable_contract",
+      "commandSha256": "50a837979c73b44fa1fbd5e7a7eac9dbe5c369cd3b70459bd7ae28cd9a40f5f6"
+    },
+    {
+      "name": "embedded_xlang_authoring_program_contract",
+      "commandSha256": "3f7b36ee06f9a7a3b3deb09288e73e687ce5ebb47ec410acf2dde6edcd599a57"
+    },
+    {
+      "name": "native_json_schema_contract",
+      "commandSha256": "9f3f3fccff19698fa8f69c3928fb41cf4e4f2a1bba14226cb4d9126060291fce"
+    },
+    {
+      "name": "native_terminal_key_input_contract",
+      "commandSha256": "7d7a7321b9aeddce3f89e970688e440ba054dc87915650fc3606cb04955cf381"
+    },
+    {
+      "name": "native_cli_plan_review_contract",
+      "commandSha256": "6a26465f8841fd08851c200d2df2e7b52b7a93a2374ad8d26928173a972a1b06"
+    },
+    {
+      "name": "native_mcp_wire_contract",
+      "commandSha256": "c16ec04faee3e4dd95b26f134c7c4c498d3eca353af7d4399082f92bd97ad932"
+    },
+    {
+      "name": "native_permission_grants_contract",
+      "commandSha256": "2e8034fa9e4148c953c098c32b129a1a2c82ca215e99dc8c1985ec9b5a64c59b"
+    },
+    {
+      "name": "native_a2a_client_contract",
+      "commandSha256": "05d39037b037ed4a7cacf366eba1961c449e5f409749365cafd0c9a29ad95106"
+    },
+    {
+      "name": "native_a2a_client_sdk_contract",
+      "commandSha256": "ebb6eaa8acc280f901ce15b76364f9df20d12f983e99228a2fa0b4078ca0e21d"
+    },
+    {
+      "name": "native_a2a_agent_registry_contract",
+      "commandSha256": "0c3051147ff9908770ecd0ebd3800836e3b8528e33e0d6ed83179c4652b8cacd"
+    },
+    {
+      "name": "model_stream_protocol_contract",
+      "commandSha256": "27b70cee434c6dbba74e4f59bc393e252909aa8074354727108a07c76b208dc9"
+    },
+    {
+      "name": "model_request_contract",
+      "commandSha256": "d48a33f3676da30d2a7929257adabea79c7e751a52ce96274c366f783c27afeb"
+    },
+    {
+      "name": "native_context_selection_contract",
+      "commandSha256": "1fb1c827f92ae50d981e7b21bc93e641a8b978c23cfda4c522fe1687817bd400"
+    },
+    {
+      "name": "native_gemini_request_contract",
+      "commandSha256": "cb209baec13a1c6210bb46d2adb9c8933b25507d5bad08c696d9a744349e7864"
+    },
+    {
+      "name": "native_gemini_stream_contract",
+      "commandSha256": "2390b51b9323f0fc5dabd92aaec5dc7364277837b3163abacaec34b82a55f1a1"
+    },
+    {
+      "name": "native_gemini_history_contract",
+      "commandSha256": "48102c8679da4acbe0b76b61d4ba08f0907b10641bfc12b244dfa2543783bbe0"
+    },
+    {
+      "name": "native_provider_history_bridge_contract",
+      "commandSha256": "d34ade0185c7786a513e01f05a6a6d5ddc36981502ed832c86b2b9c507acb124"
+    },
+    {
+      "name": "native_anthropic_request_contract",
+      "commandSha256": "3cf553da6bbbbdb77bbff7567616fd95022eb2edbf260cc663a06f7c5c479d5e"
+    },
+    {
+      "name": "native_anthropic_stream_contract",
+      "commandSha256": "6b680544fbcb08d0f3c6fbf20c2713910e34b89299d92f2d960518b56f365d79"
+    },
+    {
+      "name": "native_anthropic_history_contract",
+      "commandSha256": "63753a1f9c45d2ab9651c493460c6ef5a8a6111fe6f979e119f4530889df5804"
+    },
+    {
+      "name": "native_responses_protocol_contract",
+      "commandSha256": "5400183bcd9a30892666846855d5dad3362e9cff7f7d659399fcd4a6e8d48c59"
+    },
+    {
+      "name": "native_dynamic_plan_contract",
+      "commandSha256": "a04197299c1c8b6d41565cf6764844b644aeeba153c0d17fc59e9e201a4ca291"
+    },
+    {
+      "name": "native_agent_authority_contract",
+      "commandSha256": "882a09fe12ae8b455365cc87f780b33e46ffdc432ea0c9c640090a70a0ed8887"
+    },
+    {
+      "name": "native_dynamic_plan_repository_contract",
+      "commandSha256": "4d87b02d64cd6be8c3ff9587bb427631ec8fca58565a574316472eed5702fc76"
+    },
+    {
+      "name": "native_context_repository_contract",
+      "commandSha256": "f498971b9c5470c626d2012255ddc71ba367261cbc06f0bb18f467e05cf3b9e5"
+    },
+    {
+      "name": "native_agent_worker_native_execution_contract",
+      "commandSha256": "28f1c71fcfefe311dca539ad836245c49190abc9c063903dff60468dd33f42f8"
+    },
+    {
+      "name": "native_xmind_ipc_lifetime_contract",
+      "commandSha256": "b42c158f53bfc91f143dc570387d3179c603c8ad6d3729801e6849068ecd3bbb"
+    },
+    {
+      "name": "native_xmind_ipc_api_contract",
+      "commandSha256": "4ec2bfadd6d179a5a6d9b6c56b0d02ef2c8e972d16a9ac2fea0111a1495a2f13"
+    },
+    {
+      "name": "native_context_control_contract",
+      "commandSha256": "0c684c638a8dfd2d33680b03c6daa61d3310b9ca55b4b226552ed92acc59fb30"
+    },
+    {
+      "name": "native_context_cli_contract",
+      "commandSha256": "eb24327f0fa4a5961c86831b11d9c8626f7b76c8fa7885af0acf1a8171e2dd00"
+    },
+    {
+      "name": "native_context_engine_contract",
+      "commandSha256": "5cc330b6b73e26b1410de08732f6602edb8139ecf22331fdc536662418c17670"
+    },
+    {
+      "name": "native_context_graph_engine_contract",
+      "commandSha256": "8fb5af93059ff3ef899be220e767802fec9e10966c9ae50e569e698a89dbd380"
+    },
+    {
+      "name": "native_nested_context_graph_engine_contract",
+      "commandSha256": "4d8604b3be1ca989969a64d3a1161853cb484a20c8bc7ab5d9ab9061d1d7d95c"
+    },
+    {
+      "name": "native_provider_yaml_config_contract",
+      "commandSha256": "8057320ff9f88f9680c3767e375300309a6222e62e4eb6f505fd65c47b3ba439"
+    },
+    {
+      "name": "native_planning_http_contract",
+      "commandSha256": "289e511c782fbc7c3a952830b0557c3b625061ff5260a8ac08b130b04a1208ce"
+    },
+    {
+      "name": "native_mcp_resource_route_contract",
+      "commandSha256": "ea1ef5245201515b0d8beb827ea6ce084f8efe12c07bec238ec6289ddca1f1f1"
+    },
+    {
+      "name": "native_child_executor_contract",
+      "commandSha256": "114751908576c8ccce1c7a90c4ce595155f9af2fcdb474a800a088c7ecc1fae8"
+    },
+    {
+      "name": "native_dynamic_plan_engine_contract",
+      "commandSha256": "ded6c8eaea4084a6a639e3e11b748e115369b3a8addd16882c494d22279a64f6"
+    },
+    {
+      "name": "native_dynamic_plan_mcp_contract",
+      "commandSha256": "991272cf5dcdd7e53167cf188986e091bae3a888c1d9ec014a6b5ccb436952cf"
+    },
+    {
+      "name": "native_secret_protection_contract",
+      "commandSha256": "40fe6ab7829f1e371222c94f650906fdd1af7570117656e8365f9c51bb6d634a"
+    },
+    {
+      "name": "native_a2a_task_control_http_contract",
+      "commandSha256": "b4f170671994bf6e1d7ad63ede7845243da96a918abfadbbc0e7a9e816b0c367"
+    },
+    {
+      "name": "native_a2a_message_http_contract",
+      "commandSha256": "5cfe6872aa36c49b3dd16075a659cf2d6288a96f7147542640c941ae299e6e92"
+    },
+    {
+      "name": "native_a2a_stream_http_contract",
+      "commandSha256": "a4ff2626ea82ef60d7f53591c21691a8815c2e92ae866f7047f52b51bd6ce548"
+    },
+    {
+      "name": "native_a2a_v1_http_contract",
+      "commandSha256": "aa6004977bf38a382cbf2297c0dce4712a9ecb1b0cb9ee6b94d2a32377dd81ab"
+    },
+    {
+      "name": "native_responses_agent_http_contract",
+      "commandSha256": "e4cb26d067264875893e3e4e129f1a2d9317e21b92ffa0637e501c2595269aa8"
+    },
+    {
+      "name": "native_graph_service_http_contract",
+      "commandSha256": "6506b69d331bf42178bd4d2b111faa8122d8101b1042164d760dac658cdd1ba0"
+    },
+    {
+      "name": "native_provider_cli_contract",
+      "commandSha256": "e7425cf781494122a84e031984c7f4ebe58ebe0035df2235bd271b243d5d088c"
+    },
+    {
+      "name": "native_provider_setup_contract",
+      "commandSha256": "d41d89dec9385ce8e8e5ab5aef8b24f8b0235ca259384b2010cb4cd4ae619985"
+    },
+    {
+      "name": "native_graph_runner_contract",
+      "commandSha256": "2b20ed9e39415206b6112cf8ece0ae52bbf4070f793239f6219d6f52e9b06cc6"
+    },
+    {
+      "name": "native_graph_mcp_contract",
+      "commandSha256": "99581354c58c5668d7101df01ef80c0c09ecbae9e5139f20ea31d1ab402fd431"
+    },
+    {
+      "name": "native_graph_mcp_http_contract",
+      "commandSha256": "599ce3260c5b75e86cbc12f64f99df59e9e0e6088c317d6b17968507b6f278d6"
+    },
+    {
+      "name": "native_graph_mcp_http_subscription_contract",
+      "commandSha256": "ade7a61a4c4a21995662bab30022e23bb5b8a6180de095d0e487e2396bae17c1"
+    },
+    {
+      "name": "native_delegation_contract",
+      "commandSha256": "9d50531977fbf6a828f979ec9c07df3a74c6657379112858556f2812201c6839"
+    },
+    {
+      "name": "native_delegation_http_contract",
+      "commandSha256": "998ff5c957b54e5d084e47e7a6026f1bcecc238e0a2f09807e534e5ca0b431f3"
+    },
+    {
+      "name": "native_graph_checkpoint_contract",
+      "commandSha256": "dafeea67fd8945c6bb5bc6102181ec2e32c8be7baa7951d6c1407752d9bc9670"
+    },
+    {
+      "name": "native_graph_children_contract",
+      "commandSha256": "9d0419002d8765aad39dce0a6e37e738c502ee6738ce09f23e11eac706cc5776"
+    },
+    {
+      "name": "native_graph_contract",
+      "commandSha256": "2eda29e68fde497a17c5ebf53c2772591c949dcc56e7f7a96c59bdb295d11ec2"
+    },
+    {
+      "name": "native_instruction_configuration_contract",
+      "commandSha256": "f5d272eab38bccd17de5ddbdeb5f80f7355d674fcf19e63a586b84ba864a95c2"
+    },
+    {
+      "name": "native_process_configuration_contract",
+      "commandSha256": "cd4663b6276e84001ac26409853e5531e09b9403af67b71590ec70f87fc48b4c"
+    },
+    {
+      "name": "native_process_executor_contract",
+      "commandSha256": "a6bc92fbfc3a773cc00920c7b785b80b438377c036f8621a0d6f981fd8263662"
+    },
+    {
+      "name": "native_agent_process_http_contract",
+      "commandSha256": "1e7e29e864d6ebaa53cd0f4c6c6245e1f7493ef95e277697c09c1fdf857e0c8a"
+    },
+    {
+      "name": "native_xlang3_default_process_contract",
+      "commandSha256": "45cfd47958d9b0eacbc59e378c7eb4c852a4bec1e8ba82436df887d2f9b2fc5f"
+    },
+    {
+      "name": "native_process_adapter_contract",
+      "commandSha256": "89e768f4e8d7c279bdff078aa1421882c88444b96f9e0abbfd92ac4fded5e0ba"
+    },
+    {
+      "name": "native_persistent_pty_sessions_contract",
+      "commandSha256": "0c8ba85fffd75e1e6b0e17fbd656c7bddd56d04c78f398bef4224ad5a9e23ed6"
+    },
+    {
+      "name": "native_mcp_configuration_contract",
+      "commandSha256": "11569e20e98d547a37d7bc63f2d884c655d401d60c37471b8c3f0c55d6c9befa"
+    },
+    {
+      "name": "native_mcp_oauth_credentials_contract",
+      "commandSha256": "71831b013b979f113af867b8120381e08cc7d433ba75cda028e917b7e08e70c1"
+    },
+    {
+      "name": "native_mcp_oauth_refresh_storage_contract",
+      "commandSha256": "38a7b1526000793a32007ab28bd0b8c19832b6a0e7422c7a148efb4233e553ff"
+    },
+    {
+      "name": "native_mcp_oauth_service_contract",
+      "commandSha256": "3e283910f0fe35ef4428f47c279c5cbd5a819d417b4dabe058e697a39979f3a4"
+    },
+    {
+      "name": "native_mcp_authorization_cli_contract",
+      "commandSha256": "4ecec9dd238b78ba888668e5f9c876f209d2cab20f8644602388335ca717f7da"
+    },
+    {
+      "name": "native_mcp_oauth_renewal_negative_contract",
+      "commandSha256": "a6654040f2c8101bd70e7f28f44b2cac5a9d15d3549d13d856eaeb598533349f"
+    },
+    {
+      "name": "native_mcp_oauth_trusted_peer_contract",
+      "commandSha256": "098e82abdcdf1633a6b2b02d93f68b07aee6e023aafc0ed7be5423f270c8c8e4"
+    },
+    {
+      "name": "native_schema_worker_contract",
+      "commandSha256": "ec0f7bb579afae2b9825e2d84ed9cb215abab8c20afa90983053b5e8b45c5c4c"
+    },
+    {
+      "name": "native_mcp_stdio_contract",
+      "commandSha256": "614867640fdeac5274e19cdeb21cbc97597a5f56298387bfb9f0fef7bcfa697f"
+    },
+    {
+      "name": "native_mcp_handshake_contract",
+      "commandSha256": "29759af4d787771dcc7d0189631fe02363102e2fcb47d5f9047057ae56806b0f"
+    },
+    {
+      "name": "native_mcp_client_contract",
+      "commandSha256": "931e31e22f2c07d1585aa27c3916196697d637032d0e0645027077b72272fa75"
+    },
+    {
+      "name": "native_mcp_http_readonly_contract",
+      "commandSha256": "a29144f224d05adb40ae79ce7950d816a34ff5b28e1cdfd02d3c4516befd317b"
+    },
+    {
+      "name": "native_mcp_http_fallback_contract",
+      "commandSha256": "3fe701326e65eeb777d0221a9561a6766a33a681261a4ac0987e898752c2c568"
+    },
+    {
+      "name": "native_language_server_diagnostics_contract",
+      "commandSha256": "24d765c1a8169287768fe841ddae425fee3fcc0fd936b26c57381131b3ea6ba7"
+    },
+    {
+      "name": "native_language_server_rust_fixture_check",
+      "commandSha256": "3a6a4cd97384a1995369b989026b653d8a4830afb75f3746efc7218225536f66"
+    },
+    {
+      "name": "native_language_server_rust_analyzer_contract",
+      "commandSha256": "ccd10dcefe0b48eb889a2e611878ffa02843f757e4c8c4483770061e0c8e8ba6"
+    },
+    {
+      "name": "native_multifolder_language_server_contract",
+      "commandSha256": "e2ce539d8a8f9a6b9a6bfc8de4c63a23163b3a29d4229a92b37719f32122937e"
+    },
+    {
+      "name": "native_language_server_configuration_contract",
+      "commandSha256": "f6cd5ad023f9516e2b3e4fe61ce60247b62f65f28842204895a9635e1e4bfd53"
+    },
+    {
+      "name": "native_mcp_effect_contract",
+      "commandSha256": "9142f8fe7001262ca9feb728d6e561920cabec0f8e724a41801b37c208bc0278"
+    },
+    {
+      "name": "native_mcp_input_contract",
+      "commandSha256": "58b89aa9112ede9a98dee01d961d59722819ed17ad0e6190740b35af6a92645d"
+    },
+    {
+      "name": "native_xlang_python_config_contract",
+      "commandSha256": "b018e9840c1db566f6de7185f61e783031fc30dcc02535054d89752e0fa2240e"
+    },
+    {
+      "name": "native_agent_worker_native_planning_contract",
+      "commandSha256": "1e7f1d74958ec313556cd4cd7c77dd22efed084026b503d769eba3c935d5b52f"
+    },
+    {
+      "name": "native_agent_worker_model_rpc_contract",
+      "commandSha256": "28926ef58df10528e87cd61d8f68e25811a855c6524a60349eb52e6adaea6f56"
+    },
+    {
+      "name": "native_agent_worker_graph_no_context_contract",
+      "commandSha256": "715e6f56096ca1be22a6103ea90ca75023195e9e86685cdbd228142e82294968"
+    },
+    {
+      "name": "native_agent_worker_graph_callable_contract",
+      "commandSha256": "3d42af737b716a97a375366b7163c621818a509d5c504e1bf0e47963e4e3cc5d"
+    },
+    {
+      "name": "native_agent_worker_graph_remote_contract",
+      "commandSha256": "feaa34abde881023f41dc370044248fb6f9fb1f9bd85ca228920298d946c6f36"
+    },
+    {
+      "name": "native_agent_worker_server_contract",
+      "commandSha256": "c362685fd5e0158e3a615149021a6c2fa736d8abc07ca0fa4dc8a9f8811c0184"
+    },
+    {
+      "name": "native_agent_worker_coding_server_contract",
+      "commandSha256": "15221ed26734c41b2630cf76e0ada043f2b604b92290f767594cf7abaa42a82f"
+    },
+    {
+      "name": "native_agent_worker_ledger_contract",
+      "commandSha256": "aae5c117415c2160b5a2804394b58b38e8f3f2b2aca3d52d5078ac51a7a31c6b"
+    },
+    {
+      "name": "native_agent_worker_channel_contract",
+      "commandSha256": "d20f2d4f9ad6cb9d84d85775b053a62fa1c555614ae64751668bb2ddfe5d009a"
+    },
+    {
+      "name": "native_xlang3_shared_memory_worker_contract",
+      "commandSha256": "a47a1db4fc0f1abba1e7a3d99807a2cd4447ca8d1c13ae30ac83a460b379f29f"
+    },
+    {
+      "name": "native_agent_service_contract",
+      "commandSha256": "3d3545ef188e2c544dddd0a0ae7837a32e89c9e465bc8c2a283f9834a817a759"
+    },
+    {
+      "name": "native_agent_runner_contract",
+      "commandSha256": "045665bcfecb3011f1771282ded51ab291a8578394d27c96fcb709dc172ed37e"
+    },
+    {
+      "name": "native_gemini_agent_contract",
+      "commandSha256": "9ff8fdc410c48e395311150f86611b6422efd6ead75f2a8440738baaddfa623d"
+    },
+    {
+      "name": "native_anthropic_agent_contract",
+      "commandSha256": "017629c14370483e3f078018a9e608fde4dd24a37101d0c3c7da217cb9a1ede8"
+    },
+    {
+      "name": "native_file_patch_contract",
+      "commandSha256": "6161932e7de853e959607bb8af067efd34c03c8028e1011d0aab0021817a5d23"
+    },
+    {
+      "name": "native_command_context_contract",
+      "commandSha256": "82de14ca8784087185100694cd6a9bc759e37d7c5196a63cdd5451d0125868fb"
+    },
+    {
+      "name": "native_skill_state_contract",
+      "commandSha256": "4ef989c652ea19487fad2b6532eae267589ba3ab8a864386d0b8006a4e766f64"
+    },
+    {
+      "name": "native_skill_catalogue_contract",
+      "commandSha256": "d33f03b1a839e966eb596a6f12a45af1c18d52a56c279f88d5183f3e7a96e364"
+    },
+    {
+      "name": "native_create_executor_contract",
+      "commandSha256": "a999886d37b9cee75f10f6744aec2acc72308f146c3a9f968d1a5b115f5e066e"
+    },
+    {
+      "name": "native_edit_executor_contract",
+      "commandSha256": "9787856d5301eeded3962c75ecc51774493edb657f427b537d6f9d6e2aedb2c0"
+    },
+    {
+      "name": "native_patch_file_executor_contract",
+      "commandSha256": "8a6e158d2c3e7bdb3d74444c188e3e83d3fe34defe8591aaa76e904029ba3658"
+    },
+    {
+      "name": "native_patch_executor_contract",
+      "commandSha256": "d72276ea2d8d305ef73e70ac9e65bf2042a56cf8722c49456c39c4deb05b75c2"
+    },
+    {
+      "name": "native_restore_executor_contract",
+      "commandSha256": "650bd43522f6e941b9a8fe6a0210d78d2161e18da5b7fd119aa0b990b7235279"
+    },
+    {
+      "name": "native_agent_remote_tool_host_contract",
+      "commandSha256": "8da0c160986920605752caad8c920b9566e3d8b04bdea378a06ee3a3412a9d83"
+    },
+    {
+      "name": "native_agent_file_tool_host_contract",
+      "commandSha256": "2ee219bc87cabce218808366c5165d0bac0d9ce0a70ec134ae8a47ebb0c36947"
+    },
+    {
+      "name": "native_agent_process_tool_host_contract",
+      "commandSha256": "745891c10e5807636116413dda453e16aca3542ae3cd61c7af018afaf7270281"
+    },
+    {
+      "name": "native_agent_read_tool_host_contract",
+      "commandSha256": "16e36714daf163042d05f26ec776604f603b13d0ce37c2fb24a2eeeb46156fa9"
+    },
+    {
+      "name": "native_patch_tool_contract",
+      "commandSha256": "2d738b076cf4e24e23c36534de4f4ccd795551522a49760b12a6b572639c1120"
+    },
+    {
+      "name": "native_approved_edit_http_contract",
+      "commandSha256": "b4e1416ebf7d57f3407cf848aa69c4c2f1e268617eee1703b40c6e9f3f84abde"
+    },
+    {
+      "name": "native_workspace_tools_contract",
+      "commandSha256": "c738bd7e75286a267c632b1e2f1ddb2ae7f8a57223f08353fe273145b70731d2"
+    },
+    {
+      "name": "native_repository_instructions_contract",
+      "commandSha256": "0773770a7dfe65d7acae27b2da6f174b51fad253a88505890b48e9ea51d8a236"
+    },
+    {
+      "name": "native_skill_context_contract",
+      "commandSha256": "6381a43f24f2d798a4f3ebe1ae4d277d105df695dd3df059a16f2a2934a207ce"
+    },
+    {
+      "name": "native_chat_provider_contract",
+      "commandSha256": "7d8e6d74611dd9e1185826a94989da9fe62f70aaf04c94437ca1d2b606e7610b"
+    },
+    {
+      "name": "native_gemini_provider_contract",
+      "commandSha256": "7c8e32cabeec4e68e04139d6e47dcb20afde96e6467c2c910af349c243d29205"
+    },
+    {
+      "name": "native_deepseek_provider_contract",
+      "commandSha256": "42b5d51496ff719ebcbafff5cec15e483493061aa4a4026c2e813a96dfdc0129"
+    },
+    {
+      "name": "native_deepseek_profile_runtime_contract",
+      "commandSha256": "0aac5f66d8977828f1a9e83dde875698489e5fa7b0830b464645b96f70a7bd41"
+    },
+    {
+      "name": "native_provider_model_policy_runtime_contract",
+      "commandSha256": "29e3d64349d6e65cd41696b85e844b469a28156826ab72c083c97114387aa175"
+    },
+    {
+      "name": "native_anthropic_provider_contract",
+      "commandSha256": "40881232f5ba41bf1d87cafbace49752fe1afc099c9895a4f02b858e40f7a222"
+    },
+    {
+      "name": "native_mcp_oauth_callback_contract",
+      "commandSha256": "8234c551bfd3d3e70e8be8854aa28e563935e6c3283448f2b9aea969d89d0cb3"
+    },
+    {
+      "name": "native_mcp_oauth_refresh_contract",
+      "commandSha256": "4b59163fc7aecd70104c63121317e31921bb64356f4676089b98957dec0e887b"
+    },
+    {
+      "name": "native_responses_context_contract",
+      "commandSha256": "d35856fe50e8f237cc1f66f7c178f6c97b6c80e5f6a19a94c5f9f3aeaecf3169"
+    },
+    {
+      "name": "native_http_stream_transport_contract",
+      "commandSha256": "d0b5fdc2e37b4b8fe48e30be18b4c3b58458b8c149b7ebe85c5b5445d8788399"
+    },
+    {
+      "name": "native_agent_http_contract",
+      "commandSha256": "642bcaa9d49ba173f5fdfe4119d21e6cb60286135da8e7477b02e461358c5d77"
+    },
+    {
+      "name": "native_agent_edit_http_contract",
+      "commandSha256": "64506000164fdf13491e96e685f29b366e83200843ab99606e2a343f6143453b"
+    },
+    {
+      "name": "native_agent_patch_http_contract",
+      "commandSha256": "61d2e8f2f56e9a3a7f42be9d585bbf1f751062c9db384107ccdf95c73013294e"
+    },
+    {
+      "name": "native_agent_mcp_http_contract",
+      "commandSha256": "1d7c85110e69d869f1cf6a0f95923c4c52286469552a4191ab1727c4bca69e76"
+    },
+    {
+      "name": "native_agent_mcp_http_subscription_contract",
+      "commandSha256": "7b992d341f606723edd7e39cd230b933995ac3237a13b4a83c010ccd141a58e3"
+    },
+    {
+      "name": "native_mcp_sdk_modern_contract",
+      "commandSha256": "d3c610d27df909fb77137fbf058866d3e9dfe839bd19ee581614b4a67bfb534e"
+    },
+    {
+      "name": "native_mcp_sdk_legacy_contract",
+      "commandSha256": "241510951624c02dde78cfdd7fdbd925ec6fb52b70253721adca0ef07e7d28a1"
+    },
+    {
+      "name": "native_cli_output_contract",
+      "commandSha256": "d6e03d0ca33421b33bc4a49c2de6e14c94588ec095c970d38ba11f6f649bfbf6"
+    },
+    {
+      "name": "native_http_cli_contract",
+      "commandSha256": "c66b4471ea26b8638112e9b5212217a3854cd50b348d7717ae94bbf504fd47a6"
+    },
+    {
+      "name": "native_cli_vcs_status_contract",
+      "commandSha256": "950f259e684f6c62a649c4cf375f12d82b2bcdaa24762a8155bdc29495321a38"
+    },
+    {
+      "name": "native_cli_vcs_metadata_contract",
+      "commandSha256": "4733f2d7c72a13a03e0cf343f2a81040362d74d80f4a5880bd0629effbe9aa25"
+    },
+    {
+      "name": "native_cli_vcs_diff_contract",
+      "commandSha256": "4f533dd06866f0c112c0c134694719ebd72e841936f243554c12ad3239d5854d"
+    },
+    {
+      "name": "native_unified_program_contract",
+      "commandSha256": "d620226369b62bde5c12f7bbf1b7542fa886ce50991c4f658bdc3ca163bd670b"
+    },
+    {
+      "name": "native_unified_patch_http_contract",
+      "commandSha256": "36a996948ded25c1ff0a11e90df3d4219c1cb3d07ca0de20335eb643a19b13ba"
+    },
+    {
+      "name": "native_unified_graph_http_contract",
+      "commandSha256": "9497622701b3b370c2c5f2ae7dd1df1266b537d7ce6eb01767ec60a4d83ac9ac"
+    },
+    {
+      "name": "native_unified_mcp_http_contract",
+      "commandSha256": "71c3630f3d690f48f4cfe47f3de30d161c94a475a5c466dd5489adc608b1ef76"
+    },
+    {
+      "name": "native_console_workspace_contract",
+      "commandSha256": "158c2a9ed69c1985b9e63618c7eacec42ddbc85cc66579709ebdd70431ddd9c5"
+    },
+    {
+      "name": "native_local_profile_contract",
+      "commandSha256": "06e9c69e59aff4636ee2693536222761cd6d5832b3dda6500837fef25f82546d"
+    },
+    {
+      "name": "native_local_view_contract",
+      "commandSha256": "83de6aa6e2a5ce01a4d46d7b0670b750f7903d47aca4dd1c9b236419fc100354"
+    },
+    {
+      "name": "native_local_view_provider_config_contract",
+      "commandSha256": "f8fcff76cfc2bb0173bd137910d0e1799cf0a000889b12199fcd30cd226d92f6"
+    },
+    {
+      "name": "native_workspace_registry_contract",
+      "commandSha256": "a6e0501b7eddefb56698edca54c7a440b8cfcd155fc27dda8aab89dc5fbdcc33"
+    },
+    {
+      "name": "embedded_xlang_sqlite_contract",
+      "commandSha256": "7a18e793c27d9497f0e9b0c43727f7108a82ee523706c0fee053abd42b51579c"
+    },
+    {
+      "name": "native_incoming_repository_contract",
+      "commandSha256": "6f48283aacf0bc7612054668a3797e04466a9c5cef528eac27fd5fae43fdc431"
+    },
+    {
+      "name": "native_task_list_repository_contract",
+      "commandSha256": "f353377ebc666ea9ff0401b5d6c466d58fb7ca92146b35d6d1210195c122d1a0"
+    },
+    {
+      "name": "native_permission_waiter_contract",
+      "commandSha256": "00cc939274b0611fbe2e2a7adc9b3b7085b4c4327e67a4b6c154ba1802cacdfe"
+    },
+    {
+      "name": "native_operation_repository_contract",
+      "commandSha256": "800671ffedceec0650f966bf9614ca4c2a64f59553e095c511a84f6a4a98a929"
+    },
+    {
+      "name": "xlang_repository_contract",
+      "commandSha256": "30085464a528b8309f87bfbc724adc849357df036711998d28522f1ff8f35047"
+    },
+    {
+      "name": "persistence_service_contract",
+      "commandSha256": "ca40d946efed14787bfae6fb7e8a04e78d247b0018da7d960714c39a29c4eca4"
+    },
+    {
+      "name": "native_backend_owner_contract",
+      "commandSha256": "0a61639b594179124fde0c799350e151636371416de5044ee303da030e8b3345"
+    },
+    {
+      "name": "native_profile_record_publication_contract",
+      "commandSha256": "cb85e22645fe7fe066db15ef2c4c28c63e55798d687204c240289a1e2eef8784"
+    },
+    {
+      "name": "native_legacy_owner_contract",
+      "commandSha256": "b9c27615ec20638d6d81c3abbcdd2912567fd127997c5b4ac5fd5da39535e0f2"
+    },
+    {
+      "name": "native_owner_process_contract",
+      "commandSha256": "691d1ee9f68e8a42b69911db97483163314ff903286f49a36c579295ef5123df"
+    },
+    {
+      "name": "native_runtime_generation_contract",
+      "commandSha256": "8bd92a0f2a4c0d415d4369056bd9110ae0f5f9d1c937f3e5d2838d91ba901eff"
+    },
+    {
+      "name": "native_backend_owner_http_contract",
+      "commandSha256": "eb274bada775bf103b48df12972c6041a8b3bca7a966adc35b6b85f1028256d7"
+    },
+    {
+      "name": "native_backend_handoff_contract",
+      "commandSha256": "f8ba48692776457fe46725293f136dc4ebe2a7379116fe34a5b714bdba10981c"
+    },
+    {
+      "name": "native_connection_profiles_contract",
+      "commandSha256": "13cf619b6c8c882feeb743bcda2921f1c2681bc71210cff1495c61f4c3a2a167"
+    },
+    {
+      "name": "native_connection_profiles_http_contract",
+      "commandSha256": "50e46177ef539e7e694c4f7e4ddab5cadd628b246140581e9d2ce73f8eaa5dbe"
+    },
+    {
+      "name": "native_provider_profiles_contract",
+      "commandSha256": "3d9bd891f44dfe4f669e3e698dd935b2eb0257e758009a0ef391f045820e80ac"
+    },
+    {
+      "name": "native_provider_profile_lsp_responsiveness_contract",
+      "commandSha256": "7d5e06d291479129e5f5b922def31d60febd5ff6bc4a153cd4635e5decd958d7"
+    },
+    {
+      "name": "native_provider_profile_runtime_contract",
+      "commandSha256": "66037422a7fb2a4de61d27c56e3fe5d117260a142007060faa1e89e03d959b68"
+    },
+    {
+      "name": "native_provider_profile_cli_contract",
+      "commandSha256": "42969b71e76b0498c4527cbc70f2c2de86a4d65115dd3deef1ca05b975ba9685"
+    },
+    {
+      "name": "native_gemini_catalogue_contract",
+      "commandSha256": "068227945445d0c2ccd100d3f0772da177edc1485d62797bbbf694d5f4ac60b6"
+    },
+    {
+      "name": "native_gemini_profile_runtime_contract",
+      "commandSha256": "052339b28832f4a8f4f19778f46dfe9c689e33518341f7aa2afdfbe25a8a988d"
+    },
+    {
+      "name": "encrypted_credential_repository_contract",
+      "commandSha256": "678bfff7339a24c80270be247ec8b2ac784fd379f3a36041959fe7b40b4d5249"
+    }
+  ]
+}

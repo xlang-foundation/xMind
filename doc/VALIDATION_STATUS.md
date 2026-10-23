@@ -1,3 +1,19 @@
+## Complete current SDK8c native qualification passes172 - 2026-10-23
+
+Sourceb133a0ee /SDK8c7972d1 complete rebuild and full172-contract CTest pass
+172/172 in1324.08s. Native49413090, SDKDLL7e72cedf. Actual source2813, SDK
+headers16, pure libraries1870, SDK runtime30, dependency18598 and native binary
+137 file sets/bytes remain unchanged around validation. Patch is empty; no
+CPython or paid inference. CTest23088 and build33116 are terminal exit0.
+
+Includes Rust definition9.35s, worker RPC57.27s, ledger38.32s, graph runner12.85s,
+local profile533.75s and local view152.33s, plus current scoped CLI run commands.
+This is complete local acceptance for this exact source/runtime; earlier failed
+runs remain retained. It does not establish hosted graph/ledger resolution,
+current-runtime rendered browser/VS Code coding, remote protocol/enrollment or
+nested dynamic process recovery. Installed62 and completed tasks unchanged.
+Evidence: captured-cli-b133a0ee-full-native-20261023*.
+
 ## Captured CLI run commands through SDK subobjects - 2026-10-23
 
 Added connections run-start/run-open/run-cancel to the native IPC CLI using
