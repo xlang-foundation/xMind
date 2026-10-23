@@ -1,3 +1,20 @@
+## Captured SDK Runs.Submit options - 2026-10-23
+
+Added Runs.Submit ordinary SDK dictionary plus CLI connections run-submit.
+SDK/HTTP share extracted native string/identity/provider/workspace/attachment
+validation and existing typed admission dispatch. Start convenience remains.
+No custom wire/value serializer, peer.call dispatcher or root orchestration.
+Shared test recording peer verifies model/provider/workspace/files/inbox options
+through actual SDK object calls, with invalid and stale requests causing no
+execution. Actual separate xmind.exe client submits a model option and completes
+the controlled run; HTTP option regression still passes. All3 focused contracts
+pass3.35s, frozen2815-source/SDK/library/dependency/137-binary sets unchanged.
+Initial existing-contract build passes3/3 before new option assertions; final
+qualification includes those assertions. No paid inference, CPython or install.
+The complete172 and actual browser/CLI coding receipts remain scoped to earlier
+b133a0ee Native49413090; this adapter checkpoint is focused acceptance only.
+Evidence: sdk-run-options-20261023*.
+
 ## Actual CLI coding on current SDK8c - 2026-10-23
 
 Full-qualified b133a0ee Native49413090/SDK8c uses fresh sum-of-squares fixture:

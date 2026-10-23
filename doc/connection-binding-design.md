@@ -80,14 +80,14 @@ internal call correlation and value serialization need no application replacemen
 
 The Local service and HTTP adapter share native binding lifetime, revision and
 admission checks. HTTP run requests support model/provider, workspace revision,
-file attachments and queued inbox options. The scoped SDK Runs.Start currently
-accepts only id, session and prompt; exposing those additional options through
-ordinary SDK dictionary arguments remains work. SDK value serialization stays
+file attachments and queued inbox options. The scoped SDK Runs.Start accepts id, session and prompt; Runs.Submit accepts
+those additional options through an ordinary SDK dictionary using the same
+native request validation and admission dispatch. SDK value serialization stays
 inside xlang3.
 
 Browser and extension clients negotiate Local admission support, capture a
 binding for session creation and prompt submission, and validate returned
-identity and ownership. CLI scoped session/event reads use SDK subobjects.
+identity and ownership. CLI scoped session/run/event commands use SDK subobjects.
 Approval, model, graph and other client operations still use Local compatibility
 routes. Actual browser and CLI coding receipts exist; actual rendered VS Code
 coding remains unverified. These results do not establish remote execution.

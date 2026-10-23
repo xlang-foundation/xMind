@@ -1,3 +1,4 @@
+#include "connection_run_input.hpp"
 #include "agentflow/agent_worker_native_execution.hpp"
 #include "agentflow/agent_worker_native_links.hpp"
 #include "agentflow/agent_worker_native_planning.hpp"
@@ -94,7 +95,8 @@ struct BoundRunsApi {
     X::Value Open(std::string id){return api_call([&]{check();return bound_value(Host(),state->open_run(id));});}
     X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{check();return bound_value(Host(),state->start_run(id,session,prompt));});}
     void Cancel(std::string id){api_call([&]{check();state->cancel_run(id);});}
-    BEGIN_PACKAGE(BoundRunsApi) APISET().AddFunc<1>("Open",&BoundRunsApi::Open);APISET().AddFunc<3>("Start",&BoundRunsApi::Start);APISET().AddFunc<1>("Cancel",&BoundRunsApi::Cancel); END_PACKAGE
+    X::Value Submit(X::Value request){return api_call([&]{check();return bound_value(Host(),state->start_run(connection_input::run_request(sdk_values::from_value(request))));});}
+    BEGIN_PACKAGE(BoundRunsApi) APISET().AddFunc<1>("Submit",&BoundRunsApi::Submit);APISET().AddFunc<1>("Open",&BoundRunsApi::Open);APISET().AddFunc<3>("Start",&BoundRunsApi::Start);APISET().AddFunc<1>("Cancel",&BoundRunsApi::Cancel); END_PACKAGE
 };
 struct BoundEventsApi {
     std::shared_ptr<ConnectionEventStream> state;BoundEventsApi()=default;explicit BoundEventsApi(std::shared_ptr<ConnectionEventStream> value):state(std::move(value)){}

@@ -4,7 +4,9 @@ This audit preserves the complete recovered delivery objective; completion remai
 unproven. Installed 0.1.62 uses Native2f105e11 and SDK499415d0, with its protected
 backup and user state retained. Current source adds SDK8c7972d1 lifetime guards,
 shared worker retirement ordering, captured connection adapters and scoped CLI
-run commands. It is not installed.
+run commands. The subsequent SDK Runs.Submit option API has focused acceptance
+and shares HTTP validation; the earlier full172/browser/CLI receipts remain
+scoped to b133a0ee. Current source is not installed.
 
 The [last complete hosted run](../doc/evidence/hosted-native-full-f890c8d2-20261023.json)
 passes 167/170 in 915.52 seconds. Graph process execution, worker compaction and
@@ -26,7 +28,7 @@ these older runtime results retain their original scope. [Current SDK8c browser 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
 | Shared native C++ backend, embedded xlang3 and SQLite | [Current SDK8c full172](../doc/evidence/captured-cli-b133a0ee-full-native-20261023.json); complete input closures and binary file sets verified unchanged. | SDK8c/current-source complete local172 now passes. Resolve hosted failures and verify current-runtime client delivery; historical SDK499 passes retain their original scope. |
-| Standard xlang3 root/subobjects and process workers | [Actual separate-process Connections API and lifetime tests](../doc/evidence/connection-catalog-sdk-api-20261022.json); SDK owns value/reference transfer. | [Scoped CLI run services](../doc/evidence/captured-cli-runs-20261023.json) pass actual separate-process completion/cancellation. Full run options and authenticated remote binding remain incomplete. |
+| Standard xlang3 root/subobjects and process workers | [Actual separate-process Connections API and lifetime tests](../doc/evidence/connection-catalog-sdk-api-20261022.json); SDK owns value/reference transfer. | [Scoped CLI run services](../doc/evidence/captured-cli-runs-20261023.json) pass actual separate-process completion/cancellation. SDK full run options now pass focused same-process/lifetime and separate-process tests; authenticated remote binding remains incomplete. |
 | Browser coding | [Current SDK8c browser coding](../doc/evidence/client-browser-captured-b133a0ee-20261023.json): actual UI Send, edit/command approvals, Node4, identical eight-message rendered history after reload and matching CLI records. | Preserve the completed task. This runtime fixture is not installed; rendered VS Code and other remaining delivery areas stay separate. |
 | CLI coding | [Current SDK8c CLI coding](../doc/evidence/client-cli-coding-b133a0ee-20261023.json): real read/edit/Node4, two approvals, physical SDK worker retirement, exact history/watch and owned backend exit. | Preserve the completed task. Explicit loopback CLI attachment is proven; current managed installation and rendered VS Code remain separate. |
 | VS Code extension | [Protected installed62](../doc/evidence/installed-0.1.62-2f105e11-20261022.json): package/runtime bytes and installed native managed discovery/read smoke pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. Keep visible Code closed unless requested. |

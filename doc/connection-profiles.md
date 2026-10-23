@@ -170,6 +170,7 @@ The native IPC CLI supports these captured service commands after
 - `connections open ID PROFILE_REV`
 - `connections session-create ID PROFILE_REV SESSION TITLE`
 - `connections session-open ID PROFILE_REV SESSION`
+- `connections run-submit ID PROFILE_REV JSON_OBJECT`
 - `connections run-start ID PROFILE_REV RUN SESSION PROMPT`
 - `connections run-open ID PROFILE_REV RUN`
 - `connections run-cancel ID PROFILE_REV RUN`
@@ -179,9 +180,26 @@ A null JSON cursor starts from the captured initial cursor. Run start/open retur
 native binding/run receipts; cancellation returns the captured identity, run ID
 and acknowledgement. Cancellation requests the existing run's stop; inspect its
 terminal state separately. Commands use the existing SDK service objects and
-values. Start currently accepts the default run options only. Browser/extension
+values. Start accepts the default run options; Submit accepts the options below. Browser/extension
 prompt admission uses the shared native HTTP adapter; other client operations
 and authenticated remote connectors still require integration.
+
+## SDK run options
+
+The captured Runs subobject exposes `Submit(request)` in addition to
+`Start(id, session, prompt)`. Request is an ordinary SDK dictionary; xlang3 owns
+remote object/method calls and value serialization. SDK and HTTP use the same
+native request validation and typed admission dispatch.
+
+Required fields are `id`, `session_id` and `prompt`. Optional fields are
+`model_id`, paired `provider_profile_id`/`expected_provider_revision`, paired
+`expected_workspace_id`/`expected_workspace_authority_id`,
+`expected_workspace_revision`, `files` and `inbox_id`. File attachments require
+the observed workspace membership revision. Unknown fields, malformed revision
+bindings and stale connection admission are rejected before execution. Submit
+returns the same captured binding/run receipt as Start. The SDK caller supplies
+the run ID; it can inspect that ID after an uncertain reply before any retry.
+This API is in source; installed 0.1.62 does not advertise this new method.
 
 ## HTTP captured-binding adapter
 

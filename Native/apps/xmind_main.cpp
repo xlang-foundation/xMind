@@ -22,7 +22,7 @@ namespace {
 void help(){
     std::cout<<"xMind Runtime, Coding Harness and AI Model Gateway\n"
         "Usage:\n"
-        "  xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-cancel ID REV RUN | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID\n"
+        "  xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections run-submit ID REV JSON_OBJECT | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-cancel ID REV RUN | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID\n"
         "  xmind serve --db FILE --modules DIR --stdlib DIR [--agent-execution thread|process-read|process-code] [server options]\n"
         "  xmind [--workspace DIR] [--profile-root DIR] [--config FILE] [--python-tools-config FILE] [--language-server-config FILE] [--process-config FILE] [--mcp-config FILE] [COMMAND ARGS...]\n"
         "  xmind --port PORT [--workspace DIR] [COMMAND ARGS...]\n"
