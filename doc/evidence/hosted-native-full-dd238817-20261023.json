@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "runId": 40001405031,
+  "jobId": 120578130859,
+  "sourceRevision": "dd2388170654ae2ca0a0e96afb5db0a52543a3ed",
+  "conclusion": "failure",
+  "fullNativeSuiteRan": true,
+  "fullNativeAcceptance": false,
+  "total": 170,
+  "passed": 167,
+  "failed": 3,
+  "seconds": 909.68,
+  "failures": {
+    "native_graph_runner_contract": "PowerShell process effect times out at unchanged 30000 ms budget; script_entered only",
+    "native_agent_worker_model_rpc_contract": "Overall production fixture terminated by unchanged 70000 ms Node wrapper deadline; no compaction assertion failure",
+    "native_agent_worker_ledger_contract": "Terminated by unchanged 45000 ms Node wrapper deadline"
+  },
+  "hostedContextCasesPassed": [
+    "coding_context",
+    "coding_context_compact",
+    "coding_context_overflow",
+    "coding_context_overflow_repeat"
+  ],
+  "diagnosticDump": {
+    "reason": "slow",
+    "exceptionNotEstablished": true,
+    "bytes": 294132,
+    "sha256": "92115bb47d62050b1ed1d54630631961160e034482ff7749c98bd365699a8fe6"
+  },
+  "artifactId": 12525334970,
+  "artifactSha256": "2cf8419f28867fc7d3b0d4eb0270541b440308f900b637d35479a46c4c27c177",
+  "logSha256": "be82b3b1742739576f945e9430ace54e5e0eedd4b502904342c1be25bc0ba395",
+  "installedChanged": false
+}

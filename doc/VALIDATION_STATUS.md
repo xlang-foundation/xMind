@@ -1,3 +1,15 @@
+## Canonical compaction passes hosted; aggregate RPC timeout remains - 2026-10-23
+
+Run40001405031/source dd238817 completes167/170 in909.68s. All four counted
+context cases (ordinary/compact/overflow/repeat) report verified success. The
+old compaction assertion is absent: native RPC production fixture subsequently
+hits its unchanged70-second Node wrapper deadline and is killed, not reported
+as a native crash. Slow diagnostic dump retained privately with official artifact
+and hashes. Graph PowerShell30s and ledger45s still fail. No deadlines changed
+and no broader success inferred. Current SDK option source is a later focused
+checkpoint; complete local172 and actual browser/CLI receipts remain b133a0ee.
+Installed62 unchanged. Evidence: hosted-native-full-dd238817-20261023.json.
+
 ## Captured SDK Runs.Submit options - 2026-10-23
 
 Added Runs.Submit ordinary SDK dictionary plus CLI connections run-submit.

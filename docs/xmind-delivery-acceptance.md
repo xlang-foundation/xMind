@@ -8,11 +8,12 @@ run commands. The subsequent SDK Runs.Submit option API has focused acceptance
 and shares HTTP validation; the earlier full172/browser/CLI receipts remain
 scoped to b133a0ee. Current source is not installed.
 
-The [last complete hosted run](../doc/evidence/hosted-native-full-f890c8d2-20261023.json)
-passes 167/170 in 915.52 seconds. Graph process execution, worker compaction and
-worker ledger fail. The subsequent compaction fixture correction uses canonical
-workspace authority and [passes the focused actual worker RPC contract](../doc/evidence/worker-compaction-canonical-authority-20261023.json);
-hosted confirmation remains required. [Complete local requalification on sourceb133a0ee](../doc/evidence/captured-cli-b133a0ee-full-native-20261023.json)
+The [last complete hosted run](../doc/evidence/hosted-native-full-dd238817-20261023.json)
+passes167/170 in909.68 seconds. All four counted context cases, including
+compaction, pass after the canonical workspace correction. The overall worker
+RPC production fixture then reaches its70-second wrapper deadline; graph
+PowerShell and ledger also fail their unchanged deadlines. These are unresolved
+hosted failures, even though [Complete local requalification on sourceb133a0ee](../doc/evidence/captured-cli-b133a0ee-full-native-20261023.json)
 passes all172 in1324.08s, including Rust semantic checks absent from the hosted
 inventory. Source/SDK/library/dependency/binary file sets and bytes are frozen
 and verified. Earlier SDK8c full-run Rust failure remains historical evidence;
