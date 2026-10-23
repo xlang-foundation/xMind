@@ -1,0 +1,19 @@
+{
+  "output": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\2f105e11\\package\\native-runtime",
+  "manifestSha256": "3fa2fcd78f3df21371ee22bb979903a6deb62ae754cf0ac0a22f38a1e1b64d0b",
+  "nativeFiles": 5,
+  "pureSourceFiles": 1869,
+  "files": 2398,
+  "nativeExecuted": false,
+  "configAccessed": false,
+  "installed": false,
+  "source": "2f105e112a6ef8c796c4a2a84af70d035f8a1a06",
+  "sdkRevision": "499415d03dba6536355ac3ef19522e335f03f95c",
+  "excludedUnusedDemonstrationModules": {
+    "modules/xlang1_compat_sample.x3pkg.dll": "4a16024341b8d9df2cae19c8ee5cdc43fc65ab59b2bc7d4a70f9d86176638a68",
+    "modules/xlang_curmodule_probe.x3pkg.dll": "78f8788031d70a6ca1113fc2bf9ba316bb6824b676c5e470bb5721f1736b96e8",
+    "modules/xlang_graph_native.x3pkg.dll": "69025238c37f0176da0d84e970437ca9be52f4d86fe2426b7608ce29a1cb1e2f"
+  },
+  "fullNativeAcceptance": true,
+  "executed": false
+}
