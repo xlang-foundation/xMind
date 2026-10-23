@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-10-23T00:41:20.843Z",
+  "source": "01439743",
+  "files": {
+    "Native/src/agent_worker_entry.cpp": "f37dd574423945ace62613e6ef12f76b340bd9a19382008c7d95ddfae8d8f982",
+    "Native/src/agent_worker_supervisor.cpp": "4525d31bf7d6ecb94f1f32c253b8ec3a2f8c23564f2315684dd0618ae2604524",
+    "Native/src/agent_worker_channel.cpp": "2470cd5a1b7ba8641fc23b020aa8bc4e80ff2cd72c853801a127743dc4dc1249",
+    "Native/src/agent_worker_rpc.cpp": "90669fd4be28e4a3eea616974cc49cb8fb19a422fb7983f78fcb61d57a44ad48",
+    "Native/include/agentflow/agent_worker_client_context.hpp": "c2fa493a729543860d8aaaac9a63f732b1b7f780ddd23fc7171d7f9fe4aab2fe",
+    "Native/src/agent_worker_file_rpc.cpp": "7d235cf9a301a1fe58a927b0f4d76f5c14b6aa6e2729a5bac836a7c385445f8e",
+    "Native/src/agent_worker_model_rpc.cpp": "068c0d3fe6884328f33f116b780858a17ed78e30501b674f1f1fae454593a7e8",
+    "Native/CMakeLists.txt": "4fdb1992c744c29ffd7edeb98ab08a71fdceda4bb6704ad02ba1e13f0d9fbe88"
+  },
+  "findings": [
+    {
+      "scope": "Product channel-worker entry",
+      "evidence": "Native/src/agent_worker_entry.cpp constructs NativeWorkerContext with non-null NativeWorkerModelClient; NativeWorkerContext.call throws unsupported.",
+      "conclusion": "Product runner uses SDK object services, not the generic string-method fallback."
+    },
+    {
+      "scope": "Worker bootstrap",
+      "evidence": "AgentWorkerChannel still sends worker.ready, worker.boot and worker.execution.ready through SDK Link.Deliver.",
+      "conclusion": "These are active startup/lifetime messages; retain until a separately verified SDK startup redesign exists."
+    },
+    {
+      "scope": "Old generic transport and adapter fallbacks",
+      "evidence": "AgentWorkerRpcPeer remains in agent_worker_rpc.cpp, retirement helper and model RPC contract; eight adapter translation units retain peer.call fallbacks. CMake still builds generic transport.",
+      "conclusion": "Remaining cleanup audit required: identify fixture-only dependencies, replace meaningful fault injection with SDK seams, remove unused product code. Do not claim all old implementation removed."
+    }
+  ],
+  "changesApplied": false,
+  "fullGateInProgress": true
+}

@@ -1,0 +1,1 @@
+{"graphs":[{"id":"managed.read","spec":{"nodes":[{"id":"read","type":"tool","tool":"read_file","arguments":{"path":"managed-marker.txt"}}]}},{"id":"managed.pause","spec":{"nodes":[{"id":"approval","type":"human","prompt":"Confirm controlled package handoff"}]}}]}

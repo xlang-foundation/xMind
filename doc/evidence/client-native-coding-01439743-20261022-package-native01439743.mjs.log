@@ -1,0 +1,25 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+const repo='D:/CantorAI2026/xMind',root=repo+'/.agentflow/client-delivery-validation/01439743/package',stage=root+'/extension',client=repo+'/.agentflow/client-delivery-validation/0.1.61';
+const require=createRequire(repo+'/extensions/vscode/package.json'),{pack}=require('@vscode/vsce/out/package.js'),yauzl=require('yauzl'),sha=b=>createHash('sha256').update(b).digest('hex');
+const inputs=JSON.parse(await fs.readFile(client+'/inputs-before-tests.json','utf8')),gate=JSON.parse(await fs.readFile(client+'/gate.json','utf8'));assert.equal(gate.passed,true);
+const frontend={};for(const [name,expected]of Object.entries(inputs.project))if(name.startsWith('extensions/vscode/')||name.startsWith('views/browser/')){assert.equal(sha(await fs.readFile(repo+'/'+name)),expected,name);frontend[name]=expected;}
+await fs.mkdir(stage);const expected={};
+async function copy(from,name,hash){const bytes=await fs.readFile(from);if(hash)assert.equal(sha(bytes),hash,name);await fs.mkdir(path.dirname(stage+'/'+name),{recursive:true});await fs.writeFile(stage+'/'+name,bytes,{flag:'wx'});expected[name]=sha(bytes);}
+const names=execFileSync('git',['ls-files','-z','extensions/vscode'],{cwd:repo,encoding:'utf8',windowsHide:true}).split('\0').filter(Boolean);
+for(const name of names){const relative=name.slice('extensions/vscode/'.length);if(relative.startsWith('tests/')||relative.startsWith('scripts/')||relative==='package-lock.json'||relative.endsWith('.vsix'))continue;await copy(repo+'/'+name,relative,inputs.project[name]);}
+async function copyDependency(from,prefix){for(const item of await fs.readdir(from,{withFileTypes:true})){assert.equal(item.isSymbolicLink(),false);const name=prefix+'/'+item.name;if(item.isDirectory())await copyDependency(from+'/'+item.name,name);else {await copy(from+'/'+item.name,name);if(!['node_modules/marked/lib/marked.umd.js','node_modules/marked/LICENSE','node_modules/dompurify/dist/purify.min.js','node_modules/dompurify/LICENSE','node_modules/dompurify/LICENSE-MPL'].includes(name))delete expected[name];}}}
+for(const name of ['marked','dompurify','@types/trusted-types','@xterm/xterm','@xterm/addon-fit'])await copyDependency(repo+'/extensions/vscode/node_modules/'+name,'node_modules/'+name);
+const assets=JSON.parse(await fs.readFile(client+'/browser-manifest.json','utf8'));for(const [name,hash]of Object.entries(assets))await copy(client+'/browser-assets/'+name,'browser-runtime/assets/'+name,hash);await copy(client+'/server.mjs','browser-runtime/server.mjs');
+async function walk(dir,prefix=''){const result={};for(const item of await fs.readdir(dir,{withFileTypes:true})){const name=prefix+item.name;if(item.isDirectory())Object.assign(result,await walk(dir+'/'+item.name,name+'/'));else result[name]=sha(await fs.readFile(dir+'/'+item.name));}return result;}
+const runtimeBefore=await walk(root+'/native-runtime');await fs.cp(root+'/native-runtime',stage+'/native-runtime',{recursive:true,errorOnExist:true,force:false});for(const [name,hash]of Object.entries(runtimeBefore))expected['native-runtime/'+name]=hash;
+const archive=root+'/agentflow-0.1.61-sdk-f809.vsix';assert.equal(await fs.stat(archive).then(()=>true,()=>false),false);await pack({cwd:stage,packagePath:archive,dependencies:true,useYarn:false});
+const entries=await new Promise((resolve,reject)=>yauzl.open(archive,{lazyEntries:true},(error,zip)=>{if(error)return reject(error);const result={};zip.on('error',reject);zip.on('entry',entry=>{if(entry.fileName.endsWith('/')){zip.readEntry();return;}zip.openReadStream(entry,(e,stream)=>{if(e)return reject(e);const chunks=[];stream.on('data',c=>chunks.push(c));stream.on('error',reject);stream.on('end',()=>{result[entry.fileName]=sha(Buffer.concat(chunks));zip.readEntry();});});});zip.on('end',()=>resolve(result));zip.readEntry();}));
+for(const [name,hash]of Object.entries(expected)){if(name==='.vscodeignore')continue;const target=name==='LICENSE'?'LICENSE.txt':name==='README.md'?'readme.md':name;assert.equal(entries['extension/'+target],hash,name);}
+assert.deepEqual(await walk(root+'/native-runtime'),runtimeBefore);assert.equal(Object.keys(entries).some(name=>/\.pyd$|__pycache__|\/tests\/|\/scripts\//.test(name)),false);
+await fs.writeFile(root+'/vsix-receipt.json',JSON.stringify({archive,archiveSha256:sha(await fs.readFile(archive)),archiveBytes:(await fs.stat(archive)).size,entries,frontendSourcesMatchAcceptedClientGate:frontend,acceptedExtensionTests:gate.results.extension.pass,acceptedBrowserTests:gate.results.browser.pass,repeatedUnitSuites:false,allExpectedRuntimeClientAssetsAndLibrariesVerified:true,cleanRuntimeUnchanged:true,nativeExecuted:false,installed:false,releaseAccepted:false},null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({archive,archiveEntries:Object.keys(entries).length,frontendFilesMatched:Object.keys(frontend).length,nativeExecuted:false,installed:false,releaseAccepted:false}));

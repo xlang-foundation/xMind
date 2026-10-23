@@ -1,0 +1,1 @@
+Managed backend owner request was rejected: /v1/backend/owner/quiesce: {"detail":"Native execution must be healthy and idle before owner control"}

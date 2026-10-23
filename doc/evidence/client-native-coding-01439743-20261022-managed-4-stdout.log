@@ -1,0 +1,16 @@
+{
+  "graphs": [
+    {
+      "executable": true,
+      "id": "managed.read",
+      "node_count": 1,
+      "revision": 1
+    },
+    {
+      "executable": true,
+      "id": "managed.pause",
+      "node_count": 1,
+      "revision": 1
+    }
+  ]
+}

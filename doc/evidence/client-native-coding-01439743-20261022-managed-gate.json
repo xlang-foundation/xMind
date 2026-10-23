@@ -1,0 +1,117 @@
+{
+  "prior": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:58444",
+    "process_id": 29296,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\01439743\\managed-upgrade\\profiles\\4983546f4ec9a5a95fb8f63bcd18673d99e80c09d7c745279571467a1b0778c8",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "workspace_edits": "approved"
+  },
+  "owner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:58444",
+    "process_id": 33528,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\01439743\\managed-upgrade\\profiles\\4983546f4ec9a5a95fb8f63bcd18673d99e80c09d7c745279571467a1b0778c8",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "workspace_edits": "approved"
+  },
+  "session": "29ca605217ba70dfaeb1e3152504686b",
+  "completedRoot": "c087d724253f0b2edddea80e4c99ea8a",
+  "history": [
+    {
+      "data": {
+        "content": "Read the original managed marker",
+        "model_id": ""
+      },
+      "id": "msg_1",
+      "role": "user",
+      "seq": 1
+    },
+    {
+      "data": {
+        "content": "Completed graph managed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Native managed package handoff: exact original history.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000070d90b0000000000\",\n      \"path\": \"managed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000070d90b0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "managed.read",
+        "nodes": [
+          {
+            "id": "read",
+            "output": {
+              "content": "Native managed package handoff: exact original history.\n",
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000070d90b0000000000",
+              "path": "managed-marker.txt",
+              "source": "graph_tool",
+              "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000070d90b0000000000",
+              "workspace_revision": 1
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_4",
+      "role": "assistant",
+      "seq": 4
+    },
+    {
+      "data": {
+        "content": "Hold this exact graph during attempted package upgrade",
+        "model_id": ""
+      },
+      "id": "msg_5",
+      "role": "user",
+      "seq": 5
+    },
+    {
+      "data": {
+        "content": "Completed graph managed.pause.\n\n```json\n[\n  {\n    \"id\": \"approval\",\n    \"output\": {\n      \"approved\": true\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "managed.pause",
+        "nodes": [
+          {
+            "id": "approval",
+            "output": {
+              "approved": true
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_6",
+      "role": "assistant",
+      "seq": 6
+    }
+  ],
+  "migration": "Actual immutable32a24adb package to actual01439743 package",
+  "managedDiscovery": true,
+  "activeGraphUpgradeRefused": true,
+  "originalGraphResumedOnce": true,
+  "historyAndProfileExactAfterUpgrade": true,
+  "modelCalls": 0,
+  "paidInference": false,
+  "installed": false,
+  "passed": true,
+  "packageIntegrity": {
+    "oldExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "oldClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    }
+  },
+  "ownedOwnerRetirementObserved": true
+}

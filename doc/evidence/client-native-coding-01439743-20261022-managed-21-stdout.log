@@ -1,0 +1,52 @@
+{
+  "checkpoint": {
+    "nodes": [
+      {
+        "id": "approval",
+        "output": {
+          "approved": true
+        },
+        "state": "completed"
+      }
+    ],
+    "spec": {
+      "nodes": [
+        {
+          "id": "approval",
+          "prompt": "Confirm controlled package handoff",
+          "type": "human"
+        }
+      ]
+    },
+    "version": 1
+  },
+  "checkpoint_revision": 3,
+  "context": {
+    "enabled": false,
+    "remaining_active_ms": null,
+    "resumable": false
+  },
+  "graph_id": "managed.pause",
+  "graph_revision": 1,
+  "input": {
+    "content": "Hold this exact graph during attempted package upgrade",
+    "model_id": ""
+  },
+  "run": {
+    "graph_root": true,
+    "id": "c087d724253f0b2edddea80e4c99ea8a",
+    "node_id": "",
+    "parent_id": "",
+    "session_id": "29ca605217ba70dfaeb1e3152504686b",
+    "state": "completed"
+  },
+  "spec": {
+    "nodes": [
+      {
+        "id": "approval",
+        "prompt": "Confirm controlled package handoff",
+        "type": "human"
+      }
+    ]
+  }
+}

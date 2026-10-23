@@ -1,0 +1,56 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {setTimeout as delay} from 'node:timers/promises';
+const repo='D:/CantorAI2026/xMind',base=repo+'/.agentflow/client-delivery-validation/01439743',out=base+'/managed-upgrade',workspace='D:/CantorAI2026/TestProj/xmind-delivery-validation/managed-profile-01439743',execute=promisify(execFile),sha=b=>createHash('sha256').update(b).digest('hex');
+const full=JSON.parse(await fs.readFile(repo+'/.agentflow/workspace-switch-validation/native/schema-worker-sdk-unified-full/gate.json','utf8'));assert.equal(full.scopePassed,true);assert.equal(full.total,172);
+const packageReceipt=JSON.parse(await fs.readFile(base+'/package/stage-receipt.json','utf8'));assert.equal(packageReceipt.source,full.sourceParent);assert.equal(packageReceipt.fullNativeAcceptance,true);
+async function verifyPackage(root,receipt,{allowAdded=false}={}){
+ const bytes=await fs.readFile(root+'/native-runtime-manifest.json');assert.equal(sha(bytes),receipt.manifestSha256);const manifest=JSON.parse(bytes);
+ async function walk(dir,prefix=''){const result=[];for(const e of await fs.readdir(dir,{withFileTypes:true})){assert.equal(e.isSymbolicLink(),false);const n=prefix+e.name;if(e.isDirectory())result.push(...await walk(dir+'/'+e.name,n+'/'));else result.push(n);}return result.sort();}
+ const expected=[...Object.keys(manifest.files),'native-runtime-manifest.json'].sort(),actual=await walk(root),added=actual.filter(n=>!expected.includes(n));
+ assert.ok(expected.every(n=>actual.includes(n)));if(!allowAdded)assert.deepEqual(actual,expected);
+ for(const [name,hash]of Object.entries(manifest.files))assert.equal(sha(await fs.readFile(root+'/'+name)),hash,name);
+ return {coveredFiles:Object.keys(manifest.files).length,coveredBytesUnchanged:true,addedFiles:added};
+}
+const oldReceipt=JSON.parse(await fs.readFile(repo+'/.agentflow/client-delivery-validation/32a24adb/package/stage-receipt.json','utf8'));
+await verifyPackage(repo+'/.agentflow/client-delivery-validation/32a24adb/package/native-runtime',oldReceipt);await verifyPackage(base+'/package/native-runtime',packageReceipt);
+await fs.mkdir(out);await fs.mkdir(workspace);const profiles=out+'/profiles',old=out+'/old-runtime',next=out+'/new-runtime';
+await fs.cp(repo+'/.agentflow/client-delivery-validation/32a24adb/package/native-runtime',old,{recursive:true,errorOnExist:true,force:false});await fs.cp(base+'/package/native-runtime',next,{recursive:true,errorOnExist:true,force:false});
+assert.equal(sha(await fs.readFile(next+'/xmind.exe')),full.nativeSha256);
+await verifyPackage(old,oldReceipt);await verifyPackage(next,packageReceipt);
+await fs.writeFile(workspace+'/managed-marker.txt','Native managed package handoff: exact original history.\n',{flag:'wx'});
+const graphs=out+'/graphs.json',providers=out+'/providers.yaml',answer=out+'/answer.json';
+await fs.writeFile(providers,'version: 1\nprofiles: {}\n',{flag:'wx'});await fs.writeFile(answer,'{"approved":true}\n',{flag:'wx'});
+await fs.writeFile(graphs,JSON.stringify({graphs:[{id:'managed.read',spec:{nodes:[{id:'read',type:'tool',tool:'read_file',arguments:{path:'managed-marker.txt'}}]}},{id:'managed.pause',spec:{nodes:[{id:'approval',type:'human',prompt:'Confirm controlled package handoff'}]}}]})+'\n',{flag:'wx'});
+const env={...process.env};for(const key of Object.keys(env))if(key==='XMIND_AUTH_TOKEN'||key==='XMIND_API_KEY'||key.startsWith('XMIND_UI_'))delete env[key];
+let sequence=0,owner,ownerBirth,run,accepted,passed=false;const commands=[];
+async function cli(runtime,args,{expected=0}={}){let stdout='',stderr='',code=0;try{({stdout,stderr}=await execute(runtime+'/xmind.exe',['--profile-root',profiles,...args],{cwd:workspace,env,windowsHide:true,timeout:30000,maxBuffer:4*1024*1024}));}catch(error){stdout=error.stdout??'';stderr=error.stderr??'';code=error.code;}
+ ++sequence;await fs.writeFile(out+'/'+sequence+'-stdout.log',stdout,{flag:'wx'});await fs.writeFile(out+'/'+sequence+'-stderr.log',stderr,{flag:'wx'});commands.push({args,code,stdout:sequence+'-stdout.log',stderr:sequence+'-stderr.log'});if(expected===0)assert.equal(code,0,stderr);else assert.equal(code,expected,'Protected upgrade should refuse with its native status');return code===0?JSON.parse(stdout):{code,stderr};}
+async function graph(runtime,id,state){const end=Date.now()+15000;let value;do{value=await cli(runtime,['graph',id]);if(value.run.state===state)return value;await delay(25);}while(Date.now()<end);throw Error('Managed graph did not reach '+state+': '+JSON.stringify(value));}
+async function retire(runtime,pid){const result=await execute(runtime+'/xmind.exe',['admin','inspect-owner-process',String(pid)],{cwd:workspace,env,windowsHide:true,timeout:15000});const identity=JSON.parse(result.stdout);assert.equal(identity.process_id,pid);assert.equal(identity.process_birth,ownerBirth);
+ const queried=await execute('powershell.exe',['-NoProfile','-Command',`Get-CimInstance Win32_Process -Filter "ProcessId=${pid}" | Select-Object ProcessId,ExecutablePath | ConvertTo-Json -Compress`],{env,windowsHide:true,timeout:15000});const image=JSON.parse(queried.stdout);assert.equal(image.ProcessId,pid);const real=await fs.realpath(image.ExecutablePath),allowed=[await fs.realpath(profiles),await fs.realpath(next)];assert(allowed.some(root=>real.toLowerCase().startsWith(root.toLowerCase()+path.sep)));assert.equal(sha(await fs.readFile(real)),full.nativeSha256);identity.image_path=real;await fs.writeFile(out+'/retirement-identity.json',JSON.stringify(identity,null,2)+'\n',{flag:'wx'});process.kill(pid);const observed=await execute(runtime+'/xmind.exe',['admin','observe-owner-exit',String(pid),identity.process_birth,'10000'],{env,windowsHide:true,timeout:15000});assert.equal(JSON.parse(observed.stdout).exited,true);}
+try{
+ owner=await cli(old,['--config',providers,'--graphs-config',graphs,'--agent-execution','process-code','profile-info']);assert.equal(owner.started,true);assert.equal(owner.agent_execution,'process-code');
+ const attached=await cli(old,['profile-info']);assert.equal(attached.process_id,owner.process_id);assert.equal(attached.started,false);
+ const session=await cli(old,['create-session','Managed release package handoff']);const catalog=(await cli(old,['graphs'])).graphs;
+ const read=catalog.find(g=>g.id==='managed.read');run=await cli(old,['graph-run',session.id,read.id,String(read.revision),'Read the original managed marker']);const completed=await graph(old,run.id,'completed');assert.equal(completed.checkpoint.nodes[0].output.content,'Native managed package handoff: exact original history.\n');
+ const pause=catalog.find(g=>g.id==='managed.pause');run=await cli(old,['graph-run',session.id,pause.id,String(pause.revision),'Hold this exact graph during attempted package upgrade']);const paused=await graph(old,run.id,'paused');const before=await cli(old,['history',session.id]);
+ await cli(next,['--upgrade-backend','profile-info'],{expected:2});assert.equal((await cli(old,['profile-info'])).process_id,owner.process_id);assert.deepEqual(await cli(old,['history',session.id]),before);assert.equal((await cli(old,['graph',run.id])).run.state,'paused');
+ await cli(old,['graph-input',run.id,'approval',String(paused.checkpoint_revision),answer]);await graph(old,run.id,'completed');const history=await cli(old,['history',session.id]),sessions=await cli(old,['sessions']),prior=owner;
+ owner=await cli(next,['--upgrade-backend','profile-info']);const birth=await execute(next+'/xmind.exe',['admin','inspect-owner-process',String(owner.process_id)],{env,windowsHide:true,timeout:15000});ownerBirth=JSON.parse(birth.stdout).process_birth;assert.notEqual(owner.process_id,prior.process_id);assert.equal(owner.origin,prior.origin);assert.equal(owner.profile_directory,prior.profile_directory);assert.deepEqual(await cli(next,['sessions']),sessions);assert.deepEqual(await cli(next,['history',session.id]),history);assert.equal((await cli(next,['graph',run.id])).run.state,'completed');
+ assert.equal((await cli(next,['profile-info'])).process_id,owner.process_id);
+ accepted={prior,owner,session:session.id,completedRoot:run.id,history,migration:'Actual immutable32a24adb package to actual01439743 package',managedDiscovery:true,activeGraphUpgradeRefused:true,originalGraphResumedOnce:true,historyAndProfileExactAfterUpgrade:true,modelCalls:0,paidInference:false,installed:false,passed:true};passed=true;
+}finally{
+ await fs.writeFile(out+'/commands.json',JSON.stringify(commands,null,2)+'\n',{flag:'wx'});
+ // Only this freshly created profile's exact inspected owner is retired.
+ if(passed&&owner)await retire(next,owner.process_id);
+ if(!passed)console.error(JSON.stringify({retained:true,owner,run,profiles,reason:'Preserve failed fixture and owner; inspect before any recovery, never replay completed roots'}));
+}
+
+const packageIntegrity={oldExecution:await verifyPackage(old,oldReceipt,{allowAdded:true}),newExecution:await verifyPackage(next,packageReceipt,{allowAdded:true}),oldClean:await verifyPackage(repo+'/.agentflow/client-delivery-validation/32a24adb/package/native-runtime',oldReceipt),newClean:await verifyPackage(base+'/package/native-runtime',packageReceipt)};
+await fs.writeFile(out+'/gate.json',JSON.stringify({...accepted,packageIntegrity,ownedOwnerRetirementObserved:true},null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({passed:true,session:accepted.session,root:accepted.completedRoot,modelCalls:0,ownedOwnerRetirementObserved:true}));

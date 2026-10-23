@@ -1,0 +1,208 @@
+[
+  {
+    "args": [
+      "--config",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/providers.yaml",
+      "--graphs-config",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/graphs.json",
+      "--agent-execution",
+      "process-code",
+      "profile-info"
+    ],
+    "code": 0,
+    "stdout": "1-stdout.log",
+    "stderr": "1-stderr.log"
+  },
+  {
+    "args": [
+      "profile-info"
+    ],
+    "code": 0,
+    "stdout": "2-stdout.log",
+    "stderr": "2-stderr.log"
+  },
+  {
+    "args": [
+      "create-session",
+      "Managed release package handoff"
+    ],
+    "code": 0,
+    "stdout": "3-stdout.log",
+    "stderr": "3-stderr.log"
+  },
+  {
+    "args": [
+      "graphs"
+    ],
+    "code": 0,
+    "stdout": "4-stdout.log",
+    "stderr": "4-stderr.log"
+  },
+  {
+    "args": [
+      "graph-run",
+      "29ca605217ba70dfaeb1e3152504686b",
+      "managed.read",
+      "1",
+      "Read the original managed marker"
+    ],
+    "code": 0,
+    "stdout": "5-stdout.log",
+    "stderr": "5-stderr.log"
+  },
+  {
+    "args": [
+      "graph",
+      "18848b08fcc8149293341ee97e16aceb"
+    ],
+    "code": 0,
+    "stdout": "6-stdout.log",
+    "stderr": "6-stderr.log"
+  },
+  {
+    "args": [
+      "graph-run",
+      "29ca605217ba70dfaeb1e3152504686b",
+      "managed.pause",
+      "1",
+      "Hold this exact graph during attempted package upgrade"
+    ],
+    "code": 0,
+    "stdout": "7-stdout.log",
+    "stderr": "7-stderr.log"
+  },
+  {
+    "args": [
+      "graph",
+      "c087d724253f0b2edddea80e4c99ea8a"
+    ],
+    "code": 0,
+    "stdout": "8-stdout.log",
+    "stderr": "8-stderr.log"
+  },
+  {
+    "args": [
+      "history",
+      "29ca605217ba70dfaeb1e3152504686b"
+    ],
+    "code": 0,
+    "stdout": "9-stdout.log",
+    "stderr": "9-stderr.log"
+  },
+  {
+    "args": [
+      "--upgrade-backend",
+      "profile-info"
+    ],
+    "code": 2,
+    "stdout": "10-stdout.log",
+    "stderr": "10-stderr.log"
+  },
+  {
+    "args": [
+      "profile-info"
+    ],
+    "code": 0,
+    "stdout": "11-stdout.log",
+    "stderr": "11-stderr.log"
+  },
+  {
+    "args": [
+      "history",
+      "29ca605217ba70dfaeb1e3152504686b"
+    ],
+    "code": 0,
+    "stdout": "12-stdout.log",
+    "stderr": "12-stderr.log"
+  },
+  {
+    "args": [
+      "graph",
+      "c087d724253f0b2edddea80e4c99ea8a"
+    ],
+    "code": 0,
+    "stdout": "13-stdout.log",
+    "stderr": "13-stderr.log"
+  },
+  {
+    "args": [
+      "graph-input",
+      "c087d724253f0b2edddea80e4c99ea8a",
+      "approval",
+      "2",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/answer.json"
+    ],
+    "code": 0,
+    "stdout": "14-stdout.log",
+    "stderr": "14-stderr.log"
+  },
+  {
+    "args": [
+      "graph",
+      "c087d724253f0b2edddea80e4c99ea8a"
+    ],
+    "code": 0,
+    "stdout": "15-stdout.log",
+    "stderr": "15-stderr.log"
+  },
+  {
+    "args": [
+      "history",
+      "29ca605217ba70dfaeb1e3152504686b"
+    ],
+    "code": 0,
+    "stdout": "16-stdout.log",
+    "stderr": "16-stderr.log"
+  },
+  {
+    "args": [
+      "sessions"
+    ],
+    "code": 0,
+    "stdout": "17-stdout.log",
+    "stderr": "17-stderr.log"
+  },
+  {
+    "args": [
+      "--upgrade-backend",
+      "profile-info"
+    ],
+    "code": 0,
+    "stdout": "18-stdout.log",
+    "stderr": "18-stderr.log"
+  },
+  {
+    "args": [
+      "sessions"
+    ],
+    "code": 0,
+    "stdout": "19-stdout.log",
+    "stderr": "19-stderr.log"
+  },
+  {
+    "args": [
+      "history",
+      "29ca605217ba70dfaeb1e3152504686b"
+    ],
+    "code": 0,
+    "stdout": "20-stdout.log",
+    "stderr": "20-stderr.log"
+  },
+  {
+    "args": [
+      "graph",
+      "c087d724253f0b2edddea80e4c99ea8a"
+    ],
+    "code": 0,
+    "stdout": "21-stdout.log",
+    "stderr": "21-stderr.log"
+  },
+  {
+    "args": [
+      "profile-info"
+    ],
+    "code": 0,
+    "stdout": "22-stdout.log",
+    "stderr": "22-stderr.log"
+  }
+]

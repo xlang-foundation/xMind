@@ -1,0 +1,30 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {stageNativeRuntime} from '../extensions/vscode/scripts/package-native-runtime.mjs';
+const repo='D:/CantorAI2026/xMind',root=repo+'/.agentflow/client-delivery-validation/01439743',out=root+'/package',bundle=out+'/bundle',old=repo+'/.agentflow/client-delivery-validation/f5255335/package/bundle';
+const sha=b=>createHash('sha256').update(b).digest('hex'),read=async file=>JSON.parse(await fs.readFile(file,'utf8'));
+const focused=await read(repo+'/.agentflow/workspace-switch-validation/native/schema-worker-sdk-unified-focused/gate.json'),full=await read(repo+'/.agentflow/workspace-switch-validation/native/schema-worker-sdk-unified-full/inputs-before-build.json'),binaries=await read(repo+'/.agentflow/workspace-switch-validation/native/schema-worker-sdk-unified-full/binaries-before-test.json'),sdk=await read(repo+'/.agentflow/xlang3-sdk/provenance.json');
+const acceptedFull=await read(repo+'/.agentflow/workspace-switch-validation/native/schema-worker-sdk-unified-full/gate.json');assert.equal(acceptedFull.scopePassed,true);assert.equal(acceptedFull.total,172);assert.equal(acceptedFull.allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged,true);assert.equal(acceptedFull.sourceParent,full.sourceParent);assert.equal(acceptedFull.nativeSha256,focused.nativeSha256);
+assert.equal(focused.scopePassed,true);assert.equal(focused.total,13);assert.equal(binaries['xmind.exe'],focused.nativeSha256);assert.equal(sdk.commit,'f809da864b582a90f77fef408c5c6a0db200e11e');
+assert.equal(execFileSync('git',['diff','--binary','--','Native'],{cwd:repo,windowsHide:true}).length,0);
+const current=execFileSync('git',['rev-parse','HEAD'],{cwd:repo,windowsHide:true,encoding:'utf8'}).trim();assert.equal(current,full.sourceParent);
+await fs.mkdir(bundle,{recursive:true});assert.deepEqual(await fs.readdir(bundle),[]);
+const source=await read(old+'/source-manifest.json'),files={},excluded={};
+const demos=new Set(['modules/xlang1_compat_sample.x3pkg.dll','modules/xlang_curmodule_probe.x3pkg.dll','modules/xlang_graph_native.x3pkg.dll']);
+for(const [name,expected]of Object.entries(source.files)){
+ const accepted=await fs.readFile(old+'/'+name);assert.equal(sha(accepted),expected);
+ if(demos.has(name)){excluded[name]=expected;continue;}
+ let bytes=accepted;
+ if(name==='xmind.exe'){bytes=await fs.readFile(repo+'/build/skill-state-native/Release/xmind.exe');assert.equal(sha(bytes),focused.nativeSha256);}
+ else if(name==='xlang3_runtime.dll'||name==='xlang3.exe'){bytes=await fs.readFile(repo+'/.agentflow/xlang3-sdk/Release/'+name);assert.equal(sha(bytes),full.runtime[name]);}
+ else if(name.startsWith('modules/'))assert.equal(expected,full.runtime[name]);
+ else if(name==='provenance.json')bytes=Buffer.from(JSON.stringify({sourceRevision:current,sdkRevision:sdk.commit,nativeSha256:focused.nativeSha256,sdkRuntimeSha256:sdk.runtimeSha256,qualification:'All 172 Native contracts and 13 focused schema/IPC/MCP/agent/unified contracts passed, with isolated SDK correctness and the complete default SDK performance gate. Installed and rendered client acceptance remain separate.',modelCalls:0,installed:false,executed:false},null,2)+'\n');
+ await fs.mkdir(bundle+'/'+name.split('/').slice(0,-1).join('/'),{recursive:true});await fs.writeFile(bundle+'/'+name,bytes,{flag:'wx'});files[name]=sha(bytes);
+}
+assert.equal(Object.keys(excluded).length,3);
+const manifest={...source,nativeRevision:current,sdkRevision:sdk.commit,files},manifestBytes=Buffer.from(JSON.stringify(manifest,null,2)+'\n');await fs.writeFile(bundle+'/source-manifest.json',manifestBytes,{flag:'wx'});
+const staged=await stageNativeRuntime({explicitStage:true,bundle,bundleManifest:bundle+'/source-manifest.json',bundleManifestSha256:sha(manifestBytes),stdlibSource:'C:/Python/Python314/Lib',stdlibLicense:'C:/Python/Python314/LICENSE.txt',out:out+'/native-runtime'});
+await fs.writeFile(out+'/stage-receipt.json',JSON.stringify({...staged,source:current,sdkRevision:sdk.commit,excludedUnusedDemonstrationModules:excluded,focusedNativePassed:true,fullNativeAcceptance:true,installed:false,executed:false},null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({...staged,excludedUnusedDemonstrationModules:Object.keys(excluded),installed:false,executed:false}));

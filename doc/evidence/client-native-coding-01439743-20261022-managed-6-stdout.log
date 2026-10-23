@@ -1,0 +1,63 @@
+{
+  "checkpoint": {
+    "nodes": [
+      {
+        "id": "read",
+        "output": {
+          "content": "Native managed package handoff: exact original history.\n",
+          "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000070d90b0000000000",
+          "path": "managed-marker.txt",
+          "source": "graph_tool",
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000070d90b0000000000",
+          "workspace_revision": 1
+        },
+        "state": "completed"
+      }
+    ],
+    "spec": {
+      "nodes": [
+        {
+          "arguments": {
+            "path": "managed-marker.txt"
+          },
+          "id": "read",
+          "tool": "read_file",
+          "type": "tool"
+        }
+      ]
+    },
+    "version": 1
+  },
+  "checkpoint_revision": 3,
+  "context": {
+    "enabled": false,
+    "remaining_active_ms": null,
+    "resumable": false
+  },
+  "graph_id": "managed.read",
+  "graph_revision": 1,
+  "input": {
+    "content": "Read the original managed marker",
+    "model_id": ""
+  },
+  "run": {
+    "graph_root": true,
+    "id": "18848b08fcc8149293341ee97e16aceb",
+    "node_id": "",
+    "parent_id": "",
+    "session_id": "29ca605217ba70dfaeb1e3152504686b",
+    "state": "completed"
+  },
+  "spec": {
+    "nodes": [
+      {
+        "arguments": {
+          "path": "managed-marker.txt"
+        },
+        "id": "read",
+        "tool": "read_file",
+        "type": "tool"
+      }
+    ]
+  }
+}

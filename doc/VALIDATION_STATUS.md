@@ -1,3 +1,74 @@
+## Qualified runtime package and managed handoff - 2026-10-22
+
+Source 01439743 is staged as an uninstalled 0.1.61 candidate: 2398 runtime files,
+manifest SHA-256 739faccc5c039404c5a1abcb8c34e5ff4455b894e17b4633f40fdb962357011c.
+VSIX readback verifies all expected runtime/client/browser/library bytes in 2443
+entries; 64 frontend files match the accepted client gate (464 extension / 162
+browser tests). These unchanged client suites were not rerun.
+
+The actual prior 32a24adb package starts an isolated managed process-code profile;
+CLI discovery reuses it. A real marker-read graph completes, and a human graph
+pauses. Attempting the new-package upgrade exits 2, preserving the exact old PID,
+history and pause. The original graph is answered once and completes; idle upgrade
+then retains origin, profile directory, sessions and exact history. Zero model calls.
+Session 29ca605217ba70dfaeb1e3152504686b / completed pause root
+c087d724253f0b2edddea80e4c99ea8a MUST NEVER be replayed.
+Both clean and execution-copy covered bytes match; any execution additions are
+recorded in the receipt. Only the identity/birth/image/hash-checked fixture owner
+was retired, and native exit observation succeeded.
+Evidence: client-native-coding-01439743-20261022-*.
+
+This is actual managed CLI/package handoff acceptance, not rendered browser/editor
+coding or installation. Shared CLI/browser history rendering, managed workspace
+switching, current VS Code acceptance and remaining generic RPC cleanup stay open.
+
+## Full schema SDK and unified executable qualification - 2026-10-22
+
+Source 0143974300a2d26f46c014b17866e9acfdd5bbff with SDK f809da86 passes
+all 172 Native contracts in 1328.13 seconds. The exact 2790 project, 16 SDK,
+1870 pure-library, 30 runtime, 18598 dependency and 137 native binary file sets
+and hashes remain unchanged. xmind.exe remains
+fa07695e1b830dda47ecc33a69bac492f0897fe078f572b49b5e91df8366bc99.
+The corrected unified entry, actual SDK schema, MCP, worker/model, Rust, managed
+profile and local-view contracts all pass in this single complete run.
+Evidence: process-xmind-root-schema-sdk-unified-full-20261022-*.
+Earlier failures remain preserved; no deadline changes or pass union.
+No paid inference, CPython, installation or rendered-client acceptance is claimed.
+Package staging, managed handoff, rendered shared history/workspace switching,
+current VS Code acceptance and remaining generic RPC cleanup are still open.
+
+## Unified executable SDK schema fixture and cleanup audit - 2026-10-22
+
+Source 6f65f5ac completed the entire 172-test run: 171 passed, one failed in
+1314.87 seconds. The failure was native_unified_program_contract expecting the
+removed private schema JSON-RPC input to succeed. Actual schema SDK, MCP effects,
+model RPC and Rust semantics passed. All 2790 project / 16 SDK / 1870 pure-library /
+30 runtime / 18598 dependency / 137 binary file sets and hashes stayed unchanged.
+This remains a failed full gate, preserved under
+process-xmind-root-schema-sdk-full-20261022-*. It is not full acceptance.
+
+Checkpoint 01439743 replaces that outdated assertion with the real C++ SchemaWorker
+adapter calling xmind schema-worker through the shared SDK root. It verifies
+schema-only validation, a Unicode instance, invalid-instance rejection and refusal
+of the removed JSON-RPC input. All 13 focused contracts pass in 100.83 seconds with
+the same frozen input counts and production executable
+fa07695e1b830dda47ecc33a69bac492f0897fe078f572b49b5e91df8366bc99.
+Evidence: process-xmind-root-schema-sdk-unified-20261022-*.
+A fresh complete gate is running; no current full pass is claimed here.
+
+The source-hashed IPC audit confirms the product channel-worker entry constructs
+NativeWorkerContext with a non-null SDK client; its generic call fallback rejects.
+Startup/lifetime still uses SDK Link.Deliver for ready/boot/execution-ready messages.
+Old generic AgentWorkerRpcPeer code, retirement overloads and eight adapter fallback
+translation units remain for fixtures and still need cleanup qualification. Their
+presence must not be described as complete removal of the old implementation.
+Audit: [remaining IPC code](evidence/process-xmind-root-ipc-cleanup-audit-01439743.json).
+
+Package upgrade, same-backend CLI/browser coding restoration, rendered current
+VS Code acceptance and the broader product completion audit remain open. No paid
+inference, CPython, installation or user-history changes were performed for this
+checkpoint.
+
 ## Schema worker SDK integration qualified - 2026-10-22
 
 The active private schema route now uses the common xmind.Schemas SDK object and
