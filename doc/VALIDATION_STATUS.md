@@ -1,3 +1,27 @@
+## Packaged managed workspace switching rendered - 2026-10-22
+
+Client b95abba9 includes the footer correction, packaged with the unchanged
+01439743/f809 qualified native runtime. The rebuilt uninstalled VSIX verifies
+2443 entries and all 64 frontend source files against the new 464/162 client gate.
+Native tests were not repeated for this CSS-only client change.
+
+Actual hidden IAB ran the packaged browser through native xmind view using the
+preserved managed fixture profile. The original graph history appeared. UI New
+workspace registered managed-browser-second-b95abba9 under TestProj, selected it,
+and displayed its exclusive second-workspace.txt content with no sessions. The
+actual selector switched back to managed-profile-01439743; the original file and
+completed graph history returned, including after reload. CLI confirms the exact
+original history and an empty second session list, with distinct backend PIDs.
+No model calls, completed-graph replay or user profile/installation changes.
+
+Only the two fixture owners were retired after comparing birth, image under the
+owned profile root and executable hash, then observing native exit. The owned
+browser host/tab closed. Both the clean 2398-file runtime and execution-copy
+covered bytes remain exact; execution additions are listed in the receipt.
+Evidence: client-managed-workspaces-b95abba9-20261022-*.
+Current rendered VS Code, protected installation, generic RPC cleanup and the
+remaining full product audit are still open.
+
 ## Shared CLI/browser history and footer correction - 2026-10-22
 
 The actual 01439743 packaged CLI completed a fresh mean.cjs edit and real Node

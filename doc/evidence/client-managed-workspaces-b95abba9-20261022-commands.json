@@ -1,0 +1,116 @@
+[
+  {
+    "args": [
+      "admin",
+      "inspect-owner-process",
+      "11256"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "1-stdout.log",
+    "stderr": "1-stderr.log"
+  },
+  {
+    "args": [
+      "--profile-root",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/profiles",
+      "--workspace",
+      "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+      "history",
+      "29ca605217ba70dfaeb1e3152504686b"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "2-stdout.log",
+    "stderr": "2-stderr.log"
+  },
+  {
+    "args": [
+      "--profile-root",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/profiles",
+      "--workspace",
+      "D:/CantorAI2026/TestProj/xmind-delivery-validation/managed-browser-second-b95abba9",
+      "profile-info"
+    ],
+    "cwd": "D:/CantorAI2026/TestProj/xmind-delivery-validation/managed-browser-second-b95abba9",
+    "stdout": "3-stdout.log",
+    "stderr": "3-stderr.log"
+  },
+  {
+    "args": [
+      "admin",
+      "inspect-owner-process",
+      "10460"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "4-stdout.log",
+    "stderr": "4-stderr.log"
+  },
+  {
+    "args": [
+      "--profile-root",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/profiles",
+      "--workspace",
+      "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+      "history",
+      "29ca605217ba70dfaeb1e3152504686b"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "5-stdout.log",
+    "stderr": "5-stderr.log"
+  },
+  {
+    "args": [
+      "--profile-root",
+      "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/01439743/managed-upgrade/profiles",
+      "--workspace",
+      "D:/CantorAI2026/TestProj/xmind-delivery-validation/managed-browser-second-b95abba9",
+      "sessions"
+    ],
+    "cwd": "D:/CantorAI2026/TestProj/xmind-delivery-validation/managed-browser-second-b95abba9",
+    "stdout": "6-stdout.log",
+    "stderr": "6-stderr.log"
+  },
+  {
+    "args": [
+      "admin",
+      "inspect-owner-process",
+      "11256"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "7-stdout.log",
+    "stderr": "7-stderr.log"
+  },
+  {
+    "args": [
+      "admin",
+      "observe-owner-exit",
+      "11256",
+      "134371914909916979",
+      "10000"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "8-stdout.log",
+    "stderr": "8-stderr.log"
+  },
+  {
+    "args": [
+      "admin",
+      "inspect-owner-process",
+      "10460"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "9-stdout.log",
+    "stderr": "9-stderr.log"
+  },
+  {
+    "args": [
+      "admin",
+      "observe-owner-exit",
+      "10460",
+      "134371915173672296",
+      "10000"
+    ],
+    "cwd": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-profile-01439743",
+    "stdout": "10-stdout.log",
+    "stderr": "10-stderr.log"
+  }
+]

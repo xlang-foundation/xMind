@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "proof": {
+    "passed": true,
+    "switchedToSecond": true,
+    "secondMarkerObserved": true,
+    "secondHistoryEmpty": true,
+    "returnedToOriginal": true,
+    "reloaded": true,
+    "sessionId": "29ca605217ba70dfaeb1e3152504686b",
+    "completedRoot": "c087d724253f0b2edddea80e4c99ea8a",
+    "originalMarkerRestored": true,
+    "originalGraphHistoryRestored": true,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "originalSession": "29ca605217ba70dfaeb1e3152504686b",
+  "originalCompletedRoot": "c087d724253f0b2edddea80e4c99ea8a",
+  "historyExact": true,
+  "secondWorkspaceSessions": 0,
+  "owners": [
+    {
+      "process_birth": "134371914909916979",
+      "process_id": 11256
+    },
+    {
+      "process_birth": "134371915173672296",
+      "process_id": 10460
+    }
+  ],
+  "ownedFixtureOwnersRetired": true,
+  "modelCalls": 0,
+  "completedGraphsReplayed": false,
+  "installed": false
+}

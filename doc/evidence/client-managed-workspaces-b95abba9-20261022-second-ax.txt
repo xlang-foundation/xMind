@@ -1,0 +1,8 @@
+Browser tab: 5, Title: "xMind · Browser", URL: "http://127.0.0.1:63411/ui/".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 54-56
++					96 text second-workspace.txt
++					97 text Read-only preview · file changes require approval
++				98 text Only the second managed workspace contains this marker.
+
+The focused UI element is 48 button · second-workspace.txt, Help: second-workspace.txt

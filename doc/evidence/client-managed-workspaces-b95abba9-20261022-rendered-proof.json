@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "switchedToSecond": true,
+  "secondMarkerObserved": true,
+  "secondHistoryEmpty": true,
+  "returnedToOriginal": true,
+  "reloaded": true,
+  "sessionId": "29ca605217ba70dfaeb1e3152504686b",
+  "completedRoot": "c087d724253f0b2edddea80e4c99ea8a",
+  "originalMarkerRestored": true,
+  "originalGraphHistoryRestored": true,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  }
+}

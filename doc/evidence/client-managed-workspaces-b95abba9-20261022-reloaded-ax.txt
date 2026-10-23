@@ -1,0 +1,149 @@
+Browser tab: 5, Title: "xMind · Browser", URL: "http://127.0.0.1:63411/ui/".
+1 AXWebArea xMind · Browser, URL: 127.0.0.1:63411/ui/
+	2 container
+		3 text xMind Local node · This computer
+		62 container workspace-control
+			63 text Workspace
+			64 button Description: Configure current workspace, Help: Switch workspace or manage folders, ID: workspace-label-open
+				65 text managed-profile-01439743
+			66 button Description: Configure workspace, ID: workspace-config-open
+		67 button Description: Disconnect view, ID: disconnect-view
+	5 container
+		6 heading Workspace files, Value: 1
+			7 text Workspace files
+		68 text D:\CantorAI2026\TestProj\xmind-delivery-validation\managed-profile-01439743 · Files and agent runs use this workspace on this computer.
+		9 button Terminal, ID: workspace-terminal-toggle
+		10 button Git status, ID: workspace-vcs-status
+		11 button Initialize Git, ID: workspace-vcs-init
+		12 button Description: Refresh workspace files, ID: workspace-refresh
+		13 container Git diff review
+			14 container
+				15 text Repository folder
+				16 pop up button (disabled, collapsed, settable) Repository folder, Value: managed-profile-01439743 · Primary, ID: workspace-vcs-folder, Secondary Actions: Expand
+					69 menu
+						70 (disabled) managed-profile-01439743 · Primary
+			17 container
+				18 text Compare
+				19 pop up button (collapsed, settable) Compare, Value: Working tree, ID: workspace-vcs-mode, Secondary Actions: Expand
+					20 menu
+						21 (disabled) Working tree
+						22 (disabled) Branch changes
+						23 (disabled) Committed changes
+			24 container
+				25 text Base
+				26 text field (settable) Base, ID: workspace-vcs-base
+			27 button Review diff, ID: workspace-vcs-diff
+			28 container
+				29 text Changed file
+				30 pop up button (disabled, collapsed, settable) Description: Changed file patch, Value: Run a comparison to list changed files, ID: workspace-vcs-files, Secondary Actions: Expand
+					31 menu
+						32 (disabled) Run a comparison to list changed files
+		71 container workspace-canvas
+			72 container Workspace files
+				73 text PROJECT FILES
+				74 container workspace-find-form
+					75 search text field (settable) Description: Find files by name, ID: workspace-find-query
+					76 button Find, ID: workspace-find-submit
+				77 content list workspace-files
+					78 container
+						79 text managed-profile-01439743 PRIMARY D:\CantorAI2026\TestProj\xmind-delivery-validation\managed-profile-01439743
+						80 content list
+							81 container
+								82 button · managed-marker.txt, Help: managed-marker.txt
+									83 text ·
+									84 text managed-marker.txt
+								85 checkbox Description: Attach managed-marker.txt, Help: Attach managed-marker.txt to the next message, Value: 0
+			86 container File preview
+				87 container
+					88 text Select a file
+					89 text Files are read from the selected workspace folders.
+				90 text Choose a file from the workspace tree to preview it here.
+	33 splitter Description: Resize agent sidebar, Value: 420, ID: sidebar-divider
+	34 container Description: xMind agent sidebar, ID: agent-sidebar
+		35 container
+			36 pop up button (collapsed, settable) Description: Conversation history, Value: Managed release package handoff, ID: sessions, Secondary Actions: Expand
+				91 menu
+					92 (selected) Managed release package handoff
+			37 button Description: New conversation, ID: new
+			38 button Description: Refresh history, ID: refresh
+			39 button Description: Settings, ID: settings
+			40 toolbar Conversation and workspace tools
+				41 button Description: Export conversation, ID: session-export
+				42 button Description: Import conversation, ID: session-import
+				93 button Description: Rename conversation, ID: rename
+				94 button Description: Remove conversation, ID: delete-session
+				43 button Description: Open workspace terminal, ID: terminal
+				44 button Description: Workspace Git, ID: git
+				45 button Description: Conversation permissions, ID: permission-grants
+		95 text completed
+		96 container run-picker
+			97 text Run details
+			98 pop up button (collapsed, settable) Description: Inspect a recorded run, Value: completed · c087d724253f0b2edddea80e4c99ea8a, ID: runs, Secondary Actions: Expand
+				99 menu
+					100 completed · 18848b08fcc8149293341ee97e16aceb
+					101 (selected) completed · c087d724253f0b2edddea80e4c99ea8a
+		47 container scroll
+			102 container history
+				103 container
+					104 heading YOU, Value: 4
+						105 text YOU
+					106 text Read the original managed marker
+					107 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				108 container
+					109 heading XMIND, Value: 4
+						110 text XMIND
+					111 text Completed graph managed.read. Observed node outputs are below. Provider metrics remain on the agent responses.
+					112 button (collapsed) Observed join outputs · 1 nodes, Secondary Actions: Expand
+						113 text Observed join outputs · 1 nodes
+					114 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				115 container
+					116 heading YOU, Value: 4
+						117 text YOU
+					118 text Hold this exact graph during attempted package upgrade
+					119 button Fork before this message, Help: Create a new conversation ending immediately before this message
+				120 container
+					121 heading XMIND, Value: 4
+						122 text XMIND
+					123 text Completed graph managed.pause. Observed node outputs are below. Provider metrics remain on the agent responses.
+					124 button (collapsed) Observed join outputs · 1 nodes, Secondary Actions: Expand
+						125 text Observed join outputs · 1 nodes
+					126 button Fork before this message, Help: Create a new conversation ending immediately before this message
+			127 container Description: Graph workflow, ID: graph-view
+				128 heading managed.pause · revision 1, Value: 3
+					129 text managed.pause · revision 1
+				130 container
+					131 heading approval · human · completed, Value: 4
+						132 text approval · human · completed
+					133 button (collapsed) Observed output, Secondary Actions: Expand
+						134 text Observed output
+			52 button (collapsed) Selected run activity, Secondary Actions: Expand
+				53 text Selected run activity
+		54 container
+			135 button (collapsed) Skills, ID: skills-summary, Secondary Actions: Expand
+				136 text Skills
+			137 container agent-picker
+				138 text Agent
+				139 pop up button (collapsed, settable) Description: Conversation agent, Help: Select a reusable named agent for this conversation, Value: Agent (default), ID: agent, Secondary Actions: Expand
+					140 menu
+						141 (selected) Agent (default)
+				142 text Default agent
+			143 container workflow-picker
+				144 text Run mode
+				145 pop up button (collapsed, settable) Description: Agent workflow, Help: Agent chooses its next tool step dynamically. Workflows run registered connected steps., Value: Agent (default), ID: workflow, Secondary Actions: Expand
+					146 menu
+						147 (selected) Agent (default)
+						148 managed.read · 1 nodes
+						149 managed.pause · 1 nodes
+			55 text entry area (settable) Description: Message xMind, ID: prompt
+			56 button Description: Attach workspace files, Help: Attach files from the current xMind workspace, ID: attach-files
+			150 pop up button (disabled, collapsed, settable) Description: Saved provider, Help: Choose a saved provider profile. Saved credentials are reused automatically., Value: Add a provider in Settings, ID: footer-provider, Secondary Actions: Expand
+				151 menu
+					152 (disabled) Add a provider in Settings
+			57 pop up button (disabled, collapsed, settable) Description: Model, Help: Open Settings to add a provider and load models, Value: Add a provider in Settings, ID: model, Secondary Actions: Expand
+				58 menu
+					153 (disabled) Add a provider in Settings
+			60 button (disabled) Send ↑, Help: Choose a model in the sidebar footer, ID: send
+			61 text Enter to send · Shift+Enter for a new line 
+			154 text · File changes require approval
+
+The focused UI element is 1 AXWebArea xMind · Browser, URL: 127.0.0.1:63411/ui/
