@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "0f89c68524370144060d88c2bba0760260d392f2",
+  "runId": 40041574387,
+  "jobId": 120713625831,
+  "artifactId": 12539054201,
+  "artifactBytes": 8021,
+  "artifactSha256": "73e52cd955a44cdb30bbf8f4c11d0b09ecbe3425f676daa79dfb0ac86f43b6a6",
+  "jobLogSha256": "ed4481095b6fe1b0b44a7d9cfebb7440d48da1ac275f94ba6d7ec6a16cda01f9",
+  "scope": "Official original-case artifact inspected; all eight diagnostic jobs failed, but only original-case payload was downloaded and analyzed here.",
+  "observedCases": [
+    {
+      "label": "01-graph-default",
+      "exitCode": 4294901760,
+      "elapsedMs": 1014,
+      "termination": "exited",
+      "stderr": "The shell cannot be started. A failure occurred during initialization:\r\nThe type initializer for 'System.Net.ServicePointManager' threw an exception.\r\n",
+      "markerExists": false,
+      "phaseCount": 0
+    },
+    {
+      "label": "02-graph-default",
+      "exitCode": 4294901760,
+      "elapsedMs": 102,
+      "termination": "exited",
+      "stderr": "The shell cannot be started. A failure occurred during initialization:\r\nThe type initializer for 'System.Net.ServicePointManager' threw an exception.\r\n",
+      "markerExists": false,
+      "phaseCount": 0
+    },
+    {
+      "label": "03-agent-default",
+      "exitCode": 4294901760,
+      "elapsedMs": 104,
+      "termination": "exited",
+      "stderr": "The shell cannot be started. A failure occurred during initialization:\r\nThe type initializer for 'System.Net.ServicePointManager' threw an exception.\r\n",
+      "markerExists": false,
+      "phaseCount": 0
+    },
+    {
+      "label": "04-dotnet-control-default",
+      "exitCode": 4294901760,
+      "elapsedMs": 104,
+      "termination": "exited",
+      "stderr": "The shell cannot be started. A failure occurred during initialization:\r\nThe type initializer for 'System.Net.ServicePointManager' threw an exception.\r\n",
+      "markerExists": false,
+      "phaseCount": 0
+    }
+  ],
+  "finding": "PowerShell fails during initialization with ServicePointManager type-initializer error before all script markers; .NET-only control also fails. This differs from previous Start-Sleep timeout. Generic extended-prefix compatibility is suspected; causal A/B and correction remain pending.",
+  "installed": false,
+  "budgetsWeakened": false,
+  "fullGoalComplete": false
+}

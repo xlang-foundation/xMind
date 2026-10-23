@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "3024124e94208d330a994bc901c260c100e565c2",
+  "runId": 40033184405,
+  "jobId": 120689935297,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40033184405",
+  "conclusion": "failure",
+  "nativeInventory": 170,
+  "passed": 167,
+  "failed": 3,
+  "seconds": 928.29,
+  "jobLogSha256": "4eb440a23e280e55a08edacdae2177fc48323396ac5f88df1a0c2f2c67b886be",
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 40.76,
+      "processElapsedMs": 30037,
+      "timeoutMs": 30000,
+      "startupPhases": [
+        "script_entered"
+      ],
+      "state": "uncertain",
+      "processTreeRetired": true
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "seconds": 71.25,
+      "wrapperTermination": "Existing 70-second wrapper; actual killed/signal details retained in official log"
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "seconds": 20.47,
+      "failure": "Worker planning funding expired",
+      "lastObservedCase": "planning-continuation",
+      "childContextPrepareElapsedMs": 19953,
+      "childContextPreparedElapsedMs": 19997,
+      "remainingMsAfterPrepare": 2,
+      "scope": "Actual planning deadline, not a Node wrapper kill or proof of physical startup failure"
+    }
+  ],
+  "fullGoalComplete": false
+}

@@ -1,3 +1,22 @@
+## Hosted3024124e and startup diagnostics inspected — 2026-10-23
+
+Official hosted3024124e run40033184405/job120689935297 fails167/170 in928.29s.
+Graph PowerShell again times out with only script_entered. Worker RPC hits its
+wrapper; ledger instead fails its actual20-second planning funding deadline.
+Child context preparation begins at19953ms and returns at19997ms, leaving2ms.
+That ledger result is not a wrapper kill or a physical-startup diagnosis.
+[Receipt](evidence/hosted-native-3024124e-20261023.json).
+
+The0f89c685 process-startup matrix fails all eight jobs. The official original
+artifact12539054201 (8021 bytes, hashed) shows four processes exit4294901760
+before script markers with a ServicePointManager initializer error; the
+.NET-only control also fails. This differs from the earlier delayed cmdlet
+failures. Compatibility of the generic extended-image path is suspected,
+not yet causally proven. No regression is accepted or hidden. The current
+full native run remains frozen and live; correction/verification follows its
+terminal closure. Installed62 and candidate0.1.63 are unchanged.
+[Artifact audit](evidence/hosted-process-startup-0f89c685-20261023.json).
+
 ## Model-driven coding from248-character runtime path — 2026-10-23
 
 Actual Native15431644/source2e0418eb process-code execution completes a new
