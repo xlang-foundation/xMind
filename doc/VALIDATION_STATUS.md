@@ -1,3 +1,19 @@
+## Hosted source2909572f failure audit — 2026-10-23
+
+Official completed run40028091741/job120669235469 records167/170 in924.67s.
+Graph runner40.88s contains an uncertain PowerShell process:30036ms against
+30000ms, only script_entered observed, with its tree retired. Worker RPC71.30s
+and ledger45.11s are Node-wrapper SIGTERM failures. Ledger finished planning
+admission16204ms and main-process planning7202ms, then began delegation without
+observed completion. A slow-worker dump is not crash proof. No wrapper or
+process budget was weakened and no completed task or CI run was replayed.
+
+The official log is retained privately with its SHA-256 in the receipt. Later
+source3024124e run40033184405 is observed in progress; c2c7a32e run40039032034
+is pending. These observations are not hosted acceptance. The current local
+full172 run is separately live on c2c7a32e and its inputs remain frozen.
+[Receipt](evidence/hosted-native-2909572f-20261023.json).
+
 ## Managed-owner Windows loader path fix — 2026-10-23
 
 The retained cold-start failure is reproduced without tasks: the original

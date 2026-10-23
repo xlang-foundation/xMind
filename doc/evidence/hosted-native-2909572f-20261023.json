@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "2909572fcde974e01c8af1cfff2e414eed18ec90",
+  "runId": 40028091741,
+  "jobId": 120669235469,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40028091741",
+  "conclusion": "failure",
+  "nativeInventory": 170,
+  "passed": 167,
+  "failed": 3,
+  "seconds": 924.67,
+  "jobLogSha256": "8e69be3524d9a72e4cce1c5fdfaa3e1d416ec068ba0426b82af57f4a0980dc15",
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 40.88,
+      "processElapsedMs": 30036,
+      "processTimeoutMs": 30000,
+      "state": "uncertain",
+      "processTreeRetired": true,
+      "startupPhases": [
+        "script_entered"
+      ],
+      "termination": "timed_out"
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "seconds": 71.3,
+      "wrapperKilled": true,
+      "signal": "SIGTERM",
+      "diagnostic": "Slow-worker dump written; not evidence of a crash or completion of truncated later stdout"
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "seconds": 45.11,
+      "wrapperKilled": true,
+      "signal": "SIGTERM",
+      "planningAdmissionElapsedMs": 16204,
+      "mainProcessPlanningElapsedMs": 7202,
+      "lastObservedPhase": "main-planning-delegation began; completion not observed"
+    }
+  ],
+  "scope": "Official completed GitHub job log; historical source2909572f full170. Not current local172 acceptance, and no root-cause inference from timeout evidence.",
+  "laterObserved": {
+    "observedAt": "2026-10-23T23:23:22.750Z",
+    "source3024124eRun": 40033184405,
+    "status": "in_progress",
+    "sourceC2c7a32eRun": 40039032034,
+    "statusC2c7a32e": "pending"
+  },
+  "budgetsWeakened": false,
+  "rerunRequested": false,
+  "fullGoalComplete": false
+}
