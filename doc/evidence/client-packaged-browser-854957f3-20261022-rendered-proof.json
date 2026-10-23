@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "sessionId": "93238a8ff7b29d4ce9a0d8359d3b8f8a",
+  "runId": "f9284573f43e5a6c6b70ba4c94144fa9",
+  "historyMessages": 8,
+  "reloaded": true,
+  "actualSendClicked": true,
+  "editApprovalClicked": true,
+  "commandApprovalClicked": true,
+  "actualCommandExit": 0,
+  "actualStdout": "3 median checks passed"
+}

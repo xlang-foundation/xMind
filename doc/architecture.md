@@ -9,6 +9,30 @@ methods through the standard xlang3 SDK. xlang3 owns IPC serialization, remote
 references and transport. Cantor's network-task DataFrame path is a separate
 mechanism and is not part of this IPC contract.
 
+The registered hierarchy is defined by RootApi in
+[Native/src/xmind_ipc_api.cpp](../Native/src/xmind_ipc_api.cpp). Each process binds
+the services and capabilities it owns. The root organizes service classes;
+execution remains on their bound subobjects.
+
+| Registered service | Methods / role | Admission |
+| --- | --- | --- |
+| Host() | ApiVersion, Transport | Public transport metadata |
+| Sessions(ownerToken) | Open, Create | Existing local backend owner token |
+| Runs(ownerToken) | Open, Start, Cancel | Existing local backend owner token and backend admission |
+| Workers().Open(ticket) | Model, Journal, Reads, Files, Processes, Remotes, Callables | Captured worker lease and capability |
+| Executions().Open(ticket) | Execute, Status, Cancel, Close | Exact child PID/scope and one-shot execution capability |
+| Planning().Open(ticket) | Identity, Healthy, Invoke, Resume; operation Status/Result/Cancel | Captured planning owner and original budget |
+| WorkerLinks().Open(ticket) | Deliver, Close | Private inherited startup/lifetime rendezvous |
+| PythonTools().Open(capability) | Identity, Invoke | Private trusted callable worker capability |
+| Schemas().Open(capability) | Identity, Validate | Private schema child capability and one-time evaluation |
+
+Clients use the supported xlang3 SDK remote-object API, as in Cantor. SDK values,
+remote references and method arguments use xlang3 IPC serialization. Schema JSON
+and tool argument text remain domain inputs. The packet peer and callback binders
+used for crash/cancellation fixtures live under Native/tests and BUILD_TESTING;
+production executable link inputs exclude that fixture library. Client adapters
+still contain string-method fixture fallbacks, which remain cleanup work.
+
 The current private worker services beneath xmind.Workers().Open(ticket) are
 Model(), Journal(), Reads(), Files(), Processes(), Remotes() and Callables().
 Requests, events and results use SDK values.

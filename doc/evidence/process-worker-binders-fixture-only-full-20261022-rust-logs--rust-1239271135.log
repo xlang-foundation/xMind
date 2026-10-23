@@ -1,0 +1,222 @@
+2026-10-22T18:54:06.0950711-07:00  INFO server version 1.98.1 (48a229ce 2026-09-01) will start
+2026-10-22T18:54:06.0953605-07:00  INFO InitializeParams: {"capabilities":{"textDocument":{"definition":{"linkSupport":true},"diagnostic":{"dynamicRegistration":false,"relatedDocumentSupport":false},"documentSymbol":{"hierarchicalDocumentSymbolSupport":true},"formatting":{"dynamicRegistration":false},"hover":{"contentFormat":["plaintext","markdown"]},"publishDiagnostics":{"versionSupport":true},"references":{"dynamicRegistration":false}}},"clientInfo":{"name":"xMind","version":"native"},"processId":null,"rootUri":"file:///D:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust","workspaceFolders":[{"name":"lsp-rust","uri":"file:///D:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust"}]}
+2026-10-22T18:54:06.0954739-07:00  INFO Client 'xMind' native
+2026-10-22T18:54:06.0960502-07:00  INFO discovered projects: [CargoToml(ManifestPath { file: AbsPathBuf("D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml") })]
+2026-10-22T18:54:06.0969082-07:00  INFO initial config: Config {
+    discovered_projects_from_filesystem: [
+        CargoToml(
+            ManifestPath {
+                file: AbsPathBuf(
+                    "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml",
+                ),
+            },
+        ),
+    ],
+    discovered_projects_from_command: [],
+    workspace_roots: [
+        AbsPathBuf(
+            "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust",
+        ),
+    ],
+    caps: ClientCapabilities(
+        ClientCapabilities {
+            workspace: None,
+            text_document: Some(
+                TextDocumentClientCapabilities {
+                    synchronization: None,
+                    completion: None,
+                    hover: Some(
+                        HoverClientCapabilities {
+                            dynamic_registration: None,
+                            content_format: Some(
+                                [
+                                    PlainText,
+                                    Markdown,
+                                ],
+                            ),
+                        },
+                    ),
+                    signature_help: None,
+                    references: Some(
+                        DynamicRegistrationClientCapabilities {
+                            dynamic_registration: Some(
+                                false,
+                            ),
+                        },
+                    ),
+                    document_highlight: None,
+                    document_symbol: Some(
+                        DocumentSymbolClientCapabilities {
+                            dynamic_registration: None,
+                            symbol_kind: None,
+                            hierarchical_document_symbol_support: Some(
+                                true,
+                            ),
+                            tag_support: None,
+                        },
+                    ),
+                    formatting: Some(
+                        DynamicRegistrationClientCapabilities {
+                            dynamic_registration: Some(
+                                false,
+                            ),
+                        },
+                    ),
+                    range_formatting: None,
+                    on_type_formatting: None,
+                    declaration: None,
+                    definition: Some(
+                        GotoCapability {
+                            dynamic_registration: None,
+                            link_support: Some(
+                                true,
+                            ),
+                        },
+                    ),
+                    type_definition: None,
+                    implementation: None,
+                    code_action: None,
+                    code_lens: None,
+                    document_link: None,
+                    color_provider: None,
+                    rename: None,
+                    publish_diagnostics: Some(
+                        PublishDiagnosticsClientCapabilities {
+                            related_information: None,
+                            tag_support: None,
+                            version_support: Some(
+                                true,
+                            ),
+                            code_description_support: None,
+                            data_support: None,
+                        },
+                    ),
+                    folding_range: None,
+                    selection_range: None,
+                    linked_editing_range: None,
+                    call_hierarchy: None,
+                    semantic_tokens: None,
+                    moniker: None,
+                    type_hierarchy: None,
+                    inline_value: None,
+                    inlay_hint: None,
+                    diagnostic: Some(
+                        DiagnosticClientCapabilities {
+                            dynamic_registration: Some(
+                                false,
+                            ),
+                            related_document_support: Some(
+                                false,
+                            ),
+                        },
+                    ),
+                    inline_completion: None,
+                },
+            ),
+            window: None,
+            general: None,
+            offset_encoding: None,
+            experimental: None,
+        },
+    ),
+    root_path: AbsPathBuf(
+        "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust",
+    ),
+    snippets: [],
+    client_info: Some(
+        ClientInfo {
+            name: "xMind",
+            version: None,
+        },
+    ),
+    client_config: (
+        FullConfigInput {
+            global: GlobalConfigInput,
+            workspace: WorkspaceConfigInput,
+            local: LocalConfigInput,
+            client: ClientConfigInput,
+        },
+        ConfigErrors(
+            [],
+        ),
+    ),
+    user_config: None,
+    ratoml_file: {},
+    source_root_parent_map: {},
+    validation_errors: ConfigErrors(
+        [],
+    ),
+    detached_files: [],
+}
+2026-10-22T18:54:06.0987921-07:00  INFO will fetch workspaces cause=startup
+2026-10-22T18:54:06.0989979-07:00 DEBUG Discovering sysroot by "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin\\rustc.exe" "--print" "sysroot"
+2026-10-22T18:54:06.1182216-07:00 DEBUG checking sysroot library: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library
+2026-10-22T18:54:06.1547467-07:00  INFO Using sysroot workspace=D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.toml src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc"))
+2026-10-22T18:54:06.154902-07:00 DEBUG Discovering cargo config by "C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "-Z" "unstable-options" "config" "get" "--format" "toml" "--show-origin"
+2026-10-22T18:54:06.1896454-07:00 DEBUG Discovered cargo config: "# The following environment variables may affect the loaded values.\n# CARGO_HOME=C:\\Users\\shaw9/.cargo"
+2026-10-22T18:54:06.2348978-07:00 DEBUG Copied lock file from `D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-0\Cargo.lock`
+2026-10-22T18:54:06.271623-07:00 DEBUG Running `"C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "metadata" "--format-version" "1" "--manifest-path" "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml" "--filter-platform" "x86_64-pc-windows-msvc" "-Zlockfile-path" "-Zunstable-options"`
+2026-10-22T18:54:06.2717048-07:00 DEBUG Loading library metadata: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library\Cargo.toml
+2026-10-22T18:54:06.2725836-07:00 DEBUG Copied lock file from `C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-1\Cargo.lock`
+2026-10-22T18:54:06.3423173-07:00 DEBUG Running `"C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "metadata" "--format-version" "1" "--manifest-path" "C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library\\Cargo.toml" "--filter-platform" "x86_64-pc-windows-msvc" "-Zlockfile-path" "-Zunstable-options"`
+2026-10-22T18:54:06.3642413-07:00 DEBUG rustc_cfg::get: rustc cfgs found rustc_cfgs=[KeyValue { key: "panic", value: "unwind" }, KeyValue { key: "target_abi", value: "" }, KeyValue { key: "target_arch", value: "x86_64" }, KeyValue { key: "target_endian", value: "little" }, KeyValue { key: "target_env", value: "msvc" }, KeyValue { key: "target_family", value: "windows" }, KeyValue { key: "target_feature", value: "cmpxchg16b" }, KeyValue { key: "target_feature", value: "fxsr" }, KeyValue { key: "target_feature", value: "sse" }, KeyValue { key: "target_feature", value: "sse2" }, KeyValue { key: "target_feature", value: "sse3" }, KeyValue { key: "target_has_atomic", value: "128" }, KeyValue { key: "target_has_atomic", value: "16" }, KeyValue { key: "target_has_atomic", value: "32" }, KeyValue { key: "target_has_atomic", value: "64" }, KeyValue { key: "target_has_atomic", value: "8" }, KeyValue { key: "target_has_atomic", value: "ptr" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "128" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "16" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "32" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "64" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "8" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "ptr" }, KeyValue { key: "target_os", value: "windows" }, KeyValue { key: "target_pointer_width", value: "64" }, KeyValue { key: "target_vendor", value: "pc" }, Flag("windows"), KeyValue { key: "target_has_atomic_equal_alignment", value: "8" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "16" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "32" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "64" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "128" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "ptr" }, Flag("target_has_atomic_load_store"), KeyValue { key: "target_has_atomic_load_store", value: "8" }, KeyValue { key: "target_has_atomic_load_store", value: "16" }, KeyValue { key: "target_has_atomic_load_store", value: "32" }, KeyValue { key: "target_has_atomic_load_store", value: "64" }, KeyValue { key: "target_has_atomic_load_store", value: "128" }, KeyValue { key: "target_has_atomic_load_store", value: "ptr" }, Flag("target_thread_local"), Flag("target_has_atomic")]
+2026-10-22T18:54:06.4697157-07:00  INFO Loaded sysroot src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=workspace C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library
+2026-10-22T18:54:06.4697462-07:00  INFO did fetch workspaces workspaces=[Ok(Cargo { root: Some("lsp-rust"), n_packages: 1, n_sysroot_crates: 26, n_rustc_compiler_crates: 0, n_rustc_cfg: 42, n_cfg_overrides: 2, n_extra_includes: 0, toolchain: Some(Version { major: 1, minor: 98, patch: 1 }), data_layout: Ok(TargetData { data_layout: "e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128", arch: Other }), set_test: true, build_scripts: "ok" })]
+2026-10-22T18:54:06.4697885-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: will switch workspaces cause=fetched workspace
+2026-10-22T18:54:06.4698026-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: cause=fetched workspace force_crate_graph_reload=false switching_from_empty_workspace=true
+2026-10-22T18:54:06.4698578-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: abandon build scripts for workspaces
+2026-10-22T18:54:06.4706448-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: Spawning proc-macro servers
+2026-10-22T18:54:06.4707513-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: Using proc-macro server at C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\libexec\rust-analyzer-proc-macro-srv.exe
+2026-10-22T18:54:06.5232248-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: recreating the crate graph cause="fetched workspace"
+2026-10-22T18:54:06.5232615-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: Building Crate Graph cause="fetched workspace"
+2026-10-22T18:54:06.5406978-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces:GlobalState::reload_flycheck: Spawning flycheck id=0 workspace_root=AbsPathBuf("D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust")
+2026-10-22T18:54:06.5407694-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: did switch workspaces
+2026-10-22T18:54:06.5407771-07:00  INFO GlobalState::handle_event{event=Event::Task}: will fetch workspaces cause=project structure change
+2026-10-22T18:54:06.5409091-07:00 DEBUG Discovering sysroot by "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin\\rustc.exe" "--print" "sysroot"
+2026-10-22T18:54:06.5570627-07:00 DEBUG checking sysroot library: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library
+2026-10-22T18:54:06.5924294-07:00  INFO Using sysroot workspace=D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.toml src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc"))
+2026-10-22T18:54:06.5925544-07:00 DEBUG Discovering cargo config by "C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "-Z" "unstable-options" "config" "get" "--format" "toml" "--show-origin"
+2026-10-22T18:54:06.6272243-07:00 DEBUG Discovered cargo config: "# The following environment variables may affect the loaded values.\n# CARGO_HOME=C:\\Users\\shaw9/.cargo"
+2026-10-22T18:54:06.6722423-07:00 DEBUG Copied lock file from `D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-2\Cargo.lock`
+2026-10-22T18:54:06.7085354-07:00 DEBUG Running `"C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "metadata" "--format-version" "1" "--manifest-path" "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml" "--filter-platform" "x86_64-pc-windows-msvc" "-Zlockfile-path" "-Zunstable-options"`
+2026-10-22T18:54:06.7088677-07:00 DEBUG Loading library metadata: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library\Cargo.toml
+2026-10-22T18:54:06.7096719-07:00 DEBUG Copied lock file from `C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-3\Cargo.lock`
+2026-10-22T18:54:06.7662005-07:00 DEBUG rustc_cfg::get: rustc cfgs found rustc_cfgs=[KeyValue { key: "panic", value: "unwind" }, KeyValue { key: "target_abi", value: "" }, KeyValue { key: "target_arch", value: "x86_64" }, KeyValue { key: "target_endian", value: "little" }, KeyValue { key: "target_env", value: "msvc" }, KeyValue { key: "target_family", value: "windows" }, KeyValue { key: "target_feature", value: "cmpxchg16b" }, KeyValue { key: "target_feature", value: "fxsr" }, KeyValue { key: "target_feature", value: "sse" }, KeyValue { key: "target_feature", value: "sse2" }, KeyValue { key: "target_feature", value: "sse3" }, KeyValue { key: "target_has_atomic", value: "128" }, KeyValue { key: "target_has_atomic", value: "16" }, KeyValue { key: "target_has_atomic", value: "32" }, KeyValue { key: "target_has_atomic", value: "64" }, KeyValue { key: "target_has_atomic", value: "8" }, KeyValue { key: "target_has_atomic", value: "ptr" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "128" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "16" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "32" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "64" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "8" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "ptr" }, KeyValue { key: "target_os", value: "windows" }, KeyValue { key: "target_pointer_width", value: "64" }, KeyValue { key: "target_vendor", value: "pc" }, Flag("windows"), KeyValue { key: "target_has_atomic_equal_alignment", value: "8" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "16" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "32" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "64" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "128" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "ptr" }, Flag("target_has_atomic_load_store"), KeyValue { key: "target_has_atomic_load_store", value: "8" }, KeyValue { key: "target_has_atomic_load_store", value: "16" }, KeyValue { key: "target_has_atomic_load_store", value: "32" }, KeyValue { key: "target_has_atomic_load_store", value: "64" }, KeyValue { key: "target_has_atomic_load_store", value: "128" }, KeyValue { key: "target_has_atomic_load_store", value: "ptr" }, Flag("target_thread_local"), Flag("target_has_atomic")]
+2026-10-22T18:54:06.7664188-07:00 DEBUG Running `"C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "metadata" "--format-version" "1" "--manifest-path" "C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library\\Cargo.toml" "--filter-platform" "x86_64-pc-windows-msvc" "-Zlockfile-path" "-Zunstable-options"`
+2026-10-22T18:54:06.8899337-07:00  INFO Loaded sysroot src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=workspace C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library
+2026-10-22T18:54:06.8899604-07:00  INFO did fetch workspaces workspaces=[Ok(Cargo { root: Some("lsp-rust"), n_packages: 1, n_sysroot_crates: 26, n_rustc_compiler_crates: 0, n_rustc_cfg: 42, n_cfg_overrides: 2, n_extra_includes: 0, toolchain: Some(Version { major: 1, minor: 98, patch: 1 }), data_layout: Ok(TargetData { data_layout: "e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128", arch: Other }), set_test: true, build_scripts: "ok" })]
+2026-10-22T18:54:06.8900462-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: will switch workspaces cause=fetched workspace
+2026-10-22T18:54:06.8900609-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: cause=fetched workspace force_crate_graph_reload=false switching_from_empty_workspace=false
+2026-10-22T18:54:06.8901578-07:00  INFO GlobalState::handle_event{event=Event::Task}: will fetch build data cause=workspace updated
+2026-10-22T18:54:06.8911119-07:00 DEBUG Copied lock file from `D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-4\Cargo.lock`
+2026-10-22T18:54:06.8911326-07:00  INFO Running build scripts: "C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "check" "--quiet" "--workspace" "--message-format=json" "--manifest-path" "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml" "-Zlockfile-path" "--keep-going" "--compile-time-deps" "--all-targets" "-Zunstable-options"
+2026-10-22T18:54:06.9326757-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: will switch workspaces cause=fetched build data
+2026-10-22T18:54:06.9326933-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: cause=fetched build data force_crate_graph_reload=false switching_from_empty_workspace=false
+2026-10-22T18:54:06.9327849-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: set build scripts to workspaces
+2026-10-22T18:54:06.9328311-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: same workspace, but new build data
+2026-10-22T18:54:06.9331663-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: recreating the crate graph cause="fetched build data"
+2026-10-22T18:54:06.9331741-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: Building Crate Graph cause="fetched build data"
+2026-10-22T18:54:06.9495604-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: did switch workspaces
+2026-10-22T18:54:06.9496217-07:00  INFO GlobalState::handle_event{event=Event::Task}: will load proc macros cause=fetched build data
+2026-10-22T18:54:06.9502023-07:00  INFO GlobalState::handle_event{event=Event::Vfs}:GlobalState::handle_event/vfs:GlobalState::handle_vfs_msg:GlobalState::handle_vfs_msg/progress:vfs_load{total=14}:GlobalState::handle_event{event=Event::Task}:GlobalState::handle_event/task:GlobalState::reload_flycheck: Spawning flycheck id=0 workspace_root=AbsPathBuf("D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust")
+2026-10-22T18:54:07.0502932-07:00  INFO GlobalState::handle_event{event=Event::Vfs}:GlobalState::handle_event/vfs:GlobalState::handle_vfs_msg:GlobalState::handle_vfs_msg/progress:vfs_load{total=14}:GlobalState::handle_event{event=Event::FetchWorkspaces}: will fetch workspaces cause=project structure change
+2026-10-22T18:54:07.0504957-07:00 DEBUG Discovering sysroot by "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin\\rustc.exe" "--print" "sysroot"
+2026-10-22T18:54:07.0661242-07:00 DEBUG checking sysroot library: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library
+2026-10-22T18:54:07.0996974-07:00  INFO Using sysroot workspace=D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.toml src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc"))
+2026-10-22T18:54:07.0998397-07:00 DEBUG Discovering cargo config by "C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "-Z" "unstable-options" "config" "get" "--format" "toml" "--show-origin"
+2026-10-22T18:54:07.1365283-07:00 DEBUG Discovered cargo config: "# The following environment variables may affect the loaded values.\n# CARGO_HOME=C:\\Users\\shaw9/.cargo"
+2026-10-22T18:54:07.1817348-07:00 DEBUG Copied lock file from `D:\CantorAI2026\xMind\Native\tests\fixtures\lsp-rust\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-5\Cargo.lock`
+2026-10-22T18:54:07.2169276-07:00 DEBUG Loading library metadata: C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library\Cargo.toml
+2026-10-22T18:54:07.2170049-07:00 DEBUG Running `"C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "metadata" "--format-version" "1" "--manifest-path" "D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust\\Cargo.toml" "--filter-platform" "x86_64-pc-windows-msvc" "-Zlockfile-path" "-Zunstable-options"`
+2026-10-22T18:54:07.2178564-07:00 DEBUG Copied lock file from `C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib/rustlib/src/rust/library\Cargo.lock` to `C:\Users\shaw9\AppData\Local\Temp\rust-analyzer3508-6\Cargo.lock`
+2026-10-22T18:54:07.2706187-07:00 DEBUG Running `"C:\\Users\\shaw9/.cargo\\bin\\cargo.exe" "metadata" "--format-version" "1" "--manifest-path" "C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library\\Cargo.toml" "--filter-platform" "x86_64-pc-windows-msvc" "-Zlockfile-path" "-Zunstable-options"`
+2026-10-22T18:54:07.2734283-07:00 DEBUG rustc_cfg::get: rustc cfgs found rustc_cfgs=[KeyValue { key: "panic", value: "unwind" }, KeyValue { key: "target_abi", value: "" }, KeyValue { key: "target_arch", value: "x86_64" }, KeyValue { key: "target_endian", value: "little" }, KeyValue { key: "target_env", value: "msvc" }, KeyValue { key: "target_family", value: "windows" }, KeyValue { key: "target_feature", value: "cmpxchg16b" }, KeyValue { key: "target_feature", value: "fxsr" }, KeyValue { key: "target_feature", value: "sse" }, KeyValue { key: "target_feature", value: "sse2" }, KeyValue { key: "target_feature", value: "sse3" }, KeyValue { key: "target_has_atomic", value: "128" }, KeyValue { key: "target_has_atomic", value: "16" }, KeyValue { key: "target_has_atomic", value: "32" }, KeyValue { key: "target_has_atomic", value: "64" }, KeyValue { key: "target_has_atomic", value: "8" }, KeyValue { key: "target_has_atomic", value: "ptr" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "128" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "16" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "32" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "64" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "8" }, KeyValue { key: "target_has_atomic_primitive_alignment", value: "ptr" }, KeyValue { key: "target_os", value: "windows" }, KeyValue { key: "target_pointer_width", value: "64" }, KeyValue { key: "target_vendor", value: "pc" }, Flag("windows"), KeyValue { key: "target_has_atomic_equal_alignment", value: "8" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "16" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "32" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "64" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "128" }, KeyValue { key: "target_has_atomic_equal_alignment", value: "ptr" }, Flag("target_has_atomic_load_store"), KeyValue { key: "target_has_atomic_load_store", value: "8" }, KeyValue { key: "target_has_atomic_load_store", value: "16" }, KeyValue { key: "target_has_atomic_load_store", value: "32" }, KeyValue { key: "target_has_atomic_load_store", value: "64" }, KeyValue { key: "target_has_atomic_load_store", value: "128" }, KeyValue { key: "target_has_atomic_load_store", value: "ptr" }, Flag("target_thread_local"), Flag("target_has_atomic")]
+2026-10-22T18:54:07.3871479-07:00  INFO Loaded sysroot src_root=Some(AbsPath("C:\\Users\\shaw9\\.rustup\\toolchains\\stable-x86_64-pc-windows-msvc\\lib/rustlib/src/rust/library")) root=workspace C:\Users\shaw9\.rustup\toolchains\stable-x86_64-pc-windows-msvc\lib\rustlib\src\rust\library
+2026-10-22T18:54:07.3871752-07:00  INFO did fetch workspaces workspaces=[Ok(Cargo { root: Some("lsp-rust"), n_packages: 1, n_sysroot_crates: 26, n_rustc_compiler_crates: 0, n_rustc_cfg: 42, n_cfg_overrides: 2, n_extra_includes: 0, toolchain: Some(Version { major: 1, minor: 98, patch: 1 }), data_layout: Ok(TargetData { data_layout: "e-m:w-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128", arch: Other }), set_test: true, build_scripts: "ok" })]
+2026-10-22T18:54:07.3872438-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: will switch workspaces cause=fetched workspace
+2026-10-22T18:54:07.3872575-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: cause=fetched workspace force_crate_graph_reload=true switching_from_empty_workspace=false
+2026-10-22T18:54:07.3873325-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: build scripts do not match the version of the active workspace
+2026-10-22T18:54:07.3873362-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::switch_workspaces: Building Crate Graph cause="fetched workspace"
+2026-10-22T18:54:07.4031291-07:00  INFO GlobalState::handle_event{event=Event::Task}: will load proc macros cause=fetched workspace
+2026-10-22T18:54:07.404006-07:00  INFO GlobalState::handle_event{event=Event::Task}:GlobalState::handle_event/task:GlobalState::reload_flycheck: Spawning flycheck id=0 workspace_root=AbsPathBuf("D:\\CantorAI2026\\xMind\\Native\\tests\\fixtures\\lsp-rust")
+2026-10-22T18:54:15.1415959-07:00  INFO server did shut down

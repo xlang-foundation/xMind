@@ -1,3 +1,64 @@
+## Current cleanup package: actual browser coding - 2026-10-22
+
+Source 854957f3/c6794eb0 with fixed SDK f809 and footer client b95abba9 is staged
+as uninstalled 0.1.61. Runtime manifest SHA-256
+345bd982f1a2ae91307d6237b61471c069081a6442a362572d1a88449f03efd8
+covers 2398 files. VSIX readback verifies 2443 entries and all 64 frontend files
+against the accepted 464-extension/162-browser client gate. Native full 172/172
+acceptance is the single current source run recorded below.
+
+Actual hidden IAB submitted a fresh median.cjs task through Send. The real worker
+read the file, proposed numeric sorting, and awaited UI Allow edit. The proposed
+Node check command awaited UI Allow command. Its actual process exited 0 with
+3 median checks passed. The completed eight-message conversation restores after
+actual reload; explicit-port CLI confirms the same history, two succeeded effects,
+four controlled model calls and one completed SDK worker retirement. Session
+93238a8ff7b29d4ce9a0d8359d3b8f8a / root f9284573f43e5a6c6b70ba4c94144fa9
+MUST NEVER be replayed. This uses a scripted loopback model peer, not paid inference.
+
+The exact spawned backend's birth and image were checked before shutdown; its
+exit was observed and the owned tab closed. Clean runtime sets/bytes and every
+covered execution-copy file remain exact; execution additions are recorded.
+Evidence: client-packaged-browser-854957f3-20261022-*.
+Installed 0.1.60, settings and old user histories remain unchanged. Protected
+installation, actual current VS Code rendering, client fixture fallback cleanup,
+generic Nexus binding and nested planning/recovery completion remain open.
+
+## Complete Native gate after packet/binder cleanup - 2026-10-22
+
+Source 854957f3fc357142c4a66450e1fc73ca758fec74 with SDK f809da86 passes
+all 172 Native contracts in 1332.76 seconds. The exact 2801 project /16 SDK /
+1870 pure-library /30 runtime /18598 dependency /137 native binary file sets
+and hashes remain unchanged. xmind.exe is
+c6794eb0fe7009681bd8c09250628b599c1f3494f7a2a00157710eb80524c837.
+This complete run covers the packet peer/binders moved to tests, SDK-only read
+owner/context fixtures, real Rust semantics, worker lifecycle, managed profiles
+and local-view integration. Evidence: process-worker-binders-fixture-only-full-20261022-*.
+No paid provider inference, CPython, installation or new rendered-client claim.
+
+Installed 0.1.60 is still unchanged. Its exact 2492-file installation was backed
+up under repository .agentflow, with pre/post source sets and hashes matching the
+backup; no settings or user profile access. Receipt:
+installation-backup-0.1.60-before-854957f3-20261022.json.
+The completion audit preserves broader missing requirements, including generic
+Nexus binding/enrollment and nested dynamic-process planning. It is an evidence
+snapshot, not a claim of finished OSS delivery. Current-source package/client
+verification, protected installation, rendered VS Code and client fallback
+cleanup remain open.
+
+## Actual child SDK method timing - 2026-10-22
+
+The accepted 25-test cleanup gate records two actual child execution cases, each
+with 100 warm SDK Status() calls on its bound execution object. Complete case:
+p50 0.0719ms, p95 0.0944ms, maximum 0.1173ms. Cancel case: p50 0.0724ms,
+p95 0.0956ms, maximum 0.1193ms. Whole cases take 117.7379/119.8843ms and
+include launch, publication, negative identity probes, binding, execution and
+physical close. Client binding takes 6.1447/6.0199ms; launch 55.5279/46.2673ms.
+These are observed warm Status-method timings, not tool/provider latency, process
+startup latency or a universal bound. No extra benchmark or native execution was
+run while the complete suite was active; the values are extracted from the
+preserved accepted log. Evidence: process-worker-sdk-status-latency-854957f3-20261022.json.
+
 ## Packet callback binders confined to tests - 2026-10-22
 
 Model, journal, read, file, process, remote and callable callback binder bodies

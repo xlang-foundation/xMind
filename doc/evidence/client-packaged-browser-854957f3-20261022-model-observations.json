@@ -1,0 +1,102 @@
+[
+  {
+    "phase": 1,
+    "tools": [
+      "read_repository_instructions",
+      "read_file",
+      "list_files",
+      "search_files",
+      "find_files",
+      "glob_files",
+      "delegate_tasks",
+      "edit_file",
+      "create_file",
+      "apply_patch",
+      "restore_operation",
+      "run_process",
+      "wait_process",
+      "stop_process",
+      "list_skills",
+      "load_skill",
+      "plan_tasks",
+      "revise_plan",
+      "inspect_plan"
+    ],
+    "lastTool": null
+  },
+  {
+    "phase": 2,
+    "tools": [
+      "read_repository_instructions",
+      "read_file",
+      "list_files",
+      "search_files",
+      "find_files",
+      "glob_files",
+      "delegate_tasks",
+      "edit_file",
+      "create_file",
+      "apply_patch",
+      "restore_operation",
+      "run_process",
+      "wait_process",
+      "stop_process",
+      "list_skills",
+      "load_skill",
+      "plan_tasks",
+      "revise_plan",
+      "inspect_plan"
+    ],
+    "lastTool": "client-read"
+  },
+  {
+    "phase": 3,
+    "tools": [
+      "read_repository_instructions",
+      "read_file",
+      "list_files",
+      "search_files",
+      "find_files",
+      "glob_files",
+      "delegate_tasks",
+      "edit_file",
+      "create_file",
+      "apply_patch",
+      "restore_operation",
+      "run_process",
+      "wait_process",
+      "stop_process",
+      "list_skills",
+      "load_skill",
+      "plan_tasks",
+      "revise_plan",
+      "inspect_plan"
+    ],
+    "lastTool": "client-edit"
+  },
+  {
+    "phase": 4,
+    "tools": [
+      "read_repository_instructions",
+      "read_file",
+      "list_files",
+      "search_files",
+      "find_files",
+      "glob_files",
+      "delegate_tasks",
+      "edit_file",
+      "create_file",
+      "apply_patch",
+      "restore_operation",
+      "run_process",
+      "wait_process",
+      "stop_process",
+      "list_skills",
+      "load_skill",
+      "plan_tasks",
+      "revise_plan",
+      "inspect_plan"
+    ],
+    "lastTool": "client-test"
+  }
+]

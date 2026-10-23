@@ -1,0 +1,43 @@
+{
+  "source": "854957f3",
+  "nativeSha256": "c6794eb0fe7009681bd8c09250628b599c1f3494f7a2a00157710eb80524c837",
+  "sourceLog": "doc/evidence/process-worker-binders-fixture-only-qualified-20261022-LastTest.log",
+  "sourceLogSha256": "997ef33b56f645ef7b153be84a1de0ffb92a4c731058291d717f2628f648496b",
+  "samplesPerCase": 100,
+  "measuredOperation": "SDK Status() on actual child-process execution object, after binding/execution",
+  "scope": "Warm Status method latency; not process startup, tool execution, provider latency or a universal upper bound",
+  "measurements": [
+    {
+      "child_pre_registration_ms": 17.4361,
+      "client_bind_ms": 6.1447,
+      "close_and_exit_ms": 13.0189,
+      "execute_ms": 0.4005,
+      "launch_ms": 55.5279,
+      "mode": "complete",
+      "negative_identity_probes_ms": 20.1194,
+      "publish_ms": 0.614,
+      "root_registration_ms": 0.1895,
+      "status_and_duplicate_probes_ms": 21.9125,
+      "status_call_ms_max": 0.1173,
+      "status_call_ms_p50": 0.0719,
+      "status_call_ms_p95": 0.0944,
+      "total_ms": 117.7379
+    },
+    {
+      "child_pre_registration_ms": 16.9286,
+      "client_bind_ms": 6.0199,
+      "close_and_exit_ms": 6.161,
+      "execute_ms": 16.0156,
+      "launch_ms": 46.2673,
+      "mode": "cancel",
+      "negative_identity_probes_ms": 19.7745,
+      "publish_ms": 0.5919,
+      "root_registration_ms": 0.2375,
+      "status_and_duplicate_probes_ms": 25.0541,
+      "status_call_ms_max": 0.1193,
+      "status_call_ms_p50": 0.0724,
+      "status_call_ms_p95": 0.0956,
+      "total_ms": 119.8843
+    }
+  ]
+}

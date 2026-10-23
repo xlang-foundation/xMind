@@ -1,0 +1,9 @@
+{
+  "pid": 2772,
+  "image": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/854957f3/browser-median/runtime/xmind.exe",
+  "backend": "http://127.0.0.1:53607",
+  "browser": "http://127.0.0.1:53608/ui/",
+  "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/browser-median-854957f3",
+  "candidate": true,
+  "syntheticProvider": true
+}

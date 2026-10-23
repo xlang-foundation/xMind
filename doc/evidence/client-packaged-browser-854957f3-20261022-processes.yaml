@@ -1,0 +1,5 @@
+profiles:
+  - id: node
+    executable: "C:/Program Files/nodejs/node.exe"
+    prefix_arguments: []
+    max_timeout_ms: 10000

@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-23T01:54:21.594Z",
+  "source": "854957f3",
+  "completionProven": false,
+  "inputs": {
+    "AGENTS.md": "166623ff597fb77142cf08e82df35eabfea47ce4532baef5cf910ee25b10fc82",
+    "doc/architecture.md": "2acade8394ee15039d48295e38a0628e1c88f580068c38b91a56102d96e4dcbc",
+    "doc/runtime-product-design.md": "3d74367bcc88030a8e41b87aab2ce969f720d51c4da8b255f286a18df713eb28",
+    "doc/connection-profiles.md": "2575261bbf2184b57b96766fbb1f794c1b3fda198ba7949ef9151baeb95d6bd5",
+    "Native/src/http_server.cpp": "691b005f2a78d25e9656c3657ef19a26d674953d9b228d5e2fec5af2f1ef9d2f",
+    "Native/src/connection_profiles.cpp": "67871ca48059fafedb57ce9b920269edc587a6e3271acf37e173a4ee1f0b505f",
+    "Native/src/agent_worker_planning_owner.cpp": "de9d85293724b660a79c17bc701c09ecc52659cd70db61633e64e1eafaf15586"
+  },
+  "areas": [
+    {
+      "area": "Native C++ / embedded xlang3 / SQLite",
+      "state": "Current full gate pending",
+      "evidence": "25 focused contracts at 854957f3; earlier 172/172 at 01439743 predates cleanup; current executable c6794eb0."
+    },
+    {
+      "area": "Cantor-style shared IPC root",
+      "state": "Product peer/server binders removed; client fixture fallbacks remain",
+      "evidence": "process-worker-binders-fixture-only-qualified-20261022-*; real SDK root/execution/context fixtures pass."
+    },
+    {
+      "area": "CLI coding and durable shared browser history",
+      "state": "Verified on earlier native package, needs refreshed final package",
+      "evidence": "client-cli-browser-footer-20261022-*; completed mean task and exact reload, never replay."
+    },
+    {
+      "area": "Browser footer and managed workspace switching",
+      "state": "Rendered on b95abba9 client with 01439743 native",
+      "evidence": "client-managed-workspaces-b95abba9-20261022-* and footer before/after evidence."
+    },
+    {
+      "area": "VS Code coding / editor context",
+      "state": "Current actual rendered acceptance missing",
+      "evidence": "464 unit tests pass for footer client; they do not prove actual current VS Code rendering/coding. Visible windows remain prohibited unless requested."
+    },
+    {
+      "area": "Single/graph agents and dynamic planning",
+      "state": "Partially verified; nested dynamic-process planning missing",
+      "evidence": "Current planning eligibility in agent_worker_planning_owner.cpp rejects root_run_id != owner_run_id; docs architecture.md identifies nested planning as open."
+    },
+    {
+      "area": "Generic Local/Nexus connection protocol",
+      "state": "Catalogue implemented; authenticated binding/enrollment unfinished",
+      "evidence": "http_server.cpp /v1/connections/select refuses every Nexus selection as unauthenticated; connection-profiles.md phases 2-4 remain pending. Private team server/PostgreSQL remain excluded."
+    },
+    {
+      "area": "Native providers",
+      "state": "Protocol fixtures and historical live evidence; current final delivery audit needed",
+      "evidence": "Current suite covers native adapters. No current paid-provider execution claimed."
+    },
+    {
+      "area": "MCP/A2A",
+      "state": "Controlled independent peer coverage; final complete current gate pending",
+      "evidence": "25 focused includes MCP integration; current full includes A2A contracts."
+    },
+    {
+      "area": "Cancellation, ownership, recovery and no replay",
+      "state": "Worker-level focused coverage; full product recovery audit incomplete",
+      "evidence": "Ledger, loss/cancel fixtures pass in 25-test gate; this is not proof of all restart and in-flight recovery policies."
+    },
+    {
+      "area": "Installation / preservation",
+      "state": "Installed 0.1.60 unchanged; exact backup verified",
+      "evidence": ".agentflow/installation-backups/0.1.60-before-854957f3/receipt.json verifies 2492 files and unchanged source. No settings/profile access."
+    }
+  ],
+  "next": "Finish the same current full gate; refresh source-bound package; qualify protected installation/rendered editor and remaining implementation gaps. Never count private Nexus implementation as OSS work."
+}
