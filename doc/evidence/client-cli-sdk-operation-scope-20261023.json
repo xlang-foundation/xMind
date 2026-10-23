@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "4f731857334ad49147a1904e6aa1657fe4535b58",
+  "sourcePatchSha256": "7f1c8e8d32b5846901674c8fc8f8133a8a25a16a3ae7188c6fd784603ec142e0",
+  "nativeSha256": "494d74a3e99e943eb756e33238ae3b23cb16e111ea5d3a4b0f40f7a8cf5591ee",
+  "focusedNativeContractsPassed": 4,
+  "fullNativeAcceptance": false,
+  "sessionId": "35a535e4fe2331580196cd7fe50310d0",
+  "rootRunId": "a19c3842ffe52d5bac9cad4ca295b43e",
+  "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/cli-ceil-div-sdk-operations",
+  "completedTaskNeverReplay": true,
+  "sdkCalls": 8,
+  "sdkDecisionCalls": 2,
+  "wrongSessionSdkDecisionsRejected": 2,
+  "separateClientPids": [
+    35404,
+    4276,
+    17584,
+    37808,
+    13976,
+    6228,
+    33736,
+    32440
+  ],
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "approvals": 2,
+  "nodeChecksPassed": 4,
+  "runtimeFilesAndBytesUnchanged": true,
+  "ownedBackendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 15756,
+    "birthAndImageVerified": true
+  },
+  "operations": [
+    {
+      "id": "86d77c1da16bd9e578f0e4e460a7fd54",
+      "tool": "replace_file",
+      "state": "succeeded",
+      "decision_actor": "local-owner"
+    },
+    {
+      "id": "8b7d90f868fcce53ba9d5e81eb95075c",
+      "tool": "run_process",
+      "state": "succeeded",
+      "decision_actor": "local-owner"
+    }
+  ],
+  "scope": "Actual CLI coding; operation inspection and decisions use independent xmind.exe SDK subobject calls. HTTP CLI handles prompt/history. Wrong-session SDK decisions refused; synthetic provider, actual native file/process effects.",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "passed": true
+}

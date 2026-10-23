@@ -184,6 +184,25 @@ values. Start accepts the default run options; Submit accepts the options below.
 prompt admission uses the shared native HTTP adapter; other client operations
 and authenticated remote connectors still require integration.
 
+## Captured operation service
+
+`binding.Operations(session_id, run_id)` returns a native SDK service scoped to
+one existing run in that session. `List()` returns its captured binding, session,
+run and operations. `Open(operation_id)` and `Decide(operation_id, decision)`
+return captured binding/operation receipts. Decision is allow or deny; the owning
+backend assigns local-owner, never an actor supplied by the caller. The existing
+native decision transition remains responsible for expiry and exactly-once state.
+Argument JSON stays byte-for-byte unchanged. Another session/run's operation is
+rejected before a decision. Metadata edits retain admitted operation reads;
+backend retirement invalidates every retained service object.
+
+CLI exposes `connections operations ID REV SESSION RUN`,
+`connections operation ID REV SESSION RUN OPERATION`, and
+`connections operation-decide ID REV SESSION RUN OPERATION DECISION` through
+these SDK subobjects. This adds neither effect execution nor a replacement
+permission engine to the adapter. Browser/extension captured approval routing,
+operation output and reconciliation adapters remain separate work.
+
 ## SDK run options
 
 The captured Runs subobject exposes `Submit(request)` in addition to

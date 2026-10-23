@@ -1,3 +1,4 @@
+#include "connection_binding_values.hpp"
 #include "connection_run_input.hpp"
 #include "agentflow/http_server.hpp"
 #include <initializer_list>
@@ -10,7 +11,7 @@
 #if defined(_WIN32)
 #include "agentflow/connection_profiles.hpp"
 #include "agentflow/connection_binding.hpp"
-#include "connection_binding_values.hpp"
+
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/context_records.hpp"
 #endif
@@ -226,13 +227,7 @@ Json graph_record(const GraphRootRecord& root) {
 }
 Json encode(const Event& value) {return {{"seq",value.sequence},{"run_id",value.run_id},{"kind",value.kind},{"data",Json::parse(value.json)}};}
 Json encode(const Message& value) {return {{"id","msg_"+std::to_string(value.sequence)},{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
-Json encode(const Operation& value) {
-    // Keep exact argument bytes: clients must not reserialize numeric/content
-    // values and present a different payload as the granted operation.
-    return {{"id",value.id},{"run_id",value.spec.run_id},{"workspace_id",value.spec.workspace},
-        {"tool",value.spec.tool},{"arguments_json",value.spec.arguments_json},{"resources",value.spec.resources},{"state",to_string(value.state)},
-        {"expires_unix_ms",value.expires_unix_ms},{"decision_actor",value.decision_actor},{"result_json",value.result_json}};
-}
+Json encode(const Operation& value) {return connection_values::operation(value);}
 Json encode(const AgentPermissionGrant& value) {
     return {{"id",value.id},{"workspace_id",value.workspace_id},{"policy_binding",value.policy_binding},
         {"action",value.action},{"resource",value.resource},{"created_unix_ms",value.created_unix_ms}};

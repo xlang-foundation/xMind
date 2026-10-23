@@ -1,3 +1,24 @@
+## Captured SDK operation scopes and actual CLI decisions - 2026-10-23
+
+Binding.Operations(session,run) exposes List/Open/Decide through standard SDK
+subobjects. Native scope checks bind session/run/backend generation; exact
+arguments preserved. Cross-run/session or malformed decisions reject before
+state change, repeated approval cannot overwrite state, actor is backend
+local-owner, metadata reads survive and backend retirement fences retained
+objects. HTTP and SDK share one operation value adapter. Four focused contracts
+pass3.94s with source/SDK/library/dependency/binary file sets unchanged.
+
+Fresh actual CLI ceil-div task uses8 separate SDK xmind calls to inspect/list/
+approve2 real operations, including2 refused wrong-session decisions. Read,
+approved edit, approved Node4,8 messages,4 model calls and SDK worker retirement
+pass; runtime fixture bytes unchanged and exact owned backend exit observed.
+Session35a535e4fe2331580196cd7fe50310d0/roota19c3842ffe52d5bac9cad4ca295b43e
+are completed, NEVER replay. This source patch has focused acceptance only;
+complete172/browser/CLI receipts remain b133a0ee. Browser approval routing,
+output/reconciliation, other connection operations and protocol work stay open.
+No paid inference, CPython or installation change. Evidence: sdk-operation-scope
+and client-cli-sdk-operation-scope-20261023*.
+
 ## Canonical compaction passes hosted; aggregate RPC timeout remains - 2026-10-23
 
 Run40001405031/source dd238817 completes167/170 in909.68s. All four counted

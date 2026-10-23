@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/records.hpp"
+#include "agentflow/operation.hpp"
 #include "agentflow/run_executor.hpp"
 #include <memory>
 namespace agentflow {
@@ -16,6 +17,20 @@ struct ConnectionEventCursor {
 struct ConnectionEventPage {std::vector<Event> events;ConnectionEventCursor cursor;};
 struct BoundConnectionSession {ConnectionBindingIdentity binding;Session session;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
+struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
+struct BoundConnectionOperations {ConnectionBindingIdentity binding;std::string session_id,run_id;std::vector<Operation> operations;};
+class CapturedRunOperations {
+public:
+    BoundConnectionOperations list()const;
+    BoundConnectionOperation open(const std::string& id)const;
+    BoundConnectionOperation decide(const std::string& id,OperationDecision decision)const;
+private:
+    friend class CapturedLocalConnection;
+    CapturedRunOperations()=default;
+    std::shared_ptr<LocalConnectionContext> context_;
+    ConnectionBindingIdentity identity_;
+    std::string session_,run_;
+};
 struct ConnectionRunRequest {
     std::string id,session,prompt,model;
     std::optional<std::string> inbox;
@@ -44,6 +59,7 @@ public:
     BoundConnectionRun start_run(std::string id,std::string session,std::string prompt)const;
     BoundConnectionRun start_run(ConnectionRunRequest request)const;
     void cancel_run(const std::string& id)const;
+    std::shared_ptr<CapturedRunOperations> operations(std::string session,std::string run)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;
 private:
     friend class LocalConnectionBindings;

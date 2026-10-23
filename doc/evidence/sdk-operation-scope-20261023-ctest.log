@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  28: native_xmind_ipc_lifetime_contract
+1/4 Test  #28: native_xmind_ipc_lifetime_contract .........   Passed    0.34 sec
+    Start  29: native_xmind_ipc_api_contract
+2/4 Test  #29: native_xmind_ipc_api_contract ..............   Passed    1.87 sec
+    Start 154: native_operation_repository_contract
+3/4 Test #154: native_operation_repository_contract .......   Passed    0.80 sec
+    Start 165: native_connection_profiles_http_contract
+4/4 Test #165: native_connection_profiles_http_contract ...   Passed    0.91 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   3.94 sec
