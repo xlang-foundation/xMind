@@ -33,8 +33,8 @@ int child(int argc,char** argv){
         }else throw std::runtime_error("Unexpected fixture operation");
     }
 }
-void process_contract(){
-    auto bound=ForegroundProcess::bind_executable(executable());require(!bound->identity().empty()&&bound->identity()==ForegroundProcess::executable_identity(executable()),"Worker must use its exact retained native image");
+void process_contract(const std::string& image){
+    auto bound=ForegroundProcess::bind_executable(image);require(!bound->identity().empty()&&bound->identity()==ForegroundProcess::executable_identity(image),"Worker must use its exact retained native image");
     SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",L"synthetic-private-parent-value");
     auto launch=[&]{return AgentWorkerProcess::launch(bound,scope(),Clock::now()+10s);};
     std::cout<<"SDK IPC phase: initial launch"<<std::endl;auto worker=launch();std::cout<<"SDK IPC phase: environment"<<std::endl;require(worker->pid()!=GetCurrentProcessId()&&worker->creation_time()!=0&&worker->executable_identity()==bound->identity()&&worker->alive(),"Ready identity must name the actual distinct child");
@@ -50,5 +50,21 @@ void process_contract(){
     for(bool oversized:{false,true}){auto bounded=launch();rejects<AgentWorkerProtocolError>([&]{bounded->channel().send({oversized?"test.echo":"invalid operation",oversized?std::string(AgentWorkerChannel::max_message_bytes,'x'):""},Clock::now()+5s);});require(bounded->alive(),"Rejected local message must not fabricate process exit");bounded->terminate();}
     std::stop_source cancelled;cancelled.request_stop();rejects<AgentWorkerChannelCancelled>([&]{AgentWorkerProcess::launch(bound,scope(),Clock::now()+5s,cancelled.get_token());});SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",nullptr);
 }
+void long_image_contract(){
+    const auto source=std::filesystem::u8path(executable());
+    const auto root=std::filesystem::temp_directory_path()/(L"xmind-channel-path-"+std::to_wstring(GetCurrentProcessId())+L"-"+std::to_wstring(GetTickCount64()));
+    require(std::filesystem::create_directory(root),"Fresh channel fixture directory required");
+    try{
+        require(root.native().size()<237,"Channel fixture temporary root is too long");
+        const auto directory=root/std::wstring(237-root.native().size(),L'p');
+        std::filesystem::create_directory(directory);
+        const auto image=directory/L"xmind.exe";
+        require(image.native().size()==248,"Channel loader regression must use a 248-character image");
+        std::filesystem::copy_file(source,image);
+        std::filesystem::copy_file(source.parent_path()/L"xlang3_runtime.dll",directory/L"xlang3_runtime.dll");
+        const auto text=image.u8string();process_contract({reinterpret_cast<const char*>(text.data()),text.size()});
+        std::filesystem::remove_all(root);
+    }catch(...){std::cerr<<"Retained long-image channel fixture: "<<root<<'\n';throw;}
 }
-int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc==2&&std::string(argv[1])=="channel-fixture-hold"){Sleep(INFINITE);return 1;}require(argc==1,"Unexpected fixture arguments");process_contract();std::cout<<"Native SDK worker links, captured scope, distinct PID, cancellation and owned tree retirement passed.\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+}
+int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc==2&&std::string(argv[1])=="channel-fixture-hold"){Sleep(INFINITE);return 1;}require(argc==1,"Unexpected fixture arguments");process_contract(executable());long_image_contract();std::cout<<"Native SDK worker links, captured scope, distinct PID, cancellation and owned tree retirement passed at short and long image paths.\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

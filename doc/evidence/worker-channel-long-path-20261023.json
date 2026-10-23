@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-23T23:49:24.440Z",
+  "sourceParent": "0f89c68524370144060d88c2bba0760260d392f2",
+  "sourcePatchSha256": "2a199701817c0a7ee69b82da88d772d5e819dbf1a7a2f5709e274a677b01842d",
+  "build": {
+    "pid": 28376,
+    "launchedAt": "2026-10-23T23:48:56.627Z",
+    "completedAt": "2026-10-23T23:49:17.138Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "fdb7c39019766a87e79c5b47b491b05f303a737578c41f0725aaeaf0ef00dad5"
+  },
+  "test": {
+    "pid": 32252,
+    "launchedAt": "2026-10-23T23:49:19.802Z",
+    "completedAt": "2026-10-23T23:49:21.849Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c6d08fb5384de55af55c7940717aaa95400df5ff48ffd0edcebd19e9bc6b34cd"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 2.01,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "15431644cb1b09f819c4c51721b04547a7f19ad7261cd55a3d566b9a8d52272e",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Actual separate-process SDK channel fixture at original and 248-character copied native fixture image paths. Captured scope, native payloads, environment isolation, PID/birth/image binding, cancellation and process-tree retirement. Not a full model-driven long-path coding task.",
+  "red": {
+    "failed": 1,
+    "seconds": 11.02,
+    "logSha256": "60b1cdb2c3331bd8f23dd4b355df353b8ec5fce88ea2933a7f5dbe9fbf28893f",
+    "retainedFixture": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-channel-path-39772-101399750",
+    "lastPhase": "Long-image initial launch; SDK handshake deadline elapsed"
+  },
+  "unchangedBootstrapAndAuthorityChecks": true,
+  "qualifiedPackage063Unchanged": true,
+  "fullGoalComplete": false
+}

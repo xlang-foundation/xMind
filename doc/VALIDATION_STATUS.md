@@ -1,3 +1,22 @@
+## Separate SDK worker-channel loader path fix — 2026-10-23
+
+The channel contract now repeats its complete process/SDK checks using a copied
+native fixture image at248 characters with the adjacent SDK DLL. Short-path
+cases pass before the fix; long-path launch then reaches its handshake deadline.
+That failed fixture remains retained. Extending only the Windows application
+path in AgentWorkerProcess::launch passes both short and long cases1/1 in2.01s.
+Canonical retained image/argv, inherited bootstrap, scope, suspended job ownership,
+PID/birth, SDK payload, private environment, cancellation, crash and descendant
+retirement checks remain intact. No custom dispatch or serializer was added.
+
+The complete frozen input/binary closure is unchanged during the focused gate.
+Native SHA-256 is15431644cb1b09f819c4c51721b04547a7f19ad7261cd55a3d566b9a8d52272e.
+This is actual SDK process-channel evidence, not a model-driven long-path
+coding task or a new full172 pass. Production model-worker RPC regression is
+next. Candidate0.1.63 and installed62 remain unchanged. No paid inference,
+CPython or visible window. [Receipt](evidence/worker-channel-long-path-20261023.json),
+[CTest log](evidence/worker-channel-long-path-20261023-ctest.log).
+
 ## Generic native process loader path fix — 2026-10-23
 
 The complete foreground process adapter contract now copies actual xmind/DLL
