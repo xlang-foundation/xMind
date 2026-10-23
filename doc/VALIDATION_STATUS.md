@@ -1,3 +1,24 @@
+## Managed-owner Windows loader path fix — 2026-10-23
+
+The retained cold-start failure is reproduced without tasks: the original
+248-character old image exits before main with Windows STATUS_NAME_TOO_LONG
+(0xC0000106), while the exact unchanged bytes start with the extended path prefix.
+The current candidate has the same loader failure; a manifest-only experiment
+does not fix it. Managed launch now uses the extended image path and argv[0].
+OS-reported local-drive prefixes are normalized for protected runtime validation
+and publication. User path admission, process birth, file identity and digest
+checks remain intact. Two intermediate native failures are retained.
+
+The actual local-profile contract now exercises longer managed paths across
+startup, attachment and replacement handoff; it passes1/1 in89.80 seconds under
+its unchanged600-second budget. All2815 project,16 SDK source,1870 libraries,
+30 runtime,18598 dependencies and137 native binary file sets/bytes remain
+unchanged during validation. New Native SHA-256 is1d9e636095bfb91dd303ba74fee8066237d8cbd7555660d667e970d6f33d4aa5.
+This is focused acceptance only; full native qualification and delivery of
+this fix remain open. Candidate0.1.63 and installed62 are unchanged. No paid
+inference, CPython or visible window. [Receipt](evidence/managed-owner-extended-path-20261023.json),
+[CTest log](evidence/managed-owner-extended-path-20261023-ctest.log).
+
 ## Candidate0.1.63 packaged browser coding — 2026-10-23
 
 Actual hidden browser coding passes with the exact packaged browser adapter

@@ -340,6 +340,10 @@ std::string loaded_root() {
     const auto size = GetModuleFileNameW(nullptr, image.data(), static_cast<DWORD>(image.size()));
     require(size > 0 && size < image.size());
     image.resize(size);
+    // Normalize only the OS-reported local drive image for comparison with
+    // the protected canonical runtime record; user path admission is unchanged.
+    if (image.starts_with(L"\\\\?\\") && image.size() > 6 && image[5] == L':')
+        image.erase(0, 4);
     require(same(fs::path(image).filename().native(), L"xmind.exe"),
             "Managed local profiles require the unified xmind.exe package");
     return text(fs::path(image).parent_path());
@@ -538,7 +542,11 @@ Child launch(Store &store, Json &state) {
                                       inherited_handles.data(), sizeof(inherited_handles), nullptr,
                                       nullptr) != 0);
     const auto runtime = absolute(state.at("runtime").get<std::string>()), program = runtime / L"xmind.exe";
-    std::vector<std::wstring> args{program.native(),
+    // The loader can reject a near-MAX_PATH image before main while resolving
+    // its adjacent runtime DLL. Keep the verified identity canonical, but use
+    // the extended Windows path for both the image and argv[0] at launch.
+    const auto native_program = extended(program);
+    std::vector<std::wstring> args{native_program,
                                    L"serve",
                                    L"--db",
                                    (store.directory / L"state.sqlite").native(),
@@ -604,7 +612,7 @@ Child launch(Store &store, Json &state) {
     startup.StartupInfo.hStdError = log.value;
     startup.lpAttributeList = attributes;
     PROCESS_INFORMATION process{};
-    require(CreateProcessW(program.c_str(), command.data(), nullptr, nullptr, TRUE,
+    require(CreateProcessW(native_program.c_str(), command.data(), nullptr, nullptr, TRUE,
                            CREATE_SUSPENDED | DETACHED_PROCESS | CREATE_UNICODE_ENVIRONMENT |
                                EXTENDED_STARTUPINFO_PRESENT,
                            env.data(), wide(state.at("workspace").get<std::string>()).c_str(),

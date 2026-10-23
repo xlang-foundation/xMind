@@ -1,0 +1,65 @@
+{
+  "recordedAt": "2026-10-23T23:18:38.670Z",
+  "sourceParent": "35f94ad19c0cc2bd80d5b3941b59c39619118cb0",
+  "sourcePatchSha256": "bef5d195a7de77bbcbff74339d7e754f36ce993c07cae091a56f3d6e5fbf89e3",
+  "build": {
+    "pid": 4908,
+    "launchedAt": "2026-10-23T23:16:45.918Z",
+    "completedAt": "2026-10-23T23:17:03.840Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "73a0bf44725ffff8476354544be1e85b9ed2f7ac1ef4b273d605a677c668b653"
+  },
+  "test": {
+    "pid": 8864,
+    "launchedAt": "2026-10-23T23:17:06.310Z",
+    "completedAt": "2026-10-23T23:18:36.143Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "20ac0b73968b02c4fc97d4cff9c6f9d63e2405d00b8148855f7c57bdeba64327"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 89.8,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "1d9e636095bfb91dd303ba74fee8066237d8cbd7555660d667e970d6f33d4aa5",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Focused actual native local-profile startup/attachment/owner-handoff contract, with managed image paths at least 248 characters. Not full-suite acceptance or installation.",
+  "diagnostic": {
+    "originalPreservedOldImagePathCharacters": 248,
+    "unprefixedStatus": 3221225734,
+    "ntstatus": "STATUS_NAME_TOO_LONG (0xC0000106), Windows SDK ntstatus.h",
+    "originalOldExtendedPrefixHelpExit": 0,
+    "originalOldExtendedPrefixStdoutBytes": 2728,
+    "candidateUnprefixedHelpStatus": 3221225734,
+    "manifestOnlyAttemptStatus": 3221225734,
+    "extendedPrefixHelpExit": 0
+  },
+  "failedIterationsRetained": [
+    {
+      "gate": "managed-owner-extended-path",
+      "testSeconds": 15.6,
+      "cause": "Child loaded, but OS-reported extended image root failed canonical local-path admission"
+    },
+    {
+      "gate": "managed-owner-extended-path-canonical",
+      "testSeconds": 12.33,
+      "cause": "Child reached native API; profile publication rejected OS prefix versus protected canonical runtime record"
+    }
+  ],
+  "canonicalAdmissionAndFileIdentityChecksRetained": true,
+  "package063Unchanged": true,
+  "fullGoalComplete": false
+}
