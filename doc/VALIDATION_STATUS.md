@@ -1,3 +1,21 @@
+## Fresh qualified candidate CLI coding — 2026-10-23
+
+The exact 3024124e native binary (9054a6ff) completed a fresh sum-cubes
+coding task through the CLI and an SDK worker process: native read, reviewed
+file replacement and reviewed Node command; four assertions passed. Four
+controlled model replies produced eight canonical history messages and two
+succeeded operations. History/watch restoration and runtime file sets/bytes
+remain exact. Worker35244 is absent and owned backend36160 exited after its
+birth/image were verified. This intentional shutdown is not a crash result.
+
+Session9eb2d00cb6372b1f2c01a51a86d5828e / root71da2e13056eb4572dcc066084382a82
+are completed and must never be replayed. This is explicit loopback CLI
+attachment using a development runtime, with a controlled provider and real
+file/process effects. Browser coding on this candidate, rendered VS Code,
+package/install and remaining execution/protocol requirements stay open. No
+paid inference, CPython, visible windows or installation.
+[Receipt](evidence/client-cli-coding-3024124e-20261023.json).
+
 ## Complete local candidate qualification at3024124e — 2026-10-23
 
 All native targets rebuilt, then **172/172 registered contracts passed in
