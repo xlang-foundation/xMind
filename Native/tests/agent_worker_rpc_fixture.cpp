@@ -29,13 +29,14 @@ struct FixtureWorkerRpcPeer::Impl {
     struct Pending {std::deque<std::string> events;bool done=false,local_failure=false;std::string result,code;};
     struct Incoming {std::stop_source stop;std::atomic<bool> done=false;};
     struct Flight {std::shared_ptr<Incoming> owner;std::jthread thread;};
+    const std::shared_ptr<NativeWorkerModelClient> sdk_services;
     std::shared_ptr<NativeExecutionClient> native_execution;
     AgentWorkerChannel& channel;FixtureWorkerRpcHandler handler;AgentWorkerChannel::Deadline deadline;
     std::mutex state,writer,request_order;std::condition_variable changed;bool closed=false,started=false;
     std::uint64_t outgoing=1,incoming=1;std::size_t queued=0;
     std::map<std::uint64_t,std::shared_ptr<Pending>> pending;std::map<std::uint64_t,std::shared_ptr<Incoming>> active;
     std::vector<Flight> flights;std::stop_source session_stop;std::jthread reader;
-    Impl(AgentWorkerChannel& channel,FixtureWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline):channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
+    Impl(AgentWorkerChannel& channel,FixtureWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline,std::shared_ptr<NativeWorkerModelClient> sdk):sdk_services(std::move(sdk)),channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
     void start(){std::lock_guard lock(state);if(started||closed)throw AgentWorkerRpcClosed("Native worker RPC cannot restart");started=true;reader=std::jthread([this]{read();});}
     void fail(const std::string& reason){
         std::vector<std::stop_source> stops;{std::lock_guard lock(state);if(closed)return;closed=true;for(auto& [id,call]:pending)if(!call->done){call->done=true;call->local_failure=true;call->code=reason;}for(const auto& [id,owner]:active)stops.push_back(owner->stop);}
@@ -80,9 +81,9 @@ struct FixtureWorkerRpcPeer::Impl {
     }
     void stop(){if(native_execution)native_execution->close();fail("closed");if(reader.joinable())reader.join();for(auto& flight:flights){flight.owner->stop.request_stop();if(flight.thread.joinable())flight.thread.join();}flights.clear();std::lock_guard lock(writer);channel.close();}
 };
-FixtureWorkerRpcPeer::FixtureWorkerRpcPeer(AgentWorkerChannel& channel,FixtureWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline)){}
+FixtureWorkerRpcPeer::FixtureWorkerRpcPeer(AgentWorkerChannel& channel,FixtureWorkerRpcHandler handler,AgentWorkerChannel::Deadline deadline,std::shared_ptr<NativeWorkerModelClient> sdk):impl_(std::make_unique<Impl>(channel,std::move(handler),deadline,std::move(sdk))){}
 FixtureWorkerRpcPeer::~FixtureWorkerRpcPeer(){impl_->stop();}
-std::shared_ptr<NativeWorkerModelClient> FixtureWorkerRpcPeer::native_model()const{return {};}
+std::shared_ptr<NativeWorkerModelClient> FixtureWorkerRpcPeer::native_model()const{return impl_->sdk_services;}
 void FixtureWorkerRpcPeer::bind_native_execution(std::shared_ptr<NativeExecutionClient> client){std::lock_guard lock(impl_->state);if(!client||impl_->native_execution||impl_->started||impl_->closed)throw AgentWorkerRpcClosed("Native execution binding requires fresh worker");impl_->native_execution=std::move(client);}
 std::shared_ptr<NativeExecutionClient> FixtureWorkerRpcPeer::native_execution()const{std::lock_guard lock(impl_->state);return impl_->native_execution;}
 AgentWorkerChannel::Deadline FixtureWorkerRpcPeer::execution_deadline()const noexcept{return impl_->deadline;}

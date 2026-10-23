@@ -14,7 +14,7 @@ using FixtureWorkerRpcHandler=std::function<std::string(const std::string& metho
 // caller threads before destruction; stop must not run inside a handler/sink.
 class FixtureWorkerRpcPeer:public AgentWorkerClientContext {
 public:
-    FixtureWorkerRpcPeer(AgentWorkerChannel&,FixtureWorkerRpcHandler,AgentWorkerChannel::Deadline);
+    FixtureWorkerRpcPeer(AgentWorkerChannel&,FixtureWorkerRpcHandler,AgentWorkerChannel::Deadline,std::shared_ptr<NativeWorkerModelClient> sdk_services={});
     ~FixtureWorkerRpcPeer()override;
     FixtureWorkerRpcPeer(const FixtureWorkerRpcPeer&)=delete;
     FixtureWorkerRpcPeer& operator=(const FixtureWorkerRpcPeer&)=delete;

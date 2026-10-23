@@ -1,6 +1,7 @@
 #pragma once
 #include "agentflow/agent_worker_read_context.hpp"
-#include "agentflow/agent_worker_model_rpc.hpp"
+#include "agentflow/agent_worker_channel.hpp"
+#include "agentflow/agent_worker_model_host.hpp"
 #include "agentflow/agent_worker_journal_host.hpp"
 
 namespace agentflow {
@@ -20,8 +21,6 @@ public:
     bool outcome_unrecorded()const noexcept;
     AgentWorkerReadOwner(const AgentWorkerReadOwner&)=delete;
     AgentWorkerReadOwner& operator=(const AgentWorkerReadOwner&)=delete;
-    std::string dispatch(const std::string& method,const std::string& payload,
-        AgentWorkerRpcSink,std::stop_token cancel={});
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

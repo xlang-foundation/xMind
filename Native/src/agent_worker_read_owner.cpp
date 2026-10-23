@@ -1,7 +1,5 @@
 #include "agentflow/agent_worker_read_owner.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
-#include "agentflow/agent_worker_read_rpc.hpp"
-#include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/agent_worker_context_window.hpp"
 #include "agentflow/agent_worker_planning_owner.hpp"
@@ -20,13 +18,12 @@ struct AgentWorkerReadOwner::Impl {
     std::unique_ptr<AgentWorkerJournalHost> native_journal;
     std::unique_ptr<NativePlanningBinding> native_planning;
     std::unique_ptr<NativeWorkerModelBinding> native_model;
-    bool native_model_required=false;
-    AgentWorkerRpcHandler model_rpc,read_rpc,journal_rpc;
     Impl(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
         AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,ChatProviderConfig provider,
         std::string identity,std::shared_ptr<AgentModelGateway> gateway,
         AgentWorkerChannel::Deadline deadline,std::stop_token cancel,std::function<void(AgentWorkerJournalReadKind,std::stop_token)> journal_read)
         :context(store,store,lease,captured_owner(std::move(owner),deadline),policy,cancel){
+        if(scope!=AgentWorkerScope{lease.root_run_id,lease.owner_run_id,lease.workspace_id,lease.generation,lease.workspace_revision})throw Conflict("Read owner differs from captured worker scope");
         AgentWorkerModelPolicy model_policy{policy.include_usage,policy.max_output_tokens,std::move(identity)};
         model_policy.request_context=[this](std::stop_token stop){return context.prepare(stop);};
         model_policy.admit_context=[this](const std::string& attempt,const ModelRequest& request,std::stop_token stop){context.admit(attempt,request,stop);};
@@ -51,9 +48,6 @@ struct AgentWorkerReadOwner::Impl {
             std::move(model_policy),std::move(gateway),deadline,cancel);
         native_journal=std::make_unique<AgentWorkerJournalHost>(store,lease,deadline,cancel,hooks);
         native_model=std::make_unique<NativeWorkerModelBinding>(*model,native_journal.get(),&context,nullptr,nullptr,nullptr,nullptr,native_planning.get());
-        model_rpc=bind_agent_worker_model_rpc(*model,scope);
-        read_rpc=bind_agent_worker_read_rpc(context,lease,scope);
-        journal_rpc=bind_agent_worker_journal_rpc(store,std::move(lease),scope,deadline,cancel,std::move(hooks));
     }
 };
 AgentWorkerReadOwner::AgentWorkerReadOwner(PersistenceService& store,AgentWorkerLeaseSpec lease,const AgentWorkerScope& scope,
@@ -62,11 +56,5 @@ AgentWorkerReadOwner::AgentWorkerReadOwner(PersistenceService& store,AgentWorker
     :impl_(std::make_unique<Impl>(store,std::move(lease),scope,std::move(owner),std::move(policy),std::move(provider),std::move(identity),std::move(gateway),deadline,cancel,std::move(journal_read))){}
 AgentWorkerReadOwner::~AgentWorkerReadOwner()=default;
 bool AgentWorkerReadOwner::outcome_unrecorded()const noexcept{return impl_->native_model->outcome_unrecorded();}
-NativeWorkerModelAccess AgentWorkerReadOwner::native_model_access()const{impl_->native_model_required=true;impl_->model_rpc={};impl_->journal_rpc={};impl_->read_rpc={};return impl_->native_model->access();}
-std::string AgentWorkerReadOwner::dispatch(const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel){
-    if(method.starts_with("model.")){if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");return impl_->model_rpc(method,payload,std::move(sink),cancel);}
-    if(method.starts_with("journal.")){if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");return impl_->journal_rpc(method,payload,std::move(sink),cancel);}
-    if(impl_->native_model_required)throw AgentWorkerRpcRemoteError("unsupported");
-    return impl_->read_rpc(method,payload,std::move(sink),cancel);
-}
+NativeWorkerModelAccess AgentWorkerReadOwner::native_model_access()const{return impl_->native_model->access();}
 }

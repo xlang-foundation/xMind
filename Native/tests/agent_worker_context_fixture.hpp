@@ -66,18 +66,15 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
     }
     AgentWorkerReadOwner backend_owner(store,lease,worker->channel().scope(),owner,context_policy,config,profiled?identity:std::string{},gateway,deadline,{},[&](AgentWorkerJournalReadKind kind,std::stop_token){if((mode.starts_with("product_admission_")&&kind==AgentWorkerJournalReadKind::run)||(mode.starts_with("product_journal_")&&kind==AgentWorkerJournalReadKind::history)){if(mode.ends_with("_cancel"))throw AgentWorkerAuthorityCancelled("Injected journal cancellation");throw AgentWorkerAuthorityExpired("Injected journal deadline");}});
     FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink sink,std::stop_token cancel)->std::string{
-        return backend_owner.dispatch(method,payload,std::move(sink),cancel);
+        throw AgentWorkerRpcRemoteError("unsupported");
     },deadline);
-    std::string startup=mode;
+    const auto access=backend_owner.native_model_access();
+    std::string startup=Json{{"mode",mode},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
     if(product_entry){
-        const auto access=backend_owner.native_model_access();
         if(no_tools){
         rejects<Conflict>([&]{NativeWorkerModelClient wrong(access,id,"foreign-owner",lease.workspace_id,generation,1);});
         auto wrong_ticket=access;wrong_ticket.ticket[0]=wrong_ticket.ticket[0]=='a'?'b':'a';
         rejects<AgentWorkerModelOutcomeUnrecorded>([&]{NativeWorkerModelClient wrong(wrong_ticket,id,id,lease.workspace_id,generation,1);});
-        rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("model.admission","{}",{},{});});
-        rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("journal.run","{}",{},{});});
-        rejects<AgentWorkerRpcRemoteError>([&]{backend_owner.dispatch("read.invoke","{}",{},{});});
         NativeWorkerModelClient scoped(access,id,id,lease.workspace_id,generation,1);
         rejects<AgentFileToolOutcomeUnrecorded>([&]{scoped.file_invoke(AgentFileToolInvocation{});});
         rejects<ProcessOutcomeUnrecorded>([&]{scoped.process_join("missing-attempt");});

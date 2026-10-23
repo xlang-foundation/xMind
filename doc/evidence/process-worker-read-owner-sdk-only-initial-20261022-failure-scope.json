@@ -1,0 +1,6 @@
+{
+  "phase": "build",
+  "testsExecuted": false,
+  "reason": "Read-owner header relied on removed RPC header for AgentWorkerScope and channel deadline declarations.",
+  "repair": "Include the channel contract explicitly, without restoring the packet dispatcher."
+}

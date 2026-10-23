@@ -1,3 +1,31 @@
+## Read-owner dispatcher removed; context fixtures use SDK - 2026-10-22
+
+AgentWorkerReadOwner no longer declares or implements string-method dispatch,
+constructs model/read/journal packet callbacks, or carries a native-model-required
+switch. It retains only the real SDK binding. Exact captured scope validation is
+now explicit in the constructor, preserving the prior wrong-scope rejection.
+
+Read-context fixture children receive private SDK access and call the real model,
+read and journal objects; their parent rejects packet domain requests. The test
+peer only retains fixture run/cancel control. Existing raw malformed-packet and
+other fault fixtures remain separate test support. Three checks for the deleted
+owner dispatch API are removed; actual SDK wrong-owner/ticket and journal/tool
+authority rejection checks remain, along with wrong-scope constructor rejection.
+
+The initial build caught a missing explicit channel include after removal of the
+RPC include; its failed log and exact inputs are preserved. The corrected complete
+build and 24 focused contracts pass in 164.26 seconds, including all context cases
+inside model RPC plus graph workers, coding server, ledger/lifecycle, shared memory,
+schema/MCP and unified entry. Exact 2792 project /16 SDK /1870 pure-library /30
+runtime /18598 dependency /137 binary file sets and hashes stay unchanged.
+Native patch 19466373e52731ba49e80694fb69533b24fbd7500fe9e909a1a9da4e031b954a;
+xmind.exe e2d017e24dbdacd6807fbccfc960c4cf204027b6c6a0a8f7f029efa9dd730a2d.
+Evidence: process-worker-read-owner-sdk-only-{initial,qualified}-20261022-*.
+
+This focused gate is not a new full Native pass. Remaining adapter string fallbacks
+and now fixture-only callback binders still need cleanup. No installation, paid
+inference, CPython, completed-task replay or user-history modification.
+
 ## Packet transport removed from product targets - 2026-10-22
 
 The obsolete packet peer header/source and peer-based retirement overloads are
