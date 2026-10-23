@@ -4,6 +4,7 @@
 #include "agentflow/root_execution_budget.hpp"
 #include "agentflow/agent_worker_context_window.hpp"
 #include "nlohmann/json.hpp"
+#include <algorithm>
 
 namespace agentflow {
 namespace {
@@ -22,11 +23,19 @@ struct Owner {
     void check(std::stop_token stop={})const{
         if(cancel.stop_requested()||stop.stop_requested())throw TransportCancelled("Planning owner cancelled");
         if(std::chrono::steady_clock::now()>=deadline)throw TransportTimeout("Planning owner expired");
-        if(!execution||!budget||!settings.planning||!settings.workspace||lease.root_run_id!=lease.owner_run_id||budget->root_id()!=lease.root_run_id||budget->deadline()!=deadline||!budget->segment_open())throw DynamicPlanUnavailable("Planning requires its captured ordinary root owner");
+        if(!execution||!budget||!settings.planning||!settings.workspace||budget->root_id()!=lease.root_run_id||budget->deadline()!=deadline||!budget->segment_open())throw DynamicPlanUnavailable("Planning requires its captured dynamic owner");
         budget->check(stop);
         (void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
         const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
-        if(segment.state!="open"||segment.id!=budget->segment_id()||!capabilities.catalogue_finalized||capabilities.workspace_identity!=lease.workspace_id||Json::parse(capabilities.provider_identity_json)!=Json::parse(lease.provider_identity_json)||agent_authority_identity(settings,settings.provider.model,capabilities.workspace_identity,agent_authority_credentials(store,settings))!=capabilities.backend_identity)throw DynamicPlanUnavailable("Planning owner authority changed");
+        auto owner_authority=capabilities.backend_identity;
+        if(lease.owner_run_id!=lease.root_run_id){
+            const auto admitted=store.child_admission(lease.owner_run_id).get();
+            const auto parent=store.dynamic_plan(admitted.plan_id).get();
+            const auto preset=std::find_if(parent.capabilities.presets.begin(),parent.capabilities.presets.end(),[&](const auto& value){return value.id==admitted.preset_id&&value.revision==admitted.preset_revision;});
+            if(admitted.kind!=ChildAdmissionKind::dynamic_agent||admitted.root_run_id!=lease.root_run_id||parent.root_run_id!=lease.root_run_id||preset==parent.capabilities.presets.end()||preset->backend_identity!=admitted.backend_identity)throw DynamicPlanUnavailable("Planning child preset authority changed");
+            owner_authority=preset->backend_identity;
+        }
+        if(segment.state!="open"||segment.id!=budget->segment_id()||!capabilities.catalogue_finalized||capabilities.workspace_identity!=lease.workspace_id||Json::parse(capabilities.provider_identity_json)!=Json::parse(lease.provider_identity_json)||agent_authority_identity(settings,settings.provider.model,capabilities.workspace_identity,agent_authority_credentials(store,settings))!=owner_authority)throw DynamicPlanUnavailable("Planning owner authority changed");
         if(!execution->healthy())throw DynamicOutcomeUnrecorded("Planning execution generation is faulted");
     }
     void started(const AgentWorkerPlanningClaimRecord& claim){

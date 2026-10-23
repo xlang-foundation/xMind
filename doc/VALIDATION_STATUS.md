@@ -1,3 +1,22 @@
+## Exact child planning owner service — 2026-10-23
+
+Backend planning callbacks now validate a dynamic child against the exact
+admitted preset revision and captured settings authority while retaining the
+existing ultimate-root budget, deadline and segment. The current worker journal
+lease and lineage checks remain required. The ledger fixture calls the standard
+xlang3 SDK planning service for child-only inspection, refuses altered child
+settings and a parent-owner request, and hides the parent pending call. The
+existing nested continuation checks remain enabled.
+
+Native build and the focused ledger contract pass **1/1 in 36.07 seconds**.
+The frozen 2,815 source, 16 SDK source, 1,870 pure-library, 30 runtime,
+18,598 dependency and 137 binary file sets and bytes remained unchanged.
+This service fixture uses a local SDK client; it does not prove an independent
+nested planner process. Automatic child enrollment, counted context, shared
+scheduling and recovery remain open. No paid inference, CPython or installation.
+[Receipt](evidence/nested-worker-planning-owner-service-20261023.json),
+[CTest log](evidence/nested-worker-planning-owner-service-20261023-ctest.log).
+
 ## Captured-history client CI inventory corrected — 2026-10-23
 
 Hosted views run `40019560782` failed its exact inventory gate despite all

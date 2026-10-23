@@ -242,3 +242,14 @@ ownership; immediate orchestration lineage is stored in the plan/node admission.
 Worker validation now respects that distinction. Runtime service enrollment,
 shared scheduler, counted context, typed pause/adoption/recovery and an actual
 parent/child/grandchild planning-process chain remain unqualified.
+
+### Child callback authority checkpoint (2026-10-23)
+
+The native planning callback owner now permits an admitted dynamic child. It
+resolves the child admission and its parent plan preset revision, checks the
+captured backend authority against the actual settings, and retains the root
+budget and live lease fence. A focused SDK service fixture verifies child-only
+inspection and rejects altered settings and a parent-owner request. This does
+not change worker runtime enrollment: independent nested planner processes,
+shared scheduling, counted context and recovery remain pending. See the
+[native receipt](evidence/nested-worker-planning-owner-service-20261023.json).

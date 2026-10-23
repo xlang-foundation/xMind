@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-23T21:11:11.968Z",
+  "sourceParent": "a792b757a2b43f49ea9e8fa6a26e123185b70582",
+  "sourcePatchSha256": "50bc44bf082212473aae1228b7d2771f1734618e846398589d492ef3df043d02",
+  "build": {
+    "pid": 2472,
+    "launchedAt": "2026-10-23T21:09:50.927Z",
+    "completedAt": "2026-10-23T21:10:31.049Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "3b51b0f61fb2f9c12cf4cd0805b322d00b215f176a99eed062f2f3dfc3c43474"
+  },
+  "test": {
+    "pid": 32060,
+    "launchedAt": "2026-10-23T21:10:33.446Z",
+    "completedAt": "2026-10-23T21:11:09.547Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2c1f562323d380a54d673d43ffd8c7cd920bed3f5f85f16085bd95ee3d62dbab"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 36.07,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "472e38afa202b67eba1d84179e4d8f02f6d2ae578424fe99fd772d18ad12ffc7",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Backend native planning callbacks accept an exact admitted dynamic child using its captured preset authority and existing root budget. SDK service inspection remains scoped to that child; altered settings and parent-owner requests are rejected. This fixture does not enroll an automatic nested worker process or verify nested recovery."
+}
