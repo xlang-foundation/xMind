@@ -299,3 +299,10 @@ uses this captured page service, and validates binding/session receipts before
 merging records. Legacy full-history, individual-message and export APIs remain
 separate.470 extension/165 browser unit tests and the actual native-backed view
 contract pass; no new rendered or complete native qualification is inferred.
+
+CLI: `xmind ipc --endpoint lrpc:PORT connections messages ID REV SESSION
+BEFORE_SEQUENCE COUNT` calls the same SDK Sessions.Messages method. Use0 for
+the latest page and the sequence of its first message to request earlier records.
+The command returns the native binding/session/page receipt; credentials remain
+in the existing XMIND_AUTH_TOKEN environment flow. Independent CLI processes
+verify pagination, cross-session cursor refusal and authentication.

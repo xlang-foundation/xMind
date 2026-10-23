@@ -1,3 +1,18 @@
+## CLI captured history through independent SDK processes - 2026-10-23
+
+connections messages ID REV SESSION BEFORE_SEQUENCE COUNT calls the existing
+binding.Sessions().Messages through standard registered xlang3 SDK subobjects.
+Help lists the API;0 selects latest, count1..1000 and positive session-owned
+sequence cursors page earlier. Actual independent CLI processes verify page
+order, backward cursor, captured identity, foreign-session refusal, count/cursor
+bounds and authentication. All history checks occur before any model dispatch;
+existing explicit synthetic completion/cancellation fixtures remain separate.
+Four focused contracts pass4.29s with complete frozen closure unchanged. Native
+e1b99cc3; no full suite or new browser/Code claim, installed62 unchanged. Rust,
+hosted failures and remaining connection/planning requirements stay open.
+Session2168 terminal0; no local build/test live. Evidence: captured-cli-history-
+20261023.json and corresponding ctest log.
+
 ## Ledger deadline boundary clarified and case timing added - 2026-10-23
 
 Source inspection locates hosted Worker start deadline elapsed at

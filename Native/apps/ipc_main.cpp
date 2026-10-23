@@ -10,7 +10,7 @@
 namespace agentflow {
 int run_xmind_ipc_client(int argc,char** argv){
     try{
-        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections run-submit ID REV JSON_OBJECT | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-cancel ID REV RUN | connections operations ID REV SESSION RUN | connections operation ID REV SESSION RUN OPERATION | connections operation-decide ID REV SESSION RUN OPERATION allow|deny | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
+        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections messages ID REV SESSION BEFORE_SEQUENCE COUNT | connections run-submit ID REV JSON_OBJECT | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-cancel ID REV RUN | connections operations ID REV SESSION RUN | connections operation ID REV SESSION RUN OPERATION | connections operation-decide ID REV SESSION RUN OPERATION allow|deny | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
         const std::string endpoint=argv[2];if(!endpoint.starts_with("lrpc:"))throw std::invalid_argument("xMind IPC requires an xlang3 LRPC endpoint");
         X::Runtime runtime;auto root=runtime.ImportRemote("xmind",endpoint.c_str());
         auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;if(!method.Call(args,result))throw std::runtime_error("xMind IPC call failed: "+runtime.LastError());return result;};
@@ -21,7 +21,8 @@ int run_xmind_ipc_client(int argc,char** argv){
             const auto* token=std::getenv("XMIND_AUTH_TOKEN");if(!token)throw std::invalid_argument("Set XMIND_AUTH_TOKEN for authenticated xMind IPC services");
             if(command=="connections"){
                 auto service=call(root["Connections"],{text(token)});X::Value result;
-                const auto revision=[](const char* input){const std::string value=input;std::int64_t number=0;const auto parsed=std::from_chars(value.data(),value.data()+value.size(),number);if(parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||number<0||number>9007199254740991LL)throw std::invalid_argument("Invalid connection revision");return X::Value(number);};
+                const auto number=[](const char* input,const char* field){const std::string value=input;std::int64_t number=0;const auto parsed=std::from_chars(value.data(),value.data()+value.size(),number);if(parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||number<0||number>9007199254740991LL)throw std::invalid_argument(std::string("Invalid ")+field);return X::Value(number);};
+                const auto revision=[&](const char* input){return number(input,"connection revision");};
                 if(argc==5&&std::string(argv[4])=="list")result=call(service["List"],{});
                 else if(argc==7&&std::string(argv[4])=="save")result=call(service["Save"],{sdk_values::to_value(runtime.host(),nlohmann::json::parse(argv[6])),revision(argv[5])});
                 else if(argc==7&&std::string(argv[4])=="select")result=call(service["Select"],{text(argv[5]),revision(argv[6])});
@@ -30,6 +31,7 @@ int run_xmind_ipc_client(int argc,char** argv){
                     if(method=="open"&&argc==7)result=call(binding["Identity"],{});
                     else if(method=="session-create"&&argc==9){auto sessions=call(binding["Sessions"],{});result=call(sessions["Create"],{text(argv[7]),text(argv[8])});}
                     else if(method=="session-open"&&argc==8){auto sessions=call(binding["Sessions"],{});result=call(sessions["Open"],{text(argv[7])});}
+                    else if(method=="messages"&&argc==10){auto sessions=call(binding["Sessions"],{});result=call(sessions["Messages"],{text(argv[7]),number(argv[8],"history cursor"),number(argv[9],"history count")});}
                     else if(method=="run-submit"&&argc==8){auto runs=call(binding["Runs"],{});result=call(runs["Submit"],{sdk_values::to_value(runtime.host(),nlohmann::json::parse(argv[7]))});}
                     else if(method=="run-open"&&argc==8){auto runs=call(binding["Runs"],{});result=call(runs["Open"],{text(argv[7])});}
                     else if(method=="run-start"&&argc==10){auto runs=call(binding["Runs"],{});result=call(runs["Start"],{text(argv[7]),text(argv[8]),text(argv[9])});}
