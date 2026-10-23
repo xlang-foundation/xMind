@@ -1,3 +1,19 @@
+## Ledger deadline boundary clarified and case timing added - 2026-10-23
+
+Source inspection locates hosted Worker start deadline elapsed at
+PersistenceService::start_agent_worker_model, before repository model-call start;
+it is not the distinct start_agent_worker_run startup guard. Physical bootstrap
+cause remains unproven. Planning-admission currently shares one20s clock across
+independent seeded roots. New fixture-only seed/worker-ready/model-reserve/start
+markers expose elapsed/remaining time without changing20s or45s deadlines,
+assertions, permissions, effects or product behavior. Local focused ledger passes
+35.19s; first actual worker ready88ms and second217ms from phase start, with
+model starts90/219ms. Hosted failure still needs a matching marked run.
+Frozen source/SDK/libraries/dependency/binary sets/bytes unchanged around gate;
+Native9276c5a5 unchanged. Session5067 terminal0. No local validation live, no
+installation/full pass claim. Evidence: ledger-start-stage-diagnostic-20261023*;
+hosted receipt annotated with exact source boundary while preserving raw logs.
+
 ## Rendered captured paging and hosted terminal diagnostics - 2026-10-23
 
 Fresh hidden IAB11 loads120 synthetic primary messages in40/80/120 pages with

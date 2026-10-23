@@ -23,7 +23,8 @@
     {
       "name": "native_agent_worker_ledger_contract",
       "seconds": 20.46,
-      "detail": "First planning-admission phase fails Worker start deadline elapsed; exit1, killed false, no signal. This differs from prior aggregate45s timeout."
+      "detail": "First planning-admission phase fails Worker start deadline elapsed; exit1, killed false, no signal. This differs from prior aggregate45s timeout.",
+      "sourceBoundary": "PersistenceService::start_agent_worker_model checks captured deadline before Repository::start_model_call; the error alone does not prove physical process startup failure"
     }
   ],
   "artifact": {
