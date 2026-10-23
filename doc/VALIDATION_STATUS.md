@@ -1,3 +1,15 @@
+## Remote graph fixture canonical membership - 2026-10-23
+
+Fixture now constructs WorkspaceToolSet membership with WorkspaceTools.root_path()
+rather than raw temporary-directory text, matching the registry and existing
+workspace contract. Production identity/membership protection is unchanged.
+Rebuilt focused contract passes3 actual repetitions in34.75s with full frozen
+source/SDK/pure-library/dependency/binary file sets unchanged during validation.
+Native product58bb2671 remains identical. This is local focused acceptance,
+not hosted reproduction closure or full acceptance. Earlier graph PowerShell,
+compaction, ledger and Rust failures remain open; installed62 unchanged.
+Evidence: graph-remote-canonical-membership-20261023*.
+
 ## Hosted full suite starts; four failures precede job cancellation - 2026-10-23
 
 Run39949609700 passes the corrected exact170-contract inventory, SDK checks and
