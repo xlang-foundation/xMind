@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-23T20:20:20.315Z",
+  "source": "36a572f9c3d37cc9f4915c5fd7455fcc586726f2",
+  "diagnosticOnly": true,
+  "fullAcceptance": false,
+  "originalFullFailureResolved": false,
+  "exitCode": 0,
+  "tests": 2,
+  "passed": true,
+  "observations": [
+    {
+      "trace": "rust-1706469675.log.client.lsp",
+      "definitionRequests": 5,
+      "emptyArrayResponses": 1,
+      "nullResponses": 2,
+      "contentModifiedResponses": 0,
+      "successfulDefinitionResponses": 2,
+      "notificationMethods": []
+    },
+    {
+      "trace": "rust-2368271877.log.client.lsp",
+      "definitionRequests": 0,
+      "emptyArrayResponses": 0,
+      "nullResponses": 0,
+      "contentModifiedResponses": 0,
+      "successfulDefinitionResponses": 0,
+      "notificationMethods": []
+    },
+    {
+      "trace": "rust-540235476.log.client.lsp",
+      "definitionRequests": 0,
+      "emptyArrayResponses": 0,
+      "nullResponses": 0,
+      "contentModifiedResponses": 0,
+      "successfulDefinitionResponses": 0,
+      "notificationMethods": []
+    },
+    {
+      "trace": "rust-695578902.log.client.lsp",
+      "definitionRequests": 38,
+      "emptyArrayResponses": 1,
+      "nullResponses": 35,
+      "contentModifiedResponses": 1,
+      "successfulDefinitionResponses": 1,
+      "notificationMethods": [
+        "workspace/diagnostic/refresh"
+      ]
+    }
+  ],
+  "traceSha256": {
+    "rust-1706469675.log": "661872d165d850e6f16462a0db21a5acac55b34b3c4736fc636b10f62ddef6a9",
+    "rust-1706469675.log.client.lsp": "2f760ffc95a75eab382239bf6c9553fe9b4e36cee5a35be7836b5c18d8385d10",
+    "rust-1706469675.log.server.lsp": "1a87ef7eb7a7a63e9a0752aae500af7a116e4f9ad5b8e7af306dc0e7df70a528",
+    "rust-2368271877.log": "e9660db73d7d825278a2f1b93340a236df3ca6435481b4696716ac3a5878a319",
+    "rust-2368271877.log.client.lsp": "53eda53a8f62935e5ccf464792949757b384f1194af84d63f53a51c041da196f",
+    "rust-2368271877.log.server.lsp": "dc394f9dda7ae4e0ad296822ee4ad683a61325b5fe08b7666de88e6b24f664ae",
+    "rust-540235476.log": "27128ea2cf877613d7fee681d2d76d29fd34b09b0b820fc69003598d7a65ebff",
+    "rust-540235476.log.client.lsp": "e9fc84b455642a4bbe9f0168410b7d6cb886de0ac61b2dafa6daca06ac18459b",
+    "rust-540235476.log.server.lsp": "dc67d5e2075f59e111abb6b2b074858494361c91dc8f6563c2cd3821e620f532",
+    "rust-695578902.log": "60587f90e341cfad6aeab081f4b5fcc4badde56874505d130efcfe4c41eec4e8",
+    "rust-695578902.log.client.lsp": "bc0fa60ed4e7a743955c26a69279b48cf626312620507aab33b7e0744945802f",
+    "rust-695578902.log.server.lsp": "cdc623ba48337c1cf88cbec0841846dc59f4d80114cbaa150af259ac2a4edf3e"
+  },
+  "scope": "Existing native semantic fixture through byte-forwarding proxy, including original workspace Cargo check. Analyzer eventually returned real semantic locations after empty/null responses. Timing/instrumentation differs from original full run; root cause remains unproven.",
+  "inputHashesUnchanged": true,
+  "cpythonExecuted": false,
+  "paidInference": false
+}

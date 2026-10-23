@@ -1,3 +1,17 @@
+## Rust semantic wire diagnostic remains separate - 2026-10-23
+
+Existing byte-forwarding proxy reruns the real native semantic fixture and
+original workspace Cargo check:2/2 pass26.56s. Four analyzer sessions captured;
+first semantic owner returns1 empty array,35 actual nulls,1 content-modified
+response then1 real definition. Another owner returns real HTTP/native semantic
+locations. This shows null replies exist on analyzer wire; it does not establish
+why the original full run stayed null60s. Proxy timing/PATH process setup differs;
+no cause or full acceptance inferred. Original failed full receipt preserved.
+Current source/runtime/dependency hashes and native binary set unchanged around
+diagnostic; no code patch or installation. Session39100 terminal0, no local
+build/test live. Evidence: rust-current-native-wire-diagnostic-20261023.json;
+raw fixture protocol/logs retained privately under.agentflow/rust-current-failure-wire.
+
 ## Complete current run and repaired client integration fixtures - 2026-10-23
 
 Full sourcefcd97b06 completes168/172 in1299.02s. Actual source/SDK/libraries/
