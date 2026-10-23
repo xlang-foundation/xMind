@@ -36,7 +36,10 @@ is recorded separately. No paid inference or completed acceptance task is replay
 
 The source17be6368 complete native result is recorded and passes.
 Complete remaining client routing after the source57c05580 full172 acceptance.
-Corrected frontend CI succeeds on56820015; native hosted validation is pending.
+Corrected frontend CI succeeds on56820015. Native hosted validation fails its
+SDK concurrent runtime-isolation prerequisite; local repeated execution also
+fails with heap corruption. See doc/VALIDATION_STATUS.md. SDK diagnosis and
+requalification are required before a new delivery.
 Fresh qualified-runtime CLI read/edit/Node4/watch/history passes; preserve its
 completed IDs in doc/VALIDATION_STATUS.md.
 Fresh rendered browser coding on source00f25996 passes; preserve its completed

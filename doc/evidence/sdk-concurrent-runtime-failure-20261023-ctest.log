@@ -1,0 +1,24 @@
+Test project D:/CantorAI2026/xMind/.agentflow/sdk-host-guard-candidate/build
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...   Passed    0.44 sec
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...   Passed    0.45 sec
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...   Passed    0.42 sec
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...   Passed    0.41 sec
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...   Passed    0.41 sec
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...   Passed    0.46 sec
+    Start 6: xlang3_runtime_isolation_tests
+    Test #6: xlang3_runtime_isolation_tests ...Exit code 0xc0000374***Exception:   6.71 sec
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   9.31 sec
+
+The following tests FAILED:
+	  6 - xlang3_runtime_isolation_tests (Exit code 0xc0000374)
+Errors while running CTest

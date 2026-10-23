@@ -1,0 +1,37 @@
+{
+  "revision": "499415d03dba6536355ac3ef19522e335f03f95c",
+  "startedAt": "2026-10-23T09:41:08.291Z",
+  "endedAt": "2026-10-23T09:41:19.348Z",
+  "pid": 32264,
+  "exitCode": 8,
+  "signal": null,
+  "sourceFiles": 14055,
+  "binaries": 31,
+  "inputSetsAndHashesUnchanged": true,
+  "requestedRepeatedProcessLifetimes": 30,
+  "scope": "Diagnostic repeat of the unchanged qualified SDK runtime-isolation test; no xMind task replay, CPython or paid inference",
+  "logSha256": "9688fce1c6f23d1489bb2c1c095f7a383e915823aa7e134f7292e1cbdf784dd3",
+  "sameSdkTestFailsLocally": true,
+  "sharedRootCauseProven": false,
+  "hosted": {
+    "run": 39930037400,
+    "source": "56820015cbbdf98296801260cbb577b79d9335f9",
+    "job": 120335751162,
+    "sdk": "499415d03dba6536355ac3ef19522e335f03f95c",
+    "failed": "xlang3_runtime_isolation_tests",
+    "observation": "Segmentation fault after2.38s; IPC host and Unicode path contracts pass; xMind native suite not reached",
+    "logSha256": "f4b4cbbd2aa035584de3f05f692763f5a8f01ffe1d126a5c7841c751ee55c441"
+  },
+  "localObservation": "Six process repetitions pass; seventh fails with0xc0000374 heap corruption",
+  "debugger": {
+    "runCount": 1,
+    "exception": "0xc0000374",
+    "dumpCaptured": true,
+    "dumpSha256": "c97fcad759f82201e4d09000b514748b4be2aa6bb627ce2bb396ee2fd2094b4d",
+    "inputBytesUnchanged": true,
+    "rawDumpPrivate": true,
+    "analysis": "PE unwind reconstruction includes runtime/module teardown frames. No PDB validation; export ranges do not establish root cause."
+  },
+  "runtimeSourceChanged": false,
+  "installedRuntimeChanged": false
+}

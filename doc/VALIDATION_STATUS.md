@@ -1,3 +1,21 @@
+## Hosted SDK isolation failure and local reproduction - 2026-10-23
+
+Hosted native39930037400 on56820015 now passes the SDK revision guard, then
+fails SDK499 runtime-isolation with SegFault in2.38s; IPC host/Unicode pass.
+It never reaches xMind native contracts. Source57 local172 remains recorded,
+not a hosted success. Original hosted job log retained privately.
+
+Unchanged local SDK499 test passes6 repeated process invocations, then fails
+seventh with Windows heap corruption0xc0000374. Source14055 and31 binary file
+sets/hashes stay unchanged. A separate exact-spawn debugger captures a fatal
+heap-corruption dump on its first invocation and observes exit. Raw dump stays
+private. Preliminary PE unwind includes module/runtime teardown; no PDB-validated
+source diagnosis or shared hosted/local root cause is established. No runtime
+source, installed package, user owner, profile or completed coding task changed.
+Next: isolate concurrent runtime teardown and prove a narrow SDK correction,
+then repeat required correctness/performance and xMind qualification.
+Evidence: sdk-concurrent-runtime-failure-20261023.json and raw CTest log.
+
 ## Fresh qualified-runtime CLI coding and hosted frontend - 2026-10-23
 
 The source57c05580 qualified native binary e4719ea8 completes fresh CLI coding:
