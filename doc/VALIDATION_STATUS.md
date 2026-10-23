@@ -1,3 +1,21 @@
+## Packaged 0.1.62 browser coding - 2026-10-22
+
+Candidate Native2f105e11/SDK499415d0 packages 2398 runtime files and 2443 VSIX
+entries; 64 frontend source files match the accepted 464-extension/162-browser
+client gate. Actual background browser Send submits a fresh leap-year correction.
+UI approvals authorize the edit and literal Node test command; four actual Node
+checks pass. Four controlled local model calls, eight saved history messages,
+two succeeded operations and one completed worker retirement are verified via CLI.
+Rendered history is exact after reload. No paid provider inference occurred.
+
+Session ce5d1fe85972a1bf33956e3d9dc5046e / root
+3064aee2e4f65e59176e257b1dc539bb completed; NEVER replay this task. Only the
+verified fixture backend was stopped and its tab closed. Installed61 is unchanged.
+Evidence: client-packaged-browser-2f105e11-20261022.json and .png. This verifies
+actual browser coding plus CLI observation, not a fresh CLI-originated coding
+turn or actual rendered VS Code acceptance. Those and generic connection binding
+and nested process planning/recovery remain open.
+
 ## Native SDK host-guard integration - 2026-10-22
 
 SDK 499415d03dba6536355ac3ef19522e335f03f95c fixes demonstrated package-host
