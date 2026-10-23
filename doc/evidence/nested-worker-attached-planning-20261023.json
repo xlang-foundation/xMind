@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-23T21:14:20.922Z",
+  "sourceParent": "3bc9330f64c011c2329715da587f6c2e13785b42",
+  "sourcePatchSha256": "8084f176ec5fcf9b55ae9296d07127b6849d3d8d6e24846502bf832c8d3a6c5f",
+  "build": {
+    "pid": 32612,
+    "launchedAt": "2026-10-23T21:12:57.308Z",
+    "completedAt": "2026-10-23T21:13:38.907Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "a3fe560ab5bd1b11e7f2c41f105d82ed8d8af56c76f3ff8c66597c7db86ff25a"
+  },
+  "test": {
+    "pid": 38304,
+    "launchedAt": "2026-10-23T21:13:41.513Z",
+    "completedAt": "2026-10-23T21:14:18.460Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "b5578b38a8822b5c4f2c59466da2f65e9d074483eedab0d203ab44f2541bf892"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 36.9,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "2736ecb9f8c9b7528c5e0f578d8b959e228eed874246d840984bdaa6f566346d",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "An independently launched process acquires a dynamic child read owner through the standard xlang3 Workers.Open(...).Planning() subobject and invokes native inspection. Exact scope and dynamic admission are required; altered worker settings/arguments do not replace stored facts. Automatic nested planning scheduling and counted continuation/recovery remain outside this fixture."
+}

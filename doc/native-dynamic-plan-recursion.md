@@ -253,3 +253,13 @@ inspection and rejects altered settings and a parent-owner request. This does
 not change worker runtime enrollment: independent nested planner processes,
 shared scheduling, counted context and recovery remain pending. See the
 [native receipt](evidence/nested-worker-planning-owner-service-20261023.json).
+
+### Attached child worker IPC checkpoint (2026-10-23)
+
+A child read owner may now attach its native planning service after validating
+exact scope, typed dynamic admission and the existing root segment/budget. An
+independent process opens its standard xlang3 worker object and Planning
+subobject, then inspects the child using stored model facts. No custom method
+dispatch or external value serializer is introduced. This qualifies service
+attachment only; automatic nested scheduling and counted/recovery integration
+remain unfinished. [Receipt](evidence/nested-worker-attached-planning-20261023.json).

@@ -1,3 +1,23 @@
+## Child worker attached planning IPC — 2026-10-23
+
+Read-owner context admission now allows a planning service for an exact
+dynamic-agent child under its original root budget and active segment. Scope,
+workspace revision, deadline and typed child admission remain mandatory; other
+child kinds cannot acquire planning through this path.
+
+An independently launched process acquires the child owner through the standard
+xlang3 `Workers.Open(...).Planning()` subobject. Its call commits the native
+stored inspection despite deliberately altered worker arguments/settings, sees
+only the child plan and no parent pending call, and makes zero model requests.
+The fixture also refuses a mismatched planning scope. Native build and the
+focused ledger contract pass **1/1 in 36.90 seconds**; this is the entire fixture
+runtime, not one IPC latency. Frozen source, SDK, libraries, dependencies and
+binary sets/bytes remain unchanged. No CPython, paid inference or installation.
+
+Automatic nested worker scheduling, counted planning continuations and recovery
+remain open. [Receipt](evidence/nested-worker-attached-planning-20261023.json),
+[CTest log](evidence/nested-worker-attached-planning-20261023-ctest.log).
+
 ## Exact child planning owner service — 2026-10-23
 
 Backend planning callbacks now validate a dynamic child against the exact
