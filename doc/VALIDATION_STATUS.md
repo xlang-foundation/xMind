@@ -1,3 +1,18 @@
+## Actual rendered browser coding on current SDK8c - 2026-10-23
+
+Full-qualified b133a0ee Native49413090/SDK8c7972d1 drives fresh hidden IABtab9
+clamp task: actual read, visible edit approval, actual replacement, visible Node
+approval and4 actual checks pass. Reload restores identical history innerHTML,
+8 messages and original ownership; Send remains visible. CLI observes completed
+root,2 succeeded operations,4 exact charges and one physical SDK worker retirement.
+Frozen runtime fixture1901 files/bytes remain unchanged. Exact owned backend
+30424 birth/image checked before exit; exit observed; owned tab9 closed.
+Sessionc8eb5f7a6bb2404a8ccb4cc08960aa2b/root058a43a5f955442cae44b897bb308bb0
+are completed, NEVER replay. No paid inference/CPython or installation change.
+This proves current-runtime actual browser coding; VS Code, hosted failures and
+remaining connection/planning requirements remain separate. Public receipt/PNG:
+client-browser-captured-b133a0ee-20261023.
+
 ## Complete current SDK8c native qualification passes172 - 2026-10-23
 
 Sourceb133a0ee /SDK8c7972d1 complete rebuild and full172-contract CTest pass

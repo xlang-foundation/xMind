@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "b133a0eeb7d2f2d6a031d09d05356388cf9187c5",
+  "nativeSha256": "49413090f90d9deaa15921a9c60df35d8f6e604c009ba92a8ea82b6133a1c7b3",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "fullNativeContractsPassed": 172,
+  "frontendBytesMatchAcceptedClientGate": true,
+  "actualBrowser": "Hidden IAB tab 9",
+  "sessionId": "c8eb5f7a6bb2404a8ccb4cc08960aa2b",
+  "rootRunId": "058a43a5f955442cae44b897bb308bb0",
+  "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/browser-clamp-b133a0ee",
+  "completedTaskNeverReplay": true,
+  "modelCalls": 4,
+  "paidInference": false,
+  "historyMessages": 8,
+  "reloadedRenderedHistoryExact": true,
+  "operations": [
+    {
+      "id": "038583bebbc8073c20c9731d30808692",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "7f4a52a52aa7c327c631d5c300f554c3",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "renderedSendVisible": true,
+  "viewport": {
+    "height": 720,
+    "width": 1280
+  },
+  "nodeChecksPassed": 4,
+  "workerRetirements": 1,
+  "ownedBackendExited": true,
+  "ownedTabClosed": true,
+  "runtimeFixtureFiles": 1901,
+  "runtimeFileSetAndBytesUnchanged": true,
+  "fixtureManifestSha256": "6968ae0d4ba9b290083c1a3186e1da447b1ba0a99e1e8b871c86f69a90c100ca",
+  "screenshotSha256": "0abc16ae03a419e2a57a3c9d8e0173e42331ec69ca0cc84e13233796a5de5154",
+  "installed": false,
+  "fullGoalComplete": false,
+  "limitations": [
+    "Controlled local provider only",
+    "Current runtime actual VS Code/editor coding remains unverified",
+    "Hosted graph and ledger failures remain separate"
+  ],
+  "passed": true
+}
