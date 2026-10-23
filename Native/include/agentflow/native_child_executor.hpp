@@ -8,10 +8,27 @@
 namespace agentflow {
 struct NativeChildCapacityUnavailable : std::runtime_error {using std::runtime_error::runtime_error;};
 struct NativeChildOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
+// Backend-only lease for one pool job. It may be used by the job's native IPC
+// callback thread. The pool retains retirement authority and drains the job.
+class NativeChildSlot {
+public:
+    bool yield();
+    void reacquire(std::stop_token cancel={});
+private:
+    friend struct NativeChildSlotAccess;
+    NativeChildSlot(std::shared_ptr<RootExecutionBudget>,std::stop_token);
+    void retire() noexcept;
+    std::shared_ptr<RootExecutionBudget> budget_;
+    std::stop_token cancel_;
+    std::mutex mutex_;
+    enum class State {held,yielded,retired};
+    State state_=State::held;
+};
 struct NativeChildWork {
     std::shared_ptr<RootExecutionBudget> budget;
     std::function<Run(std::stop_token)> action;
     std::stop_token cancel;
+    std::function<void(std::shared_ptr<NativeChildSlot>)> bind_slot;
 };
 // One bounded pool shared by ordinary delegation and dynamic children in an
 // execution generation. Its workers are separate from occupied root workers.

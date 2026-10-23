@@ -1,3 +1,34 @@
+## Transferable native child slot and saturated stop — 2026-10-23
+
+Native child work can bind a backend-only slot lease after its actual root slot
+is acquired. Another native callback thread can yield and reacquire that exact
+lease. Pool-only retirement is idempotent and handles both held and yielded
+leases; retained handles refuse after retirement. Jobs without a slot binding
+retain their existing scheduling path. Bound jobs are intended to use the
+explicit lease rather than thread-local budget yielding.
+
+Two real pool workers share a root limited to one parallel leaf. The fixture
+yields from the controlling thread, lets the second closure acquire the slot,
+checks cancelled reacquisition and duplicate yield, then tests both parent
+reacquisition and parent retirement while its slot remains yielded. The latter
+must leave the second closure's slot occupied. Binding observation re-enters
+pool health without a pool-lock deadlock. This is pool/thread evidence, not a
+new independent-process nesting claim.
+
+The audit found the stop snapshot sized68 despite allowed64 queued/staged plus
+8 executing jobs. Expanded it to72 and exercised8 executing/64 queued synthetic
+closures through fault/close, verifying all72 results. These saturation closures
+create no task admission, inference or effect receipts. The original private
+retirement access compile failure is retained.
+
+Final build and **4/4 context repository, context engine, child-pool and worker
+ledger contracts pass in 45.02 seconds**; frozen source/SDK/library/runtime/
+dependency/binary file sets and bytes unchanged. No paid inference, CPython,
+install or visible windows. Automatic nested enrollment, slot binding through
+planning callbacks, multi-root starvation handling and recovery remain open.
+[Receipt](evidence/transferable-child-slot-20261023.json),
+[CTest log](evidence/transferable-child-slot-20261023-ctest.log).
+
 ## Lease-specific continuation authority on shared root budget — 2026-10-23
 
 Counted worker context now carries a backend-only reservation callback bound to

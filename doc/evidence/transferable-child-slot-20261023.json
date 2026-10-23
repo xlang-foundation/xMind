@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-23T22:03:35.833Z",
+  "sourceParent": "2542e6ee96aa5e852be444ccb21da9f61461d256",
+  "sourcePatchSha256": "502fedb29ebca5006830188af686f66e23dab88bf377ea723f3b4b68567a353a",
+  "build": {
+    "pid": 32512,
+    "launchedAt": "2026-10-23T22:02:04.231Z",
+    "completedAt": "2026-10-23T22:02:45.763Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "56307dd44dbe31f7d9f5476b3edc35b3e295f5c40f6749ff0cbe650f57e850e7"
+  },
+  "test": {
+    "pid": 22676,
+    "launchedAt": "2026-10-23T22:02:48.242Z",
+    "completedAt": "2026-10-23T22:03:33.300Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "7e1423655b342a1b3b6d9a2315b5d593b173278b44f6a06edc861d9db1a0a66a"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 45.02,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "07fb4485f4dace7e134b0ecdcd063d74d075a13be9ba084b125b27f3c3b36fae",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Backend pool job slot lease supports cross-thread yield/reacquire with exact retirement and owner/caller cancellation. Two-worker fixtures share max_parallel=1 and exercise parent resume plus yielded parent retirement without releasing the descendant slot. Pool stop snapshot covers64 pending plus8 executing synthetic closures. This is thread/pool component evidence, not automatic nested process execution or recovery.",
+  "initialBuildFailure": {
+    "reason": "Exception cleanup called private slot retirement directly; corrected to the pool-only access helper before testing.",
+    "logSha256": "6a934c54d9972a0f04b6831b0c6809783200ba6bc4a40795e028833d31112640"
+  }
+}

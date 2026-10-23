@@ -311,3 +311,14 @@ was removed. A ledger regression proves a parent callback refuses the child
 while that child context succeeds with its own lease. Automatic nested runtime
 enrollment, transferable slot ownership and recovery remain pending.
 [Receipt](evidence/worker-shared-budget-authority-20261023.json).
+
+### Transferable pool slot checkpoint (2026-10-23)
+
+NativeChildWork may publish its actual acquired slot to a backend owner. That
+lease supports cross-thread yield/reacquire and pool-only retirement. A two-
+worker/one-slot fixture verifies resume and retirement while yielded without
+decrementing a descendant's slot. A separate saturated-stop fixture verifies
+all64 queued plus8 executing closures; snapshot capacity is corrected to72.
+These are native pool/thread fixtures. Planning callback integration, automatic
+nested process enrollment, multi-root starvation handling and recovery remain
+unqualified. [Receipt](evidence/transferable-child-slot-20261023.json).

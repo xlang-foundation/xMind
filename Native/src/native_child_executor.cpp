@@ -7,6 +7,13 @@
 #include <thread>
 
 namespace agentflow {
+struct NativeChildSlotAccess {static std::shared_ptr<NativeChildSlot> acquire(std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel){return std::shared_ptr<NativeChildSlot>(new NativeChildSlot(std::move(budget),cancel));}static void retire(const std::shared_ptr<NativeChildSlot>& slot){slot->retire();}};
+NativeChildSlot::NativeChildSlot(std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel):budget_(std::move(budget)),cancel_(cancel){if(!budget_)throw std::invalid_argument("Child slot requires its acquired root budget");}
+bool NativeChildSlot::yield(){std::lock_guard lock(mutex_);if(state_!=State::held)return false;budget_->release_leaf();state_=State::yielded;return true;}
+void NativeChildSlot::reacquire(std::stop_token cancel){
+    for(;;){if(cancel_.stop_requested())throw TransportCancelled("Child slot owner cancelled");budget_->check(cancel);{std::lock_guard lock(mutex_);if(state_==State::retired)throw Conflict("Child slot lease retired");if(state_!=State::yielded)throw Conflict("Child slot is not yielded");if(budget_->try_acquire_leaf()){state_=State::held;return;}}std::this_thread::sleep_for(std::chrono::milliseconds(1));}
+}
+void NativeChildSlot::retire()noexcept{std::lock_guard lock(mutex_);if(state_==State::held)budget_->release_leaf();state_=State::retired;}
 struct NativeChildExecutor::Impl {
     struct Job {
         enum class Phase {staged,dispatched,retired};
@@ -15,10 +22,12 @@ struct NativeChildExecutor::Impl {
         std::promise<Run> promise;
         std::shared_future<Run> result;
         std::stop_source stop;
+        std::function<void(std::shared_ptr<NativeChildSlot>)> bind_slot;
+        std::shared_ptr<NativeChildSlot> slot;
         Phase phase=Phase::staged;
         std::stop_callback<std::function<void()>> external;
         Job(NativeChildWork work,std::condition_variable& changed)
-            :budget(std::move(work.budget)),action(std::move(work.action)),result(promise.get_future().share()),
+            :budget(std::move(work.budget)),action(std::move(work.action)),result(promise.get_future().share()),bind_slot(std::move(work.bind_slot)),
              external(work.cancel,[this,&changed]{stop.request_stop();changed.notify_all();}){}
     };
     mutable std::mutex mutex;
@@ -34,8 +43,9 @@ struct NativeChildExecutor::Impl {
     }
     ~Impl(){close();}
     struct StopSnapshot {
-        std::array<std::shared_ptr<Job>,68> jobs;
-        std::array<bool,68> retired{};
+        // At most 64 queued/staged reservations plus 8 executing workers.
+        std::array<std::shared_ptr<Job>,72> jobs;
+        std::array<bool,72> retired{};
         std::size_t count=0;
     };
     StopSnapshot stop_locked(bool failure){
@@ -73,11 +83,13 @@ struct NativeChildExecutor::Impl {
                 }
             }
             try{
+                if(child_slot&&job->bind_slot){job->slot=NativeChildSlotAccess::acquire(job->budget,job->stop.get_token());child_slot=false;job->bind_slot(job->slot);}
                 auto actual=job->action(job->stop.get_token());
+                if(job->slot)NativeChildSlotAccess::retire(job->slot);
                 if(child_slot){job->budget->release_leaf();child_slot=false;}
                 job->promise.set_value(std::move(actual));
             }catch(...){
-                const auto failure=std::current_exception();if(child_slot){job->budget->release_leaf();child_slot=false;}
+                const auto failure=std::current_exception();if(job->slot)NativeChildSlotAccess::retire(job->slot);if(child_slot){job->budget->release_leaf();child_slot=false;}
                 fail();
                 job->promise.set_exception(failure);
             }
