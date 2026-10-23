@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "runId": 39949609700,
+  "jobId": 120400568944,
+  "sourceRevision": "a67ecbcfc602f6c4bfa90e6aeb9ecfce1016735d",
+  "conclusion": "cancelled",
+  "jobBudgetMinutes": 60,
+  "completedStepAt": "2026-10-23T12:57:21Z",
+  "fullNativeAcceptance": false,
+  "exactInventoryPassed": true,
+  "expectedContracts": 170,
+  "failuresObserved": [
+    "native_graph_runner_contract",
+    "native_agent_worker_model_rpc_contract",
+    "native_agent_worker_graph_remote_contract",
+    "native_agent_worker_ledger_contract"
+  ],
+  "observations": {
+    "graph_runner": "PowerShell effect timed out after 30000 ms; only script_entered recorded, uncertain receipt and physical retirement retained",
+    "worker_model_rpc": "Actual worker compaction must retain a canonical checkpoint and actual provider receipt",
+    "graph_remote": "Workspace folder identity changed since membership admission",
+    "worker_ledger": "Agent worker channel deadline elapsed"
+  },
+  "logSha256": "25500c265a4a329163b22f590d2f6f1a370892e7d04f602f376364f8e59ffea9",
+  "installedChanged": false,
+  "nextInvestigation": "Remote graph fixture constructs membership using raw temp directory path instead of WorkspaceTools.root_path(); hosted TEMP uses RUNNER~1 short name. Investigate canonical-path fixture mismatch while retaining production membership checks.",
+  "scope": "Partial suite cancelled by total job budget. Four actual failures preceded cancellation; a longer budget alone would not qualify this build."
+}

@@ -1,3 +1,15 @@
+## Hosted full suite starts; four failures precede job cancellation - 2026-10-23
+
+Run39949609700 passes the corrected exact170-contract inventory, SDK checks and
+30 isolation repetitions. The full suite records graph runner, worker model RPC,
+remote graph and worker ledger failures before the60-minute job budget cancels
+it. This is a partial failed run, never a full acceptance result. Raw log retained
+under.agentflow/hosted-ci-a67ecbcf. Public receipt records actual failure messages.
+Remote graph fixture passes raw TEMP paths into a canonical membership snapshot;
+short-name normalization is under investigation, with production checks retained.
+No budget relaxed, task replayed, package installed or user owner retired.
+Evidence: hosted-native-partial-a67ecbcf-20261023.json.
+
 ## Hosted SDK repeat passes; native inventory gate corrected - 2026-10-23
 
 Hosted run39942792825 passes SDK4/4,30 runtime-isolation processes and the early
