@@ -534,3 +534,10 @@ test('captured operations require explicit scope and reject mismatched receipts 
  mismatch=true;await assert.rejects(client.operations('run','session'),/another run/);await assert.rejects(client.decide('operation','deny',{session_id:'session',run_id:'run'}),/another run/);assert.equal(requests.some(r=>r.path==='/v1/operations/operation/decision'),false);
  missing=true;await assert.rejects(client.health(),/protocol changed/);await client.closeConnection();await assert.rejects(client.operations('run','session'),/closed/);
 });
+
+test('captured run inspection and cancellation retain the original binding and never retry',async()=>{
+ const {client,requests,identity,handle}=capturedAdmissionFixture();const baseFetch=client.fetch;let mismatch=false,failCancel=false;
+ client.fetch=async(url,options)=>{const path=new URL(url).pathname;if(path.endsWith('/runs/run')||path.endsWith('/runs/run/cancel')){requests.push({path,method:options.method,input:options.body?JSON.parse(options.body):undefined});const cancel=path.endsWith('/cancel');return {ok:!(cancel&&failCancel),status:cancel&&failCancel?409:200,json:async()=>cancel?(failCancel?{detail:'Captured run cancellation refused'}:{cancel_requested:true}):{binding:mismatch?{...identity,backend_generation:'foreign'}:identity,run:{id:'run',session_id:'session',state:'running',parent_id:'',node_id:'',graph_root:false}}};}return baseFetch(url,options);};
+ await client.health();assert.equal((await client.status('run')).id,'run');assert.deepEqual(await client.cancel('run'),{cancel_requested:true});const path='/v1/connection-bindings/'+handle+'/runs/run';assert(requests.some(r=>r.path===path));assert(requests.some(r=>r.path===path+'/cancel'&&r.method==='POST'&&Object.keys(r.input).length===0));
+ mismatch=true;await assert.rejects(client.status('run'),/another connection/);failCancel=true;await assert.rejects(client.cancel('run'),/refused/);assert(!requests.some(r=>r.path==='/v1/runs/run'||r.path==='/v1/runs/run/cancel'));await client.closeConnection();const before=requests.length;await assert.rejects(client.status('run'),/closed/);assert.equal(requests.length,before);
+});

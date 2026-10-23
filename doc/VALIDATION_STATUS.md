@@ -1,3 +1,16 @@
+## Captured client run inspection and cancellation - 2026-10-23
+
+Shared browser/extension client now uses the original captured handle for status
+and cancellation when Local admission is advertised. Status validates exact
+binding and requested run identity; cancellation validates its acknowledgement.
+Generation mismatch, refused cancellation and closed context never retry on a
+legacy route. Complete469 extension and164 browser unit contracts pass with64
+tracked client source file sets/bytes unchanged. No new rendered/full-native
+claim or installation change. Hosted40010370205 remains in progress at its native
+build/test step, so no duplicate build was started. Design status corrected to
+preserve b133 full172 acceptance and distinguish later focused adapter receipts.
+Evidence: captured-run-control-client-20261023.json.
+
 ## Actual browser captured operation approvals - 2026-10-23
 
 Fresh hidden IAB10 coding task completes read, reviewed file edit, reviewed Node

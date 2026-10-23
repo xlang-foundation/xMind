@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-23T19:49:59.174Z",
+  "sourceParent": "a3593474f78d6dcfc678f3d49236d349b9e2336a",
+  "sourcePatchSha256": "d0b00303b5cfcaf3dffe1a0d5a80c24cab5cff8b989d8756647b7e038836bafe",
+  "sourceFiles": 64,
+  "sourceFilesAndBytesUnchanged": true,
+  "results": [
+    {
+      "label": "extension",
+      "exitCode": 0,
+      "tests": 469,
+      "passed": 469,
+      "failed": 0,
+      "logSha256": "73016a00d304ec7fa223b19ac60afff8e6c21ec42f711d2964da69a87cc51c07"
+    },
+    {
+      "label": "browser",
+      "exitCode": 0,
+      "tests": 164,
+      "passed": 164,
+      "failed": 0,
+      "logSha256": "3d4af02560aef6580b8a0f1173039ddaa0b37a52691a85a1e0636758ce1813a9"
+    }
+  ],
+  "scope": "Client transport/controller unit contracts; captured run read/cancel routing, identity mismatch, refusal and closed-handle checks. No new rendered or full native acceptance.",
+  "installed": false
+}

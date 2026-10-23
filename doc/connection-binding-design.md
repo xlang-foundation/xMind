@@ -88,15 +88,18 @@ inside xlang3.
 Browser and extension clients negotiate Local admission support, capture a
 binding for session creation and prompt submission, and validate returned
 identity and ownership. CLI scoped session/run/event commands use SDK subobjects.
-Approval, model, graph and other client operations still use Local compatibility
-routes. Actual browser and CLI coding receipts exist; actual rendered VS Code
+Operation inspection and decisions use native captured run-scoped services via
+SDK and HTTP. Browser/extension clients pass the observed session/run and validate
+binding receipts; run inspection and cancellation use the same captured handle.
+Model, graph, stream and other client operations still require integration.
+Actual browser and CLI coding receipts exist; actual rendered VS Code
 coding remains unverified. These results do not establish remote execution.
 
 The latest SDK lifetime fix passed SDK contracts, repeated runtime isolation and
-the required performance gate. Its complete local xMind run passed 171/172 with
-an unresolved Rust definition failure. Later focused cold-workspace checks
-passed, but do not replace that failed full run. Hosted validation is tracked
-separately; no new package is qualified by these focused results.
+the required performance gate. The complete b133a0ee local xMind run passed
+172/172; later SDK/HTTP operation adapters have focused acceptance and actual
+browser/CLI proof. Earlier failed Rust and hosted runs remain recorded. Hosted
+validation is tracked separately; no new package is qualified by focused results.
 
 1. Add captured Local binding and scoped service objects to the registered root.
    Exercise actual independent SDK processes, HTTP/SDK agreement, wrong token,

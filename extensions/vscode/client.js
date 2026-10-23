@@ -428,8 +428,17 @@ class BackendClient {
   ownedChildren(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/children`); }
   ownedChildHistory(parent,child) { return this.request(`/v1/runs/${encodeURIComponent(parent)}/children/${encodeURIComponent(child)}/history`); }
   treeEvents(id,after=0) { if(!Number.isSafeInteger(after)||after<0)throw new Error('Invalid tree event cursor');return this.request(`/v1/runs/${encodeURIComponent(id)}/tree-events?after=${after}`); }
-  status(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}`); }
-  cancel(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
+  async #boundRun(id,cancel=false){
+    executionIdentity(id);const capture=await this.#captureConnection();
+    if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured run connection changed.');
+    const value=await this.request('/v1/connection-bindings/'+capture.id+'/runs/'+encodeURIComponent(id)+(cancel?'/cancel':''),cancel?{}:undefined);
+    if(cancel){exactFields(value,['cancel_requested']);if(value.cancel_requested!==true)throw new Error('Cancellation was not acknowledged.');return value;}
+    exactFields(value,['binding','run']);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Run receipt belongs to another connection context.');
+    validateRunDTO(value.run);if(value.run.id!==id)throw new Error('Run receipt differs from its requested identity.');return value.run;
+  }
+  status(id) { return this.#connectionAdmissionSupported?this.#boundRun(id):this.request(`/v1/runs/${encodeURIComponent(id)}`); }
+  cancel(id) { return this.#connectionAdmissionSupported?this.#boundRun(id,true):this.request(`/v1/runs/${encodeURIComponent(id)}/cancel`, {}); }
   async #scopedOperations(run,session,id,decision){
     executionIdentity(run);executionIdentity(session);if(id!==undefined)executionIdentity(id);
     const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured operation connection changed.');
