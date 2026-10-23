@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "b133a0eeb7d2f2d6a031d09d05356388cf9187c5",
+  "nativeSha256": "49413090f90d9deaa15921a9c60df35d8f6e604c009ba92a8ea82b6133a1c7b3",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "fullNativeContractsPassed": 172,
+  "sessionId": "053bae2564e937a51e106bb8177731ed",
+  "rootRunId": "64b55d6799a74ffe630a42694eaa7ce1",
+  "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/cli-sum-squares-b133a0ee",
+  "completedTaskNeverReplay": true,
+  "state": "completed",
+  "modelCalls": 4,
+  "approvals": 2,
+  "nodeChecksPassed": 4,
+  "historyMessages": 8,
+  "historyAndWatchExact": true,
+  "operations": [
+    {
+      "id": "a1a2444720f63762d552f4312310a5c2",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "d1e2c063c6dd7e3fbb3f5bebab3b0ff2",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "workerRetirements": 1,
+  "budgetSegmentsClosed": 1,
+  "runtimeFilesAndBytesUnchanged": true,
+  "ownedBackendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 20156,
+    "birthAndImageVerified": true
+  },
+  "scope": "Actual hash-verified development CLI attached by explicit loopback port; synthetic provider, real native read/edit/Node command and SDK process owner. Managed profile auto-discovery not covered.",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "fullGoalComplete": false,
+  "passed": true
+}

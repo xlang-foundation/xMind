@@ -28,7 +28,7 @@ these older runtime results retain their original scope. [Current SDK8c browser 
 | Shared native C++ backend, embedded xlang3 and SQLite | [Current SDK8c full172](../doc/evidence/captured-cli-b133a0ee-full-native-20261023.json); complete input closures and binary file sets verified unchanged. | SDK8c/current-source complete local172 now passes. Resolve hosted failures and verify current-runtime client delivery; historical SDK499 passes retain their original scope. |
 | Standard xlang3 root/subobjects and process workers | [Actual separate-process Connections API and lifetime tests](../doc/evidence/connection-catalog-sdk-api-20261022.json); SDK owns value/reference transfer. | [Scoped CLI run services](../doc/evidence/captured-cli-runs-20261023.json) pass actual separate-process completion/cancellation. Full run options and authenticated remote binding remain incomplete. |
 | Browser coding | [Current SDK8c browser coding](../doc/evidence/client-browser-captured-b133a0ee-20261023.json): actual UI Send, edit/command approvals, Node4, identical eight-message rendered history after reload and matching CLI records. | Preserve the completed task. This runtime fixture is not installed; rendered VS Code and other remaining delivery areas stay separate. |
-| CLI coding | [Packaged CLI coding](../doc/evidence/client-packaged-cli-2f105e11-20261022.json): real read/edit/Node4, two approvals, SDK worker retirement, exact history/watch. | Preserve completed tasks. The later CLI receipt above is additional evidence; captured SDK run commands have focused acceptance, while current full delivery is pending. |
+| CLI coding | [Current SDK8c CLI coding](../doc/evidence/client-cli-coding-b133a0ee-20261023.json): real read/edit/Node4, two approvals, physical SDK worker retirement, exact history/watch and owned backend exit. | Preserve the completed task. Explicit loopback CLI attachment is proven; current managed installation and rendered VS Code remain separate. |
 | VS Code extension | [Protected installed62](../doc/evidence/installed-0.1.62-2f105e11-20261022.json): package/runtime bytes and installed native managed discovery/read smoke pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. Keep visible Code closed unless requested. |
 | Conversation/footer layout | [Current rendered browser screenshot](../doc/evidence/client-packaged-browser-2f105e11-20261022.png); packaged frontend bytes match the accepted client gate. | Existing expanded-skills/long-draft fixture is bounded evidence, not a complete viewport/accessibility matrix. |
 | Workspace selection and isolation | [Rendered managed-workspace proof](../doc/evidence/client-managed-workspaces-b95abba9-20261022-gate.json) and native local-profile/view contracts. | Keep the source/runtime versions of rendered and native evidence distinct; never infer remote connection isolation from workspace switching. |
@@ -52,8 +52,8 @@ hosted too. These scoped results do not resolve the remaining graph process
 and ledger failures. Current full local evidence includes a passing Rust contract. [Current validation status](../doc/VALIDATION_STATUS.md)
 retains every full and focused result, including initial failed fixtures.
 
-Earlier SDK499 CLI read/edit/Node4/watch/history passes; preserve its
-completed IDs in doc/VALIDATION_STATUS.md.
+Current SDK8c CLI read/edit/Node4/watch/history passes; preserve its
+completed IDs in doc/VALIDATION_STATUS.md. Historical SDK499 receipts are retained.
 Earlier SDK499 rendered browser coding on source00f25996 passes; preserve its completed
 session/root in doc/VALIDATION_STATUS.md.
 Captured Local identity, SDK/HTTP services, scoped event cursors and shared-client

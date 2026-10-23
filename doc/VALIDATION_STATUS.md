@@ -1,3 +1,16 @@
+## Actual CLI coding on current SDK8c - 2026-10-23
+
+Full-qualified b133a0ee Native49413090/SDK8c uses fresh sum-of-squares fixture:
+CLI prompt/read/edit approval/Node approval,4 actual checks,8 messages,4 controlled
+model calls,2 successful operations and1 physical SDK worker retirement. Root
+budget segment closes; watch and repeated history preserve exact records.
+Runtime1901 payload files plus manifest remain unchanged; exact owned backend
+birth/image checked and exit observed. No paid inference/CPython/install change.
+Session053bae2564e937a51e106bb8177731ed/root64b55d6799a74ffe630a42694eaa7ce1
+are completed, NEVER replay. Browser and CLI now have current-runtime coding
+receipts; rendered VS Code and remaining protocol/planning work stay open.
+Evidence: client-cli-coding-b133a0ee-20261023.json.
+
 ## Actual rendered browser coding on current SDK8c - 2026-10-23
 
 Full-qualified b133a0ee Native49413090/SDK8c7972d1 drives fresh hidden IABtab9
