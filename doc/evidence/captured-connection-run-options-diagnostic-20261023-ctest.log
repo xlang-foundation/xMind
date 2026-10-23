@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 165: native_connection_profiles_http_contract
+1/1 Test #165: native_connection_profiles_http_contract ...***Failed    0.49 sec
+Captured run admission provider returned 409 {"detail":"Session already has an active root run"}
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.50 sec
+
+The following tests FAILED:
+	165 - native_connection_profiles_http_contract (Failed)
+Errors while running CTest

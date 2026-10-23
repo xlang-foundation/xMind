@@ -71,6 +71,10 @@ function validateEditInspection(proposal,inspection) {
 class BackendClient {
   #tokenProvider;
   #workspaceGuard;
+  #connectionAdmissionSupported=false;
+  #connectionCapture;
+  #connectionClosed=false;
+  #connectionClosing;
   constructor(baseUrl, tokenProvider, fetchImpl = (...args) => fetch(...args)) {
     this.baseUrl = backendOrigin(baseUrl);
     if (typeof tokenProvider !== 'function') throw new Error('Server authentication is required.');
@@ -88,7 +92,7 @@ class BackendClient {
     if(ticket){
       if(ticket.origin!==this.baseUrl)throw new Error('The selected workspace backend changed before admission.');
       this.#workspaceGuard.assert(ticket);
-      if(path==='/v1/runs'||path==='/v1/graph-runs'||/^\/v1\/sessions\/[A-Za-z0-9_-]+\/commands$/.test(path))body={...body,...ticket.fields};
+      if(path==='/v1/runs'||/^\/v1\/connection-bindings\/[a-f0-9]{32}\/runs$/.test(path)||path==='/v1/graph-runs'||/^\/v1\/sessions\/[A-Za-z0-9_-]+\/commands$/.test(path))body={...body,...ticket.fields};
     }
     const response = await this.fetch(this.baseUrl + path, {
       method: method || (body === undefined ? 'GET' : 'POST'),
@@ -101,7 +105,44 @@ class BackendClient {
     if (!response.ok) { const error=new Error(typeof data.detail === 'string' ? data.detail : `Backend returned ${response.status}`);error.status=response.status;throw error; }
     return data;
   }
-  health() { return this.request('/v1/health'); }
+  async health() {
+    const health=await this.request('/v1/health');
+    if(health&&Object.hasOwn(health,'local_connection_admission')){if(health.local_connection_admission!==1)throw new Error('Unsupported captured Local admission protocol. Reconnect to a compatible backend.');this.#connectionAdmissionSupported=true;}
+    else if(this.#connectionCapture)throw new Error('The backend connection protocol changed. Reconnect before admitting new work.');
+    return health;
+  }
+  async #captureConnection(){
+    if(this.#connectionClosed)throw new Error('This connection context was closed. Reconnect before admitting new work.');
+    if(!this.#connectionCapture){const origin=this.baseUrl;this.#connectionCapture=(async()=>{
+      const catalog=await this.connectionProfiles(),profile=catalog.profiles.find(p=>p.id===catalog.active_id);
+      if(!profile||profile.kind!=='local'||!profile.authenticated||!profile.command_routing)throw new Error('The selected connection is unavailable. No Local fallback was attempted.');
+      if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The connection changed before capture.');
+      const value=await this.request('/v1/connection-bindings',{id:profile.id,expected_profile_revision:profile.revision});exactFields(value,['binding_id','identity']);
+      if(typeof value.binding_id!=='string'||!/^[a-f0-9]{32}$/.test(value.binding_id))throw new Error('Invalid native connection handle.');validateConnectionBindingIdentity(value.identity);
+      if(value.identity.connection_id!==profile.id||value.identity.profile_revision!==profile.revision)throw new Error('Native connection capture differs from the selected profile.');
+      return Object.freeze({id:value.binding_id,origin,identity:Object.freeze({...value.identity})});
+    })();}
+    return this.#connectionCapture;
+  }
+  async #admitConnection(resource,body){
+    if(!this.#connectionAdmissionSupported)return this.request('/v1/'+resource,body);
+    if(resource==='sessions'&&body.title===undefined)body={...body,title:'New session'};
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured connection changed before admission.');
+    const id=globalThis.crypto.randomUUID().replaceAll('-',''),kind=resource==='sessions'?'session':'run';
+    try{
+      const value=await this.request('/v1/connection-bindings/'+capture.id+'/'+resource,{...body,id});exactFields(value,['binding',kind]);validateConnectionBindingIdentity(value.binding);
+      if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Admission receipt belongs to another connection context.');
+      const record=value[kind];if(!record||record.id!==id)throw new Error('Admission receipt does not match its request identity.');
+      if(kind==='run'){validateRunDTO(record);if(record.session_id!==body.session_id)throw new Error('Run receipt belongs to another conversation.');}
+      else if(record.title!==body.title||record.parent_id!=='')throw new Error('Session receipt differs from its requested conversation.');
+      return record;
+    }catch(error){error.admissionId=id;error.connectionBinding=capture.identity;throw error;}
+  }
+  async closeConnection(){
+    if(!this.#connectionAdmissionSupported&&!this.#connectionCapture)return;
+    if(this.#connectionClosing)return this.#connectionClosing;this.#connectionClosed=true;
+    this.#connectionClosing=(async()=>{if(!this.#connectionCapture)return;let capture;try{capture=await this.#connectionCapture;}catch{return;}if(this.baseUrl!==capture.origin)return;await this.request('/v1/connection-bindings/'+capture.id,undefined,15000,'DELETE');})();return this.#connectionClosing;
+  }
   async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
   async workspaceMembership(workspace) { const identity=workspace||await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspace/membership'),identity); }
   async addWorkspaceFolder(root) {
@@ -284,7 +325,7 @@ class BackendClient {
     if(!providerBinding||typeof providerBinding.provider_profile_id!=='string'||!Number.isSafeInteger(providerBinding.expected_provider_revision)||providerBinding.expected_provider_revision<0)throw new Error('Refresh the provider profile before choosing a conversation model.');
     return validateSessionModel(await this.request(`/v1/sessions/${encodeURIComponent(id)}/model`,{model_id:model,provider_profile_id:providerBinding.provider_profile_id,expected_provider_revision:providerBinding.expected_provider_revision,expected_revision:observed.revision}),id);
   }
-  createSession(title) { return this.request('/v1/sessions', { title }); }
+  createSession(title) { return this.#admitConnection('sessions', { title }); }
   sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }
   async enqueueSessionInput(session_id,content,id,files=[],expectedWorkspaceRevision) { const value={...(id?{id}:{}),content};if(files.length){const workspace=await this.workspace();if(!workspace.configured||typeof workspace.workspace_id!=='string'||typeof workspace.authority_id!=='string')throw new Error('Queued file attachments require an opened workspace.');const membership=await this.workspaceMembership(workspace);if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before queuing.');value.files=files;value.expected_workspace_id=workspace.workspace_id;value.expected_workspace_authority_id=workspace.authority_id;value.expected_workspace_revision=expectedWorkspaceRevision??membership.revision;}return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,value); }
   cancelSessionInput(session_id,input_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox/${encodeURIComponent(input_id)}`,undefined,15000,'DELETE'); }
@@ -349,7 +390,7 @@ class BackendClient {
   runs(id) { return this.request(`/v1/sessions/${encodeURIComponent(id)}/runs`); }
   run(session_id, prompt, model_id,binding,inbox_id,files=[],expectedWorkspaceRevision) {
     if(!Array.isArray(files)||files.length>32)throw new Error('Invalid workspace file attachments.');
-    if(!files.length)return this.request('/v1/runs', { session_id, prompt,...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) });
+    if(!files.length)return this.#admitConnection('runs', { session_id, prompt,...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) });
     return this.runWithAttachments(session_id,prompt,model_id,binding,inbox_id,files,expectedWorkspaceRevision);
   }
   async runWithAttachments(session_id,prompt,model_id,binding,inbox_id,files,expectedWorkspaceRevision){
@@ -357,7 +398,7 @@ class BackendClient {
     if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before sending.');
     const workspaceFields={expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id,expected_workspace_revision:expectedWorkspaceRevision??membership.revision};
     for(const file of files)if(!file||typeof file!=='object'||Array.isArray(file)||Object.keys(file).some(key=>!['path','folder_id','name','description','mention'].includes(key))||typeof file.path!=='string'||!file.path||file.path.length>4096||file.path.startsWith('/')||/^[A-Za-z]:/.test(file.path)||file.path.includes('\\')||file.path.split('/').some(part=>!part||part==='.'||part==='..')||file.folder_id!==undefined&&(typeof file.folder_id!=='string'||file.folder_id.length>256))throw new Error('Invalid workspace file attachment.');
-    return this.request('/v1/runs', { session_id, prompt,files,...workspaceFields,...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) });
+    return this.#admitConnection('runs', { session_id, prompt,files,...workspaceFields,...(model_id ? {model_id} : {}),...(inbox_id?{inbox_id}:{}),...profileBindingFields(binding) });
   }
   events(id, after) { return this.request(`/v1/runs/${encodeURIComponent(id)}/events?after=${after}`); }
   async openEventStream(path,signal){
@@ -963,6 +1004,10 @@ function validateSessionArchive(value){
 function connectionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid connection profile identity.');return value;}
 function connectionName(value){if(typeof value!=='string'||!value.trim()||value.length>128||/[\r\n\0]/.test(value))throw new Error('Enter a connection name (up to 128 characters).');return value;}
 function connectionOrigin(value){if(typeof value!=='string'||value.length>8192||!value.startsWith('https://')||/[\\?#@\s\0-\x1f]/.test(value))throw new Error('Enter an HTTPS server URL without credentials, query or fragment.');return value;}
+function validateConnectionBindingIdentity(value){
+  exactFields(value,['connection_id','profile_revision','server_id','backend_generation','protocol_version','kind']);
+  if(value.connection_id!=='local'||value.kind!=='local'||!Number.isSafeInteger(value.profile_revision)||value.profile_revision<1||typeof value.server_id!=='string'||!/^local-[a-f0-9]{64}$/.test(value.server_id)||typeof value.backend_generation!=='string'||!value.backend_generation||value.backend_generation.length>256||/[\x00-\x1f\x7f]/.test(value.backend_generation)||value.protocol_version!==1)throw new Error('Invalid captured Local connection identity.');return value;
+}
 function validateConnectionProfiles(value){
   const fields=['revision','active_id','profiles'];if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field))||!Number.isSafeInteger(value.revision)||value.revision<1||!Array.isArray(value.profiles)||!value.profiles.length||value.profiles.length>32)throw new Error('Invalid connection profile catalog.');
   connectionIdentity(value.active_id);const ids=new Set();let local=false,active=false;

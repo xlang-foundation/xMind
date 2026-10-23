@@ -557,7 +557,7 @@ async function activate(context) {
     }else connection=await workspaceBackend.connect();
     const origin=connection.origin,connectionEpoch=workspaceBackend.epoch;
     const connectionCurrent=()=>workspaceBackend.epoch===connectionEpoch&&workspaceBackend.active?.origin===origin;
-    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));historyPager=new SessionHistoryPager(client);
+    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();Promise.resolve(client?.closeConnection?.()).catch(()=>{});client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));historyPager=new SessionHistoryPager(client);
     client.bindWorkspace(workspaceBackend);
     await languageServerEditor.connect(client);
     if(!connectionCurrent())throw new Error('Workspace changed while connecting language servers.');

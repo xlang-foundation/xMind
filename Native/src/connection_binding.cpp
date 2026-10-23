@@ -33,7 +33,18 @@ ConnectionBindingIdentity CapturedLocalConnection::identity()const{auto life=con
 BoundConnectionSession CapturedLocalConnection::open_session(std::string id)const{auto life=context_->enter();return {identity_,context_->store.session(id).get()};}
 BoundConnectionSession CapturedLocalConnection::create_session(std::string id,std::string title)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();return {identity_,context_->store.create_session(id,title).get()};}
 BoundConnectionRun CapturedLocalConnection::open_run(std::string id)const{auto life=context_->enter();return {identity_,context_->store.run(id).get()};}
-BoundConnectionRun CapturedLocalConnection::start_run(std::string id,std::string session,std::string prompt)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");return {identity_,context_->executor->submit(id,session,prompt)};}
+Run submit_local_connection_run(RunExecutor& executor,ConnectionRunRequest request){
+    if(!request.files.empty()&&(!request.workspace||request.workspace->revision<1))throw std::invalid_argument("File attachments require the observed workspace membership revision");
+    if(request.workspace)validate_workspace_admission(*request.workspace,executor.execution_workspace());
+    if(request.inbox)return executor.submit_queued(request.id,request.session,request.prompt,request.model,*request.inbox,request.workspace,request.provider,std::move(request.files));
+    if(!request.files.empty())return executor.submit_with_attachments(request.id,request.session,request.prompt,request.model,std::move(request.files),request.workspace,request.provider);
+    if(request.workspace)return executor.submit_workspace(request.id,request.session,request.prompt,request.model,*request.workspace,request.provider);
+    if(request.provider)return executor.submit_profile(request.id,request.session,request.prompt,request.model,*request.provider);
+    return executor.submit_model(request.id,request.session,request.prompt,request.model);
+}
+BoundConnectionRun CapturedLocalConnection::start_run(std::string id,std::string session,std::string prompt)const{return start_run(ConnectionRunRequest{std::move(id),std::move(session),std::move(prompt)});}
+BoundConnectionRun CapturedLocalConnection::start_run(ConnectionRunRequest request)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");return {identity_,submit_local_connection_run(*context_->executor,std::move(request))};}
+
 void CapturedLocalConnection::cancel_run(const std::string& id)const{auto life=context_->enter();auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");context_->executor->cancel(id);}
 std::shared_ptr<ConnectionEventStream> CapturedLocalConnection::events(std::string session,std::string root)const{
     auto life=context_->enter();const auto run=context_->store.run(root).get();if(run.session_id!=session||!run.parent_id.empty())throw Conflict("Event stream requires its captured root session");

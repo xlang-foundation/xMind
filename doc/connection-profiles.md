@@ -199,8 +199,23 @@ The local owner retains administrative access. Registry entries expire after
 handle does not cancel work or reinterpret its ownership. Cursor boundaries must
 actually belong to the captured stream, not only contain matching labels.
 
-The initial run-start surface carries only id/session_id/prompt. Existing UI run
-options, provider/workspace/attachment admission and other operations still use
-their current routes until the scoped adapter supports their complete contract.
-The browser proxy/client integration and authenticated remote binding remain open;
-this native HTTP API is not a claim of those completed product flows.
+Run start now accepts the same model, provider revision, workspace authority and
+membership revision, file metadata and inbox identity as /v1/runs. Both routes
+use one typed native request parser/dispatch path; the captured route also holds
+its profile admission guard. Public provider context is retained in the response.
+The SDK's three-argument Start remains available with default options.
+
+Health advertises local_connection_admission=1. Shared browser/extension clients
+lazily capture the selected available Local profile before session creation or
+prompt-run admission. Read-only health does not allocate handles. The capability
+absent on an older Local backend preserves its explicit legacy path. Unsupported
+versions and unavailable selected profiles fail closed; failed admissions are
+never retried through a fresh context or legacy endpoint. Reconciliation errors
+retain the request ID and captured identity. Workspace admission guards still
+attach their authority fields to scoped run requests. View/backend disposal
+releases only its own handle and does not cancel admitted work.
+
+This version scopes session creation and regular prompt runs. Graph admission,
+commands, queued-input creation, general read/event/approval/model adapters and
+authenticated remote binding remain to be integrated. Unit/native contracts do
+not establish actual rendered verification of this new client source.

@@ -1,3 +1,32 @@
+## Captured Local prompt admission in shared clients - 2026-10-23
+
+The native captured run route preserves model selection, provider revision,
+workspace authority/membership revision, attachments and inbox identity through
+the same typed dispatch used by legacy Local admission. Public provider context
+is preserved. Shared extension/browser clients negotiate the versioned health
+capability, capture Local lazily, and use scoped session creation/prompt runs.
+They preserve workspace guards, validate receipt ownership, retain request IDs
+on errors and never automatically retry through another context. Older Local
+backends retain their existing path. Browser proxy methods are explicitly
+allowlisted; disposal releases only the view handle.
+
+The initial native run fails 3/4 because its synthetic execution peer leaves the
+first root queued before testing the next variant. Diagnostic reproduction
+records HTTP409: Session already has an active root run. The corrected fixture
+settles each synthetic root through explicit native cancellation; no concurrency
+guard or deadline is weakened. The qualified four-contract run passes in2.75s
+with input closures unchanged. Tests preserve every run-option combination and
+public provider metadata, and reject missing attachment/workspace authority.
+Initial/diagnostic/qualified evidence: captured-connection-run-options-*-20261023-*.
+
+Complete client units pass467 extension and163 browser tests, plus browser asset
+build, with source/dependency bytes and file sets unchanged. Evidence:
+client-captured-local-admission-20261023.json. This is not rendered acceptance.
+Source17be6368 full172 predates these changes; fresh full/native/rendered delivery
+remains pending. Graph/command/queue/read/event/approval/model binding adapters,
+remote authentication/enrollment, nested process planning/recovery and actual
+VS Code coding remain open. Installed62 is unchanged; no paid inference/CPython.
+
 ## Shared native binding service and HTTP adapter - 2026-10-23
 
 Captured Local binding logic moves into a transport-neutral C++ service used by

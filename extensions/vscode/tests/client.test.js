@@ -490,3 +490,36 @@ test('graph stream validates pinned invocation ancestry before delivering a deep
 test('nested graph input keeps owner identity both revisions and raw JSON on its versioned route',async()=>{
  const calls=[],client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>({})};});await client.graphTreeInput('root','child','answer','{"x":1,"x":2}',4,99);assert.equal(new URL(calls[0].url).pathname,'/v1/graph-runs/root/invocations/child/human/answer');assert.deepEqual(JSON.parse(calls[0].options.body),{input_json:'{"x":1,"x":2}',expected_checkpoint_revision:4,expected_owner_checkpoint_revision:99});
 });
+function capturedAdmissionFixture({supported=true,failRun=false,mismatch=false}={}){
+ const identity={connection_id:'local',profile_revision:1,server_id:'local-'+'a'.repeat(64),backend_generation:'fixture-generation',protocol_version:1,kind:'local'},handle='1'.repeat(32),requests=[];
+ const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-captured-client-token-32-bytes',async(url,options)=>{
+  const path=new URL(url).pathname,input=options.body?JSON.parse(options.body):undefined;requests.push({path,method:options.method,input});let data,status=200;
+  if(path==='/v1/health')data=supported?{status:'ok',local_connection_admission:1}:{status:'ok'};
+  else if(path==='/v1/connections')data={revision:1,active_id:'local',profiles:[{id:'local',name:'Local',kind:'local',origin:'',revision:1,status:'connected',command_routing:true,authenticated:true}]};
+  else if(path==='/v1/connection-bindings')data={binding_id:handle,identity};
+  else if(path.endsWith('/sessions')&&path.includes(handle))data={binding:identity,session:{id:input.id,title:input.title,parent_id:''}};
+  else if(path.endsWith('/runs')&&path.includes(handle)){if(failRun){status=409;data={detail:'Captured connection profile revision changed'};}else data={binding:mismatch?{...identity,server_id:'local-'+'b'.repeat(64)}:identity,run:{id:input.id,session_id:input.session_id,state:'queued',parent_id:'',node_id:'',graph_root:false}};}
+  else if(path==='/v1/connection-bindings/'+handle&&options.method==='DELETE')data={closed:true};
+  else if(path==='/v1/sessions')data={id:'legacy-session',title:input.title};
+  else throw new Error('Unexpected fixture route '+path);
+  return {ok:status<400,status,json:async()=>structuredClone(data)};
+ });return {client,requests,identity,handle};
+}
+test('captured Local admission is lazy, preserves full prompt options and carries workspace guard fields',async()=>{
+ const {client,requests,identity,handle}=capturedAdmissionFixture();await client.health();assert.deepEqual(requests.map(r=>r.path),['/v1/health']);
+ client.bindWorkspace({prepare:async()=>({origin:client.baseUrl,fields:{expected_workspace_id:'fixture-workspace',expected_workspace_authority_id:'a'.repeat(32),expected_workspace_revision:9}}),assert:()=>{}});
+ const session=await client.createSession('Captured conversation');assert.match(session.id,/^[a-f0-9]{32}$/);assert.equal(session.title,'Captured conversation');
+ client.workspace=async()=>({configured:true,workspace_id:'fixture-workspace',authority_id:'a'.repeat(32)});client.workspaceMembership=async()=>({revision:9});
+ const files=[{path:'input.txt',folder_id:'primary',name:'input.txt',description:'Observed attachment',mention:'@input'}];const run=await client.run(session.id,'Observed prompt','selected-model',{provider_profile_id:'selected-provider',expected_provider_revision:7},'queued-input',files,9);assert.match(run.id,/^[a-f0-9]{32}$/);
+ const sent=requests.find(r=>r.path==='/v1/connection-bindings/'+handle+'/runs').input;assert.equal(sent.session_id,session.id);assert.equal(sent.model_id,'selected-model');assert.equal(sent.provider_profile_id,'selected-provider');assert.equal(sent.expected_provider_revision,7);assert.equal(sent.inbox_id,'queued-input');assert.equal(sent.expected_workspace_revision,9);assert.equal(sent.expected_workspace_authority_id,'a'.repeat(32));assert.deepEqual(sent.files,files);assert.equal(requests.filter(r=>r.path==='/v1/connection-bindings').length,1);assert.equal(requests.some(r=>r.path==='/v1/runs'),false);
+ await Promise.all([client.closeConnection(),client.closeConnection()]);assert.equal(requests.filter(r=>r.method==='DELETE').length,1);assert.equal(identity.connection_id,'local');
+});
+test('stale or mismatched captured admission never retries through a new or legacy context',async()=>{
+ for(const settings of [{failRun:true},{mismatch:true}]){
+  const {client,requests}=capturedAdmissionFixture(settings);await client.health();let failure;try{await client.run('session','Observed prompt');}catch(error){failure=error;}assert(failure);assert.match(failure.admissionId,/^[a-f0-9]{32}$/);assert.equal(failure.connectionBinding.connection_id,'local');
+  assert.equal(requests.filter(r=>r.path==='/v1/connection-bindings').length,1);assert.equal(requests.filter(r=>r.path.endsWith('/runs')).length,1);assert.equal(requests.some(r=>r.path==='/v1/runs'),false);await client.closeConnection();const before=requests.length;await assert.rejects(client.run('session','Must reconnect'),/closed/);assert.equal(requests.length,before);
+ }
+});
+test('older Local backend health keeps the existing session path without a binding request',async()=>{
+ const {client,requests}=capturedAdmissionFixture({supported:false});await client.health();assert.deepEqual(await client.createSession('Existing Local flow'),{id:'legacy-session',title:'Existing Local flow'});assert.deepEqual(requests.map(r=>r.path),['/v1/health','/v1/sessions']);
+});

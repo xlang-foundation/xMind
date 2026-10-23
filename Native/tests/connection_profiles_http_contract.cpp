@@ -1,4 +1,5 @@
 #include "agentflow/http_server.hpp"
+#include "agentflow/connection_binding.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -17,12 +18,28 @@ struct TemporaryDatabase {
         ("xmind-connections-http-"+std::to_string(std::random_device{}())+".sqlite");
     ~TemporaryDatabase(){for(const auto* suffix:{"","-wal","-shm"}){auto file=path;file+=suffix;std::error_code ignored;std::filesystem::remove(file,ignored);}}
 };
+// Recording execution peer: tests transport/native option dispatch only. No model
+// inference or real process effects are claimed by this fixture.
+struct RecordingExecutor:RunExecutor {
+    PersistenceService& store;ConnectionRunRequest observed;std::string mode;unsigned calls=0;
+    explicit RecordingExecutor(PersistenceService& value):store(value){}
+    ExecutionWorkspaceMetadata execution_workspace()const override{return {true,"fixture-root","fixture-workspace",std::string(32,'a')};}
+    Run record(std::string route,ConnectionRunRequest value){mode=std::move(route);observed=std::move(value);++calls;auto run=store.create_run(observed.id,observed.session).get();if(observed.provider)run.provider_context_json=Json{{"profile_id",observed.provider->id},{"route_id","fixture-route"},{"provider","fixture"},{"wire","chat-completions"},{"model_id",observed.model},{"profile_revision",observed.provider->revision}}.dump();return run;}
+    Run submit(std::string id,std::string session,std::string prompt)override{return record("plain",{id,session,prompt});}
+    Run submit_model(std::string id,std::string session,std::string prompt,std::string model)override{return record("model",{id,session,prompt,model});}
+    Run submit_profile(std::string id,std::string session,std::string prompt,std::string model,ProviderProfileAdmission provider)override{ConnectionRunRequest request{id,session,prompt,model};request.provider=provider;return record("provider",std::move(request));}
+    Run submit_workspace(std::string id,std::string session,std::string prompt,std::string model,WorkspaceAdmission workspace,std::optional<ProviderProfileAdmission> provider)override{ConnectionRunRequest request{id,session,prompt,model};request.workspace=workspace;request.provider=provider;return record("workspace",std::move(request));}
+    Run submit_with_attachments(std::string id,std::string session,std::string prompt,std::string model,std::vector<PromptFileAttachment> files,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> provider)override{ConnectionRunRequest request{id,session,prompt,model};request.files=std::move(files);request.workspace=workspace;request.provider=provider;return record("files",std::move(request));}
+    Run submit_queued(std::string id,std::string session,std::string prompt,std::string model,std::string inbox,std::optional<WorkspaceAdmission> workspace,std::optional<ProviderProfileAdmission> provider,std::vector<PromptFileAttachment> files)override{ConnectionRunRequest request{id,session,prompt,model};request.inbox=inbox;request.files=std::move(files);request.workspace=workspace;request.provider=provider;return record("queued",std::move(request));}
+    void cancel(const std::string& id)override{store.transition(id,RunState::queued,RunState::cancelled,"{}").get();}
+    bool healthy()const override{return true;}
+};
 struct Access {
     HttpServer server;
     int port;
     std::thread worker;
-    Access(PersistenceService& store,const std::string& token)
-        :server(store,token),port(server.bind(0)),worker([this]{server.listen();}){
+    Access(PersistenceService& store,const std::string& token,RunExecutor* executor=nullptr)
+        :server(store,token,executor),port(server.bind(0)),worker([this]{server.listen();}){
         require(port>0,"Connection profile HTTP server must bind");
     }
     ~Access(){server.stop();if(worker.joinable())worker.join();}
@@ -44,7 +61,7 @@ int main(int argc,char** argv){
         {
             PersistenceService store(database.path.string(),{argv[1],argv[2]});
             {
-            Access access(store,token);
+            RecordingExecutor execution(store);Access access(store,token,&execution);
             httplib::Client client("127.0.0.1",access.port);
             client.set_connection_timeout(2,0);client.set_read_timeout(3,0);
             const auto unauthorized=client.Get("/v1/connections");
@@ -112,6 +129,13 @@ int main(int argc,char** argv){
             const auto opened=client.Post("/v1/connection-bindings",view_auth,Json{{"id","local"},{"expected_profile_revision",1}}.dump(),"application/json");require(opened&&opened->status==201,"A view must capture a native Local binding");const auto binding=Json::parse(opened->body);const auto base="/v1/connection-bindings/"+binding.at("binding_id").get<std::string>();const auto identity=binding.at("identity");require(identity.at("connection_id")=="local"&&identity.at("profile_revision")==1,"HTTP binding identity must be captured natively");
             const auto other_view=client.Post("/v1/view-sessions",auth,Json{{"origin","http://127.0.0.1:60422"}}.dump(),"application/json");require(other_view&&other_view->status==200,"Second origin-bound view must be available");const httplib::Headers other_auth{{"Authorization","View "+Json::parse(other_view->body).at("credential").get<std::string>()},{"X-XMind-View-Origin","http://127.0.0.1:60422"}};const auto crossed=client.Get(base+"/identity",other_auth);require(crossed&&crossed->status==404,"One view must not acquire another view's HTTP binding handle");
             const auto created=client.Post(base+"/sessions",view_auth,R"({"id":"bound-http","title":"Captured Local session"})","application/json");require(created&&created->status==201&&Json::parse(created->body).at("binding")==identity,"Captured HTTP session creation must use the native binding");require(store.session("bound-http").get().title=="Captured Local session","Captured HTTP operation must persist actual native session state");
+            Json options{{"id","captured-model"},{"session_id","bound-http"},{"prompt","Observed request"},{"model_id","selected-model"}};
+            auto submit=[&](const char* mode){const auto response=client.Post(base+"/runs",view_auth,options.dump(),"application/json");require(response&&response->status==202,("Captured run admission "+std::string(mode)+" returned "+(response?std::to_string(response->status)+" "+response->body:std::string("no response"))).c_str());require(execution.mode==mode&&execution.observed.model=="selected-model"&&execution.observed.prompt=="Observed request","Native executor must receive the exact selected route/model/prompt");if(execution.observed.provider)require(Json::parse(response->body).at("run").at("provider_context").at("profile_id")=="selected-provider","Captured receipts must preserve public provider context");const auto cancelled=client.Post(base+"/runs/"+options.at("id").get<std::string>()+"/cancel",view_auth,"{}","application/json");require(cancelled&&cancelled->status==200&&store.run(options.at("id").get<std::string>()).get().state==RunState::cancelled,"Settle the synthetic fixture root before the next admission variant");};
+            submit("model");options["id"]="captured-provider";options["provider_profile_id"]="selected-provider";options["expected_provider_revision"]=7;submit("provider");require(execution.observed.provider&&execution.observed.provider->id=="selected-provider"&&execution.observed.provider->revision==7,"Provider revision must reach native admission");
+            options["id"]="captured-workspace";options["expected_workspace_id"]="fixture-workspace";options["expected_workspace_authority_id"]=std::string(32,'a');options["expected_workspace_revision"]=9;submit("workspace");require(execution.observed.workspace&&execution.observed.workspace->revision==9,"Workspace authority and membership revision must reach native admission");
+            options["id"]="captured-files";options["files"]=Json::array({{{"path","input.txt"},{"folder_id","primary"},{"name","input.txt"},{"description","Observed attachment"},{"mention","@input"}}});submit("files");require(execution.observed.files.size()==1&&execution.observed.files[0].folder_id=="primary"&&execution.observed.files[0].description=="Observed attachment","File metadata must reach native admission intact");
+            options["id"]="captured-inbox";options["inbox_id"]="queued-input";submit("queued");require(execution.observed.inbox==std::optional<std::string>{"queued-input"}&&execution.observed.files.size()==1&&execution.observed.provider&&execution.observed.workspace,"Queued admission must retain files, provider and workspace");
+            auto invalid_options=options;invalid_options["id"]="captured-invalid";invalid_options.erase("expected_workspace_revision");const auto before_calls=execution.calls;const auto rejected_files=client.Post(base+"/runs",view_auth,invalid_options.dump(),"application/json");require(rejected_files&&rejected_files->status==400&&execution.calls==before_calls,"Missing attachment membership revision must reject before native dispatch");invalid_options=options;invalid_options["expected_workspace_authority_id"]=std::string(32,'b');const auto wrong_workspace=client.Post(base+"/runs",view_auth,invalid_options.dump(),"application/json");require(wrong_workspace&&wrong_workspace->status==409&&execution.calls==before_calls,"Changed workspace authority must reject before dispatch");
             store.create_run("bound-root","bound-http").get();store.append_event("bound-root","fixture.event","{}").get();const auto run=client.Get(base+"/runs/bound-root",view_auth);require(run&&run->status==200&&Json::parse(run->body).at("run").at("state")=="queued","Captured HTTP run inspection must use persisted native state");
             const auto event_input=Json{{"session_id","bound-http"},{"run_id","bound-root"},{"cursor",nullptr}};const auto events=client.Post(base+"/events",view_auth,event_input.dump(),"application/json");require(events&&events->status==200&&!Json::parse(events->body).at("events").empty(),"Captured HTTP event page must read actual native events");auto resumed=event_input;resumed["cursor"]=Json::parse(events->body).at("cursor");auto invalid=resumed;invalid["cursor"]["session_id"]="another-session";const auto wrong_cursor=client.Post(base+"/events",view_auth,invalid.dump(),"application/json");require(wrong_cursor&&wrong_cursor->status==409,"Event cursors must remain scoped to their captured session");invalid=resumed;invalid["cursor"]["sequence"]=9007199254740991LL;const auto ahead=client.Post(base+"/events",view_auth,invalid.dump(),"application/json");require(ahead&&ahead->status==409,"An uncommitted cursor boundary must not be accepted");
             auto renamed=input;renamed["expected_revision"]=2;renamed["profiles"][0]["name"]="Next Local";const auto edited=client.Post("/v1/connections",auth,renamed.dump(),"application/json");require(edited&&edited->status==200,"Local profile edit must remain available");const auto stale_admission=client.Post(base+"/sessions",view_auth,R"({"id":"stale-binding-session","title":"must not exist"})","application/json");require(stale_admission&&stale_admission->status==409,"Stale HTTP bindings must not admit new sessions");const auto retained=client.Get(base+"/sessions/bound-http",view_auth);require(retained&&retained->status==200&&Json::parse(retained->body).at("binding")==identity,"Profile edits must preserve original captured reads and identity");const auto next_events=client.Post(base+"/events",view_auth,resumed.dump(),"application/json");require(next_events&&next_events->status==200,"Captured event reads must survive a metadata edit");

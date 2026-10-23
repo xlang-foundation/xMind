@@ -227,3 +227,8 @@ test('browser forwards revision-bound permission-grant DELETE bodies and blocks 
   const result=await fetch(viewOrigin+'/v1/sessions/session-a/permission-grants/grant_a',{method:'DELETE',headers:{Cookie:cookie,Origin:viewOrigin,'Sec-Fetch-Site':'same-origin','Content-Type':'application/json'},body:'{"expected_revision":7}'});assert.equal(result.status,200);assert.deepEqual(await result.json(),{session_id:'session-a',revision:8,grants:[]});assert.equal(revocations,1);
  }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });
+test('captured connection proxy routes are explicit about handle shape and HTTP method',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');const base='/v1/connection-bindings/'+'a'.repeat(32);
+ for(const [path,method]of [['/v1/connection-bindings','POST'],[base,'DELETE'],[base+'/identity','GET'],[base+'/sessions','POST'],[base+'/sessions/session','GET'],[base+'/runs','POST'],[base+'/runs/run','GET'],[base+'/runs/run/cancel','POST'],[base+'/events','POST']])assert.equal(allowedApiRoute(path,method),true,path+' '+method);
+ for(const [path,method]of [['/v1/connection-bindings','GET'],[base,'POST'],[base+'/identity','POST'],[base+'/events','GET'],[base+'/sessions/session','DELETE'],[base+'/owner','GET'],['/v1/connection-bindings/not-a-handle/identity','GET']])assert.equal(allowedApiRoute(path,method),false,path+' '+method);
+});

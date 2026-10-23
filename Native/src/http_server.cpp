@@ -466,6 +466,13 @@ struct HttpServer::Impl {
     void stop_queued_session_dispatcher(){
         if(!queued_session_dispatcher.joinable())return;queued_session_dispatcher.request_stop();queued_sessions_changed.notify_all();queued_session_dispatcher.join();
     }
+#if defined(_WIN32)
+    ConnectionRunRequest connection_run_request(const Request& request){
+        if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Run admission does not accept query parameters");
+        const auto value=body(request,{"id","session_id","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision","inbox_id"});
+        ConnectionRunRequest result;result.id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();result.session=identifier(string_field(value,"session_id",128));result.prompt=string_field(value,"prompt",1024*1024);result.model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};result.provider=profile_admission(value);result.workspace=workspace_admission(value);result.files=prompt_file_attachments(value);if(value.contains("inbox_id"))result.inbox=string_field(value,"inbox_id",128);return result;
+    }
+#endif
     template<class Handler> auto guarded(Handler handler){return guard_errors([this,handler=std::move(handler)](const Request& request,Response& response){
 #if defined(_WIN32)
         std::optional<std::shared_lock<std::shared_mutex>> admission;
@@ -716,7 +723,11 @@ struct HttpServer::Impl {
         }));
         server.Get("/v1/health",guarded([this,graphs](const Request&,Response& response) {
             const auto models=executor?executor->models():std::vector<std::string>{};
-            reply(response,{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"graph_tree_human_input",graphs&&graphs->supports_graph_tree_human_input()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()},{"mcp_elicitation",true}});
+            auto health=Json{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"graph_tree_human_input",graphs&&graphs->supports_graph_tree_human_input()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()},{"mcp_elicitation",true}};
+#if defined(_WIN32)
+            health["local_connection_admission"]=1;
+#endif
+            reply(response,health);
         }));
         server.Get("/v1/info",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty())
@@ -782,7 +793,7 @@ struct HttpServer::Impl {
         server.Delete(R"(/v1/connection-bindings/([0-9a-f]{32}))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);(void)connection_handle(request);std::lock_guard lock(connection_handles_mutex);connection_handles.erase(request.matches[1]);reply(response,{{"closed",true}});}));
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"id","title"});const auto result=connection_handle(request)->create_session(identifier(string_field(input,"id",128)),string_field(input,"title",4096));reply(response,connection_values::bound(result),201);}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto result=connection_handle(request)->open_session(identifier(request.matches[2]));reply(response,connection_values::bound(result));}));
-        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/runs)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"id","session_id","prompt"});const auto result=connection_handle(request)->start_run(identifier(string_field(input,"id",128)),identifier(string_field(input,"session_id",128)),string_field(input,"prompt",65536));reply(response,connection_values::bound(result),202);}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/runs)",guard_errors([this](const Request& request,Response& response){const auto result=connection_handle(request)->start_run(connection_run_request(request));reply(response,connection_values::bound(result),202);}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/runs/([A-Za-z0-9_-]+))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto result=connection_handle(request)->open_run(identifier(request.matches[2]));reply(response,connection_values::bound(result));}));
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/runs/([A-Za-z0-9_-]+)/cancel)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);(void)body(request,{});connection_handle(request)->cancel_run(identifier(request.matches[2]));reply(response,{{"cancel_requested",true}});}));
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/events)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"session_id","run_id","cursor"});auto stream=connection_handle(request)->events(identifier(string_field(input,"session_id",128)),identifier(string_field(input,"run_id",128)));const auto cursor=!input.contains("cursor")||input["cursor"].is_null()?stream->cursor():connection_values::cursor(input["cursor"]);reply(response,connection_values::page(stream->read(cursor)));}));
@@ -1651,6 +1662,9 @@ struct HttpServer::Impl {
                 reply(response,encode(executor->resume_plan(root,"local-owner",revision,sequence)),202);
             }));
             server.Post("/v1/runs",guarded([this](const Request& request,Response& response) {
+#if defined(_WIN32)
+                reply(response,encode(submit_local_connection_run(*executor,connection_run_request(request))),202);
+#else
                 if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Run admission does not accept query parameters");
                 const auto value=body(request,{"id","session_id","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision","inbox_id"});
                 const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
@@ -1660,6 +1674,7 @@ struct HttpServer::Impl {
                 if(workspace)validate_workspace_admission(*workspace,executor?executor->execution_workspace():ExecutionWorkspaceMetadata{});
                 const auto result=value.contains("inbox_id")?executor->submit_queued(id,session,prompt,model,string_field(value,"inbox_id",128),workspace,binding,files):!files.empty()?executor->submit_with_attachments(id,session,prompt,model,files,workspace,binding):workspace?executor->submit_workspace(id,session,prompt,model,*workspace,binding):binding?executor->submit_profile(id,session,prompt,model,*binding):executor->submit_model(id,session,prompt,model);
                 reply(response,encode(result),202);
+#endif
             }));
             server.Post(R"(/v1/runs/([A-Za-z0-9_-]+)/cancel)",guarded([this](const Request& request,Response& response) {
                 body(request,{});const auto id=identifier(request.matches[1]);executor->cancel(id);

@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/records.hpp"
+#include "agentflow/run_executor.hpp"
 #include <memory>
 namespace agentflow {
 class PersistenceService;class RunExecutor;class BackendOwnerControl;struct LocalConnectionContext;
@@ -15,6 +16,14 @@ struct ConnectionEventCursor {
 struct ConnectionEventPage {std::vector<Event> events;ConnectionEventCursor cursor;};
 struct BoundConnectionSession {ConnectionBindingIdentity binding;Session session;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
+struct ConnectionRunRequest {
+    std::string id,session,prompt,model;
+    std::optional<std::string> inbox;
+    std::vector<PromptFileAttachment> files;
+    std::optional<WorkspaceAdmission> workspace;
+    std::optional<ProviderProfileAdmission> provider;
+};
+Run submit_local_connection_run(RunExecutor&,ConnectionRunRequest);
 class ConnectionEventStream {
 public:
     ConnectionEventCursor cursor()const;
@@ -33,6 +42,7 @@ public:
     BoundConnectionSession create_session(std::string id,std::string title)const;
     BoundConnectionRun open_run(std::string id)const;
     BoundConnectionRun start_run(std::string id,std::string session,std::string prompt)const;
+    BoundConnectionRun start_run(ConnectionRunRequest request)const;
     void cancel_run(const std::string& id)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;
 private:

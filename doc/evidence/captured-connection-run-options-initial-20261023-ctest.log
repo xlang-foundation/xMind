@@ -1,0 +1,19 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  28: native_xmind_ipc_lifetime_contract
+1/4 Test  #28: native_xmind_ipc_lifetime_contract .........   Passed    0.37 sec
+    Start  29: native_xmind_ipc_api_contract
+2/4 Test  #29: native_xmind_ipc_api_contract ..............   Passed    1.23 sec
+    Start 164: native_connection_profiles_contract
+3/4 Test #164: native_connection_profiles_contract ........   Passed    0.23 sec
+    Start 165: native_connection_profiles_http_contract
+4/4 Test #165: native_connection_profiles_http_contract ...***Failed    0.55 sec
+Captured run admission must preserve supported options
+
+
+75% tests passed, 1 tests failed out of 4
+
+Total Test time (real) =   2.39 sec
+
+The following tests FAILED:
+	165 - native_connection_profiles_http_contract (Failed)
+Errors while running CTest
