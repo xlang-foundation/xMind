@@ -273,3 +273,12 @@ SDK processes verify both owner bindings preserve root state, budget revision,
 parent history/events and parent lease while completing the child-owned plan.
 The coding binding fixture uses read-only tools.
 [Receipt](evidence/nested-worker-planning-completion-20261023.json).
+
+### Counted child continuation checkpoint (2026-10-23)
+
+Uncompacted child continuation preparation validates its exact signed call and
+execution scope. The existing held leaf attempt acquires one logical inference
+step without another model charge. Two ledger paths retain the canonical
+completion receipt and preserve root ownership. Nested compaction, automatic
+worker enrollment/scheduling and recovery remain unfinished.
+[Receipt](evidence/nested-worker-counted-continuation-20261023.json).

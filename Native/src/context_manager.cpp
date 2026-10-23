@@ -245,9 +245,9 @@ public:
             const auto run=run_journal.run(owner.owner_run_id).get();
             if(run.state!=RunState::running||run.graph_root||
                (owner.scope.kind==ContextScopeKind::session&&(owner.scope.id!=run.session_id||!run.parent_id.empty()||owner.role!=ModelCallRole::parent||owner.root_run_id!=run.id))||
-               (owner.scope.kind==ContextScopeKind::execution&&(owner.scope.id!=run.id||run.parent_id.empty()||owner.role!=ModelCallRole::leaf))||
-               (owner.planning_call_id&&(!run.parent_id.empty()||owner.root_run_id!=run.id)))
+               (owner.scope.kind==ContextScopeKind::execution&&(owner.scope.id!=run.id||run.parent_id.empty()||owner.role!=ModelCallRole::leaf)))
                 throw ContextBindingChanged("Context scope differs from its actual execution owner");
+            if(owner.planning_call_id){const auto call=run_journal.dynamic_plan_call(*owner.planning_call_id).get();if(call.root_run_id!=owner.root_run_id||call.owner_run_id!=owner.owner_run_id||call.state!="turn_committed"||!call.conversation_commit_seq)throw ContextBindingChanged("Planning context differs from its exact committed owner");}
         }else if(!owner.root_run_id.empty()||owner.planning_call_id||owner.scope.kind!=ContextScopeKind::session||owner.owner_run_id.empty())
             throw ContextBindingChanged("Idle context requires its exclusive session maintenance owner");
         if(failed){

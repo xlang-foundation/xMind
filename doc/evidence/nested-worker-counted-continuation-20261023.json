@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-23T21:23:08.405Z",
+  "sourceParent": "7ebc271e6e8523cbd90c7606bb12704567695bfc",
+  "sourcePatchSha256": "a2a7c0562163e4317914291c366caf9e58ebfcddd1ca850af4bafc87a4c6aed5",
+  "build": {
+    "pid": 35208,
+    "launchedAt": "2026-10-23T21:21:32.805Z",
+    "completedAt": "2026-10-23T21:22:18.469Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c24f04b9e5901f3ce0198385c03c0c4b7524ea349ac7fbe161c3a20c7b556447"
+  },
+  "test": {
+    "pid": 34916,
+    "launchedAt": "2026-10-23T21:22:21.012Z",
+    "completedAt": "2026-10-23T21:23:05.858Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "ba1e20137e717b38a493c8d3651b072c1df89154c44cbbd8e2b2ad4cbaecac0e"
+  },
+  "total": 3,
+  "failed": 0,
+  "passed": 3,
+  "seconds": 44.81,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "1aa13b8ec2de72348db8212411157e0692f648ab83442840adb9074dfcaacaf8",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Uncompacted counted child planning continuation binds its existing held attempt to one logical inference step in the exact child execution scope and retains leaf role, signed call, root budget and final canonical receipt. Existing independent SDK child completion fixtures remain enabled. Nested compaction and automatic runtime enrollment are not qualified.",
+  "initialBuildFailure": {
+    "reason": "Fixture omitted the required stop-token argument; corrected before final validation.",
+    "logSha256": "4c87d6d10eb6899007e202d287077385cc9fcab9fd7d0e04f4550e9c4397be20"
+  }
+}

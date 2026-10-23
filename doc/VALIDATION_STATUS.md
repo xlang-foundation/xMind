@@ -1,3 +1,26 @@
+## Counted child signed continuation — 2026-10-23
+
+Context preparation now checks the signed call's exact root/owner/committed
+turn rather than requiring every planning owner to be the root. Repository
+inference admission likewise binds the call's exact owner and derives its
+parent/leaf role from that ownership. Existing context owner, source, budget
+revision and original funded-attempt checks remain required.
+
+The ledger exercises two child continuation windows using their existing held
+attempts: one logical inference step per child execution scope, leaf role, exact
+signed call, no second model charge, and the canonical successful final receipt.
+A parent-owned call is refused. Existing independent SDK completion checks still
+verify root preservation. This fixture disables compaction; nested compaction
+and automatic runtime enrollment remain open.
+
+The first build failed because the fixture omitted the required stop token; its
+log is retained. After correction, native build and **3/3 context repository,
+context engine and worker ledger contracts pass in 44.81 seconds**. Frozen
+source, SDK, libraries, runtime, dependencies and binary sets/bytes unchanged.
+No paid inference, CPython, installation or visible windows.
+[Receipt](evidence/nested-worker-counted-continuation-20261023.json),
+[CTest log](evidence/nested-worker-counted-continuation-20261023-ctest.log).
+
 ## Child planning completion preserves root ownership — 2026-10-23
 
 Read and coding owners previously selected the root planning completion hook

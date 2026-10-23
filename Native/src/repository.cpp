@@ -2159,7 +2159,7 @@ InferenceStepRecord Repository::reserve_inference_step(const InferenceStepSpec& 
         const auto prior=db.execute("SELECT state,owner_run_id,role,purpose,inference_step_id FROM agent_model_call_reservations WHERE root_run_id=? AND attempt_id=?",{s.root_run_id,s.attempt_id}).rows;
         if(!prior.empty()){
             if(!s.planning_call_id||text(prior[0][0])!="reserved"||text(prior[0][1])!=s.owner_run_id||text(prior[0][2])!=call_role(s.role)||text(prior[0][3])!="inference"||!std::holds_alternative<std::nullptr_t>(prior[0][4]))throw Conflict("Only an exact reserved original held attempt can acquire a step");
-            const auto call=dynamic_plan_call(*s.planning_call_id);if(call.root_run_id!=s.root_run_id||call.state!="turn_committed"||call.continuation_attempt_id!=s.attempt_id||s.owner_run_id!=s.root_run_id||s.role!=ModelCallRole::parent)throw Conflict("Inference does not match its signed held continuation");insert_pending_inference(db,s,true);
+            const auto call=dynamic_plan_call(*s.planning_call_id);if(call.root_run_id!=s.root_run_id||call.state!="turn_committed"||call.continuation_attempt_id!=s.attempt_id||call.owner_run_id!=s.owner_run_id||s.role!=(s.owner_run_id==s.root_run_id?ModelCallRole::parent:ModelCallRole::leaf))throw Conflict("Inference does not match its signed held continuation");insert_pending_inference(db,s,true);
         }else{
             if(s.planning_call_id)throw Conflict("Signed continuation must use its original funded attempt");
             const auto signed_holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{s.root_run_id}).rows.at(0).at(0));
