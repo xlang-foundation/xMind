@@ -1,3 +1,26 @@
+## Ordinary Responses backend exit capture - 2026-10-22
+
+The original Responses CTest fixture now records each directly spawned backend's
+PID, exit code/signal, stdout and stderr. A failed API request includes value-free
+backend process status while preserving its fetch error as the cause. With the
+explicit private diagnostic directory configured, closed-process logs and a copy
+of isolated fixture state are retained before the original guarded cleanup.
+Native server launch, actual worker/backend PID checks, model requests, assertions,
+and all existing deadlines remain unchanged. Capture uses no debugger. Capture
+errors preserve an existing test failure; private state and logs stay outside Git.
+
+The bounded ordinary CTest until-fail diagnostic completes all ten executions
+in 104.17 seconds. All 2810 project /16 SDK /1870 pure-library /30 runtime /
+18598 dependency /137 binary file sets and hashes remain unchanged. Every run
+retains seven valid backend exit records and a database copy: 70 records total,
+all expected harness SIGTERM stops, with no observed fatal exit. Evidence:
+responses-exit-recording-repeat-20261022-*.
+
+This verifies the recording path and those ten contract executions. It does not
+resolve the prior Responses backend loss or earlier intermittent failures, and
+is not complete-suite acceptance. Native product runtime remains 90675a30;
+installed 0.1.61 is unchanged. Packaging remains on hold.
+
 ## Current complete gate: Responses backend loss - 2026-10-22
 
 Source e49d694c complete Native run finishes 171/172 in 1301.76 seconds.

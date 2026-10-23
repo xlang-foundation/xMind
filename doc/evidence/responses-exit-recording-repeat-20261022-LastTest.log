@@ -1,0 +1,163 @@
+Start testing: Oct 22 21:10 Pacific Daylight Time
+----------------------------------------------------------
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:10 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.29 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:11 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.38 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:11 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.28 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:11 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:11 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.65 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:11 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =   9.88 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:11 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:09
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:11 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.88 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:12 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.34 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:12 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.86 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:12 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+46/172 Testing: native_responses_agent_http_contract
+46/172 Test: native_responses_agent_http_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/responses_agent_http_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_server.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind_cli.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_responses_agent_http_contract" start time: Oct 22 21:12 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native Responses agent passed actual CLI/HTTP admission, real workspace read/tool loop, real Chat-produced plain assistant and actual graph aggregate SQLite reopen followed by role-aware Responses continuation without fabricated IDs or original-history rewrites, reasoning-only terminal ciphertext compatibility with exact completed-item continuation through a real two-leaf read/join, six owned audited model calls with independent per-response metrics, SQLite history reopen without parent/child replay, exact supplied token metrics, encrypted backend credential reuse, restart conversation replay, actual persisted bounded value-free terminal diagnostics for independently constructed metadata/identity/call/summary/unlisted/argument/invalid-opaque mismatches, strict failed delegation before tools or children with user-only history and no retry/effect/invented usage, unsupported tool and incomplete/provider-error rejection, and cancellation. Model output and opaque reasoning are synthetic; live-provider/full frontier coverage remains unverified.
+<end of output>
+Test time =  10.38 sec
+----------------------------------------------------------
+Test Passed.
+"native_responses_agent_http_contract" end time: Oct 22 21:12 Pacific Daylight Time
+"native_responses_agent_http_contract" time elapsed: 00:00:10
+----------------------------------------------------------
+
+End testing: Oct 22 21:12 Pacific Daylight Time

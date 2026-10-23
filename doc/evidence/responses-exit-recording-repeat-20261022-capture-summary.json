@@ -1,0 +1,10 @@
+{
+  "ordinaryCTestExecutions": 10,
+  "backendExitRecords": 70,
+  "validPrivateRecordsAndDatabaseCopies": true,
+  "exitDistribution": {
+    "{\"code\":null,\"signal\":\"SIGTERM\"}": 70
+  },
+  "rawStatePublished": false,
+  "fullSuiteQualification": false
+}
