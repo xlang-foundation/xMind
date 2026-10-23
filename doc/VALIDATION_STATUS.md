@@ -1,3 +1,27 @@
+## Child planning completion preserves root ownership — 2026-10-23
+
+Read and coding owners previously selected the root planning completion hook
+whenever planning was attached. That hook correctly refuses a child owner; an
+attached child therefore could not finish. Both owners now use the existing
+child completion contract for child leases, retaining the shared budget check.
+Root owners retain measured dynamic segment closure. The child contract still
+requires its exact final stored assistant, fully retired model calls, canonical
+tool turns and a finished owned plan.
+
+Two independent xlang3 SDK processes exercise completion through read and
+coding owner bindings after native nested plan settlement. Assertions verify
+only the child and its owned plan complete: root running, root segment open,
+parent plan active, parent lease active, budget revision and parent history/
+events unchanged. Child authority becomes unhealthy after lease retirement.
+The coding owner fixture uses read-only tools; no new coding effect is claimed.
+
+Build and the focused ledger contract pass **1/1 in 36.24 seconds** with frozen
+source/SDK/library/runtime/dependency/binary file sets and bytes unchanged.
+No paid inference, CPython, visible window or installation. Counted planning
+continuations, automatic scheduling and recovery remain unfinished.
+[Receipt](evidence/nested-worker-planning-completion-20261023.json),
+[CTest log](evidence/nested-worker-planning-completion-20261023-ctest.log).
+
 ## Child worker attached planning IPC — 2026-10-23
 
 Read-owner context admission now allows a planning service for an exact

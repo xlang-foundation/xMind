@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-23T21:17:55.385Z",
+  "sourceParent": "405c3b703ef385e97a3e1da1608390f09a963b47",
+  "sourcePatchSha256": "d760b022f2fc37d2d4cd6f0281b3c268f127c452ddc4c6d3089526db021df3fd",
+  "build": {
+    "pid": 1120,
+    "launchedAt": "2026-10-23T21:16:35.470Z",
+    "completedAt": "2026-10-23T21:17:14.035Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "94c87de4b36fe00494b6ffab869cbe4a667b8804cdc7dff9e422150747f04602"
+  },
+  "test": {
+    "pid": 11860,
+    "launchedAt": "2026-10-23T21:17:16.563Z",
+    "completedAt": "2026-10-23T21:17:52.843Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "f7b841c28b586f49e3caefa43493bc4e310cb4abd5c3c8ea6d1dcc4fd09b21f3"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 36.24,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "df2590d1e6992b42c09831d104544dba2179940bf3164c9f7808351617d7caa3",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Read and coding owners with attached planning complete a child through the child completion contract; only root owners use measured dynamic-root closure. Independent xlang3 SDK processes complete two exact child leases after nested plan settlement, leaving the root budget segment, parent plan/history/events and lease active. Coding owner fixture carries read-only tools; no coding effects are claimed."
+}

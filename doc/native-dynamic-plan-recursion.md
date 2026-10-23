@@ -263,3 +263,13 @@ subobject, then inspects the child using stored model facts. No custom method
 dispatch or external value serializer is introduced. This qualifies service
 attachment only; automatic nested scheduling and counted/recovery integration
 remain unfinished. [Receipt](evidence/nested-worker-attached-planning-20261023.json).
+
+### Child completion boundary (2026-10-23)
+
+Attached planning does not grant root termination authority. Read and coding
+owner journal completion routes child leases through the existing child
+completion contract; only the root closes the measured root segment. Separate
+SDK processes verify both owner bindings preserve root state, budget revision,
+parent history/events and parent lease while completing the child-owned plan.
+The coding binding fixture uses read-only tools.
+[Receipt](evidence/nested-worker-planning-completion-20261023.json).
