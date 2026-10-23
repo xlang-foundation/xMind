@@ -1,3 +1,29 @@
+## Installed 0.1.61 checkpoint - 2026-10-22
+
+The qualified source 854957f3 runtime is now installed as agentflow-local.agentflow
+0.1.61. Code CLI installation exited 0. All 2440 installed payload hashes match
+the accepted VSIX; package.json matches except installer metadata. The exact
+2442-file installed set includes the archive manifest. All 2398 covered runtime
+files still match after the installed-executable smoke check. Native SHA-256:
+c6794eb0fe7009681bd8c09250628b599c1f3494f7a2a00157710eb80524c837.
+
+Before/after file sets and hashes are identical for .xMind, Code settings.json,
+keybindings.json, extension globalStorage and repository .config. Other extension
+registry entries are unchanged. Detailed private state inventories remain outside
+Git. The exact previous 2492-file installation backup is preserved under .agentflow.
+
+The actual installed executable started and reused a separate managed fixture
+profile, completed a real file-read graph, restored its two-message history and
+retired its identity-verified owner with exit observed. No model calls or visible
+windows. Session c339a2392a9b82abfd66020c0d4f180c / completed root
+4cbbb8353dd546085f4e45e40ed628f7 MUST NEVER be replayed. No Code or xMind
+process was present in the final process inventory.
+
+Evidence: installed-0.1.61-854957f3-20261022-*.
+Actual VS Code rendering, client fixture fallback cleanup, generic connection
+binding/enrollment and nested process planning/recovery remain open. Historical
+sections below describe their checkpoint-time installation state.
+
 ## Current cleanup package: actual browser coding - 2026-10-22
 
 Source 854957f3/c6794eb0 with fixed SDK f809 and footer client b95abba9 is staged

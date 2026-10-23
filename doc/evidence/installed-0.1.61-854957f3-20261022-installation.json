@@ -1,0 +1,29 @@
+{
+  "recordedAt": "2026-10-23T02:32:52.140Z",
+  "passed": true,
+  "installedVersion": "0.1.61",
+  "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.61",
+  "vsixSha256": "8f60d9bf5902a9a4de1b3c52550d4b6e1d0e123a4bb2c3be2b83c40994a37cfb",
+  "installedPayloadFilesVerified": 2440,
+  "packageJsonMatchesExceptInstallerMetadata": true,
+  "runtimeFilesVerified": 2398,
+  "runtimeManifestSha256": "345bd982f1a2ae91307d6237b61471c069081a6442a362572d1a88449f03efd8",
+  "nativeSha256": "c6794eb0fe7009681bd8c09250628b599c1f3494f7a2a00157710eb80524c837",
+  "otherExtensionRegistryEntriesUnchanged": true,
+  "preservedRoots": [
+    "C:/Users/shaw9/.xMind",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+    "D:/CantorAI2026/xMind/.config"
+  ],
+  "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+  "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+  "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+  "exactOldInstallationBackup": 2492,
+  "visibleWindowRequested": false,
+  "installedNativeExecuted": false,
+  "userProfileBackendStarted": false,
+  "paidInference": false,
+  "renderedVSCode": false
+}

@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed60 clientcf7dfbf4/native3123b5c5/5100131c, SDK1ff:163native/464/161;2447archive/2444installed/2401runtime; no legacy agent worker. Primary32396 remains58/dc900cad and CLI59 owner68928 remains2a2; neither adopted. Ten prior owners/four pages/settings/seven profiles and exact old histories preserved;59backup2447. See doc/VALIDATION_STATUS.md for births and receipts.
+- Installed61 Native854957f3/c6794eb0, SDKf809/footerb95:172/464/162 checks;2442 installed/2398 runtime. Settings/profiles unchanged;60 backup2492 retained. Smoke sessionc339a2392a9b82abfd66020c0d4f180c/root4cbbb8353dd546085f4e45e40ed628f7 completed read, NEVER replay. Owner exited. Code rendering unverified. See doc/VALIDATION_STATUS.md.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 
@@ -48,7 +48,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Keep heavy builds, packages and diagnostics under repository .agentflow and build/skill-state-native. The user cleanup can delete C:/xMindNativeValidation; do not create arbitrary top-level folders. Preserve unrelated untracked endpoint.obj and probe.obj. Do not mass-retire existing user backends, browser hosts or profiles. Verify ownership with exact PID, creation time and image before any retirement, and keep private tokens/configuration out of logs, command arguments and Git. Existing provider/process YAML remains under D:/CantorAI2026/xMind/.config; use configured credentials without asking for the same key again.
 
-- Use the isolated SDK at .agentflow/xlang3-sdk, pinned source f809da864b582a90f77fef408c5c6a0db200e11e (xmind/ctypes-runtime-isolation). Its source/build are .agentflow/xlang3-ctypes-runtime-fix and .agentflow/ctypes-runtime-fix-build/build/Release. SDK correctness/performance pass; Native integration pending. Baseline: .agentflow/xlang3-ctypes-baseline. Original D:/CantorAI2026/xlang3 is unchanged. No broad engine optimization or disruption of other goals.
+- Use the isolated SDK at .agentflow/xlang3-sdk, pinned source f809da864b582a90f77fef408c5c6a0db200e11e (xmind/ctypes-runtime-isolation). Its source/build are .agentflow/xlang3-ctypes-runtime-fix and .agentflow/ctypes-runtime-fix-build/build/Release. SDK correctness/performance and Native172/172 pass. Baseline: .agentflow/xlang3-ctypes-baseline. Original D:/CantorAI2026/xlang3 is unchanged. No broad engine optimization or disruption of other goals.
 
 - Commit and push reviewable checkpoints. Preserve installed/runtime backups, user settings, workspace selection, history and existing successful pages. No legacy profile migration is required; do not rewrite user data to make a new package appear compatible.
 
