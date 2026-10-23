@@ -1,3 +1,17 @@
+## Compaction fixture canonical authority correction - 2026-10-23
+
+Hosted run39993237099 completes167/170 in915.52s. Graph runner, worker model RPC
+and ledger fail. Diagnostic proves provider digest matches while checkpoint
+exists under a different authority; queried authority head has no checkpoint.
+ExecutionPlatform canonicalizes settings.workspace before capture, but fixture
+AgentRunner inspector reused the raw temporary path. Authority includes that
+path text. Fixture now seeds settings.workspace from WorkspaceTools.root_path(),
+matching platform capture and subsequent inspector. Production authority checks
+are unchanged; no cross-binding checkpoint fallback is added. Actual worker RPC
+passes54.50s with frozen input/binary sets unchanged. Hosted verification remains
+required; graph process and ledger failures remain open. Installed62 unchanged.
+Evidence: hosted-native-full-f890c8d2 and worker-compaction-canonical-authority-20261023*.
+
 ## Shutdown correction passes hosted; compaction diagnostics added - 2026-10-23
 
 Run39982730682 completes166/170 in975.50s. Agent service shutdown passes2.54s;

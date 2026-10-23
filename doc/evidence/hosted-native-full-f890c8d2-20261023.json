@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "runId": 39993237099,
+  "jobId": 120550070099,
+  "sourceRevision": "f890c8d245e50076c5f02bcd22421a12fac72a19",
+  "conclusion": "failure",
+  "fullNativeSuiteRan": true,
+  "fullNativeAcceptance": false,
+  "total": 170,
+  "passed": 167,
+  "failed": 3,
+  "seconds": 915.52,
+  "failures": [
+    "native_graph_runner_contract",
+    "native_agent_worker_model_rpc_contract",
+    "native_agent_worker_ledger_contract"
+  ],
+  "compactionDiagnostic": "Provider digest matches; expected authority head has revision zero and no checkpoint, another authority head contains revision one checkpoint.",
+  "artifactId": 12522810098,
+  "artifactSha256": "85ca41e00e6fcca3283b24fb9a30ce82aa6086f2f811253410a853fae3f6df01",
+  "installedChanged": false
+}
