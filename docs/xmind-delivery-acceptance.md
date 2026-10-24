@@ -1,13 +1,20 @@
 # xMind delivery acceptance audit
 
-## Current installed73 checkpoint
+## Current installed74 checkpoint
+
+Installed0.1.74 uses qualified source5e5849cd/Native f3b9bf69/SDK8c7972d1. Full native179/179 passes801.53s. Fresh packaged CLI, rendered browser and actual loopback VS Code selection/read/edit/approved Node4/reload pass; clean open editor updates before reload. Managed73-to74 handoff refuses while paused and preserves exact history/profile after one resume and idle upgrade. All2442 installed files/2398 runtime files, extension registry, exact73 backup and five protected roots verify. Fresh installed managed read/history smoke passes with zero models and owned-backend exit. [Installed receipt](../doc/evidence/installed-0.1.74-5e5849cd-20261024.json).
+
+Generic remote scoped session metadata reads are implemented; command routing/receipts/enrollment/fencing, broader in-flight recovery and scheduling remain open. Hosted f11370fc passes177 native contracts but fails the separate browser integration fixture; ownership is corrected with fresh local integration evidence, hosted workflow acceptance still pending. The complete goal remains active.
+
+
+## Prior installed73 checkpoint
 
 Installed0.1.73 combines Native12fc37cd/source264cadb4/SDK8c7972d1 with frontend0201c326. Complete native178 passes754.01s; clients497/178 pass with frozen source/assets. Fresh packaged process-agent browser spread read/edit/Node4, clean first completion and eight-message reload pass using passive HTTP observation. Exact2398 runtime/helper hashes reuse accepted CLI and72-to73 managed handoff without task replay. Installed payload/registry, five protected roots, exact72 backup and isolated zero-model installed read/history smoke verify. [Installed receipt](../doc/evidence/installed-0.1.73-0201c326-20261024.json), [packaged browser](../doc/evidence/candidate73-passive-browser-coding-20261024.json).
 
 Earlier browser body-loss observations remain retained. Node cancellation can silently empty response iterators; proxy checks now refuse incomplete/canceled finite replies. Current clean acceptance does not establish the earlier exact trigger. Hosted full-suite failures, rendered VSCode, remote enrollment/routing and deeper recovery remain open.
 
 
-## Current development checkpoint
+## Earlier development checkpoints (superseded by74 qualification)
 
 Latest full source1035d900/Native d2121db4 finishes178/179: graph worker passes11.88s; only HTTP agent fails with localhost ENOBUFS. Cause remains unproven. HTTP failure retention is corrected and one fresh focused contract passes8.46s; no full acceptance or install. [Current full/focused evidence](../doc/evidence/native-delivery-1035d900-result-20261024.json).
 

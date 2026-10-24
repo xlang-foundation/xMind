@@ -159,3 +159,12 @@ owner/history/settings backup.
 Superseded after complete local qualification5e5849cd (verbatim):
 
 - Scoped remote session reads pass11 focused; full179 still failed ledger (178pass), no install. See doc/evidence/remote-scoped-session-read-20261024.json. Native candidate uninstalled; original fixtures NEVER replay.
+
+
+Superseded after installed74 qualification (verbatim):
+
+- Installed73 Native12fc37cd/SDK8c passes full178, clients497/178, packaged browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.73-0201c326-20261024.json; NEVER replay. Remaining goal active.
+
+- Rendered loopback Code Server candidate passes selected-editor read/edit/Node4/reload8 with separate worker; clients500/178. NEVER replay sessionc81fc6637b564336bb2419f1929e1aae/root09841bb1abe94ec8a90b87c26715a1ea. Immediate editor refresh remains open; doc/evidence/rendered-vscode-loopback-coding-20261024.json. Installed73 unchanged.
+
+- Native5e5849cd passes full179/179 in801.53s; frozen inputs exact. Package/editor/hosted checks pending; installed73 unchanged. See doc/evidence/native-delivery-5e5849cd-full-20261024.json. Goal active.
