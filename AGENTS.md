@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Captured agents pass native4/clients488-171 and rendered selection/guidance/reload/clear. Native71bb71fb; installed68 unchanged. Receipt doc/evidence/captured-agents-20261024.json; NEVER replay. Full173/package remain open.
+- Agents3233 pass full173/clients488-171; candidate69 CLI passes, browser placement fails before send. Fix249ce7d6 passes4; full/package/rendered open. Receipt doc/evidence/captured-agent-placement-20261024.json; NEVER replay. Installed68 preserved.
 
 - Installed68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
 

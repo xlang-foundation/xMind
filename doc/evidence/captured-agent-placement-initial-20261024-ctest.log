@@ -1,0 +1,19 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  28: native_xmind_ipc_lifetime_contract
+1/4 Test  #28: native_xmind_ipc_lifetime_contract .........***Failed    0.60 sec
+Invalid agent placement; process placement requires primary mode; retained fixture D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-api-lifetime-1463688425
+
+    Start  29: native_xmind_ipc_api_contract
+2/4 Test  #29: native_xmind_ipc_api_contract ..............   Passed    4.74 sec
+    Start 130: native_agent_http_contract
+3/4 Test #130: native_agent_http_contract .................   Passed    9.42 sec
+    Start 166: native_connection_profiles_http_contract
+4/4 Test #166: native_connection_profiles_http_contract ...   Passed    1.46 sec
+
+75% tests passed, 1 tests failed out of 4
+
+Total Test time (real) =  16.24 sec
+
+The following tests FAILED:
+	 28 - native_xmind_ipc_lifetime_contract (Failed)
+Errors while running CTest

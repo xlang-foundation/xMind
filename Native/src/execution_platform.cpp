@@ -231,7 +231,7 @@ Run ExecutionPlatform::submit_graph_workspace_with_attachments(std::string id,st
 }
 std::vector<std::string> ExecutionPlatform::models() const{return agents_?agents_->models():std::vector<std::string>{};}
 std::vector<AgentDefinitionMetadata> ExecutionPlatform::agent_definitions()const{
-    std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default,item.permissions});return result;
+    std::vector<AgentDefinitionMetadata> result;for(const auto& item:AgentDefinitionStore(store_).load().entries)result.push_back({item.id,item.revision,item.model_id,item.name,item.description,item.mode,item.hidden,item.is_default,item.permissions,item.placement});return result;
 }
 AgentDefinition ExecutionPlatform::agent_definition(const std::string& id)const{
     const auto catalog=AgentDefinitionStore(store_).load();const auto found=std::find_if(catalog.entries.begin(),catalog.entries.end(),[&](const auto& item){return item.id==id;});

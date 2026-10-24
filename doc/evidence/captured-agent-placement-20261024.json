@@ -1,0 +1,238 @@
+{
+  "recordedAt": "2026-10-24T11:29:08.835Z",
+  "fullBaseline": {
+    "recordedAt": "2026-10-24T11:22:05.090Z",
+    "sourceParent": "3233cc765f70446267d02777b18f5ae97d7855ed",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 40992,
+      "launchedAt": "2026-10-24T11:06:22.893Z",
+      "completedAt": "2026-10-24T11:08:17.699Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "721a251cde205b3cc167e6e4af2479fc8461c68cd9500982706d353b4c0c5fb4"
+    },
+    "test": {
+      "pid": 38592,
+      "launchedAt": "2026-10-24T11:08:20.362Z",
+      "completedAt": "2026-10-24T11:21:29.266Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6984f777281273328a3e85d38909fdf94929447d4632bf00388894b24fec5b7f"
+    },
+    "total": 173,
+    "failed": 0,
+    "passed": 173,
+    "seconds": 788.88,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "71bb71fbc40df53229c622267f78da921eb9cae2c0509a6f5ee54be91c02ec37",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "candidateVersion": "0.1.69",
+  "candidateInstalled": false,
+  "installedVersion": "0.1.68",
+  "packagedCli": {
+    "passed": true,
+    "sessionId": "7aac271ad6d2c34aa1892e14054b3d37",
+    "runId": "641923abc6bf8c3d748c0a8349101322",
+    "nativeSha256": "71bb71fbc40df53229c622267f78da921eb9cae2c0509a6f5ee54be91c02ec37",
+    "modelCalls": 4,
+    "history": 8,
+    "approvals": 2,
+    "scope": "Actual byte-verified distributable candidate CLI attached by explicit loopback port; synthetic provider, real native read/edit/Node command and SDK process owner. Managed profile auto-discovery not covered.",
+    "neverReplay": true
+  },
+  "browserFailure": {
+    "passed": false,
+    "reason": "Selected agent differs from its backend catalogue: catalogue omits process placement, selected receipt includes it.",
+    "sessionId": "4678c3b0122a463c914e2281a492699f",
+    "promptSubmitted": false,
+    "modelCalls": 0,
+    "toolEffects": 0,
+    "tabClosed": true
+  },
+  "observations": [
+    {
+      "path": "/v1/connection-bindings/24f0465bcbbf0228279d6a5d5c637d8d/agents",
+      "method": "GET",
+      "status": 200,
+      "receipt": {
+        "agents": [
+          {
+            "default": false,
+            "description": "Controlled packaged coding fixture",
+            "hidden": false,
+            "id": "coding.process",
+            "mode": "primary",
+            "model_id": "client-coding-fixture",
+            "name": "Native Process Coder",
+            "permissions": [],
+            "revision": 1
+          }
+        ],
+        "binding": {
+          "backend_generation": "3291433391-2643493123-27687524-993149413-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-e95c49c524a52ea497372b0a55f8855702db44bda46b0a09a367353beb875471"
+        }
+      }
+    },
+    {
+      "path": "/v1/connection-bindings/24f0465bcbbf0228279d6a5d5c637d8d/sessions/4678c3b0122a463c914e2281a492699f/agent",
+      "method": "GET",
+      "status": 200,
+      "receipt": {
+        "binding": {
+          "backend_generation": "3291433391-2643493123-27687524-993149413-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-e95c49c524a52ea497372b0a55f8855702db44bda46b0a09a367353beb875471"
+        },
+        "editable": true,
+        "revision": 0,
+        "selected": null,
+        "session_id": "4678c3b0122a463c914e2281a492699f"
+      }
+    },
+    {
+      "path": "/v1/connection-bindings/24f0465bcbbf0228279d6a5d5c637d8d/sessions/4678c3b0122a463c914e2281a492699f/agent",
+      "method": "POST",
+      "status": 200,
+      "body": {
+        "agent_id": "coding.process",
+        "agent_revision": 1,
+        "expected_revision": 0
+      },
+      "receipt": {
+        "binding": {
+          "backend_generation": "3291433391-2643493123-27687524-993149413-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-e95c49c524a52ea497372b0a55f8855702db44bda46b0a09a367353beb875471"
+        },
+        "editable": true,
+        "revision": 1,
+        "selected": {
+          "default": false,
+          "description": "Controlled packaged coding fixture",
+          "hidden": false,
+          "id": "coding.process",
+          "mode": "primary",
+          "model_id": "client-coding-fixture",
+          "name": "Native Process Coder",
+          "permissions": [],
+          "placement": "process",
+          "revision": 1
+        },
+        "session_id": "4678c3b0122a463c914e2281a492699f"
+      }
+    }
+  ],
+  "retirement": {
+    "pid": 37384,
+    "expectedBirth": "134373146230507463",
+    "observedAbsentAfterParentExit": true,
+    "killSent": false,
+    "promptSubmitted": false
+  },
+  "cause": "ExecutionPlatform::agent_definitions omitted placement while selected metadata retained it; strict client consistency correctly rejected the mismatch.",
+  "fix": "Include persisted placement in direct execution catalogue; SDK regression checks catalogue, definition and selected receipt agreement.",
+  "initialFocused": {
+    "recordedAt": "2026-10-24T11:26:54.399Z",
+    "sourceParent": "3233cc765f70446267d02777b18f5ae97d7855ed",
+    "sourcePatchSha256": "1435e9d0212e067136251d12773964de0e2a34c03d9959e4117e521fd34cf7c9",
+    "build": {
+      "pid": 17464,
+      "launchedAt": "2026-10-24T11:25:36.205Z",
+      "completedAt": "2026-10-24T11:26:32.761Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3e028464870a9f0ae344dc1c89017dd9f52419ead9e4e1e8eabca7fa39e905d9"
+    },
+    "test": {
+      "pid": 39164,
+      "launchedAt": "2026-10-24T11:26:35.425Z",
+      "completedAt": "2026-10-24T11:26:51.723Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "4c6cb9f951bd1b32ed1a85bf224818f664f52a122c6c12834881f64554ce11b5"
+    },
+    "total": 4,
+    "failed": 1,
+    "passed": 3,
+    "seconds": 16.24,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "249ce7d6a6f701f5bd5b079711f5b59b9aa73787f6d7a0d39725ae9c6ad6ae7c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "correctedFocused": {
+    "recordedAt": "2026-10-24T11:28:35.201Z",
+    "sourceParent": "3233cc765f70446267d02777b18f5ae97d7855ed",
+    "sourcePatchSha256": "eda23dd4524b7191793c827b1e273f08dd90a319cdab8bae5ad3efb6f086f72d",
+    "build": {
+      "pid": 39076,
+      "launchedAt": "2026-10-24T11:27:26.502Z",
+      "completedAt": "2026-10-24T11:28:13.452Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "62393a1822a9ba4d4514343ca5e0c9ab67b692aa572641c7ac42c739a005c460"
+    },
+    "test": {
+      "pid": 37532,
+      "launchedAt": "2026-10-24T11:28:16.224Z",
+      "completedAt": "2026-10-24T11:28:32.551Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6b6d0115257f6db416f764048a97f1135f259f549ad9954a4f796d68add0eb68"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 16.29,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "249ce7d6a6f701f5bd5b079711f5b59b9aa73787f6d7a0d39725ae9c6ad6ae7c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "fullCorrectedQualification": false,
+  "remaining": "Corrected full native qualification, new package, fresh rendered named-process coding, managed handoff and preserved installation; broader goal remains active.",
+  "harnessPreparation": "The unused maximum fixture also retained an incorrect sum-minus-maximum replacement from its source harness. No prompt or effect ran. Correct the next fresh harness before executing it.",
+  "paidInference": false,
+  "cpythonExecuted": false
+}
