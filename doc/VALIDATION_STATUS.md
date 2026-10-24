@@ -1,3 +1,7 @@
+## Hosted native inventory failure identified and corrected — 2026-10-23
+
+Hosted native run40065884877 on c68485ce failed before the full native CTest invocation: its expected set omitted native_agent_worker_nested_human_contract. Official artifact12550274530 records exactly that one additional test (171 actual,170 expected). The corrected explicit expected set matches all171 hosted names without duplicates. PowerShell syntax is checked separately; no deadline or runtime assertion changes. This is inventory repair, not hosted native acceptance. Earlier run logs/artifacts and local complete173 qualification remain distinct. [Receipt](evidence/hosted-native-c68485ce-inventory-failure-20261023.json).
+
 ## Captured model catalog passes native5 and client477/165 — 2026-10-23
 
 Models().List() is a registered xlang3 subobject of the captured connection. SDK and HTTP use the same native model list and value encoder. Shared browser/extension reads retain binding identity and validate default/entry uniqueness; a negotiated error or downgrade cannot fall back. Actual separate xmind.exe calls agree with the configured HTTP catalog. Actual managed-view/browser gateway reads and retired-object refusal pass.
