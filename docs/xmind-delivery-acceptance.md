@@ -1,7 +1,7 @@
 # xMind delivery acceptance audit
 
 This audit preserves the full recovered delivery objective; completion remains
-unproven. Installed 0.1.62 still uses Native2f105e11 and SDK499415d0. Its protected
+unproven. Candidate0.1.64 is [assembled and byte-verified](../doc/evidence/candidate-0.1.64-package-d3fef238-20261023.json) from the complete corrected172-contract gate; fresh packaged execution and installation remain pending. Installed 0.1.62 still uses Native2f105e11 and SDK499415d0. Its protected
 backup and user state remain separate from candidate qualification. Current
 source is not installed. Candidate0.1.63 is [assembled and byte-verified](../doc/evidence/candidate-0.1.63-package-3024124e-20261023.json); [Packaged CLI coding](../doc/evidence/candidate-0.1.63-cli-coding-20261023.json), [packaged browser coding](../doc/evidence/candidate-0.1.63-browser-coding-20261023.json) and [isolated managed handoff](../doc/evidence/candidate-0.1.63-managed-handoff-20261023.json) pass. Protected installation, rendered VS Code and the retained initial old-owner cold-start failure remain separate open gates.
 

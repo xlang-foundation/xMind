@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.64",
+  "sourceRevision": "d3fef238fd17424986db18ce303bfc7b601d66a8",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "nativeSha256": "41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f",
+  "archive": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-d3fef238/package-qualified/agentflow-0.1.64-sdk-8c7972d1.vsix",
+  "archiveSha256": "8e8a56b987951569a6d7df82d1a719ee4876a15e59c5a605d5d45187c6d07fec",
+  "archiveBytes": 35237760,
+  "archiveEntries": 2443,
+  "runtimeFiles": 2398,
+  "runtimeManifestSha256": "19792721433fa03e63cee07b64064851db73624172c72620b3c340a98aa3715a",
+  "acceptedExtensionTests": 470,
+  "acceptedBrowserTests": 165,
+  "frontendFilesMatched": 69,
+  "sourceAndDependencySetsRechecked": true,
+  "unchangedClientSuitesRepeated": false,
+  "allExpectedRuntimeClientAssetsAndLibrariesVerified": true,
+  "cleanRuntimeUnchanged": true,
+  "excludedDevelopmentOnlyFiles": {
+    "modules/xlang1_compat_sample.x3pkg.dll": "4a16024341b8d9df2cae19c8ee5cdc43fc65ab59b2bc7d4a70f9d86176638a68",
+    "modules/xlang_graph_native.x3pkg.dll": "69025238c37f0176da0d84e970437ca9be52f4d86fe2426b7608ce29a1cb1e2f",
+    "modules/xlang_curmodule_probe.x3pkg.dll": "78f8788031d70a6ca1113fc2bf9ba316bb6824b676c5e470bb5721f1736b96e8",
+    "xlang3_runtime.lib": "5c3b83a87597df78f6b90cdb095409f97d57f8ed88dcd5323f32779f902944ab"
+  },
+  "nativeExecuted": false,
+  "installed": false,
+  "releaseAccepted": false,
+  "scope": "Byte-verified distributable assembly using exact full172-qualified corrected Native41bb202a and SDK8c; unchanged client gate inputs/assets/dependencies rechecked. Packaged execution, protected install and rendered VS Code remain separate.",
+  "fullGoalComplete": false,
+  "passed": true
+}

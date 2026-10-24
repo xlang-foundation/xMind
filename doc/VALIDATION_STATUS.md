@@ -1,3 +1,19 @@
+## Candidate0.1.64 assembled from complete corrected gate — 2026-10-23
+
+The separate0.1.64 VSIX contains2443 entries and a2398-file distributable
+runtime, including exact full172-qualified Native41bb202a and SDK8c7972d1.
+Runtime manifest SHA-256 is19792721433fa03e63cee07b64064851db73624172c72620b3c340a98aa3715a.
+All expected native/library/client assets match; clean runtime file sets and
+bytes remain exact. The accepted470 extension /165 browser source, generated
+assets and dependency closure match; those unchanged suites were not replayed.
+Package assembly executes no native runtime, provider or Python interpreter.
+
+Installed62 and the prior0.1.63 candidate remain unchanged. Fresh packaged
+coding/managed checks, protected installation and rendered VS Code remain
+separate gates. Native qualifications do not complete automatic nested planning,
+recovery or generic remote authority work.
+[Package receipt](evidence/candidate-0.1.64-package-d3fef238-20261023.json).
+
 ## Complete corrected native qualification — 2026-10-23
 
 All targets build and172/172 contracts pass in1311.69s on exact source
