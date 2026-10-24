@@ -1,5 +1,9 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Corrected read-only browser cancellation timing — 2026-10-24
+
+Actual hidden browser restores and reloads completed product task with eight messages and zero warnings/models. Native JSON reads complete in milliseconds; downstream responses have no premature close or5xx. Observed timeout signals occur after native reads/response completion, so this clean run does not identify the original lost-body trigger. Original DB/WAL/SHM hashes remain exact; owned backend exits. Initial private trace finalization failed due a missing generated listener; its database/owner preservation is separately audited, and it is not counted as a passed gate. [Receipt](evidence/browser-abort-timing-readonly-20261024.json), [rendered reload](evidence/browser-abort-timing-readonly-20261024.png). Installed72 unchanged; full goal active.
+
 ## Node fetch silently empty aborted-body mechanism reproduced — 2026-10-24
 
 A local real HTTP peer returns complete50-byte JSON. Reading a cloned response then iterating the original yields50 bytes without cancellation, but aborting after the clone read makes original iteration finish with0 bytes and no exception on Node22.19.0. This matches the empty forwarded-body mechanism; it does not identify which disconnect/deadline signal fired in the packaged browser case. [Probe source](evidence/browser-response-abort-reproduction-20261024.mjs), [raw output](evidence/browser-response-abort-reproduction-20261024.log), [receipt](evidence/browser-response-abort-mechanism-20261024.json).

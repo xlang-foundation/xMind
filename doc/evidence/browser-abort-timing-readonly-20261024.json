@@ -1,0 +1,35 @@
+{
+  "recordedAt": "2026-10-24T18:54:10.964Z",
+  "source": "0201c326",
+  "scope": "Actual hidden browser read-only restore/reload of completed packaged product task with cancellation timing",
+  "session": "ee2cd7fd669849ff966bdcf2039d02dd",
+  "run": "f58cfb96399b43d5bcdf695066fcc717",
+  "historyMessages": 8,
+  "modelRequests": 0,
+  "originalDatabaseUnchanged": true,
+  "ownedOwnerRetired": true,
+  "browser": {
+    "completed": true,
+    "messages": 8,
+    "warnings": []
+  },
+  "nativeResponses": 104,
+  "invalidNativeJson": 0,
+  "nativeReadMaxMs": 21,
+  "abortedAtNativeRead": 0,
+  "downstreamRequests": 129,
+  "downstreamPrematureClose": [],
+  "downstream5xx": [],
+  "downstreamFinishMaxMs": 25,
+  "timeoutSignalsObservedAfterNativeRead": 94,
+  "initialDiagnostic": {
+    "passed": false,
+    "reason": "Trace-generation listener insertion missed; finalization ReferenceError after owned process retirement",
+    "originalDatabaseHashesVerifiedUnchanged": true,
+    "ownedPidConfirmedAbsent": true
+  },
+  "causalLimit": "This clean observation does not identify the original body-loss trigger. Later timeout signals alone do not indicate failed already-completed responses.",
+  "installedVersion": "0.1.72",
+  "candidate73Installed": false,
+  "neverReplay": true
+}
