@@ -1,3 +1,25 @@
+## Candidate0.1.64 managed handoff and packaged CLI — 2026-10-23
+
+Isolated managed handoff from the original0.1.62 bundle to corrected0.1.64
+passes. A real read graph observes seeded bytes. An active paused graph blocks
+upgrade, resumes once, completes, then idle handoff preserves origin, profile,
+sessions, history and terminal graph state. New-owner discovery attaches and
+exact birth/image retirement is observed. Both clean payloads remain exact.
+Managed session554d80aa1156273fe7868d78868d7a91; completed roots 8382843824cc511e3d9738c65b6e6150, e9bf6dd89fdc6c4874a4f68f8a27cb62
+are never to be replayed. [Handoff receipt](evidence/candidate-0.1.64-managed-handoff-20261023.json).
+
+The actual0.1.64 distributable CLI also completes a fresh sum-of-evens task:
+native read, approved edit, approved Node command and four assertions. Four
+controlled replies yield eight canonical messages, two succeeded effects, exact
+history/watch, closed budget and retired SDK worker; physical exit is observed.
+Runtime sets/bytes are unchanged. Session450e5b42e5f343e3e6c35a2d7cf5a957 /
+roote25733fc541a370922191af8dcfe3fd3 are complete; never replay.
+[CLI receipt](evidence/candidate-0.1.64-cli-coding-20261023.json).
+
+No paid inference, CPython, visible window, user-profile operation or actual
+installation. Packaged browser, protected install and rendered VS Code remain
+separate, along with unfinished scheduling/recovery/remote authority work.
+
 ## Candidate0.1.64 assembled from complete corrected gate — 2026-10-23
 
 The separate0.1.64 VSIX contains2443 entries and a2398-file distributable

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.64",
+  "sourceRevision": "d3fef238fd17424986db18ce303bfc7b601d66a8",
+  "nativeSha256": "41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f",
+  "scope": "Actual isolated managed-profile handoff from original0.1.62 package to corrected0.1.64 package; real native read/human-input graphs and native persistent owner, no model calls. Not an installed VS Code upgrade.",
+  "sessionId": "554d80aa1156273fe7868d78868d7a91",
+  "completedRootIdsNeverReplay": [
+    "8382843824cc511e3d9738c65b6e6150",
+    "e9bf6dd89fdc6c4874a4f68f8a27cb62"
+  ],
+  "completedTaskNeverReplay": true,
+  "priorOwner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:59409",
+    "process_id": 5568,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p64\\profiles\\e353e1bd48c215cccdaaa457527fc68821a20e1e8bb37904de5f733397e64035",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff64",
+    "workspace_edits": "approved"
+  },
+  "owner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:59409",
+    "process_id": 25796,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p64\\profiles\\e353e1bd48c215cccdaaa457527fc68821a20e1e8bb37904de5f733397e64035",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff64",
+    "workspace_edits": "approved"
+  },
+  "activeGraphUpgradeRefused": true,
+  "originalGraphResumedOnce": true,
+  "historyAndProfileExactAfterUpgrade": true,
+  "managedDiscovery": true,
+  "packageIntegrity": {
+    "oldExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "oldClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    }
+  },
+  "ownedOwnerRetirementObserved": true,
+  "modelCalls": 0,
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "renderedVSCode": false,
+  "fullGoalComplete": false,
+  "passed": true
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.64",
+  "sourceRevision": "d3fef238fd17424986db18ce303bfc7b601d66a8",
+  "nativeSha256": "41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f",
+  "scope": "Actual byte-verified distributable candidate CLI attached by explicit loopback port; synthetic provider, real native read/edit/Node command and SDK process owner. Managed profile auto-discovery not covered.",
+  "sessionId": "450e5b42e5f343e3e6c35a2d7cf5a957",
+  "rootRunId": "e25733fc541a370922191af8dcfe3fd3",
+  "completedTaskNeverReplay": true,
+  "state": "completed",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "approvals": 2,
+  "nodeChecksPassed": 4,
+  "historyAndWatchExact": true,
+  "operations": [
+    {
+      "id": "1bc5013bffe0fb4f9492e107b91fe0e9",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "d31834c2cc30eb99ec6435a3608332d9",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "workerExit": {
+    "generation": "cf9b82c735ceb6dff4179fc9310b0672",
+    "pid": 15280,
+    "root_run_id": "e25733fc541a370922191af8dcfe3fd3",
+    "observedAbsent": true,
+    "observedAt": "2026-10-24T00:51:49.041Z"
+  },
+  "ownedBackendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 31704,
+    "birthAndImageVerified": true
+  },
+  "runtimeFileSetsAndBytesUnchanged": true,
+  "gateSha256": "540837f50c7f9dffbb8b16cc960101fe9f2c567d20fdec5557d0c0a3c15ec66c",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "renderedVSCode": false,
+  "fullGoalComplete": false,
+  "passed": true
+}
