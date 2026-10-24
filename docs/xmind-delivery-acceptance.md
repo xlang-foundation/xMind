@@ -96,3 +96,7 @@ root budget. Actual rendered VS Code coding remains an explicit delivery gate.
 The public root remains a registration surface. Services belong in subobjects;
 local cross-process methods and values use the supported xlang3 SDK. Private Nexus
 implementation/specifications are not copied into this public repository.
+
+## 2026-10-23 automatic child planning checkpoint
+
+Actual SDK dynamic children now plan a native read and consume its report through their registered xlang3 Planning subobject. Four read/coding and plain/counted parent cases retain exact child generations and charges through parent human pause/reopen without replay. Focused gates pass5/5 (49.16s) and4/4 (74.93s), with the same frozen patch and binary. See [receipt](../doc/evidence/automatic-child-planning-20261023.json). This does not qualify child-owned human pause/resume, deeper recovery, a full172 suite or a new installed package; installed64 remains unchanged.

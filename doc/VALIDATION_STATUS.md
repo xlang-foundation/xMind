@@ -1,3 +1,23 @@
+## Automatic process children use their scoped xlang3 planning service — 2026-10-23
+
+Typed dynamic-agent workers now acquire the registered Planning subobject,
+start their exact queued owner and reserve planning continuations through the
+original shared pool, slot and root budget. Sealed leaf tools are verified before
+adding only inherited planning tools; delegated leaves remain bounded.
+
+The production child creates a plan, executes a real native file read, consumes
+its canonical report and completes. Read/coding parents with plain/counted
+context then pause for human input and reopen without replaying that child.
+Each case retains two completed children, one child SDK generation and four
+model charges. Existing coexistence, selected permissions and exact restricted
+catalogues pass. Dynamic-plan/context/pool/ledger5 pass in49.16s; adjacent
+repository/engine/graph/production-IPC4 pass in74.93s on the same patch/binary.
+All frozen input/binary file sets and hashes remain unchanged.
+[Receipt and retained diagnostic failures](evidence/automatic-child-planning-20261023.json).
+
+Full automatic child-owned human pause/resume, counted/repeated nested resume,
+deeper cancellation/recovery and full172 remain open. Installed64 is unchanged.
+
 ## Process children verify the same sealed catalogue — 2026-10-23
 
 Native process child construction now verifies actual leaf tools, exact schema

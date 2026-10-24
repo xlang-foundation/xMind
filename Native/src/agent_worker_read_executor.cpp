@@ -58,14 +58,17 @@ public:
     McpToolRegistry* mcp(const std::string& alias)const{const auto found=mcp_.find(alias);return found==mcp_.end()?nullptr:found->second;}
     A2aAgentToolRegistry* a2a(const std::string& alias)const{if(!a2a_)return nullptr;const auto definitions=a2a_->definitions();return std::any_of(definitions.begin(),definitions.end(),[&](const auto& tool){return tool.name==alias;})?a2a_.get():nullptr;}
 };
+struct DynamicWorkerOwner {std::shared_ptr<NativeChildExecutor> children;std::shared_ptr<NativeChildSlot> slot;std::shared_ptr<RootExecutionBudget> budget;bool resumed=false;};
 class WorkspaceExecutor final:public AgentRootExecutor {
     PersistenceService& store_;
     AgentSettings settings_;
     bool coding_=false,delegated_=false,graph_=false,dynamic_=false;
     std::shared_ptr<NativeChildExecutor> children_;
+    std::optional<DynamicWorkerOwner> dynamic_owner_;
     std::shared_ptr<DelegationExecutor> delegation_;
     std::shared_ptr<DynamicPlanExecutor> planning_;
     bool planning_root()const{return settings_.planning&&!dynamic_&&!delegated_&&!graph_;}
+    bool planning_child()const{return settings_.planning&&dynamic_&&dynamic_owner_.has_value();}
     std::shared_ptr<const BoundProcessExecutable> image_;
     std::unique_ptr<WorkspaceTools> primary_;
     std::shared_ptr<ProcessExecutor> process_catalogue_;
@@ -108,8 +111,9 @@ class WorkspaceExecutor final:public AgentRootExecutor {
         return result;
     }
 public:
-    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={},bool graph=false,bool dynamic=false)
-        :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),graph_(graph),dynamic_(dynamic),image_(std::move(image)){
+    WorkspaceExecutor(PersistenceService& store,AgentSettings settings,std::shared_ptr<const BoundProcessExecutable> image,bool coding,bool delegated=false,std::shared_ptr<AgentModelGateway> gateway={},bool graph=false,bool dynamic=false,std::optional<DynamicWorkerOwner> owner={})
+        :store_(store),settings_(std::move(settings)),coding_(coding),delegated_(delegated),graph_(graph),dynamic_(dynamic),children_(owner?owner->children:nullptr),dynamic_owner_(std::move(owner)),image_(std::move(image)){
+        if(dynamic_!=dynamic_owner_.has_value()||(dynamic_owner_&&(!children_||!dynamic_owner_->slot||!dynamic_owner_->budget||!dynamic_owner_->slot->shares_budget(dynamic_owner_->budget))))throw Conflict("Dynamic worker requires its captured pool, slot and shared budget");
         if(!image_||(!settings_.workspace&&(coding_||delegated_||graph_||dynamic_||settings_.delegation||!settings_.language_servers.empty()||settings_.language_server_registry||settings_.language_server_dispatch))||(!coding_&&(settings_.approved_edits||settings_.a2a_enabled||!settings_.mcp_servers.empty()||!settings_.process_profiles.empty()))||((delegated_||graph_||dynamic_)&&settings_.delegation)||((delegated_||graph_)&&settings_.planning)||(!coding_&&settings_.workspace&&!delegated_&&!graph_&&!dynamic_&&!settings_.delegation&&!settings_.planning&&settings_.context)||(!coding_&&!settings_.xlang_python_tools.empty()))throw std::invalid_argument("Unsupported worker read settings");
         if(planning_root()&&settings_.planning->max_parent_turns>=1&&settings_.planning->max_parent_turns<=32)settings_.planning->max_parent_turns=static_cast<std::int64_t>(std::min(settings_.max_turns,static_cast<std::size_t>(settings_.planning->max_parent_turns)));
         if(coding_&&!settings_.approved_edits)throw std::invalid_argument("Coding worker requires approved native file tools");
@@ -122,7 +126,7 @@ public:
         }
         if(coding_&&!settings_.process_profiles.empty()){process_catalogue_=std::make_shared<ProcessExecutor>(store_,*primary_,primary_->root_path(),settings_.process_profiles);settings_.process_profiles=process_catalogue_->profiles();}
         if(!delegated_&&settings_.delegation){if(!settings_.delegated_execution)settings_.delegated_execution=make_agent_worker_delegated_executor(store_,image_);children_=std::make_shared<NativeChildExecutor>();delegation_=std::make_shared<DelegationExecutor>(store_,children_);}
-        if(planning_root()){if(!children_)children_=std::make_shared<NativeChildExecutor>();planning_=std::make_shared<DynamicPlanExecutor>(store_,children_,make_agent_worker_dynamic_executor(store_,image_,gateway));}
+        if(planning_root()||planning_child()){if(!children_)children_=std::make_shared<NativeChildExecutor>();planning_=std::make_shared<DynamicPlanExecutor>(store_,children_,make_agent_worker_dynamic_executor(store_,image_,gateway,children_));}
         if(!dynamic_)validator_=std::make_unique<AgentRunner>(store_,settings_,delegation_,planning_);
         gateway_=gateway?std::move(gateway):make_persistence_agent_model_gateway(store_,settings_.credential);
     }
@@ -144,11 +148,11 @@ public:
     }
     Run execute(const AgentRootExecutionRequest& request,std::stop_token cancel)override{if(delegated_||graph_)throw Conflict("Child executor requires its original shared budget");return execute_owned(request,{},cancel);}
     Run execute_owned(const AgentRootExecutionRequest& request,std::shared_ptr<RootExecutionBudget> shared,std::stop_token cancel){
-        if((delegated_||graph_||dynamic_)!=bool(shared))throw Conflict("Worker executor budget kind differs from captured admission");
+        if((delegated_||graph_||dynamic_)!=bool(shared)||(dynamic_owner_&&dynamic_owner_->budget!=shared))throw Conflict("Worker executor budget kind differs from captured admission");
         const auto execution_started=Clock::now();auto deadline=shared?shared->deadline():execution_started+settings_.run_timeout;validate(request);
         const auto effective=(!delegated_&&!graph_&&!dynamic_)?effective_agent_settings(settings_,request.agent_instructions,request.agent_tools,request.agent_permissions):settings_;
         const auto admitted=store_.run(request.run_id).get();
-        const bool resumed=planning_root()&&admitted.state==RunState::paused;
+        const bool resumed=(planning_root()&&admitted.state==RunState::paused)||(dynamic_owner_&&dynamic_owner_->resumed&&admitted.state==RunState::running&&shared->may_resume_owner(request.run_id));
         if(admitted.graph_root||(admitted.state!=RunState::queued&&!resumed)||((graph_||dynamic_)?admitted.parent_id.empty():delegated_?admitted.parent_id!=shared->root_id():!admitted.parent_id.empty()))throw Conflict("Worker execution requires its fresh queued owner");
         if(delegated_){const auto child=store_.child_admission(request.run_id).get();if(child.kind!=ChildAdmissionKind::delegated_leaf||child.root_run_id!=shared->root_id()||child.preset_id!="workspace.inspect"||child.preset_revision!=1||settings_.max_turns>4)throw Conflict("Worker differs from bounded delegated admission");shared->check(cancel);}
         const auto history=store_.run_history(request.run_id).get();
@@ -207,6 +211,7 @@ public:
             Json bindings=remote_tools?Json::parse(remote_tools->approval_bindings(policy.tools)):Json::array();
             for(const auto& tool:settings_.xlang_python_tools)if(std::any_of(policy.tools.begin(),policy.tools.end(),[&](const auto& offered){return offered.name==tool.definition.name;}))bindings.push_back({{"kind","trusted_xlang3_callable"},{"alias",tool.definition.name},{"input_schema_json",tool.definition.input_schema_json},{"execution",tool.execution==XlangPythonExecution::worker?"worker":"in_process"}});
             verify_dynamic_child_catalogue(policy.tools,bindings.dump(),plan.capabilities,*preset);
+            if(planning_child())for(const auto& definition:dynamic_plan_tool_definitions(plan.capabilities)){if(settings_.tool_allowlist&&std::find(settings_.tool_allowlist->begin(),settings_.tool_allowlist->end(),definition.name)==settings_.tool_allowlist->end())continue;if(policy.tools.size()>=64)throw DynamicPlanUnavailable("Child planning catalogue exceeds limits");policy.tools.push_back(definition);}
         }
         std::optional<DynamicBudgetSegment> planning_segment;std::optional<DynamicResumeRecord> planning_resume;
         if(planning_root()){
@@ -236,7 +241,7 @@ public:
         std::optional<std::string> saved_membership;for(const auto& event:store_.events(request.run_id).get())if(event.kind=="agent.workspace_membership"){if(saved_membership||!resumed)throw Conflict("Worker root already has an execution membership receipt");saved_membership=event.json;}
         auto captured_membership=Json{{"workspace_id",membership.workspace_id},{"revision",membership.revision},{"primary_folder_id",membership.folders.front().folder_id},{"folders",std::move(folders)},{"snapshot","run_admission"}}.dump();
         if(delegated_||graph_||dynamic_){bool found=false;for(const auto& event:store_.events(root).get())if(event.kind=="agent.workspace_membership"){captured_membership=event.json;found=true;break;}if(!found)throw Conflict("Delegated worker requires the parent membership snapshot");}
-        if(resumed){if(!saved_membership||Json::parse(*saved_membership)!=Json::parse(captured_membership))throw DynamicPlanUnavailable("Paused worker membership differs from its admitted snapshot");const auto plan=store_.dynamic_plan_for_root(root).get();if(!plan)throw DynamicPlanUnavailable("Paused worker has no plan");DynamicResumeSpec wake{plan->id,generation(),plan->capabilities.backend_identity,plan->revision,plan->state_sequence,store_.root_budget(root).get().revision};wake.context_pin=store_.dynamic_context_pause(root).get();if(settings_.context&&!wake.context_pin)throw DynamicPlanUnavailable("Paused worker has no context pin");const auto started=Clock::now();planning_resume=store_.resume_dynamic_owner(wake).get();planning_segment=planning_resume->segment;deadline=started+std::chrono::milliseconds(planning_segment->remaining_active_ms);}
+        if(resumed){if(!saved_membership||Json::parse(*saved_membership)!=Json::parse(captured_membership))throw DynamicPlanUnavailable("Paused worker membership differs from its admitted snapshot");if(planning_root()){const auto plan=store_.dynamic_plan_for_root(root).get();if(!plan)throw DynamicPlanUnavailable("Paused worker has no plan");DynamicResumeSpec wake{plan->id,generation(),plan->capabilities.backend_identity,plan->revision,plan->state_sequence,store_.root_budget(root).get().revision};wake.context_pin=store_.dynamic_context_pause(root).get();if(settings_.context&&!wake.context_pin)throw DynamicPlanUnavailable("Paused worker has no context pin");const auto started=Clock::now();planning_resume=store_.resume_dynamic_owner(wake).get();planning_segment=planning_resume->segment;deadline=started+std::chrono::milliseconds(planning_segment->remaining_active_ms);}}
         else store_.append_event(request.run_id,"agent.workspace_membership",captured_membership).get();
         if(!resumed&&settings_.instruction_policy.revision>0)store_.append_event(request.run_id,"agent.instructions",Json{{"revision",settings_.instruction_policy.revision},{"byte_count",settings_.instruction_policy.instructions.size()},{"scope","server"},{"runtime_state","startup_snapshot"}}.dump()).get();
         AgentReadToolOwnerContext owner;owner.run_id=request.run_id;owner.primary_workspace=&members.folder_tools(0);owner.workspace_members=&members;owner.deadline=deadline;owner.approval_timeout=settings_.run_timeout;
@@ -273,14 +278,14 @@ public:
         const auto physical=[&]{for(;;){try{supervisor->drain_physical(Clock::now()+5s);return;}
                 catch(...){std::this_thread::sleep_for(1s);}}};
         std::exception_ptr failure;std::shared_ptr<RootExecutionBudget> planning_budget;
-        try{supervisor->launch();if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);bind_delegation(policy,request,planning_budget,cancel);auto frozen=effective_agent_settings(settings_,request.agent_instructions,request.agent_tools,request.agent_permissions);frozen.provider.model=provider.model;auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
+        try{supervisor->launch();if(planning_child()){const auto lease=supervisor->lease();auto frozen=settings_;frozen.provider.model=provider.model;auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,dynamic_owner_->budget,deadline,cancel,{},dynamic_owner_->slot);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),dynamic_owner_->budget});}else if(segment){const auto lease=supervisor->lease();const auto caps=store_.dynamic_capabilities(root).get();planning_budget=std::make_shared<RootExecutionBudget>(store_,store_.root_budget(root).get(),deadline,cancel,*segment,caps.backend_identity,resume?resume->owner_runs:std::vector<std::string>{},[this,lease,deadline,cancel](const auto& call,const auto& attempt,std::stop_token stop){return store_.reserve_agent_worker_planning_continuation(lease,call,attempt,deadline,cancel,stop).get();});if(resume&&resume->context_pin)planning_budget->adopt_context_pin(*resume->context_pin);bind_delegation(policy,request,planning_budget,cancel);auto frozen=effective_agent_settings(settings_,request.agent_instructions,request.agent_tools,request.agent_permissions);frozen.provider.model=provider.model;auto callbacks=make_agent_worker_planning_callbacks(store_,lease,std::move(frozen),planning_,planning_budget,deadline,cancel);policy.planning=std::make_shared<AgentWorkerPlanningServices>(AgentWorkerPlanningServices{std::move(callbacks),planning_budget});}
             if(coding_)supervisor->start_coding(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel,process_catalogue_,remote_owner,callable_owner);else supervisor->start(owner,policy,provider,provider_context_json(settings_,provider.model),gateway_,cancel);(void)supervisor->execute();}
         catch(...){failure=std::current_exception();}
         try{
             if(!supervisor->admitted()){physical();if(failure)std::rethrow_exception(failure);throw Conflict("Worker lease was not admitted");}
             for(;;){try{
                     if(store_.run(request.run_id).get().state==RunState::completed)return supervisor->drain_completed(Clock::now()+5s).run;
-                    if(segment&&store_.run(request.run_id).get().state==RunState::paused)return supervisor->drain_paused(segment->id,Clock::now()+5s).run;
+                    if((segment||planning_child())&&store_.run(request.run_id).get().state==RunState::paused)return supervisor->drain_paused(segment?segment->id:dynamic_owner_->budget->segment_id(),Clock::now()+5s).run;
                     const bool cancelled=cancel.stop_requested();std::string reason=cancelled?"cancelled":Clock::now()>=deadline?"deadline":"dispatch_error";
                     // Only backend model-host events may establish provider failure.
                     if(!cancelled&&reason!="deadline")for(const auto& event:store_.events(request.run_id).get()){if(event.kind!="worker.model.uncertain")continue;const auto data=Json::parse(event.json,nullptr,false);if(data.is_object()&&data.contains("generation")&&data["generation"]==supervisor->lease().generation&&data.contains("failure_code")&&data["failure_code"]=="provider_failure")reason="provider_failure";}
@@ -296,12 +301,12 @@ public:
     }
 };
 }
-DynamicAgentExecution make_agent_worker_dynamic_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){
+DynamicAgentExecution make_agent_worker_dynamic_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway,std::shared_ptr<NativeChildExecutor> children){
     if(!image)throw std::invalid_argument("Dynamic execution requires a bound xmind image");
-    return [&store,image=std::move(image),gateway=std::move(gateway)](const AgentSettings& frozen,const std::string& id,std::shared_ptr<RootExecutionBudget> budget,std::shared_ptr<NativeChildSlot> slot,bool resume,std::stop_token cancel){
-        if(resume||!budget||!slot||!slot->shares_budget(budget)||!frozen.workspace)throw Conflict("Dynamic process requires its original shared child budget and native slot");const auto child=store.child_admission(id).get();if(child.kind!=ChildAdmissionKind::dynamic_agent||child.root_run_id!=budget->root_id())throw Conflict("Dynamic process lacks its exact child claim");const auto plan=store.dynamic_plan(child.plan_id).get();const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});if(preset==plan.capabilities.presets.end()||frozen.max_turns!=static_cast<std::size_t>(preset->turn_limit)||agent_authority_identity(frozen,frozen.provider.model,plan.capabilities.workspace_identity,agent_authority_credentials(store,frozen))!=child.backend_identity)throw Conflict("Dynamic process settings differ from signed preset");
+    return [&store,image=std::move(image),gateway=std::move(gateway),children=std::move(children)](const AgentSettings& frozen,const std::string& id,std::shared_ptr<RootExecutionBudget> budget,std::shared_ptr<NativeChildSlot> slot,bool resume,std::stop_token cancel){
+        if(!budget||!slot||!children||!slot->shares_budget(budget)||!frozen.workspace||(resume&&!budget->may_resume_owner(id)))throw Conflict("Dynamic process requires its original shared child budget and native slot");const auto child=store.child_admission(id).get();if(child.kind!=ChildAdmissionKind::dynamic_agent||child.root_run_id!=budget->root_id())throw Conflict("Dynamic process lacks its exact child claim");const auto plan=store.dynamic_plan(child.plan_id).get();const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==child.preset_id&&p.revision==child.preset_revision;});if(preset==plan.capabilities.presets.end()||frozen.max_turns!=static_cast<std::size_t>(preset->turn_limit)||agent_authority_identity(frozen,frozen.provider.model,plan.capabilities.workspace_identity,agent_authority_credentials(store,frozen))!=child.backend_identity)throw Conflict("Dynamic process settings differ from signed preset");
         auto membership=std::make_shared<WorkspaceMembershipSnapshot>();bool found=false;for(const auto& event:store.events(budget->root_id()).get())if(event.kind=="agent.workspace_membership"){const auto value=Json::parse(event.json);membership->workspace_id=value.at("workspace_id");membership->revision=value.at("revision");for(const auto& folder:value.at("folders"))membership->folders.push_back({folder.at("folder_id").get<std::string>(),folder.at("root").get<std::string>()});found=true;break;}if(!found)throw Conflict("Dynamic process lacks captured root membership");
-        WorkspaceExecutor executor(store,frozen,image,!preset->readonly,false,gateway,false,true);AgentRootExecutionRequest request;request.run_id=id;request.model_id=frozen.provider.model;request.agent_tools=preset->tools;request.workspace=std::move(membership);request.placement="process";return executor.execute_owned(request,std::move(budget),cancel);
+        WorkspaceExecutor executor(store,frozen,image,!preset->readonly,false,gateway,false,true,DynamicWorkerOwner{children,slot,budget,resume});AgentRootExecutionRequest request;request.run_id=id;request.model_id=frozen.provider.model;request.agent_tools=preset->tools;request.workspace=std::move(membership);request.placement="process";return executor.execute_owned(request,std::move(budget),cancel);
     };
 }
 AgentGraphExecution make_agent_worker_graph_executor(PersistenceService& store,std::shared_ptr<const BoundProcessExecutable> image,std::shared_ptr<AgentModelGateway> gateway){

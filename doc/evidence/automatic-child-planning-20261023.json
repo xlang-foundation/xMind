@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "scope": "Automatic typed dynamic-agent process children acquire the registered xlang3 Planning subobject and reserve exact scoped continuations through the shared native pool, original slot and root budget.",
+  "gates": [
+    {
+      "recordedAt": "2026-10-24T03:17:52.291Z",
+      "sourceParent": "ed8e8dd2c391fee3b5a3625c0ae90500665bee6b",
+      "sourcePatchSha256": "bf42501f80fb8819046508a2fdd24ae4882b875459657f2e62e2f6f29fd66d2c",
+      "build": {
+        "pid": 25280,
+        "launchedAt": "2026-10-24T03:15:56.060Z",
+        "completedAt": "2026-10-24T03:16:57.882Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "649d29a36b470ec077c4dff55da33410eeea10199e1879dfe13c761f544d3e85"
+      },
+      "test": {
+        "pid": 41248,
+        "launchedAt": "2026-10-24T03:17:00.542Z",
+        "completedAt": "2026-10-24T03:17:49.740Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "500c3e5cfd4d32c5779b582e5642b3260053b5991a32a2f82f24151ee3e254d1"
+      },
+      "total": 5,
+      "failed": 0,
+      "passed": 5,
+      "seconds": 49.16,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    {
+      "recordedAt": "2026-10-24T03:20:21.210Z",
+      "sourceParent": "ed8e8dd2c391fee3b5a3625c0ae90500665bee6b",
+      "sourcePatchSha256": "bf42501f80fb8819046508a2fdd24ae4882b875459657f2e62e2f6f29fd66d2c",
+      "build": {
+        "pid": 10604,
+        "launchedAt": "2026-10-24T03:18:05.025Z",
+        "completedAt": "2026-10-24T03:19:01.050Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "f2a711f4534267d827d4869581706792950a30cda159ee65cda219da3bfbcf67"
+      },
+      "test": {
+        "pid": 11584,
+        "launchedAt": "2026-10-24T03:19:03.694Z",
+        "completedAt": "2026-10-24T03:20:18.655Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "30de7aec4a2cfd30dcc2c5b6fa0253877f16e70f1cafd5523d4279c6b558982d"
+      },
+      "total": 4,
+      "failed": 0,
+      "passed": 4,
+      "seconds": 74.93,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    }
+  ],
+  "verified": [
+    "Actual SDK child creates its own plan and consumes real native read_file bytes before final inference.",
+    "Read/coding parent assemblies with plain/counted context; parent human wait/reopen retains two completed children, one child worker generation and four total model charges without child replay.",
+    "Existing exact sealed leaf catalogue verification precedes addition of inherited planning tools.",
+    "Delegated leaves acquire no planning or delegation capability; planned children acquire only the inherited planning allowlist.",
+    "Graph, dynamic-plan engine/repository and production worker-model IPC contracts pass on the same patch and binary."
+  ],
+  "retainedFailures": [
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-binding",
+      "sourcePatchSha256": "520297a5be9da21e37d156ffcc6732ef979c0738e882cac277d9f4f2e55c2abb",
+      "passed": 4,
+      "total": 5,
+      "seconds": 10.95,
+      "ctestLogSha256": "582a7be3f67d50d2b51346ab3d908c6270b8748053030732451233a4f9ff4f3f"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-continuation",
+      "sourcePatchSha256": "9fb05f0c1c18bdbaa4818127385311f2cc484c6ee7023b97014ebc2bcc4a6b8c",
+      "passed": 4,
+      "total": 5,
+      "seconds": 28.81,
+      "ctestLogSha256": "712e3c43e09a85b19a93a95fc901f7e78cd7725e6423914a2ed7adf3d265d9af"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-diagnostic",
+      "sourcePatchSha256": "f6be273c3eddff09fb64b6427677ea09809bf0db039c6ec3aa98c581678b04cd",
+      "passed": 4,
+      "total": 5,
+      "seconds": 10.74,
+      "ctestLogSha256": "4404f3772499324ee40c7c252df888f2cac24c093ef982e2da76980842806244"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-events",
+      "sourcePatchSha256": "f6e0c3cd3eab5feba1c9045df8a26d2aecc444fcf645ecf103849a5827733256",
+      "passed": 4,
+      "total": 5,
+      "seconds": 13.95,
+      "ctestLogSha256": "fcd64d2512acdd33b9d5b85090ecda0243ce7311c7eb71b2170b80f7edaf1b61"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-factory",
+      "sourcePatchSha256": "f9b97272b9dc964d70b42b5f850ba7b5911c8b42fe5b2937e71cafd3260e1043",
+      "passed": 4,
+      "total": 5,
+      "seconds": 10.89,
+      "ctestLogSha256": "d785d517dd97423e4f32b66d272397a734d4951dc4755684b3b725e3c4a85c31"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-initial",
+      "sourcePatchSha256": "7b943791e7288fc3842646ac65275be79cd3d6d310012f39700136e4120a6422",
+      "passed": 4,
+      "total": 5,
+      "seconds": 11.03,
+      "ctestLogSha256": "cd5400acc8c744764b90627a714b7e233dd64097e01ad49abc6e2a18c52fc57d"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-nested-error",
+      "sourcePatchSha256": "0346e5d9993bdda00a0064c46969739b23cdff8d58832736af63afe0010d2883",
+      "passed": 4,
+      "total": 5,
+      "seconds": 22.17,
+      "ctestLogSha256": "ed08db1d713022998679cee697401afe0cec70586fd8f6188aaea45d9c858092"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-nested-report",
+      "sourcePatchSha256": "3c11dbb28d726d4ef958a1bb9c9f3b6cf3b8510f1be5d5bb3353fd683a40d169",
+      "passed": 4,
+      "total": 5,
+      "seconds": 22.19,
+      "ctestLogSha256": "dab78fad34759c02b2af8089bdd35b1d5e23f9d38bcbb76136884803b9d98428"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-qualified",
+      "sourcePatchSha256": "a8ccec1c3e243e62a47200a03de738cb469bf376475a18f0bae18a608245890b",
+      "passed": 4,
+      "total": 5,
+      "seconds": 45.76,
+      "ctestLogSha256": "97d309486e23aa10b4895a2becab7ccbea024f0d296ede377188f2e55ab9edec"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-queued-owner",
+      "sourcePatchSha256": "0a725cfe1e280392bb7b1cf2b319a820ad1f07711281143339bd52fa41ddb555",
+      "passed": 4,
+      "total": 5,
+      "seconds": 22.76,
+      "ctestLogSha256": "be718c693fe975c1c97100ed9218233347acfb1d190814d6932c8f9efbe8a501"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-refusal",
+      "sourcePatchSha256": "d0775bc8b062f5cf713105d8a19b3c04698f51c627df55d65e8aa1b1c4d5cfae",
+      "passed": 4,
+      "total": 5,
+      "seconds": 10.89,
+      "ctestLogSha256": "40d6f77b6e50f8bbbae9d03c9a8d11ae0b49c611975573db2a1e847ff842c28e"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-report",
+      "sourcePatchSha256": "6660f0e9fd49721ccff47a385da995521531e7a56c4c3c74571257d3372b32cc",
+      "passed": 4,
+      "total": 5,
+      "seconds": 11.2,
+      "ctestLogSha256": "072d7cb14fc8f28181f642db89be98e1e1b3bae1b937d8fec6f0d84015707a2f"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-setup",
+      "sourcePatchSha256": "e4835a8b78b34bb49fda1e2123a37e9029cadd540b072a35ac71e683697c4472",
+      "passed": 4,
+      "total": 5,
+      "seconds": 11.32,
+      "ctestLogSha256": "832a8a6aa7cce4316f5e0bc925344b8bd54a1343fb766acc8ab235e82bc3beb8"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-worker-error",
+      "sourcePatchSha256": "05dc0f49ce1d001e555b2b690d8d41f9dce7b1fc6d87bfd0a37da9893adda5fb",
+      "passed": 4,
+      "total": 5,
+      "seconds": 11.14,
+      "ctestLogSha256": "a5cd95fd0735a5403643e5dbb61a76ba4730d2c132d4ee6927736dff1f8bc5d8"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-worker-error-bound",
+      "sourcePatchSha256": "2228936ed1a5e05f4ecb3576880c88e401688f6abd6ee97e00632b2bf229570c",
+      "passed": 4,
+      "total": 5,
+      "seconds": 11.45,
+      "ctestLogSha256": "d1cbc89fe15446279f8da93003a681bbdbce07eadc2e55fb3ea63d2d5eefb4a6"
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/automatic-child-planning-worker-proxy",
+      "sourcePatchSha256": "d8e28eaa3c44ed3441f04fa34321ca012197f5cc4d058246e824f6a3525e870a",
+      "passed": 4,
+      "total": 5,
+      "seconds": 11.91,
+      "ctestLogSha256": "94cc003f43b95ac8033e14411694cc03856671fb2431e9e11cfe46959567542d"
+    }
+  ],
+  "limitations": [
+    "Focused gates only; no new complete 172-contract suite.",
+    "Full automatic child-owned human pause/resume, counted/repeated nested resume, deeper/multibranch cancellation and recovery remain unqualified.",
+    "Installed 0.1.64, qualified package, user settings/history and backups are unchanged.",
+    "Controlled synthetic model gateways only; no paid provider inference and no CPython."
+  ]
+}

@@ -451,8 +451,8 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             budget->snapshot().spec.policy_id!="native.graph-context"))
             throw std::invalid_argument("Registered graph agent requires its exact shared graph context budget");
     }else if(budget)throw std::invalid_argument("Normal agent root must acquire its own durable budget");
-    const bool remote_planning=admitted.parent_id.empty()&&read_workspace_&&read_workspace_->execution_policy_id()=="native.dynamic-plan";
-    if(remote_planning&&(!planning_||!planning_->healthy()||admitted.state!=RunState::running))throw Conflict("Planning worker requires its running captured SDK owner");
+    const bool remote_planning=(admitted.parent_id.empty()||dynamic_child)&&read_workspace_&&read_workspace_->execution_policy_id()=="native.dynamic-plan";
+    if(remote_planning&&(!planning_||!planning_->healthy()||(admitted.state!=RunState::running&&!(dynamic_child&&admitted.state==RunState::queued))))throw Conflict("Planning worker requires its running captured SDK owner");
     const bool dynamic_root=admitted.parent_id.empty()&&settings_.planning&&planning_;
     const bool dynamic_plan_owner=remote_planning||dynamic_root||(dynamic_child&&settings_.planning&&planning_);
     const bool resumed=dynamic_root&&admitted.state==RunState::paused;
@@ -502,7 +502,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
             active_started+std::chrono::milliseconds(resume->segment.remaining_active_ms),token,resume->segment,root_caps->backend_identity,resume->owner_runs);}
         catch(...){throw DynamicOutcomeUnrecorded("Resumed dynamic segment lacks its live clock owner; recovery is required");}
         if(resume->context_pin)budget->adopt_context_pin(*resume->context_pin);
-    }else if(!resumed_dynamic_child&&!remote_planning)journal_.transition(id,RunState::queued,RunState::running).get();
+    }else if((!resumed_dynamic_child&&!remote_planning)||(remote_planning&&dynamic_child&&admitted.state==RunState::queued))journal_.transition(id,RunState::queued,RunState::running).get();
     std::stop_source linked;
     std::stop_callback external(token,[&]{linked.request_stop();});
     std::atomic<bool> timed_out=false;
