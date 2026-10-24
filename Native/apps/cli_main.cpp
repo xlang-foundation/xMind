@@ -485,7 +485,7 @@ class ChatInput {
         std::condition_variable changed;
         std::deque<std::string> ready,deferred;
         std::size_t queued_bytes{},queued_lines{};
-        bool eof{},stopped{};
+        bool eof{},source_closed{},stopped{};
         std::exception_ptr error;
     };
 public:
@@ -515,7 +515,10 @@ public:
                 for(;;){DWORD count{};if(!ReadFile(handle,buffer.data(),static_cast<DWORD>(buffer.size()),&count,nullptr)||count==0)break;std::vector<std::string> lines;
                     for(DWORD index=0;index<count;++index){if(buffer[index]=='\n'){lines.push_back(std::move(pending));pending.clear();}else{pending.push_back(buffer[index]);if(pending.size()>1024*1024)throw std::invalid_argument("Chat line exceeds limits");}}
                     DWORD available{};const bool pipe_closed=!PeekNamedPipe(handle,nullptr,0,nullptr,&available,nullptr)&&GetLastError()==ERROR_BROKEN_PIPE;
-                    if(pipe_closed){std::lock_guard lock(state->mutex);state->eof=true;}
+                    // Physical closure prevents scripted commands becoming live
+                    // controls, but EOF is published only after every buffered
+                    // line has entered the bounded queue below.
+                    if(pipe_closed){std::lock_guard lock(state->mutex);state->source_closed=true;}
                     for(auto& line:lines)enqueue(std::move(line));
                     if(pipe_closed)break;
                 }
@@ -546,14 +549,14 @@ public:
         state->queued_bytes-=line.size();--state->queued_lines;state->changed.notify_all();return true;
     }
     bool source_closed()const{
-        std::lock_guard lock(state_->mutex);return state_->eof;
+        std::lock_guard lock(state_->mutex);return state_->source_closed||state_->eof;
     }
     std::optional<std::string> control_line(){
         auto state=state_;std::lock_guard lock(state->mutex);
         if(state->error)std::rethrow_exception(state->error);
         // Closed input is a complete scripted conversation; leave its queued
         // commands for normal processing after the current turn.
-        if(state->eof)return std::nullopt;
+        if(state->source_closed||state->eof)return std::nullopt;
         if(state->ready.empty())return std::nullopt;
         auto line=std::move(state->ready.front());state->ready.pop_front();
         if(line=="/cancel"||line=="/exit"){

@@ -1,3 +1,11 @@
+## Closed-pipe CLI input correction; full qualification refused — 2026-10-24
+
+The full source9463b396/Nativecf441f05 gate is terminal177/178 in751.55s: native_console_workspace_contract received no run row after composed input. Original failed namespace xmind-console-workspace-oj2MS7 is preserved and must not be replayed. Packaging/install did not start. [Evidence](evidence/console-buffered-eof-20261024.json), [original complete log](evidence/native-delivery-9463b396-full-failure-ctest.log).
+
+Code audit found a Windows input race: physical pipe closure set EOF before all buffered lines reached the bounded queue, allowing read_line to return false between publications. A distinct source_closed flag now suppresses scripted live controls while final EOF is published only after queued lines are complete. The old-binary512-draft probe passed; it did not reproduce the intermittent failure, whose exact CLI rows were not retained. Future failed fixtures retain those rows.
+
+Native12fc37cd passes six focused contracts11.83s:512 buffered compose/discard pairs, actual console graph read/workspace pinning, unified/HTTP CLI, output, MCP CLI and SDK/CLI/HTTP TLS refusal. Frozen closure unchanged. [Focused log](evidence/console-buffered-eof-focused-ctest.log). A new complete qualification is required before candidate73 packaging. Installed72 remains unchanged; full goal active.
+
 ## Separate native HTTP authentication TLS fixture — 2026-10-24
 
 The SDK fixture host now also exposes actual native HTTP routes. Its separate fresh HTTP namespace uses an origin-bound view credential and proves malformed-input refusal before TLS, exactly one valid untrusted TLS attempt with zero credential HTTP requests, absent/revision0 cached status, stale-profile refusal, Local retention and database reopen with no saved grant. Existing SDK/CLI hosts remain separate. Ten focused contracts pass11.78s with frozen closure unchanged and Nativecf441f05 unchanged. [Evidence](evidence/remote-auth-http-tls-bridge-20261024.json), [test log](evidence/remote-auth-http-tls-bridge-ctest.log).
