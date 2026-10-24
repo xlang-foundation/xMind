@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Source3c490dd9 full173 passes; Nativee2638e65. Installed66 unchanged. See doc/VALIDATION_STATUS.md.
+- Sourceeafe1b2e full173 passes; Native11678c9a. Installed66 unchanged. See doc/VALIDATION_STATUS.md.
 
 - Candidate66 CLI session773ac2efc0558863ad0cc629ace7e211/root e209f03d19e58216c40e4e22e06eb968; browser6a9cd04098714dbfa559e149dbd3715b/root3ec2da626b0d4d9e99acb4d8e0d85e13; handoff89727aa7415090fb464ae470a0f37e0d/root1d19ae73fa6583c89e786af1e1277a7c completed. Failed browser6aa83bfd30a045fd96ed5ec0b8efe1f2/root5bf575aa1b5748349143430abeac6afa retained. NEVER replay. Fixtures exited; installed66 preservation passes. See candidate-0.1.66-qualified-coding-20261024.json in doc/evidence.
 

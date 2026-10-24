@@ -8,12 +8,14 @@ backup is retained. [Installed receipt](../doc/evidence/installed-0.1.66-2d98bdd
 and [packaged browser/CLI/handoff evidence](../doc/evidence/candidate-0.1.66-qualified-coding-20261024.json)
 have separate scopes. Preserve every completed task; never replay it.
 
-Current source3c490dd9 adds captured provider List/Select/Save/Discover/Import.
+Current sourceeafe1b2e includes captured provider List/Select/Save/Discover/Import
+and atomic captured permission Pending/Grants/Reply/Revoke.
 [Setup native7 and client483/166](../doc/evidence/captured-provider-setup-20261024.json)
 and [positive separate-process SDK discovery](../doc/evidence/captured-provider-sdk-discovery-20261024.json)
-pass. The complete173 native gate for this source passes173/173 in768.07s, with all
-frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-3c490dd9-full-20261024.json)). Installed66 is unchanged by these development checkpoints.
-Rendered VS Code coding, remaining general/permission adapters, authenticated
+pass. [Atomic permissions and client485/168](../doc/evidence/captured-permission-reply-20261024.json)
+pass separately. The complete173 native gate for this source passes173/173 in817.90s, with all
+frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-eafe1b2e-full-20261024.json)). Installed66 is unchanged by this native qualification.
+Rendered VS Code coding, remaining general captured APIs, authenticated
 remote/enrollment and deeper scheduling/recovery remain open. Private Nexus
 server/database/scheduler implementation remains excluded.
 

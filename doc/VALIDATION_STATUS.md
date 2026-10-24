@@ -1,3 +1,9 @@
+## Complete native173 qualification passes on eafe1b2e — 2026-10-24
+
+All native targets build and the complete173-contract inventory passes173/173 in817.90s. All2816 project inputs,16 SDK headers,1870 pure-library files,30 SDK runtime files,18598 Node dependency files,137 native binaries and their exact file sets remain unchanged. Native SHA11678c9a; SDK8c7972d1. The gate includes atomic captured permission replies and actual separate-process SDK approval/revocation. No paid inference or CPython.
+
+[Full receipt](evidence/native-delivery-eafe1b2e-full-20261024.json), [actual inventory](evidence/native-delivery-eafe1b2e-full-inventory.json) and [terminal CTest log](evidence/native-delivery-eafe1b2e-full-ctest.log). Client485/168 retains its separate accepted scope. Candidate0.1.67 is assembled from this runtime; packaged browser/CLI, managed handoff and installation have separate receipts. Installed66 remains the preserved installation until those checks qualify its replacement. Rendered VS Code coding, remaining general captured APIs, authenticated remote/enrollment and deeper scheduling/recovery remain open. The earlier sidebar observation failure remains retained with an unproven cause.
+
 ## Atomic captured permission replies pass core12, SDK/view4 and clients485/168 — 2026-10-24
 
 Reusable read grants, operation approval and its event now publish in one backend transaction through embedded xlang3/SQLite. Expired approval publishes no grant; duplicate/denied requests create no authority; a forced operation-event SQL failure rolls both records back. Only a pre-publication grant CAS conflict can retry, with no effect dispatch. The obsolete grant-only helper is removed and read-tool/runner fixtures use atomic replies.
