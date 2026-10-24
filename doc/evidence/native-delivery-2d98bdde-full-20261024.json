@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "scope": "Complete native173 qualification for captured graph streams, model/command/workspace services and browser file-read adapters",
+  "recordedAt": "2026-10-24T07:49:43.175Z",
+  "sourceParent": "2d98bdde671329b290552c2d26de679c06a217dc",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 34404,
+    "launchedAt": "2026-10-24T07:35:04.810Z",
+    "completedAt": "2026-10-24T07:36:49.670Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2280c4fd003979d7b2b3db932577d4f5b9e14e6b8f685b29c63bd77048d697fb"
+  },
+  "test": {
+    "pid": 29904,
+    "launchedAt": "2026-10-24T07:36:52.732Z",
+    "completedAt": "2026-10-24T07:49:40.428Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "94e46e7d6c9b1adcff6f0deb95f618b685fd920166ec31740ec66fe613d555f5"
+  },
+  "total": 173,
+  "failed": 0,
+  "passed": 173,
+  "seconds": 767.66,
+  "projectFiles": 2816,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "3d727450756c3c9287a87b7bdfb8dfb56e960bbcb2821b559e5c03dd88e9a5eb",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "limitations": [
+    "Native fixtures use controlled peers, not paid inference or universal external compatibility",
+    "Qualification does not establish a new installation, rendered browser/editor acceptance or remote/enrollment completion",
+    "Installed0.1.65 unchanged; candidate0.1.66 package and coding evidence are separate"
+  ]
+}

@@ -3,7 +3,7 @@
 This audit preserves the full recovered delivery objective; completion remains
 unproven. Current installed0.1.65 has complete173 native qualification and protected
 installation evidence ([receipt](../doc/evidence/installed-0.1.65-c68485ce-20261023.json)).
-The historical0.1.64 checkpoints below retain their original scope. [Installed0.1.64](../doc/evidence/installed-0.1.64-d3fef238-20261023.json)
+Current development source2d98bdde also passes the complete173-contract native gate in767.66s ([receipt](../doc/evidence/native-delivery-2d98bdde-full-20261024.json)). Candidate0.1.66 is assembled; coding/rendered/install acceptance remain separate. The historical0.1.64 checkpoints below retain their original scope. [Installed0.1.64](../doc/evidence/installed-0.1.64-d3fef238-20261023.json)
 uses the corrected172-qualified native runtime and SDK8c7972d1.
 [Packaged browser coding](../doc/evidence/candidate-0.1.64-browser-coding-20261023.json),
 [CLI coding](../doc/evidence/candidate-0.1.64-cli-coding-20261023.json),

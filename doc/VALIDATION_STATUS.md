@@ -1,3 +1,9 @@
+## Current captured-service checkpoint passes complete173 — 2026-10-24
+
+Source2d98bdde builds all native targets and completes the actual173-contract inventory:173 pass in767.66s. Rust/multifolder language servers, worker RPC/ledger/nested human lifecycle, native managed view/gateway, SDK model/command/workspace/file services and provider/CLI contracts pass inside this single complete run. All2816 source inputs,16 SDK headers,1870 pure-library files,30 SDK runtime files,18598 dependency files,137 native binaries and their file sets remain unchanged. Native SHA3d727450; SDK8c7972d1. [Full receipt and inventory](evidence/native-delivery-2d98bdde-full-20261024.json).
+
+Candidate0.1.66 has been assembled from these exact native/runtime bytes and accepted client481/165 assets:2443 archive entries and2398 runtime files verified. Candidate coding, rendered acceptance and installation remain separate. Installed65 and its backups/user state are unchanged. Remote/enrollment, remaining adapters and deeper recovery remain open.
+
 ## Captured browser explorer reads pass native7 and client481/165 — 2026-10-24
 
 Browser listing, preview and filename search now use shared captured-file methods. They read current native membership, carry folder/revision to the captured backend route and verify returned binding/workspace/folder/revision. Negotiated mismatch, closure or downgrade cannot fall back. The gateway admits the exact read-only POST routes; servers that never advertised support retain compatibility reads.
