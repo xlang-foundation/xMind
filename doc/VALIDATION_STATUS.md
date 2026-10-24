@@ -1,5 +1,11 @@
 ## Captured named-agent SDK/HTTP and rendered selection pass — 2026-10-24
 
+## Installed69 preserved delivery checkpoint (2026-10-24)
+
+Installed0.1.69 uses Native249ce7d6/source872f2585 and SDK8c7972d1. All2442 installed files and2398 runtime files match the qualified package; package metadata/installer manifest and other extension registry entries verify. Five protected roots retain exact file sets/hashes. Exact68 backup is retained. [Installed receipt](evidence/installed-0.1.69-872f2585-20261024.json). No visible window was requested.
+
+Fresh installed smoke session7fdf93954ebd8e606b1a1ce9bdb551cd/root4033b84db9c0e8cf81a5edd5b539b7b9 verifies managed discovery/reuse, actual native file read and restored history with zero model calls; its owned backend exits. NEVER replay. Candidate browser/CLI/handoff and full173 scope remain in their separate receipts below. No actual rendered VS Code coding, generic remote enrollment, remaining captured context/skills/inbox or deeper recovery/scheduling completion is claimed; the full goal remains active.
+
 ## Candidate69 complete qualification and coding (2026-10-24)
 
 Source872f2585/Native249ce7d6 passes all173 native contracts in729.35s with the complete2816 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/137 binary closure unchanged. [Full receipt](evidence/native-delivery-872f2585-full-20261024.json), [terminal log](evidence/native-delivery-872f2585-full-ctest.log), [inventory](evidence/native-delivery-872f2585-full-inventory.json). The corrected direct execution catalogue retains process placement.

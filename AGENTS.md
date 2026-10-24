@@ -6,9 +6,9 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Agents3233 pass full173/clients488-171; candidate69 CLI passes, browser placement fails before send. Fix249ce7d6 passes4; full/package/rendered open. Receipt doc/evidence/captured-agent-placement-20261024.json; NEVER replay. Installed68 preserved.
+- Installed69 Native249ce7d6/SDK8c passes full173, clients488/171, named-process browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.69-872f2585-20261024.json; NEVER replay. Remaining goal active.
 
-- Installed68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
+- Prior68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
 
 - Prior67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
 

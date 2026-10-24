@@ -37,3 +37,32 @@ Preserve these historical identities and constraints verbatim.
 ## Preserved candidate67 coding guidance before named-agent qualification
 
 - Candidate67 CLI41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b; browser157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b; handoff500cc07a8096747a157f468cb1b13f89/root9b490dc7a004889d2ad6fdfc46732dca completed. NEVER replay. See candidate-0.1.67-qualified-coding-20261024.json.
+
+## Superseded candidate69 guidance (verbatim)
+
+- Agents3233 pass full173/clients488-171; candidate69 CLI passes, browser placement fails before send. Fix249ce7d6 passes4; full/package/rendered open. Receipt doc/evidence/captured-agent-placement-20261024.json; NEVER replay. Installed68 preserved.
+
+## Prior installed68 acceptance introduction (verbatim)
+
+# xMind delivery acceptance audit
+
+This audit preserves the full recovered delivery objective; completion remains
+unproven. Installed0.1.68 packages frontend825bd613 and the unchanged native
+sourceeafe1b2e runtime, which passed the complete173 inventory. Its2442 installed
+files and2398 runtime files match the qualified package; five protected user-state
+roots are unchanged and the exact67 backup is retained.
+[Installed receipt](../doc/evidence/installed-0.1.68-825bd613-20261024.json),
+[packaged first-send/reuse evidence](../doc/evidence/candidate-0.1.68-first-send-and-reuse-20261024.json)
+and [unchanged-native browser/CLI/handoff evidence](../doc/evidence/candidate-0.1.67-qualified-coding-20261024.json)
+have separate scopes. Preserve every completed task; never replay it.
+
+Current sourceeafe1b2e includes captured provider List/Select/Save/Discover/Import
+and atomic captured permission Pending/Grants/Reply/Revoke.
+[Setup native7 and client483/166](../doc/evidence/captured-provider-setup-20261024.json)
+and [positive separate-process SDK discovery](../doc/evidence/captured-provider-sdk-discovery-20261024.json)
+pass. [Atomic permissions and client485/168](../doc/evidence/captured-permission-reply-20261024.json)
+pass separately. The complete173 native gate for this source passes173/173 in817.90s, with all
+frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-eafe1b2e-full-20261024.json)). Installed68 retains this qualified runtime and the verified first-send permission-refresh correction.
+Rendered VS Code coding, remaining general captured APIs, authenticated
+remote/enrollment and deeper scheduling/recovery remain open. Private Nexus
+server/database/scheduler implementation remains excluded.
