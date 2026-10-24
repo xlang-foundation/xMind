@@ -1,0 +1,187 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-24T17:18:08.374Z",
+    "sourceParent": "a5f63c0637a7e9db11875ac3342ff4b21cc092d6",
+    "sourcePatchSha256": "1c64054bcf6b3d358b3074618fcb1ccf5835185e76dc3fd197aaf6f3001b5797",
+    "build": {
+      "pid": 20384,
+      "launchedAt": "2026-10-24T17:16:14.980Z",
+      "completedAt": "2026-10-24T17:17:32.941Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1dfda67647164f81661b1731db0ae662ddb4c2e64d2eff8bd0a155d9e4f4596c"
+    },
+    "test": {
+      "pid": 37212,
+      "launchedAt": "2026-10-24T17:17:35.557Z",
+      "completedAt": "2026-10-24T17:18:05.761Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d4f80ccaea8133066e9faf212901f99d47b6568dd7c6b7f6280ecb9ad22ebdb3"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 30.16,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "cf441f05018b543749175a7b7727cd8fca5845116ed7800f01a1a4efbe41dabf",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "phases": [
+    {
+      "nested_case": "production-nested-human-read-plain-once",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1277,
+      "nested_case": "production-nested-human-read-plain-once",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-read-plain-twice",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1910,
+      "nested_case": "production-nested-human-read-plain-twice",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-read-counted-once",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1425,
+      "nested_case": "production-nested-human-read-counted-once",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-read-counted-twice",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2065,
+      "nested_case": "production-nested-human-read-counted-twice",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-coding-plain-once",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1449,
+      "nested_case": "production-nested-human-coding-plain-once",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-coding-plain-twice",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2201,
+      "nested_case": "production-nested-human-coding-plain-twice",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-coding-counted-once",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1508,
+      "nested_case": "production-nested-human-coding-counted-once",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "production-nested-human-coding-counted-twice",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2265,
+      "nested_case": "production-nested-human-coding-counted-twice",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-read-plain-resume",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2126,
+      "nested_case": "paused-root-read-plain-resume",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-read-plain-cancel",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1494,
+      "nested_case": "paused-root-read-plain-cancel",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-read-counted-resume",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2301,
+      "nested_case": "paused-root-read-counted-resume",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-read-counted-cancel",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1654,
+      "nested_case": "paused-root-read-counted-cancel",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-coding-plain-resume",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2311,
+      "nested_case": "paused-root-coding-plain-resume",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-coding-plain-cancel",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1622,
+      "nested_case": "paused-root-coding-plain-cancel",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-coding-counted-resume",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 2494,
+      "nested_case": "paused-root-coding-counted-resume",
+      "phase": "exit"
+    },
+    {
+      "nested_case": "paused-root-coding-counted-cancel",
+      "phase": "begin"
+    },
+    {
+      "elapsed_ms": 1833,
+      "nested_case": "paused-root-coding-counted-cancel",
+      "phase": "exit"
+    }
+  ],
+  "scope": "Test-only flushed case timing, no timeout/behavior/retry changes; not a hosted repair"
+}

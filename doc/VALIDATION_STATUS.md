@@ -1,3 +1,11 @@
+## Hosted bc2de6f2 result and lifecycle diagnostics — 2026-10-24
+
+Hosted run40109419472 is terminal failure172/176: graph runner40.57s, worker RPC70.10s, ledger45.11s and nested-human CTest45.02s timeout. Original artifact12568550235 and job hashes are in [result evidence](evidence/hosted-native-bc2de6f2-result-20261024.json). No deadline changes or effect replay; local green does not repair hosted failure.
+
+The trusted-TLS fixture independently passes3.60s. [Original output](evidence/hosted-native-bc2de6f2-trusted-sdk-tls.log) confirms actual separate xlang3 SDK authentication through verified native HTTPS, wrong-credential refusal, accepted grant, stale retry without extra HTTP, encrypted credential/grant reopen and unchanged Local. Owned isolated-runner certificate removal/absence is confirmed. This source predates CLI/HTTP adapters, whose positive TLS acceptance remains pending.
+
+Test-only nested lifecycle timing markers pass sixteen fresh local cases30.15s within unchanged45s deadline; all32 begin/exit markers verify. [Diagnostic evidence](evidence/nested-human-hosted-diagnostics-20261024.json). Markers locate the next hosted stopping point; no root-cause fix claimed. Installed72 preserved. Browser controls, remote routing/enrollment, rendered VS Code and broader recovery remain unfinished.
+
 ## Development native HTTP authentication adapter — 2026-10-24
 
 The native HTTP backend exposes authentication capability/status/submission routes through the existing C++ authentication service. Owner and origin-bound view access, foreign-origin refusal, absent/stale state and malformed/duplicate/control-byte credential refusal pass ten focused contracts in10.92s. Source, SDK, libraries, dependencies and binary file sets/hashes remain unchanged across the gate. Two test-fixture mistakes (duplicate variable and invalidated catalog reference) retain their original failure receipts; production code is unchanged between the failed runtime and final pass. [Evidence](evidence/remote-auth-http-adapter-20261024.json), [final log](evidence/remote-auth-http-adapter-ctest.log), [fixture failure](evidence/remote-auth-http-adapter-fixture-failure.log). Positive HTTP TLS/storage, stored-state HTTP observations and rendered browser controls remain unfinished. Not installed or fully requalified; installed72 preserved.

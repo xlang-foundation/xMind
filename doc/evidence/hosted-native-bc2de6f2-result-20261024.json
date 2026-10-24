@@ -1,0 +1,50 @@
+{
+  "source": "bc2de6f248b37b0aec6b42195ef25f10975311ee",
+  "run": 40109419472,
+  "job": 120921591552,
+  "status": "completed",
+  "conclusion": "failure",
+  "passed": 172,
+  "total": 176,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40109419472",
+  "log": {
+    "bytes": 736023,
+    "sha256": "64d09fcf8145591e372514050ea0051031a1775961c1ee8d462a846ec5b332a5"
+  },
+  "artifact": {
+    "id": 12568550235,
+    "name": "native-windows-evidence-bc2de6f248b37b0aec6b42195ef25f10975311ee",
+    "size": 111514,
+    "downloadBytes": 111514,
+    "sha256": "d76f554ea85bfbcf60e78694acc285d447af831acda3ece1138bac42180758d7"
+  },
+  "failed": [
+    {
+      "name": "native_graph_runner_contract",
+      "seconds": 40.57,
+      "observation": "PowerShell script_entered then process budget; uncertain effect, no replay"
+    },
+    {
+      "name": "native_agent_worker_model_rpc_contract",
+      "seconds": 70.1,
+      "observation": "Wrapper deadline"
+    },
+    {
+      "name": "native_agent_worker_ledger_contract",
+      "seconds": 45.11,
+      "observation": "Wrapper failure"
+    },
+    {
+      "name": "native_agent_worker_nested_human_contract",
+      "seconds": 45.02,
+      "observation": "CTest timeout, no phase output"
+    }
+  ],
+  "positiveScope": "Trusted TLS fixture passed3.60s: actual separate SDK client verified native HTTPS, wrong-credential refusal, accepted grant, stale retry without extra HTTP, encrypted credential/grant reopen, Local retained. Owned isolated-runner certificate removal and absence confirmed.",
+  "limitations": [
+    "Hosted suite failed",
+    "Source predates CLI/HTTP adapters, no positive acceptance for those",
+    "Remote routing disabled",
+    "Worker root causes remain unknown"
+  ]
+}
