@@ -30,6 +30,7 @@ inline nlohmann::json provider_profiles(const ProviderProfileRuntimeMetadata& va
     for(const auto& item:policy){const char* wire=nullptr;switch(item.wire){case ProviderWire::chat_completions:wire="chat-completions";break;case ProviderWire::responses:wire="responses";break;case ProviderWire::anthropic_messages:wire="anthropic-messages";break;case ProviderWire::gemini_generate_content:wire="gemini-generate-content";break;}if(!wire)throw std::invalid_argument("Unknown backend provider wire");routes.push_back({{"id",item.id},{"provider",item.provider},{"wire",wire},{"discovery",item.discovery}});}
     return {{"revision",value.revision},{"active",value.active},{"profiles",std::move(profiles)},{"routes",std::move(routes)}};
 }
+inline nlohmann::json bound(const BoundConnectionProviderModels& value){auto models=nlohmann::json::array();for(const auto& id:value.models)models.push_back({{"id",id}});return {{"binding",identity(value.binding)},{"models",std::move(models)}};}
 inline nlohmann::json bound(const BoundConnectionProviders& value){return {{"binding",identity(value.binding)},{"providers",provider_profiles(value.configuration,value.routes)}};}
 inline nlohmann::json bound(const BoundConnectionModels& value){auto result=model_catalog(value.models);result["binding"]=identity(value.binding);return result;}
 inline nlohmann::json cursor(const ConnectionEventCursor& value){return {{"server_id",value.server_id},{"connection_id",value.connection_id},{"session_id",value.session_id},{"run_id",value.run_id},{"sequence",value.sequence}};}

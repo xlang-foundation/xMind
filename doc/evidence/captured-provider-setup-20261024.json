@@ -1,0 +1,102 @@
+{
+  "recordedAt": "2026-10-24T08:32:59.138Z",
+  "native": {
+    "recordedAt": "2026-10-24T08:31:39.080Z",
+    "sourceParent": "48278aa423bd9b756df48ee6580761188a1af854",
+    "sourcePatchSha256": "5fc256c5895d4cb58c04b60450f8139410071e39c3446b941ec10ae7f6c7a6d6",
+    "build": {
+      "pid": 25736,
+      "launchedAt": "2026-10-24T08:27:55.765Z",
+      "completedAt": "2026-10-24T08:30:03.769Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "04c165049a9a117bd958a19635d14ba5e4000ca7a372e048139afad888b65873"
+    },
+    "test": {
+      "pid": 39476,
+      "launchedAt": "2026-10-24T08:30:06.412Z",
+      "completedAt": "2026-10-24T08:31:36.505Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "fa64a4380278ade77a38eaef6cb410010a922c946e42eb0de79f7d624790b14b"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 90.06,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "e2638e65602a3de6ca859f6ae1c0c2586cc4c49f62f73fc76377ec88633a762c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": {
+    "sourceRevision": "48278aa423bd9b756df48ee6580761188a1af854",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 483,
+      "browser": 166
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 483,
+      "passed": 483,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 166,
+      "passed": 166,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "clientLauncher": {
+    "ciSourceSha256": "e7cfc711fb173870ec1c04b818a8528a2a1199adc5b44b2906d3c31d34df164d",
+    "localLauncherSha256": "98ec3b5cc0f6f29fb25edc7376cafc1e559f278a52d5e30aa82860e28a6acd11",
+    "differences": [
+      "GitHub-only guard replaced after actual local native/benchmark process audit",
+      "Evidence/assets written to fresh isolated repository directory"
+    ],
+    "githubActionsImpersonated": false
+  },
+  "scope": [
+    "Registered Providers.Save/Discover/Import use ordinary SDK method/value transfer",
+    "Shared native SDK/HTTP request validation with strict fields and captured admission",
+    "Actual separate xmind.exe save and identical YAML import with omitted credential, stale save/discovery refusal, provider registry revision3 after restart",
+    "Actual captured HTTP discovery through controlled local catalogue using saved credential, save/import and unknown-destination refusal",
+    "Backend retirement refuses setup; encrypted credential remains out of public metadata and plaintext registry",
+    "Shared client captured setup identity, closure, downgrade and refusal without compatibility retry; exact browser gateway method admission"
+  ],
+  "limitations": [
+    "Positive separate-process SDK discovery against a catalogue is not newly proven; actual positive discovery is native HTTP",
+    "No rendered setup acceptance",
+    "Focused7 does not replace full native qualification",
+    "Authenticated remote/enrollment, remaining general/permission routing, deeper scheduling/recovery and rendered VS Code remain open"
+  ],
+  "nativePatchUnchangedAfterGate": true,
+  "installedVersion": "0.1.66",
+  "installedChanged": false,
+  "paidInference": false,
+  "cpythonExecuted": false
+}

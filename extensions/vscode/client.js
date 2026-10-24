@@ -79,6 +79,7 @@ class BackendClient {
   #connectionRunStreamSupported=false;
   #connectionModelsSupported=false;
   #connectionProvidersSupported=false;
+  #connectionProviderSetupSupported=false;
   #connectionCommandsSupported=false;
   #connectionWorkspaceSupported=false;
   #connectionWorkspaceFilesSupported=false;
@@ -144,6 +145,8 @@ class BackendClient {
     else if(this.#connectionCommandsSupported)throw new Error("The backend command protocol changed. Reconnect before invoking commands.");
     if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
     else if(this.#connectionModelSelectionSupported)throw new Error("The backend model selection protocol changed. Reconnect before choosing models.");
+    if(health&&Object.hasOwn(health,"local_connection_provider_setup")){if(health.local_connection_provider_setup!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured provider setup protocol.");this.#connectionProviderSetupSupported=true;}
+    else if(this.#connectionProviderSetupSupported)throw new Error("The backend provider setup protocol changed. Reconnect before configuring providers.");
     if(health&&Object.hasOwn(health,"local_connection_providers")){if(health.local_connection_providers!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured provider protocol.");this.#connectionProvidersSupported=true;}
     else if(this.#connectionProvidersSupported)throw new Error("The backend provider protocol changed. Reconnect before using providers.");
     if(health&&Object.hasOwn(health,"local_connection_models")){if(health.local_connection_models!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured models protocol.");this.#connectionModelsSupported=true;}
@@ -314,7 +317,7 @@ class BackendClient {
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
   async importProviderConfiguration(path,expected_revision) {
     if(typeof path!=='string'||!path||path.length>32768||/[\x00-\x1f]/.test(path)||!(/^[A-Za-z]:[\\/]/.test(path)||/^\\\\[^\\/]+[\\/][^\\/]+/.test(path)))throw new Error('Provider configuration must be an absolute local path');
-    planInteger(expected_revision);return validateProviderProfiles(await this.request('/v1/provider/configuration/import',{path,expected_revision}),true);
+    planInteger(expected_revision);return validateProviderProfiles(await this.#providerSetupRequest('import',{path,expected_revision}),true);
   }
   async mcpAuthorizationServers() { return validateMcpAuthorizationServers(await this.request('/v1/mcp/authorization/servers')); }
   async mcpResources() { return validateMcpResourceCatalog(await this.request('/v1/mcp/resources')); }
@@ -334,6 +337,11 @@ class BackendClient {
   }
   discoverProviderModels(api_key,expected_revision) { return this.request('/v1/provider/models',{api_key,expected_revision}); }
   configureProvider(model,api_key,expected_revision) { return this.request('/v1/provider/configuration',{model,api_key,expected_revision}); }
+  async #providerSetupRequest(action,request) {
+    if(!this.#connectionProviderSetupSupported)return this.request(action==='import'?'/v1/provider/configuration/import':action==='models'?'/v1/provider/profiles/models':'/v1/provider/profiles',request,action==='models'?35000:15000);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured provider connection changed.');
+    const value=await this.request('/v1/connection-bindings/'+capture.id+'/providers/'+action,request,action==='models'?35000:15000);const field=action==='models'?'models':'providers';exactFields(value,['binding',field]);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Provider setup belongs to another connection');return field==='models'?{models:value.models}:value.providers;
+  }
   async #providerProfilesRequest(selection) {
     if(!this.#connectionProvidersSupported)return this.request(selection?'/v1/provider/profiles/select':'/v1/provider/profiles',selection);
     const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured provider connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/providers'+(selection?'/select':''),selection);
@@ -343,7 +351,7 @@ class BackendClient {
   async providerProfiles() { return validateProviderProfiles(await this.#providerProfilesRequest(),true); }
   async discoverProfileModels(id,route_id,api_key,expected_revision) {
     profileIdentity(id);profileIdentity(route_id);profileRevision(expected_revision);profileKey(api_key);
-    const catalogue=await this.request('/v1/provider/profiles/models',{id,route_id,api_key,expected_revision},35000);
+    const catalogue=await this.#providerSetupRequest('models',{id,route_id,api_key,expected_revision});
     exactFields(catalogue,['models']);
     if(!Array.isArray(catalogue.models)||catalogue.models.length>4096)throw new Error('Invalid provider model catalogue');
     const ids=new Set();for(const model of catalogue.models){exactFields(model,['id']);profileIdentity(model.id);if(ids.has(model.id)||model.id===api_key||(api_key&&model.id.includes(api_key)))throw new Error('Invalid provider model catalogue');ids.add(model.id);}
@@ -352,7 +360,7 @@ class BackendClient {
   async saveProviderProfile(id,route_id,model,api_key,expected_revision,activate=false) {
     profileIdentity(id);profileIdentity(route_id);profileIdentity(model);profileRevision(expected_revision);profileKey(api_key);
     if(typeof activate!=='boolean'||model===api_key)throw new Error('Invalid provider profile enrollment');
-    return validateProviderProfiles(await this.request('/v1/provider/profiles',{id,route_id,model,api_key,expected_revision,activate}));
+    return validateProviderProfiles(await this.#providerSetupRequest('save',{id,route_id,model,api_key,expected_revision,activate}));
   }
   async selectProviderProfile(id,expected_revision) {
     profileIdentity(id);profileRevision(expected_revision);

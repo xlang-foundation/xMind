@@ -35,6 +35,7 @@ struct ConnectionFindRequest {std::string query,path=".",type="file";std::size_t
 struct BoundConnectionFind {ConnectionFolderScope scope;WorkspaceFind found;};
 struct BoundConnectionWorkspace {ConnectionBindingIdentity binding;ExecutionWorkspaceMetadata workspace;};
 struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMembershipSnapshot membership;};
+struct BoundConnectionProviderModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionProviders {ConnectionBindingIdentity binding;ProviderProfileRuntimeMetadata configuration;std::vector<ProviderProfileRouteMetadata> routes;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
@@ -84,6 +85,9 @@ public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
     BoundConnectionProviders providers()const;
+    BoundConnectionProviders save_provider(std::string id,std::string route,std::string model,SecretBytes key,std::int64_t revision,bool activate)const;
+    BoundConnectionProviderModels discover_provider_models(std::string id,std::string route,SecretBytes key,std::int64_t revision)const;
+    BoundConnectionProviders import_providers(std::string path,std::int64_t revision)const;
     BoundConnectionProviders select_provider(std::string id,std::int64_t revision)const;
     BoundConnectionWorkspace workspace()const;
     BoundConnectionMembership membership()const;

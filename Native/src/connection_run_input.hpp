@@ -2,6 +2,7 @@
 #include "agentflow/connection_binding.hpp"
 #include "nlohmann/json.hpp"
 #include <array>
+#include <initializer_list>
 #include <algorithm>
 #include <string_view>
 namespace agentflow::connection_input {
@@ -12,6 +13,12 @@ inline std::string string_field(const Json& value,const char* key,std::size_t ma
     if(result.empty() || result.size()>max || result.find('\0')!=std::string::npos) throw std::invalid_argument("String field exceeds limits");
     return result;
 }
+inline std::int64_t provider_revision(const Json& value){if(!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Invalid provider profile revision");return value["expected_revision"].get<std::int64_t>();}
+inline void provider_fields(const Json& value,std::initializer_list<const char*> allowed){if(!value.is_object())throw std::invalid_argument("Invalid provider request");for(const auto& item:value.items())if(std::none_of(allowed.begin(),allowed.end(),[&](auto key){return item.key()==key;}))throw std::invalid_argument("Unknown provider request field");}
+inline SecretBytes provider_key(const Json& value){if(!value.contains("api_key"))return SecretBytes(std::span<const std::uint8_t>{});if(!value["api_key"].is_string())throw std::invalid_argument("Invalid provider credential");const auto& key=value["api_key"].get_ref<const std::string&>();if(key.size()>32768||key.find('\0')!=std::string::npos)throw std::invalid_argument("Invalid provider credential");return SecretBytes({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});}
+inline BoundConnectionProviders save_provider(CapturedLocalConnection& state,const Json& value){provider_fields(value,{"id","route_id","model","api_key","expected_revision","activate"});if(value.contains("activate")&&!value["activate"].is_boolean())throw std::invalid_argument("Invalid provider activation");return state.save_provider(string_field(value,"id",256),string_field(value,"route_id",256),string_field(value,"model",256),provider_key(value),provider_revision(value),value.value("activate",false));}
+inline BoundConnectionProviderModels discover_provider_models(CapturedLocalConnection& state,const Json& value){provider_fields(value,{"id","route_id","api_key","expected_revision"});return state.discover_provider_models(string_field(value,"id",256),string_field(value,"route_id",256),provider_key(value),provider_revision(value));}
+inline BoundConnectionProviders import_providers(CapturedLocalConnection& state,const Json& value){provider_fields(value,{"path","expected_revision"});return state.import_providers(string_field(value,"path",32768),provider_revision(value));}
 inline std::optional<ProviderProfileAdmission> profile_admission(const Json& value){
     const bool named=value.contains("provider_profile_id"),versioned=value.contains("expected_provider_revision");
     if(named!=versioned)throw std::invalid_argument("Provider profile and revision must be supplied together");

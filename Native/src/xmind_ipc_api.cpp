@@ -120,7 +120,10 @@ struct BoundProvidersApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundProvidersApi()=default;explicit BoundProvidersApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
     X::Value List(){return api_call([&]{if(!state)throw RunUnavailable("Unbound provider service");return sdk_values::to_value(Host(),connection_values::bound(state->providers()));});}
     X::Value Select(std::string id,std::int64_t revision){return api_call([&]{if(!state)throw RunUnavailable("Unbound provider service");return sdk_values::to_value(Host(),connection_values::bound(state->select_provider(std::move(id),revision)));});}
-    BEGIN_PACKAGE(BoundProvidersApi) APISET().AddFunc<0>("List",&BoundProvidersApi::List);APISET().AddFunc<2>("Select",&BoundProvidersApi::Select); END_PACKAGE
+    X::Value Save(X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound provider service");return sdk_values::to_value(Host(),connection_values::bound(connection_input::save_provider(*state,sdk_values::from_value(request))));});}
+    X::Value Discover(X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound provider service");return sdk_values::to_value(Host(),connection_values::bound(connection_input::discover_provider_models(*state,sdk_values::from_value(request))));});}
+    X::Value Import(X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound provider service");return sdk_values::to_value(Host(),connection_values::bound(connection_input::import_providers(*state,sdk_values::from_value(request))));});}
+    BEGIN_PACKAGE(BoundProvidersApi) APISET().AddFunc<1>("Save",&BoundProvidersApi::Save);APISET().AddFunc<1>("Discover",&BoundProvidersApi::Discover);APISET().AddFunc<1>("Import",&BoundProvidersApi::Import);APISET().AddFunc<0>("List",&BoundProvidersApi::List);APISET().AddFunc<2>("Select",&BoundProvidersApi::Select); END_PACKAGE
 };
 struct BoundModelsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundModelsApi()=default;explicit BoundModelsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}

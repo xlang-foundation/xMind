@@ -245,5 +245,5 @@ test('captured history proxy permits only scoped message POST',async()=>{
 });
 
 test('captured provider proxy permits metadata GET and explicit selection POST only',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');const base='/v1/connection-bindings/'+'a'.repeat(32)+'/providers';for(const [path,method]of [[base,'GET'],[base+'/select','POST']]){for(const candidate of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,candidate),candidate===method);assert.equal(allowedApiRoute(path+'/extra',method),false);}assert.equal(allowedApiRoute('/v1/connection-bindings/invalid/providers','GET'),false);
+ const {allowedApiRoute}=await import('../server.mjs');const base='/v1/connection-bindings/'+'a'.repeat(32)+'/providers';for(const [path,method]of [[base,'GET'],...[ 'select','save','models','import'].map(action=>[base+'/'+action,'POST'])]){for(const candidate of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,candidate),candidate===method);assert.equal(allowedApiRoute(path+'/extra',method),false);}assert.equal(allowedApiRoute('/v1/connection-bindings/invalid/providers','GET'),false);
 });
