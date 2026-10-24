@@ -16,3 +16,8 @@ Preserve these historical identities and constraints verbatim.
 - Installed66 smoke sessione396142dfae23f973429a308f3c264c4/root430c3d73de6b88e377abcc6c9f92e51f completed read/history, zero models; NEVER replay. Owner exited. Five protected roots unchanged;2442 installed/2398 runtime exact.
 
 - Installed66 Native2d98bdde/3d727450, SDK8c7972d1: full173 and browser/CLI/handoff pass; exact65 backup retained. Receipt doc/evidence/installed-0.1.66-2d98bdde-20261024.json. Installed65 history archived in doc/development-checkpoints-20261024.md; NEVER replay its completed smoke. Rendered Code remains unverified.
+
+
+## Preserved first-send permission defect guidance
+
+- Browser permission sessiondac128fea38846f8b4f85c549895dde2/root32d82da2df694147b254dc380528ae29 completed one read/two controlled calls and grant/revoke after reload; NEVER replay. Initial first-send refresh defect retained in .agentflow/pb67-permissions. Development correction remains separate from installed67.

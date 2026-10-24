@@ -12,7 +12,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Installed67 smoke55a89cad4783844c55b74fccd45ea580/root8866649c22b59f0793866858907107f4 completed read/history, zero models; NEVER replay. Owner exited. Installation66 guidance archived verbatim in doc/development-checkpoints-20261024.md.
 
-- Browser permission sessiondac128fea38846f8b4f85c549895dde2/root32d82da2df694147b254dc380528ae29 completed one read/two controlled calls and grant/revoke after reload; NEVER replay. Initial first-send refresh defect retained in .agentflow/pb67-permissions. Development correction remains separate from installed67.
+- Browser first-send permission fix passes clients485/169 and actual UI without reload. Installed67 unchanged. Both completed read/grant/revoke fixtures are in doc/evidence/browser-first-send-permission-refresh-20261024.json; NEVER replay.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 

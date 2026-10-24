@@ -2,6 +2,15 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('first browser send observes reusable permission details without reloading or resubmitting',async()=>{
+ const posted=[],calls=[],operation={id:'permission-first',run_id:'first-run',workspace_id:'workspace',tool:'read_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,agent_permission_request:{grantable:true,action:'read_file',resource:'note.txt'}};
+ let pending=[];const client={createSession:async()=>{calls.push('create');return {id:'first-session'};},sessionPermissions:async session=>{assert.equal(session,'first-session');calls.push('permissions');return {session_id:session,requests:pending};},run:async()=>{calls.push('run');pending=[operation];return {id:'first-run',session_id:'first-session',state:'running',parent_id:'',graph_root:false};},sessions:async()=>[{id:'first-session'}]};
+ const view=new BrowserController(client,message=>posted.push(message),{subscriptionFactory:()=>({watch(){},stop(){}})});view.health={agent_execution:true};
+ try{await view.handle({type:'send',prompt:'Read note.txt'});assert.equal(view.runId,'first-run');assert.deepEqual(calls,['create','permissions','run']);assert.ok(view.permissionTimer);
+  await new Promise(resolve=>setTimeout(resolve,2700));assert.deepEqual(view.operations.get(operation.id).agent_permission_request,operation.agent_permission_request);assert.equal(calls.filter(value=>value==='run').length,1);assert.ok(posted.some(message=>message.type==='operations'&&message.operations.some(item=>item.id===operation.id&&item.agent_permission_request?.grantable===true)));
+ }finally{view.dispose();}
+});
+
 test('browser invalidates workspace views once per observed terminal operation state without invoking a tool',()=>{
  const changed=[],posted=[],view=new BrowserController({},message=>posted.push(message),{workspaceChanged:items=>changed.push(items)});
  const operation={id:'effect',run_id:'root',workspace_id:'workspace',tool:'patch_file',state:'awaiting_approval'};

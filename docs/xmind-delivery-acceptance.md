@@ -3,7 +3,7 @@
 This audit preserves the full recovered delivery objective; completion remains
 unproven. Installed0.1.67 packages sourceeafe1b2e, which passed the complete173
 native inventory. Its2442 installed files and2398 runtime files match the
-qualified package; five protected user-state roots are unchanged and the exact65
+qualified package; five protected user-state roots are unchanged and the exact66
 backup is retained. [Installed receipt](../doc/evidence/installed-0.1.67-eafe1b2e-20261024.json)
 and [packaged browser/CLI/handoff evidence](../doc/evidence/candidate-0.1.67-qualified-coding-20261024.json)
 have separate scopes. Preserve every completed task; never replay it.
