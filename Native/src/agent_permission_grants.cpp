@@ -68,6 +68,7 @@ std::string agent_permission_grant_identifier(const std::string& workspace_id,co
     return "grant_"+context_digest(Json{{"version",1},{"workspace_id",workspace_id},{"policy_binding",policy_binding},{"action",action},{"resource",resource}}.dump());
 }
 
+std::vector<AgentPermissionPendingRequest> AgentPermissionGrantStore::pending(const std::string& session){text(session,128,"Invalid permission request session");std::vector<AgentPermissionPendingRequest> result;for(auto& operation:persistence_.pending_operations_for_session(session).get()){auto context=request(operation.id);if(context&&(context->session_id!=session||context->operation_id!=operation.id))throw Conflict("Permission request differs from its session");result.push_back({std::move(operation),std::move(context)});}return result;}
 void AgentPermissionGrantStore::record_request(const AgentPermissionAskContext& request){
     text(request.operation_id,128,"Invalid permission request operation ID");text(request.session_id,128,"Invalid permission request session");
     text(request.workspace_id,32768,"Invalid permission request workspace");text(request.policy_binding,64,"Invalid permission policy binding");

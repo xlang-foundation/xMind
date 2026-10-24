@@ -4,6 +4,7 @@
 #include "agentflow/run_executor.hpp"
 #include "agentflow/graph_service.hpp"
 #include "agentflow/provider_profile_setup.hpp"
+#include "agentflow/agent_permission_grants.hpp"
 #include <memory>
 namespace agentflow {
 class PersistenceService;class RunExecutor;class GraphExecution;class BackendOwnerControl;struct LocalConnectionContext;
@@ -41,6 +42,20 @@ struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std:
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
 struct BoundConnectionOperations {ConnectionBindingIdentity binding;std::string session_id,run_id;std::vector<Operation> operations;};
+struct BoundConnectionPermissions {ConnectionBindingIdentity binding;std::string session_id;std::vector<AgentPermissionPendingRequest> requests;};
+struct BoundConnectionPermissionGrants {ConnectionBindingIdentity binding;std::string session_id;AgentPermissionGrantSnapshot snapshot;};
+class CapturedSessionPermissions {
+public:
+    BoundConnectionPermissions pending()const;
+    BoundConnectionPermissionGrants grants()const;
+    BoundConnectionPermissionGrants revoke(std::string id,std::int64_t revision)const;
+private:
+    friend class CapturedLocalConnection;
+    CapturedSessionPermissions()=default;
+    std::shared_ptr<LocalConnectionContext> context_;
+    ConnectionBindingIdentity identity_;
+    std::string session_;
+};
 class CapturedRunOperations {
 public:
     BoundConnectionOperations list()const;
@@ -113,6 +128,7 @@ public:
     BoundConnectionGraphUpdate graph_input(const std::string& root,const std::string& owner,const std::string& node,const std::string& input,std::int64_t revision,std::int64_t owner_revision=0)const;
     BoundConnectionRun resume_graph(const std::string& root,std::int64_t revision)const;
     void cancel_run(const std::string& id)const;
+    std::shared_ptr<CapturedSessionPermissions> permissions(std::string session)const;
     std::shared_ptr<CapturedRunOperations> operations(std::string session,std::string run)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;
     std::shared_ptr<ConnectionEventStream> run_events(std::string session,std::string run)const;

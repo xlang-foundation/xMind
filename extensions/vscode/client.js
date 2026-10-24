@@ -86,6 +86,7 @@ class BackendClient {
   #connectionModelSelectionSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
+  #connectionPermissionCatalogSupported=false;
   #connectionHistorySupported=false;
   #connectionChildHistorySupported=false;
   #connectionCapture;
@@ -145,6 +146,8 @@ class BackendClient {
     else if(this.#connectionCommandsSupported)throw new Error("The backend command protocol changed. Reconnect before invoking commands.");
     if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
     else if(this.#connectionModelSelectionSupported)throw new Error("The backend model selection protocol changed. Reconnect before choosing models.");
+    if(health&&Object.hasOwn(health,"local_connection_permission_catalog")){if(health.local_connection_permission_catalog!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured permission catalog protocol.");this.#connectionPermissionCatalogSupported=true;}
+    else if(this.#connectionPermissionCatalogSupported)throw new Error("The backend permission catalog protocol changed. Reconnect before using permissions.");
     if(health&&Object.hasOwn(health,"local_connection_provider_setup")){if(health.local_connection_provider_setup!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured provider setup protocol.");this.#connectionProviderSetupSupported=true;}
     else if(this.#connectionProviderSetupSupported)throw new Error("The backend provider setup protocol changed. Reconnect before configuring providers.");
     if(health&&Object.hasOwn(health,"local_connection_providers")){if(health.local_connection_providers!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured provider protocol.");this.#connectionProvidersSupported=true;}
@@ -566,8 +569,13 @@ class BackendClient {
   }
   operations(id,session) { return this.#connectionOperationsSupported?this.#scopedOperations(id,session):this.request(`/v1/runs/${encodeURIComponent(id)}/operations`); }
   operation(id,scope) { return this.#connectionOperationsSupported?this.#scopedOperations(scope?.run_id,scope?.session_id,id):this.request(`/v1/operations/${encodeURIComponent(id)}`); }
+  async #permissionCatalogRequest(session,suffix,request,method='GET') {
+    if(!this.#connectionPermissionCatalogSupported)return this.request('/v1/sessions/'+encodeURIComponent(session)+suffix,request,15000,method);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured permission connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(session)+suffix,request,15000,method);
+    exactFields(value,suffix==='/permissions'?['binding','session_id','requests']:['binding','session_id','revision','grants']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key])||value.session_id!==session)throw new Error('Permission catalog belongs to another connection or session');const {binding,...result}=value;return result;
+  }
   async sessionPermissions(id) {
-    executionIdentity(id);const value=await this.request(`/v1/sessions/${encodeURIComponent(id)}/permissions`);
+    executionIdentity(id);const value=await this.#permissionCatalogRequest(id,'/permissions');
     if(!value||value.session_id!==id||!Array.isArray(value.requests)||value.requests.length>256||value.requests.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.run_id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.run_id)||typeof item.workspace_id!=='string'||!item.workspace_id||item.workspace_id.length>32768||typeof item.tool!=='string'||!item.tool||item.tool.length>128||typeof item.arguments_json!=='string'||typeof item.expires_unix_ms!=='number'||!Number.isSafeInteger(item.expires_unix_ms)||item.state!=='awaiting_approval'))throw new Error('Invalid pending session permission requests.');
     return value;
   }
@@ -579,13 +587,13 @@ class BackendClient {
     return result;
   }
   async sessionPermissionGrants(sessionId) {
-    executionIdentity(sessionId);const value=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permission-grants`);
+    executionIdentity(sessionId);const value=await this.#permissionCatalogRequest(sessionId,'/permission-grants');
     if(!value||value.session_id!==sessionId||!Number.isSafeInteger(value.revision)||value.revision<0||!Array.isArray(value.grants)||value.grants.length>256||value.grants.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.workspace_id!=='string'||!item.workspace_id||typeof item.action!=='string'||!item.action||typeof item.resource!=='string'||!item.resource||typeof item.policy_binding!=='string'||!item.policy_binding||!Number.isSafeInteger(item.created_unix_ms)))throw new Error('Invalid saved session permission grants.');
     return value;
   }
   async revokeSessionPermissionGrant(sessionId,grantId,expectedRevision) {
     executionIdentity(sessionId);executionIdentity(grantId);if(!Number.isSafeInteger(expectedRevision)||expectedRevision<0)throw new Error('Invalid saved permission revision.');
-    const value=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permission-grants/${encodeURIComponent(grantId)}`,{expected_revision:expectedRevision},15000,'DELETE');
+    const value=await this.#permissionCatalogRequest(sessionId,'/permission-grants/'+encodeURIComponent(grantId),{expected_revision:expectedRevision},'DELETE');
     if(!value||value.session_id!==sessionId||!Number.isSafeInteger(value.revision)||value.revision!==expectedRevision+1||!Array.isArray(value.grants)||value.grants.some(item=>item?.id===grantId))throw new Error('Saved permission grant revocation was not confirmed.');return value;
   }
   async processOutput(id,channel,after=0,limit=65536) {

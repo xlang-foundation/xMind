@@ -186,3 +186,11 @@ HTTP uses POST `/v1/connection-bindings/{binding}/providers/save`, `/models` and
 [Exact acceptance](evidence/captured-provider-setup-20261024.json) distinguishes positive separate-process save/import/restart from positive native HTTP discovery and the still-unverified rendered setup scope.
 
 Positive separate-process Providers.Discover now has [direct SDK evidence](evidence/captured-provider-sdk-discovery-20261024.json): distinct xmind.exe callers share the actual captured identity, the backend uses its saved credential against a controlled catalogue, and exactly one additional catalogue request returns the expected deduplicated models without revision changes. This remains separate from rendered setup and live-provider acceptance.
+
+## Captured session permission catalog
+
+`binding.Permissions(session_id)` returns an ordinary registered SDK subobject. Pending() returns `{binding, session_id, requests}`; Grants() and Revoke(grant_id, expected_revision) return `{binding, session_id, revision, grants}`. The native grant store owns pending collection and scope metadata. Reads retain their original captured generation/profile identity; new revocation requires an admitted profile revision and uses the existing grant CAS. Backend retirement fences every object.
+
+Health advertises `local_connection_permission_catalog:1`. HTTP GET uses `/v1/connection-bindings/{binding}/sessions/{session}/permissions` and `/permission-grants`; DELETE `/permission-grants/{grant}` accepts exactly expected_revision. The authenticated origin-bound view policy and browser gateway admit only the specific methods and paths. Existing compatibility DELETE is also fixed. The shared client checks returned binding/session, refuses downgrade and never retries through a compatibility route after negotiated refusal.
+
+Diagnostic SDK CLI methods are connections permissions ID REV SESSION, permission-grants ID REV SESSION and permission-revoke ID REV SESSION GRANT GRANT_REV after `xmind ipc --endpoint lrpc:PORT`. Permission replies and reusable-grant admission are separate migration work. [Evidence and exact limitations](evidence/captured-permission-catalog-20261024.json).

@@ -1,0 +1,140 @@
+{
+  "recordedAt": "2026-10-24T09:10:52.699Z",
+  "native": {
+    "recordedAt": "2026-10-24T09:08:45.800Z",
+    "sourceParent": "6585d3f28361d46f38adf154eee0f8c4a0fda3cc",
+    "sourcePatchSha256": "e46161075e4b43859f702381f5ff4b65fa7f3556f8a66c36ab325eb4c6a5a089",
+    "build": {
+      "pid": 35656,
+      "launchedAt": "2026-10-24T09:05:40.615Z",
+      "completedAt": "2026-10-24T09:07:12.380Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "10c402b4de627decde1ffaf6498351bf2a7cd8fe7d5e19610645ea2be55d3cfe"
+    },
+    "test": {
+      "pid": 25040,
+      "launchedAt": "2026-10-24T09:07:14.926Z",
+      "completedAt": "2026-10-24T09:08:43.250Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ac1c08ba7d877f27c381fe80754f717893ae00763b71c87962c24b204e7a179b"
+    },
+    "total": 8,
+    "failed": 0,
+    "passed": 8,
+    "seconds": 88.29,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "42fd55b7615c829652cb1266a714a3263922d90916e035d5408871c45bec5349",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": {
+    "sourceRevision": "6585d3f28361d46f38adf154eee0f8c4a0fda3cc",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 484,
+      "browser": 167
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 484,
+      "passed": 484,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 167,
+      "passed": 167,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "initialNativeGate": {
+    "recordedAt": "2026-10-24T09:04:38.652Z",
+    "sourceParent": "6585d3f28361d46f38adf154eee0f8c4a0fda3cc",
+    "sourcePatchSha256": "cfdfd755a72b2c55bc6c39ad99c5d9a5ca51a9d0bca2e7b91228be4982346bef",
+    "build": {
+      "pid": 36664,
+      "launchedAt": "2026-10-24T09:00:40.495Z",
+      "completedAt": "2026-10-24T09:03:05.341Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "5253b24e10e28dc8eb88b2d020a73d76e80ede3ad6bf36a154e00d198502f34f"
+    },
+    "test": {
+      "pid": 38220,
+      "launchedAt": "2026-10-24T09:03:07.838Z",
+      "completedAt": "2026-10-24T09:04:36.080Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "5fbb6ac0be5d9ea6db054ca6ad552623faf59d41d0ab712d4d01a105d6dba932"
+    },
+    "total": 8,
+    "failed": 1,
+    "passed": 7,
+    "seconds": 88.21,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "eec72b80ef98afd584ab5abfbe0b3c27c9c3ce949d7612744df10909ca419f84",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "initialFailure": "Origin-bound view authentication did not admit permission-grant DELETE; exact captured and compatibility routes are now admitted. The corrected HTTP contract verifies stale refusal and actual revocation through both routes.",
+  "initialLogSha256": "5fbb6ac0be5d9ea6db054ca6ad552623faf59d41d0ab712d4d01a105d6dba932",
+  "clientLauncher": {
+    "ciSourceSha256": "7da5efacb09d80fa2514179e4b213b3ce4a5c8d68c0cdfb123d09ebfc31a0e52",
+    "localLauncherSha256": "4d209ba829251958e47f6784d6efa2ea3c8f7bdffc753ec66b74d5a3da040647",
+    "differences": [
+      "GitHub-only guard replaced after actual local native/benchmark process audit",
+      "Evidence/assets written to fresh isolated repository directory"
+    ],
+    "githubActionsImpersonated": false
+  },
+  "scope": [
+    "Registered binding.Permissions(session).Pending/Grants/Revoke methods with SDK-owned value transfer",
+    "Central native pending-request collection and shared grant/request encoders for compatibility and captured HTTP",
+    "Same-process SDK actual pending/grants/revocation, missing-session/foreign-grant/stale revision and retired-backend refusal; reads retain original profile identity while stale-profile mutation rejects",
+    "Independent xmind.exe clients read captured pending/grant collections and reject missing sessions",
+    "Origin-bound HTTP actual saved grant read/revoke; stale revision and foreign-view refusal; compatibility DELETE regression",
+    "Shared browser/extension identity, revision, closure, downgrade and no-fallback checks; exact gateway method admission"
+  ],
+  "limitations": [
+    "Positive populated-grant revocation from a distinct SDK client remains separate from same-process SDK and native HTTP evidence",
+    "Permission reply and reusable-grant admission migration remain open",
+    "Focused8 is not a complete new native suite or installation",
+    "Rendered coding/setup, authenticated remote/enrollment and deeper recovery remain open"
+  ],
+  "installedChanged": false,
+  "paidInference": false,
+  "cpythonExecuted": false
+}
