@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured single-run event service through standard registered xlang3 objects, native HTTP and shared clients",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T06:41:11.423Z",
+    "sourceParent": "28e16a4821c833fb772032d276ec4399357f1a0e",
+    "sourcePatchSha256": "fb517493fe6b725ce9d340625fe6d0cf10a51f306bcd3edb5d0b101cc4471638",
+    "build": {
+      "pid": 9816,
+      "launchedAt": "2026-10-24T06:38:08.041Z",
+      "completedAt": "2026-10-24T06:39:44.443Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e6a2bb92d591b8ac2db382e9a1237d8ee45d304ceea4d2cba198a9750efa098e"
+    },
+    "test": {
+      "pid": 13560,
+      "launchedAt": "2026-10-24T06:39:47.156Z",
+      "completedAt": "2026-10-24T06:41:08.753Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e2991db116633d5c27948a2248b30a2aab8caf43d757d56aec3bb0863745a588"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 81.56,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "f84bf1b5b7366beb59b268590ccce609d20c9043d29388339ad07006173c6d6f",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "28e16a4821c833fb772032d276ec4399357f1a0e",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 476,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 476,
+      "passed": 476,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "verified": [
+    "Separate xmind.exe clients call Connection.RunEvents and Events.Cursor/Read through SDK dispatch",
+    "Cursor replay returns no duplicates; foreign session refused before read",
+    "Retained RunEvents object refuses access after backend retirement",
+    "Actual graph root run-only stream excludes child events and actual child stream contains only child records",
+    "Shared client retains immutable binding identity and rejects downgrade/closed handle without fallback"
+  ],
+  "limits": [
+    "Focused native5 only; not a new complete173 qualification",
+    "No rendered/installed editor acceptance",
+    "No paid inference or CPython",
+    "Installed0.1.65 remains unchanged",
+    "Authenticated remote/enrollment and command/model/general-read adapters remain unfinished"
+  ]
+}

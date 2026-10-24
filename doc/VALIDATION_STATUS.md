@@ -1,3 +1,9 @@
+## Captured single-run event streams pass native5 and client476/165 — 2026-10-23
+
+Connection.RunEvents(session, run) returns the registered SDK Events subobject with Cursor()/Read(cursor). The C++ service validates the owning session, reads only that run and rejects retired backend objects. It supports child runs independently; existing Events(session, root) remains the complete root-tree observer. The captured HTTP events/stream route, gateway and shared clients use the same native service and verify immutable binding identity.
+
+Native5/5 passes in81.56s, including separate xmind.exe SDK dispatch, replay, foreign-session refusal, backend lifetime and actual root/child event separation. Complete client476/165 passes with71 source files/18 assets unchanged. [Receipt](evidence/captured-run-stream-clients-20261023.json). Installed65 remains unchanged. Command/model/general reads, authenticated remote/enrollment, deeper recovery/scheduling and rendered VS Code remain open.
+
 ## Captured graph/tree event streams pass focused acceptance — 2026-10-23
 
 Captured root graph/tree SSE now carries and verifies its immutable connection identity. The native backend validates session/root/cursor ownership, observes binding closure and retains existing capacity, frame and rotation limits. Both the native managed view and browser gateway forward the exact captured route incrementally. The managed view had buffered the new graph-events path; preserved failed diagnostics identify that missing forwarding branch.

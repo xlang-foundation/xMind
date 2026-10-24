@@ -118,11 +118,15 @@ std::shared_ptr<ConnectionEventStream> CapturedLocalConnection::events(std::stri
     auto life=context_->enter();const auto run=context_->store.run(root).get();if(run.session_id!=session||!run.parent_id.empty())throw Conflict("Event stream requires its captured root session");
     auto stream=std::shared_ptr<ConnectionEventStream>(new ConnectionEventStream);stream->context_=context_;stream->identity_=identity_;stream->session_=std::move(session);stream->root_=std::move(root);return stream;
 }
+std::shared_ptr<ConnectionEventStream> CapturedLocalConnection::run_events(std::string session,std::string id)const{
+    auto life=context_->enter();if(context_->store.run(id).get().session_id!=session)throw Conflict("Event stream differs from its captured run session");
+    auto stream=std::shared_ptr<ConnectionEventStream>(new ConnectionEventStream);stream->context_=context_;stream->identity_=identity_;stream->session_=std::move(session);stream->root_=std::move(id);stream->tree_=false;return stream;
+}
 ConnectionEventCursor ConnectionEventStream::cursor()const{auto life=context_->enter();return {identity_.server_id,identity_.connection_id,session_,root_,0};}
 ConnectionEventPage ConnectionEventStream::read(ConnectionEventCursor input)const{
     auto life=context_->enter();const ConnectionEventCursor expected{identity_.server_id,identity_.connection_id,session_,root_,input.sequence};
     if(input.sequence<0||input.sequence>9007199254740991LL||input!=expected)throw Conflict("Event cursor differs from captured connection/session/run");
-    if(input.sequence){const auto boundary=context_->store.tree_events(root_,input.sequence-1,1).get();if(boundary.empty()||boundary.front().sequence!=input.sequence)throw Conflict("Cursor sequence does not belong to the captured stream");}
-    ConnectionEventPage page{context_->store.tree_events(root_,input.sequence,256).get(),input};if(!page.events.empty())page.cursor.sequence=page.events.back().sequence;return page;
+    if(input.sequence){const auto boundary=tree_?context_->store.tree_events(root_,input.sequence-1,1).get():context_->store.event_batch(root_,input.sequence-1,1).get();if(boundary.empty()||boundary.front().sequence!=input.sequence)throw Conflict("Cursor sequence does not belong to the captured stream");}
+    ConnectionEventPage page{tree_?context_->store.tree_events(root_,input.sequence,256).get():context_->store.event_batch(root_,input.sequence,256).get(),input};if(!page.events.empty())page.cursor.sequence=page.events.back().sequence;return page;
 }
 }

@@ -140,7 +140,7 @@ revision rejection, forbidden credential fields and retired-object refusal.
 ## Captured Local binding
 
 Connections.Open(profile_id, expected_profile_revision) returns a Local binding
-with Identity(), Sessions(), Runs() and Events(session_id, root_run_id). The
+with Identity(), Sessions(), Runs(), Events(session_id, root_run_id) and RunEvents(session_id, run_id). The
 revision is the profile revision, not the overall catalog revision. Open refuses
 unavailable remote profiles; saving an address is not authentication.
 
@@ -364,3 +364,9 @@ The loopback browser gateway now forwards captured graph catalog/detail, submit,
 ## Captured graph children HTTP/client
 
 `GET /v1/connection-bindings/{binding}/graph-runs/{root}/children` returns the SDK child receipt and retains principal/origin scope. It accepts no query parameters. `local_connection_graph_children:1` advertises support with captured admission. The browser gateway permits only GET on that path. The shared browser/extension client checks binding identity, requested graph owner, session identity, immediate parent, unique child IDs and native Run shape. Protocol loss, identity drift and a closed context do not retry through legacy routes. Backends without negotiated support keep the existing compatibility read. [Actual native/controller and client evidence](evidence/captured-graph-children-clients-20261023.json). SSE remains a separate adapter requirement.
+
+## Single-run event observation
+
+`binding.RunEvents(session_id, run_id)` returns a standard registered xlang3 Events subobject. Call `Cursor()` for its initial cursor and `Read(cursor)` for committed records. SDK values use the existing native list/dictionary conversion. The backend validates the session/run and cursor namespace on every read; child runs are supported and no descendant records enter a run-only page. `Events(session_id, root_id)` retains root-tree semantics. Both object types reject reads after backend retirement.
+
+Independent clients can use `xmind ipc --endpoint lrpc:PORT connections run-events local PROFILE_REV SESSION RUN JSON_CURSOR`, with `null` as the initial cursor. The HTTP adapter exposes `GET /v1/connection-bindings/{binding}/sessions/{session}/runs/{run}/events/stream?after=SEQUENCE`, negotiated by `local_connection_run_stream:1`. Opening observations carry the captured identity; clients must retain that binding on reconnect and refuse a changed identity. This is read-only observation, never execution replay. [Focused validation](evidence/captured-run-stream-clients-20261023.json).

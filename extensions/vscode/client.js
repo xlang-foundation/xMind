@@ -76,6 +76,7 @@ class BackendClient {
   #connectionGraphReadSupported=false;
   #connectionGraphChildrenSupported=false;
   #connectionTreeStreamSupported=false;
+  #connectionRunStreamSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
@@ -129,6 +130,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_run_stream")){if(health.local_connection_run_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured run stream protocol.");this.#connectionRunStreamSupported=true;}
+    else if(this.#connectionRunStreamSupported)throw new Error("The backend run stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_tree_stream")){if(health.local_connection_tree_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured tree stream protocol.");this.#connectionTreeStreamSupported=true;}
     else if(this.#connectionTreeStreamSupported)throw new Error("The backend tree stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
@@ -459,7 +462,7 @@ class BackendClient {
     if(!['run','tree','graph'].includes(scope)||typeof onEvent!=='function'||onObservation!==undefined&&typeof onObservation!=='function')throw new Error('Invalid event stream observer');
     signal?.throwIfAborted();
     let capture;let route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
-    if(scope!=="run"&&this.#connectionTreeStreamSupported){capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured tree stream connection changed.");route="/v1/connection-bindings/"+capture.id+"/sessions/"+session_id+"/runs/"+id+"/"+(scope==="graph"?"graph-events":"tree-events")+"/stream";}
+    if(scope==="run"?this.#connectionRunStreamSupported:this.#connectionTreeStreamSupported){capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured tree stream connection changed.");route="/v1/connection-bindings/"+capture.id+"/sessions/"+session_id+"/runs/"+id+"/"+(scope==="graph"?"graph-events":scope==="tree"?"tree-events":"events")+"/stream";}
     let response;try{response=await this.openEventStream(route+'?after='+after,signal);}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}
     if(!response.ok){const value=await response.json();const error=new Error(typeof value.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
     const known=new Set([id]);

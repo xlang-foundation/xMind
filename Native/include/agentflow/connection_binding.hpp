@@ -60,6 +60,7 @@ private:
     std::shared_ptr<LocalConnectionContext> context_;
     ConnectionBindingIdentity identity_;
     std::string session_,root_;
+    bool tree_=true;
 };
 class CapturedLocalConnection {
 public:
@@ -81,6 +82,7 @@ public:
     void cancel_run(const std::string& id)const;
     std::shared_ptr<CapturedRunOperations> operations(std::string session,std::string run)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;
+    std::shared_ptr<ConnectionEventStream> run_events(std::string session,std::string run)const;
 private:
     friend class LocalConnectionBindings;
     CapturedLocalConnection()=default;

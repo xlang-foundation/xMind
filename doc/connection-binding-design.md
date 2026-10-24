@@ -14,7 +14,7 @@ Keep the registered xmind root and its authenticated Connections(owner_token)
 subobject. Open(profile_id, expected_profile_revision) returns a captured
 binding object. Root remains a registration surface, not a command dispatcher.
 The Local binding exposes Identity(), Sessions(), Runs() and
-Events(session_id, root_run_id) as scoped service objects.
+Events(session_id, root_run_id) and RunEvents(session_id, run_id) as scoped service objects.
 Use ordinary SDK method calls and SDK list/dictionary values for local IPC.
 Do not add peer.call routes, custom remote-value envelopes or a second serializer.
 
@@ -123,3 +123,9 @@ binding design does not remove that requirement or count private Nexus server,
 PostgreSQL/team scheduling, WebRTC, Electron or broad runtime optimization as OSS
 work. Do not claim the goal complete until every acceptance area in
 ../docs/xmind-delivery-acceptance.md has authoritative evidence.
+
+## Single-run event observation
+
+`binding.RunEvents(session_id, run_id)` returns a standard registered xlang3 Events subobject. Call `Cursor()` for its initial cursor and `Read(cursor)` for committed records. SDK values use the existing native list/dictionary conversion. The backend validates the session/run and cursor namespace on every read; child runs are supported and no descendant records enter a run-only page. `Events(session_id, root_id)` retains root-tree semantics. Both object types reject reads after backend retirement.
+
+Independent clients can use `xmind ipc --endpoint lrpc:PORT connections run-events local PROFILE_REV SESSION RUN JSON_CURSOR`, with `null` as the initial cursor. The HTTP adapter exposes `GET /v1/connection-bindings/{binding}/sessions/{session}/runs/{run}/events/stream?after=SEQUENCE`, negotiated by `local_connection_run_stream:1`. Opening observations carry the captured identity; clients must retain that binding on reconnect and refuse a changed identity. This is read-only observation, never execution replay. [Focused validation](evidence/captured-run-stream-clients-20261023.json).
