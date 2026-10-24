@@ -1,3 +1,20 @@
+## Candidate0.1.65 CLI and rendered browser coding pass — 2026-10-23
+
+The byte-verified candidate completes fresh CLI and hidden in-app browser coding
+fixtures through process-code workers. Each performs actual file read/edit,
+two explicit fixture approvals and Node4 checks, with4 synthetic model replies
+and8 persisted messages. Browser reload restores the same completed owner;
+captured operation decisions use the original session/run binding. Backend
+birth/image checks precede exact owned exit. The temporary hidden tab is closed.
+
+NEVER replay CLI sessionfe27e5148b7ba131c979109b043ab382/root2f83aff40afb179fd8f7079484d1a993
+or browser session2efda5f13d7d48e5aa6a62592266c945/rootc0a7f3eb67ab46a5aaabfdb905d3ca4d.
+[CLI receipt](evidence/candidate-0.1.65-cli-coding-20261023.json),
+[browser receipt](evidence/candidate-0.1.65-browser-coding-20261023.json) and
+[rendered screenshot](evidence/candidate-0.1.65-browser-coding-20261023.png).
+Managed upgrade/handoff, protected installation and rendered VS Code remain
+separate. Installed64 stays unchanged; no paid inference was used.
+
 ## Candidate0.1.65 assembled, uninstalled — 2026-10-23
 
 The complete173-qualified nativec68485ce runtime and unchanged accepted474/165

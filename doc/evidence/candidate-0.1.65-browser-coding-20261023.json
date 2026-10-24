@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.65",
+  "source": "c68485ce9322c6a2409abca54cbc43e2241cd605",
+  "nativeQualification": {
+    "fullPassed": 173,
+    "fullFailed": 0,
+    "productBinaryUnchanged": true
+  },
+  "sessionId": "2efda5f13d7d48e5aa6a62592266c945",
+  "runId": "c0a7f3eb67ab46a5aaabfdb905d3ca4d",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "operationCount": 2,
+  "actualNodeChecks": 4,
+  "renderedProof": {
+    "passed": true,
+    "sessionId": "2efda5f13d7d48e5aa6a62592266c945",
+    "runId": "c0a7f3eb67ab46a5aaabfdb905d3ca4d",
+    "renderedCompletion": true,
+    "reloadRestoredSameOwner": true,
+    "approvals": 2,
+    "hiddenIabTab": 15,
+    "paidInference": false,
+    "screenshot": "doc/evidence/candidate-0.1.65-browser-coding-20261023.png"
+  },
+  "screenshotSha256": "9dbebbf02ad68fa06c3fe5a19026ff64cfb1a0ac617e7ba940a8faaf0992e89f",
+  "rawGateSha256": "e6663d76d2198f4f22e0c994979520d04e00db826b9ca6cddeb7cea25b72d914",
+  "ownedBackendExited": true,
+  "backendExitVerifiedByBirthAndImage": true,
+  "hiddenTemporaryTabClosed": true,
+  "paidInference": false,
+  "installed": false,
+  "neverReplay": true,
+  "passed": true,
+  "limits": "Packaged hidden in-app browser coding with synthetic provider replies and real native read/edit/Node effects. No rendered VS Code or managed upgrade/installation claim."
+}

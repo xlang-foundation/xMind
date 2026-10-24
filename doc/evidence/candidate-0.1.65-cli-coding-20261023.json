@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.65",
+  "source": "c68485ce9322c6a2409abca54cbc43e2241cd605",
+  "nativeSha256": "c1f1aa6bae0081679f9fdb044ae42215db71ee73ca441f2a600d081dd611b49b",
+  "sessionId": "fe27e5148b7ba131c979109b043ab382",
+  "runId": "2f83aff40afb179fd8f7079484d1a993",
+  "state": "completed",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "approvals": 2,
+  "operationCount": 2,
+  "actualNodeChecks": 4,
+  "runtimeFilesAndHashesUnchanged": true,
+  "backendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 39232,
+    "birthAndImageVerified": true
+  },
+  "rawGateSha256": "9182951ee554f3635d0ef0990137daf1719260e9bf6da84d21573378d6381d8e",
+  "scope": "Actual byte-verified distributable candidate CLI attached by explicit loopback port; synthetic provider, real native read/edit/Node command and SDK process owner. Managed profile auto-discovery not covered.",
+  "paidInference": false,
+  "installed": false,
+  "neverReplay": true,
+  "passed": true
+}

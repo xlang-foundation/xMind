@@ -152,3 +152,7 @@ All173 contracts pass in753.20s with complete frozen source/SDK/library/dependen
 ### Candidate0.1.65 assembly — 2026-10-23
 
 Current173-qualified native runtime is assembled with the accepted474/165 client into an uninstalled0.1.65 VSIX. All2398 runtime files and2443 archive entries match expected inputs. This is assembly evidence, not packaged execution or installation acceptance. [Receipt](../doc/evidence/candidate-0.1.65-package-20261023.json).
+
+### Candidate0.1.65 actual CLI/browser coding — 2026-10-23
+
+Fresh candidate CLI and rendered hidden browser tasks pass real read/edit/Node4 with two approvals, four synthetic model replies and eight messages each. Browser reload preserves the exact completed run; owned workers/backends retire and temporary tab closes. Never replay the task IDs recorded in the receipts. Managed upgrade/installation and rendered VS Code remain separate. [CLI](../doc/evidence/candidate-0.1.65-cli-coding-20261023.json), [browser](../doc/evidence/candidate-0.1.65-browser-coding-20261023.json).
