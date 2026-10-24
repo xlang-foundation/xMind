@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-24T18:41:48.813Z",
+  "scope": "Read-only browser restore diagnostic; not package or intermittent-failure acceptance",
+  "sourceParent": "917fd0ab",
+  "experimentalClientSha256": "1371fffa478ecf85bf8a9d1d91176aa6612e1ccf483d08ca5cdcf9790becde7b",
+  "previousMinimumTask": {
+    "runId": "adc5a5b0794240b58061aef38a0fc7c8",
+    "sessionId": "ecf195f304c94eca95da27c9babc5947",
+    "passed": false,
+    "cleanFirstCompletion": true,
+    "nativeTaskCompleted": true,
+    "historyMessagesRestored": 8,
+    "selectedAgentRetained": true,
+    "reloadObservationError": "The backend response was incomplete. Refresh saved status before retrying an action.",
+    "commandExit": 0,
+    "stdout": "4 minimum checks passed",
+    "neverReplay": true
+  },
+  "diagnostic": {
+    "passed": true,
+    "historyMessages": 8,
+    "modelRequests": 0,
+    "originalDatabaseUnchanged": true,
+    "ownedOwnerRetired": true,
+    "nativeResponses": 378,
+    "invalidNativeJson": 0,
+    "browser": {
+      "initialRestore": "completed",
+      "reload": "completed",
+      "warnings": [],
+      "scope": "Read-only copy of completed minimum task; no task resubmission"
+    }
+  },
+  "clientSuites": {
+    "sourceRevision": "917fd0ab40a4341223eb8b2b6adce22145939334",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 497,
+      "browser": 177
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 497,
+      "passed": 497,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 177,
+      "passed": 177,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "causalLimit": "One clean restore and reload with explicit text parsing does not prove the intermittent failure resolved or establish its cause.",
+  "installedVersion": "0.1.72",
+  "candidate73Accepted": false,
+  "neverReplay": true
+}
