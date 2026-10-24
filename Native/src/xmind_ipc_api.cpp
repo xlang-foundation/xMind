@@ -12,6 +12,8 @@
 #include "agentflow/local_auth.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/connection_profiles.hpp"
+#include "agentflow/remote_connection_authentication.hpp"
+#include "agentflow/http_stream_transport.hpp"
 #include "agentflow/connection_binding.hpp"
 #include "connection_binding_values.hpp"
 #include "agent_worker_sdk_values.hpp"
@@ -26,11 +28,12 @@ struct ApiContext {
     RunExecutor* executor;
     std::string token;
     ConnectionProfiles connections;
+    RemoteConnectionAuthentication authentication;
     LocalConnectionBindings bindings;
     BackendOwnerControl* owner=nullptr;
     mutable std::shared_mutex lifetime;
     bool active=true;
-    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),connections(persistence),bindings(persistence,execution,control),owner(control){}
+    ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),connections(persistence),authentication(persistence,connections),bindings(persistence,execution,control),owner(control){}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("unavailable");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
     void authorize(const std::string& supplied)const {
@@ -45,6 +48,10 @@ struct ApiContext {
 template<class F>auto api_call(F action)->decltype(action()){
     try{return action();}catch(const NotFound&){throw std::runtime_error("not_found");}catch(const Conflict&){throw std::runtime_error("conflict");}catch(const BackendQuiesced&){throw std::runtime_error("backend_quiesced");}catch(const RunBusy&){throw std::runtime_error("busy");}catch(const RunUnavailable&){throw std::runtime_error("unavailable");}catch(const std::invalid_argument&){throw std::runtime_error("invalid_arguments");}catch(...){throw std::runtime_error("internal_error");}
 }
+template<class F>auto authentication_call(F action)->decltype(action()){
+    try{return action();}catch(const RemoteNegotiationError& error){throw std::runtime_error(error.reason()==RemoteNegotiationFailure::server_mismatch?"remote_server_mismatch":error.reason()==RemoteNegotiationFailure::unsupported_version?"remote_protocol_unsupported":error.reason()==RemoteNegotiationFailure::missing_capability?"remote_capability_missing":error.reason()==RemoteNegotiationFailure::expired_grant?"remote_grant_expired":"remote_protocol_invalid");}catch(const ProviderHttpError& error){throw std::runtime_error(error.status==401?"remote_unauthenticated":error.status==403?"remote_forbidden":"remote_unavailable");}catch(const TransportError&){throw std::runtime_error("remote_unavailable");}catch(...){const auto failure=std::current_exception();return api_call([&]()->decltype(action()){std::rethrow_exception(failure);});}
+}
+
 void set(X::Value& value,const char* name,const X::Value& field){if(!value.Set(name,field))throw std::runtime_error("Cannot construct xMind API record");}
 X::Value session_value(X3PackageHost* host,const Session& session){auto value=X::Value::Dict(host);set(value,"id",X::Value::String(host,session.id));set(value,"title",X::Value::String(host,session.title));set(value,"parent_id",X::Value::String(host,session.parent_id));return value;}
 X::Value run_value(X3PackageHost* host,const Run& run){auto value=X::Value::Dict(host);set(value,"id",X::Value::String(host,run.id));set(value,"session_id",X::Value::String(host,run.session_id));set(value,"state",X::Value::String(host,to_string(run.state)));set(value,"parent_id",X::Value::String(host,run.parent_id));set(value,"node_id",X::Value::String(host,run.node_id));set(value,"graph_root",X::Value(run.graph_root));return value;}
@@ -238,7 +245,19 @@ struct ConnectionsApi {
     X::Value List(){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.load_or_initialize());});}
     X::Value Save(X::Value profiles,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();if(!profiles.IsList()||profiles.Size()>32)throw std::invalid_argument("Connection profiles require a bounded list");return value(context->connections.apply(nlohmann::json{{"profiles",sdk_values::from_value(profiles)}}.dump(),revision));});}
     X::Value Select(std::string id,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.select(id,revision));});}
+    X::Value Capabilities(){return api_call([&]{auto life=context->enter();auto admission=context->admit();auto result=X::Value::Dict(Host());set(result,"remote_authentication",X::Value(1));return result;});}
+    X::Value Authenticate(std::string id,std::int64_t revision,X::Value request){return authentication_call([&]{
+        auto life=context->enter();auto admission=context->admit();if(!request.IsDict()||request.Size()<2||request.Size()>3)throw std::invalid_argument("Invalid authentication fields");
+        for(std::uint64_t i=0;i<request.Size();++i){X::Value key,field;if(!request.DictEntry(i,key,field)||!key.IsString())throw std::invalid_argument("Invalid authentication fields");const auto name=key.ToString();if(name!="credential"&&name!="expected_credential_revision"&&name!="timeout_ms")throw std::invalid_argument("Invalid authentication fields");}
+        const auto integer=[](const X::Value& field){if(field.raw().tag==X3_TAG_BOOL||(!field.IsInt64()&&!field.IsUInt64())||(field.IsUInt64()&&field.ToUInt64()>INT64_MAX))throw std::invalid_argument("Invalid authentication revision or timeout");return field.ToInt64();};
+        const auto expected=integer(request["expected_credential_revision"]);const auto timeout=request.Size()==3?integer(request["timeout_ms"]):15000;const auto field=request["credential"];if(!field.IsString())throw std::invalid_argument("Invalid remote credential");
+        struct SecretText{std::string value;~SecretText(){volatile char* data=value.data();for(std::size_t i=0;i<value.size();++i)data[i]=0;}} plaintext{field.ToString()};
+        if(plaintext.value.empty()||plaintext.value.size()>8192)throw std::invalid_argument("Invalid remote credential");SecretBytes credential({reinterpret_cast<const std::uint8_t*>(plaintext.value.data()),plaintext.value.size()});
+        const auto receipt=context->authentication.authenticate(id,revision,expected,credential,std::chrono::milliseconds(timeout));auto result=X::Value::Dict(Host());set(result,"connection_id",X::Value::String(Host(),receipt.connection_id));set(result,"server_id",X::Value::String(Host(),receipt.server_id));set(result,"profile_revision",X::Value(receipt.profile_revision));set(result,"credential_revision",X::Value(receipt.credential_revision));set(result,"protocol_version",X::Value(receipt.protocol_version));set(result,"expires_at",X::Value(receipt.expires_at));set(result,"command_routing",X::Value(false));return result;
+    });}
     BEGIN_PACKAGE(ConnectionsApi)
+        APISET().AddFunc<0>("Capabilities",&ConnectionsApi::Capabilities);
+        APISET().AddFunc<3>("Authenticate",&ConnectionsApi::Authenticate);
         APISET().AddFunc<2>("Open",&ConnectionsApi::Open);
         APISET().AddFunc<0>("List",&ConnectionsApi::List);
         APISET().AddFunc<2>("Save",&ConnectionsApi::Save);

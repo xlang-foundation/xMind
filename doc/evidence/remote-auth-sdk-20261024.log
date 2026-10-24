@@ -1,0 +1,116 @@
+Start testing: Oct 24 08:20 Pacific Daylight Time
+----------------------------------------------------------
+4/177 Testing: native_remote_negotiation_contract
+4/177 Test: native_remote_negotiation_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_negotiation_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_negotiation_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native proposed remote negotiation validates pinned identity, exact offered versions/capabilities, expiry, authorized scope shape and bounded duplicate-free JSON; 58 malformed/incompatible responses rejected. No transport, authentication, persistence or remote activation claimed.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_negotiation_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_remote_negotiation_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/177 Testing: native_remote_connection_client_contract
+5/177 Test: native_remote_connection_client_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_client_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_client_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native remote client made 10 controlled bearer-authenticated loopback negotiation requests: positive grant, expired/mismatched/incompatible/malformed responses, HTTP401/403/307 and bounded-response refusal; no retry, downgrade or redirect. Unsafe/default HTTP origins and pre-cancelled calls sent nothing. No TLS trust, profile activation or persistence claim.
+<end of output>
+Test time =   0.09 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_client_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_remote_connection_client_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/177 Testing: native_remote_connection_credentials_contract
+6/177 Test: native_remote_connection_credentials_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_credentials_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_credentials_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native xlang3/SQLite remote credentials preserve encrypted combined grant/token revisions across two database reopens; stale/duplicate/expired/server-mismatch writes refuse without replacement, changed origins require explicit new save, public catalog and database bytes expose no plaintext credential/grant. Local remains selected and remote activation refuses. No network authentication claim.
+<end of output>
+Test time =   0.16 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_credentials_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_remote_connection_credentials_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/177 Testing: native_remote_connection_authentication_contract
+7/177 Test: native_remote_connection_authentication_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_authentication_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_authentication_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native authentication service integrates nine controlled injected negotiation outcomes with real xlang3/SQLite encrypted publication: failure/cancellation preserves prior grant, same-origin renewal retains pin, stale credential/profile rejects before exchange, profile edit during exchange refuses publication, explicit changed-origin authentication and database reopen retain revision4. No actual TLS/network exchange in this service fixture; standalone HTTP peer coverage is separate. Remote selection remains disabled.
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_authentication_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_remote_connection_authentication_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+32/177 Testing: native_xmind_ipc_lifetime_contract
+32/177 Test: native_xmind_ipc_lifetime_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_xmind_ipc_lifetime_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_lifetime_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process root registration passed concurrent initialization, unbound service refusal, one listener, exclusive public ownership, stale object/token refusal, rebinding without re-registration, persisted data and refusal after backend destruction. Same-process SDK lifecycle fixture; separate xmind.exe calls are covered independently.
+<end of output>
+Test time =   2.14 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_lifetime_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_xmind_ipc_lifetime_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+33/177 Testing: native_xmind_ipc_api_contract
+33/177 Test: native_xmind_ipc_api_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/xmind_ipc_api_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_api_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualOrdinarySdkCommand":true,"commandRunId":"sdk-direct-command","sessionId":"sdk-direct-command-session","controlledModelRequests":1,"persistedMessages":2,"duplicateDispatchRefused":true,"literalArgumentsRetained":true}
+{"backendPid":34160,"clientPids":[30424,29072,38112,36584,22480,34992,27776,32908,41780,2964,39196,32500,35572,40776,31984,41492,11828,11032,4392,24828,15296,24528,19368,40212,36104,32572,19240,29880,15520,29964,24256,35020,10448,22012,26372,31444,27904,7484,28360,28152,1036,18988,31656,41200,30064,38484,32620,36136,9416,12660,35380,34064,40392,37572,2828,41696,32240,31008,27660,40264,4076,4544,40040,35120,4700,26588,31212,36004,17164,39984,37924,29588,20344,3412,17044,34180,41524,11804,31192,8768,38140,17876,40828,2408,27032,17668,13680,29128,28936,39572,25252,13052,36736,41448,5348,26308,39972,37808,34540,16088,13924,30424,29072,34384,39292,22480,27116,27776,36948,35216,34252,36528,29328,12328,21336,29044,34920,27128,40724,24828,30248,41784,39356,14384,13716,41608,31840,35820,36964,29964,34808,30544,30396,37248,12724,39964,39232,37320,8780,24752,1048,4964],"apiVersion":1,"transport":"xlang3-lrpc","actualUnifiedExecutable":true,"verified":["Distinct SDK agent list/definition/select/clear with real imported definitions and zero added inference","Origin-bound captured HTTP agent selection, stale refusal and shared parsing","Root registered at backend startup","Native Host/Connections/Sessions/Runs subobjects","Distinct xmind.exe clients call SDK methods directly","Exact UTF-8 persisted session survives independent clients","Duplicate create and wrong authentication rejected","No unauthorized session created","Unknown run rejected","Captured run start/open/events and live cancellation use actual SDK service subobjects","Wrong-token and stale captured run admissions dispatch no model","SDK value catalog agrees with HTTP and persists UTF-8 metadata","Independent clients race one catalog revision; exactly one succeeds","Unauthenticated selection, wrong token, stale revision and credential fields rejected"],"limitations":["No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate","No live provider or rendering acceptance"],"passed":true}
+<end of output>
+Test time =   5.81 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_api_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_xmind_ipc_api_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+169/177 Testing: native_connection_profiles_contract
+169/177 Test: native_connection_profiles_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_connection_profiles_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_connection_profiles_contract" start time: Oct 24 08:20 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native xlang3 connection-profile registry passed first-use Local selection, YAML/JSON idempotence, HTTPS endpoint checks, unknown credential-field rejection, revision conflicts, profile retirement and SQLite reopen. Nexus authentication, command routing, UI selection and remote execution remain unimplemented by this checkpoint.
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"native_connection_profiles_contract" end time: Oct 24 08:20 Pacific Daylight Time
+"native_connection_profiles_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 24 08:20 Pacific Daylight Time

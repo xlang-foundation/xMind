@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-24T15:21:54.776Z",
+  "gate": {
+    "recordedAt": "2026-10-24T15:20:55.686Z",
+    "sourceParent": "ebba8947dd91f1b43fdad06e1e465491a2ddf975",
+    "sourcePatchSha256": "4cd42ece537394ce027b507b05a39bf8c2d5655e8afadbf8278b376e5b349336",
+    "build": {
+      "pid": 34444,
+      "launchedAt": "2026-10-24T15:19:31.186Z",
+      "completedAt": "2026-10-24T15:20:41.485Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6e164898900ec8f136bbb881b0f06432ba458e0adf0c7f29e3133aaeba42da4c"
+    },
+    "test": {
+      "pid": 28320,
+      "launchedAt": "2026-10-24T15:20:44.269Z",
+      "completedAt": "2026-10-24T15:20:52.925Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "87b3e978e200c5f8702f4d5678a1974cdfef266f53f4925dd9b1d01373850358"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 8.62,
+    "projectFiles": 2834,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 141,
+    "nativeSha256": "c5e772e3974af51e9867ee8281be367f3d8e920c25d7d14a02386b2c3ba22d34",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Seven focused contracts including registered SDK capability/authentication refusal/lifetime checks plus existing separate-process IPC regression. No positive remote authentication via SDK.",
+  "sdk": {
+    "registeredSubobject": "xmind.Connections(owner_token)",
+    "capability": {
+      "remote_authentication": 1
+    },
+    "method": "Authenticate(profile_id, expected_profile_revision, request)",
+    "requiredRequestFields": [
+      "credential",
+      "expected_credential_revision"
+    ],
+    "optionalRequestFields": [
+      "timeout_ms"
+    ],
+    "callerSelectedEndpointRefused": true,
+    "malformedLocalMissingProfileAndRetiredOwnerRefuse": true,
+    "noCredentialPublishedByRefusedCalls": true,
+    "usesStandardSdkValuesAndMethodCalls": true,
+    "positiveSeparateProcessAuthenticationVerified": false
+  },
+  "productionBackendRebuilt": true,
+  "nativeSha256": "c5e772e3974af51e9867ee8281be367f3d8e920c25d7d14a02386b2c3ba22d34",
+  "fullNativeSuiteRun": false,
+  "nativeInventory": 177,
+  "trustedTlsToStorageTested": false,
+  "remoteRoutingOrSelectionEnabled": false,
+  "installed71Unchanged": true,
+  "goalComplete": false
+}

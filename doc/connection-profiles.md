@@ -13,6 +13,31 @@ save/remove Nexus address metadata; it does not yet select a remote profile or
 authenticate to Nexus. Model-provider profiles are a separate configuration
 domain.
 
+Development SDK support now includes `Connections(owner_token).Capabilities()`
+with `remote_authentication:1` and
+`Authenticate(profile_id, expected_profile_revision, request)`. The request is
+an ordinary SDK dictionary with exactly `credential` and
+`expected_credential_revision`, plus optional integer `timeout_ms` (default15000,
+range1..120000). Credentials must be supplied through authenticated IPC, never
+command-line arguments. Caller-selected endpoints, grants, scopes and unknown
+fields are refused. Native code uses the captured configured HTTPS origin and
+the [proposed generic v1 contract](generic-remote-protocol-v1-proposal.md).
+
+Successful authentication returns connection_id, server_id, profile_revision,
+credential_revision, protocol_version, expires_at (Unix UTC seconds) and
+command_routing:false. No credential or grant ID is returned. This stores an
+authorization; it does not select a connection or open a remote execution
+binding. Catalog status/authenticated fields still describe current usable
+bindings, so remote entries remain not_connected with routing/authenticated
+false until remote binding/status integration is implemented. Browser/CLI
+authentication adapters and deployed Nexus compatibility remain unimplemented.
+
+SDK capability discovery, malformed/refused calls and retired-owner refusal
+have [focused evidence](evidence/remote-auth-sdk-20261024.json). Positive
+authentication via a separate SDK process and actual trusted TLS remains
+unverified. The existing independent SDK regression exercises other captured
+services; it is not positive remote authentication evidence.
+
 ![Connection architecture](connection-profiles.svg)
 
 ## User experience

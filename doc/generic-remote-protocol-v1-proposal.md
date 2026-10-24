@@ -8,7 +8,9 @@ acceptance and runtime activation remain incomplete. A backend-private encrypted
 credential/grant store now has isolated xlang3/SQLite coverage. The native
 authentication service composes verified-HTTPS negotiation with encrypted
 publication, with controlled injected-exchange tests for failure/race behavior.
-Actual trusted-TLS-to-storage acceptance and registered SDK exposure remain open. This is
+Registered `Connections.Capabilities/Authenticate` now expose the service through
+ordinary xlang3 SDK methods, with bounded refusal/lifetime coverage. Actual
+trusted-TLS-to-storage and positive separate-process SDK authentication remain open. This is
 an OSS client/worker contract proposal. It makes no claim about any existing
 Nexus endpoint, authentication system, database or scheduler. An existing public
 server contract, if supplied, must be reconciled before implementation.
