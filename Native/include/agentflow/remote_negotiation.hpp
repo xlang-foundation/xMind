@@ -32,4 +32,5 @@ struct RemoteNegotiatedGrant {
     std::map<std::string,std::int64_t> capabilities;
 };
 RemoteNegotiatedGrant validate_remote_negotiation(std::string_view response,const RemoteNegotiationRequirements& requirements);
+std::string encode_remote_negotiation_request(const RemoteNegotiationRequirements& requirements);
 }

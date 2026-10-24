@@ -1,8 +1,10 @@
 # Generic remote connection v1 proposal
 
 Status: proposed for architecture review, not deployed. The bounded native
-negotiation-response validator is implemented as a standalone connector
-component; transport/authentication and runtime activation remain unimplemented. This is
+negotiation-response validator and bounded native negotiation client are
+implemented as standalone connector components. The client reuses native HTTP
+transport and has isolated loopback-peer coverage; trusted TLS/authentication
+acceptance, credential persistence and runtime activation remain incomplete. This is
 an OSS client/worker contract proposal. It makes no claim about any existing
 Nexus endpoint, authentication system, database or scheduler. An existing public
 server contract, if supplied, must be reconciled before implementation.

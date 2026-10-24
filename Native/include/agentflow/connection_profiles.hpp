@@ -9,6 +9,7 @@
 #include <vector>
 
 namespace agentflow {
+void validate_remote_connection_origin(const std::string& origin);
 enum class ConnectionKind {local,nexus};
 struct ConnectionProfile {
     std::string id,name,origin;

@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-24T15:06:00.568Z",
+  "gate": {
+    "recordedAt": "2026-10-24T15:05:34.617Z",
+    "sourceParent": "2cd7c3d6e00c7a486bba527f21986c024f871398",
+    "sourcePatchSha256": "3faa3b988650ea9876ede14ee3943a1000d7600346230302964111aa25281b43",
+    "build": {
+      "pid": 13732,
+      "launchedAt": "2026-10-24T15:04:53.476Z",
+      "completedAt": "2026-10-24T15:05:28.593Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d5ac29e4c2b46345aca8246a11782f0a49e1cdd238e3f6a8bc49937299aece24"
+    },
+    "test": {
+      "pid": 27984,
+      "launchedAt": "2026-10-24T15:05:31.317Z",
+      "completedAt": "2026-10-24T15:05:31.882Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "efa3752d39a751069dedaf1621ccc0341459833f4e2306388bb43f8771fbee23"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 0.52,
+    "projectFiles": 2828,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 139,
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Three focused contracts: native negotiation validation, actual native WinHTTP loopback bearer negotiation, and xlang3/SQLite connection profile regression.",
+  "controlledRequests": 10,
+  "redirectTargetRequests": 0,
+  "automaticRetries": 0,
+  "protocolDowngrades": 0,
+  "verified": [
+    "Positive grant through actual native HTTP transport",
+    "Expired grant, server mismatch, protocol/capability mismatch and malformed response refusal",
+    "HTTP401/403/307 and response byte bound refusal",
+    "Default HTTP/unsafe origins, empty HTTPS host and pre-cancelled calls rejected before send",
+    "Existing connection registry revision/retirement/SQLite reopen"
+  ],
+  "trustedTlsPeerTested": false,
+  "credentialPersistenceImplemented": false,
+  "productionProfileActivationEnabled": false,
+  "productionBackendLinkedToNewClient": false,
+  "productionExecutableRebuilt": false,
+  "installed71Unchanged": true,
+  "nativeInventory": 175,
+  "fullNativeSuiteRun": false,
+  "goalComplete": false
+}

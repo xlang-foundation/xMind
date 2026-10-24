@@ -22,6 +22,7 @@ RemoteNegotiationError::RemoteNegotiationError(RemoteNegotiationFailure reason):
     reason==RemoteNegotiationFailure::unsupported_version?"Remote protocol version unsupported":
     reason==RemoteNegotiationFailure::missing_capability?"Required remote capability unavailable":
     reason==RemoteNegotiationFailure::expired_grant?"Remote grant expired":"Malformed remote negotiation response"),reason_(reason){}
+std::string encode_remote_negotiation_request(const RemoteNegotiationRequirements& requirements){requirements_valid(requirements);return Json{{"supported_versions",requirements.supported_versions},{"required_capabilities",requirements.required_capabilities},{"expected_server_id",requirements.expected_server_id?Json(*requirements.expected_server_id):Json(nullptr)}}.dump();}
 RemoteNegotiatedGrant validate_remote_negotiation(std::string_view response,const RemoteNegotiationRequirements& requirements){
     requirements_valid(requirements);if(response.empty()||response.size()>65536)fail();
     try{

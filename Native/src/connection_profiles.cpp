@@ -34,7 +34,7 @@ void origin(const std::string& value){
     std::string host,port;
     if(authority.front()=='['){const auto close=authority.find(']');if(close==std::string::npos||close<3||authority.substr(1,close-1).find(':')==std::string::npos)throw std::invalid_argument("Invalid bracketed Nexus IPv6 host");host=authority.substr(1,close-1);for(unsigned char c:host)if(!(std::isxdigit(c)||c==':'||c=='.'))throw std::invalid_argument("Invalid bracketed Nexus IPv6 host");if(close+1<authority.size()){if(authority[close+1]!=':')throw std::invalid_argument("Invalid Nexus origin port");port=authority.substr(close+2);}}
     else{const auto colon=authority.find(':');if(colon!=std::string::npos){if(authority.find(':',colon+1)!=std::string::npos)throw std::invalid_argument("IPv6 Nexus hosts must be bracketed");host=authority.substr(0,colon);port=authority.substr(colon+1);}else host=authority;
-        if(host.size()>253||host.front()=='.'||host.back()=='.')throw std::invalid_argument("Invalid Nexus origin host");
+        if(host.empty()||host.size()>253||host.front()=='.'||host.back()=='.')throw std::invalid_argument("Invalid Nexus origin host");
         std::size_t label_begin=0;while(label_begin<host.size()){const auto dot=host.find('.',label_begin);const auto end=dot==std::string::npos?host.size():dot;const auto length=end-label_begin;if(length==0||length>63||host[label_begin]=='-'||host[end-1]=='-')throw std::invalid_argument("Invalid Nexus origin host label");for(std::size_t i=label_begin;i<end;++i)if(!(std::isalnum(static_cast<unsigned char>(host[i]))||host[i]=='-'))throw std::invalid_argument("Invalid Nexus origin host label");if(dot==std::string::npos)break;label_begin=dot+1;}}
     if(!port.empty()){unsigned value_port=0;const auto parsed=std::from_chars(port.data(),port.data()+port.size(),value_port);if(parsed.ec!=std::errc{}||parsed.ptr!=port.data()+port.size()||value_port==0||value_port>65535)throw std::invalid_argument("Invalid Nexus origin port");}else if(authority.back()==':')throw std::invalid_argument("Invalid Nexus origin port");
     const auto path=authority_end==std::string::npos?std::string{}:value.substr(authority_end);
@@ -81,6 +81,7 @@ std::string decode_server_identity(const std::string& raw){
     const auto id=value["id"].get<std::string>();if(id.size()!=70||!id.starts_with("local-")||id.find_first_not_of("0123456789abcdef",6)!=std::string::npos)throw DatabaseError("Invalid local connection server identity");return id;
 }
 }
+void validate_remote_connection_origin(const std::string& value){origin(value);}
 ConnectionProfiles::ConnectionProfiles(PersistenceService& store):store_(store),admission_(connection_admission(&store)){}
 std::shared_lock<std::shared_mutex> ConnectionProfiles::admit_local(std::int64_t revision){
     std::shared_lock admission(*admission_);const auto catalog=load();const auto local=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[](const auto& profile){return profile.id=="local"&&profile.kind==ConnectionKind::local;});
