@@ -46,6 +46,7 @@ struct ConnectionGraphRequest {ConnectionRunRequest run;std::string graph;std::i
 struct ConnectionGraphSnapshot {GraphRootRecord record;GraphContextMetadata context;};
 struct BoundConnectionGraphs {ConnectionBindingIdentity binding;std::vector<GraphExecutionMetadata> graphs;};
 struct BoundConnectionGraph {ConnectionBindingIdentity binding;ConnectionGraphSnapshot graph;};
+struct BoundConnectionGraphUpdate {ConnectionBindingIdentity binding;GraphRootRecord graph;};
 ConnectionGraphSnapshot read_local_connection_graph(PersistenceService&,GraphExecution&,const std::string&);
 Run submit_local_connection_run(RunExecutor&,ConnectionRunRequest);
 class ConnectionEventStream {
@@ -73,6 +74,8 @@ public:
     BoundConnectionRun start_graph(ConnectionGraphRequest request)const;
     BoundConnectionGraphs graphs()const;
     BoundConnectionGraph graph(const std::string& id)const;
+    BoundConnectionGraphUpdate graph_input(const std::string& root,const std::string& owner,const std::string& node,const std::string& input,std::int64_t revision,std::int64_t owner_revision=0)const;
+    BoundConnectionRun resume_graph(const std::string& root,std::int64_t revision)const;
     void cancel_run(const std::string& id)const;
     std::shared_ptr<CapturedRunOperations> operations(std::string session,std::string run)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;

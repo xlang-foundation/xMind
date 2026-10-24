@@ -23,6 +23,7 @@ inline nlohmann::json page(const ConnectionEventPage& value){auto events=nlohman
 inline nlohmann::json graph_record(const GraphRootRecord& root){return {{"run",run_value(root.run)},{"graph_id",root.graph_id},{"graph_revision",root.graph_revision},{"checkpoint_revision",root.checkpoint_revision},{"checkpoint",nlohmann::json::parse(root.checkpoint_json)},{"spec",nlohmann::json::parse(root.specification_json)},{"input",root.input_json.empty()?nlohmann::json(nullptr):nlohmann::json::parse(root.input_json)}};}
 inline nlohmann::json graph_snapshot(const ConnectionGraphSnapshot& value){auto result=graph_record(value.record);result["context"]={{"enabled",value.context.enabled},{"resumable",value.context.resumable},{"remaining_active_ms",value.context.remaining_active_ms?nlohmann::json(*value.context.remaining_active_ms):nlohmann::json(nullptr)}};return result;}
 inline nlohmann::json bound(const BoundConnectionGraph& value){return {{"binding",identity(value.binding)},{"graph",graph_snapshot(value.graph)}};}
+inline nlohmann::json bound(const BoundConnectionGraphUpdate& value){return {{"binding",identity(value.binding)},{"graph",graph_record(value.graph)}};}
 inline nlohmann::json bound(const BoundConnectionGraphs& value){auto entries=nlohmann::json::array();for(const auto& graph:value.graphs)entries.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.node_count},{"executable",graph.executable}});return {{"binding",identity(value.binding)},{"graphs",std::move(entries)}};}
 
 }

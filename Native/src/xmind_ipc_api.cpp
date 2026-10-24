@@ -106,7 +106,10 @@ struct BoundGraphsApi {
     X::Value Submit(X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return bound_value(Host(),state->start_graph(connection_input::graph_request(sdk_values::from_value(request))));});}
     X::Value List(){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return sdk_values::to_value(Host(),connection_values::bound(state->graphs()));});}
     X::Value Open(std::string id){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return sdk_values::to_value(Host(),connection_values::bound(state->graph(id)));});}
-    BEGIN_PACKAGE(BoundGraphsApi) APISET().AddFunc<0>("List",&BoundGraphsApi::List);APISET().AddFunc<1>("Open",&BoundGraphsApi::Open);APISET().AddFunc<1>("Submit",&BoundGraphsApi::Submit); END_PACKAGE
+    X::Value Input(std::string root,std::string node,std::string input,std::int64_t revision){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return sdk_values::to_value(Host(),connection_values::bound(state->graph_input(root,{},node,input,revision)));});}
+    X::Value TreeInput(std::string root,std::string owner,std::string node,std::string input,std::int64_t revision,std::int64_t owner_revision){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");if(owner.empty())throw std::invalid_argument("Nested graph owner is required");return sdk_values::to_value(Host(),connection_values::bound(state->graph_input(root,owner,node,input,revision,owner_revision)));});}
+    X::Value Resume(std::string root,std::int64_t revision){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return bound_value(Host(),state->resume_graph(root,revision));});}
+    BEGIN_PACKAGE(BoundGraphsApi) APISET().AddFunc<4>("Input",&BoundGraphsApi::Input);APISET().AddFunc<6>("TreeInput",&BoundGraphsApi::TreeInput);APISET().AddFunc<2>("Resume",&BoundGraphsApi::Resume);APISET().AddFunc<0>("List",&BoundGraphsApi::List);APISET().AddFunc<1>("Open",&BoundGraphsApi::Open);APISET().AddFunc<1>("Submit",&BoundGraphsApi::Submit); END_PACKAGE
 };
 struct BoundOperationsApi {
     std::shared_ptr<CapturedRunOperations> state;BoundOperationsApi()=default;explicit BoundOperationsApi(std::shared_ptr<CapturedRunOperations> value):state(std::move(value)){}

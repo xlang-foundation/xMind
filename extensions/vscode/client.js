@@ -74,6 +74,7 @@ class BackendClient {
   #connectionAdmissionSupported=false;
   #connectionGraphAdmissionSupported=false;
   #connectionGraphReadSupported=false;
+  #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
   #connectionChildHistorySupported=false;
@@ -124,6 +125,8 @@ class BackendClient {
     else if(this.#connectionGraphAdmissionSupported)throw new Error("The backend graph admission protocol changed. Reconnect before admitting graph work.");
     if(health&&Object.hasOwn(health,"local_connection_graph_read")){if(health.local_connection_graph_read!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph read protocol.");this.#connectionGraphReadSupported=true;}
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
+    if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
+    else if(this.#connectionGraphControlSupported)throw new Error("The backend graph control protocol changed. Reconnect before continuing graphs.");
     return health;
   }
   async #captureConnection(){
@@ -236,9 +239,14 @@ class BackendClient {
     executionIdentity(session);executionIdentity(id);planInteger(expected_head_revision);if(model!==undefined)profileIdentity(model);
     return validateContextRequest(await this.request(`/v1/sessions/${session}/context/compact`,{id,expected_head_revision,...(model?{model_id:model}:{}),...profileBindingFields(binding)}),id);
   }
+  async #controlGraph(root,path,body,resume=false){
+    executionIdentity(root);const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured graph control connection changed.");
+    const value=await this.request('/v1/connection-bindings/'+capture.id+'/graph-runs/'+encodeURIComponent(root)+path,body);exactFields(value,['binding',resume?'run':'graph']);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error("Graph control receipt belongs to another connection.");const run=resume?value.run:value.graph?.run;validateRunDTO(run);if(run.id!==root||!run.graph_root||run.parent_id)throw new Error("Graph control receipt belongs to another root.");return resume?value.run:value.graph;
+  }
   async resumeGraph(root,expected_checkpoint_revision) {
     executionIdentity(root);planInteger(expected_checkpoint_revision,1);
-    const result=await this.request(`/v1/graph-runs/${root}/resume`,{expected_checkpoint_revision});validateRunDTO(result);
+    const result=await (this.#connectionGraphControlSupported?this.#controlGraph(root,'/resume',{expected_checkpoint_revision},true):this.request(`/v1/graph-runs/${root}/resume`,{expected_checkpoint_revision}));validateRunDTO(result);
     if(result.id!==root||result.parent_id!==''||result.graph_root!==true)throw new Error('Graph resume ownership changed');return result;
   }
   #admitGraph(body){return this.#connectionGraphAdmissionSupported?this.#admitConnection('graph-runs',body):this.request('/v1/graph-runs',body);}
@@ -254,8 +262,8 @@ class BackendClient {
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
   graphChildHistory(root,child,session) { return this.#connectionChildHistorySupported?this.#capturedChildHistory(root,child,session):this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
-  graphInput(root,node,input_json,expected_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
-  graphTreeInput(root,owner,node,input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/invocations/${encodeURIComponent(owner)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision}); }
+  graphInput(root,node,input_json,expected_checkpoint_revision) { if(this.#connectionGraphControlSupported)return this.#controlGraph(root,'/human/'+encodeURIComponent(node),{input_json,expected_checkpoint_revision});return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
+  graphTreeInput(root,owner,node,input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision) { if(this.#connectionGraphControlSupported)return this.#controlGraph(root,'/invocations/'+encodeURIComponent(owner)+'/human/'+encodeURIComponent(node),{input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision});return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/invocations/${encodeURIComponent(owner)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision}); }
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
   async importProviderConfiguration(path,expected_revision) {
     if(typeof path!=='string'||!path||path.length>32768||/[\x00-\x1f]/.test(path)||!(/^[A-Za-z]:[\\/]/.test(path)||/^\\\\[^\\/]+[\\/][^\\/]+/.test(path)))throw new Error('Provider configuration must be an absolute local path');

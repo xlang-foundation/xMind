@@ -92,6 +92,17 @@ ConnectionGraphSnapshot read_local_connection_graph(PersistenceService& store,Gr
 }
 BoundConnectionGraphs CapturedLocalConnection::graphs()const{auto life=context_->enter();if(!context_->graphs)throw RunUnavailable("Graph catalog unavailable");return {identity_,context_->graphs->graphs()};}
 BoundConnectionGraph CapturedLocalConnection::graph(const std::string& id)const{auto life=context_->enter();if(!context_->graphs)throw RunUnavailable("Graph observation unavailable");return {identity_,read_local_connection_graph(context_->store,*context_->graphs,id)};}
+BoundConnectionGraphUpdate CapturedLocalConnection::graph_input(const std::string& root,const std::string& owner,const std::string& node,const std::string& input,std::int64_t revision,std::int64_t owner_revision)const{
+    auto life=context_->enter();auto admission=context_->admit();if(!context_->graphs)throw RunUnavailable("Graph input unavailable");
+    if(root.empty()||root.size()>128||node.empty()||node.size()>64||input.empty()||input.size()>65536||revision<1||revision>9007199254740991LL||owner.size()>128||(!owner.empty()&&(owner_revision<1||owner_revision>9007199254740991LL)))throw std::invalid_argument("Invalid captured graph human input");
+    if(owner.empty())return {identity_,context_->graphs->human_input(root,node,input,"local-owner",revision)};
+    if(!context_->graphs->supports_graph_tree_human_input())throw RunUnavailable("Nested graph human input is unavailable");
+    return {identity_,context_->graphs->tree_human_input(root,owner,node,input,"local-owner",revision,owner_revision)};
+}
+BoundConnectionRun CapturedLocalConnection::resume_graph(const std::string& root,std::int64_t revision)const{
+    auto life=context_->enter();auto admission=context_->admit();if(!context_->graphs)throw RunUnavailable("Graph resume unavailable");if(root.empty()||root.size()>128||revision<1||revision>9007199254740991LL)throw std::invalid_argument("Invalid captured graph resume");
+    return {identity_,context_->graphs->resume_graph(root,"local-owner",revision)};
+}
 
 void CapturedLocalConnection::cancel_run(const std::string& id)const{auto life=context_->enter();auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");context_->executor->cancel(id);}
 namespace {

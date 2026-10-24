@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured Graphs.Input, TreeInput and Resume SDK methods, native HTTP adapters and shared browser/extension client.",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T04:44:34.565Z",
+    "sourceParent": "ce0f7b5ab587c089a4dd50422b284c2ab0df2c6e",
+    "sourcePatchSha256": "251c982df265679045c17bab7840413f4b5cb7c606860f6260738218e40e6c5d",
+    "build": {
+      "pid": 8864,
+      "launchedAt": "2026-10-24T04:42:36.135Z",
+      "completedAt": "2026-10-24T04:44:10.463Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "15faff6164e331228894a3b96b23dddc6d8d5f1dd2c8f84146ebaf40e505d7fa"
+    },
+    "test": {
+      "pid": 14184,
+      "launchedAt": "2026-10-24T04:44:13.591Z",
+      "completedAt": "2026-10-24T04:44:31.811Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4fa38fadb9859cf1f910d358b1d4b00a6c9d40286892f28ae577d1e9d93b295c"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 18.18,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "68747eb56084484eaed8b062f70e768b1b01dc175b03b86695cb8b795f9971fb",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "ce0f7b5ab587c089a4dd50422b284c2ab0df2c6e",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 474,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 474,
+      "passed": 474,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "evidence": {
+    "recording": "SDK and HTTP recording fixture checks raw JSON bytes, local-owner actor, both checkpoint revisions, binding identity and retired/origin-bound handle refusal; recording resume does not execute continuation.",
+    "production": "Native graph HTTP fixture completes root two-stage human input and nested owner human input through captured routes, with real file reads and no model requests for those graphs. Actual resume refuses an unanswered context-disabled graph.",
+    "limits": "Positive enabled-context captured resume, graph streams, remaining API routing, authenticated remote enrollment, deeper repeated recovery and rendered VS Code remain unverified. Previous full native result remains 172/173 with Rust restoration failure. No new full suite or installation."
+  }
+}

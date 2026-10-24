@@ -128,3 +128,7 @@ Hosted7c7408ad view cases all passed471/165, but the gate expected470 extension 
 ## 2026-10-23 captured graph catalog/detail
 
 Captured SDK/HTTP/client graph List/Open share native snapshot and serialization logic with compatibility reads. Actual state-change observation, stale-profile retained reads, foreign handle/retirement refusal and real graph-service response equality pass native4/4 (17.69s). Current local view CI logic passes473/165; hosted earlier2e908a44 independently passes472/165. [Receipt](../doc/evidence/captured-graph-read-20261023.json) keeps those scopes distinct. Full173 Rust failure, rendered VS Code, graph human/resume/streams, commands/models and remote/enrollment remain open; installed64 is unchanged.
+
+### Captured graph controls — 2026-10-23
+
+Captured SDK Input/TreeInput/Resume dispatch and shared client routing pass native4/4 (18.18s), extension474/474 and browser165/165. Actual native root/nested human input completes real file reads; positive context-enabled resume is still unverified. This focused checkpoint does not resolve the full-native Rust failure or qualify a release. See [receipt](../doc/evidence/captured-graph-control-20261023.json).

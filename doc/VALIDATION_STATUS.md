@@ -1,3 +1,18 @@
+## Captured graph human input and resume dispatch — 2026-10-23
+
+Graphs.Input, TreeInput and Resume now use captured native connection subobjects.
+The shared browser/extension client negotiates local_connection_graph_control:1,
+preserves raw input and checkpoint guards and refuses identity/protocol drift
+without retrying through compatibility routes. Native4/4 pass in18.18s; the
+complete local client gate passes474 extension and165 browser cases, with
+71 source/vendor files and18 assets unchanged.
+
+Actual native HTTP graphs complete root and nested human input with real file
+reads. SDK/HTTP recording fixtures prove resume argument transfer; actual resume
+refusal is covered, but positive enabled-context resume remains unverified.
+Previous full-native172/173 Rust failure remains unresolved. Installed64 stays
+unchanged. [Receipt](evidence/captured-graph-control-20261023.json).
+
 ## Captured graph catalog/detail and shared consistent snapshots — 2026-10-23
 
 Graphs.List and Graphs.Open now use captured native connection objects. HTTP
