@@ -1,0 +1,45 @@
+{
+  "recordedAt": "2026-10-24T23:27:54.319Z",
+  "passed": true,
+  "calls": 4,
+  "proof": {
+    "passed": true,
+    "sessionId": "99b136d7bb544013a4d98bbc72705860",
+    "runId": "c3266a85e6704444b2c640e05babc442",
+    "selectedEditorContext": true,
+    "approvals": 2,
+    "cleanFirstCompletion": true,
+    "automaticCleanEditorRefreshBeforeReload": true,
+    "restoredHistory": true,
+    "restoredAgent": "coding.process",
+    "noLatencyBoundClaimed": true
+  },
+  "nativeSha256": "f3b9bf699afd376ef2fd4b437fdb98c72f8d6d5fba03c1caa2f37e6bac548952",
+  "ownedNativeExited": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "paidInference": false,
+  "installedExtensionUnchanged": true,
+  "scope": "Rendered actual Code editor selection and xMind native process coding through controlled local model peer",
+  "goalComplete": false,
+  "version": "0.1.74",
+  "historyMessages": 8,
+  "completedWorkerRetirements": 1,
+  "stagedExtensionFilesVerified": 2439,
+  "serverRetirement": {
+    "retired": true,
+    "ownedCount": 9,
+    "recordedAt": "2026-10-24T23:27:27.1098125Z"
+  },
+  "editorBeforeReload": {
+    "observedAt": "2026-10-24T23:27:00.115Z",
+    "visibleEditorLines": [
+      "module.exports = (value, min, max) => Math.max(min, Math.min(max, value));"
+    ],
+    "noReloadSinceTaskSubmission": true
+  },
+  "installed": false,
+  "releaseAccepted": false,
+  "handoffAndPreservationPending": true
+}
