@@ -1,27 +1,28 @@
 {
-  "recordedAt": "2026-10-24T08:47:05.315Z",
+  "recordedAt": "2026-10-24T08:53:12.266Z",
   "output": "docs/xmind-implementation-status.pdf",
-  "sha256": "eaca5153c8485342c2415a8b0706dccf61d545ebfebd597d9e01770548f66479",
-  "previousPdfSha256": "4423d49b1b8c0911e4fd991e0fe588f357f36adaa52d3f91fd2e6166962df728",
+  "sha256": "d4d25fc5bd5bf407b66008cac7ec19c0399c6376fa5840817f81e7f5095f27d2",
+  "previousPdfSha256": "eaca5153c8485342c2415a8b0706dccf61d545ebfebd597d9e01770548f66479",
   "pages": 2,
   "areas": 14,
   "installedVersion": "0.1.66",
   "source": "3c490dd9",
-  "fullNativeGate": "Still running; no terminal qualification claimed",
+  "fullNativeGate": "173/173 passed in768.07s; frozen closures unchanged",
+  "fullNativeReceipt": "doc/evidence/native-delivery-3c490dd9-full-20261024.json",
   "evidenceIndex": "docs/xmind-delivery-acceptance.md",
   "detailedEvidence": "doc/VALIDATION_STATUS.md",
-  "renderedWith": "Bundled Poppler pdftoppm; both pages visually reviewed at1300-pixel height",
+  "renderedWith": "Bundled Poppler; both qualified pages visually reviewed at1300-pixel height",
   "pageImages": [
     {
       "page": 1,
-      "sha256": "56d63c86daa4850c23dde023bbe65b7c50f2849f5486082b22713fd76981cdd8"
+      "sha256": "294353a41d1609c844f128ab3311985250c0e8c89fd5e37b207ba4319aaf8864"
     },
     {
       "page": 2,
-      "sha256": "d0e19905e3fe11ef36097c2d1806ec2a54b5b9b802ebf52b8f9582efe0d245bb"
+      "sha256": "9957f60d2f667d62b693bfbfdefe2809dde58d45759d8ff7a545b47173b13d24"
     }
   ],
-  "textExtractionChecked": "Node PDF.js: both pages and all area labels",
+  "textExtractionChecked": "Node PDF.js: two pages, current full-pass statement and active goal",
   "authoring": "Node pdf-lib; no CPython",
-  "gateInputsModified": false
+  "wholeDeliveryComplete": false
 }

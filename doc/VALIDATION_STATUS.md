@@ -1,3 +1,9 @@
+## Complete native173 qualification passes on3c490dd9 — 2026-10-24
+
+All native targets build, and the actual complete173-contract inventory passes173/173 in768.07s. This includes positive independent SDK provider discovery, provider save/import/restart, Rust and multifolder language servers, process workers/RPC/ledger/nested human lifecycle, local profile/view/provider configuration, native HTTP/CLI, MCP/A2A and encrypted embedded-xlang3/SQLite persistence. All2816 project inputs,16 SDK headers,1870 pure-library files,30 SDK runtime files,18598 Node dependency files,137 native binaries and their exact file sets remain unchanged throughout the gate. Native SHAe2638e65; SDK8c7972d1. No paid inference or CPython.
+
+[Full receipt](evidence/native-delivery-3c490dd9-full-20261024.json), [actual inventory](evidence/native-delivery-3c490dd9-full-inventory.json) and [terminal CTest log](evidence/native-delivery-3c490dd9-full-ctest.log). Client483/166 remains separately accepted and unchanged. This qualifies the current local native source, not a new installation or the full delivery goal. Installed66 retains its qualified2d98bdde runtime. Future package/coding/handoff/preservation, rendered VS Code/setup/command, remaining general/permission routing, authenticated remote/enrollment and deeper scheduling/recovery remain open.
+
 ## Positive separate-process SDK provider discovery passes focused3 — 2026-10-24
 
 An actual xmind.exe client opens Providers on the authenticated registered root, then a distinct client calls Discover using an already saved backend credential. The actual controlled catalogue returns two deduplicated/sorted model IDs and the captured binding agrees with List. The parent peer checks exactly one additional discovery request; the provider revision remains4 and no credential is forwarded in request arguments. No inference is added.

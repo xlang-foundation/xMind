@@ -11,8 +11,8 @@ have separate scopes. Preserve every completed task; never replay it.
 Current source3c490dd9 adds captured provider List/Select/Save/Discover/Import.
 [Setup native7 and client483/166](../doc/evidence/captured-provider-setup-20261024.json)
 and [positive separate-process SDK discovery](../doc/evidence/captured-provider-sdk-discovery-20261024.json)
-pass. The complete173 native gate for this source is running; its result is not
-yet acceptance. Installed66 is unchanged by these development checkpoints.
+pass. The complete173 native gate for this source passes173/173 in768.07s, with all
+frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-3c490dd9-full-20261024.json)). Installed66 is unchanged by these development checkpoints.
 Rendered VS Code coding, remaining general/permission adapters, authenticated
 remote/enrollment and deeper scheduling/recovery remain open. Private Nexus
 server/database/scheduler implementation remains excluded.
@@ -58,7 +58,7 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | [Installed66 source full173](../doc/evidence/native-delivery-2d98bdde-full-20261024.json):173 pass in767.66s with frozen file sets/hashes unchanged. Current provider source has focused7 plus separate SDK proof. | The complete173 gate for3c490dd9 is running. No new full-pass claim until its terminal result and closure verification. Hosted and rendered scopes remain separate; earlier intermittent failures retain their original scope. |
+| Shared native C++ backend, embedded xlang3 and SQLite | [Installed66 source full173](../doc/evidence/native-delivery-2d98bdde-full-20261024.json):173 pass in767.66s with frozen file sets/hashes unchanged. Current provider source has focused7 plus separate SDK proof. | The complete173 gate for3c490dd9 passed173/173 with terminal closure verification. Hosted and rendered scopes remain separate; earlier intermittent failures retain their original scope. |
 | Standard xlang3 root/subobjects and process workers | [Actual separate-process Connections API and lifetime tests](../doc/evidence/connection-catalog-sdk-api-20261022.json); SDK owns value/reference transfer. | [Scoped CLI run services](../doc/evidence/captured-cli-runs-20261023.json) pass actual separate-process completion/cancellation. SDK full run options now pass focused same-process/lifetime and separate-process tests; authenticated remote binding remains incomplete. |
 | Browser coding | [Qualified66 browser coding](../doc/evidence/candidate-0.1.66-qualified-coding-20261024.json): actual Send, native read, two scoped approvals, edit, Node4, automatic completion and exact eight-message reload. Captured file list/preview/search also reach the actual native gateway. | Preserve the completed span task and retained failed product fixture. Current provider setup has adapter tests, not rendered setup acceptance. External-browser and rendered VS Code scopes remain separate. |
 | CLI coding | [Qualified66 CLI coding](../doc/evidence/candidate-0.1.66-qualified-coding-20261024.json): read/edit/Node4, approvals, native process worker, watch/history and exact owned backend exit. Installed66 managed discovery/reuse/read/history smoke passes separately. | Preserve completed tasks. No new inference is needed to repeat existing acceptance. Current provider source needs its full qualification and future package adoption. |
@@ -75,9 +75,10 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 
 ## Next implementation sequence
 
-Follow the existing complete173 gate for3c490dd9 to its terminal result, preserving
-all failures and source/runtime closure checks. Do not start duplicate builds or
-replay completed coding tasks. A green focused gate is not complete qualification.
+The complete173 gate for3c490dd9 passes with source/runtime closure verification.
+Preserve its receipts, earlier failures and completed task IDs. Do not replay
+completed coding tasks. Native qualification remains separate from package,
+rendered coding, handoff and installation acceptance.
 Installed66 retains its separately verified delivery closure until a new package
 has qualified coding, handoff and preservation evidence.
 
