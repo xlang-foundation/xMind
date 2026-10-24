@@ -1,0 +1,531 @@
+{
+  "recordedAt": "2026-10-24T21:39:12.176Z",
+  "source": "ffe04c279ef617c11c7cca2ed217789bbc9b118e",
+  "run": 40129759627,
+  "job": 120980596156,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40129759627",
+  "conclusion": "failure",
+  "passed": 173,
+  "total": 177,
+  "failed": 4,
+  "seconds": 952.07,
+  "artifact": {
+    "id": 12576431695,
+    "name": "native-windows-evidence-ffe04c279ef617c11c7cca2ed217789bbc9b118e",
+    "bytes": 117490,
+    "sha256": "e4705d13e168c35974198d92df54ce89722437a217eb9e2153b4e69a84175779"
+  },
+  "failures": [
+    {
+      "name": "native_graph_runner_contract",
+      "seconds": 41.22
+    },
+    {
+      "name": "native_agent_worker_model_rpc_contract",
+      "seconds": 70.88
+    },
+    {
+      "name": "native_agent_worker_ledger_contract",
+      "seconds": 20.46
+    },
+    {
+      "name": "native_agent_worker_nested_human_contract",
+      "seconds": 45.06
+    }
+  ],
+  "graphProcess": {
+    "elapsed_ms": 30043,
+    "exit_code": 1,
+    "id": "7b1d25bbe25b7da8e3cdea1d15a057bd",
+    "output_artifact": {
+      "operation_id": "7b1d25bbe25b7da8e3cdea1d15a057bd",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process",
+    "diagnosis": "Only script_entered output is recorded. Module/thread observations do not prove an AMSI/module causal explanation; exact stall cause remains unproven."
+  },
+  "graphProcessObservations": [
+    {
+      "pid": 744,
+      "createdUtc": "2026-10-24T21:18:18.1186130Z",
+      "sampledUtc": "2026-10-24T21:18:20.0782138Z",
+      "processAgeMs": 1960,
+      "cpuMs": 703.125,
+      "modulePresence": {
+        "stateRepository": true,
+        "amsi": true,
+        "management": false,
+        "utility": false,
+        "automation": true
+      },
+      "threads": [
+        {
+          "id": 1792,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 125
+        },
+        {
+          "id": 992,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 9212,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 5668,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 1592,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 3652,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 2520,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 940,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 2384,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4336,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 46.875
+        },
+        {
+          "id": 6644,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 31.25
+        },
+        {
+          "id": 6408,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4976,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 2008,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 5440,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4236,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 5540,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 8640,
+          "waitReason": null,
+          "state": "Running",
+          "cpuMs": 421.875
+        },
+        {
+          "id": 8648,
+          "waitReason": "ExecutionDelay",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 9112,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        }
+      ]
+    },
+    {
+      "pid": 744,
+      "createdUtc": "2026-10-24T21:18:18.1186130Z",
+      "sampledUtc": "2026-10-24T21:18:30.7593600Z",
+      "processAgeMs": 12641,
+      "cpuMs": 10421.875,
+      "modulePresence": {
+        "stateRepository": true,
+        "amsi": true,
+        "management": false,
+        "utility": false,
+        "automation": true
+      },
+      "threads": [
+        {
+          "id": 1792,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 125
+        },
+        {
+          "id": 992,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 9212,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 5668,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 1592,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 3652,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 2520,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 940,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 2384,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4336,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 46.875
+        },
+        {
+          "id": 6644,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 31.25
+        },
+        {
+          "id": 6408,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4976,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 2008,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 5440,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4236,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 5540,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 8640,
+          "waitReason": null,
+          "state": "Running",
+          "cpuMs": 10140.625
+        },
+        {
+          "id": 8648,
+          "waitReason": "ExecutionDelay",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 9112,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        }
+      ]
+    },
+    {
+      "pid": 744,
+      "createdUtc": "2026-10-24T21:18:18.1186130Z",
+      "sampledUtc": "2026-10-24T21:18:41.3928779Z",
+      "processAgeMs": 23274,
+      "cpuMs": 17343.75,
+      "modulePresence": {
+        "stateRepository": true,
+        "amsi": true,
+        "management": false,
+        "utility": false,
+        "automation": true
+      },
+      "threads": [
+        {
+          "id": 1792,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 125
+        },
+        {
+          "id": 992,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 9212,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 5668,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 1592,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 3652,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 15.625
+        },
+        {
+          "id": 2520,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 940,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 2384,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4336,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 46.875
+        },
+        {
+          "id": 6644,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 31.25
+        },
+        {
+          "id": 6408,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4976,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 2008,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 5440,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 4236,
+          "waitReason": "EventPairLow",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 5540,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 8640,
+          "waitReason": null,
+          "state": "Running",
+          "cpuMs": 17062.5
+        },
+        {
+          "id": 8648,
+          "waitReason": "ExecutionDelay",
+          "state": "Wait",
+          "cpuMs": 0
+        },
+        {
+          "id": 9112,
+          "waitReason": "UserRequest",
+          "state": "Wait",
+          "cpuMs": 0
+        }
+      ]
+    }
+  ],
+  "nested": {
+    "begun": 15,
+    "completed": 14,
+    "completedCaseMilliseconds": 40105,
+    "lastBegun": "paused-root-coding-counted-resume",
+    "outerSeconds": 45.06,
+    "interpretation": "Aggregate fixture reaches its outer budget while a later case is active; not proof of a single-case deadlock."
+  },
+  "ledger": {
+    "lastCompletedMarker": "child-sdk-completed planning-owner-accepted-context",
+    "remainingMilliseconds": 66,
+    "deadlineSeconds": 20,
+    "interpretation": "Shared planning fixture budget nearly consumed; no limit was increased and no cold failure is qualified by warm controls."
+  },
+  "ciRetention": {
+    "control": {
+      "recordedAt": "2026-10-24T21:38:23.9051491Z",
+      "cases": [
+        {
+          "case": "success",
+          "retainedHiddenFixture": true,
+          "originalError": null,
+          "environmentRestored": true
+        },
+        {
+          "case": "failure",
+          "retainedHiddenFixture": true,
+          "originalError": "original intentional failure",
+          "environmentRestored": true
+        }
+      ],
+      "sourceSha256": "c49d2ae1f3b7dce4e988eb40f063478338146611e0e3623bc8faa56d638562aa",
+      "modelCalls": 0,
+      "nativeExecuted": false,
+      "scopePassed": true
+    },
+    "workflowSha256": "2150682a7900dc575b49e7b1b3a15520c44cd7b65f5402727f605a2b6ee92b03",
+    "change": "Scope native CTest TEMP/TMP to build/ci-evidence/native-fixtures, restored in finally; existing diagnostic upload includes hidden fixture policy/database directories.",
+    "hostedRuntimeValidation": "Pending next normal push-triggered workflow; control is not native acceptance"
+  },
+  "priorHostedFailuresPreserved": true,
+  "priorWorkerStartupFixNotInThisHostedSource": true,
+  "installed": false,
+  "goalComplete": false,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "originalFailureLogs": {
+    "native_graph_runner_contract": {
+      "sha256": "e3d4f86a14ab3a8ab0ca2eedd354ea08599335478d3bc6d7ca8f6e787a1a8344",
+      "publicCopy": "CR bytes removed and EOF blank lines normalized; original artifact/private extract unchanged"
+    },
+    "native_agent_worker_model_rpc_contract": {
+      "sha256": "24a9608314f7cada8e6753cd2f27962cde2ccb9f9b2589f210523b0326574b87",
+      "publicCopy": "CR bytes removed and EOF blank lines normalized; original artifact/private extract unchanged"
+    },
+    "native_agent_worker_ledger_contract": {
+      "sha256": "c499390588f985ffa39696275a93c1452afe0ada7ef00f8bbb01c4fdbd968914",
+      "publicCopy": "CR bytes removed and EOF blank lines normalized; original artifact/private extract unchanged"
+    },
+    "native_agent_worker_nested_human_contract": {
+      "sha256": "0d783dc78082f625c75dad696e7b16c012e4dbc6eca6b7e3d6ef2e4f7dd2ce56",
+      "publicCopy": "CR bytes removed and EOF blank lines normalized; original artifact/private extract unchanged"
+    }
+  }
+}

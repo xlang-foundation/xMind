@@ -242,7 +242,22 @@ if(@($ciActual).Count -ne $ciExpected.Count -or $ciInventoryDifference){
     $ciInventoryDifference|ConvertTo-Json|Set-Content (Join-Path $ciEvidence 'contract-inventory-difference.json')
     throw ('The complete expected native contract set was not registered; refusing a partial green build. Expected '+$ciExpected.Count+', actual '+@($ciActual).Count+'. See contract-inventory-difference.json.')
 }
-Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')
+# Failed contracts retain their original databases/receipts beneath the existing
+# diagnostic artifact root, rather than an ephemeral runner TEMP directory.
+# Scope only the native invocation; never warm, retry or replay a failed task.
+$ciFixtureRoot=Join-Path $ciEvidence 'native-fixtures'
+if(Test-Path -LiteralPath $ciFixtureRoot){throw 'Fresh native fixture directory required.'}
+New-Item -ItemType Directory -Path $ciFixtureRoot | Out-Null
+$ciPriorTemp=$env:TEMP
+$ciPriorTmp=$env:TMP
+try {
+    $env:TEMP=$ciFixtureRoot
+    $env:TMP=$ciFixtureRoot
+    Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')
+} finally {
+    $env:TEMP=$ciPriorTemp
+    $env:TMP=$ciPriorTmp
+}
 # Publish the complete successful gate only after CTest returns zero. Packaging
 # binds this receipt to the exact registered set, test log and source revision.
 @{schemaVersion=1;sourceRevision=$ciProvenance.xmind;expectedContracts=$ciExpected;contractsSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'contracts.json') -Algorithm SHA256).Hash.ToLowerInvariant();ctestSha256=(Get-FileHash -LiteralPath (Join-Path $ciEvidence 'native-ctest.log') -Algorithm SHA256).Hash.ToLowerInvariant();exitCode=0}|ConvertTo-Json -Depth 4|Set-Content (Join-Path $ciEvidence 'native-gate.json')

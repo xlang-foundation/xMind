@@ -97,6 +97,9 @@ jobs:
           path: |
             xmind/build/ci-evidence/
             xmind/build/native/Testing/
+          # Controlled fixtures may retain their policy/database in .config or
+          # .agentflow. These isolated tests use synthetic credentials only.
+          include-hidden-files: true
           retention-days: 14
       - name: Preserve contract-tested native development bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
