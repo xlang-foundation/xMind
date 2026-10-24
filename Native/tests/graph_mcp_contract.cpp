@@ -305,7 +305,24 @@ void contention(char** argv){
     require(store.operation(first.id).get().state==OperationState::executing && store.operation(second.id).get().state==OperationState::ready && calls(fixture.root)==1,
         "Exact approved second root must wait for the shared configured-server/workspace claim before wire dispatch");
     {std::ofstream release(fixture.root/"release-ack",std::ios::binary);release<<"Fixture controller releases the held synthetic acknowledgement";}
-    eventually([&]{return store.run("first-contender").get().state==RunState::completed && store.run("second-contender").get().state==RunState::completed;},"Serialized actual graph effects did not finish");
+    try{eventually([&]{return store.run("first-contender").get().state==RunState::completed && store.run("second-contender").get().state==RunState::completed;},"Serialized actual graph effects did not finish");}
+    catch(...){
+        const auto failure=std::current_exception();
+        try{Json detail={{"healthy",service.healthy()},{"idle",service.idle()},{"calls",calls(fixture.root)},{"runs",Json::array()}};
+            for(const auto* id:{"first-contender","second-contender"}){
+                const auto run=store.run(id).get();Json row={{"id",id},{"state",to_string(run.state)},{"children",Json::array()}};
+                for(const auto& child:store.children(id).get()){
+                    Json observed={{"id",child.id},{"state",to_string(child.state)},{"operations",Json::array()},{"events",Json::array()}};
+                    for(const auto& operation:store.operations(child.id).get())observed["operations"].push_back({{"id",operation.id},{"state",to_string(operation.state)}});
+                    for(const auto& event:store.events(child.id).get())observed["events"].push_back({{"sequence",event.sequence},{"kind",event.kind},{"json",Json::parse(event.json)}});
+                    row["children"].push_back(std::move(observed));
+                }
+                detail["runs"].push_back(std::move(row));
+            }
+            std::ofstream output(fixture.root/"contention-failure.json",std::ios::binary);output<<detail.dump(2);require(bool(output),"Cannot save graph contention diagnostic");
+        }catch(...){std::cerr<<"Graph contention snapshot could not be saved\n";}
+        std::rethrow_exception(failure);
+    }
     eventually([&]{return service.idle();},"Completed contending graph roots did not retire");
     require(store.operation(first.id).get().state==OperationState::succeeded && store.operation(second.id).get().state==OperationState::succeeded &&
         calls(fixture.root)==2 && read(fixture.root/"effect.txt")==body+body,"Releasing one claim must permit exactly one later approved effect");service.close();store.close();

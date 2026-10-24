@@ -1,0 +1,100 @@
+{
+  "recordedAt": "2026-10-24T20:05:43.070Z",
+  "fullQualification": {
+    "recordedAt": "2026-10-24T20:00:55.477Z",
+    "sourceParent": "929eb49ab14d3ef9f828fbc1359356cd1ed5fe0b",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 19904,
+      "launchedAt": "2026-10-24T19:42:18.331Z",
+      "completedAt": "2026-10-24T19:44:44.879Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4978365161cec295a43f5c7f347c8c19226b56d84358c745f735a7851e54660b"
+    },
+    "test": {
+      "pid": 11828,
+      "launchedAt": "2026-10-24T19:44:47.433Z",
+      "completedAt": "2026-10-24T20:00:18.770Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "c2ad167cdb09e2c3ec5e4089138cdaf6c06f0caa4508a50084e089ec522e0048"
+    },
+    "total": 179,
+    "failed": 1,
+    "passed": 178,
+    "seconds": 931.31,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "57beac318f32155a0684f578e744ab4bcd97d853c7653500194b1fdcc1d1305a",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "failedContract": "native_graph_mcp_contract",
+  "originalError": "Serialized actual graph effects did not finish",
+  "originalFailedNamespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-graph-mcp-OxvgdV",
+  "originalDirectoryRetained": false,
+  "originalDirectoryLossReason": "Existing Node wrapper unconditionally removed temporary directory in finally, including failed execution.",
+  "changes": [
+    "Wrapper retains failed native stdout/stderr/receipt and fixture directory; original error propagates",
+    "Successful cleanup verifies resolved target parent and disposable prefix",
+    "C++ contention failure saves pre-teardown run/operation/event state without changing its wait or process budgets"
+  ],
+  "retentionNegative": {
+    "passed": true,
+    "scope": "Intentional Node child failure tests wrapper retention only; no native xMind/model/tool execution",
+    "nativeStdoutAndStderrRetained": true,
+    "originalErrorPropagated": true,
+    "productionBackendExecuted": false
+  },
+  "focusedQualification": {
+    "recordedAt": "2026-10-24T20:02:58.278Z",
+    "sourceParent": "929eb49ab14d3ef9f828fbc1359356cd1ed5fe0b",
+    "sourcePatchSha256": "b42dcdeaef5e193fab38141e767425fecdfad359a22d13f122149e1e9583d8e6",
+    "build": {
+      "pid": 30868,
+      "launchedAt": "2026-10-24T20:02:31.438Z",
+      "completedAt": "2026-10-24T20:02:44.039Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "625d9900d2ae1e9efdf14e4f9962508bb4525ecab1f11afd39912c4af04ae0f2"
+    },
+    "test": {
+      "pid": 31072,
+      "launchedAt": "2026-10-24T20:02:46.722Z",
+      "completedAt": "2026-10-24T20:02:55.535Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9b39cad8f639007a8d1c2eccaffaffac01f5005d34a23048ef75ea698194c262"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 8.78,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "57beac318f32155a0684f578e744ab4bcd97d853c7653500194b1fdcc1d1305a",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "causalLimit": "Fresh focused pass does not prove the original intermittent contention cause or override the 178/179 full failure. Original namespace is gone and was not replayed.",
+  "newNativeInstalled": false,
+  "installedVersion": "0.1.73",
+  "goalComplete": false
+}

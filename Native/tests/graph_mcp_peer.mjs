@@ -2,7 +2,7 @@
 // disposable workspace. The compiled graph/permission engines and SQLite are real.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {mkdtemp, rm} from 'node:fs/promises';
+import {mkdtemp, rm, realpath} from 'node:fs/promises';
 import {createInterface} from 'node:readline';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -86,8 +86,9 @@ if (process.argv[2] === '--peer') {
   const [binary, modules, stdlib] = process.argv.slice(2);
   assert.ok(binary && modules && stdlib, 'Expected native contract, xlang3 modules and source standard library');
   const root = await mkdtemp(join(tmpdir(), 'xmind-graph-mcp-'));
+  let result, passed = false;
   try {
-    const result = await promisify(execFile)(binary,
+    result = await promisify(execFile)(binary,
       [root, process.execPath, fileURLToPath(import.meta.url), modules, stdlib],
       {windowsHide: true, timeout: 80000, maxBuffer: 4 * 1024 * 1024});
     const expected = {
@@ -105,9 +106,27 @@ if (process.argv[2] === '--peer') {
       else assert.equal(fs.existsSync(effect), false, scenario + ': no actual file effect');
     }
     process.stdout.write(result.stdout);
+    passed = true;
+  } catch (error) {
+    try {
+      fs.writeFileSync(join(root, 'native-stdout.log'), error.stdout ?? result?.stdout ?? '');
+      fs.writeFileSync(join(root, 'native-stderr.log'), error.stderr ?? result?.stderr ?? '');
+      fs.writeFileSync(join(root, 'failure.json'), JSON.stringify({
+        passed: false, code: error.code ?? null, signal: error.signal ?? null,
+        killed: error.killed ?? false, message: error.message,
+        scope: 'Retained failed fixture; never replay this workspace',
+      }, null, 2) + '\n');
+    } catch {
+      process.stderr.write('Graph MCP failure capture could not be written.\n');
+    }
+    process.stderr.write('Graph MCP failure evidence retained at ' + root + '\n');
+    throw error;
   } finally {
-    assert.equal(dirname(resolve(root)), resolve(tmpdir()));
-    assert.ok(basename(root).startsWith('xmind-graph-mcp-'));
-    await rm(root, {recursive: true, force: true});
+    if (passed) {
+      const target = await realpath(root), parent = await realpath(tmpdir());
+      assert.equal(dirname(target), parent);
+      assert.ok(basename(target).startsWith('xmind-graph-mcp-'));
+      await rm(target, {recursive: true, force: true});
+    }
   }
 }
