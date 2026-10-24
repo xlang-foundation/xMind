@@ -117,7 +117,24 @@ void workspace_binding_contract(const std::filesystem::path& owned,const std::ve
 }
 
 }
-int main(int argc,char** argv){if(argc!=5)return 2;try{
+int main(int argc,char** argv){if(argc!=5&&argc!=6)return 2;try{
+    if(argc==6){
+        require(std::string(argv[5])=="rendered","Unknown interactive provider mode");
+        const auto root=std::filesystem::u8path(argv[1]);const std::vector<std::string> imports{argv[2],argv[3]};
+        std::filesystem::create_directory(root/"workspace");PersistenceService store((root/"rendered.sqlite").string(),imports);
+        AgentSettings base;base.workspace=(root/"workspace").string();base.max_output_tokens=64;
+        ProviderProfileRuntime runtime(store,base,policy(argv[4]),1,8);XMindIpcServer ipc(store,&runtime,"synthetic-profile-runtime-server-access-token");Access access(store,runtime);
+        {std::ofstream ready(root/"ready.json",std::ios::binary);ready<<Json{{"origin","http://127.0.0.1:"+std::to_string(access.port)},{"endpoint",ipc.endpoint()}}.dump();require(static_cast<bool>(ready),"Provider readiness publication failed");}
+        const auto deadline=std::chrono::steady_clock::now()+std::chrono::minutes(20);
+        while(!std::filesystem::is_regular_file(root/"rendered-proof.json")){require(std::chrono::steady_clock::now()<deadline,"Rendered provider observation deadline reached; preserve work");std::this_thread::sleep_for(std::chrono::milliseconds(50));}
+        Json proof;{std::ifstream input(root/"rendered-proof.json",std::ios::binary);input>>proof;}require(proof.at("passed")==true,"Rendered provider acceptance failed");
+        const auto config=runtime.configuration();require(config.profiles.size()==1&&config.active==config.profiles[0].id&&config.profiles[0].route_id=="openai.chat"&&config.profiles[0].model=="fixture-openai","Browser setup must select the actual registered profile and discovered model");
+        require(store.credentials("server").get().size()==1,"Browser setup must retain one backend credential");
+        const auto session=proof.at("sessionId").get<std::string>(),run=proof.at("runId").get<std::string>();require(store.run(run).get().state==RunState::completed&&runtime.idle(),"Rendered provider inference must settle");
+        provenance(store,session,config.profiles[0].id,config.profiles[0].revision,"fixture-openai");
+        require(store.information("native-provider-profiles","registry").get().find("rendered-provider-controlled-key")==std::string::npos,"Public provider registry must not retain plaintext key");
+        std::cout<<"Rendered native provider setup, encrypted credential ownership, discovery, selection and actual run provenance passed\n";return 0;
+    }
     const auto database=(std::filesystem::u8path(argv[1])/"profile-runtime.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};const std::string origin=argv[4];
     AgentSettings base;base.max_output_tokens=64;
     {

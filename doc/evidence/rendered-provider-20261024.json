@@ -1,0 +1,537 @@
+{
+  "recordedAt": "2026-10-24T13:58:16.341Z",
+  "acceptance": {
+    "passed": true,
+    "scope": "Actual hidden browser provider setup/discovery/model selection and inference through captured native ProviderProfileRuntime; controlled local account/model peer, real encrypted credential persistence/SQLite and run provenance. Test service host, not a live production account.",
+    "proof": {
+      "passed": true,
+      "sessionId": "ee13cc93f09844b49d5e0c528c1d73f4",
+      "runId": "99d5c6e5610340d5adbe643d599af126",
+      "profile": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+      "model": "fixture-openai",
+      "keyEnteredOnce": true,
+      "fetchClickedOnce": true,
+      "modelSelected": true,
+      "promptSubmittedOnce": true,
+      "reloadedMessages": 2,
+      "reloadedProfileAndModel": true,
+      "runProvenanceVisible": true,
+      "screenshot": "reloaded.png",
+      "neverReplay": true
+    },
+    "counts": {
+      "discovery": 4,
+      "inference": 1
+    },
+    "routes": [
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "",
+            "profiles": [],
+            "revision": 0,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers/models",
+        "method": "POST",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "models": [
+            {
+              "id": "fixture-openai"
+            },
+            {
+              "id": "fixture-openai-alternate"
+            }
+          ]
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "",
+            "profiles": [],
+            "revision": 0,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers/save",
+        "method": "POST",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+            "profiles": [
+              {
+                "id": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+                "model": "fixture-openai",
+                "provider": "openai",
+                "revision": 1,
+                "route_id": "openai.chat"
+              }
+            ],
+            "revision": 1,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+            "profiles": [
+              {
+                "id": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+                "model": "fixture-openai",
+                "provider": "openai",
+                "revision": 1,
+                "route_id": "openai.chat"
+              }
+            ],
+            "revision": 1,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+            "profiles": [
+              {
+                "id": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+                "model": "fixture-openai",
+                "provider": "openai",
+                "revision": 1,
+                "route_id": "openai.chat"
+              }
+            ],
+            "revision": 1,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers/models",
+        "method": "POST",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "models": [
+            {
+              "id": "fixture-openai"
+            },
+            {
+              "id": "fixture-openai-alternate"
+            }
+          ]
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/16e99dd601b27becf63c43fb1baeba38/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+            "profiles": [
+              {
+                "id": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+                "model": "fixture-openai",
+                "provider": "openai",
+                "revision": 1,
+                "route_id": "openai.chat"
+              }
+            ],
+            "revision": 1,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/731322988c0d7f9391cd76b20dc03ef9/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+            "profiles": [
+              {
+                "id": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+                "model": "fixture-openai",
+                "provider": "openai",
+                "revision": 1,
+                "route_id": "openai.chat"
+              }
+            ],
+            "revision": 1,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/731322988c0d7f9391cd76b20dc03ef9/providers",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "providers": {
+            "active": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+            "profiles": [
+              {
+                "id": "openai-a1821770-4260-4d4a-be35-8e374551fda2",
+                "model": "fixture-openai",
+                "provider": "openai",
+                "revision": 1,
+                "route_id": "openai.chat"
+              }
+            ],
+            "revision": 1,
+            "routes": [
+              {
+                "discovery": true,
+                "id": "openai.chat",
+                "provider": "openai",
+                "wire": "chat-completions"
+              },
+              {
+                "discovery": true,
+                "id": "anthropic.messages",
+                "provider": "anthropic",
+                "wire": "anthropic-messages"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/731322988c0d7f9391cd76b20dc03ef9/providers/models",
+        "method": "POST",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "models": [
+            {
+              "id": "fixture-openai"
+            },
+            {
+              "id": "fixture-openai-alternate"
+            }
+          ]
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/731322988c0d7f9391cd76b20dc03ef9/providers/models",
+        "method": "POST",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "2728045634-3729972608-2078497523-255101694-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-2946bf76fec7e292c485fbf235891bfdc47ace80bf8a645a2db0544dcd774871"
+          },
+          "models": [
+            {
+              "id": "fixture-openai"
+            },
+            {
+              "id": "fixture-openai-alternate"
+            }
+          ]
+        }
+      }
+    ],
+    "observations": [
+      {
+        "path": "/openai-models",
+        "method": "GET",
+        "discovery": 1,
+        "inference": 0
+      },
+      {
+        "path": "/openai-models",
+        "method": "GET",
+        "discovery": 2,
+        "inference": 0
+      },
+      {
+        "path": "/chat",
+        "method": "POST",
+        "discovery": 2,
+        "inference": 1
+      },
+      {
+        "path": "/openai-models",
+        "method": "GET",
+        "discovery": 3,
+        "inference": 1
+      },
+      {
+        "path": "/openai-models",
+        "method": "GET",
+        "discovery": 4,
+        "inference": 1
+      }
+    ],
+    "nativeContractSha256": "64c192426d696f8f984acd3db30b8ecb7ffa1d75b427b92f798ef648bd32d345",
+    "ownedNativeExited": true,
+    "paidInference": false,
+    "installed70Unchanged": true,
+    "neverReplay": true
+  },
+  "nativeRegression": {
+    "recordedAt": "2026-10-24T13:55:30.755Z",
+    "sourceParent": "0ccc4150590c3bd59c65ae621247be287b5b5670",
+    "sourcePatchSha256": "3a58e9fb5f4355d4223ee91d2552be340deb6b37e19caa2deab269766334cdb2",
+    "build": {
+      "pid": 31964,
+      "launchedAt": "2026-10-24T13:54:53.934Z",
+      "completedAt": "2026-10-24T13:55:18.234Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "88f1b5b27eccb6595e192843f46a626df10bb9560e0b153bc74865a840f8b316"
+    },
+    "test": {
+      "pid": 41464,
+      "launchedAt": "2026-10-24T13:55:20.978Z",
+      "completedAt": "2026-10-24T13:55:28.069Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0f817452728865ee3e5b3e1539ab29a3a6e629b6f659deb1978b109ca5ba0b66"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 7.06,
+    "projectFiles": 2822,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "unchangedClientSources": 71,
+  "unchangedClientAssets": 18,
+  "earlierFailure": {
+    "proof": {
+      "passed": false,
+      "reason": "Controlled discovery peer omitted required OpenAI object:list field; native rejected it before credential save or inference.",
+      "discoveryAttempts": 1,
+      "inference": 0
+    },
+    "terminal": {
+      "code": 1,
+      "signal": null
+    },
+    "routesSha256": "fc030fcdb610aadaa4e7b0cafd7cf9e783f55cdec61835b5b7490d2bad6e8ffe",
+    "neverReplay": true
+  },
+  "harnessSha256": "c0e44a3bd8a0fb3bf974786307aa290abfbeba11454d493dddd0f5941974c927",
+  "postGateHarnessCorrection": "Added the required OpenAI object:list field to controlled discovery response; native source unchanged. Fresh namespace used, original failed fixture retired.",
+  "liveVendorAccount": false,
+  "goalComplete": false,
+  "remaining": "Rendered VS Code, authenticated generic remote/enrollment and deeper recovery/scheduling remain open."
+}

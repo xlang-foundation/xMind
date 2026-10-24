@@ -80,9 +80,9 @@ Latest installed checkpoint:0.1.70. [Full native evidence](../doc/evidence/nativ
 | Conversation/footer layout | Current packaged70 screenshot shows completed history and visible composer/footer at1280x720. Earlier paging/switch/long-draft proof is retained. | Complete accessibility/viewport matrix remains outside these bounded observations. |
 | Workspace selection and isolation | Earlier rendered managed switching and native local-profile/view contracts pass; captured file browsing is used by current clients. | Do not infer remote isolation from local workspace switching. |
 | Single/graph agents, planning and delegation | Native173 includes nested human, ledger, planning and graph contracts. Named process-agent selection and actual coding pass in browser70. | Repeated/deeper pause segments, multibranch cancellation/recovery and multi-root production scheduling need acceptance. |
-| Providers, MCP and A2A | Native173 covers controlled provider/profile wire/history, MCP SDK/network/OAuth and A2A task/stream scenarios. | Not universal compatibility; rendered provider setup remains separate. No paid inference is needed for development. |
+| Providers, MCP and A2A | Native173 covers controlled provider/profile wire/history, MCP SDK/network/OAuth and A2A task/stream scenarios. Rendered native provider key/discovery/model selection/inference/reload now passes with a controlled account peer. | Not universal live vendor compatibility. MCP/A2A rendered flows retain their individual scopes; no paid inference is needed for development. |
 | Coding tools | Native suite covers approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers; packaged browser/CLI70 run real Node4 checks. | Actual rendered VS Code actions/context remain separate. |
-| Connection catalog | Captured SDK/HTTP services include context/skills/inbox. Rendered controls, separate-process SDK compaction, direct slash commands and graph commands with human input/native read/reload pass. | Production-provider setup and authenticated generic remote binding remain open. |
+| Connection catalog | Captured SDK/HTTP services include context/skills/inbox. Rendered provider setup, controls, SDK compaction, direct/graph commands and reload pass within their recorded scopes. | Authenticated generic remote binding remains open; live vendor compatibility is not inferred from controlled peers. |
 | Enrollment and distributed ownership | Local captured catalog and owner isolation are verified within their receipts. | Authenticated negotiation, explicit workspace/effect enrollment, expiring fenced leases, duplicate/revocation/lost-reply reconciliation remain required; private Nexus server stays excluded. |
 | Recovery and preservation | Managed69-to70 paused-upgrade refusal, continuation once, idle handoff and exact history pass with zero models. Five-root installation preservation passes. | Universal unattended/in-flight and repeated nested-process recovery remain unproven. |
 | Delivery checkpoint | Installed70:2442 files/2398 runtime files, exact69 backup, full173, clients493/175, packaged CLI/browser/handoff and installed read smoke. | The full objective remains active: general services, remote/enrollment, deeper recovery/scheduling and rendered VS Code are open. |
@@ -99,8 +99,10 @@ current complete qualification or installation.
 Installed70 full qualification, packaged coding/handoff and preservation are complete.
 The [rendered slash-command check](../doc/evidence/rendered-command70-20261024.json)
 passes one captured invocation, literal arguments and exact two-message reload.
-Verify production-provider setup and remaining rendered provider/setup,
-VS Code editor/sidebar coding with editor context. The [rendered graph command](../doc/evidence/rendered-graph-command70-20261024.json) passes workflow selection, human input, actual native read and reload with zero models. Keep visible
+The [rendered provider setup](../doc/evidence/rendered-provider-20261024.json)
+passes key storage, discovery, selection, inference and reload through the native
+runtime with a controlled account peer. Verify remaining VS Code editor/sidebar
+coding with editor context. The [rendered graph command](../doc/evidence/rendered-graph-command70-20261024.json) passes workflow selection, human input, actual native read and reload with zero models. Keep visible
 windows closed unless requested; retain installed70 until any replacement has
 qualified coding/handoff/preservation evidence.
 
