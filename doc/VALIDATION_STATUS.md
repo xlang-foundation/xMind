@@ -1,3 +1,20 @@
+## Corrected launch path: fresh long-runtime coding — 2026-10-23
+
+Native41bb202a/source744d27a9 completes a new sum-of-multiples-of-three task
+from a248-character native image path. Four controlled replies drive the native
+SDK worker through read, approved edit and approved canonical Node launch; all
+four checks pass. Two effects succeed, four charges finish, the segment closes
+and eight history messages restore exactly through history/watch. The worker
+is absent after retirement and the identity-verified backend exited. Runtime
+file sets/bytes are unchanged.
+
+Session43d2bea3c8368c78a0319519f57c7284 / root096069bfe648ad97a73bbe635ee40202
+are complete; never replay. This directly checks corrected third-party Node
+launch alongside native long-image worker startup. No paid inference, CPython,
+visible window or installation. Fresh complete native qualification remains
+required; installed62 and candidate0.1.63 are unchanged.
+[Receipt](evidence/long-runtime-coding-744d27a9-20261023.json).
+
 ## Correct third-party path semantics; retain native worker fix — 2026-10-23
 
 The broad generic prefix change was a regression. Complete source dcb768d2

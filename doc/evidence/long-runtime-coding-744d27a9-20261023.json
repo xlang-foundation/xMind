@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "744d27a9ee7100a3f798509e5669a05fdd5b5abc",
+  "nativeSha256": "41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f",
+  "scope": "Actual new model-driven process-code task from corrected 248-character native runtime; hash-identical short CLI, controlled HTTP/SSE provider, native SDK worker and real reviewed file/Node effects. Preserves canonical third-party Node launch and extended native worker launch together.",
+  "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/long-cli-triple-sum-2e0418eb",
+  "executablePathCharacters": 248,
+  "sessionId": "43d2bea3c8368c78a0319519f57c7284",
+  "rootRunId": "096069bfe648ad97a73bbe635ee40202",
+  "completedTaskNeverReplay": true,
+  "state": "completed",
+  "modelCalls": 4,
+  "approvals": 2,
+  "nodeChecksPassed": 4,
+  "historyMessages": 8,
+  "historyAndWatchExact": true,
+  "operations": [
+    {
+      "id": "f1c146d3fb5b03fac22988958242f37b",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "be9e898f71a92fafe4759c56b2cac359",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "workerExit": {
+    "generation": "6cfb4c6caf3c3203b39e1c68bff7a710",
+    "pid": 9472,
+    "root_run_id": "096069bfe648ad97a73bbe635ee40202",
+    "observedAbsent": true,
+    "observedAt": "2026-10-24T00:22:13.731Z"
+  },
+  "ownedBackendExit": {
+    "observed": true,
+    "code": null,
+    "pid": 32412,
+    "birthAndImageVerified": true
+  },
+  "runtimeFileSetsAndBytesUnchanged": true,
+  "gateSha256": "3bb222a517005957b80faacfffd6afc3a5691e3c27167e16abd96782743de48d",
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "fullGoalComplete": false,
+  "passed": true
+}
