@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-24T21:48:18.496Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T21:47:26.451Z",
+    "sourceParent": "f14e88d7ad9faf6d44b46636317df1e4e36c2266",
+    "sourcePatchSha256": "6098b7ab0a48037f3c432f101b6ce9643829b0dc4062349f9e4b1a5ea817ae92",
+    "build": {
+      "pid": 41884,
+      "launchedAt": "2026-10-24T21:43:52.711Z",
+      "completedAt": "2026-10-24T21:47:08.994Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3d55a6664b9e1c72a86c810f5af0573376148dd6dc9193ce640d0c57b975ac12"
+    },
+    "test": {
+      "pid": 39212,
+      "launchedAt": "2026-10-24T21:47:12.368Z",
+      "completedAt": "2026-10-24T21:47:23.668Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4d2242a29df3d2e564ec4c7783575fa59b69914b343c028c6cf3cae8f2d2c290"
+    },
+    "total": 6,
+    "failed": 0,
+    "passed": 6,
+    "seconds": 11.26,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "fe6010fb5c4cd419955368f93d0c25910839b583697297904d4ba4ede98ed5e5",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "implemented": {
+    "sdk": "xmind.Connections(owner_token).AuthorizedScopes(profile_id, expected_profile_revision)",
+    "cli": "xmind ipc --endpoint lrpc:PORT connections authorized-scopes ID REV",
+    "http": {
+      "method": "POST",
+      "path": "/v1/connections/authorized-scopes",
+      "body": {
+        "id": "PROFILE_ID",
+        "expected_profile_revision": "REV"
+      },
+      "authentication": "Existing owner or origin-bound view session"
+    },
+    "capability": {
+      "remote_authorized_scopes": 1
+    }
+  },
+  "behavior": "Cached authorized scope IDs/actions only for matching unexpired stored grant. Absent/stale/expired lists empty. No network, profile selection or remote routing. Public values contain no credential or grant IDs/revisions.",
+  "verified": "Actual xlang3/SQLite service positive cached scope, stale/expired suppression and encrypted database reopen; separate SDK/CLI/native HTTP absent observation and stale/unauthenticated/malformed refusals, retained SDK lifetime fencing and Local bindings.",
+  "remaining": "Positive trusted TLS scope discovery assertions are added to existing hosted SDK/CLI/HTTP fixture but have not run locally. Full179 qualification, scoped command routing, mutation receipts, enrollment and recovery remain required.",
+  "installed": false,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "goalComplete": false
+}

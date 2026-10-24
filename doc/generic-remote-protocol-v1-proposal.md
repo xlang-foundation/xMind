@@ -29,6 +29,7 @@ objects and method calls between applications and the local backend:
 xmind.Connections(owner_token)
   .Authenticate(profile_id, expected_profile_revision, request)  [implemented]
   .Authentication(profile_id, expected_profile_revision)         [implemented]
+  .AuthorizedScopes(profile_id, expected_profile_revision)       [implemented]
   .Open(profile_id, expected_profile_revision)
       .Identity()
       .Sessions() / .Runs() / .Graphs() / .Models() / .Commands()
@@ -45,6 +46,16 @@ no generic `Call(method, payload)` object, `peer.call` dispatcher, `ImportRemote
 wrapper or application IPC value serializer. The xlang3 SDK handles local
 object references, value transfer and correlation. The native connector alone
 maps typed service operations onto the remote network contract below.
+
+`AuthorizedScopes` is cached metadata observation, not scope binding or live
+authorization. Its nine fields are `connection_id`, `profile_revision`,
+`credential_revision`, `state`, `server_id`, `protocol_version`, `expires_at`,
+`scopes` and `command_routing`. Each scope is exactly `{id, actions}`. Only a
+matching unexpired stored grant supplies scopes; absent, stale-profile and
+expired states supply an empty list. Credentials and grant IDs/revisions remain
+backend-private. The result never selects a profile, negotiates, submits work or
+enables command routing. Future scoped operations must independently fence
+profile, credential/grant, scope and resource identity at their admission point.
 
 Network JSON is a server protocol, not an alternative IPC serializer. Remote
 server references never become caller-selected local object IDs or paths.

@@ -1,0 +1,17 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start   7: native_remote_connection_authentication_contract
+1/6 Test   #7: native_remote_connection_authentication_contract ......   Passed    0.71 sec
+    Start  32: native_xmind_ipc_lifetime_contract
+2/6 Test  #32: native_xmind_ipc_lifetime_contract ....................   Passed    1.62 sec
+    Start  33: native_xmind_ipc_api_contract
+3/6 Test  #33: native_xmind_ipc_api_contract .........................   Passed    5.71 sec
+    Start  76: native_remote_authentication_sdk_untrusted_contract
+4/6 Test  #76: native_remote_authentication_sdk_untrusted_contract ...   Passed    1.33 sec
+    Start 171: native_connection_profiles_contract
+5/6 Test #171: native_connection_profiles_contract ...................   Passed    0.20 sec
+    Start 172: native_connection_profiles_http_contract
+6/6 Test #172: native_connection_profiles_http_contract ..............   Passed    1.67 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =  11.26 sec

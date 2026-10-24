@@ -16,6 +16,9 @@ struct RemoteAuthenticationStatus {
     std::int64_t profile_revision=0,credential_revision=0;
     std::optional<std::string> server_id;
     std::optional<std::int64_t> protocol_version,expires_at;
+    // Cached, backend-observed grant metadata only. Empty unless the stored
+    // grant matches this profile and is unexpired; never execution authority.
+    std::vector<RemoteAuthorizedScope> authorized_scopes;
 };
 class RemoteConnectionAuthentication {
 public:

@@ -1,5 +1,16 @@
 # Local and Nexus connection profiles
 
+Cached authorized scope discovery is implemented through the registered SDK
+method `xmind.Connections(owner_token).AuthorizedScopes(id, profile_revision)`.
+The CLI adapter is `xmind ipc --endpoint lrpc:PORT connections authorized-scopes
+ID REV`. The owner/origin-bound HTTP adapter is
+`POST /v1/connections/authorized-scopes` with
+`{"id":"PROFILE_ID","expected_profile_revision":REV}`. Capability
+`remote_authorized_scopes:1` advertises this metadata method. Results include
+the cached authentication state and a scope ID/action list only for a matching,
+unexpired stored grant. No credentials or grant ID are returned. Scope discovery
+does not prove live authorization or enable remote command routing.
+
 This is the target connection contract. The native SQLite catalog is exposed
 through the authenticated local backend at `GET /v1/connections` and
 `POST /v1/connections`; it stores Local/Nexus profile metadata and active

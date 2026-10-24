@@ -12,7 +12,7 @@ RemoteAuthenticationStatus RemoteConnectionAuthentication::inspect(const std::st
     try{stored=credentials_.previous(profile);}catch(const NotFound&){}
     auto admission=profiles_.admit_remote(profile);if(!stored)return status;status.credential_revision=stored->revision;
     if(stored->profile.origin!=profile.origin||stored->profile.revision!=profile.revision){status.state="stale_profile";return status;}
-    status.state=stored->grant.expires_at<=now()?"expired":"stored";status.server_id=stored->grant.server_id;status.protocol_version=stored->grant.protocol_version;status.expires_at=stored->grant.expires_at;return status;
+    status.state=stored->grant.expires_at<=now()?"expired":"stored";status.server_id=stored->grant.server_id;status.protocol_version=stored->grant.protocol_version;status.expires_at=stored->grant.expires_at;if(status.state=="stored")status.authorized_scopes=stored->grant.authorized_scopes;return status;
 }
 RemoteAuthenticationReceipt RemoteConnectionAuthentication::authenticate(const std::string& id,std::int64_t revision,std::int64_t credential_revision,const SecretBytes& credential,std::chrono::milliseconds timeout,std::stop_token stop){
     if(credential_revision<0||credential_revision==INT64_MAX||timeout.count()<=0||timeout>std::chrono::minutes(2)||credential.view().empty()||credential.view().size()>8192)throw std::invalid_argument("Invalid remote authentication request");for(const auto c:credential.view())if(c<33||c>126)throw std::invalid_argument("Invalid remote credential");
