@@ -1,3 +1,9 @@
+## Cancelled-root service reopen and late input — 2026-10-24
+
+The sixteen-case SDK-worker contract passes in30.44s under the unchanged45s timeout. In each read/coding counted/plain cancellation case, the original AgentService closes after A is cancelled and B completes; a fresh service over the same PersistenceService remains healthy and idle. Late input to A's original human request and explicit resume both refuse with NotFound. Root/child cancellation, B completion, both exact transcripts, both event counts, cancelled question and two/four model charges remain unchanged. No extra inference occurs. [Receipt](evidence/cancelled-root-reopen-20261024.json), [original log](evidence/cancelled-root-reopen-20261024.log).
+
+This is service reopen, not a backend process crash or persistence connection restart. All frozen inputs and binaries remain unchanged during the focused gate; production Native51340e18 still matches installed71. Test-only change, no new installation or full-suite claim. The complete objective remains active.
+
 ## Paused-tree cancellation isolation — 2026-10-24
 
 The expanded native contract passes all sixteen cases in30.43s under its unchanged45s timeout. Four new read/coding counted/plain cases hold root B inside a real separate SDK worker model call while cancelling root A, paused on its child-owned human request. A, its child and unanswered request become cancelled; B retains the same active worker generation/PID, completes its actual child/native file read and retires normally. A retains its exact original transcript and two model charges; B retains four charges/four history messages. Both budget segments close. Eight nested pause/reopen and four independent progress cases also pass. [Receipt](evidence/paused-root-cancellation-20261024.json), [original log](evidence/paused-root-cancellation-20261024.log).
