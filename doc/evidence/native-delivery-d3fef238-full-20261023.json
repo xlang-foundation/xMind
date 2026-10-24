@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-24T00:46:17.266Z",
+  "sourceParent": "d3fef238fd17424986db18ce303bfc7b601d66a8",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 17480,
+    "launchedAt": "2026-10-24T00:22:44.223Z",
+    "completedAt": "2026-10-24T00:24:20.166Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2280c4fd003979d7b2b3db932577d4f5b9e14e6b8f685b29c63bd77048d697fb"
+  },
+  "test": {
+    "pid": 30632,
+    "launchedAt": "2026-10-24T00:24:22.841Z",
+    "completedAt": "2026-10-24T00:46:14.554Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c454f2fb1212da53bd709f39d2865ebeec41b03f86d14545276de56eae98af7c"
+  },
+  "total": 172,
+  "failed": 0,
+  "passed": 172,
+  "seconds": 1311.69,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Complete actual local172 qualification of corrected canonical third-party launch plus native owner/SDK-worker extended-path handling. Not a new package/install or rendered VS Code acceptance.",
+  "criticalContractResults": [
+    " 50/172 Test  #50: native_graph_runner_contract ..........................   Passed   11.95 sec",
+    " 64/172 Test  #64: native_process_adapter_contract .......................   Passed    4.56 sec",
+    " 88/172 Test  #88: native_agent_worker_model_rpc_contract ................   Passed   54.64 sec",
+    " 94/172 Test  #94: native_agent_worker_ledger_contract ...................   Passed   37.23 sec",
+    " 95/172 Test  #95: native_agent_worker_channel_contract ..................   Passed    2.93 sec",
+    " 98/172 Test  #98: native_agent_runner_contract ..........................   Passed    9.75 sec",
+    "146/172 Test #146: native_local_profile_contract .........................   Passed  537.83 sec",
+    "147/172 Test #147: native_local_view_contract ............................   Passed  150.12 sec"
+  ],
+  "fullGoalComplete": false
+}

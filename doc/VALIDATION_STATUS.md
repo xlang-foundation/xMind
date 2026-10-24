@@ -1,3 +1,26 @@
+## Complete corrected native qualification — 2026-10-23
+
+All targets build and172/172 contracts pass in1311.69s on exact source
+d3fef238fd17424986db18ce303bfc7b601d66a8, containing Native correction744d27a9.
+Wrapper81622 and CTest30632 are terminal zero. All2815 project,16 SDK source,
+1870 pure-library,30 runtime,18598 dependency and137 native binary file sets
+and bytes remain unchanged. Native SHA-256 is41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f.
+
+Previously failing PowerShell graph/agent runner contracts pass. Production
+RPC54.64s, ledger37.23s, SDK channel2.93s, profile537.83s, local view150.12s
+and provider configuration66.58s also pass within unchanged budgets. The
+rejected dcb768d2 full run remains retained; its focused and full failures are
+not superseded into acceptance. Hosted cmdlet discovery remains a separate
+unresolved platform issue, despite the corrected initialization controls.
+
+This local qualification permits assembling the next candidate from exact
+bytes. Fresh package provenance, packaged coding/managed checks, protected
+install and rendered VS Code remain separate. Installed62 and candidate0.1.63
+are unchanged. Nested automatic scheduling and generic remote authority work
+also remain unfinished; the full goal stays active.
+[Receipt](evidence/native-delivery-d3fef238-full-20261023.json),
+[complete CTest log](evidence/native-delivery-d3fef238-full-20261023-ctest.log).
+
 ## Installed62 full payload recheck during candidate qualification — 2026-10-23
 
 A fresh read-only comparison observes2442 installed extension files:2440
