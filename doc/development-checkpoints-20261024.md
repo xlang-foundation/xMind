@@ -21,3 +21,9 @@ Preserve these historical identities and constraints verbatim.
 ## Preserved first-send permission defect guidance
 
 - Browser permission sessiondac128fea38846f8b4f85c549895dde2/root32d82da2df694147b254dc380528ae29 completed one read/two controlled calls and grant/revoke after reload; NEVER replay. Initial first-send refresh defect retained in .agentflow/pb67-permissions. Development correction remains separate from installed67.
+
+
+## Preserved qualification58 guidance before68 package
+
+- Qualified58 stage17441files/VSIX2448entries unchanged; now installed. Pair preserved C:/xMindNativeValidation/qualified-nested-context-binaries-20261020. See doc/VALIDATION_STATUS.md.
+- Browser58 page59185 hosts65940/58988 reuses32396. Sessionad86de667793281272e4ea9c4f9cd89c/rootdae9c437883303078971bf053b83fb51 completed3reads/2approvededits/Node4/reload12messages; NEVER replay. See doc/VALIDATION_STATUS.md.

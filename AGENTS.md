@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- Candidate68 first-send approval/read/revoke and matching-native owner reuse pass; completed fixtures in doc/evidence/candidate-0.1.68-first-send-and-reuse-20261024.json must NEVER replay. Installation/preservation is pending; keep its live handle.
+
 - Installed67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
 
 - Candidate67 CLI41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b; browser157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b; handoff500cc07a8096747a157f468cb1b13f89/root9b490dc7a004889d2ad6fdfc46732dca completed. NEVER replay. See candidate-0.1.67-qualified-coding-20261024.json.
@@ -16,8 +18,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 
-- Qualified58 stage17441files/VSIX2448entries unchanged; now installed. Pair preserved C:/xMindNativeValidation/qualified-nested-context-binaries-20261020. See doc/VALIDATION_STATUS.md.
-- Browser58 page59185 hosts65940/58988 reuses32396. Sessionad86de667793281272e4ea9c4f9cd89c/rootdae9c437883303078971bf053b83fb51 completed3reads/2approvededits/Node4/reload12messages; NEVER replay. See doc/VALIDATION_STATUS.md.
+- Qualification58 and completed browser58 guidance is preserved verbatim in doc/development-checkpoints-20261024.md; NEVER replay its tasks.
 
 - Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 

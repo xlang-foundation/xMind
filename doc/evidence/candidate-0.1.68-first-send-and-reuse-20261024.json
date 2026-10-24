@@ -1,0 +1,693 @@
+{
+  "version": "0.1.68",
+  "frontendSource": "825bd613bdf0fc8288db027bb92ee3dd6a225b0f",
+  "nativeSource": "eafe1b2efc327047f26443685a3651894105b9b7",
+  "nativeSha256": "11678c9a4e23c166ce946a07857b17880551b6841fc4a412cd3af3f90ffd05c0",
+  "exactFullNativeQualificationReused": "native-delivery-eafe1b2e-full-20261024.json",
+  "nativeSourceAndFileSetUnchanged": true,
+  "package": {
+    "archiveSha256": "b0e73b446de64a2b795e92ced9e57e8dc6ac1c3e9fab693fab616b03086e9528",
+    "entries": 2443,
+    "runtimeManifestSha256": "21a04a738557a041ce4b9e1d614dc3e47f833ca725c28a3386d0b0e3ed835dfa",
+    "runtimeFiles": 2398,
+    "acceptedClientTests": {
+      "extension": 485,
+      "browser": 169
+    }
+  },
+  "cliQualificationReused": {
+    "receipt": "candidate-0.1.67-qualified-coding-20261024.json",
+    "reason": "All2398 runtime files and manifest are byte-identical; no completed CLI task replayed"
+  },
+  "browser": {
+    "passed": true,
+    "frontendScope": "Packaged 0.1.68 browser assets qualified485/169; installed67 unchanged",
+    "fullNativeAcceptance": true,
+    "nativeQualification": {
+      "fullPassed": 173,
+      "fullFailed": 0,
+      "productBinaryUnchanged": true
+    },
+    "sourceNative": "eafe1b2efc327047f26443685a3651894105b9b7",
+    "modelCalls": 2,
+    "historyMessages": 4,
+    "operations": [
+      {
+        "arguments_json": "{\"path\":\"permission-packaged.txt\"}",
+        "decision_actor": "local-owner",
+        "expires_unix_ms": 1792838396205,
+        "id": "987a2edcc2324f17dccc50973d8712f6",
+        "resources": [],
+        "result_json": "{\"content\":\"Rendered permission read fixture.\\n\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000\",\"path\":\"permission-packaged.txt\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000\",\"workspace_revision\":1}",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "state": "succeeded",
+        "tool": "read_file",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000"
+      }
+    ],
+    "events": [
+      {
+        "data": {},
+        "kind": "run.queued",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 1
+      },
+      {
+        "data": {},
+        "kind": "run.running",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 2
+      },
+      {
+        "data": {
+          "preset_count": 2,
+          "tool_count": 1
+        },
+        "kind": "plan.capabilities.finalized",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 3
+      },
+      {
+        "data": {
+          "ordinal": 1,
+          "remaining_active_ms": 600000,
+          "segment_id": "bda305bbbbfa262fb1a31f78d2589e58"
+        },
+        "kind": "budget.segment.opened",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 4
+      },
+      {
+        "data": {
+          "folders": [
+            {
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000",
+              "root": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\browser-permissions-packaged-825bd613"
+            }
+          ],
+          "primary_folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000",
+          "revision": 1,
+          "snapshot": "run_admission",
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000"
+        },
+        "kind": "agent.workspace_membership",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 5
+      },
+      {
+        "data": {
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "pid": 11636,
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4"
+        },
+        "kind": "worker.lease.admitted",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 6
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "role": "parent",
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+          "worker_generation": "5824bd37d5e2fcc922e67c2934f1324d"
+        },
+        "kind": "budget.model_call.reserved",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 7
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "role": "parent",
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4"
+        },
+        "kind": "budget.model_call.started",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 8
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "request_binding": "20f865bdc139557e2053bfbad4659a0fed4ec69affe14d263fe44a4c097fcb2f"
+        },
+        "kind": "worker.model.dispatching",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 9
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "contexts": [
+            {
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000",
+              "guidance": {
+                "scopes": [
+                  {
+                    "directory": ".",
+                    "sources": []
+                  }
+                ],
+                "snapshot": "before_model_request"
+              }
+            }
+          ],
+          "snapshot": "worker_before_model_dispatch"
+        },
+        "kind": "agent.repository_scope",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 10
+      },
+      {
+        "data": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        },
+        "kind": "model.usage",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 11
+      },
+      {
+        "data": {
+          "arguments": "{\"path\":\"permission-packaged.txt\"}",
+          "id": "permission-read",
+          "index": 0,
+          "name": "read_file"
+        },
+        "kind": "model.tool_delta",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 12
+      },
+      {
+        "data": {
+          "reason": "tool_calls"
+        },
+        "kind": "model.finish",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 13
+      },
+      {
+        "data": {},
+        "kind": "model.done",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 14
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "response_binding": "3467a8ce4ee5d73a7fe458de66f3d4bdcfde9378f4690407e02e818919eee214"
+        },
+        "kind": "worker.model.responded",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 15
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "role": "parent",
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+          "was_started": true
+        },
+        "kind": "budget.model_call.finished",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 16
+      },
+      {
+        "data": {
+          "activity_id": "d5cf315f4e5f4e168beecde58f0930d4:f29cb3beb00f3abc58bf69fa0f3ea702:0",
+          "arguments": {
+            "path": "permission-packaged.txt"
+          },
+          "call_id": "permission-read",
+          "name": "read_file"
+        },
+        "kind": "tool.started",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 17
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "call_id": "permission-read",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d"
+        },
+        "kind": "worker.read.claimed",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 18
+      },
+      {
+        "data": {
+          "operation_id": "987a2edcc2324f17dccc50973d8712f6",
+          "tool": "read_file"
+        },
+        "kind": "operation.awaiting_approval",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 19
+      },
+      {
+        "data": {
+          "decision_actor": "local-owner",
+          "operation_id": "987a2edcc2324f17dccc50973d8712f6",
+          "tool": "read_file"
+        },
+        "kind": "operation.ready",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 20
+      },
+      {
+        "data": {
+          "decision_actor": "local-owner",
+          "operation_id": "987a2edcc2324f17dccc50973d8712f6",
+          "tool": "read_file"
+        },
+        "kind": "operation.executing",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 21
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "call_id": "permission-read",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d"
+        },
+        "kind": "worker.read.dispatching",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 22
+      },
+      {
+        "data": {
+          "decision_actor": "local-owner",
+          "operation_id": "987a2edcc2324f17dccc50973d8712f6",
+          "tool": "read_file"
+        },
+        "kind": "operation.succeeded",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 23
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "call_id": "permission-read",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "output_binding": "b06f2c109bc067113010700e214db6a7ca6478b0d1578ad04a7465f335f02de6",
+          "success": true
+        },
+        "kind": "worker.read.returned",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 24
+      },
+      {
+        "data": {
+          "activity_id": "d5cf315f4e5f4e168beecde58f0930d4:f29cb3beb00f3abc58bf69fa0f3ea702:0",
+          "call_id": "permission-read",
+          "data": {
+            "content": "Rendered permission read fixture.\n",
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000",
+            "path": "permission-packaged.txt",
+            "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000",
+            "workspace_revision": 1
+          },
+          "name": "read_file"
+        },
+        "kind": "tool.completed",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 25
+      },
+      {
+        "data": {},
+        "kind": "conversation.tool_turn",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 26
+      },
+      {
+        "data": {
+          "attempt_id": "f29cb3beb00f3abc58bf69fa0f3ea702",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "messages_binding": "b1ee880e13971cc7974eefd1b52bda5db3950d93e0f2043fb121aff451da0b56"
+        },
+        "kind": "worker.tool_turn.committed",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 27
+      },
+      {
+        "data": {
+          "attempt_id": "a499aabb77b87fbf61b460691fdac616",
+          "role": "parent",
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+          "worker_generation": "5824bd37d5e2fcc922e67c2934f1324d"
+        },
+        "kind": "budget.model_call.reserved",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 28
+      },
+      {
+        "data": {
+          "attempt_id": "a499aabb77b87fbf61b460691fdac616",
+          "role": "parent",
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4"
+        },
+        "kind": "budget.model_call.started",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 29
+      },
+      {
+        "data": {
+          "attempt_id": "a499aabb77b87fbf61b460691fdac616",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "request_binding": "48967d6762e75838b33e9cfc114e006813571a5397725fc8b795b00efe048476"
+        },
+        "kind": "worker.model.dispatching",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 30
+      },
+      {
+        "data": {
+          "attempt_id": "a499aabb77b87fbf61b460691fdac616",
+          "contexts": [
+            {
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000",
+              "guidance": {
+                "scopes": [
+                  {
+                    "directory": ".",
+                    "sources": []
+                  }
+                ],
+                "snapshot": "before_model_request"
+              }
+            }
+          ],
+          "snapshot": "worker_before_model_dispatch"
+        },
+        "kind": "agent.repository_scope",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 31
+      },
+      {
+        "data": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        },
+        "kind": "model.usage",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 32
+      },
+      {
+        "data": {
+          "text": "Observed file: Rendered permission read fixture."
+        },
+        "kind": "model.text",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 33
+      },
+      {
+        "data": {
+          "reason": "stop"
+        },
+        "kind": "model.finish",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 34
+      },
+      {
+        "data": {},
+        "kind": "model.done",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 35
+      },
+      {
+        "data": {
+          "attempt_id": "a499aabb77b87fbf61b460691fdac616",
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "response_binding": "ac2d29764e29587c5bccc2406427322bd5aa00e9e1a839bab64d8ab5cedc25a0"
+        },
+        "kind": "worker.model.responded",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 36
+      },
+      {
+        "data": {
+          "attempt_id": "a499aabb77b87fbf61b460691fdac616",
+          "role": "parent",
+          "root_run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+          "was_started": true
+        },
+        "kind": "budget.model_call.finished",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 37
+      },
+      {
+        "data": {
+          "active_elapsed_ms": 20980,
+          "remaining_active_ms": 579020,
+          "segment_id": "bda305bbbbfa262fb1a31f78d2589e58"
+        },
+        "kind": "budget.segment.closed",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 38
+      },
+      {
+        "data": {
+          "content": "Observed file: Rendered permission read fixture.",
+          "elapsed_ms": 21,
+          "first_token_ms": 17,
+          "model": "client-coding-fixture",
+          "usage": {
+            "completion_tokens": 3,
+            "prompt_tokens": 7,
+            "total_tokens": 10
+          }
+        },
+        "kind": "conversation.assistant",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 39
+      },
+      {
+        "data": {},
+        "kind": "run.completed",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 40
+      },
+      {
+        "data": {
+          "generation": "5824bd37d5e2fcc922e67c2934f1324d",
+          "reason": "completed",
+          "uncertain_model_dispatches": 0
+        },
+        "kind": "worker.lease.retired",
+        "run_id": "d5cf315f4e5f4e168beecde58f0930d4",
+        "seq": 41
+      }
+    ],
+    "renderedProof": {
+      "passed": true,
+      "sessionId": "9662a89217904eb78ae4541600c66e04",
+      "runId": "d5cf315f4e5f4e168beecde58f0930d4",
+      "firstSendReusableChoiceVisible": true,
+      "reloadRequired": false,
+      "taskResubmitted": false,
+      "reusableReadApproved": true,
+      "savedGrantObservedRevision": 1,
+      "revocationObserved": true,
+      "grantListEmptyAfterRevocation": true,
+      "automaticCompletionObserved": true,
+      "hiddenTabClosed": true,
+      "paidInference": false,
+      "scope": "Actual byte-verified packaged0.1.68 browser assets, qualified Native11678c9a, first-send approval/read/revocation without reload."
+    },
+    "originalHistoryExact": [
+      {
+        "data": {
+          "agent_profile": {
+            "id": "permission.packaged",
+            "model_id": "client-coding-fixture",
+            "revision": 1,
+            "tools": [
+              "read_file"
+            ]
+          },
+          "content": "Read permission-packaged.txt and report its exact observed content."
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "",
+          "elapsed_ms": 41,
+          "first_token_ms": 33,
+          "model": "client-coding-fixture",
+          "tool_calls": [
+            {
+              "arguments": "{\"path\":\"permission-packaged.txt\"}",
+              "id": "permission-read",
+              "name": "read_file"
+            }
+          ],
+          "usage": {
+            "completion_tokens": 3,
+            "prompt_tokens": 7,
+            "total_tokens": 10
+          }
+        },
+        "id": "msg_2",
+        "role": "assistant",
+        "seq": 2
+      },
+      {
+        "data": {
+          "content": "{\"content\":\"Rendered permission read fixture.\\n\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000\",\"path\":\"permission-packaged.txt\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000090840d0000000000\",\"workspace_revision\":1}",
+          "tool_call_id": "permission-read"
+        },
+        "id": "msg_3",
+        "role": "tool",
+        "seq": 3
+      },
+      {
+        "data": {
+          "content": "Observed file: Rendered permission read fixture.",
+          "elapsed_ms": 21,
+          "first_token_ms": 17,
+          "model": "client-coding-fixture",
+          "usage": {
+            "completion_tokens": 3,
+            "prompt_tokens": 7,
+            "total_tokens": 10
+          }
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "ownedBackendExited": true,
+    "paidInference": false,
+    "installed": false
+  },
+  "managedReuse": {
+    "prior": {
+      "agent_execution": "process-code",
+      "origin": "http://127.0.0.1:54934",
+      "process_id": 20384,
+      "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p68\\profiles\\b19e75d7b897319c53c03e267cdaff6ffa42304ec8c3f29c09adf7769294bdfb",
+      "started": true,
+      "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-reuse68",
+      "workspace_edits": "approved"
+    },
+    "owner": {
+      "agent_execution": "process-code",
+      "origin": "http://127.0.0.1:54934",
+      "process_id": 20384,
+      "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p68\\profiles\\b19e75d7b897319c53c03e267cdaff6ffa42304ec8c3f29c09adf7769294bdfb",
+      "started": false,
+      "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-reuse68",
+      "workspace_edits": "approved"
+    },
+    "session": "2b699589c1c391400d85a6a1352549d2",
+    "completedRoot": "890854ce74cc280201dfb50983d0340c",
+    "history": [
+      {
+        "data": {
+          "content": "Read the original managed marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph managed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Native managed package handoff: exact original history.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000005f800d0000000000\",\n      \"path\": \"managed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000005f800d0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "managed.read",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Native managed package handoff: exact original history.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000005f800d0000000000",
+                "path": "managed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000005f800d0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      },
+      {
+        "data": {
+          "content": "Hold this exact graph during attempted package upgrade",
+          "model_id": ""
+        },
+        "id": "msg_5",
+        "role": "user",
+        "seq": 5
+      },
+      {
+        "data": {
+          "content": "Completed graph managed.pause.\n\n```json\n[\n  {\n    \"id\": \"approval\",\n    \"output\": {\n      \"approved\": true\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "managed.pause",
+          "nodes": [
+            {
+              "id": "approval",
+              "output": {
+                "approved": true
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_6",
+        "role": "assistant",
+        "seq": 6
+      }
+    ],
+    "migration": "UI-only 0.1.67 to 0.1.68: identical native runtime keeps the active owner and resumes the original paused graph once",
+    "managedDiscovery": true,
+    "identicalRuntimeOwnerReused": true,
+    "upgradeFlagDidNotReplaceMatchingOwner": true,
+    "originalGraphResumedOnce": true,
+    "historyAndProfileExact": true,
+    "modelCalls": 0,
+    "paidInference": false,
+    "installed": false,
+    "passed": true,
+    "packageIntegrity": {
+      "oldExecution": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      },
+      "newExecution": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      },
+      "oldClean": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      },
+      "newClean": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      }
+    },
+    "ownedOwnerRetirementObserved": true
+  },
+  "installed": false,
+  "renderedVSCode": false,
+  "wholeGoalComplete": false,
+  "paidInference": false,
+  "cpythonExecuted": false
+}
