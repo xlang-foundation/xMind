@@ -1,0 +1,101 @@
+{
+  "recordedAt": "2026-10-24T16:33:10.357Z",
+  "version": "0.1.72",
+  "source": "bc2de6f248b37b0aec6b42195ef25f10975311ee",
+  "nativeSha256": "88a6dad3815e139e5b831357d0824097178e728b83998f600577735554136415",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "fullNative": {
+    "passed": 178,
+    "seconds": 764.76
+  },
+  "clients": {
+    "extension": 493,
+    "browser": 175
+  },
+  "candidateBrowserCliAndManagedHandoffPassed": true,
+  "installation": {
+    "recordedAt": "2026-10-24T16:31:32.557Z",
+    "passed": true,
+    "installedVersion": "0.1.72",
+    "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.72",
+    "vsixSha256": "666bbe34be04155260794f4af3af09fa6b8a1e586e48f52904d08292930c5b0c",
+    "installedPayloadFilesVerified": 2440,
+    "completeInstalledFileSetVerified": 2442,
+    "installerVsixManifestMatches": true,
+    "packageJsonMatchesExceptInstallerMetadata": true,
+    "runtimeFilesVerified": 2398,
+    "runtimeManifestSha256": "1351d363b586b4702b3c1b8d65ba65d8ee17effa0cba21c54aced7ec34643148",
+    "nativeSha256": "88a6dad3815e139e5b831357d0824097178e728b83998f600577735554136415",
+    "otherExtensionRegistryEntriesUnchanged": true,
+    "preservedRoots": [
+      "C:/Users/shaw9/.xMind",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+      "D:/CantorAI2026/xMind/.config"
+    ],
+    "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+    "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "exactOldInstallationBackup": 2442,
+    "visibleWindowRequested": false,
+    "installedNativeExecuted": false,
+    "userProfileBackendStarted": false,
+    "paidInference": false,
+    "renderedVSCode": false
+  },
+  "smoke": {
+    "passed": true,
+    "installedNativeSha256": "88a6dad3815e139e5b831357d0824097178e728b83998f600577735554136415",
+    "managedDiscoveryAndReuse": true,
+    "sessionId": "9812712752315991166267f98d205ba5",
+    "completedRoot": "d540e3b014ae1bb8c8bf0091ac773532",
+    "history": [
+      {
+        "data": {
+          "content": "Read the installed fixture marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph installed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.72 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000164f0e0000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000164f0e0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "installed.read",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Observed installed 0.1.72 native read.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000164f0e0000000000",
+                "path": "installed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000164f0e0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "observedOutput": "Observed installed 0.1.72 native read.\n",
+    "modelCalls": 0,
+    "userProfileRootUsed": false,
+    "ownedBackendIdentityVerifiedAndExitObserved": true,
+    "visibleWindowOpened": false,
+    "renderedVSCode": false
+  },
+  "neverReplayInstalledSmoke": true,
+  "exact71Backup": ".agentflow/installation-backups/0.1.71-before-bc2de6f2/extension",
+  "hostedPositiveTlsVerified": false,
+  "renderedVsCodeVerified": false,
+  "remoteRoutingAndEnrollmentComplete": false,
+  "goalComplete": false
+}
