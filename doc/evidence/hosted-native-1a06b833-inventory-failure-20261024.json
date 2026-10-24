@@ -1,0 +1,13 @@
+{
+  "source": "1a06b833",
+  "run": 40106639011,
+  "job": 120912817265,
+  "status": "completed",
+  "conclusion": "failure",
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40106639011",
+  "logBytes": 640018,
+  "logSha256": "1ab2717a73ee11536f5f650cf8272cd730db1f3edbbaab6ac5dc5e2f7baecbd1",
+  "failure": "The complete expected native contract set was not registered; refusing a partial green build. Expected 171, actual 175.",
+  "scope": "Inventory gate failed before the full xMind CTest run; isolated SDK/test probes do not constitute full-suite acceptance.",
+  "currentSource": "Tools/ci-native.ps1 now explicitly includes remote negotiation/client/credentials/authentication and separate SDK TLS refusal. Hosted result remains separate and pending."
+}
