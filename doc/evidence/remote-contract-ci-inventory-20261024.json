@@ -1,0 +1,26 @@
+{
+  "recordedAt": "2026-10-24T15:42:05.571Z",
+  "scope": "Static exact-inventory comparison against authoritative completed local177 manifest; no hosted configuration impersonation or execution.",
+  "previousExpectedHostedCount": 171,
+  "expectedHostedCount": 175,
+  "localInventoryCount": 177,
+  "newRequiredContracts": [
+    "native_remote_negotiation_contract",
+    "native_remote_connection_client_contract",
+    "native_remote_connection_credentials_contract",
+    "native_remote_connection_authentication_contract"
+  ],
+  "remainingLocalOnly": [
+    "native_language_server_rust_analyzer_contract",
+    "native_language_server_rust_fixture_check",
+    "native_multifolder_language_server_contract"
+  ],
+  "remainingHostedOnly": [
+    "native_mcp_oauth_trusted_contract"
+  ],
+  "toolchainDifference": "Existing local Rust fixtures are unavailable in the observed hosted configuration; hosted OAuth trust fixture is guarded and absent locally.",
+  "exactSetGateRetained": true,
+  "actualHostedPassClaimed": false,
+  "trustedTlsFixtureAdded": false,
+  "goalComplete": false
+}

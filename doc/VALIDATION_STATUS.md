@@ -1,3 +1,9 @@
+## Hosted remote-contract inventory correction — 2026-10-24
+
+The hosted exact-inventory gate now explicitly requires the four new remote negotiation/client/credential/authentication contracts. Its prior171-name list omitted them and would reject the expanded native configuration before the full run. The corrected list contains175 distinct contracts; static comparison against the accepted local177 manifest leaves exactly the existing three local Rust fixtures and one hosted-only OAuth trust fixture as configuration differences. PowerShell syntax parses without execution; exact set/count rejection remains intact. [Inventory evidence](evidence/remote-contract-ci-inventory-20261024.json).
+
+This changes CI registration expectations only, not native product source or installed71. It is not an actual hosted pass. The pending trusted-TLS/separate-process authentication fixture has not been added yet; existing certificate provisioning remains restricted to an isolated hosted runner, and local trust was not changed. The full goal remains active.
+
 ## Complete current-source native qualification — 2026-10-24
 
 Source1a06b833/Nativec5e772e3 with SDK8c7972d1 passes the complete177-contract native inventory in801.61s after all targets rebuild. All2834 project/16 SDK/1870 pure-library/30 SDK-runtime/18598 dependency/141 binary hashes and file sets remain unchanged. The sixteen-case nested-human contract passes30.55s; standard SDK authentication capability/refusal/lifetime and the separate-process IPC regression pass in the same complete run. No CPython or paid inference occurs. [Full receipt](evidence/native-delivery-1a06b833-full-20261024.json), [original log](evidence/native-delivery-1a06b833-full-ctest.log), [inventory](evidence/native-delivery-1a06b833-full-inventory.json).
