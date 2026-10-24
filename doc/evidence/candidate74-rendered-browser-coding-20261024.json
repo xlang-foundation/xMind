@@ -1,0 +1,1126 @@
+{
+  "passed": true,
+  "fullNativeAcceptance": true,
+  "nativeQualification": {
+    "fullPassed": 179,
+    "fullFailed": 0,
+    "spreadBinaryUnchanged": true
+  },
+  "sourceNative": "5e5849cd38d0641718af86b8fdf805d0f9ff6d23",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "operations": [
+    {
+      "arguments_json": "{\"after_content\":\"module.exports = (a, b, c) => (Math.max(a, b, c) - Math.min(a, b, c));\\n\",\"after_sha256\":\"76187d1b2959c7739d52602c7501cbda53e0e69c6b300ee82a902afa983d5e33\",\"before_content\":\"module.exports = (a, b, c) => (a + b + c);\\n\",\"before_sha256\":\"2123cc332207d13314529a0f39fda6345190aa40effebc98a2e6465014266b29\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000323f0f0000000000\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"path\":\"spread.cjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"workspace_revision\":1}",
+      "decision_actor": "local-owner",
+      "expires_unix_ms": 1792884839501,
+      "id": "6c7a92bfbb54fedec9647492f30aa0de",
+      "resources": [],
+      "result_json": "{\"after_sha256\":\"76187d1b2959c7739d52602c7501cbda53e0e69c6b300ee82a902afa983d5e33\",\"before_sha256\":\"2123cc332207d13314529a0f39fda6345190aa40effebc98a2e6465014266b29\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000323f0f0000000000\",\"path\":\"spread.cjs\",\"size\":71,\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\"}",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "state": "succeeded",
+      "tool": "replace_file",
+      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000"
+    },
+    {
+      "arguments_json": "{\"arguments\":[\"check-spread.cjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"environment\":[],\"executable\":\"C:/Program Files/nodejs/node.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:42050100000042000000000000000000:995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"node\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"timeout_ms\":10000,\"workdir\":\".\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"workspace_revision\":1}",
+      "decision_actor": "local-owner",
+      "expires_unix_ms": 1792884842960,
+      "id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+      "resources": [
+        "process-profile:node"
+      ],
+      "result_json": "{\"elapsed_ms\":136,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"c2692e2ee0de2f18eab62e39bdd4fbe3\",\"operation_id\":\"c2692e2ee0de2f18eab62e39bdd4fbe3\",\"output_artifact\":{\"operation_id\":\"c2692e2ee0de2f18eab62e39bdd4fbe3\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":23},\"pid\":41736,\"process_tree_retired\":true,\"profile_id\":\"node\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":23,\"data\":\"4 spread checks passed\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":23},\"termination\":\"exited\",\"truncated\":false}",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "state": "succeeded",
+      "tool": "run_process",
+      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000"
+    }
+  ],
+  "events": [
+    {
+      "data": {},
+      "kind": "run.queued",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 1
+    },
+    {
+      "data": {},
+      "kind": "run.running",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 2
+    },
+    {
+      "data": {
+        "preset_count": 2,
+        "tool_count": 3
+      },
+      "kind": "plan.capabilities.finalized",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 3
+    },
+    {
+      "data": {
+        "ordinal": 1,
+        "remaining_active_ms": 600000,
+        "segment_id": "50b09e1b2271586a7ea12233160ab793"
+      },
+      "kind": "budget.segment.opened",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 4
+    },
+    {
+      "data": {
+        "folders": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+            "root": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\browser-spread-unwrapped-5e5849cd"
+          }
+        ],
+        "primary_folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+        "revision": 1,
+        "snapshot": "run_admission",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000"
+      },
+      "kind": "agent.workspace_membership",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 5
+    },
+    {
+      "data": {
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "pid": 4136,
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b"
+      },
+      "kind": "worker.lease.admitted",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 6
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "worker_generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "budget.model_call.reserved",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 7
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b"
+      },
+      "kind": "budget.model_call.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 8
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "request_binding": "711ed3d8d204882841fa2be81a57ededfacf7e535fdbdc92ae9d4aed2b02ffa0"
+      },
+      "kind": "worker.model.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 9
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "contexts": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+            "guidance": {
+              "scopes": [
+                {
+                  "directory": ".",
+                  "sources": []
+                }
+              ],
+              "snapshot": "before_model_request"
+            }
+          }
+        ],
+        "snapshot": "worker_before_model_dispatch"
+      },
+      "kind": "agent.repository_scope",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 10
+    },
+    {
+      "data": {
+        "completion_tokens": 3,
+        "prompt_tokens": 7,
+        "total_tokens": 10
+      },
+      "kind": "model.usage",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 11
+    },
+    {
+      "data": {
+        "arguments": "{\"path\":\"spread.cjs\"}",
+        "id": "client-read",
+        "index": 0,
+        "name": "read_file"
+      },
+      "kind": "model.tool_delta",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 12
+    },
+    {
+      "data": {
+        "reason": "tool_calls"
+      },
+      "kind": "model.finish",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 13
+    },
+    {
+      "data": {},
+      "kind": "model.done",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 14
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "response_binding": "ef48a37489dd48fbeb39e4de9a4f1d01de7c20189b8de6909a4e2323183dbe00"
+      },
+      "kind": "worker.model.responded",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 15
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "was_started": true
+      },
+      "kind": "budget.model_call.finished",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 16
+    },
+    {
+      "data": {
+        "activity_id": "41d61cf36b3a4fba851ad603a425b06b:9fe1e3f98faa946b86230bc1cbf9fa95:0",
+        "arguments": {
+          "path": "spread.cjs"
+        },
+        "call_id": "client-read",
+        "name": "read_file"
+      },
+      "kind": "tool.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 17
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "call_id": "client-read",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "worker.read.claimed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 18
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "call_id": "client-read",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "worker.read.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 19
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "call_id": "client-read",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "output_binding": "d5d8d12c96e8ff6f46cac4e1c5b344e397953169871c4e4b3e316a9901a1ba40",
+        "success": true
+      },
+      "kind": "worker.read.returned",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 20
+    },
+    {
+      "data": {
+        "activity_id": "41d61cf36b3a4fba851ad603a425b06b:9fe1e3f98faa946b86230bc1cbf9fa95:0",
+        "call_id": "client-read",
+        "data": {
+          "content": "module.exports = (a, b, c) => (a + b + c);\n",
+          "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+          "path": "spread.cjs",
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+          "workspace_revision": 1
+        },
+        "name": "read_file"
+      },
+      "kind": "tool.completed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 21
+    },
+    {
+      "data": {},
+      "kind": "conversation.tool_turn",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 22
+    },
+    {
+      "data": {
+        "attempt_id": "9fe1e3f98faa946b86230bc1cbf9fa95",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "messages_binding": "0a5047408007f3c32f087315a832462713a23c0b905c1fb52cba0e46f9f826fe"
+      },
+      "kind": "worker.tool_turn.committed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 23
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "worker_generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "budget.model_call.reserved",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 24
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b"
+      },
+      "kind": "budget.model_call.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 25
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "request_binding": "c81af3f9f04e2b98e9feebd62bbba3564a99af64e0c095973bc5795b6fd7e3bf"
+      },
+      "kind": "worker.model.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 26
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "contexts": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+            "guidance": {
+              "scopes": [
+                {
+                  "directory": ".",
+                  "sources": []
+                }
+              ],
+              "snapshot": "before_model_request"
+            }
+          }
+        ],
+        "snapshot": "worker_before_model_dispatch"
+      },
+      "kind": "agent.repository_scope",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 27
+    },
+    {
+      "data": {
+        "completion_tokens": 3,
+        "prompt_tokens": 7,
+        "total_tokens": 10
+      },
+      "kind": "model.usage",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 28
+    },
+    {
+      "data": {
+        "arguments": "{\"path\":\"spread.cjs\",\"old_text\":\"(a + b + c)\",\"new_text\":\"(Math.max(a, b, c) - Math.min(a, b, c))\",\"expected_occurrences\":1}",
+        "id": "client-edit",
+        "index": 0,
+        "name": "edit_file"
+      },
+      "kind": "model.tool_delta",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 29
+    },
+    {
+      "data": {
+        "reason": "tool_calls"
+      },
+      "kind": "model.finish",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 30
+    },
+    {
+      "data": {},
+      "kind": "model.done",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 31
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "response_binding": "fbe25a6c3fbcb94827e019586112e9c1f5a6d49b7167b2251ae827884c065e13"
+      },
+      "kind": "worker.model.responded",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 32
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "was_started": true
+      },
+      "kind": "budget.model_call.finished",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 33
+    },
+    {
+      "data": {
+        "activity_id": "41d61cf36b3a4fba851ad603a425b06b:5ad4f96b8dd7b2e2889125c2dd45e961:0",
+        "arguments": {
+          "expected_occurrences": 1,
+          "new_text": "(Math.max(a, b, c) - Math.min(a, b, c))",
+          "old_text": "(a + b + c)",
+          "path": "spread.cjs"
+        },
+        "call_id": "client-edit",
+        "name": "edit_file"
+      },
+      "kind": "tool.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 34
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "call_id": "client-edit",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "worker.file.claimed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 35
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "call_id": "client-edit",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "worker.file.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 36
+    },
+    {
+      "data": {
+        "operation_id": "6c7a92bfbb54fedec9647492f30aa0de",
+        "tool": "replace_file"
+      },
+      "kind": "operation.awaiting_approval",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 37
+    },
+    {
+      "data": {
+        "decision_actor": "local-owner",
+        "operation_id": "6c7a92bfbb54fedec9647492f30aa0de",
+        "tool": "replace_file"
+      },
+      "kind": "operation.ready",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 38
+    },
+    {
+      "data": {
+        "decision_actor": "local-owner",
+        "operation_id": "6c7a92bfbb54fedec9647492f30aa0de",
+        "tool": "replace_file"
+      },
+      "kind": "operation.executing",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 39
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "call_id": "client-edit",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "operation_id": "6c7a92bfbb54fedec9647492f30aa0de"
+      },
+      "kind": "worker.file.effect_claimed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 40
+    },
+    {
+      "data": {
+        "decision_actor": "local-owner",
+        "operation_id": "6c7a92bfbb54fedec9647492f30aa0de",
+        "tool": "replace_file"
+      },
+      "kind": "operation.succeeded",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 41
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "call_id": "client-edit",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "output_binding": "b8c5e7885279ef7567ec41b34ffcb76b100a5e7bba4d2776fb81f18bcd087e90",
+        "success": true
+      },
+      "kind": "worker.file.returned",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 42
+    },
+    {
+      "data": {
+        "activity_id": "41d61cf36b3a4fba851ad603a425b06b:5ad4f96b8dd7b2e2889125c2dd45e961:0",
+        "call_id": "client-edit",
+        "data": {
+          "content_sha256": "76187d1b2959c7739d52602c7501cbda53e0e69c6b300ee82a902afa983d5e33",
+          "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000323f0f0000000000",
+          "operation_id": "6c7a92bfbb54fedec9647492f30aa0de",
+          "path": "spread.cjs",
+          "size": 71
+        },
+        "name": "edit_file"
+      },
+      "kind": "tool.completed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 43
+    },
+    {
+      "data": {},
+      "kind": "conversation.tool_turn",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 44
+    },
+    {
+      "data": {
+        "attempt_id": "5ad4f96b8dd7b2e2889125c2dd45e961",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "messages_binding": "05a65e2a32cd71d13e8a6af1a11c1ffa6315f42f997ec18c73e42efddf6bc322"
+      },
+      "kind": "worker.tool_turn.committed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 45
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "worker_generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "budget.model_call.reserved",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 46
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b"
+      },
+      "kind": "budget.model_call.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 47
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "request_binding": "c5ec2d1a03dcb71a79ec23de2b1b0631943fba042a3612a45295456f0641c634"
+      },
+      "kind": "worker.model.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 48
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "contexts": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+            "guidance": {
+              "scopes": [
+                {
+                  "directory": ".",
+                  "sources": []
+                }
+              ],
+              "snapshot": "before_model_request"
+            }
+          }
+        ],
+        "snapshot": "worker_before_model_dispatch"
+      },
+      "kind": "agent.repository_scope",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 49
+    },
+    {
+      "data": {
+        "completion_tokens": 3,
+        "prompt_tokens": 7,
+        "total_tokens": 10
+      },
+      "kind": "model.usage",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 50
+    },
+    {
+      "data": {
+        "arguments": "{\"profile\":\"node\",\"arguments\":[\"check-spread.cjs\"],\"workdir\":\".\",\"timeout_ms\":10000}",
+        "id": "client-test",
+        "index": 0,
+        "name": "run_process"
+      },
+      "kind": "model.tool_delta",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 51
+    },
+    {
+      "data": {
+        "reason": "tool_calls"
+      },
+      "kind": "model.finish",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 52
+    },
+    {
+      "data": {},
+      "kind": "model.done",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 53
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "response_binding": "ae476b0bfb0624cbb795ea4a644927bb6d5ae39bd7986529228e016a77776f97"
+      },
+      "kind": "worker.model.responded",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 54
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "was_started": true
+      },
+      "kind": "budget.model_call.finished",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 55
+    },
+    {
+      "data": {
+        "activity_id": "41d61cf36b3a4fba851ad603a425b06b:83b546f87d271df89849a77694d32f0f:0",
+        "arguments": {
+          "arguments": [
+            "check-spread.cjs"
+          ],
+          "profile": "node",
+          "timeout_ms": 10000,
+          "workdir": "."
+        },
+        "call_id": "client-test",
+        "name": "run_process"
+      },
+      "kind": "tool.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 56
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "call_id": "client-test",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "worker.process.claimed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 57
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "call_id": "client-test",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "worker.process.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 58
+    },
+    {
+      "data": {
+        "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+        "tool": "run_process"
+      },
+      "kind": "operation.awaiting_approval",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 59
+    },
+    {
+      "data": {
+        "decision_actor": "local-owner",
+        "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+        "tool": "run_process"
+      },
+      "kind": "operation.ready",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 60
+    },
+    {
+      "data": {
+        "decision_actor": "local-owner",
+        "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+        "tool": "run_process"
+      },
+      "kind": "operation.executing",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 61
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "call_id": "client-test",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3"
+      },
+      "kind": "worker.process.effect_claimed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 62
+    },
+    {
+      "data": {
+        "channel": "stdout",
+        "data": "342073707265616420636865636b73207061737365640a",
+        "encoding": "hex",
+        "offset": 0,
+        "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+        "profile_id": "node",
+        "retained_bytes": 23
+      },
+      "kind": "process.output",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 63
+    },
+    {
+      "data": {
+        "decision_actor": "local-owner",
+        "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+        "tool": "run_process"
+      },
+      "kind": "operation.succeeded",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 64
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "call_id": "client-test",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "output_binding": "2526c461eceb63ecc3e921b7dce9ef6d483777659780974fd8cd9e0396c1ea66",
+        "success": true
+      },
+      "kind": "worker.process.returned",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 65
+    },
+    {
+      "data": {
+        "activity_id": "41d61cf36b3a4fba851ad603a425b06b:83b546f87d271df89849a77694d32f0f:0",
+        "call_id": "client-test",
+        "data": {
+          "elapsed_ms": 136,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+          "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+          "output_artifact": {
+            "operation_id": "c2692e2ee0de2f18eab62e39bdd4fbe3",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 23
+          },
+          "pid": 41736,
+          "process_tree_retired": true,
+          "profile_id": "node",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 23,
+            "data": "4 spread checks passed\n",
+            "encoding": "utf-8",
+            "retained_bytes": 23
+          },
+          "termination": "exited",
+          "truncated": false
+        },
+        "name": "run_process"
+      },
+      "kind": "tool.completed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 66
+    },
+    {
+      "data": {},
+      "kind": "conversation.tool_turn",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 67
+    },
+    {
+      "data": {
+        "attempt_id": "83b546f87d271df89849a77694d32f0f",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "messages_binding": "081349ec36e9c277b41307f37b1cb584f8dd5f9672a9897d328137ba062ab4a6"
+      },
+      "kind": "worker.tool_turn.committed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 68
+    },
+    {
+      "data": {
+        "attempt_id": "0a3b9ea2a4128f3333fb131f91fc9591",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "worker_generation": "6f3fde5145ee4efa23c6fff353d4eab5"
+      },
+      "kind": "budget.model_call.reserved",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 69
+    },
+    {
+      "data": {
+        "attempt_id": "0a3b9ea2a4128f3333fb131f91fc9591",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b"
+      },
+      "kind": "budget.model_call.started",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 70
+    },
+    {
+      "data": {
+        "attempt_id": "0a3b9ea2a4128f3333fb131f91fc9591",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "request_binding": "3b39942379417aac45433e055a473091081f4ef182959196442edf95452450dd"
+      },
+      "kind": "worker.model.dispatching",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 71
+    },
+    {
+      "data": {
+        "attempt_id": "0a3b9ea2a4128f3333fb131f91fc9591",
+        "contexts": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000",
+            "guidance": {
+              "scopes": [
+                {
+                  "directory": ".",
+                  "sources": []
+                }
+              ],
+              "snapshot": "before_model_request"
+            }
+          }
+        ],
+        "snapshot": "worker_before_model_dispatch"
+      },
+      "kind": "agent.repository_scope",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 72
+    },
+    {
+      "data": {
+        "completion_tokens": 3,
+        "prompt_tokens": 7,
+        "total_tokens": 10
+      },
+      "kind": "model.usage",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 73
+    },
+    {
+      "data": {
+        "text": "Fixed spread.cjs. The actual Node run exited 0: 4 spread checks passed."
+      },
+      "kind": "model.text",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 74
+    },
+    {
+      "data": {
+        "reason": "stop"
+      },
+      "kind": "model.finish",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 75
+    },
+    {
+      "data": {},
+      "kind": "model.done",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 76
+    },
+    {
+      "data": {
+        "attempt_id": "0a3b9ea2a4128f3333fb131f91fc9591",
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "response_binding": "b2b6b120c53b9ae9c5456435941ac17e6b039f137f9d0255f0cfba4d428999cf"
+      },
+      "kind": "worker.model.responded",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 77
+    },
+    {
+      "data": {
+        "attempt_id": "0a3b9ea2a4128f3333fb131f91fc9591",
+        "role": "parent",
+        "root_run_id": "41d61cf36b3a4fba851ad603a425b06b",
+        "was_started": true
+      },
+      "kind": "budget.model_call.finished",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 78
+    },
+    {
+      "data": {
+        "active_elapsed_ms": 8588,
+        "remaining_active_ms": 591412,
+        "segment_id": "50b09e1b2271586a7ea12233160ab793"
+      },
+      "kind": "budget.segment.closed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 79
+    },
+    {
+      "data": {
+        "content": "Fixed spread.cjs. The actual Node run exited 0: 4 spread checks passed.",
+        "elapsed_ms": 32,
+        "first_token_ms": 28,
+        "model": "client-coding-fixture",
+        "usage": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        }
+      },
+      "kind": "conversation.assistant",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 80
+    },
+    {
+      "data": {},
+      "kind": "run.completed",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 81
+    },
+    {
+      "data": {
+        "generation": "6f3fde5145ee4efa23c6fff353d4eab5",
+        "reason": "completed",
+        "uncertain_model_dispatches": 0
+      },
+      "kind": "worker.lease.retired",
+      "run_id": "41d61cf36b3a4fba851ad603a425b06b",
+      "seq": 82
+    }
+  ],
+  "renderedProof": {
+    "passed": true,
+    "cleanFirstCompletion": true,
+    "sessionId": "48d2c139fdb64ca18143efd5315b7a56",
+    "runId": "41d61cf36b3a4fba851ad603a425b06b",
+    "restoredAgent": "coding.process",
+    "reload": true,
+    "filePreviewCorrect": true,
+    "approvals": 2,
+    "observedAt": "2026-10-24T23:24:26.438Z"
+  },
+  "httpDiagnostics": [],
+  "selectedAgent": {
+    "editable": true,
+    "revision": 1,
+    "selected": {
+      "default": false,
+      "description": "Controlled packaged coding fixture",
+      "hidden": false,
+      "id": "coding.process",
+      "mode": "primary",
+      "model_id": "client-coding-fixture",
+      "name": "Native Process Coder",
+      "permissions": [],
+      "placement": "process",
+      "revision": 1
+    },
+    "session_id": "48d2c139fdb64ca18143efd5315b7a56"
+  },
+  "originalHistoryExact": [
+    {
+      "data": {
+        "agent_profile": {
+          "id": "coding.process",
+          "model_id": "client-coding-fixture",
+          "placement": "process",
+          "revision": 1,
+          "tools": [
+            "read_file",
+            "edit_file",
+            "run_process"
+          ]
+        },
+        "content": "Fix spread.cjs to return the largest of its three inputs minus the smallest. Read the file, edit it, run node check-spread.cjs, and report the observed test result."
+      },
+      "id": "msg_1",
+      "role": "user",
+      "seq": 1
+    },
+    {
+      "data": {
+        "content": "",
+        "elapsed_ms": 38,
+        "first_token_ms": 32,
+        "model": "client-coding-fixture",
+        "tool_calls": [
+          {
+            "arguments": "{\"path\":\"spread.cjs\"}",
+            "id": "client-read",
+            "name": "read_file"
+          }
+        ],
+        "usage": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        }
+      },
+      "id": "msg_2",
+      "role": "assistant",
+      "seq": 2
+    },
+    {
+      "data": {
+        "content": "{\"content\":\"module.exports = (a, b, c) => (a + b + c);\\n\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"path\":\"spread.cjs\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000323f0f0000000000\",\"workspace_revision\":1}",
+        "tool_call_id": "client-read"
+      },
+      "id": "msg_3",
+      "role": "tool",
+      "seq": 3
+    },
+    {
+      "data": {
+        "content": "",
+        "elapsed_ms": 30,
+        "first_token_ms": 23,
+        "model": "client-coding-fixture",
+        "tool_calls": [
+          {
+            "arguments": "{\"path\":\"spread.cjs\",\"old_text\":\"(a + b + c)\",\"new_text\":\"(Math.max(a, b, c) - Math.min(a, b, c))\",\"expected_occurrences\":1}",
+            "id": "client-edit",
+            "name": "edit_file"
+          }
+        ],
+        "usage": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        }
+      },
+      "id": "msg_4",
+      "role": "assistant",
+      "seq": 4
+    },
+    {
+      "data": {
+        "content": "{\"content_sha256\":\"76187d1b2959c7739d52602c7501cbda53e0e69c6b300ee82a902afa983d5e33\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000323f0f0000000000\",\"operation_id\":\"6c7a92bfbb54fedec9647492f30aa0de\",\"path\":\"spread.cjs\",\"size\":71}",
+        "tool_call_id": "client-edit"
+      },
+      "id": "msg_5",
+      "role": "tool",
+      "seq": 5
+    },
+    {
+      "data": {
+        "content": "",
+        "elapsed_ms": 20,
+        "first_token_ms": 16,
+        "model": "client-coding-fixture",
+        "tool_calls": [
+          {
+            "arguments": "{\"profile\":\"node\",\"arguments\":[\"check-spread.cjs\"],\"workdir\":\".\",\"timeout_ms\":10000}",
+            "id": "client-test",
+            "name": "run_process"
+          }
+        ],
+        "usage": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        }
+      },
+      "id": "msg_6",
+      "role": "assistant",
+      "seq": 6
+    },
+    {
+      "data": {
+        "content": "{\"elapsed_ms\":136,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"c2692e2ee0de2f18eab62e39bdd4fbe3\",\"operation_id\":\"c2692e2ee0de2f18eab62e39bdd4fbe3\",\"output_artifact\":{\"operation_id\":\"c2692e2ee0de2f18eab62e39bdd4fbe3\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":23},\"pid\":41736,\"process_tree_retired\":true,\"profile_id\":\"node\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":23,\"data\":\"4 spread checks passed\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":23},\"termination\":\"exited\",\"truncated\":false}",
+        "tool_call_id": "client-test"
+      },
+      "id": "msg_7",
+      "role": "tool",
+      "seq": 7
+    },
+    {
+      "data": {
+        "content": "Fixed spread.cjs. The actual Node run exited 0: 4 spread checks passed.",
+        "elapsed_ms": 32,
+        "first_token_ms": 28,
+        "model": "client-coding-fixture",
+        "usage": {
+          "completion_tokens": 3,
+          "prompt_tokens": 7,
+          "total_tokens": 10
+        }
+      },
+      "id": "msg_8",
+      "role": "assistant",
+      "seq": 8
+    }
+  ],
+  "ownedBackendExited": true,
+  "paidInference": false,
+  "installed": false,
+  "version": "0.1.74",
+  "scope": "Actual hidden-browser UI task on byte-verified packaged candidate; controlled local provider, real native process worker and read/edit/Node effects",
+  "recordedAt": "2026-10-24T23:24:38.496Z"
+}
