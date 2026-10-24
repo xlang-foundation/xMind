@@ -1,0 +1,423 @@
+{
+  "recordedAt": "2026-10-24T20:44:02.185Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T20:40:48.486Z",
+    "sourceParent": "ffe04c279ef617c11c7cca2ed217789bbc9b118e",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 12544,
+      "launchedAt": "2026-10-24T20:26:33.949Z",
+      "completedAt": "2026-10-24T20:26:57.608Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+    },
+    "test": {
+      "pid": 15808,
+      "launchedAt": "2026-10-24T20:27:00.320Z",
+      "completedAt": "2026-10-24T20:40:45.807Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "d3646f1f619bcb325fea381cbf9ddfeab87ccd63eeda8182c531983c061c422a"
+    },
+    "total": 179,
+    "failed": 1,
+    "passed": 178,
+    "seconds": 825.47,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "57beac318f32155a0684f578e744ab4bcd97d853c7653500194b1fdcc1d1305a",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "failure": "native_agent_worker_graph_remote_contract timed out at existing 60-second CTest budget",
+  "retainedNamespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-graph-remote-821778428-298953128",
+  "originalDatabaseFilesUnchangedAfterReadOnlyCopy": {
+    "state.sqlite": "0f1dbb5819f40d83475b8dc4f53809019f8d5d55cd05fdcb8a27cdc13740cebd",
+    "state.sqlite-wal": "c9f56d93aed9fce6cccd9f69c50bafb8b3466d76332853c45aecb9ec8e91d1d4",
+    "state.sqlite-shm": "265534b01bc7d56615e9e9d11ab9f6e1725e0194b758b69df0b1db1a1e62cb91"
+  },
+  "dump": {
+    "bytes": 384651,
+    "sha256": "959c8cc6a3c7f2bf8c6b4d921ab2d0c9bb0583cee402ac9164e964831f9916d8",
+    "kind": "Slow-run test-only minidump; private artifact retained",
+    "rawAddressAnalysis": "42 threads; raw address candidates are not symbolized/unwound causal proof"
+  },
+  "runs": [
+    {
+      "id": "rpc-graph-remote-uncounted-approved",
+      "state": "completed",
+      "parent": null
+    },
+    {
+      "id": "917fab8898dc765072b77146b1248405",
+      "state": "completed",
+      "parent": "rpc-graph-remote-uncounted-approved"
+    },
+    {
+      "id": "e1a0433a5e19f5f0b898973095811d7d",
+      "state": "completed",
+      "parent": "rpc-graph-remote-uncounted-approved"
+    },
+    {
+      "id": "rpc-graph-remote-uncounted-denied",
+      "state": "completed",
+      "parent": null
+    },
+    {
+      "id": "740436e10376b3b85884a5c73e8211e2",
+      "state": "completed",
+      "parent": "rpc-graph-remote-uncounted-denied"
+    },
+    {
+      "id": "5d114a3b6d67ac53b7d38dbb59f269f2",
+      "state": "completed",
+      "parent": "rpc-graph-remote-uncounted-denied"
+    },
+    {
+      "id": "rpc-graph-remote-counted-approved",
+      "state": "running",
+      "parent": null
+    },
+    {
+      "id": "18f13812279d77490f37d52775502f75",
+      "state": "queued",
+      "parent": "rpc-graph-remote-counted-approved"
+    },
+    {
+      "id": "bd8ce36506bd4a9257213650929e3554",
+      "state": "failed",
+      "parent": "rpc-graph-remote-counted-approved"
+    }
+  ],
+  "countedCaseEvents": [
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 149,
+      "kind": "agent.workspace_membership",
+      "data": {
+        "folders": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+            "root": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-remote-821778428-298953128\\graph-remote-counted-approved"
+          }
+        ],
+        "primary_folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+        "revision": 1,
+        "snapshot": "graph_admission",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000"
+      }
+    },
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 150,
+      "kind": "run.queued",
+      "data": {
+        "graph_id": "remote.worker.graph",
+        "graph_revision": 1,
+        "kind": "graph"
+      }
+    },
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 151,
+      "kind": "run.running",
+      "data": {
+        "reason": "graph_context_owner_activation"
+      }
+    },
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 152,
+      "kind": "budget.segment.opened",
+      "data": {
+        "ordinal": 1,
+        "remaining_active_ms": 20000,
+        "segment_id": "0a6cc6375c0f691717f6d651453fb11a"
+      }
+    },
+    {
+      "run_id": "18f13812279d77490f37d52775502f75",
+      "seq": 153,
+      "kind": "run.queued",
+      "data": {
+        "node_id": "remote-one",
+        "parent_run_id": "rpc-graph-remote-counted-approved"
+      }
+    },
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 154,
+      "kind": "graph.child.queued",
+      "data": {
+        "child_run_id": "18f13812279d77490f37d52775502f75",
+        "node_id": "remote-one"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 155,
+      "kind": "run.queued",
+      "data": {
+        "node_id": "remote-two",
+        "parent_run_id": "rpc-graph-remote-counted-approved"
+      }
+    },
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 156,
+      "kind": "graph.child.queued",
+      "data": {
+        "child_run_id": "bd8ce36506bd4a9257213650929e3554",
+        "node_id": "remote-two"
+      }
+    },
+    {
+      "run_id": "18f13812279d77490f37d52775502f75",
+      "seq": 157,
+      "kind": "mcp.connecting",
+      "data": {
+        "config_revision": 1,
+        "server_id": "graph-http-peer"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 158,
+      "kind": "mcp.connecting",
+      "data": {
+        "config_revision": 1,
+        "server_id": "graph-http-peer"
+      }
+    },
+    {
+      "run_id": "18f13812279d77490f37d52775502f75",
+      "seq": 159,
+      "kind": "mcp.discovered",
+      "data": {
+        "config_revision": 1,
+        "protocol_version": "2025-11-25",
+        "server_id": "graph-http-peer",
+        "tool_count": 1
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 160,
+      "kind": "mcp.discovered",
+      "data": {
+        "config_revision": 1,
+        "protocol_version": "2025-11-25",
+        "server_id": "graph-http-peer",
+        "tool_count": 1
+      }
+    },
+    {
+      "run_id": "18f13812279d77490f37d52775502f75",
+      "seq": 161,
+      "kind": "agent.workspace_membership",
+      "data": {
+        "folders": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+            "root": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-remote-821778428-298953128\\graph-remote-counted-approved"
+          }
+        ],
+        "primary_folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+        "revision": 1,
+        "snapshot": "graph_admission",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 162,
+      "kind": "agent.workspace_membership",
+      "data": {
+        "folders": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+            "root": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-remote-821778428-298953128\\graph-remote-counted-approved"
+          }
+        ],
+        "primary_folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+        "revision": 1,
+        "snapshot": "graph_admission",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 163,
+      "kind": "worker.lease.admitted",
+      "data": {
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9",
+        "pid": 7916,
+        "root_run_id": "rpc-graph-remote-counted-approved"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 164,
+      "kind": "run.running",
+      "data": {}
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 165,
+      "kind": "agent.delegation.preset",
+      "data": {
+        "preset_id": "workspace.inspect",
+        "preset_revision": 1,
+        "root_run_id": "rpc-graph-remote-counted-approved",
+        "tool_policy": "read_only"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 166,
+      "kind": "budget.model_call.reserved",
+      "data": {
+        "attempt_id": "50a08b8035a3c51634291ecca1289fa4",
+        "role": "leaf",
+        "root_run_id": "rpc-graph-remote-counted-approved"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 167,
+      "kind": "budget.model_call.started",
+      "data": {
+        "attempt_id": "50a08b8035a3c51634291ecca1289fa4",
+        "role": "leaf",
+        "root_run_id": "rpc-graph-remote-counted-approved"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 168,
+      "kind": "worker.model.dispatching",
+      "data": {
+        "attempt_id": "50a08b8035a3c51634291ecca1289fa4",
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9",
+        "request_binding": "b22bcf124153c6c6a1b7ad38ed992d6851c2210a0573327a265a34504f78b3bf"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 169,
+      "kind": "agent.repository_scope",
+      "data": {
+        "attempt_id": "50a08b8035a3c51634291ecca1289fa4",
+        "contexts": [
+          {
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000",
+            "guidance": {
+              "scopes": [
+                {
+                  "directory": ".",
+                  "sources": [
+                    {
+                      "byte_count": 29,
+                      "content_sha256": "2dfed39c4083d838e8b61398fb5d2a2bed9434ce682b07df4efc9506cf46eda8",
+                      "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:020000000000000055d70e0000000000",
+                      "path": "AGENTS.md",
+                      "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000055d70e0000000000"
+                    }
+                  ]
+                }
+              ],
+              "snapshot": "before_model_request"
+            }
+          }
+        ],
+        "snapshot": "worker_before_model_dispatch"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 170,
+      "kind": "worker.model.uncertain",
+      "data": {
+        "attempt_id": "50a08b8035a3c51634291ecca1289fa4",
+        "failure_code": "dispatch_error",
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9"
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 171,
+      "kind": "budget.model_call.interrupted",
+      "data": {
+        "attempt_id": "50a08b8035a3c51634291ecca1289fa4",
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9",
+        "reason": "dispatch_error",
+        "role": "leaf",
+        "root_run_id": "rpc-graph-remote-counted-approved",
+        "was_started": true
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 172,
+      "kind": "worker.context.interrupted",
+      "data": {
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9",
+        "members": 1,
+        "reason": "dispatch_error",
+        "replayed": false,
+        "steps": 1
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 173,
+      "kind": "worker.lease.retired",
+      "data": {
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9",
+        "reason": "dispatch_error",
+        "uncertain_model_dispatches": 0
+      }
+    },
+    {
+      "run_id": "bd8ce36506bd4a9257213650929e3554",
+      "seq": 174,
+      "kind": "run.failed",
+      "data": {
+        "generation": "3628b4e0c6a16c3dac054531e0ce7fa9",
+        "reason": "dispatch_error"
+      }
+    },
+    {
+      "run_id": "rpc-graph-remote-counted-approved",
+      "seq": 175,
+      "kind": "graph.child.settled",
+      "data": {
+        "checkpoint_revision": 4,
+        "child_run_id": "bd8ce36506bd4a9257213650929e3554",
+        "child_state": "failed",
+        "node_id": "remote-two"
+      }
+    }
+  ],
+  "missingCountedEffectFiles": [
+    "remote-one.txt",
+    "remote-two.txt"
+  ],
+  "originalNamespaceNeverReplayed": true,
+  "priorFullFailure": "Source929eb49a graph-MCP failure remains retained; current graph-MCP passes8.74s. This new failure is distinct.",
+  "diagnosticScope": "Read-only copied SQLite/WAL through xlang3 _sqlite3; original database and WAL byte hashes unchanged",
+  "deadlinesChanged": false,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "installed": false,
+  "goalComplete": false
+}

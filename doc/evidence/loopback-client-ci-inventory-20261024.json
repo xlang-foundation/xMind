@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-10-24T20:44:02.189Z",
+  "run": 40129759590,
+  "job": 120978762765,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40129759590",
+  "originalReport": {
+    "sourceRevision": "ffe04c279ef617c11c7cca2ed217789bbc9b118e",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 497,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 500,
+      "passed": 500,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": false
+  },
+  "originalJobLogSha256": "0f0690032995edcf529119e69fb467a1b0c7b762fee45b525b73bce767146178",
+  "correction": {
+    "expectedExtension": 500,
+    "expectedBrowser": 178,
+    "allOriginalTestCasesRetained": true,
+    "exactCountsAndNoSkipNoCancelChecksRetained": true,
+    "verifierSha256": "26dc8e4245a167be7bf9e23643498a1c304094bd19ba2d89352e8101ca03bf01"
+  },
+  "validation": "Existing official runner log proves500/500 and178/178 with unchanged source/assets. Expected count correction is separately awaiting the next normal push-triggered CI.",
+  "goalComplete": false
+}

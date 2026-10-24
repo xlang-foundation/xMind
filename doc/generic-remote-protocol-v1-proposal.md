@@ -7,13 +7,13 @@ and cached authentication observation are implemented. The registered
 Connections subobject exposes Authenticate and Authentication using ordinary
 xlang3 SDK values and methods; CLI and native HTTP adapters use that service.
 
-Actual hosted trusted-TLS authentication is verified through separate SDK and
-CLI clients, including wrong-credential refusal, one grant per client, stale
-retry without another negotiation, encrypted database reopen and unchanged
-Local selection. See [official hosted evidence](evidence/hosted-native-58e7eb63-sdk-cli-and-deadline-20261024.json).
-Positive native HTTP authentication remains unverified; its refusal/input and
-rendered Settings paths have separate acceptance. Authentication never enables
-remote command routing or creates workspace enrollment.
+Actual hosted trusted-TLS authentication is verified through separate SDK,
+CLI and native HTTP clients, including wrong-credential refusal, one grant per
+client, stale retry without another negotiation, encrypted database reopen and
+unchanged Local selection. See [official hosted SDK/CLI/HTTP evidence](evidence/hosted-native-264cadb4-trusted-sdk-cli-http.log)
+and [terminal hosted result](evidence/hosted-native-264cadb4-result-20261024.json).
+Rendered Settings refusal/input paths have separate acceptance. Authentication
+never enables remote command routing or creates workspace enrollment.
 
 This remains an OSS client/worker contract proposal for the unimplemented
 remote operations below. It makes no claim about any existing Nexus endpoint,
