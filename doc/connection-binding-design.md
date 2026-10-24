@@ -202,3 +202,20 @@ Diagnostic SDK CLI methods are connections permissions ID REV SESSION, permissio
 HTTP POST `/v1/connection-bindings/{binding}/sessions/{session}/permissions/{operation}/reply` uses the same strict request parser and native method, negotiated by `local_connection_permission_reply:1`. The compatibility reply route also uses the atomic backend. Shared clients verify binding/session/request and never fall back after negotiated refusal. Reusable grants reject a stale connection profile; decisions on originally admitted work retain their captured scope.
 
 Diagnostic CLI syntax is `connections permission-reply ID REV SESSION OPERATION JSON_OBJECT` after `xmind ipc --endpoint lrpc:PORT`. [Independent SDK/HTTP and rollback evidence](evidence/captured-permission-reply-20261024.json) also retains the unexplained earlier sidebar observation failure. It does not establish rendered editor acceptance or full native qualification of this source.
+
+## Next captured service: named agents (planned, not implemented)
+
+The remaining named-agent adapter should use `binding.Agents()` as an ordinary registered xlang3 subobject. This follows Cantor's `WorkerMode::WorkerLoop` in `D:/CantorAI/Cantor/src/Tasks/WorkerProcess.cpp`: the SDK imports the registered root, obtains a service object and invokes its methods. It requires no application-owned call envelope or value serializer. Existing native `RunExecutor`/`ExecutionPlatform` agent methods and embedded-xlang3 persistence remain authoritative.
+
+| Method | Native behavior and result |
+| --- | --- |
+| `List()` | Return `{binding, agents}` using the existing ordered public agent metadata. |
+| `Definition(id)` | Return `{binding, agent}` using the persisted definition, including instructions, tool allowlist and ordered permission rules. This does not grant access or effects. |
+| `Open(session_id)` | Return `{binding, session_id, revision, editable, selected}` using the existing session agent snapshot. |
+| `Select(session_id, request)` | Accept exactly `agent_id`, `agent_revision` and `expected_revision`; resolve metadata in the backend and call the existing native session-selection method. Clear selection with null ID and definition revision zero. |
+
+Reads retain their original captured backend generation and reject retirement. Selection also admits the captured connection-profile revision and backend owner, validates safe integer revisions, rejects changed/missing definitions, and keeps the native refusal for selecting a subagent as the primary agent. Clients never supply a definition snapshot as authority. Existing persistence owns idle/editability checks, the session revision and agent-switch events; the adapter must not duplicate those rules.
+
+The corresponding authenticated Local routes should be GET `/v1/connection-bindings/{binding}/agents`, GET `/agents/{id}`, and GET/POST `/sessions/{session}/agent`, advertised as `local_connection_agents:1`. SDK and HTTP must share parsing/projection. After capability negotiation the shared browser/extension client must validate returned binding/session identities and refuse downgrade or compatibility replay. Existing compatibility routes should delegate to the same native behavior.
+
+Acceptance must include a real imported definition selected and cleared by distinct SDK caller processes, persistence across restart, stale definition/session/profile refusal, retired-object refusal, native HTTP and origin-bound gateway routing, complete client inventories and an actual rendered named-agent selection. These are future checks, not acceptance claims. Authenticated remote enrollment, context/skills/inbox adapters, deeper scheduling/recovery and rendered VS Code coding remain separate requirements.
