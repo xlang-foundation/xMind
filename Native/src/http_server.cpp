@@ -12,6 +12,7 @@
 #include "agentflow/provider_yaml_config.hpp"
 #if defined(_WIN32)
 #include "agentflow/connection_profiles.hpp"
+#include "agentflow/remote_connection_authentication.hpp"
 #include "agentflow/connection_binding.hpp"
 
 #include "agentflow/mcp_configuration.hpp"
@@ -283,6 +284,7 @@ struct HttpServer::Impl {
     PersistenceService& persistence;
 #if defined(_WIN32)
     ConnectionProfiles connection_profiles;
+    RemoteConnectionAuthentication remote_authentication;
     std::unique_ptr<LocalConnectionBindings> owned_connection_bindings;
     LocalConnectionBindings* connection_binding_service=nullptr;
     struct ConnectionHandle {std::string actor;std::shared_ptr<CapturedLocalConnection> value;std::chrono::steady_clock::time_point touched;};
@@ -396,6 +398,7 @@ struct HttpServer::Impl {
     Impl(PersistenceService& store,std::string token,RunExecutor* execution,EditRecoveryReader* inspection,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* pty,McpResourceCatalog* resources,LocalConnectionBindings* bindings):persistence(store),
 #if defined(_WIN32)
         connection_profiles(store),
+        remote_authentication(store,connection_profiles),
         remote_agents(store),
 #endif
         executor(execution),graph_executor(graphs),owner_control(owner),mcp_oauth(oauth),terminals(pty),recovery(inspection),mcp_servers(std::move(configured)),mcp_resources(resources),process_profiles(std::move(profiles)),instructions(policy),authorization("Bearer "+token),provider_setup(setup),provider_profiles(profile_setup) {
@@ -427,7 +430,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|connection-bindings(/[0-9a-f]{32}(/(identity|workspace(/(membership|files|file|find))?|commands|models|providers(/(select|save|models|import))?|graphs|graph-runs(/[A-Za-z0-9_-]+(/(children|resume|human/[A-Za-z0-9_.-]+|invocations/[A-Za-z0-9_-]+/human/[A-Za-z0-9_.-]+))?)?|sessions(/[A-Za-z0-9_-]+(/permissions(/[A-Za-z0-9_-]+/reply)?|/permission-grants(/[A-Za-z0-9_-]+)?|/commands|/model|/messages|/runs/[A-Za-z0-9_-]+/(history|children/[A-Za-z0-9_-]+/history|operations(/[A-Za-z0-9_-]+(/decision)?)?))?)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/(select|capabilities|authentication|authenticate))?|connection-bindings(/[0-9a-f]{32}(/(identity|workspace(/(membership|files|file|find))?|commands|models|providers(/(select|save|models|import))?|graphs|graph-runs(/[A-Za-z0-9_-]+(/(children|resume|human/[A-Za-z0-9_.-]+|invocations/[A-Za-z0-9_-]+/human/[A-Za-z0-9_.-]+))?)?|sessions(/[A-Za-z0-9_-]+(/permissions(/[A-Za-z0-9_-]+/reply)?|/permission-grants(/[A-Za-z0-9_-]+)?|/commands|/model|/messages|/runs/[A-Za-z0-9_-]+/(history|children/[A-Za-z0-9_-]+/history|operations(/[A-Za-z0-9_-]+(/decision)?)?))?)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
             static const std::regex view_session_delete_route(R"(^/v1/sessions/[A-Za-z0-9_-]+$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(membership|skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
@@ -630,6 +633,33 @@ struct HttpServer::Impl {
                 throw std::invalid_argument("Invalid connection profile revision");
             return input["expected_revision"].get<std::int64_t>();
         };
+        const auto authentication_route=[this](auto handler){return guarded([handler=std::move(handler)](const Request& request,Response& response){
+            const auto fail=[&](const char* code,int status){reply(response,{{"detail","Connection authentication failed"},{"code",code}},status);};
+            try{handler(request,response);}
+            catch(const NotFound&){fail("not_found",404);}catch(const Conflict&){fail("conflict",409);}
+            catch(const PersistenceBusy&){fail("busy",503);}
+            catch(const RemoteNegotiationError& error){const auto reason=error.reason();fail(reason==RemoteNegotiationFailure::server_mismatch?"remote_server_mismatch":reason==RemoteNegotiationFailure::unsupported_version?"remote_protocol_unsupported":reason==RemoteNegotiationFailure::missing_capability?"remote_capability_missing":reason==RemoteNegotiationFailure::expired_grant?"remote_grant_expired":"remote_protocol_invalid",502);}
+            catch(const ProviderHttpError& error){fail(error.status==401?"remote_unauthenticated":error.status==403?"remote_forbidden":"remote_unavailable",502);}
+            catch(const TransportError&){fail("remote_unavailable",502);}
+            catch(const std::invalid_argument&){fail("invalid_request",400);}catch(const Json::exception&){fail("invalid_request",400);}
+            catch(...){fail("unavailable",503);}
+        });};
+        const auto authentication_revision=[](const Json& input,const char* field){if(!input.contains(field)||!input[field].is_number_integer()||input[field]<0||input[field]>9007199254740991LL)throw std::invalid_argument("Invalid authentication revision");return input[field].get<std::int64_t>();};
+        const auto authentication_request=[](const Request& request){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>65536)throw std::invalid_argument("Invalid authentication request");};
+        server.Get("/v1/connections/capabilities",authentication_route([authentication_request](const Request& request,Response& response){authentication_request(request);if(!request.body.empty())throw std::invalid_argument("Unexpected authentication body");reply(response,{{"remote_authentication",1},{"remote_authentication_status",1}});}));
+        server.Post("/v1/connections/authentication",authentication_route([this,authentication_request,authentication_revision](const Request& request,Response& response){
+            authentication_request(request);const auto input=body(request,{"id","expected_profile_revision"});const auto status=remote_authentication.inspect(string_field(input,"id",64),authentication_revision(input,"expected_profile_revision"));
+            reply(response,{{"connection_id",status.connection_id},{"profile_revision",status.profile_revision},{"credential_revision",status.credential_revision},{"state",status.state},{"server_id",status.server_id?Json(*status.server_id):Json(nullptr)},{"protocol_version",status.protocol_version?Json(*status.protocol_version):Json(nullptr)},{"expires_at",status.expires_at?Json(*status.expires_at):Json(nullptr)},{"command_routing",false}});
+        }));
+        server.Post("/v1/connections/authenticate",authentication_route([this,authentication_request,authentication_revision](const Request& request,Response& response){
+            authentication_request(request);auto input=body(request,{"id","expected_profile_revision","expected_credential_revision","credential","timeout_ms"});
+            if(!input.contains("credential")||!input["credential"].is_string())throw std::invalid_argument("Invalid remote credential");
+            auto& plaintext=input["credential"].get_ref<std::string&>();struct Wipe{std::string& text;~Wipe(){volatile char* data=text.data();for(std::size_t i=0;i<text.size();++i)data[i]=0;}} wipe{plaintext};
+            if(plaintext.empty()||plaintext.size()>8192)throw std::invalid_argument("Invalid remote credential");const SecretBytes credential({reinterpret_cast<const std::uint8_t*>(plaintext.data()),plaintext.size()});
+            const auto timeout=input.contains("timeout_ms")?authentication_revision(input,"timeout_ms"):15000;
+            const auto result=remote_authentication.authenticate(string_field(input,"id",64),authentication_revision(input,"expected_profile_revision"),authentication_revision(input,"expected_credential_revision"),credential,std::chrono::milliseconds(timeout));
+            reply(response,{{"connection_id",result.connection_id},{"server_id",result.server_id},{"profile_revision",result.profile_revision},{"credential_revision",result.credential_revision},{"protocol_version",result.protocol_version},{"expires_at",result.expires_at},{"command_routing",false}});
+        }));
         server.Get("/v1/connections",guarded([this,connection_metadata](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())
                 throw std::invalid_argument("Connection profiles do not accept query parameters");

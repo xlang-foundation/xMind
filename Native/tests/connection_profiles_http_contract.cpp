@@ -93,6 +93,34 @@ int main(int argc,char** argv){
             require(issued&&issued->status==200,"Authenticated local owner must be able to issue a scoped view credential");
             const auto view_credential=Json::parse(issued->body).at("credential").get<std::string>();
             const httplib::Headers view_auth{{"Authorization","View "+view_credential},{"X-XMind-View-Origin",view_origin}};
+            const auto capabilities=client.Get("/v1/connections/capabilities",view_auth);
+            require(capabilities&&capabilities->status==200&&Json::parse(capabilities->body).at("remote_authentication")==1,"Origin-bound views must discover remote authentication support");
+            require(client.Get("/v1/connections/capabilities")->status==401,"Authentication capabilities require local authorization");
+            const auto observation=Json{{"id","company"},{"expected_profile_revision",catalog.at("profiles")[1].at("revision")}};
+            for(const auto& headers:{auth,view_auth}){
+                const auto observed=client.Post("/v1/connections/authentication",headers,observation.dump(),"application/json");
+                require(observed&&observed->status==200,"Owner and origin-bound view must observe authentication state");const auto state=Json::parse(observed->body);
+                require(state.size()==8&&state.at("state")=="absent"&&state.at("credential_revision")==0&&state.at("server_id").is_null()&&state.at("command_routing")==false,"Empty authentication state must not claim an active remote binding");
+            }
+            const std::string private_input="synthetic-browser-credential-must-not-echo";
+            auto authentication=observation;authentication["expected_credential_revision"]=0;authentication["credential"]=private_input;
+            require(client.Post("/v1/connections/authenticate",authentication.dump(),"application/json")->status==401,"Credential submission requires local authorization");
+            for(const auto& field:{"timeout_ms","unexpected"}){
+                auto invalid=authentication;invalid[field]=field==std::string("timeout_ms")?Json(0):Json(private_input);
+                const auto refused=client.Post("/v1/connections/authenticate",view_auth,invalid.dump(),"application/json");
+                require(refused&&refused->status==400&&refused->body.find(private_input)==std::string::npos,"Malformed authentication must refuse without echoing credentials or dispatching HTTPS");
+            }
+            for(const auto& invalid_credential:{std::string{},private_input+"\nsecond",private_input+std::string(1,'\x1a'),std::string(8193,'x')}){
+                auto invalid=authentication;invalid["credential"]=invalid_credential;const auto refused=client.Post("/v1/connections/authenticate",view_auth,invalid.dump(),"application/json");
+                require(refused&&refused->status==400&&refused->body.find(private_input)==std::string::npos,"Invalid credential bytes must fail with fixed private errors");
+            }
+            const auto duplicate=client.Post("/v1/connections/authenticate",view_auth,"{\"credential\":\""+private_input+"\",\"credential\":\"duplicate\"}","application/json");
+            require(duplicate&&duplicate->status==400&&duplicate->body.find(private_input)==std::string::npos,"Duplicate credential fields must refuse privately");
+            auto stale_observation=observation;stale_observation["expected_profile_revision"]=9007199254740991LL;
+            require(client.Post("/v1/connections/authentication",view_auth,stale_observation.dump(),"application/json")->status==409,"Stale observation must refuse without revealing another revision");
+            require(client.Post("/v1/connections/authentication?credential="+private_input,view_auth,observation.dump(),"application/json")->status==400,"Authentication credentials and options must never be accepted in URLs");
+            const httplib::Headers foreign_auth{{"Authorization","View "+view_credential},{"X-XMind-View-Origin","http://127.0.0.1:60421"}};
+            require(client.Post("/v1/connections/authenticate",foreign_auth,authentication.dump(),"application/json")->status==401,"A different origin cannot authenticate a remote profile");
             const auto view_catalog=client.Get("/v1/connections",view_auth);
             require(view_catalog&&view_catalog->status==200&&Json::parse(view_catalog->body).at("revision")==2,
                 "A same-machine view credential must read the connection catalog without the owner token");
@@ -184,3 +212,5 @@ int main(int argc,char** argv){
         return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }
+
+

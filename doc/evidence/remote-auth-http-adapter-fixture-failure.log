@@ -1,0 +1,31 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+      Start   4: native_remote_negotiation_contract
+ 1/10 Test   #4: native_remote_negotiation_contract ....................   Passed    0.01 sec
+      Start   5: native_remote_connection_client_contract
+ 2/10 Test   #5: native_remote_connection_client_contract ..............   Passed    0.09 sec
+      Start   6: native_remote_connection_credentials_contract
+ 3/10 Test   #6: native_remote_connection_credentials_contract .........   Passed    0.14 sec
+      Start   7: native_remote_connection_authentication_contract
+ 4/10 Test   #7: native_remote_connection_authentication_contract ......   Passed    0.12 sec
+      Start  32: native_xmind_ipc_lifetime_contract
+ 5/10 Test  #32: native_xmind_ipc_lifetime_contract ....................   Passed    2.12 sec
+      Start  33: native_xmind_ipc_api_contract
+ 6/10 Test  #33: native_xmind_ipc_api_contract .........................   Passed    5.70 sec
+      Start  76: native_remote_authentication_sdk_untrusted_contract
+ 7/10 Test  #76: native_remote_authentication_sdk_untrusted_contract ...   Passed    1.06 sec
+      Start  77: native_mcp_oauth_trusted_peer_contract
+ 8/10 Test  #77: native_mcp_oauth_trusted_peer_contract ................   Passed    0.28 sec
+      Start 170: native_connection_profiles_contract
+ 9/10 Test #170: native_connection_profiles_contract ...................   Passed    0.19 sec
+      Start 171: native_connection_profiles_http_contract
+10/10 Test #171: native_connection_profiles_http_contract ..............***Failed    0.30 sec
+[json.exception.type_error.304] cannot use at() with number
+
+
+90% tests passed, 1 tests failed out of 10
+
+Total Test time (real) =  10.03 sec
+
+The following tests FAILED:
+	171 - native_connection_profiles_http_contract (Failed)
+Errors while running CTest

@@ -1,0 +1,111 @@
+{
+  "scope": "Native HTTP authentication adapter; no rendered UI or positive HTTP TLS claim",
+  "passed": {
+    "recordedAt": "2026-10-24T17:13:33.881Z",
+    "sourceParent": "41682d43dbc7d9759359de437106a8a9fa20041f",
+    "sourcePatchSha256": "6342d1e425c2d779fd3514f0f68a3fcc513f64edc2aa8f60aa5bc6d95400e838",
+    "build": {
+      "pid": 36416,
+      "launchedAt": "2026-10-24T17:12:15.216Z",
+      "completedAt": "2026-10-24T17:13:17.597Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "88d7aac017262ee6884880f09b7d970d604879851f0a080656fea7862c72487c"
+    },
+    "test": {
+      "pid": 6908,
+      "launchedAt": "2026-10-24T17:13:20.248Z",
+      "completedAt": "2026-10-24T17:13:31.211Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e69fbec3d266102cb08a0c2bfde370041fcf66ab19ce50a0d7ffd5aacbcfca6d"
+    },
+    "total": 10,
+    "failed": 0,
+    "passed": 10,
+    "seconds": 10.92,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "cf441f05018b543749175a7b7727cd8fca5845116ed7800f01a1a4efbe41dabf",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "priorFixtureFailure": {
+    "recordedAt": "2026-10-24T17:12:02.822Z",
+    "sourceParent": "41682d43dbc7d9759359de437106a8a9fa20041f",
+    "sourcePatchSha256": "91231022d56e8a796b2477654d02a3ad48c3a252b05d79d87f3bdf2142431c5d",
+    "build": {
+      "pid": 28464,
+      "launchedAt": "2026-10-24T17:10:44.255Z",
+      "completedAt": "2026-10-24T17:11:47.290Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "88d7aac017262ee6884880f09b7d970d604879851f0a080656fea7862c72487c"
+    },
+    "test": {
+      "pid": 37932,
+      "launchedAt": "2026-10-24T17:11:49.952Z",
+      "completedAt": "2026-10-24T17:12:00.049Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "cc4e0c7e78b695e7b3a8b6a8be95cba0ab7eca92e461538e22e39d3bd4a640ff"
+    },
+    "total": 10,
+    "failed": 1,
+    "passed": 9,
+    "seconds": 10.03,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "cf441f05018b543749175a7b7727cd8fca5845116ed7800f01a1a4efbe41dabf",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "priorFixtureCompileFailure": {
+    "pid": 12516,
+    "launchedAt": "2026-10-24T17:09:05.707Z",
+    "completedAt": "2026-10-24T17:10:28.478Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "a53a662f08cf91f4f7fae042e503de1a9ede8ecd9b1cb703e1d23c39e5346244"
+  },
+  "fixtureCorrections": [
+    "Rename duplicate stale variable",
+    "Read current profile catalog rather than a reference invalidated by catalog replacement"
+  ],
+  "productionUnchangedBetweenLastTwoGates": true,
+  "endpoints": [
+    "GET /v1/connections/capabilities",
+    "POST /v1/connections/authentication",
+    "POST /v1/connections/authenticate"
+  ],
+  "coverage": [
+    "Owner and origin-bound view authorization",
+    "Foreign origin and missing authorization refuse",
+    "Absent eight-field status, stale revision conflict and routing false",
+    "Empty, multiline, Ctrl-Z, oversized, duplicate and unknown credential fields refuse with fixed private errors",
+    "Existing SDK/CLI TLS refusal and native authentication regression"
+  ],
+  "limitations": [
+    "Positive HTTP native trusted TLS has not been exercised",
+    "Stored/expired/stale-profile HTTP observations need separate acceptance",
+    "Rendered browser controls remain unimplemented",
+    "Focused results do not qualify a new installation"
+  ],
+  "installedVersionUnchanged": "0.1.72"
+}
