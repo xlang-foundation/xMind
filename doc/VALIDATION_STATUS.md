@@ -1,3 +1,7 @@
+## Editor watcher controls narrow the refresh question — 2026-10-24
+
+An official Code Server with an empty extension profile and fresh workspace refreshes a clean text buffer without reload by the next observation. With auto-save explicitly off, a dirty buffer retains its exact unsaved text while an external disk replacement remains separate. The same recursive parcel regex error is logged, so that error alone is not a causal explanation for the earlier xMind completion screenshot. Standalone parcel controls deliver events for relative globs and reproduce the error for a Windows absolute glob. No forced refresh or dirty-buffer overwrite is added. This control does not prove xMind event-to-editor refresh timing; that remains open. All hidden test UI/server owners are closed/identity-retired; no model calls or user settings/install changes. [Control receipt](evidence/editor-watcher-control-20261024.json).
+
 ## Full179: graph worker passes; HTTP resource failure retained — 2026-10-24
 
 Source1035d900/Native d2121db4 completes178/179 in783.05s with all2838 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/142 binary hashes and file sets unchanged. The previously timing-out graph-worker contract passes11.88s, alongside RPC56.66s, ledger43.11s, nested31.91s, deep7.70s and channel2.63s. Only native_agent_http_contract fails: Windows connect ENOBUFS while observing a queued attachment claim on localhost. Exact cause remains unproven; the later socket snapshot is not causal proof. No network settings or user owners were changed.

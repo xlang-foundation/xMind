@@ -1,0 +1,199 @@
+{
+  "recordedAt": "2026-10-24T21:34:55.286Z",
+  "scope": "Official Code Server 1.143.1, fresh empty extension profile, separate disposable workspace, hidden browser; no xMind task or backend execution",
+  "cleanBuffer": {
+    "observedAt": "2026-10-24T21:32:41.419Z",
+    "before": "Clean before external edit",
+    "text": "Clean buffer refreshed without reload",
+    "title": "clean.txt - editor-watcher-control - Visual Studio Code",
+    "externalWriteAt": "2026-10-24T21:32:37.907Z",
+    "observationStartedSecondsAfterWrite": 3.512,
+    "reloadedAfterExternalWrite": false
+  },
+  "dirtyBuffer": {
+    "observedAt": "2026-10-24T21:32:12.668Z",
+    "text": "Dirty buffer control preserve exactly",
+    "title": "● watcher.txt - editor-watcher-control - Visual Studio Code",
+    "diskContents": "External disk version must remain separate\n",
+    "autoSave": "off in isolated Machine settings only",
+    "unsavedEditorAndExternalDiskVersionsRemainSeparate": true
+  },
+  "recursiveWatcherErrors": [
+    "2026-10-24 14:30:42.248 [error] [File Watcher ('parcel')] Unexpected error: regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape. (EUNKNOWN) (path: d:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\editor-watcher-control)",
+    "2026-10-24 14:30:42.250 [error] [File Watcher (universal)] regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape.",
+    "2026-10-24 14:31:58.388 [error] [File Watcher ('parcel')] Unexpected error: regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape. (EUNKNOWN) (path: d:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\editor-watcher-control)",
+    "2026-10-24 14:31:58.389 [error] [File Watcher (universal)] regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape.",
+    "2026-10-24 14:34:23.956 [error] [File Watcher ('parcel')] Unexpected error: regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape. (EUNKNOWN) (path: d:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\editor-watcher-control)",
+    "2026-10-24 14:34:23.957 [error] [File Watcher (universal)] regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape."
+  ],
+  "standaloneParcelControl": {
+    "recordedAt": "2026-10-24T21:28:35.335Z",
+    "node": "v22.19.0",
+    "serverWatcherVersion": "2.5.6",
+    "root": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/watcher-diagnostic",
+    "results": [
+      {
+        "name": "no-ignore",
+        "options": {},
+        "subscribed": true,
+        "events": [
+          [
+            {
+              "path": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\no-ignore.txt",
+              "type": "create"
+            }
+          ],
+          [
+            {
+              "path": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\no-ignore.txt",
+              "type": "update"
+            }
+          ]
+        ]
+      },
+      {
+        "name": "default-git",
+        "options": {
+          "ignore": [
+            "**/.git/objects/**"
+          ]
+        },
+        "subscribed": true,
+        "events": [
+          [
+            {
+              "path": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\default-git.txt",
+              "type": "create"
+            }
+          ],
+          [
+            {
+              "path": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\default-git.txt",
+              "type": "update"
+            }
+          ]
+        ]
+      },
+      {
+        "name": "default-node-modules",
+        "options": {
+          "ignore": [
+            "**/node_modules/*/**"
+          ]
+        },
+        "subscribed": true,
+        "events": [
+          [
+            {
+              "path": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\default-node-modules.txt",
+              "type": "create"
+            }
+          ],
+          [
+            {
+              "path": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\default-node-modules.txt",
+              "type": "update"
+            }
+          ]
+        ]
+      },
+      {
+        "name": "absolute-glob",
+        "options": {
+          "ignore": [
+            "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\watcher-diagnostic\\**\\.git\\objects\\**"
+          ]
+        },
+        "subscribed": false,
+        "error": "Error: regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape."
+      }
+    ],
+    "modelCalls": 0,
+    "userFilesChanged": false
+  },
+  "conclusion": "Recursive regex errors do not by themselves prevent clean-file refresh. Controls pass despite the same error. Earlier xMind completion refresh timing remains unproven; no causal fix claimed and no forced dirty-buffer reload introduced.",
+  "limitations": "Empty extension control does not prove xMind event-to-editor refresh or its timing. Auto-save was initially on; dirty-buffer proof was repeated only after disabling it in the isolated profile.",
+  "retirement": {
+    "retiredAt": "2026-10-24T21:34:25.2541855Z",
+    "verifiedIdentities": [
+      {
+        "ProcessId": 34228,
+        "ParentProcessId": 26572,
+        "CreationDate": "2026-10-24T14:30:13.387319-07:00",
+        "ExecutablePath": "C:\\Users\\shaw9\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code-tunnel.exe"
+      },
+      {
+        "ProcessId": 13760,
+        "ParentProcessId": 34228,
+        "CreationDate": "2026-10-24T14:30:13.402221-07:00",
+        "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe"
+      },
+      {
+        "ProcessId": 33868,
+        "ParentProcessId": 34228,
+        "CreationDate": "2026-10-24T14:30:30.604034-07:00",
+        "ExecutablePath": "C:\\WINDOWS\\system32\\cmd.exe"
+      },
+      {
+        "ProcessId": 12372,
+        "ParentProcessId": 33868,
+        "CreationDate": "2026-10-24T14:30:30.616193-07:00",
+        "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe"
+      },
+      {
+        "ProcessId": 29764,
+        "ParentProcessId": 33868,
+        "CreationDate": "2026-10-24T14:30:32.258478-07:00",
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe"
+      },
+      {
+        "ProcessId": 18344,
+        "ParentProcessId": 29764,
+        "CreationDate": "2026-10-24T14:30:41.919197-07:00",
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe"
+      },
+      {
+        "ProcessId": 41392,
+        "ParentProcessId": 29764,
+        "CreationDate": "2026-10-24T14:31:57.24067-07:00",
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe"
+      },
+      {
+        "ProcessId": 25184,
+        "ParentProcessId": 18344,
+        "CreationDate": "2026-10-24T14:30:43.175565-07:00",
+        "ExecutablePath": "d:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node_modules\\@github\\copilot-sdk-win32-x64\\prebuilds\\win32-x64\\copilot-runtime.exe"
+      },
+      {
+        "ProcessId": 27844,
+        "ParentProcessId": 25184,
+        "CreationDate": "2026-10-24T14:30:43.181779-07:00",
+        "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe"
+      }
+    ],
+    "retired": [
+      27844,
+      25184,
+      41392,
+      18344,
+      29764,
+      13760,
+      34228
+    ],
+    "noUserOwnersRetired": true
+  },
+  "harnessNotes": [
+    "Standalone invalid-glob subscription left a native watcher handle after producing its result; completed diagnostic Node17168 was identity-checked and explicitly retired.",
+    "First read-only process traversal did not terminate on an empty frontier; only its exact own shell33608 was retired after identifying the loop, then a bounded visited traversal collected server identities.",
+    "Launcher stdin was already closed; exact server tree was retired externally after the browser closed. Launcher87998 ended1 with unsettled-await warning; this is not a product test failure."
+  ],
+  "modelCalls": 0,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "visibleWindowsOpened": false,
+  "userSettingsChanged": false,
+  "installed": false,
+  "goalComplete": false,
+  "clean-bufferScreenshotSha256": "a49760122e077256c2ef9de93091c48b4d821a6d7bb4ed7fb77450bf4ec1df9f",
+  "dirty-bufferScreenshotSha256": "da63c50158af6c4dcb09613c8824263ba44520a870042a60962e1509a68aab6e"
+}
