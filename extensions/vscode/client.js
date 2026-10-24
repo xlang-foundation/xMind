@@ -79,6 +79,7 @@ class BackendClient {
   #connectionRunStreamSupported=false;
   #connectionModelsSupported=false;
   #connectionCommandsSupported=false;
+  #connectionWorkspaceSupported=false;
   #connectionModelSelectionSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
@@ -133,6 +134,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_workspace")){if(health.local_connection_workspace!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured workspace protocol.");this.#connectionWorkspaceSupported=true;}
+    else if(this.#connectionWorkspaceSupported)throw new Error("The backend workspace protocol changed. Reconnect before reading workspace state.");
     if(health&&Object.hasOwn(health,"local_connection_commands")){if(health.local_connection_commands!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured commands protocol.");this.#connectionCommandsSupported=true;}
     else if(this.#connectionCommandsSupported)throw new Error("The backend command protocol changed. Reconnect before invoking commands.");
     if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
@@ -179,8 +182,11 @@ class BackendClient {
     if(this.#connectionClosing)return this.#connectionClosing;this.#connectionClosed=true;
     this.#connectionClosing=(async()=>{if(!this.#connectionCapture)return;let capture;try{capture=await this.#connectionCapture;}catch{return;}if(this.baseUrl!==capture.origin)return;await this.request('/v1/connection-bindings/'+capture.id,undefined,15000,'DELETE');})();return this.#connectionClosing;
   }
-  async workspace() { return validateWorkspace(await this.request('/v1/workspace')); }
-  async workspaceMembership(workspace) { const identity=workspace||await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspace/membership'),identity); }
+  async #workspaceRead(membership=false) {
+    if(!this.#connectionWorkspaceSupported)return this.request('/v1/workspace'+(membership?'/membership':''));const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured workspace connection changed.');const field=membership?'membership':'workspace',value=await this.request('/v1/connection-bindings/'+capture.id+'/workspace'+(membership?'/membership':''));exactFields(value,['binding',field]);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Workspace state belongs to another connection');return value[field];
+  }
+  async workspace() { return validateWorkspace(await this.#workspaceRead()); }
+  async workspaceMembership(workspace) { const identity=workspace||await this.workspace();return validateWorkspaceMembership(await this.#workspaceRead(true),identity); }
   async addWorkspaceFolder(root) {
     if(typeof root!=='string'||!root||root.length>32760||/[\x00-\x1f]/.test(root)||!(/^[A-Za-z]:[\\/]/.test(root)||/^\\\\[^\\/]+\\[^\\/]+(?:\\|$)/.test(root)))throw new Error('Choose an absolute local or UNC workspace folder.');
     const workspace=await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspaces/add',{workspace_id:workspace.workspace_id,root},30000),workspace);

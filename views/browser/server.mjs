@@ -8,7 +8,7 @@ function apiPath(path){return /^\/v1\/sessions\/[A-Za-z0-9_-]+\/terminals$/.test
 export function allowedApiRoute(path,method){
  if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/commands$/.test(path))return method==='POST';
  if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/model$/.test(path))return method==='GET'||method==='POST';
- if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/(?:commands|models|graphs|graph-runs\/[A-Za-z0-9_-]+(?:\/children)?)$/.test(path))return method==='GET';
+ if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/(?:workspace(?:\/membership)?|commands|models|graphs|graph-runs\/[A-Za-z0-9_-]+(?:\/children)?)$/.test(path))return method==='GET';
  if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/graph-runs(?:\/[A-Za-z0-9_-]+\/(?:resume|human\/[A-Za-z0-9_.-]+|invocations\/[A-Za-z0-9_-]+\/human\/[A-Za-z0-9_.-]+))?$/.test(path))return method==='POST';
  if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/runs\/[A-Za-z0-9_-]+\/(?:history|children\/[A-Za-z0-9_-]+\/history)$/.test(path))return method==='POST';
  if(/^\/v1\/connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/messages$/.test(path))return method==='POST';

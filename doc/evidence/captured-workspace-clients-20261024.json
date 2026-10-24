@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured workspace identity and membership through registered xlang3 Workspace subobject, native HTTP and shared clients",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T07:20:05.090Z",
+    "sourceParent": "ff961f2f0de26b940fe106ac6d35950c7e218a02",
+    "sourcePatchSha256": "c9d7c8dbd7dcf5eee91c85c655c44befcf09125a15fc635f14e202c25f583ab5",
+    "build": {
+      "pid": 23436,
+      "launchedAt": "2026-10-24T07:17:31.986Z",
+      "completedAt": "2026-10-24T07:18:28.506Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b565914ec2036356ed14d745ddb6fa956dd19451bc6ec09db2df723eeb5261aa"
+    },
+    "test": {
+      "pid": 8756,
+      "launchedAt": "2026-10-24T07:18:31.463Z",
+      "completedAt": "2026-10-24T07:20:02.089Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "784ecf6f5581e312ac4ff1a35ac33a8b11904ab743272cd916e048e955d16618"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 90.58,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "2eff33e10d7d8521ddd062029c5da6770fb952a8fae1b4b41fbadc0ce2f0c0a6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "ff961f2f0de26b940fe106ac6d35950c7e218a02",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 480,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 480,
+      "passed": 480,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "initialFailure": {
+    "recordedAt": "2026-10-24T07:17:14.279Z",
+    "sourceParent": "ff961f2f0de26b940fe106ac6d35950c7e218a02",
+    "sourcePatchSha256": "948656cf3c308db4e4397538c897a904d6b470749ad34a24b64953115116aac2",
+    "build": {
+      "pid": 39024,
+      "launchedAt": "2026-10-24T07:13:37.473Z",
+      "completedAt": "2026-10-24T07:15:38.322Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "290b62684ffe86a4c43fa189022863142167a1cd810fb7b9e681a1a28a50a069"
+    },
+    "test": {
+      "pid": 33156,
+      "launchedAt": "2026-10-24T07:15:41.401Z",
+      "completedAt": "2026-10-24T07:17:11.395Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "c3853a83b8a1a99de3e0f42476e74614cb50bc58e7d32f0d10a6aacdcc7f85f7"
+    },
+    "total": 7,
+    "failed": 1,
+    "passed": 6,
+    "seconds": 89.95,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "2eff33e10d7d8521ddd062029c5da6770fb952a8fae1b4b41fbadc0ce2f0c0a6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "failureCause": "Lifetime test incorrectly assumed RecordingGraphExecutor was unconfigured. It explicitly supplies a fixture workspace. Final test compares that identity and separately tests the no-executor unconfigured case.",
+  "verified": [
+    "Separate xmind.exe SDK Info/Membership agree with legacy HTTP metadata",
+    "Captured membership revalidates native workspace authority and snapshot identity",
+    "Actual native managed-view and browser gateway read captured workspace/membership successfully",
+    "Configured and no-executor workspace cases remain distinct; retained workspace objects refuse after backend retirement",
+    "Shared clients reject another binding, protocol downgrade and closure without fallback",
+    "Captured and compatibility routes share native metadata encoders"
+  ],
+  "hostedObservation": {
+    "recordedAt": "2026-10-24T07:14:44.757Z",
+    "runs": [
+      {
+        "id": 40073167120,
+        "name": "Native Windows contracts",
+        "sha": "ff961f2f0de26b940fe106ac6d35950c7e218a02",
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40073167120"
+      },
+      {
+        "id": 40073010107,
+        "name": "Native Windows contracts",
+        "sha": "4adf7841c67e39bb5643a3b2cdb41af485c2fdcb",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40073010107"
+      },
+      {
+        "id": 40073009887,
+        "name": "Browser and VS Code contracts",
+        "sha": "4adf7841c67e39bb5643a3b2cdb41af485c2fdcb",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40073009887"
+      },
+      {
+        "id": 40072380061,
+        "name": "Native Windows contracts",
+        "sha": "d3235ce1e5f2d7ffee4390762e63f5bcb28037a8",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40072380061"
+      },
+      {
+        "id": 40072216791,
+        "name": "Browser and VS Code contracts",
+        "sha": "9136b715ae1598670949840eb544dae57dbd0d76",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40072216791"
+      },
+      {
+        "id": 40072216767,
+        "name": "Native Windows contracts",
+        "sha": "9136b715ae1598670949840eb544dae57dbd0d76",
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40072216767"
+      },
+      {
+        "id": 40071692446,
+        "name": "Browser and VS Code contracts",
+        "sha": "7b8d73c59386632cb7b64f7002aa3b870f54d303",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40071692446"
+      },
+      {
+        "id": 40071692402,
+        "name": "Native Windows contracts",
+        "sha": "7b8d73c59386632cb7b64f7002aa3b870f54d303",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40071692402"
+      }
+    ]
+  },
+  "limits": [
+    "Focused native7 only; no new full173 qualification or installation",
+    "File/browse/find reads, provider configuration mutation and authenticated remote/enrollment remain separate work",
+    "Rendered editor and model/command selection acceptance remain separate",
+    "No paid inference or CPython; installed65 unchanged"
+  ]
+}

@@ -1,3 +1,9 @@
+## Captured workspace metadata/membership pass native7 and client480/165 — 2026-10-24
+
+Workspace.Info/Membership are registered xlang3 subobject methods. Captured HTTP and shared browser/extension reads retain immutable backend identity; membership revalidates workspace authority and snapshot identity. Compatibility metadata routes share the same native encoders. Separate xmind.exe SDK reads agree with HTTP and the actual native managed-view/browser gateway reads both captured routes. Lifetime tests verify configured/no-executor cases and retired-object refusal.
+
+Native7/7 passes in90.58s; complete client480/165 passes with71 sources/18 assets unchanged. The first gate was6/7 because its new assertion misread the recording fixture; that failure is retained. [Receipt](evidence/captured-workspace-clients-20261024.json). File/browse/find and other general reads, provider configuration mutation, remote/enrollment, deeper recovery and rendered VS Code remain open. Installed65 remains unchanged.
+
 ## Ordinary SDK command completion and duplicate refusal pass focused3 — 2026-10-24
 
 A distinct xmind.exe client invokes Commands.Invoke without a graph. The native backend expands the actual Markdown template, preserves literal $2 arguments, makes exactly one controlled model request and persists the user/assistant pair. Reusing the completed command run ID refuses and makes no second model request.

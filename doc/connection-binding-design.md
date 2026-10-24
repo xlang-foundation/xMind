@@ -5,7 +5,7 @@ extension prompt admission are implemented. Authenticated remote functionality
 and the remaining client operations are proposed.
 The implemented catalog API is documented in connection-profiles.md. This design
 extends that public contract; it does not include private Nexus implementation.
-The installed 0.1.62 checkpoint remains separate from source validation. Current
+The installed 0.1.65 checkpoint remains separate from source validation. Current
 evidence and its limitations are recorded in VALIDATION_STATUS.md.
 
 ## Public native objects
@@ -149,3 +149,9 @@ Positive separate-process `Models.Open/Select` is now verified: distinct xmind.e
 CLI methods are `connections commands ID REV` and `connections command-invoke ID REV SESSION JSON_OBJECT` after `xmind ipc --endpoint lrpc:PORT`. HTTP uses GET `/v1/connection-bindings/{binding}/commands` and POST `/v1/connection-bindings/{binding}/sessions/{session}/commands`, negotiated by `local_connection_commands:1`. Clients retain immutable connection identity; a refused admission must never fall back or replay through another profile. [Exact acceptance scope](evidence/captured-commands-clients-20261024.json) includes positive SDK/HTTP graph-backed reads; ordinary model-backed and rendered command acceptance remain separate.
 
 Ordinary non-graph Commands.Invoke is now verified through a separate xmind.exe SDK client: one controlled model request, persisted user/assistant pair, literal arguments and duplicate-ID refusal without repeated inference. [Focused evidence](evidence/captured-ordinary-command-sdk-20261024.json). Rendered browser/editor command acceptance remains separate.
+
+## Captured workspace metadata
+
+`binding.Workspace().Info()` returns `{binding, workspace}` with configured/root/workspace_id/authority_id. `Membership()` returns `{binding, membership}` with the existing revision/folder snapshot. Reads retain their original backend generation, revalidate workspace identity and reject retirement. Info reports an unconfigured workspace when there is no executor; Membership requires an opened native root.
+
+CLI methods are `connections workspace-info ID REV` and `connections workspace-membership ID REV` after `xmind ipc --endpoint lrpc:PORT`. HTTP GET routes are `/v1/connection-bindings/{binding}/workspace` and `/workspace/membership`, negotiated by `local_connection_workspace:1`. Existing Local compatibility routes share their encoders. [SDK, gateway and shared-client evidence](evidence/captured-workspace-clients-20261024.json) does not establish file browsing or remote routing.

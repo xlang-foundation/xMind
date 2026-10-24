@@ -27,6 +27,8 @@ struct ConnectionCommandRequest {std::string id,session,command,arguments,model,
 struct BoundConnectionCommands {ConnectionBindingIdentity binding;ConnectionCommandCatalogue catalogue;};
 ConnectionCommandCatalogue read_local_connection_commands(RunExecutor&);
 Run submit_local_connection_command(PersistenceService&,RunExecutor&,GraphExecution*,ConnectionCommandRequest);
+struct BoundConnectionWorkspace {ConnectionBindingIdentity binding;ExecutionWorkspaceMetadata workspace;};
+struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMembershipSnapshot membership;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
@@ -74,6 +76,8 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionWorkspace workspace()const;
+    BoundConnectionMembership membership()const;
     BoundConnectionCommands commands()const;
     BoundConnectionRun invoke_command(ConnectionCommandRequest request)const;
     BoundConnectionModel session_model(const std::string& session)const;
