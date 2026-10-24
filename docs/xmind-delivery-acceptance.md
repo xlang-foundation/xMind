@@ -1,11 +1,11 @@
 # xMind delivery acceptance audit
 
 This audit preserves the full recovered delivery objective; completion remains
-unproven. Installed0.1.66 packages source2d98bdde, which passed the complete173
+unproven. Installed0.1.67 packages sourceeafe1b2e, which passed the complete173
 native inventory. Its2442 installed files and2398 runtime files match the
 qualified package; five protected user-state roots are unchanged and the exact65
-backup is retained. [Installed receipt](../doc/evidence/installed-0.1.66-2d98bdde-20261024.json)
-and [packaged browser/CLI/handoff evidence](../doc/evidence/candidate-0.1.66-qualified-coding-20261024.json)
+backup is retained. [Installed receipt](../doc/evidence/installed-0.1.67-eafe1b2e-20261024.json)
+and [packaged browser/CLI/handoff evidence](../doc/evidence/candidate-0.1.67-qualified-coding-20261024.json)
 have separate scopes. Preserve every completed task; never replay it.
 
 Current sourceeafe1b2e includes captured provider List/Select/Save/Discover/Import
@@ -14,7 +14,7 @@ and atomic captured permission Pending/Grants/Reply/Revoke.
 and [positive separate-process SDK discovery](../doc/evidence/captured-provider-sdk-discovery-20261024.json)
 pass. [Atomic permissions and client485/168](../doc/evidence/captured-permission-reply-20261024.json)
 pass separately. The complete173 native gate for this source passes173/173 in817.90s, with all
-frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-eafe1b2e-full-20261024.json)). Installed66 is unchanged by this native qualification.
+frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-eafe1b2e-full-20261024.json)). Installed67 retains this qualified runtime; the first-send permission-refresh correction is later development work.
 Rendered VS Code coding, remaining general captured APIs, authenticated
 remote/enrollment and deeper scheduling/recovery remain open. Private Nexus
 server/database/scheduler implementation remains excluded.

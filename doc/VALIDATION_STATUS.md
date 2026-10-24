@@ -1,3 +1,9 @@
+## Installed0.1.67 verified with protected state unchanged — 2026-10-24
+
+Installed67 matches the qualified2442-file installation and2398-file native runtime. Other extension registry entries and all five protected roots retain exact file sets/hashes. The exact66 backup is retained. Fresh managed installed smoke session55a89cad4783844c55b74fccd45ea580/root8866649c22b59f0793866858907107f4 completes native read/history with zero model calls; its owned backend exits. NEVER replay. [Installation receipt](evidence/installed-0.1.67-eafe1b2e-20261024.json).
+
+A further rendered permission check found that first browser send does not start permission-catalog refresh; reload of the same pending task restores reusable approval. Sessiondac128fea38846f8b4f85c549895dde2/root32d82da2df694147b254dc380528ae29 subsequently completes one actual read, saved grant and revocation at revision2 with no resubmission. NEVER replay. This limitation remains in installed67; its source correction and acceptance are separate work. Rendered VS Code and the full remaining objective remain open.
+
 ## Candidate0.1.67 browser, CLI and managed handoff pass — 2026-10-24
 
 The byte-verified2443-entry VSIX contains2398 runtime files and client485/168. Fresh CLI session41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b completes absolute-value read/edit/Node4 with two approvals, four controlled model calls and eight messages. Actual hidden-browser session157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b completes median read/edit/Node4 with both rendered approvals, automatic completion, actual file preview and reload of the same eight messages. The temporary tab is closed and its exact owned backend exited. NEVER replay these tasks.

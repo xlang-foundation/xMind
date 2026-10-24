@@ -1,0 +1,83 @@
+{
+  "recordedAt": "2026-10-24T10:22:38.492Z",
+  "passed": true,
+  "installedVersion": "0.1.67",
+  "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.67",
+  "vsixSha256": "f1f729adcdf6d7f6131ca806893f34c69a673aee6b26c9c19779dcef2fbe1a80",
+  "installedPayloadFilesVerified": 2440,
+  "completeInstalledFileSetVerified": 2442,
+  "installerVsixManifestMatches": true,
+  "packageJsonMatchesExceptInstallerMetadata": true,
+  "runtimeFilesVerified": 2398,
+  "runtimeManifestSha256": "21a04a738557a041ce4b9e1d614dc3e47f833ca725c28a3386d0b0e3ed835dfa",
+  "nativeSha256": "11678c9a4e23c166ce946a07857b17880551b6841fc4a412cd3af3f90ffd05c0",
+  "otherExtensionRegistryEntriesUnchanged": true,
+  "preservedRoots": [
+    "C:/Users/shaw9/.xMind",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+    "D:/CantorAI2026/xMind/.config"
+  ],
+  "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+  "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+  "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+  "exactOldInstallationBackup": 2442,
+  "visibleWindowRequested": false,
+  "installedNativeExecuted": false,
+  "userProfileBackendStarted": false,
+  "paidInference": false,
+  "renderedVSCode": false,
+  "nativeQualification": "native-delivery-eafe1b2e-full-20261024.json",
+  "codingQualification": "candidate-0.1.67-qualified-coding-20261024.json",
+  "smoke": {
+    "passed": true,
+    "installedNativeSha256": "11678c9a4e23c166ce946a07857b17880551b6841fc4a412cd3af3f90ffd05c0",
+    "managedDiscoveryAndReuse": true,
+    "sessionId": "55a89cad4783844c55b74fccd45ea580",
+    "completedRoot": "8866649c22b59f0793866858907107f4",
+    "history": [
+      {
+        "data": {
+          "content": "Read the installed fixture marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph installed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.67 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e37a0d0000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e37a0d0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "installed.read",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Observed installed 0.1.67 native read.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e37a0d0000000000",
+                "path": "installed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e37a0d0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "observedOutput": "Observed installed 0.1.67 native read.\n",
+    "modelCalls": 0,
+    "userProfileRootUsed": false,
+    "ownedBackendIdentityVerifiedAndExitObserved": true,
+    "visibleWindowOpened": false,
+    "renderedVSCode": false
+  },
+  "knownRenderedLimitation": "First browser send does not start session permission refresh until reload; development-source correction is separate.",
+  "wholeGoalComplete": false
+}

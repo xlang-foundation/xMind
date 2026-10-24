@@ -6,13 +6,13 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Sourceeafe1b2e full173 passes; Native11678c9a. Installed66 unchanged. See doc/VALIDATION_STATUS.md.
+- Installed67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
 
-- Candidate66 CLI session773ac2efc0558863ad0cc629ace7e211/root e209f03d19e58216c40e4e22e06eb968; browser6a9cd04098714dbfa559e149dbd3715b/root3ec2da626b0d4d9e99acb4d8e0d85e13; handoff89727aa7415090fb464ae470a0f37e0d/root1d19ae73fa6583c89e786af1e1277a7c completed. Failed browser6aa83bfd30a045fd96ed5ec0b8efe1f2/root5bf575aa1b5748349143430abeac6afa retained. NEVER replay. Fixtures exited; installed66 preservation passes. See candidate-0.1.66-qualified-coding-20261024.json in doc/evidence.
+- Candidate67 CLI41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b; browser157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b; handoff500cc07a8096747a157f468cb1b13f89/root9b490dc7a004889d2ad6fdfc46732dca completed. NEVER replay. See candidate-0.1.67-qualified-coding-20261024.json.
 
-- Installed66 smoke sessione396142dfae23f973429a308f3c264c4/root430c3d73de6b88e377abcc6c9f92e51f completed read/history, zero models; NEVER replay. Owner exited. Five protected roots unchanged;2442 installed/2398 runtime exact.
+- Installed67 smoke55a89cad4783844c55b74fccd45ea580/root8866649c22b59f0793866858907107f4 completed read/history, zero models; NEVER replay. Owner exited. Installation66 guidance archived verbatim in doc/development-checkpoints-20261024.md.
 
-- Installed66 Native2d98bdde/3d727450, SDK8c7972d1: full173 and browser/CLI/handoff pass; exact65 backup retained. Receipt doc/evidence/installed-0.1.66-2d98bdde-20261024.json. Installed65 history archived in doc/development-checkpoints-20261024.md; NEVER replay its completed smoke. Rendered Code remains unverified.
+- Browser permission sessiondac128fea38846f8b4f85c549895dde2/root32d82da2df694147b254dc380528ae29 completed one read/two controlled calls and grant/revoke after reload; NEVER replay. Initial first-send refresh defect retained in .agentflow/pb67-permissions. Development correction remains separate from installed67.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 
