@@ -104,7 +104,9 @@ struct BoundRunsApi {
 struct BoundGraphsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundGraphsApi()=default;explicit BoundGraphsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
     X::Value Submit(X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return bound_value(Host(),state->start_graph(connection_input::graph_request(sdk_values::from_value(request))));});}
-    BEGIN_PACKAGE(BoundGraphsApi) APISET().AddFunc<1>("Submit",&BoundGraphsApi::Submit); END_PACKAGE
+    X::Value List(){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return sdk_values::to_value(Host(),connection_values::bound(state->graphs()));});}
+    X::Value Open(std::string id){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return sdk_values::to_value(Host(),connection_values::bound(state->graph(id)));});}
+    BEGIN_PACKAGE(BoundGraphsApi) APISET().AddFunc<0>("List",&BoundGraphsApi::List);APISET().AddFunc<1>("Open",&BoundGraphsApi::Open);APISET().AddFunc<1>("Submit",&BoundGraphsApi::Submit); END_PACKAGE
 };
 struct BoundOperationsApi {
     std::shared_ptr<CapturedRunOperations> state;BoundOperationsApi()=default;explicit BoundOperationsApi(std::shared_ptr<CapturedRunOperations> value):state(std::move(value)){}

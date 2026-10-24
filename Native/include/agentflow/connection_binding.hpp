@@ -2,6 +2,7 @@
 #include "agentflow/records.hpp"
 #include "agentflow/operation.hpp"
 #include "agentflow/run_executor.hpp"
+#include "agentflow/graph_service.hpp"
 #include <memory>
 namespace agentflow {
 class PersistenceService;class RunExecutor;class GraphExecution;class BackendOwnerControl;struct LocalConnectionContext;
@@ -42,6 +43,10 @@ struct ConnectionRunRequest {
     std::optional<ProviderProfileAdmission> provider;
 };
 struct ConnectionGraphRequest {ConnectionRunRequest run;std::string graph;std::int64_t revision=0;};
+struct ConnectionGraphSnapshot {GraphRootRecord record;GraphContextMetadata context;};
+struct BoundConnectionGraphs {ConnectionBindingIdentity binding;std::vector<GraphExecutionMetadata> graphs;};
+struct BoundConnectionGraph {ConnectionBindingIdentity binding;ConnectionGraphSnapshot graph;};
+ConnectionGraphSnapshot read_local_connection_graph(PersistenceService&,GraphExecution&,const std::string&);
 Run submit_local_connection_run(RunExecutor&,ConnectionRunRequest);
 class ConnectionEventStream {
 public:
@@ -66,6 +71,8 @@ public:
     BoundConnectionRun start_run(std::string id,std::string session,std::string prompt)const;
     BoundConnectionRun start_run(ConnectionRunRequest request)const;
     BoundConnectionRun start_graph(ConnectionGraphRequest request)const;
+    BoundConnectionGraphs graphs()const;
+    BoundConnectionGraph graph(const std::string& id)const;
     void cancel_run(const std::string& id)const;
     std::shared_ptr<CapturedRunOperations> operations(std::string session,std::string run)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;

@@ -1,3 +1,28 @@
+## Captured graph catalog/detail and shared consistent snapshots — 2026-10-23
+
+Graphs.List and Graphs.Open now use captured native connection objects. HTTP
+and the shared browser/extension client retain binding identity. The old
+compatibility detail route and the captured route now share snapshot observation
+and graph/run value encoding. The original three-attempt enabled-context
+checkpoint/state consistency check remains intact. A controlled native probe
+changes actual graph state during observation and verifies a fresh snapshot.
+Profile metadata edits preserve captured reads; retired objects and foreign
+origin-bound handles refuse them.
+
+Native4 pass in17.69s. The actual graph-service fixture compares captured catalog
+and completed detail with compatibility responses after a real tool-only read.
+The current benchmark-guarded local view gate passes473 extension and165 browser
+cases with71 source/vendor files and18 built assets unchanged. The explicit
+CI inventory is updated alongside the added contract.
+[Receipt](evidence/captured-graph-read-20261023.json).
+
+Separately, official hosted view run40062363944 on earlier2e908a44 passes472/165
+with frozen source/assets. That confirms the inventory correction; it does not
+qualify current source, native full173 or rendered editor behavior. Graph
+human/resume/stream, commands/models, other reads and remote/enrollment remain
+open, as do the prior full-run Rust failure and rendered VS Code. Installed64
+is unchanged.
+
 ## View CI inventory follows the two added client contracts — 2026-10-23
 
 Official hosted view run40061297750 on7c7408ad fails its inventory gate:

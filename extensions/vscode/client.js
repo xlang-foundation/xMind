@@ -73,6 +73,7 @@ class BackendClient {
   #workspaceGuard;
   #connectionAdmissionSupported=false;
   #connectionGraphAdmissionSupported=false;
+  #connectionGraphReadSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
   #connectionChildHistorySupported=false;
@@ -121,6 +122,8 @@ class BackendClient {
     else if(this.#connectionChildHistorySupported)throw new Error("The backend child history protocol changed. Reconnect before reading children.");
     if(health&&Object.hasOwn(health,"local_connection_graph_admission")){if(health.local_connection_graph_admission!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph admission protocol.");this.#connectionGraphAdmissionSupported=true;}
     else if(this.#connectionGraphAdmissionSupported)throw new Error("The backend graph admission protocol changed. Reconnect before admitting graph work.");
+    if(health&&Object.hasOwn(health,"local_connection_graph_read")){if(health.local_connection_graph_read!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph read protocol.");this.#connectionGraphReadSupported=true;}
+    else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     return health;
   }
   async #captureConnection(){
@@ -192,7 +195,14 @@ class BackendClient {
     return validateVcsDiff(await this.request('/v1/vcs/diff?'+query.toString()));
   }
   models() { return this.request('/v1/models'); }
-  graphs() { return this.request('/v1/graphs'); }
+  async #readCapturedGraph(id){
+    if(id!==undefined)executionIdentity(id);const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured graph connection changed.");
+    const detail=id!==undefined,value=await this.request('/v1/connection-bindings/'+capture.id+(detail?'/graph-runs/'+encodeURIComponent(id):'/graphs'));exactFields(value,detail?['binding','graph']:['binding','graphs']);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error("Graph read receipt belongs to another connection.");
+    if(!detail){if(!Array.isArray(value.graphs))throw new Error("Invalid captured graph catalog");return {graphs:value.graphs};}
+    validateRunDTO(value.graph?.run);if(value.graph.run.id!==id||!value.graph.run.graph_root)throw new Error("Graph read receipt belongs to another run.");return value.graph;
+  }
+  graphs() { return this.#connectionGraphReadSupported?this.#readCapturedGraph():this.request('/v1/graphs'); }
   delegation() { return this.request('/v1/agent/delegation'); }
   async planning() { return validatePlanning(await this.request('/v1/agent/planning')); }
   async plan(root) { executionIdentity(root);return validatePlanObservation(await this.request(`/v1/runs/${root}/plan`),root); }
@@ -240,7 +250,7 @@ class BackendClient {
     for(const file of files)if(!file||typeof file!=='object'||Array.isArray(file)||Object.keys(file).some(key=>!['path','folder_id','name','description','mention'].includes(key))||typeof file.path!=='string'||!file.path||file.path.length>4096||file.path.startsWith('/')||/^[A-Za-z]:/.test(file.path)||file.path.includes('\\')||file.path.split('/').some(part=>!part||part==='.'||part==='..')||file.folder_id!==undefined&&(typeof file.folder_id!=='string'||file.folder_id.length>256))throw new Error('Invalid workspace file attachment.');
     return this.#admitGraph({session_id,graph_id,graph_revision,prompt,files,expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id,expected_workspace_revision:expectedWorkspaceRevision??membership.revision,...(model_id?{model_id}:{}),...profileBindingFields(binding)});
   }
-  async graph(id) { const value=await this.request(`/v1/graph-runs/${encodeURIComponent(id)}`);if(value.context!==undefined)validateGraphContext(value.context,value.run);return value; }
+  async graph(id) { const value=await (this.#connectionGraphReadSupported?this.#readCapturedGraph(id):this.request(`/v1/graph-runs/${encodeURIComponent(id)}`));if(value.context!==undefined)validateGraphContext(value.context,value.run);return value; }
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
   graphChildHistory(root,child,session) { return this.#connectionChildHistorySupported?this.#capturedChildHistory(root,child,session):this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }

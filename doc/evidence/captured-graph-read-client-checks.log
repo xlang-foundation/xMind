@@ -1,0 +1,14 @@
+extension
+# tests 473
+# pass 473
+# fail 0
+# cancelled 0
+# skipped 0
+# duration_ms 4403.6564
+browser
+# tests 165
+# pass 165
+# fail 0
+# cancelled 0
+# skipped 0
+# duration_ms 17517.4331

@@ -81,6 +81,17 @@ BoundConnectionRun CapturedLocalConnection::start_graph(ConnectionGraphRequest r
         run.provider?graphs.submit_graph_profile(run.id,run.session,request.graph,request.revision,run.prompt,run.model,*run.provider):graphs.submit_graph(run.id,run.session,request.graph,request.revision,run.prompt,run.model);
     return {identity_,std::move(result)};
 }
+ConnectionGraphSnapshot read_local_connection_graph(PersistenceService& store,GraphExecution& graphs,const std::string& id){
+    for(int attempt=0;attempt<3;++attempt){
+        auto record=store.graph_run(id).get();auto context=graphs.graph_context(id);
+        if(!context.enabled)return {std::move(record),std::move(context)};
+        const auto fresh=store.graph_run(id).get();
+        if(fresh.checkpoint_revision==record.checkpoint_revision&&fresh.run.state==record.run.state)return {std::move(record),std::move(context)};
+    }
+    throw Conflict("Graph context observation changed");
+}
+BoundConnectionGraphs CapturedLocalConnection::graphs()const{auto life=context_->enter();if(!context_->graphs)throw RunUnavailable("Graph catalog unavailable");return {identity_,context_->graphs->graphs()};}
+BoundConnectionGraph CapturedLocalConnection::graph(const std::string& id)const{auto life=context_->enter();if(!context_->graphs)throw RunUnavailable("Graph observation unavailable");return {identity_,read_local_connection_graph(context_->store,*context_->graphs,id)};}
 
 void CapturedLocalConnection::cancel_run(const std::string& id)const{auto life=context_->enter();auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");context_->executor->cancel(id);}
 namespace {

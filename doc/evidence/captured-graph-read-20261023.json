@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured Graphs.List/Open SDK subobjects and shared HTTP/browser/extension graph catalog/detail reads; compatibility and captured detail share native snapshot and value encoding.",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T04:33:00.625Z",
+    "sourceParent": "2e908a44f9c7e96ef0813e1f5176a5cc17c4f7d4",
+    "sourcePatchSha256": "298f35d52f3f801e660a6be3b1c2081f2e836d73f66a285d6bfb2e6fb6e284ca",
+    "build": {
+      "pid": 6608,
+      "launchedAt": "2026-10-24T04:31:09.540Z",
+      "completedAt": "2026-10-24T04:32:37.777Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "15faff6164e331228894a3b96b23dddc6d8d5f1dd2c8f84146ebaf40e505d7fa"
+    },
+    "test": {
+      "pid": 10452,
+      "launchedAt": "2026-10-24T04:32:40.353Z",
+      "completedAt": "2026-10-24T04:32:58.081Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "18b7f1b8f3158e6fa048bae1a0701834f5a5b4ea86a968caf5f1141e1293413c"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 17.69,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "53429ace81b850dacd200258345093fc6961f9a3369d6baa26cb47d0cc751bc0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "2e908a44f9c7e96ef0813e1f5176a5cc17c4f7d4",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 473,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 473,
+      "passed": 473,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "launcher": {
+    "ciSourceSha256": "7c71bd8527be81d4c5c98e44981fbc1610804f98a9874bfbdfb59a71fff84c00",
+    "localLauncherSha256": "22e56ba16513e5ff46e6cdc6eb50193ac11508ccfa428a09060be8922e8e751c",
+    "differences": [
+      "GitHub-only guard replaced after actual local native/benchmark process audit",
+      "Evidence/assets written to fresh isolated repository directory"
+    ],
+    "githubActionsImpersonated": false
+  },
+  "hostedViewConfirmation": {
+    "runId": 40062363944,
+    "jobId": 120778416205,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/40062363944",
+    "officialLogSha256": "fb9e2a8b075200e8595f91ce08a60e10f27ea49689ed14a253cb6217611a3d34",
+    "gate": {
+      "sourceRevision": "2e908a44f9c7e96ef0813e1f5176a5cc17c4f7d4",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 71,
+      "trackedSourceFiles": 66,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 472,
+        "browser": 165
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 472,
+        "passed": 472,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 165,
+        "passed": 165,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    }
+  },
+  "verified": [
+    "Catalog and detail retain immutable binding identity through SDK and origin-bound HTTP.",
+    "Native enabled-context probe changes actual graph state during the first observation; Open rereads and returns the consistent second snapshot.",
+    "Stale-profile captured reads remain valid; retired SDK objects and a different view principal reject.",
+    "The actual graph-service test compares captured client catalog and completed graph detail with native compatibility responses after a real tool-only workspace read.",
+    "Shared client rejects wrong binding/run, protocol loss and closed handles without legacy retry.",
+    "CI exact extension inventory advances to473 alongside the added contract, retaining all zero-skip/failure and byte-closure checks."
+  ],
+  "limitations": [
+    "Current native4 and local client473/165 scopes differ from hosted view472/165 on earlier2e908a44. No current-source hosted/native-full/rendered IDE claim.",
+    "Graph human/resume/stream, commands/models and other general reads, authenticated remote routing/enrollment remain unfinished.",
+    "Prior full173 rust-analyzer failure stays unresolved; no new package/install and installed0.1.64 is unchanged.",
+    "Controlled fixtures only; no paid inference or CPython."
+  ]
+}

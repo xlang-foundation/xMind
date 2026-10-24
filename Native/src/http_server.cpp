@@ -220,11 +220,8 @@ Json public_plan_policy(const DynamicPlanCapabilities& c){
     return {{"revision",c.revision},{"catalogue_finalized",c.catalogue_finalized},{"limits",{{"max_nodes",c.max_nodes},{"max_revisions",c.max_revisions},{"max_humans",c.max_humans},{"change_bytes",c.change_bytes},{"human_expiry_ms",c.human_expiry_ms},{"max_parent_turns",c.max_parent_turns}}},{"presets",std::move(presets)}};
 }
 Json public_plan_budget(const RootBudgetRecord& b){return {{"policy_id",b.spec.policy_id},{"policy_revision",b.spec.policy_revision},{"revision",b.revision},{"max_children",b.spec.max_children},{"max_parallel",b.spec.max_parallel},{"max_model_calls",b.spec.max_model_calls},{"wall_limit_ms",b.spec.wall_limit_ms},{"children_admitted",b.children_admitted},{"planned_children_reserved",b.planned_children_reserved},{"model_calls_reserved",b.model_calls_reserved},{"parent_calls_held",b.parent_calls_held},{"parent_model_calls_reserved",b.parent_model_calls_reserved}};}
-Json graph_record(const GraphRootRecord& root) {
-    return {{"run",encode(root.run)},{"graph_id",root.graph_id},{"graph_revision",root.graph_revision},
-        {"checkpoint_revision",root.checkpoint_revision},{"checkpoint",Json::parse(root.checkpoint_json)},
-        {"spec",Json::parse(root.specification_json)},{"input",root.input_json.empty()?Json(nullptr):Json::parse(root.input_json)}};
-}
+Json graph_record(const GraphRootRecord& root) {return connection_values::graph_record(root);}
+
 Json encode(const Event& value) {return {{"seq",value.sequence},{"run_id",value.run_id},{"kind",value.kind},{"data",Json::parse(value.json)}};}
 Json encode(const Message& value) {return {{"id","msg_"+std::to_string(value.sequence)},{"seq",value.sequence},{"role",value.role},{"data",Json::parse(value.json)}};}
 Json encode(const Operation& value) {return connection_values::operation(value);}
@@ -523,7 +520,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|connection-bindings(/[0-9a-f]{32}(/(identity|graph-runs|sessions(/[A-Za-z0-9_-]+(/messages|/runs/[A-Za-z0-9_-]+/(history|children/[A-Za-z0-9_-]+/history|operations(/[A-Za-z0-9_-]+(/decision)?)?))?)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|connection-bindings(/[0-9a-f]{32}(/(identity|graphs|graph-runs(/[A-Za-z0-9_-]+)?|sessions(/[A-Za-z0-9_-]+(/messages|/runs/[A-Za-z0-9_-]+/(history|children/[A-Za-z0-9_-]+/history|operations(/[A-Za-z0-9_-]+(/decision)?)?))?)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
             static const std::regex view_session_delete_route(R"(^/v1/sessions/[A-Za-z0-9_-]+$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(membership|skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
@@ -686,7 +683,7 @@ struct HttpServer::Impl {
 #if defined(_WIN32)
             health["local_connection_admission"]=1;
             health["local_connection_operations"]=1;
-            if(graphs)health["local_connection_graph_admission"]=1;health["local_connection_history"]=1;health["local_connection_child_history"]=1;
+            if(graphs){health["local_connection_graph_admission"]=1;health["local_connection_graph_read"]=1;}health["local_connection_history"]=1;health["local_connection_child_history"]=1;
 #endif
             reply(response,health);
         }));
@@ -773,6 +770,8 @@ struct HttpServer::Impl {
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/graph-runs)",guard_errors([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");const auto result=connection_handle(request)->start_graph(connection_input::graph_request(body(request,{"id","session_id","graph_id","graph_revision","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"}),new_id()));reply(response,connection_values::bound(result),202);
         }));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/graphs)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);reply(response,connection_values::bound(connection_handle(request)->graphs()));}));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/graph-runs/([A-Za-z0-9_-]+))",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);reply(response,connection_values::bound(connection_handle(request)->graph(identifier(request.matches[2]))));}));
         const auto connection_operations=[this,connection_request](const Request& request){
             connection_request(request);
             return connection_handle(request)->operations(identifier(request.matches[2]),identifier(request.matches[3]));
@@ -1105,16 +1104,7 @@ struct HttpServer::Impl {
             server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+))",guarded([this,graphs](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph detail does not accept query parameters");
                 const auto id=identifier(request.matches[1]);
-                for(int attempt=0;attempt<3;++attempt){
-                    const auto root=persistence.graph_run(id).get();auto value=graph_record(root);
-                    const auto context=graphs->graph_context(id);value["context"]={{"enabled",context.enabled},{"resumable",context.resumable},{"remaining_active_ms",context.remaining_active_ms?Json(*context.remaining_active_ms):Json(nullptr)}};
-                    // Disabled context is immutable for this admitted graph;
-                    // its original single repository snapshot is sufficient.
-                    if(!context.enabled){reply(response,value);return;}
-                    const auto fresh=persistence.graph_run(id).get();
-                    if(fresh.checkpoint_revision==root.checkpoint_revision&&fresh.run.state==root.run.state){reply(response,value);return;}
-                }
-                throw Conflict("Graph context observation changed");
+                reply(response,connection_values::graph_snapshot(read_local_connection_graph(persistence,*graphs,id)));
             }));
             server.Get(R"(/v1/graph-runs/([A-Za-z0-9_-]+)/children)",guarded([this](const Request& request,Response& response){
                 if(!request.params.empty())throw std::invalid_argument("Graph children do not accept query parameters");

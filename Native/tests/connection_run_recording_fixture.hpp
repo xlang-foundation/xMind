@@ -2,6 +2,7 @@
 #include "agentflow/connection_binding.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/graph_service.hpp"
+#include <functional>
 #include "nlohmann/json.hpp"
 namespace agentflow::test {
 using Json=nlohmann::json;
@@ -21,6 +22,8 @@ struct RecordingExecutor:RunExecutor {
 };
 struct RecordingGraphExecutor:RecordingExecutor,GraphExecution {
     using RecordingExecutor::RecordingExecutor;
+    std::function<GraphContextMetadata(const std::string&)> context_probe;
+    GraphContextMetadata graph_context(const std::string& id)const override{return context_probe?context_probe(id):GraphContextMetadata{};}
     ConnectionGraphRequest observed_graph;std::string graph_mode;unsigned graph_calls=0;
     std::vector<GraphExecutionMetadata> graphs()const override{return {{"fixture-graph",7,1,true}};}
     Run graph_record(std::string mode,ConnectionGraphRequest request){if(request.graph!="fixture-graph"||request.revision!=7)throw Conflict("Graph catalog revision changed");observed_graph=std::move(request);graph_mode=std::move(mode);++graph_calls;return store.start_graph_run(observed_graph.run.id,observed_graph.run.session,observed_graph.graph,observed_graph.revision,GraphPlan(R"({"nodes":[{"id":"worker","type":"agent","prompt":"recording fixture"}]})"),Json{{"content",observed_graph.run.prompt}}.dump()).get();}
