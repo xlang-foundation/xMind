@@ -1,3 +1,19 @@
+## Separate-process captured graph SDK controls — 2026-10-23
+
+Independent unified xmind.exe clients now expose Graphs.List/Open/Submit/Input/
+TreeInput/Resume through standard xlang3 LRPC. Real root and nested human graphs
+complete exact native file reads; stale guards and premature resume refuse.
+No model request is made by these graph tasks. Native4/4 pass in18.87s with
+frozen source/SDK/libraries/dependencies/binaries and file sets unchanged.
+The initial fixture startup failure is retained: adding a workspace required
+the explicit model-tools supported option. Production policy was unchanged.
+[Receipt](evidence/captured-graph-ipc-20261023.json).
+
+Positive contextual resume remains the actual captured HTTP close/reopen proof,
+not a new separate-process successful resume claim. Full-native Rust failure,
+remaining streams/routing, remote/enrollment, deeper recovery and rendered
+VS Code remain open. Installed64 is unchanged.
+
 ## Actual captured context-enabled graph resume — 2026-10-23
 
 The existing contextual graph-engine contract now performs its successful

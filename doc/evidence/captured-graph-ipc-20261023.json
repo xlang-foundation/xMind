@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent unified xmind.exe clients call captured Graphs SDK subobject methods over standard xlang3 LRPC.",
+  "gate": {
+    "recordedAt": "2026-10-24T04:50:47.504Z",
+    "sourceParent": "1df88ed109c20a2abf23f8c8b71c290215255d39",
+    "sourcePatchSha256": "3c337fbe4ce6ccb9f3bb919a1bcf6374acdfd5dbcd4ddb61b0f4023138b87fb2",
+    "build": {
+      "pid": 26568,
+      "launchedAt": "2026-10-24T04:49:48.324Z",
+      "completedAt": "2026-10-24T04:50:23.286Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "7e2a4adf92cf69df6420f243ea99a0f2dfa6008ef3e1d741ad90c7e4c2b9ea3f"
+    },
+    "test": {
+      "pid": 41652,
+      "launchedAt": "2026-10-24T04:50:25.924Z",
+      "completedAt": "2026-10-24T04:50:44.832Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4bf4ef6547553fb3d7d6dacbafb381541f50cc72f92a4b16022112e4cc044e16"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 18.87,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "9300c71dda2aa4fadd36917602c3a121b4c3b89a8597f41405063de91dd4313c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "verified": [
+    "List catalog and Submit registered human/nested graphs",
+    "Open root and nested graph detail with exact captured identity",
+    "Input and six-argument TreeInput transfer checkpoint guards through SDK",
+    "Stale root/nested checkpoint input refuses",
+    "Resume on unanswered context-disabled root refuses",
+    "Root and nested actual native reads return exact fixture bytes without model requests"
+  ],
+  "retainedFailure": {
+    "path": ".agentflow/workspace-switch-validation/native/captured-graph-ipc-initial",
+    "reason": "New fixture workspace requires explicit --model-tools supported; backend rejected startup before graph execution. Corrected fixture option; production policy unchanged."
+  },
+  "limits": "Positive contextual resume remains actual HTTP evidence from separate checkpoint; this process test covers resume refusal. No full suite, provider inference, rendered IDE or installation acceptance."
+}
