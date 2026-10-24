@@ -1,0 +1,491 @@
+{
+  "recordedAt": "2026-10-24T13:41:58.518Z",
+  "scope": "Actual rendered browser invokes captured native context service with three genuine native seed runs, controlled Responses peer, real SQLite; test service host, not installed production provider configuration.",
+  "rendered": {
+    "passed": true,
+    "scope": "Actual rendered browser invokes captured native context service with three genuine native seed runs, controlled Responses peer, real SQLite; test service host, not installed production provider configuration.",
+    "counts": {
+      "inference": 3,
+      "count": 2,
+      "compact": 1
+    },
+    "routes": [
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": null,
+            "enabled": true,
+            "head_revision": 0,
+            "manual": null,
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": null,
+            "enabled": true,
+            "head_revision": 0,
+            "manual": null,
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": null,
+            "enabled": true,
+            "head_revision": 0,
+            "manual": null,
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context/compact",
+        "method": "POST",
+        "status": 202,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "request": {
+            "id": "810242a16c6e485ba65a48e3a631ebe5",
+            "state": "pending"
+          },
+          "session_id": "owned"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": null,
+            "enabled": true,
+            "head_revision": 0,
+            "manual": {
+              "id": "810242a16c6e485ba65a48e3a631ebe5",
+              "state": "pending"
+            },
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context/requests/810242a16c6e485ba65a48e3a631ebe5",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "request": {
+            "id": "810242a16c6e485ba65a48e3a631ebe5",
+            "state": "claimed"
+          },
+          "session_id": "owned"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": null,
+            "enabled": true,
+            "head_revision": 0,
+            "manual": {
+              "id": "810242a16c6e485ba65a48e3a631ebe5",
+              "state": "claimed"
+            },
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context/requests/810242a16c6e485ba65a48e3a631ebe5",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "request": {
+            "id": "810242a16c6e485ba65a48e3a631ebe5",
+            "state": "claimed"
+          },
+          "session_id": "owned"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": {
+              "id": "64b634fc35542da6866afb7e23e2e73f",
+              "preparation_elapsed_ms": 62,
+              "provider_elapsed_ms": 10,
+              "usage": {
+                "input_tokens": 31,
+                "output_tokens": 7,
+                "total_tokens": 38
+              }
+            },
+            "enabled": true,
+            "head_revision": 1,
+            "manual": null,
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context/requests/810242a16c6e485ba65a48e3a631ebe5",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "request": {
+            "id": "810242a16c6e485ba65a48e3a631ebe5",
+            "state": "completed"
+          },
+          "session_id": "owned"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/372ea81ebf9b29b694d81bf454f406c8/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": {
+              "id": "64b634fc35542da6866afb7e23e2e73f",
+              "preparation_elapsed_ms": 62,
+              "provider_elapsed_ms": 10,
+              "usage": {
+                "input_tokens": 31,
+                "output_tokens": 7,
+                "total_tokens": 38
+              }
+            },
+            "enabled": true,
+            "head_revision": 1,
+            "manual": null,
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/eb89f3766981a77094a422d697456093/sessions/owned/context",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1031753972-3475170961-3636189957-944508321-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-311ecca7e82e83c407bd7e4f27f8bc62cd7cbfa7e905f7c33c09d3569298d7e9"
+          },
+          "context": {
+            "automatic": false,
+            "checkpoint": {
+              "id": "64b634fc35542da6866afb7e23e2e73f",
+              "preparation_elapsed_ms": 62,
+              "provider_elapsed_ms": 10,
+              "usage": {
+                "input_tokens": 31,
+                "output_tokens": 7,
+                "total_tokens": 38
+              }
+            },
+            "enabled": true,
+            "head_revision": 1,
+            "manual": null,
+            "model_id": "synthetic-control-a",
+            "session_id": "owned",
+            "source_watermark": 6
+          }
+        }
+      }
+    ],
+    "contractSha256": "76408278d46fa6d8c5136328adc56ddba891276f8ccb52ce88b158e94330cb54",
+    "paidInference": false,
+    "installed": false,
+    "neverReplay": true,
+    "ownedNativeExited": true
+  },
+  "proof": {
+    "passed": true,
+    "session": "owned",
+    "roots": [
+      "owned_seed_0",
+      "owned_seed_1",
+      "owned_seed_2"
+    ],
+    "request": "810242a16c6e485ba65a48e3a631ebe5",
+    "checkpoint": "64b634fc35542da6866afb7e23e2e73f",
+    "clickedCompactOnce": true,
+    "observedCompleted": true,
+    "reloadedHeadRevision": 1,
+    "reloadedMessages": 6,
+    "providerUsage": {
+      "input_tokens": 31,
+      "output_tokens": 7,
+      "total_tokens": 38
+    },
+    "screenshot": "reloaded.png",
+    "neverReplay": true
+  },
+  "nativeRegression": {
+    "recordedAt": "2026-10-24T13:38:35.234Z",
+    "sourceParent": "aaf2f1ba1fe822549ec5501c39e5ab0b76e47148",
+    "sourcePatchSha256": "c671eafc0b20cf3e2dc16dd4c4fba2d2316a21957aa463804ca1b1c21faeb0a3",
+    "build": {
+      "pid": 3428,
+      "launchedAt": "2026-10-24T13:38:09.043Z",
+      "completedAt": "2026-10-24T13:38:25.571Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e652e69742a2996e527a2868f15024e93197fe8ecacb097a55392752cf5509f8"
+    },
+    "test": {
+      "pid": 38668,
+      "launchedAt": "2026-10-24T13:38:28.320Z",
+      "completedAt": "2026-10-24T13:38:32.461Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1d9bb814a0f69d633ac6e41a521df959c367c818cc6304982ed6bd37bd1ffdd7"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 4.11,
+    "projectFiles": 2820,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true,
+    "log": "rendered-context-native-regression-20261024.log"
+  },
+  "nativeSourceFilesStillMatchFocusedGate": 2714,
+  "unchangedClientSourceFiles": 71,
+  "unchangedClientAssets": 18,
+  "priorFailedFixtures": [
+    {
+      "root": ".agentflow/rendered-context-20261024",
+      "description": "AgentService fixture lacks an execution workspace catalogue; three native seed runs, no maintenance requested.",
+      "neverReplay": true,
+      "native-stderr.log": {
+        "sha256": "9f1c60a5893ed4001d28e409ff04a656dca03fdddd5f262a7ba92e420464f06b"
+      },
+      "private-native-contract-error.log": {
+        "sha256": "45c311b4e00f22dc350b4977bf843c1959aa42736feb4c1a554c56b5fcebeb51"
+      },
+      "peer-audit.jsonl": {
+        "sha256": "90930a197fa563c88356a848db9bb646f8191fef91d0b1fe0dfebf206ece3aed"
+      },
+      "native-terminal.json": {
+        "sha256": "4f28ce20fdc0de466d37924709e00a12b257475dd0f3c52b34da60ddafc9d814"
+      },
+      "rendered-complete.json": {
+        "sha256": "bbc8aaecce9781d307761644288c437008007266da88c87179c483bd622202e8"
+      }
+    },
+    {
+      "root": ".agentflow/rendered-context-workspace-20261024",
+      "description": "Workspace model tool capability not declared; rejected before model dispatch.",
+      "neverReplay": true,
+      "native-stderr.log": {
+        "sha256": "fb7dc25806ea707e12f4379792de2a73899694b6ca92d2831f89532869b48f16"
+      },
+      "private-native-contract-error.log": {
+        "sha256": "bf940565d06827cf989e0fdbfc007f6962db0da6f0d225100e8ccb133369a820"
+      }
+    },
+    {
+      "root": ".agentflow/rendered-context-declared-tools-20261024",
+      "description": "Backend-private .agentflow location refused as model workspace; rejected before model dispatch.",
+      "neverReplay": true,
+      "native-stderr.log": {
+        "sha256": "fb7dc25806ea707e12f4379792de2a73899694b6ca92d2831f89532869b48f16"
+      },
+      "private-native-contract-error.log": {
+        "sha256": "3eae0e9d121d821bbbd2391a109d3b33053c05fac365e9672eacbcb112d510de"
+      }
+    },
+    {
+      "root": "D:/CantorAI2026/TestProj/xmind-delivery-validation/rendered-context-native-20261024",
+      "description": "AgentService has no production execution_workspace API even when configured; three native seed runs, no maintenance requested.",
+      "neverReplay": true,
+      "native-stderr.log": {
+        "sha256": "9f1c60a5893ed4001d28e409ff04a656dca03fdddd5f262a7ba92e420464f06b"
+      },
+      "private-native-contract-error.log": {
+        "sha256": "45c311b4e00f22dc350b4977bf843c1959aa42736feb4c1a554c56b5fcebeb51"
+      },
+      "peer-audit.jsonl": {
+        "sha256": "90930a197fa563c88356a848db9bb646f8191fef91d0b1fe0dfebf206ece3aed"
+      },
+      "native-terminal.json": {
+        "sha256": "4f28ce20fdc0de466d37924709e00a12b257475dd0f3c52b34da60ddafc9d814"
+      },
+      "rendered-complete.json": {
+        "sha256": "bd3bb7ef56ea8c432bbce875707d093ccf3d6d4349191eaf66ef3ec490944c89"
+      }
+    },
+    {
+      "root": "D:/CantorAI2026/TestProj/xmind-delivery-validation/rendered-context-platform-20261024",
+      "description": "Single browser request dd25fb5eb5fc4afb98c38dba0c382331 fails because controlled count peer wrongly rejects workspace tool definitions. No retry, checkpoint or provider compaction.",
+      "neverReplay": true,
+      "native-stderr.log": {
+        "sha256": "9f1c60a5893ed4001d28e409ff04a656dca03fdddd5f262a7ba92e420464f06b"
+      },
+      "private-native-contract-error.log": {
+        "sha256": "45c311b4e00f22dc350b4977bf843c1959aa42736feb4c1a554c56b5fcebeb51"
+      },
+      "private-peer-failure.log": {
+        "sha256": "789be733ff8b210a3bd3b04867a5458f6986315f09a5f43f0859f7fff5a95732"
+      },
+      "peer-audit.jsonl": {
+        "sha256": "90930a197fa563c88356a848db9bb646f8191fef91d0b1fe0dfebf206ece3aed"
+      },
+      "native-terminal.json": {
+        "sha256": "4f28ce20fdc0de466d37924709e00a12b257475dd0f3c52b34da60ddafc9d814"
+      },
+      "rendered-complete.json": {
+        "sha256": "e8419469ff8eff493a2d6337a71b57c44581e6866937a34f2a054e491aa6624b"
+      }
+    }
+  ],
+  "finalHarnessSha256": "428c2b8d60de8b952a73fecc518c41396257569015f0f29bbca95cf08015e9ce",
+  "postAcceptanceHarnessChange": "Added designated TestProj path guard only; node --check passes. Completed rendered namespace was not replayed.",
+  "installed70Unchanged": true,
+  "productionProviderSetup": false,
+  "independentSdkPositiveCompaction": false,
+  "goalComplete": false,
+  "remaining": "Production provider setup, rendered commands and VS Code, authenticated generic remote/enrollment and deeper recovery/scheduling remain open."
+}

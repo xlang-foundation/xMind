@@ -2,6 +2,7 @@
 // Only provider replies, opaque data, objectives and credentials are synthetic.
 // No run/compaction lifecycle is advanced through fixture state setters.
 #include "agentflow/agent_service.hpp"
+#include "agentflow/execution_platform.hpp"
 #include "agentflow/http_server.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "httplib.h"
@@ -52,7 +53,7 @@ struct Http {
     Json request(const std::string& session,const std::string& id,const std::string& model=model_a){return get("/v1/sessions/"+session+"/context/requests/"+id+"?model_id="+model);}
     void cancel(const std::string& id){post("/v1/runs/"+id+"/cancel",Json::object());}
 };
-void seed(PersistenceService& store,AgentService& service,Http& http,const std::string& mode,const std::string& scope="owned"){
+void seed(PersistenceService& store,RunExecutor& service,Http& http,const std::string& mode,const std::string& scope="owned"){
     store.create_session(scope,"Synthetic owned context-control conversation").get();
     if(mode=="idle"&&scope=="owned"){AgentDefinition selected{"context.selected",1,model_a,"Keep the selected instruction and permission snapshot during idle maintenance."};selected.mode="primary";selected.tools=std::vector<std::string>{};selected.permissions={{"read_file","private/**","deny"}};store.replace_session_agent(scope,selected,0).get();}
     for(int i=0;i<3;++i){const auto id=scope+"_seed_"+std::to_string(i);http.submit(id,scope,"fixture:"+mode+":"+scope+":seed:"+std::to_string(i));eventually([&]{return store.run(id).get().state==RunState::completed&&service.idle();},"Actual seed Agent did not retire");}
@@ -72,6 +73,28 @@ struct Owned {
         :store((root/"state.sqlite").string(),imports),service(store,prepare(store,base,mode,credential),1,8),server(store,token,&service),port(server.bind(0)),serving(server),http(port){}
     static AgentSettings prepare(PersistenceService& store,const std::string& base,const std::string& mode,bool credential){if(credential)put_key(store);return settings(base,mode);}
 };
+// Explicit interactive acceptance mode. Normal CTest modes never wait for UI.
+// Real native seed roots produce the history; only provider data is synthetic.
+void rendered_controller(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
+    PersistenceService store((root/"state.sqlite").string(),imports);put_key(store);
+    auto configured=settings(base,"rendered");std::filesystem::create_directory(root/"workspace");configured.workspace=(root/"workspace").string();configured.provider.tools=Capability::supported;
+    ExecutionPlatform service(store,std::move(configured),1,8);HttpServer server(store,token,&service);const auto port=server.bind(0);Serving serving(server);Http http(port);stage="rendered_seed";
+    seed(store,service,http,"rendered");
+    const auto original=store.history("owned").get();
+    public_context(http.get("/v1/sessions/owned/context"),false);
+    {std::ofstream ready(root/"rendered-ready.json",std::ios::binary);ready<<Json{{"origin","http://127.0.0.1:"+std::to_string(port)},{"session","owned"},{"model",model_a}}.dump();require(static_cast<bool>(ready),"Rendered readiness publication failed");}
+    stage="rendered_browser_compaction";
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::minutes(20);
+    while(!std::filesystem::is_regular_file(root/"rendered-complete.json")){
+        require(std::chrono::steady_clock::now()<deadline,"Rendered acceptance observation deadline reached; preserve original task");
+        std::this_thread::sleep_for(50ms);
+    }
+    {std::ifstream in(root/"rendered-complete.json",std::ios::binary);Json proof;in>>proof;require(proof.at("passed")==true,"Rendered browser acceptance failed");}
+    public_context(http.get("/v1/sessions/owned/context"),true);
+    exact_history(original,store.history("owned").get());
+    require(service.idle()&&store.runs("owned").get().size()==3,"Rendered maintenance cannot create an inference run");
+    require(count(root,"inference")==3&&count(root,"count")==2&&count(root,"compact")==1,"Rendered acceptance requires exactly one maintenance and two counts without replay");
+}
 void idle_controller(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){std::vector<Message> original;{
     Owned owner(root,imports,base,"idle");stage="idle_seed";seed(owner.store,owner.service,owner.http,"idle");original=owner.store.history("owned").get();auto& http=owner.http;
     public_context(http.get("/v1/sessions/owned/context?model_id="+model_a),false);
@@ -196,6 +219,6 @@ void uncertain(const std::filesystem::path& root,const std::vector<std::string>&
 int main(int argc,char** argv)try{
     if(argc!=6)throw std::invalid_argument("Expected owned root, modules, stdlib, loopback provider and mode");
     const std::filesystem::path root=std::filesystem::u8path(argv[1]);const std::vector<std::string> imports{argv[2],argv[3]};const std::string mode=argv[5];
-    if(mode=="idle")idle_controller(root,imports,argv[4]);else if(mode=="queued-cancel")queued_cancel(root,imports,argv[4]);else if(mode=="active-finish")active_finish(root,imports,argv[4]);else if(mode=="model-race")model_race(root,imports,argv[4]);else if(mode=="shutdown")shutdown(root,imports,argv[4]);else if(mode=="uncertain")uncertain(root,imports,argv[4]);else throw std::invalid_argument("Unknown controller fixture mode");
+    if(mode=="rendered")rendered_controller(root,imports,argv[4]);else if(mode=="idle")idle_controller(root,imports,argv[4]);else if(mode=="queued-cancel")queued_cancel(root,imports,argv[4]);else if(mode=="active-finish")active_finish(root,imports,argv[4]);else if(mode=="model-race")model_race(root,imports,argv[4]);else if(mode=="shutdown")shutdown(root,imports,argv[4]);else if(mode=="uncertain")uncertain(root,imports,argv[4]);else throw std::invalid_argument("Unknown controller fixture mode");
     std::cout<<"Native context-control boundary passed real authenticated AgentService/HTTP/maintenance/SQLite ownership; provider messages/counts/canonical replies and credentials were synthetic.\n";return 0;
 }catch(const std::exception& error){if(argc>1)try{std::ofstream private_log(std::filesystem::u8path(argv[1])/"private-native-contract-error.log",std::ios::binary);private_log<<error.what();}catch(...){}std::cerr<<"context_control_contract_failed stage="<<stage<<"\n";return 1;}

@@ -1,3 +1,9 @@
+## Rendered native context compaction — 2026-10-24
+
+Actual hidden browser IAB34 invokes captured native context maintenance once through the production ExecutionPlatform in an isolated test service host. Three genuine seed runs create six original messages. The controlled Responses peer observes exactly three inference requests, two token counts and one compaction. Request810242a16c6e485ba65a48e3a631ebe5 completes checkpoint64b634fc35542da6866afb7e23e2e73f at context revision1; reload retains the checkpoint, provider-supplied31/7/38 counters and all six original messages. Native verifies exact stored history, three original runs and idle ownership, then exits; the temporary tab closes. NEVER replay sessionowned/rootsowned_seed_0..2 in TestProj/xmind-delivery-validation/rendered-context-counted-20261024 or any earlier failed namespace.
+
+The normal native context regression passes1/1 in4.11s with complete frozen closure unchanged. The production xmind binary stays03dd5e5d and installed70 is unchanged. This is actual rendered/native/SQLite acceptance with a controlled local provider and test service host; production account setup and independent-process positive SDK compaction remain separate. [Receipt and retained failures](evidence/rendered-context-20261024.json), [rendered reload](evidence/rendered-context-reloaded-20261024.png). Initial host admission mistakes and the rejected count-peer request remain recorded; none were retried in their original namespace.
+
 ## Captured named-agent SDK/HTTP and rendered selection pass — 2026-10-24
 
 ## Installed70 preserved delivery checkpoint (2026-10-24)
