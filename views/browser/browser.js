@@ -191,7 +191,7 @@ class BrowserController {
   async graphSnapshot(id,version){
     const root=await this.client.graph(id);if(root.run.id!==id||root.run.session_id!==this.session)throw new Error('Graph observation changed');
     const snapshot=await observeGraphTree(this.client,root,this.session),histories={},operations=[];
-    for(const child of snapshot.children){if(snapshot.definitions.get(child.id)?.type==='agent')histories[child.id]=await this.client.graphChildHistory(child.parent_id,child.id);operations.push(...await this.client.operations(child.id,this.session));if(!this.current(version))return;}
+    for(const child of snapshot.children){if(snapshot.definitions.get(child.id)?.type==='agent')histories[child.id]=await this.client.graphChildHistory(child.parent_id,child.id,this.session);operations.push(...await this.client.operations(child.id,this.session));if(!this.current(version))return;}
     if(!this.current(version))return;this.children=new Map(snapshot.children.map(child=>[child.id,child]));this.graphPaths=snapshot.paths;this.graphOwners=new Map([[root.run.id,root],...snapshot.graphs.map(value=>[value.record.run.id,value.record])]);this.graph=root;this.post({type:'graph',record:root,children:snapshot.children,histories,graphs:snapshot.graphs,treeInput:this.health?.graph_tree_human_input===true});this.publishOperations(operations);return snapshot;
   }
   async pollOwned(run,version){

@@ -18,6 +18,7 @@ struct ConnectionEventPage {std::vector<Event> events;ConnectionEventCursor curs
 struct BoundConnectionSession {ConnectionBindingIdentity binding;Session session;};
 struct BoundConnectionMessages {ConnectionBindingIdentity binding;std::string session_id;MessagePage page;};
 struct BoundConnectionRunMessages {ConnectionBindingIdentity binding;std::string session_id,run_id;MessagePage page;};
+struct BoundConnectionChildHistory {ConnectionBindingIdentity binding;std::string session_id,parent_id,child_id;std::vector<Message> messages;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
 struct BoundConnectionOperations {ConnectionBindingIdentity binding;std::string session_id,run_id;std::vector<Operation> operations;};
@@ -60,6 +61,7 @@ public:
     BoundConnectionMessages messages(std::string session,std::int64_t before_sequence,std::int64_t count)const;
     BoundConnectionRun open_run(std::string id)const;
     BoundConnectionRunMessages run_messages(std::string session,std::string run,std::int64_t before_sequence,std::int64_t count)const;
+    BoundConnectionChildHistory child_history(std::string session,std::string parent,std::string child)const;
     BoundConnectionRun start_run(std::string id,std::string session,std::string prompt)const;
     BoundConnectionRun start_run(ConnectionRunRequest request)const;
     void cancel_run(const std::string& id)const;

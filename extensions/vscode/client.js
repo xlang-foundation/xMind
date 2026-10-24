@@ -74,6 +74,7 @@ class BackendClient {
   #connectionAdmissionSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
+  #connectionChildHistorySupported=false;
   #connectionCapture;
   #connectionClosed=false;
   #connectionClosing;
@@ -115,6 +116,8 @@ class BackendClient {
     else if(this.#connectionOperationsSupported)throw new Error('The backend operation protocol changed. Reconnect before deciding work.');
     if(health&&Object.hasOwn(health,'local_connection_history')){if(health.local_connection_history!==1||!this.#connectionAdmissionSupported)throw new Error('Unsupported captured history protocol.');this.#connectionHistorySupported=true;}
     else if(this.#connectionHistorySupported)throw new Error('The backend history protocol changed. Reconnect before reading history.');
+    if(health&&Object.hasOwn(health,"local_connection_child_history")){if(health.local_connection_child_history!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured child history protocol.");this.#connectionChildHistorySupported=true;}
+    else if(this.#connectionChildHistorySupported)throw new Error("The backend child history protocol changed. Reconnect before reading children.");
     return health;
   }
   async #captureConnection(){
@@ -236,7 +239,7 @@ class BackendClient {
   async graph(id) { const value=await this.request(`/v1/graph-runs/${encodeURIComponent(id)}`);if(value.context!==undefined)validateGraphContext(value.context,value.run);return value; }
   graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
-  graphChildHistory(root,child) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
+  graphChildHistory(root,child,session) { return this.#connectionChildHistorySupported?this.#capturedChildHistory(root,child,session):this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
   graphInput(root,node,input_json,expected_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
   graphTreeInput(root,owner,node,input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision) { return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/invocations/${encodeURIComponent(owner)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision,expected_owner_checkpoint_revision}); }
   providerConfiguration() { return this.request('/v1/provider/configuration'); }
@@ -436,7 +439,16 @@ class BackendClient {
     }});
   }
   ownedChildren(id) { return this.request(`/v1/runs/${encodeURIComponent(id)}/children`); }
-  ownedChildHistory(parent,child) { return this.request(`/v1/runs/${encodeURIComponent(parent)}/children/${encodeURIComponent(child)}/history`); }
+  async #capturedChildHistory(parent,child,session){
+    executionIdentity(parent);executionIdentity(child);executionIdentity(session);const capture=await this.#captureConnection();
+    if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured child history connection changed.");
+    const value=await this.request('/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(session)+'/runs/'+encodeURIComponent(parent)+'/children/'+encodeURIComponent(child)+'/history',{});
+    exactFields(value,['binding','session_id','parent_id','child_id','messages']);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key])||value.session_id!==session||value.parent_id!==parent||value.child_id!==child)throw new Error("Child history receipt belongs to another connection or owner.");
+    if(!Array.isArray(value.messages))throw new Error("Invalid captured child history");let sequence=0;for(const message of value.messages){if(!message||!Number.isSafeInteger(message.seq)||message.seq<=sequence||message.id!==`msg_${message.seq}`||typeof message.role!=='string'||!message.data||typeof message.data!=='object'||Array.isArray(message.data))throw new Error("Invalid captured child history message");sequence=message.seq;}
+    return value.messages;
+  }
+  ownedChildHistory(parent,child,session) { return this.#connectionChildHistorySupported?this.#capturedChildHistory(parent,child,session):this.request(`/v1/runs/${encodeURIComponent(parent)}/children/${encodeURIComponent(child)}/history`); }
   treeEvents(id,after=0) { if(!Number.isSafeInteger(after)||after<0)throw new Error('Invalid tree event cursor');return this.request(`/v1/runs/${encodeURIComponent(id)}/tree-events?after=${after}`); }
   async #boundRun(id,cancel=false){
     executionIdentity(id);const capture=await this.#captureConnection();
@@ -646,7 +658,7 @@ async function observeOwnedRun(client,run,session,after){
   for(const child of children){validateOwnedChild(child,run.id,session);if(owned.has(child.run.id))throw new Error('Owned child identity changed');owned.add(child.run.id);}
   for(const event of events)if(!owned.has(event.run_id))throw new Error('Unowned tree event');
   const histories={},operations=[];
-  for(const child of children){const history=await client.ownedChildHistory(run.id,child.run.id);if(!Array.isArray(history))throw new Error('Invalid owned child history');histories[child.run.id]=history;}
+  for(const child of children){const history=await client.ownedChildHistory(run.id,child.run.id,session);if(!Array.isArray(history))throw new Error('Invalid owned child history');histories[child.run.id]=history;}
   for(const id of owned){const batch=await client.operations(id,session);if(!Array.isArray(batch)||batch.some(value=>!value||value.run_id!==id))throw new Error('Owned operation identity changed');operations.push(...batch);}
   return {children,histories,events,operations,cursor,caughtUp};
 }

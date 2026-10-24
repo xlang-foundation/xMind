@@ -50,6 +50,14 @@ BoundConnectionRunMessages CapturedLocalConnection::run_messages(std::string ses
     if(messages.size()>retained){messages.erase(messages.begin(),messages.end()-retained);page.next_before_sequence=messages.front().sequence;}
     page.messages=std::move(messages);return {identity_,std::move(session),std::move(run),std::move(page)};
 }
+BoundConnectionChildHistory CapturedLocalConnection::child_history(std::string session,std::string parent,std::string child)const{
+    auto life=context_->enter();const auto owner=context_->store.run(parent).get();
+    if(owner.session_id!=session)throw Conflict("Child history differs from its captured session");
+    std::vector<Message> history;
+    if(owner.graph_root){(void)context_->store.graph_run(parent).get();const auto run=context_->store.run(child).get();if(run.parent_id!=parent||run.session_id!=session)throw NotFound("Child does not belong to this graph");history=context_->store.run_history(child).get();}
+    else history=context_->store.owned_child_history(parent,child).get();
+    return {identity_,std::move(session),std::move(parent),std::move(child),std::move(history)};
+}
 Run submit_local_connection_run(RunExecutor& executor,ConnectionRunRequest request){
     if(!request.files.empty()&&(!request.workspace||request.workspace->revision<1))throw std::invalid_argument("File attachments require the observed workspace membership revision");
     if(request.workspace)validate_workspace_admission(*request.workspace,executor.execution_workspace());

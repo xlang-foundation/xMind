@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "scope": "Browser and extension child-history adapters use a captured native Runs.ChildHistory(session,parent,child) service. Existing ordinary-root ultimate-child and graph direct-parent checks remain backend-owned.",
+  "gate": {
+    "recordedAt": "2026-10-24T04:09:17.227Z",
+    "sourceParent": "fcdc721cca50aaff5f669100e4f1fe90bb500d3a",
+    "sourcePatchSha256": "28f56cfe020344fca736af535484c4e72eddfd25ae5360b5e3e5d5404b5a3717",
+    "build": {
+      "pid": 11232,
+      "launchedAt": "2026-10-24T04:08:04.186Z",
+      "completedAt": "2026-10-24T04:09:08.215Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0c8e9a491502e6d61e192b44dc73b391893684830734ecfbd0a791982934633e"
+    },
+    "test": {
+      "pid": 39344,
+      "launchedAt": "2026-10-24T04:09:10.696Z",
+      "completedAt": "2026-10-24T04:09:14.845Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b82c67bb34ef2ed5493758138c32cc5d05c4597aaacfe24a44d1e5c58e2a3bdd"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 4.11,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "5e0f54888c4b1dc5893f14e213d3f82b155f2b41e9b3dfbc18c9c11718467bb7",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": [
+    {
+      "name": "extension",
+      "tests": 471,
+      "passed": 471,
+      "failed": 0,
+      "durationMs": 3820.215,
+      "logSha256": "b99ae7ccd3e03492ed58ec179efef0158fe38b9ab6dd8e6e80bc73d8530f21ca"
+    },
+    {
+      "name": "browser",
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "durationMs": 17512.1227,
+      "logSha256": "20ca2c87a88f74cf340c1e9b600496619b5c833ad4adbfdf80be373b5602029a"
+    }
+  ],
+  "clientFiles": {
+    "extensions/vscode/client.js": "75137010c8b0e2f27a9ba89c74060f2d36644c779441505777eef6cdb29d59ac",
+    "extensions/vscode/extension.js": "bcaaeeff2ac8584f3b23374cfff284568593b54cf23595b63b41204b7894dd5f",
+    "extensions/vscode/tests/client.test.js": "b43234d4d22945f35a5ee41b6e507a38dfd7c2c129105e71c241f7c18a7ed468",
+    "views/browser/browser.js": "1e813e6f902a5659148a61a626f4e88a9903541e2dab8a05d005a85cf496a4f0"
+  },
+  "verified": [
+    "SDK lifetime fixture reads a real repository-created graph child with only its execution-owned objective; wrong session/parent and retired objects refuse.",
+    "Origin-bound HTTP view reads the same scoped native child history and rejects foreign session and root-as-child.",
+    "Shared client routes ordinary and graph child histories through the captured handle when explicitly advertised.",
+    "Receipts must match connection, session, parent and child; protocol downgrade and closed binding reject without legacy retry.",
+    "Browser and extension graph call sites and shared ordinary-child observer pass the active session."
+  ],
+  "limitations": [
+    "Native focused3/3, extension471 and browser165 are separate scopes; no rendered editor/browser acceptance is implied.",
+    "Graph/model/command/stream routing, authenticated remote binding and enrollment remain incomplete.",
+    "Prior complete173 run retains its rust-analyzer failure. This checkpoint is not a full-suite qualification, package or installation.",
+    "Installed0.1.64, protected user state and completed tasks remain unchanged; no paid inference or CPython."
+  ]
+}

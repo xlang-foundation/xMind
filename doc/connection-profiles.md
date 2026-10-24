@@ -320,3 +320,9 @@ xmind ipc --endpoint lrpc:PORT connections run-history local PROFILE_REV SESSION
 ```
 
 The HTTP adapter is `POST /v1/connection-bindings/{binding}/sessions/{session}/runs/{run}/history` with `{ "before_sequence": 0, "count": 100 }`. Owner and origin-bound view handles remain principal-scoped. Its response matches the SDK page. [Focused evidence](evidence/captured-run-history-20261023.json) does not qualify a complete suite, installation or authenticated remote execution.
+
+## Captured child-history service and shared clients
+
+`binding.Runs().ChildHistory(session_id, parent_id, child_id)` returns `binding`, `session_id`, `parent_id`, `child_id` and chronological `messages`. The backend checks the session and existing root/child relation. Ordinary root reads retain ultimate-root admission checks; graph reads require the direct graph parent. Child messages remain execution-owned and exclude the parent conversation. SDK serialization stays inside xlang3.
+
+HTTP uses `POST /v1/connection-bindings/{binding}/sessions/{session}/runs/{parent}/children/{child}/history` with `{}`. It retains the handle principal/origin checks. Health advertises `local_connection_child_history:1` alongside captured admission support. Browser and extension use their shared client to negotiate support, pass the active session and validate all receipt identities. Once negotiated, protocol loss, a bad receipt or a closed handle does not retry through a compatibility route. Old backends without that capability retain their established route. [Scope and validation](evidence/captured-child-history-clients-20261023.json).

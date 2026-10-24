@@ -112,3 +112,7 @@ Actual source84965636 complete inventory finishes172/173 in777.91s; the rust-ana
 ## 2026-10-23 captured run-history adapter
 
 Captured native SDK/HTTP/CLI run-history paging now passes3/3 in3.66s with adjacent agent HTTP/local-view2/2 in72.02s. Root live-session and child execution-owned semantics remain unchanged; foreign ownership/cursors and retired SDK objects reject. [Receipt](../doc/evidence/captured-run-history-20261023.json). Remaining client graph/model/command/stream and remote/enrollment work stays open; prior full173 failure and rendered VS Code remain unqualified. Installed64 is unchanged.
+
+## 2026-10-23 captured child-history client integration
+
+Shared browser/extension ordinary and graph child-history reads now use the captured native service with active session and parent/child receipt validation. Native3/3 (4.11s), extension471 and browser165 pass; [receipt](../doc/evidence/captured-child-history-clients-20261023.json) distinguishes SDK/HTTP and client fixture scopes. No rendered VS Code or full-suite/install acceptance is implied. Remaining command/graph/model/stream and remote/enrollment work stays open, as does the retained full173 rust-analyzer failure.

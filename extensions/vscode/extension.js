@@ -243,7 +243,7 @@ async function activate(context) {
     const root=await client.graph(id);if(root.run.id!==id||root.run.session_id!==sessionId)throw new Error('Graph observation identity changed.');const snapshot=await observeGraphTree(client,root,sessionId),children=snapshot.children;
     if(version!==generation||!panel)return;const owned=new Map(children.map(c=>[c.id,c]));
     for(const event of events)if(event.run_id!==id&&!owned.has(event.run_id))throw new Error('Event does not belong to the observed graph.');
-    for(const child of children){if(snapshot.definitions.get(child.id)?.type!=='agent')continue;const history=await client.graphChildHistory(child.parent_id,child.id);if(version!==generation||!panel)return;childHistory.set(child.id,{state:child.state,history});}
+    for(const child of children){if(snapshot.definitions.get(child.id)?.type!=='agent')continue;const history=await client.graphChildHistory(child.parent_id,child.id,sessionId);if(version!==generation||!panel)return;childHistory.set(child.id,{state:child.state,history});}
     const operations=[];for(const child of children){operations.push(...await client.operations(child.id,sessionId));if(version!==generation||!panel)return;}
     graphSnapshot=root;graphChildren=owned;graphPaths=snapshot.paths;graphOwners=new Map([[root.run.id,root],...snapshot.graphs.map(value=>[value.record.run.id,value.record])]);
     post({type:'graph',record:root,children,graphs:snapshot.graphs,treeInput:health?.graph_tree_human_input===true,histories:Object.fromEntries([...childHistory].filter(([child])=>owned.has(child)).map(([child,value])=>[child,value.history]))});

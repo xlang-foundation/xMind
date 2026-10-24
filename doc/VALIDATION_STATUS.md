@@ -1,3 +1,24 @@
+## Shared browser/extension child history uses captured native services — 2026-10-23
+
+The captured Runs subobject adds ChildHistory(session, parent, child). Ordinary
+roots retain the repository ultimate-child check; graph owners retain direct
+child linkage. HTTP uses the same service with origin-bound view handles.
+
+Browser/extension graph call sites and their shared ordinary-child observer
+now supply the active session. After explicit protocol negotiation, reads use
+the captured connection and validate connection/session/parent/child receipts.
+Mismatches, downgrade and closed handles reject without a legacy retry.
+Older backends retain their established compatibility path.
+
+Native SDK lifetime/API/HTTP3 pass in4.11s with frozen source/dependency/binary
+sets and hashes. Extension471 and browser165 tests pass on the recorded client
+source hashes. These are separate test scopes, not rendered UI acceptance.
+[Receipt](evidence/captured-child-history-clients-20261023.json).
+
+Prior complete173 rust-analyzer failure and remaining graph/model/command/stream,
+remote/enrollment and rendered VS Code requirements remain open. Installed64
+is unchanged; no new package or installation is qualified.
+
 ## Captured run-history reads across SDK, HTTP and CLI — 2026-10-23
 
 The captured Runs subobject now exposes paged History(session, run, before,

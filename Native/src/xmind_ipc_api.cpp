@@ -94,11 +94,12 @@ struct BoundRunsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundRunsApi()=default;explicit BoundRunsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
     void check()const{if(!state)throw RunUnavailable("Unbound connection service");}
     X::Value Open(std::string id){return api_call([&]{check();return bound_value(Host(),state->open_run(id));});}
+    X::Value ChildHistory(std::string session,std::string parent,std::string child){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::bound(state->child_history(session,parent,child)));});}
     X::Value History(std::string session,std::string run,std::int64_t before,std::int64_t count){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::bound(state->run_messages(session,run,before,count)));});}
     X::Value Start(std::string id,std::string session,std::string prompt){return api_call([&]{check();return bound_value(Host(),state->start_run(id,session,prompt));});}
     void Cancel(std::string id){api_call([&]{check();state->cancel_run(id);});}
     X::Value Submit(X::Value request){return api_call([&]{check();return bound_value(Host(),state->start_run(connection_input::run_request(sdk_values::from_value(request))));});}
-    BEGIN_PACKAGE(BoundRunsApi) APISET().AddFunc<4>("History",&BoundRunsApi::History);APISET().AddFunc<1>("Submit",&BoundRunsApi::Submit);APISET().AddFunc<1>("Open",&BoundRunsApi::Open);APISET().AddFunc<3>("Start",&BoundRunsApi::Start);APISET().AddFunc<1>("Cancel",&BoundRunsApi::Cancel); END_PACKAGE
+    BEGIN_PACKAGE(BoundRunsApi) APISET().AddFunc<3>("ChildHistory",&BoundRunsApi::ChildHistory);APISET().AddFunc<4>("History",&BoundRunsApi::History);APISET().AddFunc<1>("Submit",&BoundRunsApi::Submit);APISET().AddFunc<1>("Open",&BoundRunsApi::Open);APISET().AddFunc<3>("Start",&BoundRunsApi::Start);APISET().AddFunc<1>("Cancel",&BoundRunsApi::Cancel); END_PACKAGE
 };
 struct BoundOperationsApi {
     std::shared_ptr<CapturedRunOperations> state;BoundOperationsApi()=default;explicit BoundOperationsApi(std::shared_ptr<CapturedRunOperations> value):state(std::move(value)){}
