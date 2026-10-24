@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Planning-owner test-only phase diagnostics qualified — 2026-10-24
+
+Ledger fixture now flushes per-case worker-ready, execution-returned and physical-drain begin/exit stages, including replacement-worker resume drain. All8 ready/8 execution/6 ordinary-drain pairs/2 resumed-drain pairs appear. Existing ledger passes42.46s and nested-human passes30.59s,2/2 total73.07s, with full tracked source/SDK/pure-library/dependency/binary closures and file sets unchanged. No deadline, production source, retry or runtime policy changed. Native12fc matches installed73. [Receipt](evidence/planning-owner-phase-diagnostics-20261024.json), [phase trace](evidence/planning-owner-phase-diagnostics-20261024.log), [focused log](evidence/planning-owner-phase-diagnostics-ctest.log).
+
+This is diagnostic qualification, not a full new native pass or a hosted failure fix. Hosted deadline depletion and other CI failures remain open; installed73 unchanged. Full goal active.
+
 ## Hosted trusted CLI authentication and ledger deadline depletion identified — 2026-10-24
 
 Official source58e7eb63 artifact12570054817 verifies native_mcp_oauth_trusted_contract passed. The exact source driver calls separate SDK and CLI hosts and asserts two refused/two accepted negotiations before its successful terminal marker. Each host covers wrong credential, accepted grant, stale retry without extra HTTP, encrypted database reopen and Local retention. Positive CLI authentication is now observed; positive HTTP and remote routing remain open. Full hosted suite remains172/176. [Receipt](evidence/hosted-native-58e7eb63-sdk-cli-and-deadline-20261024.json), [trusted test log](evidence/hosted-native-58e7eb63-trusted-sdk-cli.log).
