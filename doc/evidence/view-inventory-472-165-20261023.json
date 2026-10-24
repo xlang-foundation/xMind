@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "scope": "Correct the explicit hosted view-suite inventory after two added captured child-history/graph-admission contracts; keep exact count, zero-skip/failure and frozen source/assets checks.",
+  "hostedFailure": {
+    "runId": 40061297750,
+    "jobId": 120775180900,
+    "sourceRevision": "7c7408ada0e59fecdcf86223e2c346925e2e1dd2",
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/40061297750",
+    "conclusion": "failure",
+    "observed": {
+      "extension": {
+        "passed": 471,
+        "failed": 0
+      },
+      "browser": {
+        "passed": 165,
+        "failed": 0
+      }
+    },
+    "expected": {
+      "extension": 470,
+      "browser": 165
+    },
+    "sourceAndAssetBytesUnchanged": true,
+    "officialLogSha256": "f53e03389fa496af38c8991973e4aee767f729d3b58b9a2e081a12200b1a04ff",
+    "reason": "All cases passed; gate correctly rejected the stale expected inventory."
+  },
+  "localGate": {
+    "sourceRevision": "a4f5b040977e3df28e493b598a20a5af126ee9db",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 472,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 472,
+      "passed": 472,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "launcher": {
+    "ciSourceSha256": "7a126b661a02766777cd5e60588845dd1c1341f24cc094486a550cedeb1bed34",
+    "localLauncherSha256": "d6e34b54da2954fb55eefdf485f57706a9c4762be714529ecb72200b01574efd",
+    "differences": [
+      "GitHub-only guard replaced after actual local native/benchmark process audit",
+      "Evidence/assets written to fresh isolated repository directory"
+    ],
+    "githubActionsImpersonated": false
+  },
+  "limitations": [
+    "This is a benchmark-guarded local execution of CI gate logic with an explicit local guard/output adaptation; it is not a hosted CI pass. GITHUB_ACTIONS was not impersonated.",
+    "No test was removed, skipped or recounted dynamically to accept a partial suite. The two added named contracts are reviewed in client.test.js.",
+    "Adapter/controller fixtures do not establish native inference, rendered browser/editor acceptance, full173 qualification or installation.",
+    "Prior native full-suite rust-analyzer failure and remaining graph/model/command/stream, remote/enrollment and rendered VS Code work stay open. Installed0.1.64 is unchanged."
+  ]
+}

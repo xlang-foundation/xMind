@@ -120,3 +120,7 @@ Shared browser/extension ordinary and graph child-history reads now use the capt
 ## 2026-10-23 captured graph admission
 
 Captured SDK Graphs.Submit and shared HTTP/browser/extension admission now preserve native catalog revision and workspace/provider/attachment dispatch. A fresh actual tool-only graph completes a native read and returns captured child history without provider inference for that graph. Final native4/4 (19.01s), extension472 and browser165 pass; [receipt](../doc/evidence/captured-graph-admission-20261023.json) separates recording and real execution scopes. Graph catalog/detail/human/resume/stream, commands/models, remote/enrollment, full-suite Rust failure and rendered VS Code stay open. Installed64 remains unchanged.
+
+## 2026-10-23 hosted view inventory correction
+
+Hosted7c7408ad view cases all passed471/165, but the gate expected470 extension cases and correctly failed inventory matching. Current source adds another reviewed contract, so the expected inventory is corrected to472/165 without weakening skips/failures or byte-closure checks. Benchmark-guarded local CI logic passes the complete472/165 set with unchanged71 source/vendor files and18 assets. [Receipt](../doc/evidence/view-inventory-472-165-20261023.json) retains the official hosted failure; this is not hosted CI-green, rendered IDE, native full-suite or install acceptance.

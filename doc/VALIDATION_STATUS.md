@@ -1,3 +1,21 @@
+## View CI inventory follows the two added client contracts — 2026-10-23
+
+Official hosted view run40061297750 on7c7408ad fails its inventory gate:
+all471 extension and165 browser cases pass, but the expected extension count
+was still470. No skipped/failing test or changed source/assets caused that
+result. The later graph-admission contract makes the current reviewed
+inventory472 extension and165 browser cases. Tools/ci-views.mjs now declares
+those exact counts and retains the existing complete-inventory/frozen-input
+and zero-skip/failure checks.
+
+A benchmark-guarded local execution of the CI gate logic passes472/165 with
+71 source/vendor files and18 built browser assets unchanged. Only the explicit
+runner guard and fresh evidence/asset destinations differ from CI; this does
+not impersonate or qualify a GitHub run. [Receipt](evidence/view-inventory-472-165-20261023.json).
+
+Native full-suite Rust failure, remaining captured APIs/protocol work and
+rendered VS Code acceptance remain open. Installed64 is unchanged.
+
 ## Captured graph admission reaches the actual native executor — 2026-10-23
 
 The registered binding adds a Graphs subobject with Submit(dictionary).
