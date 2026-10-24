@@ -1,5 +1,9 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Remote protocol implementation status reconciled — 2026-10-24
+
+Generic v1 proposal now distinguishes implemented native authentication/storage/status and registered SDK/CLI/HTTP adapters from still-proposed remote execution/enrollment/fencing. Hosted positive SDK+CLI scope is linked; positive HTTP and remote routing remain open. This corrects stale proposal prose, not a new runtime capability. Local planning trace shows ordinary physical drains8-17ms; [derived timings](evidence/planning-owner-drain-analysis-20261024.json) do not establish a hosted cause or justify production timeout changes. Existing source264cadb4 hosted run40118270287 remains confirmed live. Installed73 unchanged; full goal active.
+
 ## Planning-owner test-only phase diagnostics qualified — 2026-10-24
 
 Ledger fixture now flushes per-case worker-ready, execution-returned and physical-drain begin/exit stages, including replacement-worker resume drain. All8 ready/8 execution/6 ordinary-drain pairs/2 resumed-drain pairs appear. Existing ledger passes42.46s and nested-human passes30.59s,2/2 total73.07s, with full tracked source/SDK/pure-library/dependency/binary closures and file sets unchanged. No deadline, production source, retry or runtime policy changed. Native12fc matches installed73. [Receipt](evidence/planning-owner-phase-diagnostics-20261024.json), [phase trace](evidence/planning-owner-phase-diagnostics-20261024.log), [focused log](evidence/planning-owner-phase-diagnostics-ctest.log).

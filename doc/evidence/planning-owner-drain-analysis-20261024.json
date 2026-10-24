@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-24T19:21:41.738Z",
+  "scope": "Derived local timings, not a hosted causal proof",
+  "sourceTrace": "doc/evidence/planning-owner-phase-diagnostics-20261024.log",
+  "drains": [
+    {
+      "case": "owner-runner-accepted",
+      "resumed": false,
+      "ms": 15
+    },
+    {
+      "case": "owner-runner-counted",
+      "resumed": false,
+      "ms": 8
+    },
+    {
+      "case": "owner-code-approved-plain",
+      "resumed": false,
+      "ms": 17
+    },
+    {
+      "case": "owner-code-approved-counted",
+      "resumed": false,
+      "ms": 16
+    },
+    {
+      "case": "owner-code-denied-plain",
+      "resumed": false,
+      "ms": 11
+    },
+    {
+      "case": "owner-code-denied-counted",
+      "resumed": false,
+      "ms": 8
+    },
+    {
+      "case": "owner-code-human-plain",
+      "resumed": true,
+      "ms": 7
+    },
+    {
+      "case": "owner-code-human-counted",
+      "resumed": true,
+      "ms": 9
+    }
+  ],
+  "ordinaryDrainMinMs": 8,
+  "ordinaryDrainMaxMs": 17,
+  "interpretation": "Local drain latency does not explain aggregate hosted planning deadline depletion; do not change production timeouts or broad xlang3 performance based on this trace.",
+  "productChanged": false
+}

@@ -1,19 +1,24 @@
 # Generic remote connection v1 proposal
 
-Status: proposed for architecture review, not deployed. The bounded native
-negotiation-response validator and bounded native negotiation client are
-implemented as standalone connector components. The client reuses native HTTP
-transport and has isolated loopback-peer coverage; trusted TLS/authentication
-acceptance and runtime activation remain incomplete. A backend-private encrypted
-credential/grant store now has isolated xlang3/SQLite coverage. The native
-authentication service composes verified-HTTPS negotiation with encrypted
-publication, with controlled injected-exchange tests for failure/race behavior.
-Registered `Connections.Capabilities/Authenticate` now expose the service through
-ordinary xlang3 SDK methods, with bounded refusal/lifetime coverage. Actual
-trusted-TLS-to-storage and positive separate-process SDK authentication remain open. This is
-an OSS client/worker contract proposal. It makes no claim about any existing
-Nexus endpoint, authentication system, database or scheduler. An existing public
-server contract, if supplied, must be reconciled before implementation.
+Status: remote execution, enrollment and worker fencing remain proposed and
+not deployed. Native verified-HTTPS negotiation, strict response validation,
+encrypted combined credential/grant storage through embedded xlang3/SQLite,
+and cached authentication observation are implemented. The registered
+Connections subobject exposes Authenticate and Authentication using ordinary
+xlang3 SDK values and methods; CLI and native HTTP adapters use that service.
+
+Actual hosted trusted-TLS authentication is verified through separate SDK and
+CLI clients, including wrong-credential refusal, one grant per client, stale
+retry without another negotiation, encrypted database reopen and unchanged
+Local selection. See [official hosted evidence](evidence/hosted-native-58e7eb63-sdk-cli-and-deadline-20261024.json).
+Positive native HTTP authentication remains unverified; its refusal/input and
+rendered Settings paths have separate acceptance. Authentication never enables
+remote command routing or creates workspace enrollment.
+
+This remains an OSS client/worker contract proposal for the unimplemented
+remote operations below. It makes no claim about any existing Nexus endpoint,
+authentication system, database or scheduler. An existing public server
+contract, if supplied, must be reconciled before implementation.
 
 ## Object boundary
 
@@ -22,7 +27,8 @@ objects and method calls between applications and the local backend:
 
 ```text
 xmind.Connections(owner_token)
-  .Authenticate(profile_id, expected_profile_revision, request)  [proposed]
+  .Authenticate(profile_id, expected_profile_revision, request)  [implemented]
+  .Authentication(profile_id, expected_profile_revision)         [implemented]
   .Open(profile_id, expected_profile_revision)
       .Identity()
       .Sessions() / .Runs() / .Graphs() / .Models() / .Commands()
@@ -238,5 +244,6 @@ Implementation must preserve current Local behavior and add these proofs:
 
 Architecture review should settle the proposed bearer bootstrap, endpoint
 namespace and exact typed schemas before production remote activation. This
-document supplies a reviewable design; none of its proposed APIs are advertised
-as current runtime capabilities.
+document supplies a reviewable design. Only the authentication APIs identified
+as implemented above are current capabilities; proposed routing/enrollment
+APIs are not advertised as available.
