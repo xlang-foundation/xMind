@@ -84,6 +84,7 @@ class BackendClient {
   #connectionWorkspaceSupported=false;
   #connectionWorkspaceFilesSupported=false;
   #connectionModelSelectionSupported=false;
+  #connectionAgentsSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionPermissionCatalogSupported=false;
@@ -163,6 +164,8 @@ class BackendClient {
     else if(this.#connectionTreeStreamSupported)throw new Error("The backend tree stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
     else if(this.#connectionGraphControlSupported)throw new Error("The backend graph control protocol changed. Reconnect before continuing graphs.");
+    if(health&&Object.hasOwn(health,"local_connection_agents")){if(health.local_connection_agents!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured agent protocol.");this.#connectionAgentsSupported=true;}
+    else if(this.#connectionAgentsSupported)throw new Error("The backend agent protocol changed. Reconnect before selecting agents.");
     return health;
   }
   async #captureConnection(){
@@ -412,13 +415,17 @@ class BackendClient {
     if(!observed.editable)throw new Error('Wait for this conversation to become idle before changing skills.');
     return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`,{ids,expected_revision:observed.revision,expected_workspace_id:observed.workspace_id,expected_workspace_authority_id:observed.authority_id}),id);
   }
-  async agentDefinitions() { return validateAgentCatalogue(await this.request('/v1/agents')); }
-  async sessionAgent(id,catalogue) { executionIdentity(id);return validateSessionAgent(await this.request(`/v1/sessions/${encodeURIComponent(id)}/agent`),id,catalogue); }
+  async #agentRequest(session,body){
+    if(!this.#connectionAgentsSupported)return this.request(session?'/v1/sessions/'+encodeURIComponent(session)+'/agent':'/v1/agents',body);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured agent connection changed.");const value=await this.request('/v1/connection-bindings/'+capture.id+(session?'/sessions/'+encodeURIComponent(session)+'/agent':'/agents'),body);if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured agent connection changed.");exactFields(value,session?['binding','session_id','revision','editable','selected']:['binding','agents']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error("Agent response belongs to another connection");const {binding,...result}=value;return result;
+  }
+  async agentDefinitions() { return validateAgentCatalogue(await this.#agentRequest()); }
+  async sessionAgent(id,catalogue) { executionIdentity(id);return validateSessionAgent(await this.#agentRequest(id),id,catalogue); }
   async replaceSessionAgent(id,definition,observed,catalogue) {
     executionIdentity(id);if(!observed?.editable||!Number.isSafeInteger(observed.revision)||observed.revision<0)throw new Error('Wait for this conversation to become idle before changing its agent.');
     const selected=definition===undefined?undefined:catalogue?.agents?.find(item=>item.id===definition.id&&item.revision===definition.revision);
     if(definition!==undefined&&!selected)throw new Error('Choose an agent from the current backend catalogue.');
-    const result=await this.request(`/v1/sessions/${encodeURIComponent(id)}/agent`,{agent_id:selected?.id??null,agent_revision:selected?.revision??0,expected_revision:observed.revision});
+    const result=await this.#agentRequest(id,{agent_id:selected?.id??null,agent_revision:selected?.revision??0,expected_revision:observed.revision});
     return validateSessionAgent(result,id,catalogue);
   }
   async #sessionModelRequest(id,body) {

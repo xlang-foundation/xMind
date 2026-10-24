@@ -1,0 +1,41 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  28: native_xmind_ipc_lifetime_contract
+1/4 Test  #28: native_xmind_ipc_lifetime_contract .........   Passed    0.68 sec
+    Start  29: native_xmind_ipc_api_contract
+2/4 Test  #29: native_xmind_ipc_api_contract ..............***Failed    3.78 sec
+Retained root API fixture: D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-root-api-MsjpnB; backend output: Provider credential reference: provider-48c411c102e1ae96706c184258c3de50
+xMind API listening on lrpc:54445
+xMind Server listening on http://127.0.0.1:61237
+; 
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+401 !== 200
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/xmind_ipc_api_contract.mjs:82:83
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 401,
+  expected: 200,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+    Start 130: native_agent_http_contract
+3/4 Test #130: native_agent_http_contract .................   Passed    9.41 sec
+    Start 166: native_connection_profiles_http_contract
+4/4 Test #166: native_connection_profiles_http_contract ...   Passed    1.64 sec
+
+75% tests passed, 1 tests failed out of 4
+
+Total Test time (real) =  15.54 sec
+
+The following tests FAILED:
+	 29 - native_xmind_ipc_api_contract (Failed)
+Errors while running CTest

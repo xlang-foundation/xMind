@@ -397,7 +397,7 @@ async function activate(context) {
     const runs = await client.runs(id);
     if (version !== generation || !panel) return;
     await refreshSessionPermissions(client,id,version);schedulePermissionRefresh(version);
-    const previousProfile=profileController?.state;await profileController?.refresh();
+    const previousProfile=profileController?.state;if(health?.provider_profile_admission!==false||health?.graph_provider_profile_admission===true)await profileController?.refresh();
     if(version!==generation||!panel)return;
     if(previousProfile&&(previousProfile.revision!==profileController.state?.revision||previousProfile.active!==profileController.state?.active)){
       const current=await capabilities();if(version!==generation||!panel)return;health=current.health;modelCatalogue=current.catalogue;selectedModel=chooseModel(modelCatalogue);post({type:'capabilities',execution:health.agent_execution,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,models:modelCatalogue.models,model:selectedModel});

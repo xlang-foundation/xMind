@@ -32,3 +32,8 @@ Preserve these historical identities and constraints verbatim.
 ## Preserved candidate68 qualification guidance
 
 - Candidate68 first-send approval/read/revoke and matching-native owner reuse pass; completed fixtures in doc/evidence/candidate-0.1.68-first-send-and-reuse-20261024.json must NEVER replay. Installation/preservation is pending; keep its live handle.
+
+
+## Preserved candidate67 coding guidance before named-agent qualification
+
+- Candidate67 CLI41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b; browser157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b; handoff500cc07a8096747a157f468cb1b13f89/root9b490dc7a004889d2ad6fdfc46732dca completed. NEVER replay. See candidate-0.1.67-qualified-coding-20261024.json.

@@ -47,6 +47,20 @@ BoundConnectionProviders CapturedLocalConnection::import_providers(std::string p
 BoundConnectionProviders CapturedLocalConnection::providers()const{auto life=context_->enter();auto* setup=dynamic_cast<ProviderProfileSetup*>(context_->executor);if(!setup)throw RunUnavailable("Provider profiles are unavailable");return {identity_,setup->configuration(),setup->profile_routes()};}
 BoundConnectionProviders CapturedLocalConnection::select_provider(std::string id,std::int64_t revision)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();if(id.empty()||id.size()>256||id.find('\0')!=std::string::npos||revision<0||revision>=9007199254740991LL)throw std::invalid_argument("Invalid provider profile selection");auto* setup=dynamic_cast<ProviderProfileSetup*>(context_->executor);if(!setup)throw RunUnavailable("Provider profiles are unavailable");return {identity_,setup->select_profile(std::move(id),revision),setup->profile_routes()};}
 BoundConnectionModels CapturedLocalConnection::models()const{auto life=context_->enter();return {identity_,context_->executor?context_->executor->models():std::vector<std::string>{}};}
+BoundConnectionAgents CapturedLocalConnection::agents()const{
+    auto life=context_->enter();if(!context_->executor||!context_->executor->supports_agent_selection())throw RunUnavailable("Named agent selection is unavailable");
+    return {identity_,context_->executor->agent_definitions()};
+}
+BoundConnectionAgentDefinition CapturedLocalConnection::agent_definition(const std::string& id)const{
+    auto life=context_->enter();if(id.empty()||id.size()>64||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos)throw std::invalid_argument("Invalid named agent ID");
+    if(!context_->executor||!context_->executor->supports_agent_selection())throw RunUnavailable("Named agent definitions are unavailable");return {identity_,context_->executor->agent_definition(id)};
+}
+BoundConnectionSessionAgent CapturedLocalConnection::session_agent(const std::string& session)const{
+    auto life=context_->enter();if(!context_->executor||!context_->executor->supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");return {identity_,session,context_->executor->session_agent(session)};
+}
+BoundConnectionSessionAgent CapturedLocalConnection::select_session_agent(const std::string& session,ConnectionAgentSelectionRequest request)const{
+    auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Conversation agent selection is unavailable");return {identity_,session,select_local_connection_agent(*context_->executor,session,std::move(request))};
+}
 BoundConnectionModel CapturedLocalConnection::session_model(const std::string& session)const{auto life=context_->enter();if(!context_->executor||!context_->executor->supports_session_models())throw RunUnavailable("Conversation model selection is unavailable");return {identity_,session,context_->executor->session_model(session)};}
 BoundConnectionModel CapturedLocalConnection::select_session_model(const std::string& session,ConnectionModelSelectionRequest request)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();if(!context_->executor||!context_->executor->supports_session_models())throw RunUnavailable("Conversation model selection is unavailable");if(request.revision<0||request.revision>=9007199254740991LL||request.provider.revision<0||request.provider.revision>9007199254740991LL)throw std::invalid_argument("Invalid model selection revision");return {identity_,session,context_->executor->select_session_model(session,std::move(request.model),request.revision,std::move(request.provider))};}
 BoundConnectionSession CapturedLocalConnection::open_session(std::string id)const{auto life=context_->enter();return {identity_,context_->store.session(id).get()};}

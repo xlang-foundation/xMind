@@ -1,0 +1,594 @@
+{
+  "recordedAt": "2026-10-24T11:04:15.937Z",
+  "sourceParent": "dde1d693810caa36a054184c02541bed0c3ce3d9",
+  "nativePatchSha256": "26f6658daab000c409b7e43d7c3741f6adc97005a3c025ef1f1267bb5aacd4bd",
+  "native": {
+    "recordedAt": "2026-10-24T10:53:15.328Z",
+    "sourceParent": "dde1d693810caa36a054184c02541bed0c3ce3d9",
+    "sourcePatchSha256": "26f6658daab000c409b7e43d7c3741f6adc97005a3c025ef1f1267bb5aacd4bd",
+    "build": {
+      "pid": 26204,
+      "launchedAt": "2026-10-24T10:51:38.770Z",
+      "completedAt": "2026-10-24T10:52:53.685Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ec9edb736a1b3e109b51e10309e83ccca6c556ec942e66a5561c923d8459ffb9"
+    },
+    "test": {
+      "pid": 29688,
+      "launchedAt": "2026-10-24T10:52:56.346Z",
+      "completedAt": "2026-10-24T10:53:12.635Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0e97b9553816ba580ea2c03b358fac3b231ee3cb0984dee7f258fbc8d95b5d25"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 16.25,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "71bb71fbc40df53229c622267f78da921eb9cae2c0509a6f5ee54be91c02ec37",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "retainedInitialNativeFailure": {
+    "recordedAt": "2026-10-24T10:49:34.821Z",
+    "sourceParent": "dde1d693810caa36a054184c02541bed0c3ce3d9",
+    "sourcePatchSha256": "01238c4eb96584df9aadf7508c7ce35822d4fed4725cff3fda3a3db4bbcff301",
+    "build": {
+      "pid": 6100,
+      "launchedAt": "2026-10-24T10:47:21.379Z",
+      "completedAt": "2026-10-24T10:49:13.642Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c5418d76db1d1bbee8917cbbed4c9a596dab5abe2de555b1e3ab50554963058c"
+    },
+    "test": {
+      "pid": 33412,
+      "launchedAt": "2026-10-24T10:49:16.407Z",
+      "completedAt": "2026-10-24T10:49:31.991Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "4f45f7534a543d76282eb231ea2c7c102a69539930746e6b7ed9c6635e4ce630"
+    },
+    "total": 4,
+    "failed": 1,
+    "passed": 3,
+    "seconds": 15.54,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "5bab3ea8c88351a34c23dea7cd38b02dd36f3eac260ca3efaeb817f15146dbfd",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false,
+    "fixture": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-root-api-MsjpnB",
+    "cause": "Origin-bound view auth omitted exact captured agents paths; 401 before HTTP agent selection. SDK/lifecycle and compatibility tests passed."
+  },
+  "distinctSdkProcessProof": {
+    "backendPid": 37940,
+    "clientPids": [
+      10288,
+      25056,
+      27356,
+      30208,
+      36044,
+      33940,
+      2800,
+      28896,
+      33036,
+      31964,
+      18416,
+      36556,
+      36476,
+      27840,
+      29564,
+      31064,
+      38988,
+      10308,
+      24380,
+      2432,
+      4432,
+      21332,
+      2304,
+      7268,
+      26416,
+      27660,
+      21424,
+      40336,
+      38392,
+      22688,
+      39692,
+      40716,
+      36396,
+      35548,
+      24188,
+      27300,
+      8804,
+      36124,
+      35732,
+      26472,
+      39488,
+      38248,
+      24172,
+      16088,
+      31576,
+      37440,
+      13464,
+      41560,
+      33060,
+      29496,
+      29556,
+      31496,
+      13676,
+      38220,
+      20996,
+      10392,
+      39028,
+      37688,
+      27644,
+      29072,
+      41308,
+      29632,
+      35292,
+      38384,
+      17336,
+      26188,
+      24696,
+      26120,
+      28840,
+      35472,
+      40236,
+      35408,
+      5536,
+      41612,
+      35740,
+      25280,
+      6664,
+      20816,
+      29412,
+      30228,
+      2256,
+      18804,
+      30552,
+      35996,
+      9172,
+      5668,
+      37800,
+      25552,
+      41360,
+      25980,
+      25336,
+      14780,
+      36588,
+      32888,
+      33276,
+      38508,
+      35184,
+      11284,
+      6088,
+      6796,
+      17624,
+      38048,
+      41408,
+      26488,
+      11792,
+      34272,
+      16028,
+      31860,
+      28480,
+      17636,
+      8448,
+      18700,
+      38480,
+      39996,
+      40816
+    ],
+    "apiVersion": 1,
+    "transport": "xlang3-lrpc",
+    "actualUnifiedExecutable": true,
+    "verified": [
+      "Distinct SDK agent list/definition/select/clear with real imported definitions and zero added inference",
+      "Origin-bound captured HTTP agent selection, stale refusal and shared parsing",
+      "Root registered at backend startup",
+      "Native Host/Connections/Sessions/Runs subobjects",
+      "Distinct xmind.exe clients call SDK methods directly",
+      "Exact UTF-8 persisted session survives independent clients",
+      "Duplicate create and wrong authentication rejected",
+      "No unauthorized session created",
+      "Unknown run rejected",
+      "Captured run start/open/events and live cancellation use actual SDK service subobjects",
+      "Wrong-token and stale captured run admissions dispatch no model",
+      "SDK value catalog agrees with HTTP and persists UTF-8 metadata",
+      "Independent clients race one catalog revision; exactly one succeeds",
+      "Unauthenticated selection, wrong token, stale revision and credential fields rejected"
+    ],
+    "limitations": [
+      "No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate",
+      "No live provider or rendering acceptance"
+    ],
+    "passed": true
+  },
+  "agentMetadataSelectionAdditionalModelCalls": 0,
+  "clients": {
+    "sourceRevision": "dde1d693810caa36a054184c02541bed0c3ce3d9",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 488,
+      "browser": 171
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 488,
+      "passed": 488,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 171,
+      "passed": 171,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "nativeQualifiedProjectChangesAfterFocusedGate": [
+    "Tools/ci-views.mjs",
+    "extensions/vscode/extension.js",
+    "extensions/vscode/tests/extension-host.test.js",
+    "views/browser/browser.js",
+    "views/browser/tests/controller.test.cjs"
+  ],
+  "postGateChangesScope": "Only capability-aware selection refresh in browser/extension, their regressions and complete view test count; Native source and binary unchanged.",
+  "retainedRenderedFailure": {
+    "passed": false,
+    "reason": "Explicit New refreshes unavailable provider catalog on legacy direct executor before named-agent selection.",
+    "promptSubmitted": false,
+    "modelCalls": 0,
+    "tabClosed": true,
+    "ownedOwner": {
+      "pid": 40720,
+      "expectedBirth": "134373128271410106",
+      "observedAbsentAfterFixtureParentExit": true,
+      "noRetirementSignalSent": true,
+      "promptSubmitted": false,
+      "modelCalls": 0
+    },
+    "cause": "Both UI adapters unconditionally refreshed saved-provider catalog even when native saved-profile admission was explicitly unavailable. No prompt was submitted."
+  },
+  "rendered": {
+    "passed": true,
+    "nativeSha256": "71bb71fbc40df53229c622267f78da921eb9cae2c0509a6f5ee54be91c02ec37",
+    "nativeFocusedTests": 4,
+    "clientTests": {
+      "extension": 488,
+      "browser": 171
+    },
+    "renderedProof": {
+      "passed": true,
+      "sessionId": "176b0a02c00744308244d8183346f24a",
+      "runId": "511d0e1dfa7341a3a2f2610c4de5f4ed",
+      "explicitNewConversationReady": true,
+      "namedAgentSelectedThroughUI": true,
+      "actualModelGuidanceObserved": true,
+      "originalHistoryAndSelectedAgentRestoredAfterReload": true,
+      "selectionClearedThroughUI": true,
+      "selectionRevision": 2,
+      "promptSubmittedOnce": true,
+      "hiddenTabClosed": true,
+      "paidInference": false
+    },
+    "actualGuidanceObserved": true,
+    "modelCalls": 1,
+    "history": [
+      {
+        "data": {
+          "agent_profile": {
+            "id": "captured.reviewer",
+            "model_id": "agent-ui-fixture",
+            "revision": 1,
+            "tools": []
+          },
+          "content": "Confirm the captured named agent marker."
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Confirmed controlled named-agent guidance.",
+          "elapsed_ms": 26,
+          "first_token_ms": 22,
+          "model": "agent-ui-fixture",
+          "usage": {
+            "completion_tokens": 3,
+            "prompt_tokens": 7,
+            "total_tokens": 10
+          }
+        },
+        "id": "msg_2",
+        "role": "assistant",
+        "seq": 2
+      }
+    ],
+    "selection": {
+      "editable": true,
+      "revision": 2,
+      "selected": null,
+      "session_id": "176b0a02c00744308244d8183346f24a"
+    },
+    "status": {
+      "graph_root": false,
+      "id": "511d0e1dfa7341a3a2f2610c4de5f4ed",
+      "node_id": "",
+      "parent_id": "",
+      "session_id": "176b0a02c00744308244d8183346f24a",
+      "state": "completed"
+    },
+    "routes": [
+      {
+        "path": "/v1/workspaces",
+        "method": "GET",
+        "status": 404,
+        "receipt": {
+          "detail": "HTTP request rejected"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/6af419f073728ede27d425637f501b21/providers",
+        "method": "GET",
+        "status": 503,
+        "receipt": {
+          "detail": "Agent executor is unavailable"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/6af419f073728ede27d425637f501b21/agents",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "agents": [
+            {
+              "default": false,
+              "description": "Controlled rendered selection fixture",
+              "hidden": false,
+              "id": "captured.reviewer",
+              "mode": "primary",
+              "model_id": "agent-ui-fixture",
+              "name": "Captured Reviewer",
+              "permissions": [
+                {
+                  "action": "read_file",
+                  "effect": "deny",
+                  "resource": ".env"
+                }
+              ],
+              "revision": 1
+            }
+          ],
+          "binding": {
+            "backend_generation": "1894129989-3984352467-2208041476-2772144532-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-27f67396c10b475b55d69497fcfc0f8dcf193b71f9204fc4d715add0561bcd2f"
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/6af419f073728ede27d425637f501b21/sessions/176b0a02c00744308244d8183346f24a/agent",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1894129989-3984352467-2208041476-2772144532-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-27f67396c10b475b55d69497fcfc0f8dcf193b71f9204fc4d715add0561bcd2f"
+          },
+          "editable": true,
+          "revision": 0,
+          "selected": null,
+          "session_id": "176b0a02c00744308244d8183346f24a"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/6af419f073728ede27d425637f501b21/sessions/176b0a02c00744308244d8183346f24a/agent",
+        "method": "POST",
+        "status": 200,
+        "body": {
+          "agent_id": "captured.reviewer",
+          "agent_revision": 1,
+          "expected_revision": 0
+        },
+        "receipt": {
+          "binding": {
+            "backend_generation": "1894129989-3984352467-2208041476-2772144532-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-27f67396c10b475b55d69497fcfc0f8dcf193b71f9204fc4d715add0561bcd2f"
+          },
+          "editable": true,
+          "revision": 1,
+          "selected": {
+            "default": false,
+            "description": "Controlled rendered selection fixture",
+            "hidden": false,
+            "id": "captured.reviewer",
+            "mode": "primary",
+            "model_id": "agent-ui-fixture",
+            "name": "Captured Reviewer",
+            "permissions": [
+              {
+                "action": "read_file",
+                "effect": "deny",
+                "resource": ".env"
+              }
+            ],
+            "revision": 1
+          },
+          "session_id": "176b0a02c00744308244d8183346f24a"
+        }
+      },
+      {
+        "path": "/v1/workspaces",
+        "method": "GET",
+        "status": 404,
+        "receipt": {
+          "detail": "HTTP request rejected"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/3a2dde3788308a5e541ba87480b4f0f0/agents",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "agents": [
+            {
+              "default": false,
+              "description": "Controlled rendered selection fixture",
+              "hidden": false,
+              "id": "captured.reviewer",
+              "mode": "primary",
+              "model_id": "agent-ui-fixture",
+              "name": "Captured Reviewer",
+              "permissions": [
+                {
+                  "action": "read_file",
+                  "effect": "deny",
+                  "resource": ".env"
+                }
+              ],
+              "revision": 1
+            }
+          ],
+          "binding": {
+            "backend_generation": "1894129989-3984352467-2208041476-2772144532-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-27f67396c10b475b55d69497fcfc0f8dcf193b71f9204fc4d715add0561bcd2f"
+          }
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/3a2dde3788308a5e541ba87480b4f0f0/sessions/176b0a02c00744308244d8183346f24a/agent",
+        "method": "GET",
+        "status": 200,
+        "receipt": {
+          "binding": {
+            "backend_generation": "1894129989-3984352467-2208041476-2772144532-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-27f67396c10b475b55d69497fcfc0f8dcf193b71f9204fc4d715add0561bcd2f"
+          },
+          "editable": true,
+          "revision": 1,
+          "selected": {
+            "default": false,
+            "description": "Controlled rendered selection fixture",
+            "hidden": false,
+            "id": "captured.reviewer",
+            "mode": "primary",
+            "model_id": "agent-ui-fixture",
+            "name": "Captured Reviewer",
+            "permissions": [
+              {
+                "action": "read_file",
+                "effect": "deny",
+                "resource": ".env"
+              }
+            ],
+            "revision": 1
+          },
+          "session_id": "176b0a02c00744308244d8183346f24a"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/3a2dde3788308a5e541ba87480b4f0f0/providers",
+        "method": "GET",
+        "status": 503,
+        "receipt": {
+          "detail": "Agent executor is unavailable"
+        }
+      },
+      {
+        "path": "/v1/connection-bindings/3a2dde3788308a5e541ba87480b4f0f0/sessions/176b0a02c00744308244d8183346f24a/agent",
+        "method": "POST",
+        "status": 200,
+        "body": {
+          "agent_id": null,
+          "agent_revision": 0,
+          "expected_revision": 1
+        },
+        "receipt": {
+          "binding": {
+            "backend_generation": "1894129989-3984352467-2208041476-2772144532-",
+            "connection_id": "local",
+            "kind": "local",
+            "profile_revision": 1,
+            "protocol_version": 1,
+            "server_id": "local-27f67396c10b475b55d69497fcfc0f8dcf193b71f9204fc4d715add0561bcd2f"
+          },
+          "editable": true,
+          "revision": 2,
+          "selected": null,
+          "session_id": "176b0a02c00744308244d8183346f24a"
+        }
+      }
+    ],
+    "ownedBackendExited": true,
+    "assetAndNativeHashesUnchanged": true,
+    "paidInference": false,
+    "installed": false,
+    "fullNativeQualified": false,
+    "renderedVSCode": false
+  },
+  "localAuthoringFailures": {
+    "nativeLauncherSyntax": "Prepared launcher initially failed syntax check; no build/test started; corrected launcher retained separately.",
+    "gatewayTestPlaceholder": "Temporary authoring placeholder caused a pre-test ReferenceError; removed before the gateway contract passed.",
+    "selectionFixtureStubs": "Initial browser regression cleanup lacked dispose/invalidate and an inbox stub; corrected regression proves original catalog refresh refusal."
+  },
+  "fullNativeQualified": false,
+  "installed": false,
+  "installed68Unchanged": true,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "renderedVSCode": false,
+  "wholeGoalComplete": false
+}

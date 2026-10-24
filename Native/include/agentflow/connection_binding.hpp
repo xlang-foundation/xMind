@@ -6,6 +6,7 @@
 #include "agentflow/provider_profile_setup.hpp"
 #include "agentflow/agent_permission_grants.hpp"
 #include <memory>
+#include <algorithm>
 namespace agentflow {
 class PersistenceService;class RunExecutor;class GraphExecution;class BackendOwnerControl;struct LocalConnectionContext;
 struct ConnectionBindingIdentity {
@@ -39,6 +40,19 @@ struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMem
 struct BoundConnectionProviderModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionProviders {ConnectionBindingIdentity binding;ProviderProfileRuntimeMetadata configuration;std::vector<ProviderProfileRouteMetadata> routes;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
+struct BoundConnectionAgents {ConnectionBindingIdentity binding;std::vector<AgentDefinitionMetadata> agents;};
+struct BoundConnectionAgentDefinition {ConnectionBindingIdentity binding;AgentDefinition agent;};
+struct BoundConnectionSessionAgent {ConnectionBindingIdentity binding;std::string session_id;SessionAgentState state;};
+struct ConnectionAgentSelectionRequest {std::optional<std::string> id;std::int64_t agent_revision=0,revision=0;};
+inline SessionAgentState select_local_connection_agent(RunExecutor& executor,const std::string& session,ConnectionAgentSelectionRequest request){
+    if(!executor.supports_agent_selection())throw RunUnavailable("Conversation agent selection is unavailable");
+    if(request.revision<0||request.revision>=9007199254740991LL||request.agent_revision<0||request.agent_revision>9007199254740991LL)throw std::invalid_argument("Invalid agent selection revision");
+    std::optional<AgentDefinitionMetadata> selected;
+    if(request.id){if(request.id->empty()||request.id->size()>64||request.id->find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-")!=std::string::npos||request.agent_revision<1)throw std::invalid_argument("Invalid named agent selection");
+        const auto catalog=executor.agent_definitions();const auto found=std::find_if(catalog.begin(),catalog.end(),[&](const auto& item){return item.id==*request.id;});if(found==catalog.end()||found->revision!=request.agent_revision)throw Conflict("Named agent definition changed; refresh before selecting it");selected=*found;
+    }else if(request.agent_revision!=0)throw std::invalid_argument("Clearing agent selection requires definition revision zero");
+    return executor.select_session_agent(session,std::move(selected),request.revision);
+}
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
 struct BoundConnectionOperations {ConnectionBindingIdentity binding;std::string session_id,run_id;std::vector<Operation> operations;};
@@ -101,6 +115,10 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionAgents agents()const;
+    BoundConnectionAgentDefinition agent_definition(const std::string& id)const;
+    BoundConnectionSessionAgent session_agent(const std::string& session)const;
+    BoundConnectionSessionAgent select_session_agent(const std::string& session,ConnectionAgentSelectionRequest request)const;
     BoundConnectionProviders providers()const;
     BoundConnectionProviders save_provider(std::string id,std::string route,std::string model,SecretBytes key,std::int64_t revision,bool activate)const;
     BoundConnectionProviderModels discover_provider_models(std::string id,std::string route,SecretBytes key,std::int64_t revision)const;
