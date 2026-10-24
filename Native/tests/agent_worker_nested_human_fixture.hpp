@@ -1,5 +1,10 @@
 // Production factory lifecycle with controlled inference; no live provider.
 namespace {
+struct NestedCaseTiming {
+    std::string name;std::chrono::steady_clock::time_point began=std::chrono::steady_clock::now();
+    explicit NestedCaseTiming(std::string value):name(std::move(value)){std::cout<<Json{{"nested_case",name},{"phase","begin"}}.dump()<<std::endl;}
+    ~NestedCaseTiming(){std::cout<<Json{{"nested_case",name},{"phase",std::uncaught_exceptions()?"unwinding":"exit"},{"elapsed_ms",std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-began).count()}}.dump()<<std::endl;}
+};
 class NestedHumanModel final:public AgentModelGateway {
 public:
     explicit NestedHumanModel(bool repeated=false):repeated_(repeated){}
@@ -51,6 +56,7 @@ void production_paused_root_fairness(PersistenceService& store,const std::string
     const auto folder=std::filesystem::path(path).parent_path();{std::ofstream file(folder/"fairness-input.txt",std::ios::binary);file<<"Actual independent root native read\n";require(static_cast<bool>(file),"Fairness source write failed");}
     for(const bool coding:{false,true})for(const bool counted:{false,true})for(const bool cancelled:{false,true}){
         const auto suffix=std::string(coding?"coding-":"read-")+(counted?"counted":"plain")+(cancelled?"-cancel":"-resume"),a="fairness-paused-"+suffix,b="fairness-ready-"+suffix;
+        NestedCaseTiming timing("paused-root-"+suffix);
         auto settings=dynamic_fixture_child(folder.string());settings.planning=DynamicPlanningPolicy{};settings.approved_edits=coding;settings.tool_allowlist.reset();if(counted){settings.context=ContextRuntimePolicy{};settings.context->compaction.automatic=false;}
         auto gateway=std::make_shared<PausedRootFairnessModel>(cancelled);auto executor=coding?make_agent_worker_coding_executor(store,settings,image,gateway):make_agent_worker_read_executor(store,settings,image,gateway);
         AgentService service(store,settings,1,8,{},executor);store.create_session(a,"Paused root A").get();store.create_session(b,"Independent root B").get();service.submit(a,a,"Synthetic nested human root input");
@@ -91,6 +97,7 @@ void production_nested_human(PersistenceService& store,const std::string& path){
     const auto image=ForegroundProcess::bind_executable((std::filesystem::path(buffer.data()).parent_path()/"xmind.exe").string());
     for(const bool coding:{false,true})for(const bool counted:{false,true})for(const bool repeated:{false,true}){
         const auto id=std::string("production-nested-human-")+(coding?"coding-":"read-")+(counted?"counted":"plain")+(repeated?"-twice":"-once");
+        NestedCaseTiming timing(id);
         auto settings=dynamic_fixture_child(std::filesystem::path(path).parent_path().string());settings.planning=DynamicPlanningPolicy{};settings.approved_edits=coding;settings.tool_allowlist.reset();
         if(counted){settings.context=ContextRuntimePolicy{};settings.context->compaction.automatic=false;}
         auto gateway=std::make_shared<NestedHumanModel>(repeated);
