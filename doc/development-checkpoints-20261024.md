@@ -74,3 +74,7 @@ server/database/scheduler implementation remains excluded.
 ## Context/skills guidance before shared inbox (verbatim)
 
 - Context/skills pass native6/clients491-172; separate SDK/HTTP included. See doc/evidence/captured-context-skills-20261024.json. Installed69 preserved; full/rendered and remaining goal open. NEVER replay completed roots.
+
+## Superseded candidate70 guidance (verbatim)
+
+- Shared inbox passes native8/clients493-175 and rendered skill/queue reload/cancel (0 models). Receipt doc/evidence/captured-inbox-20261024.json. Installed69 preserved; full qualification and remaining goal open. NEVER replay fixtures.
