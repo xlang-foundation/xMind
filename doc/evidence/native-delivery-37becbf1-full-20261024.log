@@ -1,0 +1,499 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+        Start   1: native_root_work_executor_contract
+  1/179 Test   #1: native_root_work_executor_contract ....................   Passed    0.08 sec
+        Start   2: embedded_xlang_python_callable_contract
+  2/179 Test   #2: embedded_xlang_python_callable_contract ...............   Passed    0.07 sec
+        Start   3: embedded_xlang_authoring_program_contract
+  3/179 Test   #3: embedded_xlang_authoring_program_contract .............   Passed    0.22 sec
+        Start   4: native_remote_negotiation_contract
+  4/179 Test   #4: native_remote_negotiation_contract ....................   Passed    0.02 sec
+        Start   5: native_remote_connection_client_contract
+  5/179 Test   #5: native_remote_connection_client_contract ..............   Passed    0.17 sec
+        Start   6: native_remote_connection_credentials_contract
+  6/179 Test   #6: native_remote_connection_credentials_contract .........   Passed    0.24 sec
+        Start   7: native_remote_connection_authentication_contract
+  7/179 Test   #7: native_remote_connection_authentication_contract ......   Passed    0.13 sec
+        Start   8: native_json_schema_contract
+  8/179 Test   #8: native_json_schema_contract ...........................   Passed    0.12 sec
+        Start   9: native_terminal_key_input_contract
+  9/179 Test   #9: native_terminal_key_input_contract ....................   Passed    0.03 sec
+        Start  10: native_cli_plan_review_contract
+ 10/179 Test  #10: native_cli_plan_review_contract .......................   Passed    0.03 sec
+        Start  11: native_mcp_wire_contract
+ 11/179 Test  #11: native_mcp_wire_contract ..............................   Passed    0.15 sec
+        Start  12: native_permission_grants_contract
+ 12/179 Test  #12: native_permission_grants_contract .....................   Passed    0.18 sec
+        Start  13: native_a2a_client_contract
+ 13/179 Test  #13: native_a2a_client_contract ............................   Passed    0.25 sec
+        Start  14: native_a2a_client_sdk_contract
+ 14/179 Test  #14: native_a2a_client_sdk_contract ........................   Passed    0.37 sec
+        Start  15: native_a2a_agent_registry_contract
+ 15/179 Test  #15: native_a2a_agent_registry_contract ....................   Passed    2.56 sec
+        Start  16: model_stream_protocol_contract
+ 16/179 Test  #16: model_stream_protocol_contract ........................   Passed    0.12 sec
+        Start  17: model_request_contract
+ 17/179 Test  #17: model_request_contract ................................   Passed    0.04 sec
+        Start  18: native_context_selection_contract
+ 18/179 Test  #18: native_context_selection_contract .....................   Passed    0.28 sec
+        Start  19: native_gemini_request_contract
+ 19/179 Test  #19: native_gemini_request_contract ........................   Passed    0.14 sec
+        Start  20: native_gemini_stream_contract
+ 20/179 Test  #20: native_gemini_stream_contract .........................   Passed    0.15 sec
+        Start  21: native_gemini_history_contract
+ 21/179 Test  #21: native_gemini_history_contract ........................   Passed    0.18 sec
+        Start  22: native_provider_history_bridge_contract
+ 22/179 Test  #22: native_provider_history_bridge_contract ...............   Passed    0.04 sec
+        Start  23: native_anthropic_request_contract
+ 23/179 Test  #23: native_anthropic_request_contract .....................   Passed    0.02 sec
+        Start  24: native_anthropic_stream_contract
+ 24/179 Test  #24: native_anthropic_stream_contract ......................   Passed    0.11 sec
+        Start  25: native_anthropic_history_contract
+ 25/179 Test  #25: native_anthropic_history_contract .....................   Passed    0.36 sec
+        Start  26: native_responses_protocol_contract
+ 26/179 Test  #26: native_responses_protocol_contract ....................   Passed    0.10 sec
+        Start  27: native_dynamic_plan_contract
+ 27/179 Test  #27: native_dynamic_plan_contract ..........................   Passed    0.06 sec
+        Start  28: native_agent_authority_contract
+ 28/179 Test  #28: native_agent_authority_contract .......................   Passed    0.15 sec
+        Start  29: native_dynamic_plan_repository_contract
+ 29/179 Test  #29: native_dynamic_plan_repository_contract ...............   Passed    3.22 sec
+        Start  30: native_context_repository_contract
+ 30/179 Test  #30: native_context_repository_contract ....................   Passed    3.47 sec
+        Start  31: native_agent_worker_native_execution_contract
+ 31/179 Test  #31: native_agent_worker_native_execution_contract .........   Passed    0.37 sec
+        Start  32: native_xmind_ipc_lifetime_contract
+ 32/179 Test  #32: native_xmind_ipc_lifetime_contract ....................   Passed    2.07 sec
+        Start  33: native_xmind_ipc_api_contract
+ 33/179 Test  #33: native_xmind_ipc_api_contract .........................   Passed    5.57 sec
+        Start  34: native_context_control_contract
+ 34/179 Test  #34: native_context_control_contract .......................   Passed    3.88 sec
+        Start  35: native_context_cli_contract
+ 35/179 Test  #35: native_context_cli_contract ...........................   Passed    0.54 sec
+        Start  36: native_context_engine_contract
+ 36/179 Test  #36: native_context_engine_contract ........................   Passed    5.10 sec
+        Start  37: native_context_graph_engine_contract
+ 37/179 Test  #37: native_context_graph_engine_contract ..................   Passed    1.41 sec
+        Start  38: native_nested_context_graph_engine_contract
+ 38/179 Test  #38: native_nested_context_graph_engine_contract ...........   Passed    0.76 sec
+        Start  39: native_provider_yaml_config_contract
+ 39/179 Test  #39: native_provider_yaml_config_contract ..................   Passed    0.86 sec
+        Start  40: native_planning_http_contract
+ 40/179 Test  #40: native_planning_http_contract .........................   Passed    0.54 sec
+        Start  41: native_mcp_resource_route_contract
+ 41/179 Test  #41: native_mcp_resource_route_contract ....................   Passed    0.19 sec
+        Start  42: native_child_executor_contract
+ 42/179 Test  #42: native_child_executor_contract ........................   Passed    0.45 sec
+        Start  43: native_dynamic_plan_engine_contract
+ 43/179 Test  #43: native_dynamic_plan_engine_contract ...................   Passed    6.47 sec
+        Start  44: native_dynamic_plan_mcp_contract
+ 44/179 Test  #44: native_dynamic_plan_mcp_contract ......................   Passed   14.04 sec
+        Start  45: native_secret_protection_contract
+ 45/179 Test  #45: native_secret_protection_contract .....................   Passed    0.02 sec
+        Start  46: native_a2a_task_control_http_contract
+ 46/179 Test  #46: native_a2a_task_control_http_contract .................   Passed    1.13 sec
+        Start  47: native_a2a_message_http_contract
+ 47/179 Test  #47: native_a2a_message_http_contract ......................   Passed    0.39 sec
+        Start  48: native_a2a_stream_http_contract
+ 48/179 Test  #48: native_a2a_stream_http_contract .......................   Passed    1.46 sec
+        Start  49: native_a2a_v1_http_contract
+ 49/179 Test  #49: native_a2a_v1_http_contract ...........................   Passed    1.32 sec
+        Start  50: native_responses_agent_http_contract
+ 50/179 Test  #50: native_responses_agent_http_contract ..................   Passed   11.06 sec
+        Start  51: native_graph_service_http_contract
+ 51/179 Test  #51: native_graph_service_http_contract ....................   Passed   15.42 sec
+        Start  52: native_provider_cli_contract
+ 52/179 Test  #52: native_provider_cli_contract ..........................   Passed    3.09 sec
+        Start  53: native_provider_setup_contract
+ 53/179 Test  #53: native_provider_setup_contract ........................   Passed    1.12 sec
+        Start  54: native_graph_runner_contract
+ 54/179 Test  #54: native_graph_runner_contract ..........................   Passed   11.67 sec
+        Start  55: native_graph_mcp_contract
+ 55/179 Test  #55: native_graph_mcp_contract .............................   Passed    8.48 sec
+        Start  56: native_graph_mcp_http_contract
+ 56/179 Test  #56: native_graph_mcp_http_contract ........................   Passed    3.28 sec
+        Start  57: native_graph_mcp_http_subscription_contract
+ 57/179 Test  #57: native_graph_mcp_http_subscription_contract ...........   Passed    0.78 sec
+        Start  58: native_delegation_contract
+ 58/179 Test  #58: native_delegation_contract ............................   Passed    2.43 sec
+        Start  59: native_delegation_http_contract
+ 59/179 Test  #59: native_delegation_http_contract .......................   Passed    1.99 sec
+        Start  60: native_graph_checkpoint_contract
+ 60/179 Test  #60: native_graph_checkpoint_contract ......................   Passed    0.35 sec
+        Start  61: native_graph_children_contract
+ 61/179 Test  #61: native_graph_children_contract ........................   Passed    0.47 sec
+        Start  62: native_graph_contract
+ 62/179 Test  #62: native_graph_contract .................................   Passed    1.69 sec
+        Start  63: native_instruction_configuration_contract
+ 63/179 Test  #63: native_instruction_configuration_contract .............   Passed    0.26 sec
+        Start  64: native_process_configuration_contract
+ 64/179 Test  #64: native_process_configuration_contract .................   Passed    0.36 sec
+        Start  65: native_process_executor_contract
+ 65/179 Test  #65: native_process_executor_contract ......................   Passed   11.26 sec
+        Start  66: native_agent_process_http_contract
+ 66/179 Test  #66: native_agent_process_http_contract ....................   Passed   11.67 sec
+        Start  67: native_xlang3_default_process_contract
+ 67/179 Test  #67: native_xlang3_default_process_contract ................   Passed    2.31 sec
+        Start  68: native_process_adapter_contract
+ 68/179 Test  #68: native_process_adapter_contract .......................   Passed    4.58 sec
+        Start  69: native_persistent_pty_sessions_contract
+ 69/179 Test  #69: native_persistent_pty_sessions_contract ...............   Passed    0.12 sec
+        Start  70: native_mcp_configuration_contract
+ 70/179 Test  #70: native_mcp_configuration_contract .....................   Passed    0.25 sec
+        Start  71: native_mcp_oauth_credentials_contract
+ 71/179 Test  #71: native_mcp_oauth_credentials_contract .................   Passed    0.20 sec
+        Start  72: native_mcp_oauth_refresh_storage_contract
+ 72/179 Test  #72: native_mcp_oauth_refresh_storage_contract .............   Passed    0.24 sec
+        Start  73: native_mcp_oauth_service_contract
+ 73/179 Test  #73: native_mcp_oauth_service_contract .....................   Passed   15.87 sec
+        Start  74: native_mcp_authorization_cli_contract
+ 74/179 Test  #74: native_mcp_authorization_cli_contract .................   Passed    2.14 sec
+        Start  75: native_mcp_oauth_renewal_negative_contract
+ 75/179 Test  #75: native_mcp_oauth_renewal_negative_contract ............   Passed   16.16 sec
+        Start  76: native_remote_authentication_sdk_untrusted_contract
+ 76/179 Test  #76: native_remote_authentication_sdk_untrusted_contract ...   Passed    1.40 sec
+        Start  77: native_mcp_oauth_trusted_peer_contract
+ 77/179 Test  #77: native_mcp_oauth_trusted_peer_contract ................   Passed    0.32 sec
+        Start  78: native_schema_worker_contract
+ 78/179 Test  #78: native_schema_worker_contract .........................   Passed    3.13 sec
+        Start  79: native_mcp_stdio_contract
+ 79/179 Test  #79: native_mcp_stdio_contract .............................   Passed    3.18 sec
+        Start  80: native_mcp_handshake_contract
+ 80/179 Test  #80: native_mcp_handshake_contract .........................   Passed    0.90 sec
+        Start  81: native_mcp_client_contract
+ 81/179 Test  #81: native_mcp_client_contract ............................   Passed    1.41 sec
+        Start  82: native_mcp_http_readonly_contract
+ 82/179 Test  #82: native_mcp_http_readonly_contract .....................   Passed    0.22 sec
+        Start  83: native_mcp_http_fallback_contract
+ 83/179 Test  #83: native_mcp_http_fallback_contract .....................   Passed    0.40 sec
+        Start  84: native_language_server_diagnostics_contract
+ 84/179 Test  #84: native_language_server_diagnostics_contract ...........   Passed    5.64 sec
+        Start  85: native_language_server_rust_fixture_check
+ 85/179 Test  #85: native_language_server_rust_fixture_check .............   Passed    0.21 sec
+        Start  86: native_language_server_rust_analyzer_contract
+ 86/179 Test  #86: native_language_server_rust_analyzer_contract .........   Passed   18.45 sec
+        Start  87: native_multifolder_language_server_contract
+ 87/179 Test  #87: native_multifolder_language_server_contract ...........   Passed    6.59 sec
+        Start  88: native_language_server_configuration_contract
+ 88/179 Test  #88: native_language_server_configuration_contract .........   Passed    0.16 sec
+        Start  89: native_mcp_effect_contract
+ 89/179 Test  #89: native_mcp_effect_contract ............................   Passed   23.65 sec
+        Start  90: native_mcp_input_contract
+ 90/179 Test  #90: native_mcp_input_contract .............................   Passed    0.60 sec
+        Start  91: native_xlang_python_config_contract
+ 91/179 Test  #91: native_xlang_python_config_contract ...................   Passed    0.17 sec
+        Start  92: native_agent_worker_native_planning_contract
+ 92/179 Test  #92: native_agent_worker_native_planning_contract ..........   Passed    0.28 sec
+        Start  93: native_agent_worker_model_rpc_contract
+ 93/179 Test  #93: native_agent_worker_model_rpc_contract ................   Passed   55.47 sec
+        Start  94: native_agent_worker_graph_no_context_contract
+ 94/179 Test  #94: native_agent_worker_graph_no_context_contract .........   Passed    8.21 sec
+        Start  95: native_agent_worker_graph_callable_contract
+ 95/179 Test  #95: native_agent_worker_graph_callable_contract ...........   Passed    5.64 sec
+        Start  96: native_agent_worker_graph_remote_contract
+ 96/179 Test  #96: native_agent_worker_graph_remote_contract .............   Passed   12.03 sec
+        Start  97: native_agent_worker_server_contract
+ 97/179 Test  #97: native_agent_worker_server_contract ...................   Passed    1.86 sec
+        Start  98: native_agent_worker_coding_server_contract
+ 98/179 Test  #98: native_agent_worker_coding_server_contract ............   Passed    1.01 sec
+        Start  99: native_agent_worker_ledger_contract
+ 99/179 Test  #99: native_agent_worker_ledger_contract ...................***Failed   45.20 sec
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:59886
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: null,
+  killed: true,
+  signal: 'SIGTERM',
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules C:/Python/Python314/Lib http://127.0.0.1:59886',
+  stdout: 'Ledger phase begin planning-admission\r\n' +
+    'Ledger planning seed case=terminal-failure elapsed_ms=0 remaining_ms=19999\r\n' +
+    'Ledger planning worker-ready case=terminal-failure elapsed_ms=104 remaining_ms=19895\r\n' +
+    'Ledger planning model-reserve case=terminal-failure elapsed_ms=105 remaining_ms=19894\r\n' +
+    'Ledger planning model-start case=terminal-failure elapsed_ms=107 remaining_ms=19892\r\n' +
+    'Ledger planning seed case=terminal-cancel elapsed_ms=161 remaining_ms=19838\r\n' +
+    'Ledger planning worker-ready case=terminal-cancel elapsed_ms=247 remaining_ms=19752\r\n' +
+    'Ledger planning model-reserve case=terminal-cancel elapsed_ms=247 remaining_ms=19752\r\n' +
+    'Ledger planning model-start case=terminal-cancel elapsed_ms=249 remaining_ms=19750\r\n' +
+    'Ledger planning seed case=root-plain-funding elapsed_ms=303 remaining_ms=19696\r\n' +
+    'Ledger planning seed case=root-read-epoch elapsed_ms=322 remaining_ms=19677\r\n' +
+    'Ledger planning seed case=root-read-catalogue elapsed_ms=330 remaining_ms=19669\r\n' +
+    'Ledger planning seed case=root-delegation-unsealed elapsed_ms=341 remaining_ms=19658\r\n' +
+    'Ledger planning seed case=once elapsed_ms=352 remaining_ms=19647\r\n' +
+    'Ledger planning seed case=unfinished elapsed_ms=365 remaining_ms=19634\r\n' +
+    'Ledger planning seed case=no-assistant elapsed_ms=375 remaining_ms=19624\r\n' +
+    'Ledger planning seed case=multiple elapsed_ms=385 remaining_ms=19614\r\n' +
+    'Ledger planning seed case=ordinary-tool elapsed_ms=395 remaining_ms=19604\r\n' +
+    'Ledger planning seed case=wrong-call elapsed_ms=406 remaining_ms=19593\r\n' +
+    'Ledger planning seed case=cancelled elapsed_ms=415 remaining_ms=19584\r\n' +
+    'Ledger planning seed case=expired elapsed_ms=424 remaining_ms=19575\r\n' +
+    'Ledger planning seed case=stale-attempt elapsed_ms=433 remaining_ms=19566\r\n' +
+    'Ledger planning seed case=root-file-unsealed elapsed_ms=444 remaining_ms=19555\r\n' +
+    'Ledger planning seed case=root-file-sealed elapsed_ms=454 remaining_ms=19545\r\n' +
+    'Ledger planning seed case=provisional elapsed_ms=477 remaining_ms=19522\r\n' +
+    'Ledger planning seed case=inspect_plan elapsed_ms=503 remaining_ms=19496\r\n' +
+    'Ledger planning seed case=revise_plan elapsed_ms=540 remaining_ms=19459\r\n' +
+    'Ledger planning seed case=owner-inspection elapsed_ms=553 remaining_ms=19446\r\n' +
+    'Ledger planning seed case=owner-rejection elapsed_ms=747 remaining_ms=19252\r\n' +
+    'Ledger planning seed case=owner-runner elapsed_ms=767 remaining_ms=19232\r\n' +
+    'Ledger planning seed case=slot-owner elapsed_ms=970 remaining_ms=19029\r\n' +
+    'Ledger planning seed case=slot-owner-accepted elapsed_ms=1138 remaining_ms=18861\r\n' +
+    'Ledger planning seed case=owner-runner-accepted elapsed_ms=1348 remaining_ms=18651\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-runner-accepted elapsed_ms=1441 remaining_ms=18558\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-runner-accepted elapsed_ms=2238 remaining_ms=17761\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-runner-accepted elapsed_ms=2238 remaining_ms=17761\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-runner-accepted elapsed_ms=2246 remaining_ms=17753\r\n' +
+    'Ledger planning seed case=owner-runner-counted elapsed_ms=2271 remaining_ms=17728\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-runner-counted elapsed_ms=2363 remaining_ms=17636\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-runner-counted elapsed_ms=3212 remaining_ms=16787\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-runner-counted elapsed_ms=3212 remaining_ms=16787\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-runner-counted elapsed_ms=3220 remaining_ms=16779\r\n' +
+    'Ledger planning seed case=owner-code-approved-plain elapsed_ms=3252 remaining_ms=16747\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-approved-plain elapsed_ms=3345 remaining_ms=16654\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-approved-plain elapsed_ms=4664 remaining_ms=15335\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-approved-plain elapsed_ms=4664 remaining_ms=15335\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-approved-plain elapsed_ms=4681 remaining_ms=15318\r\n' +
+    'Ledger planning seed case=owner-code-approved-counted elapsed_ms=4707 remaining_ms=15292\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-approved-counted elapsed_ms=4803 remaining_ms=15196\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-approved-counted elapsed_ms=6189 remaining_ms=13810\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-approved-counted elapsed_ms=6189 remaining_ms=13810\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-approved-counted elapsed_ms=6198 remaining_ms=13801\r\n' +
+    'Ledger planning seed case=owner-code-denied-plain elapsed_ms=6224 remaining_ms=13775\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-denied-plain elapsed_ms=6317 remaining_ms=13682\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-denied-plain elapsed_ms=7266 remaining_ms=12733\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-denied-plain elapsed_ms=7266 remaining_ms=12733\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-denied-plain elapsed_ms=7282 remaining_ms=12717\r\n' +
+    'Ledger planning seed case=owner-code-denied-counted elapsed_ms=7308 remaining_ms=12691\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-denied-counted elapsed_ms=7396 remaining_ms=12603\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-denied-counted elapsed_ms=8440 remaining_ms=11559\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-denied-counted elapsed_ms=8440 remaining_ms=11559\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-denied-counted elapsed_ms=8457 remaining_ms=11542\r\n' +
+    'Ledger planning seed case=owner-code-human-plain elapsed_ms=8485 remaining_ms=11514\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-human-plain elapsed_ms=8587 remaining_ms=11412\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-human-plain elapsed_ms=8734 remaining_ms=11265\r\n' +
+    'Ledger planning owner-code-resume-drain-begin case=owner-code-human-plain elapsed_ms=8959 remaining_ms=11040\r\n' +
+    'Ledger planning owner-code-resume-drain-exit case=owner-code-human-plain elapsed_ms=8985 remaining_ms=11014\r\n' +
+    'Ledger planning seed case=owner-code-human-counted elapsed_ms=8993 remaining_ms=11006\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-human-counted elapsed_ms=9092 remaining_ms=10907\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-human-counted elapsed_ms=9262 remaining_ms=10737\r\n' +
+    'Ledger planning owner-code-resume-drain-begin case=owner-code-human-counted elapsed_ms=9509 remaining_ms=10490\r\n' +
+    'Ledger planning owner-code-resume-drain-exit case=owner-code-human-counted elapsed_ms=9527 remaining_ms=10472\r\n' +
+    'Ledger planning seed case=accepted-atomic elapsed_ms=9534 remaining_ms=10465\r\n' +
+    'Ledger planning seed case=rejected-atomic elapsed_ms=9576 remaining_ms=10423\r\n' +
+    'Ledger planning seed case=continuation elapsed_ms=9621 remaining_ms=10378\r\n' +
+    'Ledger planning child-context-prepare case=planning-continuation elapsed_ms=10091 remaining_ms=9908\r\n' +
+    'Ledger planning child-context-prepared case=planning-continuation elapsed_ms=10112 remaining_ms=9887\r\n' +
+    'Ledger planning child-sdk-complete case=planning-continuation elapsed_ms=10225 remaining_ms=9774\r\n' +
+    'Ledger planning child-sdk-completed case=planning-continuation elapsed_ms=10254 remaining_ms=9745\r\n' +
+    'Ledger planning seed case=owner-accepted-context elapsed_ms=10436 remaining_ms=9563\r\n' +
+    'Ledger planning child-context-prepare case=planning-owner-accepted-context elapsed_ms=10642 remaining_ms=9357\r\n' +
+    'Ledger planning child-context-prepared case=planning-owner-accepted-context elapsed_ms=10694 remaining_ms=9305\r\n' +
+    'Ledger planning child-sdk-complete case=planning-owner-accepted-context elapsed_ms=10866 remaining_ms=9133\r\n' +
+    'Ledger planning child-sdk-completed case=planning-owner-accepted-context elapsed_ms=10915 remaining_ms=9084\r\n' +
+    'Ledger planning seed case=stale-settlement elapsed_ms=11118 remaining_ms=8881\r\n' +
+    'Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.\r\n' +
+    'Ledger phase end planning-admission elapsed_ms=11136\r\n' +
+    'Ledger phase begin paused-child-drain\r\n' +
+    'Ledger planning seed case=terminal-failure elapsed_ms=0 remaining_ms=19999\r\n' +
+    'Ledger planning worker-ready case=terminal-failure elapsed_ms=83 remaining_ms=19916\r\n' +
+    'Ledger planning model-reserve case=terminal-failure elapsed_ms=83 remaining_ms=19916\r\n' +
+    'Ledger planning model-start case=terminal-failure elapsed_ms=85 remaining_ms=19914\r\n' +
+    'Ledger planning seed case=terminal-cancel elapsed_ms=145 remaining_ms=19854\r\n' +
+    'Ledger planning worker-ready case=terminal-cancel elapsed_ms=231 remaining_ms=19768\r\n' +
+    'Ledger planning model-reserve case=terminal-cancel elapsed_ms=232 remaining_ms=19767\r\n' +
+    'Ledger planning model-start case=terminal-cancel elapsed_ms=234 remaining_ms=19765\r\n' +
+    'Ledger planning seed case=root-plain-funding elapsed_ms=286 remaining_ms=19713\r\n' +
+    'Ledger planning seed case=root-read-epoch elapsed_ms=310 remaining_ms=19689\r\n' +
+    'Ledger planning seed case=root-read-catalogue elapsed_ms=321 remaining_ms=19678\r\n' +
+    'Ledger planning seed case=root-delegation-unsealed elapsed_ms=333 remaining_ms=19666\r\n' +
+    'Ledger planning seed case=once elapsed_ms=344 remaining_ms=19655\r\n' +
+    'Ledger planning seed case=unfinished elapsed_ms=357 remaining_ms=19642\r\n' +
+    'Ledger planning seed case=no-assistant elapsed_ms=367 remaining_ms=19632\r\n' +
+    'Ledger planning seed case=multiple elapsed_ms=377 remaining_ms=19622\r\n' +
+    'Ledger planning seed case=ordinary-tool elapsed_ms=388 remaining_ms=19611\r\n' +
+    'Ledger planning seed case=wrong-call elapsed_ms=401 remaining_ms=19598\r\n' +
+    'Ledger planning seed case=cancelled elapsed_ms=411 remaining_ms=19588\r\n' +
+    'Ledger planning seed case=expired elapsed_ms=421 remaining_ms=19578\r\n' +
+    'Ledger planning seed case=stale-attempt elapsed_ms=431 remaining_ms=19568\r\n' +
+    'Ledger planning seed case=root-file-unsealed elapsed_ms=442 remaining_ms=19557\r\n' +
+    'Ledger planning seed case=root-file-sealed elapsed_ms=452 remaining_ms=19547\r'... 2774 more characters,
+  stderr: ''
+}
+
+Node.js v22.19.0
+
+        Start 100: native_agent_worker_nested_human_contract
+100/179 Test #100: native_agent_worker_nested_human_contract .............   Passed   32.18 sec
+        Start 101: native_agent_worker_deep_human_contract
+101/179 Test #101: native_agent_worker_deep_human_contract ...............   Passed    7.55 sec
+        Start 102: native_agent_worker_channel_contract
+102/179 Test #102: native_agent_worker_channel_contract ..................   Passed    2.67 sec
+        Start 103: native_xlang3_shared_memory_worker_contract
+103/179 Test #103: native_xlang3_shared_memory_worker_contract ...........   Passed    1.39 sec
+        Start 104: native_agent_service_contract
+104/179 Test #104: native_agent_service_contract .........................   Passed    1.53 sec
+        Start 105: native_agent_runner_contract
+105/179 Test #105: native_agent_runner_contract ..........................   Passed   15.65 sec
+        Start 106: native_gemini_agent_contract
+106/179 Test #106: native_gemini_agent_contract ..........................   Passed    0.57 sec
+        Start 107: native_anthropic_agent_contract
+107/179 Test #107: native_anthropic_agent_contract .......................   Passed    0.66 sec
+        Start 108: native_file_patch_contract
+108/179 Test #108: native_file_patch_contract ............................   Passed    0.03 sec
+        Start 109: native_command_context_contract
+109/179 Test #109: native_command_context_contract .......................   Passed    0.05 sec
+        Start 110: native_skill_state_contract
+110/179 Test #110: native_skill_state_contract ...........................   Passed    0.23 sec
+        Start 111: native_skill_catalogue_contract
+111/179 Test #111: native_skill_catalogue_contract .......................   Passed    5.32 sec
+        Start 112: native_create_executor_contract
+112/179 Test #112: native_create_executor_contract .......................   Passed    1.46 sec
+        Start 113: native_edit_executor_contract
+113/179 Test #113: native_edit_executor_contract .........................   Passed    0.97 sec
+        Start 114: native_patch_file_executor_contract
+114/179 Test #114: native_patch_file_executor_contract ...................   Passed    1.32 sec
+        Start 115: native_patch_executor_contract
+115/179 Test #115: native_patch_executor_contract ........................   Passed    1.57 sec
+        Start 116: native_restore_executor_contract
+116/179 Test #116: native_restore_executor_contract ......................   Passed    1.22 sec
+        Start 117: native_agent_remote_tool_host_contract
+117/179 Test #117: native_agent_remote_tool_host_contract ................   Passed    4.44 sec
+        Start 118: native_agent_file_tool_host_contract
+118/179 Test #118: native_agent_file_tool_host_contract ..................   Passed    3.32 sec
+        Start 119: native_agent_process_tool_host_contract
+119/179 Test #119: native_agent_process_tool_host_contract ...............   Passed    3.42 sec
+        Start 120: native_agent_read_tool_host_contract
+120/179 Test #120: native_agent_read_tool_host_contract ..................   Passed    1.51 sec
+        Start 121: native_patch_tool_contract
+121/179 Test #121: native_patch_tool_contract ............................   Passed    0.77 sec
+        Start 122: native_approved_edit_http_contract
+122/179 Test #122: native_approved_edit_http_contract ....................   Passed    2.53 sec
+        Start 123: native_workspace_tools_contract
+123/179 Test #123: native_workspace_tools_contract .......................   Passed    1.78 sec
+        Start 124: native_repository_instructions_contract
+124/179 Test #124: native_repository_instructions_contract ...............   Passed    0.50 sec
+        Start 125: native_skill_context_contract
+125/179 Test #125: native_skill_context_contract .........................   Passed    0.53 sec
+        Start 126: native_chat_provider_contract
+126/179 Test #126: native_chat_provider_contract .........................   Passed    0.15 sec
+        Start 127: native_gemini_provider_contract
+127/179 Test #127: native_gemini_provider_contract .......................   Passed    0.24 sec
+        Start 128: native_deepseek_provider_contract
+128/179 Test #128: native_deepseek_provider_contract .....................   Passed    0.58 sec
+        Start 129: native_deepseek_profile_runtime_contract
+129/179 Test #129: native_deepseek_profile_runtime_contract ..............   Passed    0.79 sec
+        Start 130: native_provider_model_policy_runtime_contract
+130/179 Test #130: native_provider_model_policy_runtime_contract .........   Passed    1.16 sec
+        Start 131: native_anthropic_provider_contract
+131/179 Test #131: native_anthropic_provider_contract ....................   Passed    0.29 sec
+        Start 132: native_mcp_oauth_callback_contract
+132/179 Test #132: native_mcp_oauth_callback_contract ....................   Passed    0.93 sec
+        Start 133: native_mcp_oauth_refresh_contract
+133/179 Test #133: native_mcp_oauth_refresh_contract .....................   Passed    0.48 sec
+        Start 134: native_responses_context_contract
+134/179 Test #134: native_responses_context_contract .....................   Passed    1.04 sec
+        Start 135: native_http_stream_transport_contract
+135/179 Test #135: native_http_stream_transport_contract .................   Passed   11.71 sec
+        Start 136: native_agent_http_contract
+136/179 Test #136: native_agent_http_contract ............................   Passed    8.81 sec
+        Start 137: native_agent_edit_http_contract
+137/179 Test #137: native_agent_edit_http_contract .......................   Passed    9.43 sec
+        Start 138: native_agent_patch_http_contract
+138/179 Test #138: native_agent_patch_http_contract ......................   Passed    3.75 sec
+        Start 139: native_agent_mcp_http_contract
+139/179 Test #139: native_agent_mcp_http_contract ........................   Passed    3.44 sec
+        Start 140: native_agent_mcp_http_subscription_contract
+140/179 Test #140: native_agent_mcp_http_subscription_contract ...........   Passed    0.98 sec
+        Start 141: native_mcp_sdk_modern_contract
+141/179 Test #141: native_mcp_sdk_modern_contract ........................   Passed    4.13 sec
+        Start 142: native_mcp_sdk_legacy_contract
+142/179 Test #142: native_mcp_sdk_legacy_contract ........................   Passed    3.43 sec
+        Start 143: native_cli_output_contract
+143/179 Test #143: native_cli_output_contract ............................   Passed    0.17 sec
+        Start 144: native_http_cli_contract
+144/179 Test #144: native_http_cli_contract ..............................   Passed    5.80 sec
+        Start 145: native_cli_vcs_status_contract
+145/179 Test #145: native_cli_vcs_status_contract ........................   Passed    0.21 sec
+        Start 146: native_cli_vcs_metadata_contract
+146/179 Test #146: native_cli_vcs_metadata_contract ......................   Passed    0.30 sec
+        Start 147: native_cli_vcs_diff_contract
+147/179 Test #147: native_cli_vcs_diff_contract ..........................   Passed    0.22 sec
+        Start 148: native_unified_program_contract
+148/179 Test #148: native_unified_program_contract .......................   Passed    1.67 sec
+        Start 149: native_unified_patch_http_contract
+149/179 Test #149: native_unified_patch_http_contract ....................   Passed    5.25 sec
+        Start 150: native_unified_graph_http_contract
+150/179 Test #150: native_unified_graph_http_contract ....................   Passed   15.17 sec
+        Start 151: native_unified_mcp_http_contract
+151/179 Test #151: native_unified_mcp_http_contract ......................   Passed    3.63 sec
+        Start 152: native_console_workspace_contract
+152/179 Test #152: native_console_workspace_contract .....................   Passed    1.94 sec
+        Start 153: native_local_profile_contract
+153/179 Test #153: native_local_profile_contract .........................   Passed  101.34 sec
+        Start 154: native_local_view_contract
+154/179 Test #154: native_local_view_contract ............................   Passed   63.61 sec
+        Start 155: native_local_view_provider_config_contract
+155/179 Test #155: native_local_view_provider_config_contract ............   Passed   21.56 sec
+        Start 156: native_workspace_registry_contract
+156/179 Test #156: native_workspace_registry_contract ....................   Passed    0.40 sec
+        Start 157: embedded_xlang_sqlite_contract
+157/179 Test #157: embedded_xlang_sqlite_contract ........................   Passed    0.04 sec
+        Start 158: native_incoming_repository_contract
+158/179 Test #158: native_incoming_repository_contract ...................   Passed    0.30 sec
+        Start 159: native_task_list_repository_contract
+159/179 Test #159: native_task_list_repository_contract ..................   Passed    0.34 sec
+        Start 160: native_permission_waiter_contract
+160/179 Test #160: native_permission_waiter_contract .....................   Passed    0.82 sec
+        Start 161: native_operation_repository_contract
+161/179 Test #161: native_operation_repository_contract ..................   Passed    0.83 sec
+        Start 162: xlang_repository_contract
+162/179 Test #162: xlang_repository_contract .............................   Passed    0.41 sec
+        Start 163: persistence_service_contract
+163/179 Test #163: persistence_service_contract ..........................   Passed    1.77 sec
+        Start 164: native_backend_owner_contract
+164/179 Test #164: native_backend_owner_contract .........................   Passed    1.95 sec
+        Start 165: native_profile_record_publication_contract
+165/179 Test #165: native_profile_record_publication_contract ............   Passed    0.28 sec
+        Start 166: native_legacy_owner_contract
+166/179 Test #166: native_legacy_owner_contract ..........................   Passed    0.51 sec
+        Start 167: native_owner_process_contract
+167/179 Test #167: native_owner_process_contract .........................   Passed    0.26 sec
+        Start 168: native_runtime_generation_contract
+168/179 Test #168: native_runtime_generation_contract ....................   Passed    5.64 sec
+        Start 169: native_backend_owner_http_contract
+169/179 Test #169: native_backend_owner_http_contract ....................   Passed    6.70 sec
+        Start 170: native_backend_handoff_contract
+170/179 Test #170: native_backend_handoff_contract .......................   Passed    3.34 sec
+        Start 171: native_connection_profiles_contract
+171/179 Test #171: native_connection_profiles_contract ...................   Passed    0.21 sec
+        Start 172: native_connection_profiles_http_contract
+172/179 Test #172: native_connection_profiles_http_contract ..............   Passed    1.74 sec
+        Start 173: native_provider_profiles_contract
+173/179 Test #173: native_provider_profiles_contract .....................   Passed    0.43 sec
+        Start 174: native_provider_profile_lsp_responsiveness_contract
+174/179 Test #174: native_provider_profile_lsp_responsiveness_contract ...   Passed    0.73 sec
+        Start 175: native_provider_profile_runtime_contract
+175/179 Test #175: native_provider_profile_runtime_contract ..............   Passed    7.32 sec
+        Start 176: native_provider_profile_cli_contract
+176/179 Test #176: native_provider_profile_cli_contract ..................   Passed    5.63 sec
+        Start 177: native_gemini_catalogue_contract
+177/179 Test #177: native_gemini_catalogue_contract ......................   Passed   11.10 sec
+        Start 178: native_gemini_profile_runtime_contract
+178/179 Test #178: native_gemini_profile_runtime_contract ................   Passed    1.67 sec
+        Start 179: encrypted_credential_repository_contract
+179/179 Test #179: encrypted_credential_repository_contract ..............   Passed    0.36 sec
+
+99% tests passed, 1 tests failed out of 179
+
+Total Test time (real) = 801.32 sec
+
+The following tests FAILED:
+	 99 - native_agent_worker_ledger_contract (Failed)
+Errors while running CTest

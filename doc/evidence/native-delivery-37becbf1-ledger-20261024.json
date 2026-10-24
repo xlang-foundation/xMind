@@ -1,0 +1,519 @@
+{
+  "recordedAt": "2026-10-24T22:08:48.365Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T22:02:44.764Z",
+    "sourceParent": "37becbf192c802187a70e9b4a15db0ec264824fc",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 10124,
+      "launchedAt": "2026-10-24T21:48:51.453Z",
+      "completedAt": "2026-10-24T21:49:17.682Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+    },
+    "test": {
+      "pid": 38212,
+      "launchedAt": "2026-10-24T21:49:20.356Z",
+      "completedAt": "2026-10-24T22:02:41.695Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "dac7f7e5a9a4054c25a5b066a32ecb279b9a4003ca37dad4ee9229d36f78b82d"
+    },
+    "total": 179,
+    "failed": 1,
+    "passed": 178,
+    "seconds": 801.32,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "fe6010fb5c4cd419955368f93d0c25910839b583697297904d4ba4ede98ed5e5",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "onlyFailure": "native_agent_worker_ledger_contract: execFile wrapper killed child at unchanged45000ms; CTest45.20s",
+  "retainedOriginal": {
+    "observedAt": "2026-10-24T21:57:28.8868179Z",
+    "original": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-worker-ledger-930570708-1797348835",
+    "files": [
+      {
+        "name": "automatic-nested-read.txt",
+        "bytes": 32,
+        "sha256": "99dd35d619dc7d26a69607fc804fc1711dbc6386d11a37933ea29692248971ff"
+      },
+      {
+        "name": "coexisting-private.txt",
+        "bytes": 24,
+        "sha256": "116743bba20e6422c2b297541bb4cf18c76a7ba7352b49ced8ed33cf1d6cf87a"
+      },
+      {
+        "name": "dynamic-child-read.txt",
+        "bytes": 29,
+        "sha256": "9bc3f94d8e1262fc83926641291f4e64fa10c5c58f7d290d3c9314bbc7b495e7"
+      },
+      {
+        "name": "dynamic-owner-code-approved-counted.txt",
+        "bytes": 34,
+        "sha256": "4a58bdec0cec8afbde2b3e1d598b5033eb78b2607ea3d57aa6daac4f765e367c"
+      },
+      {
+        "name": "dynamic-owner-code-approved-plain.txt",
+        "bytes": 34,
+        "sha256": "4a58bdec0cec8afbde2b3e1d598b5033eb78b2607ea3d57aa6daac4f765e367c"
+      },
+      {
+        "name": "ledger.sqlite",
+        "bytes": 4136960,
+        "sha256": "45554e7ff08f50c3fcb2021fb66679b2f6d43caa2f87ca99b83b1c27eb02bdca"
+      },
+      {
+        "name": "ledger.sqlite-paused-child.sqlite",
+        "bytes": 1015808,
+        "sha256": "be4a7e89c73eae14c55c6813808bfe54f8b457e30f1a66692fdfabeedc8e2124"
+      },
+      {
+        "name": "ledger.sqlite-paused-child.sqlite.backend-lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "ledger.sqlite.backend-lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "ledger.sqlite.idle",
+        "bytes": 770048,
+        "sha256": "4253e18e153ee28aa3cce59ffcc99089648a6bb4ca98ebb97865e58a7eed243a"
+      },
+      {
+        "name": "ledger.sqlite.idle.backend-lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "model.sqlite",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "model.sqlite-journal",
+        "bytes": 512,
+        "sha256": "31aacf350a404ddecae86adb5f4a0bd63336952c336f29297878749f911edacf"
+      },
+      {
+        "name": "model.sqlite.backend-lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "planned-read-secret.txt",
+        "bytes": 26,
+        "sha256": "72f3d4aa50c850a42af00820f956bffe784085b14cf359f551b227e60e64f259"
+      },
+      {
+        "name": "restricted-tools.txt",
+        "bytes": 29,
+        "sha256": "c076bb1fcd79a8dfea4e76bd610111460a85cf8952736959b7d59977a39f5cbc"
+      },
+      {
+        "name": "rollback.sqlite",
+        "bytes": 770048,
+        "sha256": "9dc9c613570711919543d9985391dccd619b987d4b77d582dc78c1e3887af9e3"
+      },
+      {
+        "name": "rollback.sqlite.backend-lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "root-owner-code-approved-counted.txt",
+        "bytes": 34,
+        "sha256": "3406e90d36a32054f11a0e25da091ce09e9b9a649080e97f38ce435dc5bb62dc"
+      },
+      {
+        "name": "root-owner-code-approved-plain.txt",
+        "bytes": 34,
+        "sha256": "3406e90d36a32054f11a0e25da091ce09e9b9a649080e97f38ce435dc5bb62dc"
+      },
+      {
+        "name": "slot-plan-read.txt",
+        "bytes": 31,
+        "sha256": "7fb62f0d6c925ca35697116ed2cf78bb837669f9840c0937aa1bc1b6010769fd"
+      },
+      {
+        "name": "terminal.sqlite",
+        "bytes": 770048,
+        "sha256": "ee090e328447f2132853cee753c9a4a27708d911a643d2e37fb316a83cac6f15"
+      },
+      {
+        "name": "terminal.sqlite.backend-lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "neverReplay": true
+  },
+  "originalFilesUnchangedAfterReadOnlyCopyInspection": true,
+  "inspectionRuntime": "xlang3 _sqlite3; no CPython",
+  "databaseSnapshot": {
+    "ledger.sqlite": {
+      "tableCount": 58,
+      "runStates": [
+        [
+          "cancelled",
+          24
+        ],
+        [
+          "completed",
+          102
+        ],
+        [
+          "failed",
+          42
+        ]
+      ],
+      "latestRuns": [
+        [
+          "cancelled-root",
+          "cancelled"
+        ],
+        [
+          "no-snapshot",
+          "failed"
+        ],
+        [
+          "foreign-root",
+          "failed"
+        ],
+        [
+          "worker-root",
+          "failed"
+        ],
+        [
+          "late-read-root",
+          "failed"
+        ],
+        [
+          "read-root",
+          "failed"
+        ],
+        [
+          "workspace-turn-root",
+          "cancelled"
+        ],
+        [
+          "turn-root",
+          "failed"
+        ],
+        [
+          "receipt-root",
+          "failed"
+        ],
+        [
+          "foreign-control-root",
+          "cancelled"
+        ],
+        [
+          "control-root",
+          "cancelled"
+        ],
+        [
+          "callable-root",
+          "cancelled"
+        ]
+      ],
+      "lastEvents": [
+        [
+          4021,
+          "cancelled-root",
+          "budget.model_call.interrupted",
+          "{\"attempt_id\":\"cancelled-attempt\",\"reason\":\"server_restart\",\"role\":\"parent\",\"root_run_id\":\"cancelled-root\",\"was_started\":true}"
+        ],
+        [
+          4020,
+          "cancelled-root",
+          "worker.lease.retired",
+          "{\"generation\":\"cancelled-generation\",\"reason\":\"cancelled\",\"uncertain_model_dispatches\":0}"
+        ]
+      ]
+    },
+    "ledger.sqlite-paused-child.sqlite": {
+      "tableCount": 58,
+      "runStates": [
+        [
+          "cancelled",
+          4
+        ],
+        [
+          "completed",
+          3
+        ],
+        [
+          "failed",
+          1
+        ],
+        [
+          "running",
+          20
+        ]
+      ],
+      "latestRuns": [
+        [
+          "planning-slot-owner-resumed-child",
+          "completed"
+        ],
+        [
+          "planning-slot-owner-resumed",
+          "cancelled"
+        ],
+        [
+          "planning-slot-owner-paused-child",
+          "cancelled"
+        ],
+        [
+          "planning-slot-owner-paused",
+          "cancelled"
+        ],
+        [
+          "planning-owner-runner",
+          "completed"
+        ],
+        [
+          "planning-owner-rejection",
+          "running"
+        ],
+        [
+          "planning-owner-inspection",
+          "running"
+        ],
+        [
+          "planning-revise_plan",
+          "running"
+        ],
+        [
+          "planning-inspect_plan",
+          "running"
+        ],
+        [
+          "ordinary-planning-root",
+          "running"
+        ],
+        [
+          "planning-provisional",
+          "running"
+        ],
+        [
+          "planning-root-file-sealed",
+          "running"
+        ]
+      ],
+      "lastEvents": [
+        [
+          429,
+          "planning-slot-owner-resumed",
+          "run.cancelled",
+          "{\"reason\":\"resume_fixture_complete\"}"
+        ],
+        [
+          428,
+          "planning-slot-owner-resumed",
+          "budget.segment.closed",
+          "{\"active_elapsed_ms\":186,\"remaining_active_ms\":18428,\"segment_id\":\"planning-slot-owner-resumed-child-generation-resumed-segment\"}"
+        ]
+      ]
+    },
+    "ledger.sqlite.idle": {
+      "tableCount": 58,
+      "runStates": [
+        [
+          "completed",
+          1
+        ]
+      ],
+      "latestRuns": [
+        [
+          "idle-root",
+          "completed"
+        ]
+      ],
+      "lastEvents": [
+        [
+          7,
+          "idle-root",
+          "worker.lease.retired",
+          "{\"generation\":\"idle-generation\",\"reason\":\"completed\",\"uncertain_model_dispatches\":0}"
+        ],
+        [
+          6,
+          "idle-root",
+          "run.completed",
+          "{}"
+        ]
+      ]
+    },
+    "terminal.sqlite": {
+      "tableCount": 58,
+      "runStates": [
+        [
+          "cancelled",
+          1
+        ],
+        [
+          "failed",
+          1
+        ]
+      ],
+      "latestRuns": [
+        [
+          "terminal-queued",
+          "cancelled"
+        ],
+        [
+          "terminal-root",
+          "failed"
+        ]
+      ],
+      "lastEvents": [
+        [
+          19,
+          "terminal-queued",
+          "run.cancelled",
+          "{\"generation\":\"terminal-queued-generation\",\"reason\":\"cancelled\"}"
+        ],
+        [
+          18,
+          "terminal-queued",
+          "worker.lease.retired",
+          "{\"generation\":\"terminal-queued-generation\",\"reason\":\"cancelled\",\"uncertain_model_dispatches\":0}"
+        ]
+      ]
+    },
+    "rollback.sqlite": {
+      "tableCount": 58,
+      "runStates": [
+        [
+          "failed",
+          1
+        ]
+      ],
+      "latestRuns": [
+        [
+          "rollback-root",
+          "failed"
+        ]
+      ],
+      "lastEvents": [
+        [
+          10,
+          "rollback-root",
+          "worker.lease.retired",
+          "{\"generation\":\"rollback-generation\",\"reason\":\"backend_recovery\",\"uncertain_model_dispatches\":1}"
+        ],
+        [
+          9,
+          "rollback-root",
+          "budget.model_call.interrupted",
+          "{\"attempt_id\":\"rollback-attempt\",\"reason\":\"server_restart\",\"role\":\"parent\",\"root_run_id\":\"rollback-root\",\"was_started\":true}"
+        ]
+      ]
+    },
+    "model.sqlite": {
+      "tableCount": 0
+    }
+  },
+  "observation": "Main ledger final recovery records, idle completion, terminal boundary and rollback recovery are present; model.sqlite has no committed tables. This locates the stop before final model-host database initialization completed. Original failed stdout was truncated by Node error inspection.",
+  "rawOutputRetentionControl": {
+    "recordedAt": "2026-10-24T22:05:12.041Z",
+    "purpose": "Intentional Node child writes >50KB then exits7; verifies complete raw failure output and original nonzero propagation without any native/model/tool task",
+    "pid": 34784,
+    "wrapperExitCode": 1,
+    "childFailure": {
+      "recordedAt": "2026-10-24T22:05:12.030Z",
+      "code": 7,
+      "killed": false,
+      "signal": null,
+      "requests": 0,
+      "timeoutMs": 45000,
+      "maxBuffer": 1048576,
+      "completedTasksMustNeverBeReplayed": true
+    },
+    "rawStdoutBytes": 50015,
+    "rawStdoutSha256": "a8aa7a25841a195bd690b6f7c72b62354c4b7a3273d0b4f183bb6f38f028e1b9",
+    "sourceSha256": "c8b9f740caaf6704d34823d32cf14eefd1ad9b08b27c31c88b49f631c0425816",
+    "sourceUnchanged": true,
+    "nativeExecuted": false,
+    "modelCalls": 0,
+    "scopePassed": true
+  },
+  "instrumentedFocused": {
+    "recordedAt": "2026-10-24T22:07:16.088Z",
+    "sourceParent": "37becbf192c802187a70e9b4a15db0ec264824fc",
+    "sourcePatchSha256": "8c13cc5e18a3860e3e6d6edd163cae918fdc55a56f3d8eeef67896691a2e6819",
+    "build": {
+      "pid": 16524,
+      "launchedAt": "2026-10-24T22:05:29.223Z",
+      "completedAt": "2026-10-24T22:06:25.541Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8546e7f2407d678d75e596345dbeb42a64f84808c0a95314b51e0716faf45239"
+    },
+    "test": {
+      "pid": 39700,
+      "launchedAt": "2026-10-24T22:06:28.293Z",
+      "completedAt": "2026-10-24T22:07:13.310Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0329063b9c18192476ec1e8f8eb1726a05fe2f0a89a02ed46fe367ac92c20ff9"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 44.97,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "fe6010fb5c4cd419955368f93d0c25910839b583697297904d4ba4ede98ed5e5",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "phaseTimings": [
+    "Ledger suite phase begin ledger elapsed_ms=0",
+    "Ledger phase end planning-admission elapsed_ms=10782",
+    "Ledger phase end paused-child-drain elapsed_ms=1567",
+    "Ledger phase end main-process-planning elapsed_ms=7853",
+    "Ledger phase end main-planning-delegation elapsed_ms=16381",
+    "Ledger phase end planned-read-permissions elapsed_ms=2834",
+    "Ledger phase end restricted-catalogues elapsed_ms=3701",
+    "Ledger suite phase end ledger elapsed_ms=44333 phase_ms=44333",
+    "Ledger suite phase begin terminal-boundary elapsed_ms=44333",
+    "Ledger suite phase end terminal-boundary elapsed_ms=44440 phase_ms=106",
+    "Ledger suite phase begin recovery-rollback elapsed_ms=44440",
+    "Ledger suite phase end recovery-rollback elapsed_ms=44579 phase_ms=139",
+    "Ledger suite phase begin model-host elapsed_ms=44579",
+    "Ledger suite phase end model-host elapsed_ms=44695 phase_ms=116"
+  ],
+  "interpretation": "Instrumented control reaches final model-host at44579ms and completes44695ms; main ledger consumes44333ms. This demonstrates extremely narrow aggregate wrapper headroom in this control. It is not proof of the exact earlier stall cause and does not erase the failed full gate.",
+  "productionCodeChanged": false,
+  "deadlinesChanged": false,
+  "retriesAdded": false,
+  "originalNamespaceNeverReplayed": true,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false,
+  "goalComplete": false
+}

@@ -146,3 +146,7 @@ owner/history/settings backup.
 ## Superseded startup focus guidance after full1035d900 — verbatim
 
 - Worker startup ownership fix passes direct expired-launch regression and RPC/remote/channel3. Native d2121db4 is uninstalled; full179 required. See doc/evidence/worker-startup-ownership-20261024.json; original failures retained.
+
+## Superseded full1035d900 guidance after ledger failure — verbatim
+
+- Native d2121db4 full179 fails HTTP ENOBUFS (178pass); graph-worker passes11.88s. HTTP retention negative/focus pass; no install. See doc/evidence/native-delivery-1035d900-result-20261024.json; original failures retained.
