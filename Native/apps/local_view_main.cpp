@@ -23,6 +23,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <regex>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -1018,7 +1019,7 @@ int run_local_view(int argc, char **argv) {
                         headers.emplace("X-XMind-View-Origin",
                                         request.get_header_value("X-XMind-View-Origin"));
                 }
-                const bool streaming=request.method=="GET"&&(request.path.ends_with("/events/stream")||request.path.ends_with("/tree-events/stream"));
+                const bool streaming=request.method=="GET"&&(request.path.ends_with("/events/stream")||request.path.ends_with("/tree-events/stream")||std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/runs/[A-Za-z0-9_-]+/graph-events/stream$)")));
                 if(streaming&&request.has_header("Last-Event-ID")){
                     require(request.get_header_value_count("Last-Event-ID")==1,"Duplicate stream cursor");
                     headers.emplace("Last-Event-ID",request.get_header_value("Last-Event-ID"));

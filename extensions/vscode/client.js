@@ -75,6 +75,7 @@ class BackendClient {
   #connectionGraphAdmissionSupported=false;
   #connectionGraphReadSupported=false;
   #connectionGraphChildrenSupported=false;
+  #connectionTreeStreamSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
@@ -128,6 +129,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_tree_stream")){if(health.local_connection_tree_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured tree stream protocol.");this.#connectionTreeStreamSupported=true;}
+    else if(this.#connectionTreeStreamSupported)throw new Error("The backend tree stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
     else if(this.#connectionGraphControlSupported)throw new Error("The backend graph control protocol changed. Reconnect before continuing graphs.");
     return health;
@@ -455,11 +458,12 @@ class BackendClient {
     executionIdentity(id);executionIdentity(session_id);planInteger(after);
     if(!['run','tree','graph'].includes(scope)||typeof onEvent!=='function'||onObservation!==undefined&&typeof onObservation!=='function')throw new Error('Invalid event stream observer');
     signal?.throwIfAborted();
-    const route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
+    let capture;let route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
+    if(scope!=="run"&&this.#connectionTreeStreamSupported){capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured tree stream connection changed.");route="/v1/connection-bindings/"+capture.id+"/sessions/"+session_id+"/runs/"+id+"/"+(scope==="graph"?"graph-events":"tree-events")+"/stream";}
     let response;try{response=await this.openEventStream(route+'?after='+after,signal);}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}
     if(!response.ok){const value=await response.json();const error=new Error(typeof value.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
     const known=new Set([id]);
-    return readCommittedEventStream(response,{root:id,session:session_id,scope,after,signal,onEvent,onObservation,authorizeEvent:async event=>{
+    return readCommittedEventStream(response,{root:id,session:session_id,scope,after,binding:capture?.identity,signal,onEvent,onObservation,authorizeEvent:async event=>{
       if(known.has(event.run_id))return true;
       if(scope==='graph'){const root=await this.graph(id);if(root.run.id!==id)throw new Error('Graph stream root changed');const tree=await observeGraphTree(this,root,session_id);signal?.throwIfAborted();for(const child of tree.children)known.add(child.id);return known.has(event.run_id);}
       const children=await this.ownedChildren(id);signal?.throwIfAborted();
@@ -768,7 +772,7 @@ class SkillViewController {
     this.record={scope,catalogue:observed.catalogue,selection,catalogueError:observed.catalogueError};this.post({type:'skills',catalogue:observed.catalogue,selection,catalogueError:observed.catalogueError});return this.record;
   }
 }
-async function readCommittedEventStream(response,{root,session,scope,after,signal,onEvent,onObservation,authorizeEvent}){
+async function readCommittedEventStream(response,{root,session,scope,after,binding,signal,onEvent,onObservation,authorizeEvent}){
   if(response.headers?.get('content-type')!=='text/event-stream'||!response.body?.getReader){try{await response.body?.cancel();}catch{}throw new Error('Invalid native event stream response');}
   const reader=response.body.getReader(),decoder=new TextDecoder('utf-8',{fatal:true});let pending='',cursor=after,observation,total=0;
   const detach=()=>{reader.cancel().catch(()=>{});};signal?.addEventListener('abort',detach,{once:true});
@@ -782,7 +786,8 @@ async function readCommittedEventStream(response,{root,session,scope,after,signa
     if(!fields.data.length){if(fields.id!==undefined||fields.event!==undefined)throw new Error('Incomplete native event stream frame');return;}
     const data=JSON.parse(fields.data.join('\n'));signal?.throwIfAborted();
     if(fields.event==='observation'){
-      planFields(data,['run','after','scope']);validateRunDTO(data.run);
+      planFields(data,binding?['run','after','scope','binding']:['run','after','scope']);validateRunDTO(data.run);
+      if(binding){validateConnectionBindingIdentity(data.binding);if(Object.keys(binding).some(key=>data.binding[key]!==binding[key]))throw new Error('Native event stream belongs to another connection');}
       if(observation||fields.id!==undefined||data.run.id!==root||data.run.session_id!==session||data.scope!==scope||data.after!==after||scope!=='run'&&data.run.parent_id!==''||scope==='graph'&&!data.run.graph_root)throw new Error('Native event stream identity changed');
       observation=data;await onObservation?.(data);signal?.throwIfAborted();return;
     }

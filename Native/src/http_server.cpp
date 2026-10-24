@@ -2,6 +2,7 @@
 #include "connection_run_input.hpp"
 #include "agentflow/http_server.hpp"
 #include <initializer_list>
+#include <functional>
 #include <utility>
 #include <algorithm>
 #include "agentflow/edit_executor.hpp"
@@ -437,7 +438,7 @@ struct HttpServer::Impl {
 #endif
         handler(request,response);
     });}
-    void event_stream(const Request& request,Response& response,bool graph,bool tree){
+    void event_stream(const Request& request,Response& response,bool graph,bool tree,std::string bound_id={},std::function<Run()> observe_run={},std::function<std::vector<Event>(std::int64_t)> observe_events={},std::function<bool()> bound_live={},Json bound_identity=Json()){
         for(const auto& [name,value]:request.params)if(name!="after")throw std::invalid_argument("Unknown event stream query");
         auto after=cursor(request);
         if(request.get_header_value_count("Last-Event-ID")>1)throw std::invalid_argument("Duplicate stream cursor");
@@ -449,16 +450,17 @@ struct HttpServer::Impl {
             after=resumed;
         }
         if(after>9007199254740991LL)throw std::invalid_argument("Stream cursor exceeds public integer limits");
-        const auto id=identifier(request.matches[1]);const auto initial=persistence.run(id).get();
+        const auto id=bound_id.empty()?identifier(request.matches[1]):std::move(bound_id);const auto initial=observe_run?observe_run():persistence.run(id).get();
         if(graph){if(!initial.graph_root)throw std::invalid_argument("Expected a graph root");persistence.graph_run(id).get();}
         if((graph||tree)&&!initial.parent_id.empty())throw std::invalid_argument("Tree observation requires a root run");
-        if(after){const auto boundary=(graph||tree)?persistence.tree_events(id,after-1,1).get():persistence.event_batch(id,after-1,1).get();if(boundary.empty()||boundary.front().sequence!=after)throw std::invalid_argument("Cursor does not belong to this event stream");}
+        if(observe_events){(void)observe_events(after);}
+        else if(after){const auto boundary=(graph||tree)?persistence.tree_events(id,after-1,1).get():persistence.event_batch(id,after-1,1).get();if(boundary.empty()||boundary.front().sequence!=after)throw std::invalid_argument("Cursor does not belong to this event stream");}
         auto lease=std::make_shared<StreamLease>(active_streams);
         if(stopping||!lease->acquire()){reply(response,{{"detail","Event stream capacity is busy; reconnect later"}},503);return;}
         const auto supplied=request.get_header_value("Authorization"),view_origin=request.get_header_value("X-XMind-View-Origin");
         const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(25);
         response.set_header("Cache-Control","no-store");response.set_header("X-Content-Type-Options","nosniff");response.set_header("X-Accel-Buffering","no");
-        response.set_chunked_content_provider("text/event-stream",[this,id,graph,tree,after,lease,supplied,view_origin,deadline,first=true,written=std::size_t{0}](std::size_t,httplib::DataSink& sink)mutable{
+        response.set_chunked_content_provider("text/event-stream",[this,id,graph,tree,after,lease,supplied,view_origin,deadline,observe_run,observe_events,bound_live,bound_identity,first=true,written=std::size_t{0}](std::size_t,httplib::DataSink& sink)mutable{
             const auto finish=[&](const char* reason){const auto frame="event: end\ndata: "+Json{{"reason",reason},{"after",after}}.dump()+"\n\n";if(!sink.write(frame.data(),frame.size()))return false;sink.done();return true;};
             const auto heartbeat=std::chrono::steady_clock::now()+std::chrono::seconds(1);
             while(!stopping&&sink.is_writable()){
@@ -468,9 +470,10 @@ struct HttpServer::Impl {
 #endif
                     // Read state before the batch: terminal state and final events
                     // are committed together. Drain that batch before ending.
-                    const auto run=persistence.run(id).get();
-                    if(first){const auto frame="event: observation\ndata: "+Json{{"run",encode(run)},{"after",after},{"scope",graph?"graph":tree?"tree":"run"}}.dump()+"\n\n";if(!sink.write(frame.data(),frame.size()))return false;first=false;}
-                    const auto events=(graph||tree)?persistence.tree_events(id,after,16).get():persistence.event_batch(id,after,16).get();
+                    if(bound_live&&!bound_live())return finish("interrupted");
+                    const auto run=observe_run?observe_run():persistence.run(id).get();
+                    if(first){auto observation=Json{{"run",encode(run)},{"after",after},{"scope",graph?"graph":tree?"tree":"run"}};if(!bound_identity.is_null())observation["binding"]=bound_identity;const auto frame="event: observation\ndata: "+observation.dump()+"\n\n";if(!sink.write(frame.data(),frame.size()))return false;first=false;}
+                    const auto events=observe_events?observe_events(after):(graph||tree)?persistence.tree_events(id,after,16).get():persistence.event_batch(id,after,16).get();
                     for(const auto& event:events){
                         if(event.sequence<=after||event.sequence>9007199254740991LL)throw std::runtime_error("Invalid persisted event cursor");
                         const auto frame="id: "+std::to_string(event.sequence)+"\nevent: committed\ndata: "+encode(event).dump()+"\n\n";
@@ -527,7 +530,7 @@ struct HttpServer::Impl {
             static const std::regex workspace_find_route(R"(^/v1/workspace/find$)");
             static const std::regex plan_write_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/plan/(human/[A-Za-z0-9_-]+|resume)|sessions/[A-Za-z0-9_-]+/context/compact|graph-runs/[A-Za-z0-9_-]+/resume)$)");
             static const std::regex run_mcp_input_route(R"(^/v1/runs/[A-Za-z0-9_-]+/mcp-inputs(/[A-Za-z0-9_-]+)?$)");
-            static const std::regex stream_route(R"(^/v1/(runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
+            static const std::regex stream_route(R"(^/v1/(connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/runs/[A-Za-z0-9_-]+/(graph-events|tree-events)|runs/[A-Za-z0-9_-]+/(events|tree-events)|graph-runs/[A-Za-z0-9_-]+/events)/stream$)");
             const bool stream=std::regex_match(request.path,stream_route);
             static const std::regex mcp_auth_read(R"(^/v1/mcp/authorization/(servers|attempts/[A-Za-z0-9_-]+)$)");
             static const std::regex mcp_auth_write(R"(^/v1/mcp/authorization/(attempts(/[A-Za-z0-9_-]+/cancel)?|renewals)$)");
@@ -682,7 +685,7 @@ struct HttpServer::Impl {
             auto health=Json{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"graph_tree_human_input",graphs&&graphs->supports_graph_tree_human_input()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()},{"mcp_elicitation",true}};
 #if defined(_WIN32)
             health["local_connection_admission"]=1;
-            health["local_connection_operations"]=1;
+            health["local_connection_operations"]=1;health["local_connection_tree_stream"]=1;
             if(graphs){health["local_connection_graph_admission"]=1;health["local_connection_graph_read"]=1;health["local_connection_graph_children"]=1;health["local_connection_graph_control"]=1;}health["local_connection_history"]=1;health["local_connection_child_history"]=1;
 #endif
             reply(response,health);
@@ -791,6 +794,11 @@ struct HttpServer::Impl {
             auto operations=connection_operations(request);const auto input=body(request,{"decision"});const auto decision=string_field(input,"decision",16);
             if(decision!="allow"&&decision!="deny")throw std::invalid_argument("Invalid operation decision");
             reply(response,connection_values::bound(operations->decide(identifier(request.matches[4]),decision=="allow"?OperationDecision::allow:OperationDecision::deny)));
+        }));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/runs/([A-Za-z0-9_-]+)/(graph-events|tree-events)/stream)",guard_errors([this](const Request& request,Response& response){
+            const auto captured=connection_handle(request);const auto id=identifier(request.matches[3]);const auto stream=captured->events(identifier(request.matches[2]),id);const auto origin_cursor=stream->cursor();const std::string handle=request.matches[1];
+            auto live=[this,handle,captured]{std::lock_guard lock(connection_handles_mutex);const auto found=connection_handles.find(handle);if(found==connection_handles.end()||found->second.value!=captured||std::chrono::steady_clock::now()-found->second.touched>std::chrono::minutes(15))return false;found->second.touched=std::chrono::steady_clock::now();return true;};
+            event_stream(request,response,request.matches[4]=="graph-events",true,id,[captured,id]{return captured->open_run(id).run;},[stream,origin_cursor](std::int64_t after){auto next=origin_cursor;next.sequence=after;auto events=stream->read(next).events;if(events.size()>16)events.resize(16);return events;},std::move(live),connection_values::identity(captured->identity()));
         }));
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/events)",guard_errors([this,connection_request](const Request& request,Response& response){connection_request(request);const auto input=body(request,{"session_id","run_id","cursor"});auto stream=connection_handle(request)->events(identifier(string_field(input,"session_id",128)),identifier(string_field(input,"run_id",128)));const auto cursor=!input.contains("cursor")||input["cursor"].is_null()?stream->cursor():connection_values::cursor(input["cursor"]);reply(response,connection_values::page(stream->read(cursor)));}));
 

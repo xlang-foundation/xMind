@@ -30,7 +30,7 @@ export function allowedApiRoute(path,method){
  if(/^\/v1\/mcp\/authorization\/attempts(?:\/[A-Za-z0-9_-]{1,128}\/cancel)?$/.test(path))return method==='POST';
  if(path==='/v1/mcp/authorization/renewals')return method==='POST';
  if(path==='/v1/mcp/resources')return method==='GET';
- if(/^\/v1\/(?:runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(path))return method==='GET';
+ if(/^\/v1\/(?:connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/runs\/[A-Za-z0-9_-]+\/(?:graph-events|tree-events)|runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(path))return method==='GET';
  if(!apiPath(path)||!['GET','POST','DELETE'].includes(method))return false;
  if(path==='/v1/workspaces')return method==='GET';
  if(path==='/v1/a2a/agents')return method==='GET';
@@ -167,7 +167,7 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
    const controller=new AbortController();response.on('close',()=>{if(!response.writableEnded)controller.abort();});
    // Only the configured native origin receives the supplied access credential. Browser
    // origin enforcement belongs here; native Host/auth guards remain active.
-   const streaming=/^\/v1\/(?:runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(url.pathname),timeoutMs=streaming?30000:url.pathname.endsWith('/a2a/follow-up')?45000:15000;
+   const streaming=/^\/v1\/(?:connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/runs\/[A-Za-z0-9_-]+\/(?:graph-events|tree-events)|runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(url.pathname),timeoutMs=streaming?30000:url.pathname.endsWith('/a2a/follow-up')?45000:15000;
    const upstream=await fetch(destination+url.pathname+url.search,{method:request.method,headers:{...access,...(['POST','DELETE'].includes(request.method)?{'Content-Type':'application/json'}:{}),...(streaming&&request.headers['last-event-id']?{'Last-Event-ID':request.headers['last-event-id']}:{})},body:['POST','DELETE'].includes(request.method)?Buffer.concat(chunks):undefined,redirect:'error',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(timeoutMs)])});
    if(streaming&&upstream.status===200){
     if(upstream.headers.get('content-type')!=='text/event-stream'){controller.abort();reply(502,{detail:'Invalid native event response'});return;}

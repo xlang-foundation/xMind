@@ -1,3 +1,9 @@
+## Captured graph/tree event streams pass focused acceptance — 2026-10-23
+
+Captured root graph/tree SSE now carries and verifies its immutable connection identity. The native backend validates session/root/cursor ownership, observes binding closure and retains existing capacity, frame and rotation limits. Both the native managed view and browser gateway forward the exact captured route incrementally. The managed view had buffered the new graph-events path; preserved failed diagnostics identify that missing forwarding branch.
+
+Native5/5 pass in86.57s with complete frozen closures/file sets unchanged. Actual gateway restart, paused replay, human continuation, tool completion and stream reauthentication pass. Complete client476/165 passes with71 source files/18 assets unchanged. [Receipt](evidence/captured-tree-stream-clients-20261023.json). These are focused development checks, not a new full native or rendered IDE claim. Installed65 remains unchanged. Plain run streams, command/model/general reads and authenticated remote/enrollment remain open.
+
 ## Captured graph children shared routing passes — 2026-10-23
 
 HTTP GET /v1/connection-bindings/{binding}/graph-runs/{root}/children
