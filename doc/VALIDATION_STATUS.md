@@ -1,3 +1,17 @@
+## Captured graph children shared routing passes — 2026-10-23
+
+HTTP GET /v1/connection-bindings/{binding}/graph-runs/{root}/children
+now calls the captured native child lookup. The gateway allows that exact read.
+Health advertises local_connection_graph_children:1. The shared browser/extension
+client retains binding, graph/session and immediate-parent identity, refuses
+duplicates and never falls back after negotiated errors or downgrade.
+
+Native5/5 pass in85.94s, including real graph HTTP execution and actual gateway
+reattachment/native completion. Complete client475/165 passes with source/assets
+unchanged. [Receipt](evidence/captured-graph-children-clients-20261023.json).
+SSE/event routing remains unfinished. Installed65 and its qualified native bytes
+remain unchanged; this development checkpoint has focused acceptance only.
+
 ## Captured graph child SDK lookup passes focused4 — 2026-10-23
 
 Graphs.Children(root) returns immutable binding, graph owner/session identity

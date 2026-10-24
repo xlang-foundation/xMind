@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured graph children HTTP/gateway and shared browser/extension client routing.",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T06:00:34.521Z",
+    "sourceParent": "692ff2c5c015732a2d0e26ed82a0775a001e44bf",
+    "sourcePatchSha256": "c82ae07e73443e6f6ee6ff6c50c42d2f09aefc065c0840ce979d45db3e79d677",
+    "build": {
+      "pid": 23004,
+      "launchedAt": "2026-10-24T05:57:52.847Z",
+      "completedAt": "2026-10-24T05:59:03.030Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "5b79e6e6b1a1ba3e719bd1d7fe0f507f9ffafe1a15f19b2a69dc5ef0ff566175"
+    },
+    "test": {
+      "pid": 9492,
+      "launchedAt": "2026-10-24T05:59:05.640Z",
+      "completedAt": "2026-10-24T06:00:31.629Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2da7a566f18754241a15aab2dafec935466c42cd2b468709e5a1ce59ca19efcd"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 85.94,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "c58404cc3c249efb3d98cc90d0e48856ca9fd21b84bd0c761005b938f1c6c285",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "692ff2c5c015732a2d0e26ed82a0775a001e44bf",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 475,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 475,
+      "passed": 475,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "verified": [
+    "Principal/origin-bound HTTP receipt retains graph/session/binding identity and rejects a foreign view",
+    "Actual native graph fixture negotiates child lookup and completes root/nested human/native-read flows",
+    "Actual local-view controller passes gateway restart, paused reattachment and native completion with captured child routing",
+    "Gateway route method/shape checks include the new child read",
+    "Shared client rejects foreign binding/root/parent/session, duplicate children, negotiated downgrade and closed handle without compatibility fallback"
+  ],
+  "limits": "Focused native5/5 and client475/165, not a current full-native pass or rendered editor acceptance. SSE/event routing remains separate. Installed65 stays on full173-qualified c68485ce; no package or installed bytes changed."
+}

@@ -74,6 +74,7 @@ class BackendClient {
   #connectionAdmissionSupported=false;
   #connectionGraphAdmissionSupported=false;
   #connectionGraphReadSupported=false;
+  #connectionGraphChildrenSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
@@ -125,6 +126,8 @@ class BackendClient {
     else if(this.#connectionGraphAdmissionSupported)throw new Error("The backend graph admission protocol changed. Reconnect before admitting graph work.");
     if(health&&Object.hasOwn(health,"local_connection_graph_read")){if(health.local_connection_graph_read!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph read protocol.");this.#connectionGraphReadSupported=true;}
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
+    if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
+    else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
     if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
     else if(this.#connectionGraphControlSupported)throw new Error("The backend graph control protocol changed. Reconnect before continuing graphs.");
     return health;
@@ -259,7 +262,12 @@ class BackendClient {
     return this.#admitGraph({session_id,graph_id,graph_revision,prompt,files,expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id,expected_workspace_revision:expectedWorkspaceRevision??membership.revision,...(model_id?{model_id}:{}),...profileBindingFields(binding)});
   }
   async graph(id) { const value=await (this.#connectionGraphReadSupported?this.#readCapturedGraph(id):this.request(`/v1/graph-runs/${encodeURIComponent(id)}`));if(value.context!==undefined)validateGraphContext(value.context,value.run);return value; }
-  graphChildren(id) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`); }
+  async graphChildren(id) {
+    if(!this.#connectionGraphChildrenSupported)return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/children`);
+    executionIdentity(id);const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured graph children connection changed.");
+    const value=await this.request("/v1/connection-bindings/"+capture.id+"/graph-runs/"+encodeURIComponent(id)+"/children");exactFields(value,["binding","root_id","session_id","children"]);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key])||value.root_id!==id)throw new Error("Graph children receipt belongs to another connection or owner.");executionIdentity(value.session_id);if(!Array.isArray(value.children)||value.children.length>4096)throw new Error("Invalid captured graph children");const seen=new Set();for(const child of value.children){validateRunDTO(child);if(child.id===id||seen.has(child.id)||child.parent_id!==id||child.session_id!==value.session_id)throw new Error("Graph child ownership changed.");seen.add(child.id);}return value.children;
+  }
   graphEvents(id,after) { return this.request(`/v1/graph-runs/${encodeURIComponent(id)}/events?after=${after}`); }
   graphChildHistory(root,child,session) { return this.#connectionChildHistorySupported?this.#capturedChildHistory(root,child,session):this.request(`/v1/graph-runs/${encodeURIComponent(root)}/children/${encodeURIComponent(child)}/history`); }
   graphInput(root,node,input_json,expected_checkpoint_revision) { if(this.#connectionGraphControlSupported)return this.#controlGraph(root,'/human/'+encodeURIComponent(node),{input_json,expected_checkpoint_revision});return this.request(`/v1/graph-runs/${encodeURIComponent(root)}/human/${encodeURIComponent(node)}`,{input_json,expected_checkpoint_revision}); }
