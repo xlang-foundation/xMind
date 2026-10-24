@@ -1,6 +1,6 @@
 # xMind delivery acceptance audit
 
-Development sourcebc2de6f2/Native88a6dad3 passes the complete local178 contracts in764.76s with its full closure unchanged. Candidate72 package/CLI read-edit-Node4 and managed71-to72 handoff pass; browser coding and installation remain separate. Hosted sourcebc2de6f2 is in progress; older hosted failures retain their own scope. [Current full qualification](../doc/evidence/native-delivery-bc2de6f2-full-20261024.json), [candidate CLI/handoff](../doc/evidence/candidate-0.1.72-cli-handoff-20261024.json).
+Development sourcebc2de6f2/Native88a6dad3 passes the complete local178 contracts in764.76s with its full closure unchanged. Candidate72 package/CLI and actual hidden-browser read-edit-Node4/reload plus managed71-to72 handoff pass; installation remains separate. Hosted sourcebc2de6f2 is in progress; older hosted failures retain their own scope. [Current full qualification](../doc/evidence/native-delivery-bc2de6f2-full-20261024.json), [candidate coding/handoff](../doc/evidence/candidate-0.1.72-qualified-coding-20261024.json).
 
 ## Current installed71 checkpoint
 
