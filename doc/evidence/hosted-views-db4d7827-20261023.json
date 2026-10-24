@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "runId": 40065343728,
+  "source": "db4d7827fa11e6cdd6e26a1c7ebd00960d9e6bcb",
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40065343728",
+  "conclusion": "success",
+  "jobId": 120787297388,
+  "jobLogSha256": "c2b8103e204cb86ea588ba5a31bea20783fdf1c09175f454c3655458c087c59c",
+  "gate": {
+    "sourceRevision": "db4d7827fa11e6cdd6e26a1c7ebd00960d9e6bcb",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 474,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 474,
+      "passed": 474,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "limits": "Official hosted Node views only; no native inference or rendered IDE acceptance."
+}

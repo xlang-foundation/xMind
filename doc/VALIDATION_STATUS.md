@@ -1,3 +1,23 @@
+## Current complete native gate passes173/173 — 2026-10-23
+
+Sourcec68485ce completes the actual173-test suite in753.20s, zero failures.
+Post-run hashes and file sets match all2816 tracked inputs,16 SDK sources,1870
+pure libraries,30 SDK runtime files,18598 Node dependency files and137 native
+binaries. Native SHA256c1f1aa6bae0081679f9fdb044ae42215db71ee73ca441f2a600d081dd611b49b.
+[Complete receipt](evidence/native-delivery-c68485ce-full-20261023.json).
+
+Rust readiness/editor/view, captured graph controls, repaired browser gateway,
+CLI/tool paths, ledger and nested-human execution all pass in this same run.
+The prior RPC approval-cancellation failure did not recur; its cause remains
+unproven and historical failures remain retained. Hosted views on gateway
+checkpointdb4d7827 pass474/165 with unchanged source/assets.
+[Hosted receipt](evidence/hosted-views-db4d7827-20261023.json).
+
+This qualifies the local native source/runtime, not the whole goal. Packaging/
+installation, rendered VS Code, hosted native acceptance, remaining captured
+routing/streams, remote/enrollment and deeper recovery remain open. Installed64
+and completed task identities are unchanged.
+
 ## Rust startup readiness coordination passes focused5 — 2026-10-23
 
 The native client now advertises server-status notifications and, for an

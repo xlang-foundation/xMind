@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "gate": {
+    "recordedAt": "2026-10-24T05:34:27.414Z",
+    "sourceParent": "c68485ce9322c6a2409abca54cbc43e2241cd605",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 22360,
+      "launchedAt": "2026-10-24T05:20:54.263Z",
+      "completedAt": "2026-10-24T05:21:16.564Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2280c4fd003979d7b2b3db932577d4f5b9e14e6b8f685b29c63bd77048d697fb"
+    },
+    "test": {
+      "pid": 33672,
+      "launchedAt": "2026-10-24T05:21:19.220Z",
+      "completedAt": "2026-10-24T05:33:52.458Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "66f3009a9267b2c5c8be4c874b95c7da03e97236ec05200779bc11274090ccc0"
+    },
+    "total": 173,
+    "failed": 0,
+    "passed": 173,
+    "seconds": 753.2,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "c1f1aa6bae0081679f9fdb044ae42215db71ee73ca441f2a600d081dd611b49b",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "rustLogHashes": {
+    "rust-2151040642.log": "6b90863bc721d1fc5cba9b5f390bf3937e5415524bc6538c288b7bb72b130f94",
+    "rust-3155881215.log": "28ad1a05b475f6286684cb631a23c07166db37ee0eee9cd8d7ae895203968c69",
+    "rust-2608321393.log": "fd1d3b92952bfdf52909f9995637fda3b0b34755f5dd48142204b74c950f7817",
+    "rust-3552565855.log": "f68c0da7d0ec4e563a2e61e32883642ecbdee2804a27962c86a7345628d4fb4b"
+  },
+  "coverage": "Complete actual173 CTest inventory, including real Rust readiness/editor/view, native worker model RPC/ledger/nested human, captured graph controls, browser gateway reattachment, CLI coding tools and lifecycle contracts.",
+  "historicalFailures": "The earlier f6110c98 full168/173 result remains retained. Current readiness/gateway/caller changes have focused and complete acceptance. Prior product approval-cancellation mismatch did not recur in two focused runs and this full run; no root-cause or universal recovery claim.",
+  "limits": "Local full native qualification only. Installed64 unchanged; packaging/install, rendered VS Code, hosted native qualification, remaining captured routing/streams, authenticated remote enrollment and deeper repeated recovery remain separate requirements."
+}
