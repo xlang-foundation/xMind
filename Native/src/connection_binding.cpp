@@ -92,6 +92,7 @@ ConnectionGraphSnapshot read_local_connection_graph(PersistenceService& store,Gr
 }
 BoundConnectionGraphs CapturedLocalConnection::graphs()const{auto life=context_->enter();if(!context_->graphs)throw RunUnavailable("Graph catalog unavailable");return {identity_,context_->graphs->graphs()};}
 BoundConnectionGraph CapturedLocalConnection::graph(const std::string& id)const{auto life=context_->enter();if(!context_->graphs)throw RunUnavailable("Graph observation unavailable");return {identity_,read_local_connection_graph(context_->store,*context_->graphs,id)};}
+BoundConnectionGraphChildren CapturedLocalConnection::graph_children(const std::string& id)const{auto life=context_->enter();if(id.empty()||id.size()>128)throw std::invalid_argument("Invalid captured graph identity");const auto root=context_->store.graph_run(id).get();return {identity_,id,root.run.session_id,context_->store.children(id).get()};}
 BoundConnectionGraphUpdate CapturedLocalConnection::graph_input(const std::string& root,const std::string& owner,const std::string& node,const std::string& input,std::int64_t revision,std::int64_t owner_revision)const{
     auto life=context_->enter();auto admission=context_->admit();if(!context_->graphs)throw RunUnavailable("Graph input unavailable");
     if(root.empty()||root.size()>128||node.empty()||node.size()>64||input.empty()||input.size()>65536||revision<1||revision>9007199254740991LL||owner.size()>128||(!owner.empty()&&(owner_revision<1||owner_revision>9007199254740991LL)))throw std::invalid_argument("Invalid captured graph human input");

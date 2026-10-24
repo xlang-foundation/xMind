@@ -1,3 +1,18 @@
+## Captured graph child SDK lookup passes focused4 — 2026-10-23
+
+Graphs.Children(root) returns immutable binding, graph owner/session identity
+and immediate child runs. The backend requires a persisted graph record; nested
+graph owners are accepted. Independent unified xmind.exe clients now discover
+the actual nested owner through SDK dispatch before answering its human input
+and completing a native file read. Wrong token and missing graph refuse.
+Native4/4 pass in19.97s with frozen closures and file sets unchanged.
+[Receipt](evidence/captured-graph-children-sdk-20261023.json).
+
+This supplies child authorization needed for captured event observation; HTTP/
+gateway/shared-client routing and SSE remain separate unfinished work. Installed65
+remains unchanged on full173-qualifiedc68485ce. No new full-suite qualification
+or installation is claimed.
+
 ## Installed0.1.65 preservation and managed smoke pass — 2026-10-23
 
 Installed65 uses full173-qualified nativec68485ce/c1f1aa6b and SDK8c7972d1.

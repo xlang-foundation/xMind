@@ -24,6 +24,7 @@ inline nlohmann::json graph_record(const GraphRootRecord& root){return {{"run",r
 inline nlohmann::json graph_snapshot(const ConnectionGraphSnapshot& value){auto result=graph_record(value.record);result["context"]={{"enabled",value.context.enabled},{"resumable",value.context.resumable},{"remaining_active_ms",value.context.remaining_active_ms?nlohmann::json(*value.context.remaining_active_ms):nlohmann::json(nullptr)}};return result;}
 inline nlohmann::json bound(const BoundConnectionGraph& value){return {{"binding",identity(value.binding)},{"graph",graph_snapshot(value.graph)}};}
 inline nlohmann::json bound(const BoundConnectionGraphUpdate& value){return {{"binding",identity(value.binding)},{"graph",graph_record(value.graph)}};}
+inline nlohmann::json bound(const BoundConnectionGraphChildren& value){auto children=nlohmann::json::array();for(const auto& child:value.children)children.push_back(run_value(child));return {{"binding",identity(value.binding)},{"root_id",value.root_id},{"session_id",value.session_id},{"children",std::move(children)}};}
 inline nlohmann::json bound(const BoundConnectionGraphs& value){auto entries=nlohmann::json::array();for(const auto& graph:value.graphs)entries.push_back({{"id",graph.id},{"revision",graph.revision},{"node_count",graph.node_count},{"executable",graph.executable}});return {{"binding",identity(value.binding)},{"graphs",std::move(entries)}};}
 
 }

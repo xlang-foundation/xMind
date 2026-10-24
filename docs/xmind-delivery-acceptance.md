@@ -160,3 +160,7 @@ Fresh candidate CLI and rendered hidden browser tasks pass real read/edit/Node4 
 ### Installed0.1.65 checkpoint — 2026-10-23
 
 Full173-qualified source is installed with exact payload/runtime/registry checks, an exact64 backup and unchanged five protected roots. Managed upgrade rejects active paused work, preserves original graph/history once resumed, and changes owner only when idle. Fresh installed managed discovery/read/history smoke passes0models; owned fixtures exit. Rendered VS Code, hosted native, remaining API/remote and deeper recovery remain open. [Receipt](../doc/evidence/installed-0.1.65-c68485ce-20261023.json).
+
+### Captured graph children SDK — 2026-10-23
+
+Graphs.Children and its thin CLI adapter pass focused native4/4, including independent-process nested owner discovery and real subsequent native read completion. This is a prerequisite for captured stream authorization, not completion of HTTP/client/SSE migration. Installed65 remains unchanged; development source needs its own later full qualification. [Receipt](../doc/evidence/captured-graph-children-sdk-20261023.json).

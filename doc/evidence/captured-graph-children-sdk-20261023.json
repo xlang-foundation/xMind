@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured Graphs.Children SDK subobject method and thin independent CLI client.",
+  "gate": {
+    "recordedAt": "2026-10-24T05:56:01.286Z",
+    "sourceParent": "6c93c33cf44cdb394aa4cc3fcc73d88fe18021a8",
+    "sourcePatchSha256": "aa0dc7b14d625af386947525b8542397b13c28846a2fe887a8f594149cbe4c2d",
+    "build": {
+      "pid": 13892,
+      "launchedAt": "2026-10-24T05:53:56.266Z",
+      "completedAt": "2026-10-24T05:55:35.917Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0983183654e9ac63061a5f3f24c17286eb968d8bc3afafe513cb3d7a363bc91e"
+    },
+    "test": {
+      "pid": 38160,
+      "launchedAt": "2026-10-24T05:55:38.652Z",
+      "completedAt": "2026-10-24T05:55:58.663Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "01897d42dffbe446f7c12bb8afa5907ed96bcc4e57211ce17525015c320a7658"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 19.97,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "c8a888ef938588d05ec19780f6ec959b032d7bcfcf07c858ce6a0129764da071",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "verified": [
+    "Independent xmind.exe client discovers actual nested graph invocation through standard xlang3 SDK method instead of compatibility HTTP",
+    "Receipt preserves captured binding, graph owner ID and session ID",
+    "Nested human input then completes actual native file read",
+    "Wrong-token and missing-graph child lookups refuse"
+  ],
+  "semantics": "The backend verifies a persisted graph record before listing immediate child runs. Nested graph owners are supported. Context lifetime is entered before any persistence access; profile metadata is not re-admitted for observation.",
+  "limits": "Focused4/4 only. New method is not an HTTP/gateway/shared-client adapter or a completed captured stream migration. Existing installed65 remains full173-qualified c68485ce; this development binary is uninstalled. Full goal and remaining streams/routing/remote/recovery/rendered VS Code remain open."
+}
