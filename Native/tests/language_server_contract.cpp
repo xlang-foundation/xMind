@@ -155,7 +155,7 @@ int main(int argc,char** argv){
         require(model_format_denied,"AgentRunner language-server tool must remain read-only and cannot invoke document formatting");
         const auto diagnostics=request("diagnostics");
         require(diagnostics["result"].is_object()&&diagnostics["result"]["items"].is_array()&&diagnostics["result"]["items"].empty(),"Real rust-analyzer must report the valid fixture without diagnostics");
-        const auto editor=registry.query(LanguageServerRequest{path,"documentSymbol",0,0});require(Json::parse(editor)["result"]==symbols["result"],"Editor and AgentRunner queries must share the same trusted server-selection behavior");
+        const auto editor=registry.query(LanguageServerRequest{path,"documentSymbol",0,0});if(Json::parse(editor)["result"]!=symbols["result"])throw std::runtime_error("Editor and AgentRunner symbol comparison changed; observed "+Json::parse(editor)["result"].dump()+"; expected "+symbols["result"].dump());
         http_contract(argv[1],argv[2],path,argv[4],argv[5]);provider_profile_contract(argv[1],argv[2],path,argv[4],argv[5]);agent_owner_contract(argv[1],argv[2],path,argv[4],argv[5]);
         std::cout<<"Actual rust-analyzer verified persistent native stdio, symbols, definition, references, hover, clean diagnostics and authenticated formatting. Real AgentRunner used an explicit model fixture to verify owned language queries and path-specific denial through xlang3 SQLite; no live model or synthetic LSP peer used\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}

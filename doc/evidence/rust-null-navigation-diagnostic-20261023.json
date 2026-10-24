@@ -1,0 +1,972 @@
+{
+  "schemaVersion": 1,
+  "nativeDiagnostic": {
+    "recordedAt": "2026-10-24T05:13:15.267Z",
+    "sourceParent": "db4d7827fa11e6cdd6e26a1c7ebd00960d9e6bcb",
+    "sourcePatchSha256": "096951329e397742bbebb8a369e09b07ce6d310413cac92c9c82a471578719fa",
+    "build": {
+      "pid": 37924,
+      "launchedAt": "2026-10-24T05:12:51.809Z",
+      "completedAt": "2026-10-24T05:13:06.877Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "56c56af58eb0094cd3aa9b072fa1d46640d99b20b52b6071551c670a95a080e8"
+    },
+    "test": {
+      "pid": 23700,
+      "launchedAt": "2026-10-24T05:13:09.536Z",
+      "completedAt": "2026-10-24T05:13:12.663Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "8d0d9b4ece32f5e519ede5e355a8371979ad4ae1026b39f3aaabcfdda9bc7226"
+    },
+    "total": 2,
+    "failed": 1,
+    "passed": 1,
+    "seconds": 3.09,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "9300c71dda2aa4fadd36917602c3a121b4c3b89a8597f41405063de91dd4313c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "wireDiagnostic": {
+    "recordedAt": "2026-10-24T05:13:55.673Z",
+    "code": 8,
+    "signal": null,
+    "pid": 40736,
+    "inputsUnchanged": true,
+    "diagnosticOnly": true,
+    "fullAcceptance": false,
+    "passed": false
+  },
+  "wireFilesSha256": {
+    "rust-1466058984.log": "1108786b5f1c3d5b246cd18b5685c530940c0cc09ce1e197fde88eb3fc532de2",
+    "rust-1466058984.log.client.lsp": "95e525447e1cc96ba571075e89c1ff26ab20ddcd9170c46fdf5dcf70aa7d49ad",
+    "rust-1466058984.log.server.lsp": "7e11a1c99159cf35e81efc73d679c0c581098c98da049aba600373648154f3d7",
+    "rust-3885337666.log": "6f8e6a49830061519cb22384e6ea3d4dccffa216e69bdaa93aac6a93bbc88541",
+    "rust-3885337666.log.client.lsp": "f0be9e88594057d2d49f200b583e98d076f7055463fcefbe830bb004872728dc",
+    "rust-3885337666.log.server.lsp": "5eb63ccdca84a46e1dd126794625655f513831a70464416606c5884ab737bbb6"
+  },
+  "streams": [
+    {
+      "file": "rust-1466058984.log.client.lsp",
+      "observations": [
+        {
+          "method": "textDocument/didOpen"
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-2",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-2",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 4,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 4,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 4,
+                    "character": 15
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-3",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-3",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 4,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 4,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 4,
+                    "character": 15
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-4",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-4",
+            "result": []
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-5",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-5",
+            "result": null
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-6",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-6",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/references",
+          "id": "xmind-7",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-7",
+            "result": [
+              {
+                "uri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "range": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                }
+              },
+              {
+                "uri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/hover",
+          "id": "xmind-8",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-8",
+            "result": {
+              "contents": {
+                "kind": "markdown",
+                "value": "\n```rust\nxmind_lsp_contract\n```\n\n```rust\npub fn add(left: i32, right: i32) -> i32\n```"
+              },
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 4
+                },
+                "end": {
+                  "line": 5,
+                  "character": 7
+                }
+              }
+            }
+          }
+        },
+        {
+          "method": "textDocument/didChange",
+          "version": 2,
+          "textSha256": "1644b730655bc1cc369fd9aab296e8543fdcf2d23c3c7523d3638bd69ad28f3c"
+        },
+        {
+          "method": "textDocument/formatting",
+          "id": "xmind-9",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-9",
+            "result": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 32
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 33
+                  }
+                },
+                "newText": ""
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 34
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 34
+                  }
+                },
+                "newText": " "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 36
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 36
+                  }
+                },
+                "newText": " "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 39
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 40
+                  }
+                },
+                "newText": " {\n    "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 49
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 52
+                  }
+                },
+                "newText": " = 1;\n    "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 57
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 57
+                  }
+                },
+                "newText": "\n"
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/didChange",
+          "version": 3,
+          "textSha256": "f53fe1011d2dfadfa68d47836e09023acb3a2590391fcc6605692357243d0305"
+        },
+        {
+          "method": "textDocument/diagnostic",
+          "id": "xmind-10",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-10",
+            "result": {
+              "kind": "full",
+              "resultId": "rust-analyzer",
+              "items": []
+            }
+          }
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-11",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-11",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 4,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 4,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 4,
+                    "character": 15
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "file": "rust-3885337666.log.client.lsp",
+      "observations": [
+        {
+          "method": "textDocument/didOpen"
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-2",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-2",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 4,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 4,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 4,
+                    "character": 15
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-3",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-3",
+            "result": []
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-4",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-4",
+            "result": null
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-5",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-5",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/didChange",
+          "version": 2,
+          "textSha256": "7e445e21dfd0dd8c6cde2d63869b0a5b05502698f76e1f6965375316e670779e"
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-6",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-6",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 57
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 1,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 1,
+                    "character": 38
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 1,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 1,
+                    "character": 15
+                  }
+                }
+              },
+              {
+                "name": "unsaved_marker",
+                "detail": "fn()",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 2,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 26
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 2,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 21
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/didChange",
+          "version": 3,
+          "textSha256": "1644b730655bc1cc369fd9aab296e8543fdcf2d23c3c7523d3638bd69ad28f3c"
+        },
+        {
+          "method": "textDocument/formatting",
+          "id": "xmind-7",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-7",
+            "result": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 32
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 33
+                  }
+                },
+                "newText": ""
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 34
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 34
+                  }
+                },
+                "newText": " "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 36
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 36
+                  }
+                },
+                "newText": " "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 39
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 40
+                  }
+                },
+                "newText": " {\n    "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 49
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 52
+                  }
+                },
+                "newText": " = 1;\n    "
+              },
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 57
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 57
+                  }
+                },
+                "newText": "\n"
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/didChange",
+          "version": 4,
+          "textSha256": "f53fe1011d2dfadfa68d47836e09023acb3a2590391fcc6605692357243d0305"
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-8",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-8",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 4,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 4,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 4,
+                    "character": 15
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/documentSymbol",
+          "id": "xmind-9",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-9",
+            "result": [
+              {
+                "name": "add",
+                "detail": "fn(left: i32, right: i32) -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              },
+              {
+                "name": "call_add",
+                "detail": "fn() -> i32",
+                "kind": 12,
+                "tags": [],
+                "deprecated": false,
+                "range": {
+                  "start": {
+                    "line": 4,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 6,
+                    "character": 1
+                  }
+                },
+                "selectionRange": {
+                  "start": {
+                    "line": 4,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 4,
+                    "character": 15
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-10",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-10",
+            "error": {
+              "code": -32801,
+              "message": "content modified"
+            }
+          }
+        },
+        {
+          "method": "textDocument/definition",
+          "id": "xmind-11",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-11",
+            "result": null
+          }
+        }
+      ]
+    }
+  ],
+  "observed": "Native and wire-proxy controlled runs both fail: browser-view definition HTTP200 result null after original-text restoration, where earlier exact call site returned a valid location. Captured wire shows full original text sent in didChange version4, two subsequent correct symbol replies, then definition error -32801 content modified and null on the existing retry. This proves actual server replies, not authentication failure. Root cause not yet established.",
+  "limits": "Diagnostic proxy changes child PATH to include the same installed stable Rust toolchain and changes timing. It is not production acceptance. Native unproxied run independently exhibits HTTP200/null. No production behavior, deadline, retry count, expected symbols or provider inference changed. Full168/173 failure remains retained.",
+  "upstreamReference": "https://rust-lang.github.io/rust-analyzer/src/rust_analyzer/handlers/notification.rs.html"
+}

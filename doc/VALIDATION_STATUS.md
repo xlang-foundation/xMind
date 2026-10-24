@@ -1,3 +1,18 @@
+## Rust null-navigation failure captured on the wire — 2026-10-23
+
+Unproxied focused Rust fails1/2 (cargo fixture passes) in3.09s. The browser-view
+definition query returns HTTP200/result:null after the same call site previously
+returned a valid location. An independent diagnostic wire proxy reproduces it:
+original text is sent as full didChange version4, two correct symbol replies
+follow, then definition returns content-modified and null on the existing retry.
+Authentication and native response projection are therefore not the observed
+failure in this attempt. Root cause and repair remain unproven.
+
+The proxy adds the installed stable Rust toolchain to PATH and changes timing;
+it is diagnostic evidence only. The native assertion now records actual/expected
+symbols on its previously opaque mismatch. No expected result, deadline or retry
+policy changed. [Retained evidence](evidence/rust-null-navigation-diagnostic-20261023.json).
+
 ## Browser captured-route regression repaired — 2026-10-23
 
 The gateway did not forward captured graph catalog/detail/control or run/child
