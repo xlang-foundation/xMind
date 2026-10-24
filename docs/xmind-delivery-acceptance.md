@@ -148,3 +148,7 @@ Native startup dispatch now waits for observed rust-analyzer quiescence inside t
 ### Complete native sourcec68485ce — 2026-10-23
 
 All173 contracts pass in753.20s with complete frozen source/SDK/library/dependency/binary sets unchanged. Current Rust readiness, browser gateway and captured graph controls pass together. Earlier full168/173 failures remain retained; the prior intermittent RPC cancellation cause is still unproven. This is local native qualification; package/install, rendered VS Code, hosted native, remaining API/remote work and deeper recovery remain open. [Receipt](../doc/evidence/native-delivery-c68485ce-full-20261023.json).
+
+### Candidate0.1.65 assembly — 2026-10-23
+
+Current173-qualified native runtime is assembled with the accepted474/165 client into an uninstalled0.1.65 VSIX. All2398 runtime files and2443 archive entries match expected inputs. This is assembly evidence, not packaged execution or installation acceptance. [Receipt](../doc/evidence/candidate-0.1.65-package-20261023.json).

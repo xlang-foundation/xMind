@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.65",
+  "source": "c68485ce9322c6a2409abca54cbc43e2241cd605",
+  "nativeSha256": "c1f1aa6bae0081679f9fdb044ae42215db71ee73ca441f2a600d081dd611b49b",
+  "archive": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-c68485ce/package-qualified/agentflow-0.1.65-sdk-8c7972d1.vsix",
+  "archiveSha256": "e8966e152dd0fd008db1b9fb10111f470f9cd6fd574dcc04e571039baf9ff3e2",
+  "archiveBytes": 35276834,
+  "archiveEntries": 2443,
+  "runtime": {
+    "output": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\native-c68485ce\\package-qualified\\native-runtime",
+    "manifestSha256": "5a1fdb26d12e8c9777934cc72c2314439cc78f00309a57ccd619c4c3cd2bac5e",
+    "nativeFiles": 5,
+    "pureSourceFiles": 1869,
+    "files": 2398,
+    "nativeExecuted": false,
+    "configAccessed": false,
+    "installed": false,
+    "source": "c68485ce9322c6a2409abca54cbc43e2241cd605",
+    "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+    "nativeSha256": "c1f1aa6bae0081679f9fdb044ae42215db71ee73ca441f2a600d081dd611b49b",
+    "excludedDevelopmentOnlyFiles": {
+      "modules/xlang1_compat_sample.x3pkg.dll": "4a16024341b8d9df2cae19c8ee5cdc43fc65ab59b2bc7d4a70f9d86176638a68",
+      "modules/xlang_graph_native.x3pkg.dll": "69025238c37f0176da0d84e970437ca9be52f4d86fe2426b7608ce29a1cb1e2f",
+      "modules/xlang_curmodule_probe.x3pkg.dll": "78f8788031d70a6ca1113fc2bf9ba316bb6824b676c5e470bb5721f1736b96e8",
+      "xlang3_runtime.lib": "5c3b83a87597df78f6b90cdb095409f97d57f8ed88dcd5323f32779f902944ab"
+    },
+    "fullNativeAcceptance": true,
+    "executed": false
+  },
+  "acceptedExtensionTests": 474,
+  "acceptedBrowserTests": 165,
+  "frontendFilesMatched": 64,
+  "allExpectedRuntimeClientAssetsAndLibrariesVerified": true,
+  "cleanRuntimeUnchanged": true,
+  "nativeExecuted": false,
+  "installed": false,
+  "releaseAccepted": false,
+  "remaining": "Packaged runtime smoke, current candidate browser/CLI coding and managed upgrade checks, protected installation and rendered VS Code remain separate. No replay of completed user tasks. Existing installed64 and its backups unchanged."
+}

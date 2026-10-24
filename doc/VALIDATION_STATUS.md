@@ -1,3 +1,16 @@
+## Candidate0.1.65 assembled, uninstalled — 2026-10-23
+
+The complete173-qualified nativec68485ce runtime and unchanged accepted474/165
+frontend are assembled as candidate0.1.65. Runtime2398 files and VSIX2443 entries
+match staged manifests;64 frontend inputs match the frozen gate. SDK8c7972d1
+and development-module exclusions remain exact. The gateway packaged here is
+the current repaired source, not an older staged copy.
+
+No native program, configuration or user database was executed/accessed by
+assembly. Packaged runtime/coding/upgrade validation and protected installation
+remain pending; installed64 stays unchanged.
+[Candidate receipt](evidence/candidate-0.1.65-package-20261023.json).
+
 ## Current complete native gate passes173/173 — 2026-10-23
 
 Sourcec68485ce completes the actual173-test suite in753.20s, zero failures.
