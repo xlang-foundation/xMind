@@ -1,3 +1,24 @@
+## Bounded nested-planner callback scheduling — 2026-10-23
+
+A yielded child slot can now lend its existing native IPC callback thread to
+one already-dispatched job from the exact same shared budget. Native slot and
+pool identities reject held, foreign, concurrent and retired use; parent
+reacquisition waits until assisted work finishes. The pool retains its queue
+bound and a global maximum of72 outstanding jobs including parked planners.
+Close/fault stop every tracked job and wait for assisted physical drain.
+
+Focused pool/ledger/context4 pass in45.03s, including eight occupied pool
+workers,64 queued jobs, exact root callback isolation, cancellation and leaf
+accounting. The actual separate-process SDK accepted-read fixture now uses a
+one-worker pool, so callback assistance is required for progress. A separate
+engine/graph/agent/production-RPC4 passes in83.19s against the same patch and
+binary. All input/binary file sets and hashes remain exact.
+[Receipt](evidence/bounded-child-assistance-20261023.json).
+
+This is focused acceptance, not a full172 run. Automatic nested process-worker
+enrollment and pause/recovery remain unfinished. Installed64 stays on its
+previous full-qualified runtime.
+
 ## Installed0.1.64 protected delivery checkpoint — 2026-10-23
 
 The qualified0.1.64 VSIX is installed without a visible window. All2440 raw

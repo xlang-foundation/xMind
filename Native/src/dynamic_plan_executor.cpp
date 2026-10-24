@@ -322,14 +322,21 @@ DynamicExecutionResult DynamicPlanExecutor::resume(const std::string& parent,con
     }
     return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
+std::shared_ptr<DynamicPlanExecutor> DynamicPlanExecutor::for_child(std::shared_ptr<NativeChildSlot> slot)const{
+    if(!slot)throw DynamicPlanUnavailable("Nested scheduling requires its exact native child slot");
+    auto bound=std::make_shared<DynamicPlanExecutor>(store_,children_,agent_execution_);bound->scheduling_slot_=std::move(slot);return bound;
+}
 DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,
     std::shared_ptr<RootExecutionBudget> budget,std::stop_token cancel,DynamicInstructionPrecondition guidance){
     const bool nested_owner=accepted.owner_run_id!=accepted.root_run_id;
     std::vector<ActiveBatch> active;active.reserve(8);
     bool pause_observed=false;
+    auto assist=[&]{return scheduling_slot_&&children_->assist(scheduling_slot_);};
+    auto await=[&](const auto& result){while(result.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready){if(!assist())std::this_thread::sleep_for(std::chrono::milliseconds(1));}};
     auto settle=[&](bool wait){
         for(auto& batch:active)for(std::size_t i=0;i<batch.children.size();++i){if(batch.settled[i])continue;const auto& result=batch.work->results()[i];
             if(!wait&&result.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready)continue;
+            if(wait)await(result);
             const auto actual=result.get();if(actual.id==accepted.root_run_id&&actual.state==RunState::paused){
                 (void)store_.dynamic_owner_pause(accepted.root_run_id).get();pause_observed=true;batch.settled[i]=true;continue;
             }
@@ -381,7 +388,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                     },cancel});
                 }
                 try{staged.work=children_->stage(std::move(work));}
-                catch(const NativeChildCapacityUnavailable&){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
+                catch(const NativeChildCapacityUnavailable&){if(!assist())std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
                 catch(const NativeChildOutcomeUnrecorded&){throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");}
                 active.push_back(std::move(staged));active.back().work->dispatch();continue;
             }
@@ -457,7 +464,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                     },cancel});
                 }
                 try{staged.work=children_->stage(std::move(work));}
-                catch(const NativeChildCapacityUnavailable&){std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
+                catch(const NativeChildCapacityUnavailable&){if(!assist())std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
                 catch(const NativeChildOutcomeUnrecorded&){throw DynamicOutcomeUnrecorded("Native child execution generation is faulted");}
                 DynamicFrontierClaim committed;
                 try{budget->check(cancel);committed=store_.admit_dynamic_frontier(std::move(claim)).get();}
@@ -472,7 +479,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                 catch(const DynamicPlanChanged&){continue;}
             }
             if(live==0&&decision.waiting_human.empty())throw DynamicOutcomeUnrecorded("Dynamic plan has no owned progress, report or human wait");
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if(!assist())std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }catch(...){
         const auto original=std::current_exception();for(auto& batch:active)batch.work->request_stop();
@@ -480,7 +487,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
         // Drain EVERY actual future even when one worker or settlement fails.
         // Completed effects/history remain under their original child owner.
         for(auto& batch:active)for(std::size_t i=0;i<batch.children.size();++i){if(batch.settled[i])continue;
-            try{const auto actual=batch.work->results()[i].get();if(actual.id!=batch.children[i]||!terminal(actual.state))throw DynamicOutcomeUnrecorded("Dynamic child failed to retire");store_.settle_dynamic_child(actual.id).get();batch.settled[i]=true;}
+            try{await(batch.work->results()[i]);const auto actual=batch.work->results()[i].get();if(actual.id!=batch.children[i]||!terminal(actual.state))throw DynamicOutcomeUnrecorded("Dynamic child failed to retire");store_.settle_dynamic_child(actual.id).get();batch.settled[i]=true;}
             catch(...){journal_fault=true;children_->fail();}
         }
         if(journal_fault)throw DynamicOutcomeUnrecorded("Dynamic children drained but outcomes require recovery; execution must stop");

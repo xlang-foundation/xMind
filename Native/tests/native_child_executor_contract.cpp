@@ -4,6 +4,7 @@
 #include "agentflow/persistence_service.hpp"
 #include "nlohmann/json.hpp"
 #include <atomic>
+#include <array>
 #include <chrono>
 #include <condition_variable>
 #include <filesystem>
@@ -67,6 +68,82 @@ void transferred_slot(PersistenceService& store,bool retire_yielded){
     auto spec=admission(store,id);auto arguments=Json::parse(spec.arguments_json);auto second=arguments["tasks"][0];second["id"]="child2";arguments["tasks"].push_back(second);spec.arguments_json=arguments.dump();auto assistant=Json::parse(spec.parent_assistant_json);assistant["tool_calls"][0]["arguments"]=spec.arguments_json;spec.parent_assistant_json=assistant.dump();auto task=spec.tasks[0];task.task_id="child2";task.node_id=id+"-node2";task.child_run_id=id+"-child2";spec.tasks.push_back(task);store.accept_delegation_batch(spec).get();batch->dispatch();
     require(slot_ready.wait_for(2s)==std::future_status::ready&&outer_ready.wait_for(2s)==std::future_status::ready,"Actual pool job must publish its held native slot");auto slot=slot_ready.get();require(!budget->try_acquire_leaf(),"One parallel root must remain occupied before cross-thread yield");require(slot->yield()&&!slot->yield(),"Only one cross-thread yield may release the exact parent slot");require(inner_ready.wait_for(2s)==std::future_status::ready&&!budget->try_acquire_leaf(),"Descendant must use the released slot without oversubscription");std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{slot->reacquire(stopped.get_token());},"Cancelled callback cannot reacquire a transferred slot");if(retire_yielded){resume_outer.set_value();require(batch->results()[0].wait_for(2s)==std::future_status::ready&&!budget->try_acquire_leaf(),"Retiring a yielded parent must not release its descendant's occupied slot");release_inner.set_value();require(batch->results()[1].wait_for(2s)==std::future_status::ready,"Descendant must retain its slot until actual retirement");}else{release_inner.set_value();require(batch->results()[1].wait_for(2s)==std::future_status::ready,"Descendant must physically leave the pool before parent reacquisition");slot->reacquire();require(!budget->try_acquire_leaf(),"Reacquired parent must occupy the original root limit");resume_outer.set_value();require(batch->results()[0].wait_for(2s)==std::future_status::ready,"Parent job must retire after its actual resume");}require(!slot->yield(),"Retained native slot must refuse yield after pool retirement");rejects<Conflict>([&]{slot->reacquire();},"Retained slot cannot reacquire after retirement");pool.close();require(budget->try_acquire_leaf(),"Transferred slot retirement must release exactly one root slot");budget->release_leaf();
     for(const auto& result:batch->results())store.settle_delegation_child(result.get().id).get();store.settle_delegation_batch(spec.id).get();store.transition(id,RunState::running,RunState::cancelled,R"({"reason":"synthetic_pool_fixture_complete"})").get();
+}
+void assisted_saturation(PersistenceService& store){
+    // Pool-only closures reproduce eight parked owners. The callback threads
+    // stand in for existing SDK receiver threads, never additional pool workers.
+    std::vector<std::shared_ptr<RootExecutionBudget>> budgets;
+    for(unsigned i=0;i<8;++i)budgets.push_back(root(store,"pool-assist-"+std::to_string(i)));
+    NativeChildExecutor pool(8,64),foreign(1,4);
+    std::array<std::promise<std::shared_ptr<NativeChildSlot>>,8> bound;
+    std::array<std::shared_ptr<NativeChildSlot>,8> slots;
+    std::array<std::atomic<unsigned>,8> completed{};
+    std::atomic<unsigned> entered=0;std::atomic<bool> release_children=false,release_parents=false,callbacks_ready=false;
+    std::array<std::thread::id,8> callback_ids;
+    const auto until=std::chrono::steady_clock::now()+5s;
+    std::vector<NativeChildWork> owners;
+    for(unsigned i=0;i<8;++i)owners.push_back({budgets[i],[&,i](std::stop_token stop){
+        while(!release_parents&&!stop.stop_requested()&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(1ms);
+        require(release_parents||stop.stop_requested(),"Parked owner must be explicitly resumed or cancelled");
+        Run result;result.id="synthetic-assisted-owner-"+std::to_string(i);result.state=RunState::cancelled;return result;
+    },{},[&,i](auto slot){bound[i].set_value(std::move(slot));}});
+    auto parents=pool.stage(std::move(owners));parents->dispatch();
+    for(unsigned i=0;i<8;++i){auto ready=bound[i].get_future();require(ready.wait_until(until)==std::future_status::ready,"All eight physical workers must hold an exact slot");slots[i]=ready.get();}
+    rejects<Conflict>([&]{pool.assist(slots[0]);},"A held slot cannot lend its callback thread");
+    for(const auto& slot:slots)require(slot->yield(),"Each parked owner must yield exactly one leaf");
+    rejects<Conflict>([&]{foreign.assist(slots[0]);},"Another pool cannot use a captured slot");
+    std::vector<std::unique_ptr<NativeChildExecutor::Batch>> batches;
+    for(unsigned n=0;n<8;++n){std::vector<NativeChildWork> children;
+        for(unsigned i=0;i<8;++i)children.push_back({budgets[i],[&,i,n](std::stop_token stop){
+            require(std::this_thread::get_id()==callback_ids[i],"Assistance must execute on its exact root callback thread");
+            if(n==0){++entered;while(!release_children&&!stop.stop_requested()&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(1ms);}
+            require(!stop.stop_requested()&&std::chrono::steady_clock::now()<until,"Assisted work must progress before its actual deadline");
+            ++completed[i];Run result;result.id="synthetic-assisted-child-"+std::to_string(i)+"-"+std::to_string(n);result.state=RunState::completed;return result;
+        },{}});
+        batches.push_back(pool.stage(std::move(children)));batches.back()->dispatch();
+    }
+    std::array<std::exception_ptr,8> failures{};std::vector<std::jthread> callbacks;
+    for(unsigned i=0;i<8;++i){callbacks.emplace_back([&,i]{try{while(!callbacks_ready)std::this_thread::yield();while(completed[i]!=8&&std::chrono::steady_clock::now()<until){if(!pool.assist(slots[i]))std::this_thread::sleep_for(1ms);}}catch(...){failures[i]=std::current_exception();}});callback_ids[i]=callbacks.back().get_id();}
+    callbacks_ready=true;
+    while(entered!=8&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(1ms);
+    require(entered==8,"All eight parked callbacks must execute descendants without another pool thread");
+    rejects<Conflict>([&]{pool.assist(slots[0]);},"One slot cannot lend concurrent callback threads");
+    rejects<Conflict>([&]{slots[0]->reacquire();},"A parent cannot reacquire while its callback owns a descendant");
+    rejects<NativeChildCapacityUnavailable>([&]{pool.stage({NativeChildWork{budgets[0],[](std::stop_token){return Run{};},{}}});},"Assistance must retain the72-job global bound even after leaving the queue");
+    release_children=true;callbacks.clear();
+    for(unsigned i=0;i<8;++i){if(failures[i])std::rethrow_exception(failures[i]);require(completed[i]==8,"A callback may help only its exact shared budget");slots[i]->reacquire();require(!budgets[i]->try_acquire_leaf(),"Resumed owner must retain its single root leaf limit");}
+    release_parents=true;
+    for(const auto& result:parents->results())require(result.wait_until(until)==std::future_status::ready,"Resumed parent must physically retire");
+    for(const auto& batch:batches)for(const auto& result:batch->results())require(result.get().state==RunState::completed,"Every assisted result must be observed exactly once");
+    pool.close();foreign.close();
+    rejects<Conflict>([&]{pool.assist(slots[0]);},"Retained retired slot cannot lend execution");
+    for(unsigned i=0;i<8;++i){require(budgets[i]->try_acquire_leaf(),"Assisted retirement must release exactly the original leaf");budgets[i]->release_leaf();store.transition("pool-assist-"+std::to_string(i),RunState::running,RunState::cancelled,R"({"reason":"synthetic_pool_assistance_complete"})").get();}
+}
+void assisted_stop(PersistenceService& store,bool fault){
+    const std::string id=fault?"pool-assist-fault":"pool-assist-close";auto budget=root(store,id);NativeChildExecutor pool(1,4);
+    std::promise<std::shared_ptr<NativeChildSlot>> bound;auto slot_ready=bound.get_future();
+    std::promise<void> entered,stopped;auto child_entered=entered.get_future(),child_stopped=stopped.get_future();
+    std::atomic<bool> release_child=false;const auto until=std::chrono::steady_clock::now()+5s;
+    auto parent=pool.stage({NativeChildWork{budget,[&](std::stop_token stop){
+        while(!stop.stop_requested()&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(1ms);
+        require(stop.stop_requested(),"Closing pool must stop its parked owner");Run r;r.state=RunState::cancelled;return r;
+    },{},[&](auto slot){bound.set_value(std::move(slot));}}});parent->dispatch();
+    require(slot_ready.wait_until(until)==std::future_status::ready,"Assisted stop requires an actual parked pool owner");auto slot=slot_ready.get();require(slot->yield(),"Assisted stop must release the parent leaf");
+    auto child=pool.stage({NativeChildWork{budget,[&](std::stop_token stop){
+        entered.set_value();while(!stop.stop_requested()&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(1ms);
+        require(stop.stop_requested(),"Close/fault must retain cancellation of the assisted job");stopped.set_value();
+        while(!release_child&&std::chrono::steady_clock::now()<until)std::this_thread::sleep_for(1ms);
+        require(release_child,"Close must wait for physical assisted child drain");Run r;r.state=RunState::cancelled;return r;
+    },{}}});child->dispatch();
+    std::exception_ptr failure;std::jthread callback([&]{try{require(pool.assist(slot),"Yielded callback must take its already-dispatched child");}catch(...){failure=std::current_exception();}});
+    require(child_entered.wait_until(until)==std::future_status::ready,"Assisted child must be physically live before close/fault");
+    if(fault)pool.fail();auto closing=std::async(std::launch::async,[&]{pool.close();});
+    require(child_stopped.wait_until(until)==std::future_status::ready&&parent->results()[0].wait_until(until)==std::future_status::ready,"Both parked owner and assisted child must observe stop");
+    require(closing.wait_for(0ms)!=std::future_status::ready,"Pool close cannot return after only the parent has retired");
+    release_child=true;callback.join();closing.get();if(failure)std::rethrow_exception(failure);
+    require(child->results()[0].get().state==RunState::cancelled&&!slot->yield(),"Stopped assisted job and parent retain exact physical retirement");
+    require(budget->try_acquire_leaf(),"Retired yielded parent cannot release the assisted child's leaf early or twice");budget->release_leaf();
+    store.transition(id,RunState::running,RunState::cancelled,R"({"reason":"synthetic_assisted_stop_complete"})").get();
 }
 void saturated_stop(PersistenceService& store){
     // Pool-only synthetic closures exercise the complete stop snapshot. They
@@ -138,7 +215,7 @@ int main(int argc,char** argv){
         folder=std::filesystem::temp_directory_path()/("xmind-child-pool-"+suffix.str());
         if(!std::filesystem::create_directory(folder))throw std::runtime_error("Native pool fixture directory already exists");
         bool recovery=false;{PersistenceService store((folder/"state.sqlite").string(),{argv[1],argv[2]});
-            staged_retirement(store,false);staged_retirement(store,true);callback_reentry(store);stopped_without_slot(store,false);stopped_without_slot(store,true);yielded_slot_retirement(store);transferred_slot(store,false);transferred_slot(store,true);saturated_stop(store);recovery=fail_dispatch_race(store);store.close();}
+            staged_retirement(store,false);staged_retirement(store,true);callback_reentry(store);stopped_without_slot(store,false);stopped_without_slot(store,true);yielded_slot_retirement(store);transferred_slot(store,false);transferred_slot(store,true);assisted_saturation(store);assisted_stop(store,false);assisted_stop(store,true);saturated_stop(store);recovery=fail_dispatch_race(store);store.close();}
         if(recovery){PersistenceService reopened((folder/"state.sqlite").string(),{argv[1],argv[2]});require(reopened.run("pool-race").get().state==RunState::failed&&reopened.run("pool-race-child").get().state==RunState::failed,"Actual reopen retires undispached accepted ownership without replay");reopened.close();}
         std::filesystem::remove_all(folder);
         std::cout<<"Native child pool contract passed: staged close/fault, synchronous stop callback re-entry, concurrent fail/dispatch ownership, stopped/deadline retirement without a leaf slot, actual SQLite cancellation/recovery. No provider was used.\n";return 0;

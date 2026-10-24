@@ -15,6 +15,25 @@ answers, cancellation races, expiry, uncertainty, and repeated-segment
 budget/context coverage remain open. See the
 [multi-branch human-wait acceptance](native-dynamic-plan-multibranch.md).
 
+## Native process scheduling checkpoint
+
+The backend planning callback now binds a native DynamicPlanExecutor to its
+exact yielded NativeChildSlot. During frontier waits, queue-capacity waits and
+error draining, it can execute already-dispatched work from the same shared
+RootExecutionBudget on the existing IPC callback thread. It does not create
+another pool or thread, admit work, transfer root authority or bypass settlement.
+Only one assistance call may use a yielded slot at a time; parent reacquisition
+is refused while that call is active. The pool counts parked and assisted jobs
+against its global72-job bound, and close/fault waits for physical assistance
+drain even after the parked parent retires.
+
+[Focused acceptance](evidence/bounded-child-assistance-20261023.json) covers
+eight parked workers and64 queued jobs, exact root/callback isolation, close and
+fault drain, plus an actual SDK accepted read plan with only one pool worker.
+Production dynamic-process enrollment and its nested pause/recovery are still
+disabled/unqualified; this scheduling capability is a prerequisite, not proof
+that those paths are complete.
+
 ## Current boundary
 
 One `dynamic_capabilities` row is admitted for an ordinary Agent root. Schema

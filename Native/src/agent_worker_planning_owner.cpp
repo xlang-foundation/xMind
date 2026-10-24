@@ -6,6 +6,7 @@
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include "agentflow/native_child_executor.hpp"
+#include "agentflow/dynamic_plan_executor.hpp"
 
 namespace agentflow {
 namespace {
@@ -95,6 +96,7 @@ NativePlanningCallbacks callbacks_for(std::shared_ptr<Owner> owner){
 NativePlanningCallbacks make_agent_worker_planning_callbacks(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentSettings settings,
     std::shared_ptr<DynamicPlanExecution> execution,std::shared_ptr<RootExecutionBudget> budget,
     AgentWorkerChannel::Deadline deadline,std::stop_token cancel,DynamicInstructionPrecondition guidance,std::shared_ptr<NativeChildSlot> slot){
+    if(slot)if(auto native=std::dynamic_pointer_cast<DynamicPlanExecutor>(execution))execution=native->for_child(slot);
     auto owner=std::make_shared<Owner>(Owner{store,std::move(lease),std::move(settings),{},std::move(execution),std::move(budget),deadline,cancel,std::move(guidance),std::move(slot)});
     owner->capabilities=store.dynamic_capabilities(owner->lease.root_run_id).get();owner->check();
     return callbacks_for(std::move(owner));
