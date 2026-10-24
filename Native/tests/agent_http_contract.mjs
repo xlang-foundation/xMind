@@ -4,9 +4,9 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {spawn,spawnSync} from 'node:child_process';
-import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,rm,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,dirname,basename} from 'node:path';
 import {randomBytes} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {createRequire} from 'node:module';
@@ -19,7 +19,7 @@ const workspace=join(folder,'workspace'),token=randomBytes(32).toString('hex');
 const key='synthetic-native-http-protocol-credential';
 const baseEnv={...process.env,XMIND_AUTH_TOKEN:token};
 delete baseEnv.XMIND_API_KEY;
-let child,port,peerError,requests=0;
+let child,port,peerError,requests=0,passed=false;
 const requestsByPrompt=new Map();
 const peer=createServer((request,response)=>{
   let source='';request.on('data',chunk=>{source+=chunk;});
@@ -359,7 +359,20 @@ try {
   assert.equal(cli('health').status,'ok');
   if(peerError) throw peerError;
   console.log('Native agent HTTP/CLI contract passed: actual read/tool loop, interactive shared-session turns/reconnect/restart without replay, durable prompt queue and automatic dispatch, bounded admission, cancellation, encrypted credential reuse, provider failure and crash recovery. Inference peer is synthetic.');
+  passed=true;
+} catch(error) {
+  const redact=value=>String(value??'').split(token).join('[redacted]').split(key).join('[redacted]');
+  try {
+    await writeFile(join(folder,'failure.json'),JSON.stringify({recordedAt:new Date().toISOString(),error:redact(error.stack||error),cause:{code:error.cause?.code,syscall:error.cause?.syscall,address:error.cause?.address,port:error.cause?.port},requests,requestsByPrompt:[...requestsByPrompt],backend:{pid:child?.pid,exitCode:child?.exitCode},port,completedTasksMustNeverBeReplayed:true},null,2)+'\n',{flag:'wx'});
+  } catch { console.error('Could not write native agent HTTP failure receipt'); }
+  console.error('Native agent HTTP failed fixture retained at '+folder);
+  throw error;
 } finally {
   await stop();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));
-  await rm(folder,{recursive:true,force:true});
+  if(passed){
+    const target=await realpath(folder),parent=await realpath(tmpdir());
+    assert.equal(dirname(target).toLowerCase(),parent.toLowerCase());
+    assert.ok(basename(target).startsWith('xmind-agent-http-'));
+    await rm(target,{recursive:true,force:true});
+  }
 }

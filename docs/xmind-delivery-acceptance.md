@@ -9,6 +9,8 @@ Earlier browser body-loss observations remain retained. Node cancellation can si
 
 ## Current development checkpoint
 
+Latest full source1035d900/Native d2121db4 finishes178/179: graph worker passes11.88s; only HTTP agent fails with localhost ENOBUFS. Cause remains unproven. HTTP failure retention is corrected and one fresh focused contract passes8.46s; no full acceptance or install. [Current full/focused evidence](../doc/evidence/native-delivery-1035d900-result-20261024.json).
+
 Startup ownership fix Native d2121db4 passes its deterministic expired-startup regression and three focused worker contracts. It is uninstalled and needs a full179 qualification. The original failed-startup drain bug is reproduced and fixed; the initial startup failure cause remains unproven. [Fix and regression evidence](../doc/evidence/worker-startup-ownership-20261024.json).
 
 Staged loopback Code Server host support passes500 extension/178 browser tests and actual selected-editor native process coding: one read, one approved edit, one approved Node command (4 checks), and eight-message/agent restoration. Installed73 is still exact2442 files. Immediate editor refresh remains unverified; reload shows the changed file. [Rendered editor receipt](../doc/evidence/rendered-vscode-loopback-coding-20261024.json).

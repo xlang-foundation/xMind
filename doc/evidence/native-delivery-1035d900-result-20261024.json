@@ -1,0 +1,252 @@
+{
+  "recordedAt": "2026-10-24T21:27:13.786Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T21:24:08.362Z",
+    "sourceParent": "1035d90033fd68a1252af61edbb9c336546533a4",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 36832,
+      "launchedAt": "2026-10-24T21:07:58.942Z",
+      "completedAt": "2026-10-24T21:10:33.792Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3c467a60d92dcd29cf52a502411da6ce46b085438bff918c154592d490cec66b"
+    },
+    "test": {
+      "pid": 29292,
+      "launchedAt": "2026-10-24T21:10:36.449Z",
+      "completedAt": "2026-10-24T21:23:39.525Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "8d3fad279c4525f91294d1e5041e0b164e68b2fe41bccbce93cb7f41150e4865"
+    },
+    "total": 179,
+    "failed": 1,
+    "passed": 178,
+    "seconds": 783.05,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d2121db4fba105fc7e3c45a3dc88289dc18fa060f4f452081da6dbfc4073d119",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "onlyFailedTest": "native_agent_http_contract",
+  "failure": "Windows connect ENOBUFS to localhost during queued file-attachment claim observation; exact cause unproven",
+  "graphWorker": {
+    "passed": true,
+    "seconds": 11.88,
+    "initialPriorStartupFailureCause": "Still unproven; startup owner loss/drain defect has deterministic original-negative and fixed regression evidence"
+  },
+  "socketObservation": {
+    "observedAt": "2026-10-24T21:19:27.7338539Z",
+    "total": 2938,
+    "states": [
+      {
+        "Name": "Listen",
+        "Count": 392
+      },
+      {
+        "Name": "Established",
+        "Count": 50
+      },
+      {
+        "Name": "CloseWait",
+        "Count": 16
+      },
+      {
+        "Name": "Closing",
+        "Count": 1
+      },
+      {
+        "Name": "TimeWait",
+        "Count": 2428
+      },
+      {
+        "Name": "Bound",
+        "Count": 51
+      }
+    ],
+    "owners": [
+      {
+        "Name": "0",
+        "Count": 2428
+      },
+      {
+        "Name": "34060",
+        "Count": 365
+      },
+      {
+        "Name": "15764",
+        "Count": 26
+      },
+      {
+        "Name": "6148",
+        "Count": 26
+      },
+      {
+        "Name": "19436",
+        "Count": 10
+      },
+      {
+        "Name": "6112",
+        "Count": 8
+      },
+      {
+        "Name": "4",
+        "Count": 7
+      },
+      {
+        "Name": "5952",
+        "Count": 5
+      },
+      {
+        "Name": "11776",
+        "Count": 4
+      },
+      {
+        "Name": "11060",
+        "Count": 3
+      },
+      {
+        "Name": "5964",
+        "Count": 3
+      },
+      {
+        "Name": "1708",
+        "Count": 3
+      }
+    ],
+    "dynamicPorts": [
+      "",
+      "Protocol tcp Dynamic Port Range",
+      "---------------------------------",
+      "Start Port      : 49152",
+      "Number of Ports : 16384",
+      ""
+    ]
+  },
+  "resourceObservation": {
+    "observedAt": "2026-10-24T21:19:35.6655627Z",
+    "owner": {
+      "ProcessId": 34060,
+      "ParentProcessId": 28752,
+      "CreationDate": "2026-10-24T14:01:53.386976-07:00",
+      "ExecutablePath": null
+    },
+    "memory": {
+      "FreePhysicalMemory": 13035304,
+      "TotalVisibleMemorySize": 33251832,
+      "FreeVirtualMemory": 13160548,
+      "TotalVirtualMemorySize": 55271928
+    },
+    "excludedPorts": [
+      "",
+      "Protocol tcp Port Exclusion Ranges",
+      "",
+      "Start Port    End Port      ",
+      "----------    --------      ",
+      "      5357        5357      ",
+      "      5985        5985      ",
+      "     47001       47001      ",
+      "     49698       49797      ",
+      "     49898       49997      ",
+      "     50000       50059     *",
+      "     50060       50159      ",
+      "     50160       50259      ",
+      "     50260       50359      ",
+      "     50384       50483      ",
+      "     50575       50674      ",
+      "     51280       51379      ",
+      "",
+      "* - Administered port exclusions.",
+      ""
+    ]
+  },
+  "diagnosticLimits": "Snapshot was collected after failure; TIME_WAIT count alone does not prove port exhaustion or causal attribution. No user process was retired and no machine networking settings changed.",
+  "originalHttpFixture": "Original wrapper unconditionally removed its temporary directory on failure. Original failed database is unavailable; do not replay any completed task.",
+  "retentionFix": "Failure now keeps fixture/database and a redacted pre-teardown receipt, rethrows original error, and cleans only successful identity-checked disposable directories.",
+  "retentionNegative": {
+    "recordedAt": "2026-10-24T21:25:07.793Z",
+    "purpose": "Intentional invalid admin image fails before native execution or any model/tool task; verifies original error propagation and retained fixture",
+    "child": {
+      "pid": 24588,
+      "exitCode": 1,
+      "signal": null
+    },
+    "fixture": "D:/CantorAI2026/xMind/.agentflow/agent-http-failure-retention/fixtures/xmind-agent-http-UMXDPH",
+    "retainedFiles": [
+      "agents.yaml",
+      "failure.json",
+      "workspace"
+    ],
+    "failure": {
+      "recordedAt": "2026-10-24T21:25:07.783Z",
+      "error": "AssertionError [ERR_ASSERTION]: C:\\Program Files\\nodejs\\node.exe: bad option: --db\r\n\n\n9 !== 0\n\n    at file:///D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs:138:197",
+      "cause": {},
+      "requests": 0,
+      "requestsByPrompt": [],
+      "backend": {},
+      "completedTasksMustNeverBeReplayed": true
+    },
+    "sourceSha256": "504204c991f171c3bb9efa0d4bd9c880021b3bd57eb97391d70dd0276431fa79",
+    "sourceUnchanged": true,
+    "nativeExecuted": false,
+    "modelCalls": 0,
+    "paidInference": false,
+    "cpythonExecuted": false,
+    "scopePassed": true
+  },
+  "focusedAfterFixtureChange": {
+    "recordedAt": "2026-10-24T21:26:05.522Z",
+    "sourceParent": "1035d90033fd68a1252af61edbb9c336546533a4",
+    "sourcePatchSha256": "c902ef028ba57374b87713474d5c3bb8ea49d9394c8f220f25f857205673a672",
+    "build": {
+      "exitCode": null,
+      "scope": "No native rebuild: fixture-only change after fully audited d2121db4 build"
+    },
+    "test": {
+      "pid": 11136,
+      "launchedAt": "2026-10-24T21:25:54.066Z",
+      "completedAt": "2026-10-24T21:26:02.590Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8fd2e4f99f274c9c1e212313aed204e31251d7065370a9b859252e9e07ce4c31"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 8.48,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d2121db4fba105fc7e3c45a3dc88289dc18fa060f4f452081da6dbfc4073d119",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Focused success does not erase failed full qualification or establish ENOBUFS cause",
+  "deadlinesChanged": false,
+  "retriesAdded": false,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false,
+  "goalComplete": false,
+  "retentionNegativeLog": {
+    "originalSha256": "0bbf741e9deb429e23913bbe751aadf3526c152417d3b621c226f6cdd45a14e1",
+    "publicCopy": "CR bytes removed for repository text format; original private log retained unchanged"
+  }
+}

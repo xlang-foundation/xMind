@@ -1,0 +1,20 @@
+Native agent HTTP failed fixture retained at D:\CantorAI2026\xMind\.agentflow\agent-http-failure-retention\fixtures\xmind-agent-http-UMXDPH
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: C:\Program Files\nodejs\node.exe: bad option: --db
+
+
+9 !== 0
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/agent_http_contract.mjs:138:197 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 9,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
