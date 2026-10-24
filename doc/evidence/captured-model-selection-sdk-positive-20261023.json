@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "scope": "Positive separate-process model selection through registered xlang3 Models subobject",
+  "gate": {
+    "recordedAt": "2026-10-24T06:59:08.439Z",
+    "sourceParent": "9136b715ae1598670949840eb544dae57dbd0d76",
+    "sourcePatchSha256": "d2ddc340e9fc03fc6d78b028da2ae2055a4996f163df6d7782a14226717532e7",
+    "build": {
+      "pid": 34184,
+      "launchedAt": "2026-10-24T06:58:09.040Z",
+      "completedAt": "2026-10-24T06:58:53.642Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "027a207c442b83fc39b58091fa1e1fbb9515842e228d5634eab9086596278ec0"
+    },
+    "test": {
+      "pid": 24920,
+      "launchedAt": "2026-10-24T06:58:56.208Z",
+      "completedAt": "2026-10-24T06:59:05.818Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "316cda571131756348b018006b0339bf232d1464edeeb847bbef485ad51ab2d1"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 9.57,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "d25d4340761d9786cc773a85c532815eb47c192679a234b5151f97dea05c38cb",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "actualObservation": {
+    "actualSeparateProcessSdkModelSelection": true,
+    "successfulClientPids": [
+      36228,
+      37336,
+      4852,
+      37908,
+      39084,
+      8396
+    ],
+    "persistedRevisionAfterBackendRestart": 2,
+    "staleProviderAndSessionRejected": true,
+    "modelRequests": 0
+  },
+  "verified": [
+    "Separate unified xmind.exe clients create/read/select/clear using standard SDK calls",
+    "Native persisted provider route and model match HTTP read",
+    "Stale session and provider revisions refuse without changing selection",
+    "Backend restart retains cleared selection revision2",
+    "Provider-profile fixture explicitly depends on unified xmind executable"
+  ],
+  "limits": [
+    "Focused3 gate, not full173 or a new installation",
+    "Rendered browser/editor model selection remains separate",
+    "Existing complete client478/165 source bytes unchanged; not rerun for this fixture-only change",
+    "No paid inference or CPython; installed65 unchanged"
+  ]
+}

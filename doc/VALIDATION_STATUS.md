@@ -1,3 +1,9 @@
+## Positive cross-process model selection passes focused3 — 2026-10-23
+
+Six successful separate xmind.exe clients use the registered Models subobject to create/read/select/clear an actual provider-bound session model. Stale session/provider revisions reject. HTTP agrees with native SQLite state; a backend restart retains cleared selection revision2. No model inference occurs. The provider runtime fixture explicitly depends on the unified executable.
+
+Native3/3 passes in9.57s with all closures/file sets unchanged; production binary SHA remains d25d4340. This closes the positive SDK selection gap from the earlier native6 checkpoint, not rendered UI acceptance or complete-suite qualification. Existing client478/165 retains unchanged frontend source scope. [Receipt](evidence/captured-model-selection-sdk-positive-20261023.json). Installed65 remains unchanged; commands, provider configuration mutations, general reads, remote/enrollment, deeper scheduling/recovery and rendered VS Code remain open.
+
 ## Captured session model selection passes native6 and client478/165 — 2026-10-23
 
 The registered Models subobject now exposes Open(session) and Select(session, request). Typed native reads/mutations retain backend lifetime and admission checks. The captured HTTP adapter and compatibility route share the selection parser and value encoder. Actual ProviderProfileRuntime selection persists, legacy reads agree, and stale provider/session revisions reject409. Shared clients verify captured identity/session and refuse errors/downgrade without fallback.
