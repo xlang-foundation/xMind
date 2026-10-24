@@ -218,6 +218,37 @@ A gap or expired epoch requires an authoritative snapshot and explicit cursor
 reset; it cannot silently skip records or replay a mutation. Reconnect is an
 observation operation. Revoked read permission refuses reconciliation visibly.
 
+## Implemented local command journal foundation
+
+`RemoteCommandJournal` is backend-private C++ infrastructure for a typed
+`sessions.create` intent. PersistenceService performs transactional compare and
+publication through embedded xlang3/SQLite. It enables no SDK capability, network
+submission, profile activation or local effect. The connector must independently
+validate current authorization before calling it.
+
+The immutable semantic record contains operation, connection, verified origin,
+server/scope, profile/credential revisions and title. Canonical validated JSON
+bytes provide exact semantic equality; no credential or auth grant is stored.
+The local credential revision is an authorization snapshot fence, not a remote
+actor ID. The peer must derive its actor from authenticated credentials and own
+its separate deduplication fingerprint. Backend generation is deliberately not
+part of durable intent identity, so restart cannot manufacture a new request.
+
+A globally unique domain request ID creates `prepared`; reusing it with another
+intent conflicts, including across connections/scopes. A single atomic compare
+changes prepared to `unknown` BEFORE any possible send. Only the winner may
+send. A crash in that interval conservatively leaves unknown even if nothing
+was sent. Reopen, duplicate prepare and competing sender attempts cannot reset
+unknown or authorize another send. No not-found retry transition exists yet.
+
+A typed matching server/scope/request/operation resolution can settle unknown
+to admitted with resource identity/revision, or rejected without an admitted
+resource. Repeating the exact terminal observation is idempotent; changing it
+conflicts. Receipt admission does not mean execution completion or worker exit.
+Network response validation, current-grant fencing, lost-reply observation and
+SDK/CLI/HTTP command methods remain required before remote routing is enabled.
+[Focused real SQLite evidence](evidence/remote-command-journal-20261024.json).
+
 ## Explicit workspace and effect enrollment
 
 `Enrollments.Create(request)` proposes request ID, authorized scope ID,

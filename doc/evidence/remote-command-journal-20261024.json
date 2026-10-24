@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-24T23:46:13.584Z",
+  "sourceParent": "20e60c5bfee35250a5cbca2506d3819f5895fc6a",
+  "sourcePatchSha256": "2f57c4ba98cf1f60e4891fdb7d382714dde6b5808ccb6587d29193f88037f15c",
+  "build": {
+    "pid": 484,
+    "launchedAt": "2026-10-24T23:43:16.386Z",
+    "completedAt": "2026-10-24T23:45:40.082Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "eb169ac2e9653bffa6906d7317f01370e59bba6ca71001aa2deee8bca40bfdb3"
+  },
+  "test": {
+    "pid": 38220,
+    "launchedAt": "2026-10-24T23:45:44.200Z",
+    "completedAt": "2026-10-24T23:46:10.516Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "80c67260fd0a90e084747cf06a1201eadb978c295de751728a4ee75b868d182d"
+  },
+  "total": 11,
+  "failed": 0,
+  "passed": 11,
+  "seconds": 26.26,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "4fb4812b175547f34b464258e6f41909055bf666cc8739d13a34801108db02ec",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Backend-private durable sessions.create intent and one-send journal; no remote command/network API enabled",
+  "storage": "PersistenceService compare_information through embedded xlang3 SQLite transactions",
+  "semantics": [
+    "Same request ID and exact canonical intent observes original record; changed intent conflicts.",
+    "One transactional prepared-to-unknown transition wins before any network send.",
+    "Unknown persists across restart; journal never retries or resets it automatically.",
+    "Matching admitted/rejected resolution is durable; terminal outcome cannot be replaced or resent.",
+    "Credential revision records original local authorization snapshot; peer derives and authorizes actor separately."
+  ],
+  "publicSdkCapabilityAdded": false,
+  "networkMutationImplemented": false,
+  "installedVersion": "0.1.74",
+  "installationChanged": false
+}
