@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 50: native_graph_runner_contract
+1/4 Test #50: native_graph_runner_contract ...........   Passed   12.02 sec
+    Start 64: native_process_adapter_contract
+2/4 Test #64: native_process_adapter_contract ........   Passed    4.58 sec
+    Start 95: native_agent_worker_channel_contract
+3/4 Test #95: native_agent_worker_channel_contract ...   Passed    2.05 sec
+    Start 98: native_agent_runner_contract
+4/4 Test #98: native_agent_runner_contract ...........   Passed    9.43 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  28.09 sec

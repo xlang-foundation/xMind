@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-24T00:20:20.311Z",
+  "sourceParent": "407640d74402ade97761b55cbf75f47ceeb9a497",
+  "sourcePatchSha256": "13e08afddf764ee5b67d5e2284326aeb29ecb5eef9588eff6616139815bf8000",
+  "build": {
+    "pid": 40532,
+    "launchedAt": "2026-10-24T00:19:08.580Z",
+    "completedAt": "2026-10-24T00:19:46.800Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "95aed5c4de523015bb8ef192cb1fa7a48fb896bb59b2bb4284af182c7d421360"
+  },
+  "test": {
+    "pid": 39596,
+    "launchedAt": "2026-10-24T00:19:49.496Z",
+    "completedAt": "2026-10-24T00:20:17.632Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "9911514cf9b88a33c66c09196216afc8a7542efd5ac2076bed474f1678c5cb88"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 28.09,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "modelRpcDiagnosticRepetitions": 1,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Restore canonical Windows image paths for arbitrary third-party programs; keep extended-image handling for verified native xMind owners and SDK workers. Actual PowerShell initialization regression, graph runner, process adapter, short/long SDK channel and agent runner all pass.",
+  "red": {
+    "seconds": 0.26,
+    "logSha256": "e4e6f9c4a0690d72cd3f0a0cc7e27a07929e45d403075a92d5a8227c67f0ef91",
+    "failure": "PowerShell exit4294901760: System.Net.ServicePointManager initializer fails under broad extended-image launch",
+    "retainedFixture": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-native-process-jTQa1w"
+  },
+  "priorFullFailure": {
+    "source": "dcb768d2178de8588f7096fe4e0bf73433d6dbfc",
+    "passed": 170,
+    "total": 172,
+    "seconds": 1307.94,
+    "failures": [
+      "native_graph_runner_contract",
+      "native_agent_runner_contract"
+    ]
+  },
+  "genericLongPathClaimWithdrawn": true,
+  "nativeWorkerLongPathContractRetained": true,
+  "noPathLengthHeuristicOrPostDispatchRetry": true,
+  "qualifiedPackage063Unchanged": true,
+  "installed62Unchanged": true,
+  "fullGoalComplete": false
+}

@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-24T00:18:05.750Z",
+  "sourceParent": "dcb768d2178de8588f7096fe4e0bf73433d6dbfc",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 34116,
+    "launchedAt": "2026-10-23T23:54:35.332Z",
+    "completedAt": "2026-10-23T23:56:12.348Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "2280c4fd003979d7b2b3db932577d4f5b9e14e6b8f685b29c63bd77048d697fb"
+  },
+  "test": {
+    "pid": 38480,
+    "launchedAt": "2026-10-23T23:56:15.040Z",
+    "completedAt": "2026-10-24T00:18:02.995Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "98c07297842ce6e188c0ae7d67516efd00cc6e041e0e3fd6c5c9059103866405"
+  },
+  "total": 172,
+  "failed": 2,
+  "passed": 170,
+  "seconds": 1307.94,
+  "projectFiles": 2815,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 137,
+  "nativeSha256": "15431644cb1b09f819c4c51721b04547a7f19ad7261cd55a3d566b9a8d52272e",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false,
+  "scope": "Complete local172 attempt rejected: broad generic extended-image prefix causes PowerShell initialization failures in graph and agent runner. Native owner/worker-specific fixes remain separately tested.",
+  "failedContracts": [
+    "native_graph_runner_contract",
+    "native_agent_runner_contract"
+  ],
+  "fullGoalComplete": false
+}

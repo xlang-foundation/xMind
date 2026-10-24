@@ -20,22 +20,25 @@ ProcessConfiguration config(char** argv,const std::string& mode,const std::files
 }
 }
 int main(int argc,char** argv) {
-    if(argc!=5)return 2;
-    std::string stage="long-image-loader";
+    if(argc!=4)return 2;
+    std::string stage="normal";
     try {
         const auto directory=std::filesystem::u8path(argv[3]);
-        {
-            ProcessConfiguration loader{argv[4],utf8(directory),ForegroundProcess::directory_identity(utf8(directory)),{"--help"},{},10s,65536};
-            loader.executable_id=ForegroundProcess::executable_identity(loader.executable);
-            const auto result=ForegroundProcess::run(loader);
-            require(result.termination==ProcessTermination::exited&&result.exit_code==0&&result.stdout_bytes.find("xmind")!=std::string::npos,"Long-path native image must load its adjacent runtime DLL and return help");
-        }
-        stage="normal";
         _putenv_s("XMIND_AUTH_TOKEN","synthetic private parent access");_putenv_s("XMIND_API_KEY","synthetic private parent model");_putenv_s("XMIND_PARENT_ONLY","synthetic parent sentinel");
         wchar_t windows_directory[32768]{};const auto windows_length=GetWindowsDirectoryW(windows_directory,static_cast<UINT>(std::size(windows_directory)));
         require(windows_length&&windows_length<std::size(windows_directory),"Actual Windows directory must be available");
         const auto expected_drive=utf8(std::filesystem::path(std::wstring(windows_directory,windows_length)).root_name());
         require(SetEnvironmentVariableW(L"SystemDrive",L"synthetic-untrusted-parent-drive")!=0,"Parent SystemDrive spoof fixture must be set");
+        {
+            stage="managed-host-initialization";
+            const auto shell=std::filesystem::path(std::wstring(windows_directory,windows_length))/L"System32"/L"WindowsPowerShell"/L"v1.0"/L"powershell.exe";
+            ProcessConfiguration managed{utf8(shell),utf8(directory),ForegroundProcess::directory_identity(utf8(directory)),{"-NoLogo","-NoProfile","-NonInteractive","-Command","[Console]::Out.WriteLine('xmind-managed-host-ready')"},{},10s,65536};
+            managed.executable_id=ForegroundProcess::executable_identity(managed.executable);
+            const auto result=ForegroundProcess::run(managed);
+            if(result.exit_code!=0)throw std::runtime_error("Managed host initialization failed (exit "+std::to_string(result.exit_code)+"): "+result.stderr_bytes);
+            require(result.termination==ProcessTermination::exited&&result.exit_code==0&&result.stdout_bytes.find("xmind-managed-host-ready")!=std::string::npos,"Canonical third-party managed host must initialize and return actual output");
+        }
+        stage="normal";
         {
             auto c=config(argv,"normal",directory/"normal.txt");c.arguments.insert(c.arguments.end(),{"space argument","\"quoted\"","trailing\\","你好 🌍",""});
             std::string observed_out,observed_err;

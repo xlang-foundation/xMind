@@ -1,3 +1,28 @@
+## Correct third-party path semantics; retain native worker fix — 2026-10-23
+
+The broad generic prefix change was a regression. Complete source dcb768d2
+validation is rejected at170/172 in1307.94s: graph and agent runner fail when
+PowerShell initialization exits4294901760. Full failed logs and unchanged
+source/SDK/runtime/dependency/binary closure remain retained.
+[Failed full run](evidence/native-delivery-dcb768d2-full-failure-20261023.json),
+[original log](evidence/native-delivery-dcb768d2-full-failure-20261023-ctest.log).
+
+A new actual PowerShell regression reproduces the same ServicePointManager
+initializer error before correction. Generic ForegroundProcess launch now
+again uses the canonical image as approved, without path-length heuristics or
+a post-dispatch retry. Native managed-owner and SDK-worker launch retain their
+verified extended paths. The misplaced generic long-image assertion is removed;
+the full native SDK channel contract still tests its actual248-character image.
+All other generic adapter checks remain; failed fixture retention is improved.
+
+Graph runner12.02s, process adapter4.58s (including managed-host startup), SDK
+channel short/long2.05s and agent runner9.43s pass4/4 in28.09s. Frozen file sets
+and bytes remain unchanged. Native SHA-256 is41bb202acc4bbb7a479087948e04cb4717284a4b7dff6ddb589626d4f0e3e22f.
+This is focused acceptance only; fresh full qualification and delivery remain
+open. Installed62 and candidate0.1.63 are unchanged. No paid inference, CPython
+or visible windows. [Correction receipt](evidence/canonical-third-party-launch-20261023.json),
+[focused log](evidence/canonical-third-party-launch-20261023-ctest.log).
+
 ## Hosted3024124e and startup diagnostics inspected — 2026-10-23
 
 Official hosted3024124e run40033184405/job120689935297 fails167/170 in928.29s.
