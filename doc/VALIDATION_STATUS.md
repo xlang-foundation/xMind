@@ -1,3 +1,9 @@
+## Captured provider catalog and selection pass native7 and clients482/166 — 2026-10-24
+
+The registered binding now exposes Providers.List/Select as ordinary xlang3 subobject calls. Metadata uses the same native encoder as the compatibility provider API; credentials/references/destinations remain absent. Selection retains connection generation and admission guards, expected provider revision and the existing idle/runtime policy. Separate xmind.exe clients select the actual runtime, reject stale/negative revisions and observe revision2 after backend restart without inference. HTTP agreement, authentication and retirement refusal also pass.
+
+Focused native7/7 passes in88.39s with all source/SDK/library/dependency/binary closures unchanged. Complete client482/166 passes with71 source inputs and18 assets unchanged; the final gateway admission and inventory edits are client-only and the exact Native patch still matches the native gate. Initial compile and client failures are retained. [Receipt](evidence/captured-provider-profiles-20261024.json). This does not qualify a new full native suite or installation. Installed66 remains unchanged. Provider save/discovery/import capture, remaining general/permission adapters, remote/enrollment, deeper scheduling/recovery and rendered VS Code remain open.
+
 ## Candidate66 coding and installed smoke — 2026-10-24
 
 Qualified66 passed actual rendered browser list/preview/search, approved edit and Node checks, automatic completion and reload history; CLI coding and managed65-to66 handoff passed. [Aggregate receipt](evidence/candidate-0.1.66-qualified-coding-20261024.json). The earlier browser fixture failure remains separately recorded; it is not acceptance. Completed tasks must never be replayed.

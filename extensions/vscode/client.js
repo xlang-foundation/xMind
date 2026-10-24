@@ -78,6 +78,7 @@ class BackendClient {
   #connectionTreeStreamSupported=false;
   #connectionRunStreamSupported=false;
   #connectionModelsSupported=false;
+  #connectionProvidersSupported=false;
   #connectionCommandsSupported=false;
   #connectionWorkspaceSupported=false;
   #connectionWorkspaceFilesSupported=false;
@@ -143,6 +144,8 @@ class BackendClient {
     else if(this.#connectionCommandsSupported)throw new Error("The backend command protocol changed. Reconnect before invoking commands.");
     if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
     else if(this.#connectionModelSelectionSupported)throw new Error("The backend model selection protocol changed. Reconnect before choosing models.");
+    if(health&&Object.hasOwn(health,"local_connection_providers")){if(health.local_connection_providers!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured provider protocol.");this.#connectionProvidersSupported=true;}
+    else if(this.#connectionProvidersSupported)throw new Error("The backend provider protocol changed. Reconnect before using providers.");
     if(health&&Object.hasOwn(health,"local_connection_models")){if(health.local_connection_models!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured models protocol.");this.#connectionModelsSupported=true;}
     else if(this.#connectionModelsSupported)throw new Error("The backend model catalog protocol changed. Reconnect before reading models.");
     if(health&&Object.hasOwn(health,"local_connection_run_stream")){if(health.local_connection_run_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured run stream protocol.");this.#connectionRunStreamSupported=true;}
@@ -331,7 +334,13 @@ class BackendClient {
   }
   discoverProviderModels(api_key,expected_revision) { return this.request('/v1/provider/models',{api_key,expected_revision}); }
   configureProvider(model,api_key,expected_revision) { return this.request('/v1/provider/configuration',{model,api_key,expected_revision}); }
-  async providerProfiles() { return validateProviderProfiles(await this.request('/v1/provider/profiles'),true); }
+  async #providerProfilesRequest(selection) {
+    if(!this.#connectionProvidersSupported)return this.request(selection?'/v1/provider/profiles/select':'/v1/provider/profiles',selection);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured provider connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/providers'+(selection?'/select':''),selection);
+    exactFields(value,['binding','providers']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Provider profiles belong to another connection');
+    return value.providers;
+  }
+  async providerProfiles() { return validateProviderProfiles(await this.#providerProfilesRequest(),true); }
   async discoverProfileModels(id,route_id,api_key,expected_revision) {
     profileIdentity(id);profileIdentity(route_id);profileRevision(expected_revision);profileKey(api_key);
     const catalogue=await this.request('/v1/provider/profiles/models',{id,route_id,api_key,expected_revision},35000);
@@ -347,7 +356,7 @@ class BackendClient {
   }
   async selectProviderProfile(id,expected_revision) {
     profileIdentity(id);profileRevision(expected_revision);
-    return validateProviderProfiles(await this.request('/v1/provider/profiles/select',{id,expected_revision}));
+    return validateProviderProfiles(await this.#providerProfilesRequest({id,expected_revision}));
   }
   async connectionProfiles() { return validateConnectionProfiles(await this.request('/v1/connections')); }
   async saveConnectionProfile(id,name,origin) {

@@ -3,6 +3,7 @@
 #include "agentflow/operation.hpp"
 #include "agentflow/run_executor.hpp"
 #include "agentflow/graph_service.hpp"
+#include "agentflow/provider_profile_setup.hpp"
 #include <memory>
 namespace agentflow {
 class PersistenceService;class RunExecutor;class GraphExecution;class BackendOwnerControl;struct LocalConnectionContext;
@@ -34,6 +35,7 @@ struct ConnectionFindRequest {std::string query,path=".",type="file";std::size_t
 struct BoundConnectionFind {ConnectionFolderScope scope;WorkspaceFind found;};
 struct BoundConnectionWorkspace {ConnectionBindingIdentity binding;ExecutionWorkspaceMetadata workspace;};
 struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMembershipSnapshot membership;};
+struct BoundConnectionProviders {ConnectionBindingIdentity binding;ProviderProfileRuntimeMetadata configuration;std::vector<ProviderProfileRouteMetadata> routes;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
@@ -81,6 +83,8 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionProviders providers()const;
+    BoundConnectionProviders select_provider(std::string id,std::int64_t revision)const;
     BoundConnectionWorkspace workspace()const;
     BoundConnectionMembership membership()const;
     BoundConnectionFiles files(std::string folder,std::int64_t revision,std::string path)const;

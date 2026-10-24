@@ -2,6 +2,7 @@
 #include "agentflow/provider_profile_legacy_setup.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/http_server.hpp"
+#include "agentflow/connection_binding.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <filesystem>
@@ -373,6 +374,17 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         runtime.submit("claude-default-reopened-run","claude-default-reopened","Claude profile reopened default output fixture");
         wait(store,"claude-default-reopened-run",RunState::completed);reply(store,"claude-default-reopened","Actual Claude fixture reply");provenance(store,"claude-default-reopened","claude46",1,"claude-sonnet-4-6-fixture");
         require(store.operations("claude-default-reopened-run").get().empty()&&store.information("native-provider-profiles","registry").get()==default_registry,"Reopened default request cannot alter the saved provider or dispatch effects");
+    }
+    {
+        PersistenceService store((std::filesystem::u8path(argv[1])/"captured-provider.sqlite").string(),imports);ProviderProfileRuntime runtime(store,base,policy(origin),1,8);
+        runtime.save_profile("openai","openai.chat","fixture-openai",key("runtime-openai-fixture-key"),0,true);
+        LocalConnectionBindings bindings(store,&runtime);auto binding=bindings.open("local",1);const auto initial=binding->providers();require(initial.configuration.revision==1&&initial.configuration.active=="openai"&&initial.routes.size()==2,"Captured provider metadata must use native runtime policy");
+        const auto selected=binding->select_provider("openai",1);require(selected.configuration.revision==2&&selected.binding.server_id==initial.binding.server_id,"Captured provider selection must retain immutable binding identity");rejects<Conflict>([&]{binding->select_provider("openai",1);});rejects<std::invalid_argument>([&]{binding->select_provider("openai",-1);});
+        Access access(store,runtime);httplib::Client client("127.0.0.1",access.port);const httplib::Headers auth{{"Authorization","Bearer synthetic-profile-runtime-server-access-token"}};
+        const auto opened=client.Post("/v1/connection-bindings",auth,R"({"id":"local","expected_profile_revision":1})","application/json");require(opened&&opened->status==201,"Provider HTTP fixture must capture an authenticated binding");const auto path="/v1/connection-bindings/"+Json::parse(opened->body).at("binding_id").get<std::string>()+"/providers";
+        const auto read=client.Get(path,auth),legacy=client.Get("/v1/provider/profiles",auth);require(read&&read->status==200&&legacy&&legacy->status==200&&Json::parse(read->body).at("providers")==Json::parse(legacy->body),"Captured and compatibility provider metadata must agree");require(read->body.find("runtime-openai-fixture-key")==std::string::npos&&read->body.find("credential_id")==std::string::npos&&read->body.find("endpoint")==std::string::npos,"Provider metadata must omit credentials and destinations");
+        const auto changed=client.Post(path+"/select",auth,R"({"id":"openai","expected_revision":2})","application/json");require(changed&&changed->status==200&&Json::parse(changed->body).at("providers").at("revision")==3,"Captured HTTP selection must change the actual native runtime");require(client.Post(path+"/select",auth,R"({"id":"openai","expected_revision":2})","application/json")->status==409,"Stale provider selection must reject");require(client.Get(path)->status==401,"Provider reads require authentication");
+        bindings.close();rejects<RunUnavailable>([&]{binding->providers();});rejects<RunUnavailable>([&]{binding->select_provider("openai",3);});require(store.information("native-provider-profiles","registry").get().find("runtime-openai-fixture-key")==std::string::npos,"Captured selection must preserve encrypted credentials");
     }
     workspace_binding_contract(std::filesystem::u8path(argv[1]),imports,origin);
     std::cout<<"Native profile runtime passed actual OpenAI/Claude wire and key isolation, actual two-root workspace metadata/bound native reads/atomic CAS/restart rejection, explicit output overrides and saved-profile defaults for legacy and adaptive-thinking Anthropic models, authenticated inference/reopen, SQL failure preservation, active/paused-graph ownership, active-profile update, restart and encrypted-reference migration; peers are synthetic, no live account or UI enrollment tested\n";return 0;

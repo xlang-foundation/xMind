@@ -1,0 +1,120 @@
+{
+  "recordedAt": "2026-10-24T08:24:17.831Z",
+  "native": {
+    "recordedAt": "2026-10-24T08:22:23.141Z",
+    "sourceParent": "1a5b451d224390fd04bd5c3d8c0cbae1b3418f2b",
+    "sourcePatchSha256": "6cd43a700dd7d683f6f8ec5012b77499a39f1b26bf09a3f302890f29ee3e999e",
+    "build": {
+      "pid": 29604,
+      "launchedAt": "2026-10-24T08:19:45.595Z",
+      "completedAt": "2026-10-24T08:20:49.322Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d7f41e2fc526056b810ddc0cdf88fee7ce50ecc1ca3bc5796bf4b5af15de4a1e"
+    },
+    "test": {
+      "pid": 9276,
+      "launchedAt": "2026-10-24T08:20:52.036Z",
+      "completedAt": "2026-10-24T08:22:20.475Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "13237a10c56fd674a3cf2bd378e3dbd6d5ecb56a7492de132db5e3fa6ac89700"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 88.39,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "203357ebe3fe7287881cfd68ccde86e29cb96fa762f3b55ecc61a107ffffda1f",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": {
+    "sourceRevision": "1a5b451d224390fd04bd5c3d8c0cbae1b3418f2b",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 482,
+      "browser": 166
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 482,
+      "passed": 482,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 166,
+      "passed": 166,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "clientLauncher": {
+    "ciSourceSha256": "646dfbe14153a8540e632aa98713580d38ad4989f09a29da96105ae5d068a49c",
+    "localLauncherSha256": "0f8b0fe8db4e83f3998e77bf26bb916be6134ed44a2b5ddd2e8e7563880e380e",
+    "differences": [
+      "GitHub-only guard replaced after actual local native/benchmark process audit",
+      "Evidence/assets written to fresh isolated repository directory"
+    ],
+    "githubActionsImpersonated": false
+  },
+  "nativePatchUnchangedAfterGate": true,
+  "clientOnlyAfterNativeGate": [
+    "views/browser/server.mjs: explicit provider GET and selection POST gateway routes",
+    "views/browser/tests/server.test.cjs: method and path refusal contract",
+    "Tools/ci-views.mjs: actual482/166 inventory"
+  ],
+  "failuresRetained": {
+    "initialNativeBuild": {
+      "directory": ".agentflow/workspace-switch-validation/native/captured-providers-initial",
+      "cause": "Unneeded private encoder include in test could not resolve; removed",
+      "buildLogSha256": "c118ad254eae34f5a03b1c7ab8349550ae00c9d4d522dc9e95bc319aa58de50f"
+    },
+    "initialClient": {
+      "logSha256": "40e5128a28d8cbac3ac1385754e6e0eb6693feee92fab7611e8721a856cce44a",
+      "cause": "Nonexistent metadata method was called; removed to follow existing health negotiation"
+    },
+    "clientAssertion": {
+      "logSha256": "8f1dd68176881a3ce83838b2393a0da9f49881c2a10ca9fd3a285da24323692c",
+      "cause": "Foreign server ID violated identity syntax before comparison; fixture now uses valid foreign backend generation"
+    }
+  },
+  "scope": [
+    "Native registered Providers.List/Select subobject with SDK-owned values",
+    "Captured HTTP metadata agrees with existing route and omits credentials/destinations",
+    "Actual independent xmind.exe clients select provider and reject stale/negative revisions; restart retains registry revision2 without inference",
+    "Backend retirement and unavailable-runtime rejection",
+    "Shared client captured identity/refusal/closure/downgrade and browser gateway method admission"
+  ],
+  "limitations": [
+    "Not full native suite qualification of this new source",
+    "No rendered provider selection acceptance",
+    "Save/discovery/import remain legacy setup adapters",
+    "Authenticated remote/enrollment and broader delivery remain open"
+  ],
+  "installedChanged": false,
+  "paidInference": false,
+  "cpythonExecuted": false
+}

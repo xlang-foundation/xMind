@@ -243,3 +243,7 @@ test('captured operation proxy routes restrict methods and scope shape',async()=
 test('captured history proxy permits only scoped message POST',async()=>{
  const {allowedApiRoute}=await import('../server.mjs');const path='/v1/connection-bindings/'+'a'.repeat(32)+'/sessions/session/messages';assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','DELETE','PUT'])assert.equal(allowedApiRoute(path,method),false);assert.equal(allowedApiRoute(path+'/foreign','POST'),false);
 });
+
+test('captured provider proxy permits metadata GET and explicit selection POST only',async()=>{
+ const {allowedApiRoute}=await import('../server.mjs');const base='/v1/connection-bindings/'+'a'.repeat(32)+'/providers';for(const [path,method]of [[base,'GET'],[base+'/select','POST']]){for(const candidate of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,candidate),candidate===method);assert.equal(allowedApiRoute(path+'/extra',method),false);}assert.equal(allowedApiRoute('/v1/connection-bindings/invalid/providers','GET'),false);
+});
