@@ -1,0 +1,78 @@
+{
+  "recordedAt": "2026-10-24T15:58:45.707Z",
+  "gate": {
+    "recordedAt": "2026-10-24T15:57:57.840Z",
+    "sourceParent": "3a5d42c981789dfa00981d3f841b7eb1b24367c7",
+    "sourcePatchSha256": "c85173374224818ca82cc2229f8d9229109b2f9a49c990aa436a16a4114b5533",
+    "build": {
+      "pid": 35940,
+      "launchedAt": "2026-10-24T15:56:14.932Z",
+      "completedAt": "2026-10-24T15:57:42.663Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1ecdddfbc9d9898c6ea8ff063aeda0592901cda16aa626fc6d2eadbd30aab3ef"
+    },
+    "test": {
+      "pid": 12356,
+      "launchedAt": "2026-10-24T15:57:45.339Z",
+      "completedAt": "2026-10-24T15:57:55.122Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "454ad19b4a6742ac60fb0a9c6f9fd56be38957cb4173875e1da78a5efe722d1b"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 9.74,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "88a6dad3815e139e5b831357d0824097178e728b83998f600577735554136415",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Nine focused native contracts. Service observation uses real encrypted xlang3/SQLite; separate actual SDK client verifies absent state around actual TLS refusal.",
+  "method": "Connections.Authentication(profile_id, expected_profile_revision)",
+  "capability": {
+    "remote_authentication_status": 1
+  },
+  "states": [
+    "absent",
+    "stored",
+    "expired",
+    "stale_profile"
+  ],
+  "returnedFields": [
+    "connection_id",
+    "profile_revision",
+    "credential_revision",
+    "state",
+    "server_id",
+    "protocol_version",
+    "expires_at",
+    "command_routing"
+  ],
+  "credentialOrGrantIdReturned": false,
+  "staleProfileIdentityFieldsNull": true,
+  "serviceObservationDoesNotNegotiate": true,
+  "serviceObservationPreservesCredentialRevision": true,
+  "storedObservationAfterDatabaseReopen": true,
+  "actualSeparateSdkAbsentAndStaleRevisionChecks": true,
+  "retiredSdkObjectRefuses": true,
+  "liveServerRevocationChecked": false,
+  "specificConcurrentMutationAttributed": false,
+  "retryAuthorityGranted": false,
+  "positiveNativeTlsObservationExecuted": false,
+  "hostedPositiveFixtureUpdated": true,
+  "nativeInventory": 178,
+  "fullNativeSuiteRun": false,
+  "installed71Unchanged": true,
+  "goalComplete": false
+}

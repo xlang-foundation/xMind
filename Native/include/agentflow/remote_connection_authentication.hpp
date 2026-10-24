@@ -11,12 +11,21 @@ struct RemoteAuthenticationReceipt {
     std::string connection_id,server_id;
     std::int64_t profile_revision,credential_revision,protocol_version,expires_at;
 };
+struct RemoteAuthenticationStatus {
+    std::string connection_id,state="absent";
+    std::int64_t profile_revision=0,credential_revision=0;
+    std::optional<std::string> server_id;
+    std::optional<std::int64_t> protocol_version,expires_at;
+};
 class RemoteConnectionAuthentication {
 public:
     RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&);
     RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange);
     RemoteAuthenticationReceipt authenticate(const std::string& profile_id,std::int64_t expected_profile_revision,
         std::int64_t expected_credential_revision,const SecretBytes& credential,std::chrono::milliseconds timeout,std::stop_token stop={});
+    // Local encrypted-record observation only; no live revocation check,
+    // mutation retry authority or attribution to a particular request.
+    RemoteAuthenticationStatus inspect(const std::string& profile_id,std::int64_t expected_profile_revision);
 private:
     ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;
 };

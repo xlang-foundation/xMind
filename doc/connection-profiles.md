@@ -45,6 +45,23 @@ certificate trust unchanged. The positive native TLS/storage fixture is wired
 into the existing isolated hosted OAuth acceptance driver; its execution/pass
 remains pending. Node explicit-CA peer acceptance is separate evidence.
 
+`Connections.Authentication(profile_id, expected_profile_revision)` is negotiated
+by `remote_authentication_status:1`. It observes the local encrypted record
+without sending credentials or other network requests. Results contain
+connection_id, profile_revision, credential_revision, state, server_id,
+protocol_version, expires_at and command_routing:false. State is `absent` (no
+record, revision0), `stored`, `expired` or `stale_profile`. Stale records retain
+only their credential revision for explicit replacement; server/protocol/expiry
+fields are null. Missing/Local profiles, stale requested revisions and retired
+owners refuse.
+
+This helps inspect publication state after a lost reply without resending
+credentials. It does not attribute a concurrent publication to a specific
+request, authorize a retry, check live server revocation or create a connected
+remote binding. [Focused observation evidence](evidence/remote-auth-observation-20261024.json)
+distinguishes actual separate-SDK absent/refusal reads from native service
+stored/expired/stale-profile tests and still-pending hosted positive TLS reads.
+
 ![Connection architecture](connection-profiles.svg)
 
 ## User experience
