@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-10-24T23:40:53.341Z",
+  "path": "docs/xmind-implementation-status.pdf",
+  "sha256": "f4e4ebedd5c3987e8b56f61ac8b27e6c7e4bc9ba20326c3c27922c3cd274d47d",
+  "bytes": 7682,
+  "pages": 2,
+  "areas": 14,
+  "installed": "0.1.74",
+  "fullNativePassed": 179,
+  "browserCliEditorAndHandoffPassed": true,
+  "automaticEditorRefreshObserved": true,
+  "source": "docs/xmind-delivery-acceptance.md",
+  "sourceSha256": "87abad865a0eedb0b7ebe32d2e751a162a0542a13cfdfff5a91145aa4e6c2ed5",
+  "allAreaLabelsAndHeadersExtracted": true,
+  "bothPagesRenderedAndVisuallyChecked": true,
+  "cpythonExecuted": false,
+  "goalComplete": false
+}
