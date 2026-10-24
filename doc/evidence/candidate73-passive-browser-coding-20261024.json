@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-10-24T18:58:19.036Z",
+  "nativeSource": "264cadb4",
+  "frontendSource": "0201c326",
+  "scope": "Actual packaged hidden browser coding with passive HTTP finish metadata; exact runtime/helper reuse of completed CLI and managed handoff",
+  "browser": {
+    "passed": true,
+    "session": "cc80bda7c19447679d681f75543c4b29",
+    "run": "ac112ee9b337415f9e0ee7d330302196",
+    "modelCalls": 4,
+    "historyMessages": 8,
+    "operations": [
+      {
+        "id": "f38580fc9d3349fd4949783e24a06e75",
+        "state": "succeeded",
+        "run_id": "ac112ee9b337415f9e0ee7d330302196",
+        "tool": "replace_file"
+      },
+      {
+        "id": "2557315e9bcc98fdb105fa9e3a2a3391",
+        "state": "succeeded",
+        "run_id": "ac112ee9b337415f9e0ee7d330302196",
+        "tool": "run_process"
+      }
+    ],
+    "renderedProof": {
+      "runId": "ac112ee9b337415f9e0ee7d330302196",
+      "sessionId": "cc80bda7c19447679d681f75543c4b29",
+      "passed": true,
+      "cleanFirstCompletion": true,
+      "historyMessagesRestored": 8,
+      "selectedAgentRetained": true,
+      "reloadWarnings": [],
+      "fetchWrapped": false,
+      "commandExit": 0,
+      "stdout": "4 spread checks passed",
+      "neverReplay": true
+    },
+    "ownedBackendExited": true
+  },
+  "runtime": {
+    "files": 2398,
+    "nativeSha256": "12fc37cd1c24cee1336c8ba0876fabd853037a5bb2f50880ffe9fb0ff6bc2e94",
+    "manifestSha256": "47ac3b2c65def44ad920ccf77670d63ce41a9e538ec617b07110984a0867362b",
+    "sameAsPreviouslyAcceptedCliAndHandoff": true,
+    "helpersIdentical": [
+      "native-runtime.js",
+      "workspace-backend.js"
+    ]
+  },
+  "reusedEvidence": {
+    "cli": ".agentflow/client-delivery-validation/native-264cadb4/packaged-cli-is-zero/gate.json",
+    "handoff": ".agentflow/p73/gate.json",
+    "tasksReplayed": false
+  },
+  "observationalLimit": "Clean current package first completion/reload does not prove the earlier intermittent trigger or its absence under all loads. Older failed observations remain recorded.",
+  "installedVersion": "0.1.72",
+  "candidateInstalled": false,
+  "renderedVsCodeAccepted": false,
+  "paidInference": false,
+  "neverReplay": true
+}

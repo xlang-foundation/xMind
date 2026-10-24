@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Candidate73 fresh packaged browser coding passes with passive observation — 2026-10-24
+
+Current frontend0201c326/Native12fc candidate completes actual hidden-browser spread.cjs read/edit/Node4 through named Native Process Coder, two scoped approvals, four controlled replies and eight messages. First completion is clean without reload; reload restores completed/all8 messages/selected agent with zero warnings. Passive HTTP finish listener never reads, clones or delays fetch responses. Terminal host0 verifies native saved history, two succeeded operations, four model charges, retired worker lease, exact runtime/assets and owned backend exit. NEVER replay session cc80bda7c19447679d681f75543c4b29/root ac112ee9b337415f9e0ee7d330302196. [Receipt](evidence/candidate73-passive-browser-coding-20261024.json), [first completion](evidence/candidate73-passive-browser-first-completion-20261024.png), [reload](evidence/candidate73-passive-browser-reload-20261024.png).
+
+Exact2398-file runtime manifest/hashes and native-runtime.js/workspace-backend.js match previously accepted packaged CLI and72-to73 managed handoff, allowing those completed tasks to remain unreplayed. This current browser pass does not erase previous failures or establish their exact trigger. Installed72 unchanged; rendered VSCode/full objective still incomplete.
+
 ## Corrected read-only browser cancellation timing — 2026-10-24
 
 Actual hidden browser restores and reloads completed product task with eight messages and zero warnings/models. Native JSON reads complete in milliseconds; downstream responses have no premature close or5xx. Observed timeout signals occur after native reads/response completion, so this clean run does not identify the original lost-body trigger. Original DB/WAL/SHM hashes remain exact; owned backend exits. Initial private trace finalization failed due a missing generated listener; its database/owner preservation is separately audited, and it is not counted as a passed gate. [Receipt](evidence/browser-abort-timing-readonly-20261024.json), [rendered reload](evidence/browser-abort-timing-readonly-20261024.png). Installed72 unchanged; full goal active.
