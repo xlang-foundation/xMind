@@ -96,3 +96,44 @@ server/database/scheduler implementation remains excluded.
 ## Prior68 guidance archived for rendered editor checkpoint
 
 - Prior68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
+
+
+## Superseded delivery next sequence before editor verification
+
+## Next implementation sequence
+
+Installed69 retains its complete173 qualification, packaged coding/handoff,
+preserved installation and read/history smoke. Development context/skills and
+shared backend inbox services now have focused native8, clients493/175 and actual
+rendered skill/queue reload/cancel evidence. [Precise scope and failures](../doc/evidence/captured-inbox-20261024.json).
+Do not replay any completed fixture or confuse this focused checkpoint with a
+current complete qualification or installation.
+
+Installed71 full qualification, packaged coding/handoff and preservation are complete.
+The [rendered slash-command check](../doc/evidence/rendered-command70-20261024.json)
+passes one captured invocation, literal arguments and exact two-message reload.
+The [rendered provider setup](../doc/evidence/rendered-provider-20261024.json)
+passes key storage, discovery, selection, inference and reload through the native
+runtime with a controlled account peer. Verify remaining VS Code editor/sidebar
+coding with editor context. The [rendered graph command](../doc/evidence/rendered-graph-command70-20261024.json) passes workflow selection, human input, actual native read and reload with zero models. Keep visible
+windows closed unless requested; retain installed71 until any replacement has
+qualified coding/handoff/preservation evidence.
+
+Then complete authenticated generic remote negotiation and explicit workspace/
+effect enrollment, fenced lease/revocation/duplicate/lost-reply reconciliation,
+and deeper repeated nested-process recovery/multi-root scheduling. Unavailable,
+expired, incompatible and cross-profile refusals need actual evidence. The
+observer-induced local cancellation readback is bounded local evidence and does
+not establish the remote protocol. Private Nexus implementation stays excluded.
+
+The [repeated nested pause fix](../doc/evidence/repeated-nested-pause-fix-20261024.json)
+has focused current-backend evidence; a complete native gate and replacement
+package qualification remain necessary before installation. Two pause/reopen
+cycles do not establish arbitrary depth, multi-root fairness or unattended crash
+recovery.
+
+The root only registers service subobjects. Standard xlang3 method calls own
+cross-process transfer; all domain execution, admission and SQLite ownership stay
+in the native backend. Preserve the original full objective and every retained
+owner/history/settings backup.
+

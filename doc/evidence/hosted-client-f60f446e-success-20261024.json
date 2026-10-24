@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-24T20:47:35.991Z",
+  "run": 40131161007,
+  "job": 120982971727,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40131161007",
+  "report": {
+    "sourceRevision": "f60f446ee66b44f0e93e1807f6688f86e953aed9",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 500,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 500,
+      "passed": 500,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "officialJobLogSha256": "2f9677bb123b0dea8022b182b78027f95d46f134e87b8b92eaf763ce7730a815",
+  "priorManifestFailureRetained": true,
+  "nativeQualification": false,
+  "renderedQualification": false,
+  "goalComplete": false
+}

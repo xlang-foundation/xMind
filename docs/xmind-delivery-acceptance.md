@@ -7,6 +7,12 @@ Installed0.1.73 combines Native12fc37cd/source264cadb4/SDK8c7972d1 with frontend
 Earlier browser body-loss observations remain retained. Node cancellation can silently empty response iterators; proxy checks now refuse incomplete/canceled finite replies. Current clean acceptance does not establish the earlier exact trigger. Hosted full-suite failures, rendered VSCode, remote enrollment/routing and deeper recovery remain open.
 
 
+## Current development checkpoint
+
+Staged loopback Code Server host support passes500 extension/178 browser tests and actual selected-editor native process coding: one read, one approved edit, one approved Node command (4 checks), and eight-message/agent restoration. Installed73 is still exact2442 files. Immediate editor refresh remains unverified; reload shows the changed file. [Rendered editor receipt](../doc/evidence/rendered-vscode-loopback-coding-20261024.json).
+
+Development Native57beac31/sourceffe04c27 fails the complete179 gate178/179 in825.47s: graph remote-worker execution times out60s in the first counted approved case. Its original database/WAL and slow dump are retained, never replayed. Graph-MCP, ledger, nested and deep three-generation recovery pass in the same run; this does not qualify a package. Trusted SDK, CLI and native HTTP authentication have hosted evidence. Generic remote execution/enrollment/fencing and broader recovery remain open. [Full failure receipt](../doc/evidence/native-delivery-ffe04c27-full-failure-20261024.json).
+
 ## Prior installed72 checkpoint
 
 Installed0.1.72 matches sourcebc2de6f2/Native88a6dad3/SDK8c7972d1. Complete178 passes in764.76s; clients493/175 remain source/asset verified. Actual packaged browser/CLI read-edit-Node4/reload and managed71-to72 handoff pass. All2442 installed files/2398 runtime files, installer metadata/other-extension registry, exact71 backup and five protected roots verify. Fresh installed managed read/history smoke passes with zero models and owned-backend exit. [Installed evidence](../doc/evidence/installed-0.1.72-bc2de6f2-20261024.json). Never replay completed tasks; hosted TLS, remote/enrollment, rendered VS Code and broader recovery remain open.
@@ -92,57 +98,30 @@ Latest installed checkpoint:0.1.73. Detailed receipts are in doc/VALIDATION_STAT
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | Installed73 Native12fc37cd matches source264cadb4. Full178/178 passes754.01s with source/runtime closure unchanged. | Hosted CI and rendered acceptance retain separate scopes. |
-| Standard xlang3 root/subobjects and process workers | Registered SDK objects and separate workers pass. SDK trusted-TLS authentication, encrypted storage, CLI/HTTP refusal and cached status are verified. | Positive trusted CLI/HTTP authentication and generic remote binding remain open. |
-| Browser coding | Packaged73 New/agent selection/Send/read/edit/Node4 passes: two approvals, four controlled replies, clean first completion and eight-message reload. | Passive observation avoids body reads. Earlier failures remain retained; external-browser acceptance is separate. |
-| CLI coding | Exact73 runtime/helper hashes match accepted read/edit/Node4, two approvals and eight-message history. Installed managed read/history smoke passes with zero models. | Broader workflows retain their own scopes. Never replay completed tasks. |
-| VS Code extension | Installed73 exact2442-file payload,2398 runtime files, registry and protected state verify.497 client tests pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. |
-| Conversation/footer layout | Current73 browser shows completed history, command result, selected agent and visible composer/footer at1280x720. Earlier paging/switch/long-draft evidence remains. | Complete accessibility/viewport coverage is not established. |
-| Workspace selection and isolation | Rendered switching and native profile/view isolation pass. Captured file browsing and five-root installation preservation verify. | Local evidence does not establish remote isolation. |
-| Single/graph agents, planning and delegation | Full178 includes graph/planning/ledger. Sixteen SDK-worker cases cover repeated pause/reopen, independent-root progress and cancellation isolation. | Deeper multibranch recovery and sustained many-root scheduling need acceptance. |
-| Providers, MCP and A2A | Native178 covers controlled provider/history, MCP network/OAuth and A2A task/stream cases. Rendered provider setup/discovery/inference/reload has controlled-peer evidence. | Live vendor breadth and every rendered MCP/A2A flow remain unproven. |
-| Coding tools | Native contracts cover approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers. Packaged browser/CLI run actual Node4 checks. | Rendered VSCode actions and editor context remain separate. |
-| Connection catalog and authentication | Captured Local SDK/HTTP services pass. Shared sign-in Settings and native SDK/CLI/HTTP authentication/status exist; trusted SDK TLS has hosted evidence. | Stored grants do not enable remote routing or prove live server authorization. |
-| Enrollment and distributed ownership | Generic v1 proposal defines authentication, enrollment, receipts and worker fencing. Native client/authentication foundations have bounded evidence. | Enrollment, fenced leases, revocation, duplicates and lost-effect reconciliation remain required. |
-| Recovery and preservation | Managed72-to73 handoff, repeated nested pauses/reopens, cancellation isolation and exact histories/charges pass. Five protected roots and installed smoke owner retirement verify. | Unattended in-flight crash recovery, arbitrary depth and sustained fairness remain unproven. |
-| Delivery checkpoint | Installed73: full178, clients497/178, packaged browser/CLI/handoff, exact72 backup,2442 installed files/2398 runtime files and zero-model smoke. | Hosted full pass, trusted CLI/HTTP TLS, rendered VSCode, remote/enrollment and deeper recovery remain open. |
+| Shared native C++ backend, embedded xlang3 and SQLite | Installed73 Native12fc37cd: full178/178,754.01s. Source/runtime closure and installed bytes verify. | New Native57beac31 full gate is178/179: retained graph-worker timeout. No new install. |
+| Standard xlang3 root/subobjects and process workers | Registered SDK objects and separate workers pass. Hosted SDK, CLI and HTTP trusted-TLS authentication/storage verify. | Generic remote binding/routing remains open. No application IPC serializer or dispatcher. |
+| Browser coding | Packaged73 New/agent/Send/read/edit/Node4: two approvals, four controlled replies, clean completion and reload8. | Earlier failures retained. External-browser acceptance and broader workflows have separate scopes. |
+| CLI coding | Exact73 runtime/helpers match accepted read/edit/Node4, two approvals and history8. Installed read/history smoke uses zero models. | Broader workflows remain scoped. Never replay completed tasks. |
+| VS Code extension | Installed73 exact2442 files. Staged adapter passes500 tests and rendered selected-editor read/edit/Node4/reload8 with a process worker. | Immediate editor refresh not observed; reload shows changes. Host fix is staged, not installed. |
+| Conversation/footer layout | Browser73 and actual editor show completed history, selected agent and composer/footer at1280x720. Paging/switch/draft evidence retained. | Complete accessibility and viewport coverage is not established. |
+| Workspace selection and isolation | Rendered switching, native profile/view isolation and captured browsing pass. Five-root installation preservation verifies. | Remote isolation and enrollment remain separate. |
+| Single/graph agents, planning and delegation | Full run passes ledger, sixteen pause/fairness cases and deep read/coding reopen across three descendant generations. | Graph remote-worker timeout unresolved. Deeper multibranch and sustained many-root acceptance remain. |
+| Providers, MCP and A2A | Native contracts cover controlled provider/history, MCP/OAuth and A2A task/stream cases. Rendered provider setup has controlled-peer evidence. | Live vendor breadth and every rendered MCP/A2A flow remain unproven. |
+| Coding tools | Native edit/patch/restore, process/PTY, VCS, instructions, skills and language-server contracts pass. Browser/CLI/editor run actual Node checks. | Rendered editor navigation, formatting and terminal breadth remain scoped; refresh limitation is open. |
+| Connection catalog and authentication | Captured Local APIs and shared Settings exist. Hosted SDK, CLI and HTTP verify trusted sign-in, encrypted reopen and status. | Stored grants do not enable routing or prove live private-server authorization. |
+| Enrollment and distributed ownership | Generic v1 proposal defines binding, receipts, enrollment and worker fencing. Authentication foundations are implemented. | Enrollment, fenced leases, revocation, duplicate/lost-effect reconciliation remain unimplemented. |
+| Recovery and preservation | Managed72-to73 handoff, repeated pauses, deep database reopen and exact histories/charges pass. Five protected roots remain exact. | Arbitrary in-flight crash recovery and broader multi-root scheduling remain unproven. |
+| Packaging and release qualification | Installed73 has full178, browser/CLI/handoff, backups, payload/registry and preservation receipts. | New179 candidate failed qualification. Hosted native failures unresolved; no replacement package/install. |
 
 ## Next implementation sequence
 
-Installed69 retains its complete173 qualification, packaged coding/handoff,
-preserved installation and read/history smoke. Development context/skills and
-shared backend inbox services now have focused native8, clients493/175 and actual
-rendered skill/queue reload/cancel evidence. [Precise scope and failures](../doc/evidence/captured-inbox-20261024.json).
-Do not replay any completed fixture or confuse this focused checkpoint with a
-current complete qualification or installation.
+1. Diagnose the retained graph remote-worker timeout before a new full native qualification. Preserve its original database, WAL, dump, completed uncounted cases and failed/queued counted children. Add bounded launch/admission observations in a fresh disposable fixture if needed; keep existing deadlines and never replay its completed model/tool work.
+2. Resolve immediate editor-buffer refresh using an isolated no-model file-watcher check. Preserve dirty editor buffers and canonical workspace ownership; do not force a stale save or replace unsaved user text. Retain the already completed selected-editor coding task.
+3. Reconcile hosted native lifecycle failures using retained phase/deadline evidence. The corrected hosted client inventory is verified500/178; it does not qualify hosted native execution.
+4. Implement the documented OSS generic captured remote binding, typed service routing and durable command reconciliation, then explicit workspace/effect enrollment and fenced worker receipts. Test expiry, revocation, duplicate delivery and lost outcomes against a controlled public-contract peer. Private Nexus server/database/scheduler implementation remains excluded.
+5. Extend deeper multibranch/in-flight recovery, sustained multi-root scheduling and remaining rendered MCP/A2A/editor tool workflows. Preserve exact history, usage and worker retirement rather than re-running successful effects.
+6. Only after complete qualification, assemble a new candidate and verify browser, CLI, rendered editor, managed handoff, backups and protected state before installation. Installed0.1.73 remains the accepted installation until then. No CPython or paid development inference.
 
-Installed71 full qualification, packaged coding/handoff and preservation are complete.
-The [rendered slash-command check](../doc/evidence/rendered-command70-20261024.json)
-passes one captured invocation, literal arguments and exact two-message reload.
-The [rendered provider setup](../doc/evidence/rendered-provider-20261024.json)
-passes key storage, discovery, selection, inference and reload through the native
-runtime with a controlled account peer. Verify remaining VS Code editor/sidebar
-coding with editor context. The [rendered graph command](../doc/evidence/rendered-graph-command70-20261024.json) passes workflow selection, human input, actual native read and reload with zero models. Keep visible
-windows closed unless requested; retain installed71 until any replacement has
-qualified coding/handoff/preservation evidence.
-
-Then complete authenticated generic remote negotiation and explicit workspace/
-effect enrollment, fenced lease/revocation/duplicate/lost-reply reconciliation,
-and deeper repeated nested-process recovery/multi-root scheduling. Unavailable,
-expired, incompatible and cross-profile refusals need actual evidence. The
-observer-induced local cancellation readback is bounded local evidence and does
-not establish the remote protocol. Private Nexus implementation stays excluded.
-
-The [repeated nested pause fix](../doc/evidence/repeated-nested-pause-fix-20261024.json)
-has focused current-backend evidence; a complete native gate and replacement
-package qualification remain necessary before installation. Two pause/reopen
-cycles do not establish arbitrary depth, multi-root fairness or unattended crash
-recovery.
-
-The root only registers service subobjects. Standard xlang3 method calls own
-cross-process transfer; all domain execution, admission and SQLite ownership stay
-in the native backend. Preserve the original full objective and every retained
-owner/history/settings backup.
 
 ## 2026-10-23 automatic child planning checkpoint
 

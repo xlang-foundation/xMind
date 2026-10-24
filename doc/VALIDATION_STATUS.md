@@ -1,3 +1,7 @@
+## Corrected hosted client inventory verified — 2026-10-24
+
+Normal push-triggered sourcef60f446e run40131161007/job120982971727 completes successfully: exact500 extension/178 browser, zero failed/skipped/cancelled and source/assets unchanged. This closes the stale497 expectation failure without dropping tests. It is adapter/controller evidence, separate from retained native178/179 failure and the staged rendered editor acceptance. [Official result](evidence/hosted-client-f60f446e-success-20261024.json). The updated14-area [status PDF](../docs/xmind-implementation-status.pdf) distinguishes installed73, staged editor support and remaining native/remote/recovery work.
+
 ## Full179 terminal178/179; retained graph-worker timeout — 2026-10-24
 
 Sourceffe04c27/Native57beac31 completes178/179 in825.47s with all2838 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/142 binary hashes and file sets unchanged. Only native_agent_worker_graph_remote_contract times out at its unchanged60s limit. Earlier graph-MCP now passes8.74s; ledger41.85s, nested human30.36s and deep three-generation read/coding7.18s pass. This is a failed full qualification. No package or installation replaces installed73. [Original full result and retained database/dump receipt](evidence/native-delivery-ffe04c27-full-failure-20261024.json), [full log](evidence/native-delivery-ffe04c27-full-failure-20261024.log).

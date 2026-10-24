@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-10-24T20:46:39.328Z",
+  "path": "docs/xmind-implementation-status.pdf",
+  "sha256": "2baa90e886194da93d7183429a8a46b4c921bfc0815218c49b6c76c2540aa936",
+  "bytes": 7482,
+  "pages": 2,
+  "areas": 14,
+  "installed": "0.1.73",
+  "native": "12fc37cd",
+  "fullNativePassed": 178,
+  "fullNativeSeconds": 754.01,
+  "clients": {
+    "extension": 500,
+    "browser": 178
+  },
+  "development": {
+    "native": "57beac31",
+    "passed": 178,
+    "failed": 1,
+    "total": 179,
+    "seconds": 825.47,
+    "installed": false
+  },
+  "renderedEditor": "Selected context + process worker + approved edit/Node4 + reload8; immediate refresh remains open",
+  "source": "docs/xmind-delivery-acceptance.md",
+  "sourceSha256": "b2fb8e478acf49842ce96b4ca6ec245e4c7836b15acdbac051bca50af83cfe87",
+  "previousPdfSha256": "3f8ebc40527f7590a03d29571d00453dff1a607550f2d35dd7877224eca90770",
+  "allAreaLabelsAndHeadersExtracted": true,
+  "allPagesRenderedAndVisuallyChecked": true,
+  "rendering": "Bundled Poppler, 1200-pixel page height; font fallback notices did not produce visible defects.",
+  "cpythonExecuted": false,
+  "goalComplete": false,
+  "hostedClientEvidence": "doc/evidence/hosted-client-f60f446e-success-20261024.json"
+}
