@@ -1,0 +1,75 @@
+{
+  "recordedAt": "2026-10-24T14:54:03.495Z",
+  "gate": {
+    "recordedAt": "2026-10-24T14:53:38.194Z",
+    "sourceParent": "9f5c7744220513e7ead83098221ef3ba857d6772",
+    "sourcePatchSha256": "90f18dd4fd8c614d2af9551a82aea9a8af6216e3fdaedec2fe80a9dd5b038b47",
+    "build": {
+      "pid": 10392,
+      "launchedAt": "2026-10-24T14:52:28.368Z",
+      "completedAt": "2026-10-24T14:53:01.969Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "7f9905c1ecd386d44091d542e5136e6574510ab3d33dfb2450ab88d1519203a2"
+    },
+    "test": {
+      "pid": 34064,
+      "launchedAt": "2026-10-24T14:53:04.894Z",
+      "completedAt": "2026-10-24T14:53:35.364Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d9e64223aa0c5543348a541d47b64c81f3a49705753172130104104996c3d850"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 30.43,
+    "projectFiles": 2822,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "One native contract with sixteen lifecycle cases: eight nested pause/reopen, four independent-root progress and four paused-tree cancellation cases. Real production SDK workers/native file reads/SQLite with controlled local inference.",
+  "cancellation": {
+    "modes": [
+      "read/plain",
+      "read/counted",
+      "coding/plain",
+      "coding/counted"
+    ],
+    "rootWorkers": 1,
+    "rootsPerCase": 2,
+    "otherRootBlockedInsideActualSdkModelCall": true,
+    "otherRootSameActiveWorkerPidAndGenerationAfterCancel": true,
+    "pausedRootAndChildCancelled": true,
+    "originalHumanRequestCancelled": true,
+    "cancelledRootModelCalls": 2,
+    "otherRootModelCalls": 4,
+    "cancelledRootOriginalTranscriptExact": true,
+    "otherRootHistoryMessages": 4,
+    "otherRootWorkerRetiredCompleted": true,
+    "bothBudgetSegmentsClosed": true
+  },
+  "productionBinaryMatchesInstalled71": true,
+  "productCodeChanged": false,
+  "installed71Unchanged": true,
+  "fullNativeSuiteRerun": false,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "notProven": [
+    "Arbitrary depth or multibranch cancellation",
+    "Unattended in-flight crash recovery",
+    "Sustained many-root FIFO scheduling",
+    "Authenticated remote enrollment/scheduling"
+  ],
+  "goalComplete": false
+}
