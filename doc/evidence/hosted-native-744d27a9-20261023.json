@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "744d27a9ee7100a3f798509e5669a05fdd5b5abc",
+  "runId": 40044528987,
+  "jobId": 120729802151,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40044528987",
+  "status": "completed",
+  "conclusion": "failure",
+  "total": 170,
+  "passed": 168,
+  "failed": 2,
+  "totalSeconds": 850.77,
+  "officialLogSha256": "00b0edd398122103f8317f8dace994162ad2f8f11507609ace43ff2890148a9f",
+  "failures": [
+    {
+      "contract": "native_agent_worker_model_rpc_contract",
+      "seconds": 69.43,
+      "killed": true,
+      "signal": "SIGTERM",
+      "slowDiagnosticDumpWritten": true,
+      "crashEstablished": false
+    },
+    {
+      "contract": "native_agent_worker_ledger_contract",
+      "seconds": 45.13,
+      "killed": true,
+      "signal": "SIGTERM",
+      "completedPhases": [
+        {
+          "name": "planning-admission",
+          "elapsedMs": 16632
+        },
+        {
+          "name": "main-process-planning",
+          "elapsedMs": 6914
+        }
+      ],
+      "lastPhase": "main-planning-delegation"
+    }
+  ],
+  "passingComparisons": [
+    {
+      "contract": "native_graph_runner_contract",
+      "seconds": 40.95
+    },
+    {
+      "contract": "native_agent_runner_contract",
+      "seconds": 28.93
+    }
+  ],
+  "scope": "Earlier corrected canonical-launch source; current cancellation source and local172 qualification are separate scopes. Passing commands do not establish a stable cold-discovery cause.",
+  "deadlinesRelaxed": false,
+  "rerunRequested": false,
+  "fullGoalComplete": false
+}

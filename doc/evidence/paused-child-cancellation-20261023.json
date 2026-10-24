@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "scope": "Atomic cancellation of a validated closed paused owner chain after physical worker retirement; focused one-child SDK fixture, not automatic nested process execution.",
+  "gates": [
+    {
+      "recordedAt": "2026-10-24T02:07:44.847Z",
+      "sourceParent": "53002e7e6e16d609ea5a027376d7df876dac7b2a",
+      "sourcePatchSha256": "53610b9c45a3dbe4ac67cce211fe0635aedb68fb5b61a89fad58b8aac5990e08",
+      "build": {
+        "pid": 17768,
+        "launchedAt": "2026-10-24T02:06:03.023Z",
+        "completedAt": "2026-10-24T02:06:52.466Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "955f1c49cbb348870d37a31eadedd190ea403c1c1949527f22db1b0b76d0c3a7"
+      },
+      "test": {
+        "pid": 14168,
+        "launchedAt": "2026-10-24T02:06:55.139Z",
+        "completedAt": "2026-10-24T02:07:42.212Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "4de10e44d2157a4889a181e607398db8276d1bb8413853a3dedb71c0afea40c8"
+      },
+      "total": 4,
+      "failed": 0,
+      "passed": 4,
+      "seconds": 47.03,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "f341878a8d690fcd94d2fcedc2cc8a2f14f5313c54e2aa19143b158c8a0031b7",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    {
+      "recordedAt": "2026-10-24T02:10:56.634Z",
+      "sourceParent": "53002e7e6e16d609ea5a027376d7df876dac7b2a",
+      "sourcePatchSha256": "53610b9c45a3dbe4ac67cce211fe0635aedb68fb5b61a89fad58b8aac5990e08",
+      "build": {
+        "pid": 24200,
+        "launchedAt": "2026-10-24T02:08:03.451Z",
+        "completedAt": "2026-10-24T02:09:37.061Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "84f40c5caeeefed4dc186a04ffbac9db331e3095e4d3df5183c92489ae97d4e1"
+      },
+      "test": {
+        "pid": 35844,
+        "launchedAt": "2026-10-24T02:09:39.670Z",
+        "completedAt": "2026-10-24T02:10:54.042Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "cb7af3b09f202404d67025fe038942ebcac924b289e08a8a612480de5979c087"
+      },
+      "total": 4,
+      "failed": 0,
+      "passed": 4,
+      "seconds": 74.32,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "f341878a8d690fcd94d2fcedc2cc8a2f14f5313c54e2aa19143b158c8a0031b7",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    }
+  ],
+  "regression": {
+    "actualSdkChildPauseAndPhysicalRetirement": true,
+    "freshServiceAdoptsPause": true,
+    "lateRootUpdateFailureRollsBackChildPlansQuestionsEventsAndBudget": true,
+    "normalServiceCancellationReachesIdle": true,
+    "childAndRootCancelled": true,
+    "nestedHumanQuestionAndCallCancelled": true,
+    "continuationAndPlannedChildHoldsReleased": true,
+    "modelChargesHistoryAndPhysicalLeaseReceiptUnchanged": true,
+    "repeatedTerminalObservationAddsNoChargeOrEvent": true
+  },
+  "implementation": {
+    "closedOwnerChainRevalidated": true,
+    "activeWorkerLeasesStillBlock": true,
+    "unresolvedEffectsStillBlock": true,
+    "canonicalChildSettlementReusedInsideCallerTransaction": true,
+    "humanEventsRetainRootJournalOwnership": true
+  },
+  "retainedFailures": [
+    {
+      "stage": "initial",
+      "sourcePatchSha256": "af5596ec999bbf1d8e24c6688c35f2a3407d7792c16b9cb1559222bf6196353c",
+      "passed": 3,
+      "failed": 1,
+      "ctestLogSha256": "2ca61481dcca1d290ccce758b33178ae54e8db20f9f584fdc7ba6491b51faf2c",
+      "observedError": "No such column depth: corrected ownership-table join."
+    },
+    {
+      "stage": "qualified",
+      "sourcePatchSha256": "bed06b77b6b75533d63ead9972624829e2c607e3898c51c680c02d5e7b761219",
+      "passed": 3,
+      "failed": 1,
+      "ctestLogSha256": "36deedc62a79c66ab4fa2a4077e20e7a7fe4fcc8791ccff6658d5d6bf3e96d81",
+      "observedError": "Human input must be owned and write once: corrected events to root journal; guard retained."
+    }
+  ],
+  "multiBranchCancellationRacesQualified": false,
+  "automaticNestedProcessEnrollment": false,
+  "nestedProcessResumeQualified": false,
+  "fullNativeSuiteRun": false,
+  "installed64Unchanged": true,
+  "fullGoalComplete": false
+}

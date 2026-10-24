@@ -1,3 +1,26 @@
+## Atomic cancellation of a drained paused child chain — 2026-10-23
+
+A fresh AgentService can now cancel a validated closed paused owner chain once
+its workers have physically retired. Claimed paused children become cancelled
+and receive canonical typed settlements in the same transaction as their plans,
+human questions, root and continuation holds. Human events retain root-journal
+ownership; model charges, history and completed physical receipts are preserved.
+Active leases and unresolved effects still block this path.
+
+The actual SDK paused-child fixture is adopted by a fresh service. A late root
+update abort rolls back the entire chain; normal cancellation then reaches idle
+and repeated terminal observation adds no event or charge. Pool/ledger/context4
+pass in47.03s; repository/engine/graph/production-RPC4 pass in74.32s against the
+same patch and binary, with frozen input/binary file sets and hashes.
+[Receipt and retained query/journal failures](evidence/paused-child-cancellation-20261023.json).
+This supersedes the prior cancellation refusal for the tested drained chain.
+Multi-branch cancellation races, automatic nested process enrollment, resume
+and full172 remain open. Installed64 is unchanged.
+
+[Earlier hosted canonical-launch source744d27a9](evidence/hosted-native-744d27a9-20261023.json)
+finished168/170 in850.77s: graph and agent-runner pass this run; RPC/ledger hit
+their wrappers. Official logs are retained; no hosted acceptance or retry claim.
+
 ## Paused child SDK handoff and physical retirement — 2026-10-23
 
 A child planning callback now projects its exact durable paused child to the

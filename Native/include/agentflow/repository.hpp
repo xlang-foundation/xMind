@@ -288,6 +288,7 @@ public:
     McpOAuthRefreshRecord publish_mcp_oauth_refresh(const std::string& request_id,const std::string& generation,const SecretBytes& complete_grant);
     std::size_t recover_interrupted(const BackendLease& owner);
 private:
+    DynamicNodeRecord settle_dynamic_child_owned(const std::string& child);
     Event agent_worker_tool_event_impl(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned,bool allow_files);
     AgentWorkerToolTurnRecord commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec&,const std::string& attempt,bool allow_files);
     struct Impl;

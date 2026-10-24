@@ -1376,12 +1376,12 @@ DynamicFrontierClaim Repository::admit_dynamic_frontier(const DynamicFrontierSpe
     }
     DynamicFrontierClaim result;result.plan=dynamic_plan(p.id);result.budget=root_budget(root.id);for(const auto& task:spec.tasks)result.nodes.push_back(*std::find_if(result.plan.nodes.begin(),result.plan.nodes.end(),[&](const auto& n){return n.definition.label==task.label;}));result.created=true;tx.commit();return result;
 }
-DynamicNodeRecord Repository::settle_dynamic_child(const std::string& child_id) try {
-    auto& db=impl_->database;Transaction tx(db);const auto rows=db.execute("SELECT plan_id,label FROM dynamic_plan_nodes WHERE child_run_id=?",{child_id}).rows;if(rows.empty())throw NotFound("Dynamic child not found");
+DynamicNodeRecord Repository::settle_dynamic_child_owned(const std::string& child_id){
+    auto& db=impl_->database;const auto rows=db.execute("SELECT plan_id,label FROM dynamic_plan_nodes WHERE child_run_id=?",{child_id}).rows;if(rows.empty())throw NotFound("Dynamic child not found");
     auto p=dynamic_plan(text(rows[0][0]));auto found=std::find_if(p.nodes.begin(),p.nodes.end(),[&](const auto& n){return n.child_run_id==child_id;});if(found==p.nodes.end())throw DatabaseError("Dynamic child ownership differs");auto n=*found;const auto child=run(child_id);const auto admitted=child_admission(child_id);
     const auto expected_admission=n.definition.kind==DynamicNodeKind::tool?ChildAdmissionKind::dynamic_tool:ChildAdmissionKind::dynamic_agent;
     if(admitted.kind!=expected_admission||admitted.plan_id!=p.id||child.parent_id!=p.root_run_id||child.node_id!=n.backend_node_id)throw Conflict("Dynamic child is not its exact claimed execution");
-    if(n.settled_event_seq){tx.commit();return n;}if(n.state!=DynamicNodeState::claimed||!terminal(child.state))throw Conflict("Dynamic child has not physically retired");
+    if(n.settled_event_seq)return n;if(n.state!=DynamicNodeState::claimed||!terminal(child.state))throw Conflict("Dynamic child has not physically retired");
     if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE owner_run_id=? AND state IN ('reserved','started')",{child_id}).rows.empty())throw Conflict("Dynamic child still owns model transport");
     const auto effect=dynamic_effect_state(operations(child_id));
     Json outcome={{"child_run_id",child_id},{"label",n.definition.label},{"child_state",state_name(child.state)},{"effect_state",effect}};
@@ -1415,7 +1415,10 @@ DynamicNodeRecord Repository::settle_dynamic_child(const std::string& child_id) 
     dynamic_safe_sequence(p.state_sequence);const auto event=impl_->event(child_id,"plan.child.settled",outcome.dump());
     changed_one(db.execute("UPDATE dynamic_plan_nodes SET state=?,child_state=?,outcome_json=?,settled_event_seq=?,effect_state=? WHERE plan_id=? AND label=? AND state='claimed' AND outcome_json IS NULL",{effect=="uncertain"?"uncertain":"settled",state_name(child.state),outcome.dump(),event.sequence,effect,p.id,n.definition.label}));
     changed_one(db.execute("UPDATE dynamic_plans SET state_sequence=state_sequence+1,state=? WHERE id=? AND state_sequence=?",{effect=="uncertain"?"uncertain":p.state,p.id,p.state_sequence}));
-    auto current=dynamic_plan(p.id);auto result=*std::find_if(current.nodes.begin(),current.nodes.end(),[&](const auto& v){return v.child_run_id==child_id;});tx.commit();return result;
+    auto current=dynamic_plan(p.id);auto result=*std::find_if(current.nodes.begin(),current.nodes.end(),[&](const auto& v){return v.child_run_id==child_id;});return result;
+}
+DynamicNodeRecord Repository::settle_dynamic_child(const std::string& child_id) try {
+    Transaction tx(impl_->database);auto result=settle_dynamic_child_owned(child_id);tx.commit();return result;
 }catch(const DatabaseError&){throw DynamicOutcomeUnrecorded("Dynamic child outcome was not durably recorded");}
 DynamicPlanStepResult Repository::settle_dynamic_plan_step(const std::string& call_id) try {
     auto& db=impl_->database;Transaction tx(db);auto c=dynamic_plan_call(call_id);auto p=dynamic_plan(c.plan_id);if(c.state=="interrupted"||c.state=="cancelled")throw Conflict("Retired plan call cannot acquire a report");if(!c.result_json.empty()){tx.commit();return {p,c,true};}
@@ -1629,7 +1632,8 @@ Run Repository::retire_dynamic_owner(const std::string& root_id,RunState next,co
     }else if(!database.execute("SELECT id FROM information WHERE category='native-agent-worker-leases' AND json_extract(payload,'$.spec.root_run_id')=? AND json_extract(payload,'$.state')='active' LIMIT 1",{root_id}).rows.empty())throw Conflict("Active planning workers require captured physical retirement");
     // Settlements remain separate typed, once-only transactions. A journal
     // failure aborts retirement; an actual result is never fabricated.
-    (void)dynamic_capabilities(root_id);for(const auto& c:owned_children(root_id)){if(!terminal(c.run.state))throw Conflict("Dynamic owner still has a physical child");if(c.kind=="dynamic_agent"||c.kind=="dynamic_tool")settle_dynamic_child(c.run.id);else if(c.kind=="delegated_leaf")settle_delegation_child(c.run.id);}
+    (void)dynamic_capabilities(root_id);std::optional<DynamicPauseBinding> closed_pause;if(!worker&&run(root_id).state==RunState::paused)closed_pause=dynamic_owner_pause(root_id);
+    for(const auto& c:owned_children(root_id)){if(!terminal(c.run.state)){if(closed_pause&&c.run.state==RunState::paused&&std::find(closed_pause->owner_runs.begin(),closed_pause->owner_runs.end(),c.run.id)!=closed_pause->owner_runs.end())continue;throw Conflict("Dynamic owner still has a physical child");}if(c.kind=="dynamic_agent"||c.kind=="dynamic_tool")settle_dynamic_child(c.run.id);else if(c.kind=="delegated_leaf")settle_delegation_child(c.run.id);}
     for(const auto& b:delegation_batches(root_id))if(b.state=="accepted"||b.state=="working")settle_delegation_batch(b.id);
     auto& db=impl_->database;Transaction tx(db);auto root=run(root_id);if(terminal(root.state)){if(root.state!=next)throw Conflict("Dynamic terminal state differs");tx.commit();return root;}
     if(worker){
@@ -1641,7 +1645,30 @@ Run Repository::retire_dynamic_owner(const std::string& root_id,RunState next,co
     }
     if(!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started')",{root.id}).rows.empty()||!db.execute("SELECT o.id FROM operations o JOIN runs r ON r.id=o.run_id WHERE (r.id=? OR r.parent_run_id=?) AND o.state='executing'",{root.id,root.id}).rows.empty())throw Conflict("Dynamic owner still has a physical transport or effect");
     const auto segments=db.execute("SELECT id FROM agent_budget_segments WHERE root_run_id=? AND state='open'",{root.id}).rows;if(!segments.empty()){if(segment_id.empty())throw Conflict("Dynamic retirement requires measured active closure");impl_->close_dynamic_segment(root.id,segment_id,elapsed);}else if(!segment_id.empty())throw Conflict("Dynamic retirement segment is no longer open");
-    auto p=dynamic_plan_for_root(root.id);if(p){for(const auto& h:dynamic_human_requests(p->id))if(h.state=="waiting"){const auto e=impl_->event(root.id,"plan.human.cancelled",Json{{"request_id",h.id},{"plan_id",p->id},{"label",h.label}}.dump());changed_one(db.execute("UPDATE dynamic_human_requests SET state='cancelled',input_event_seq=? WHERE id=? AND state='waiting'",{e.sequence,h.id}));const auto outcome=Json{{"human_state","cancelled"},{"request_id",h.id}}.dump();const auto settled=impl_->event(root.id,"plan.human.settled",outcome);changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='settled',outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND state='waiting_human'",{outcome,settled.sequence,p->id,h.label}));}
+    if(closed_pause){
+        const auto actual=dynamic_owner_pause(root.id);
+        if(actual.owner_runs!=closed_pause->owner_runs||!db.execute("SELECT id FROM information WHERE category='native-agent-worker-leases' AND json_extract(payload,'$.spec.root_run_id')=? AND json_extract(payload,'$.state')='active' LIMIT 1",{root.id}).rows.empty())throw Conflict("Paused cancellation lost its drained owner chain");
+        for(const auto& owner:actual.owner_runs)if(impl_->has_unresolved_effects(owner))throw Conflict("Paused cancellation retains an unresolved child effect");
+        if(impl_->has_unresolved_effects(root.id))throw Conflict("Paused cancellation retains an unresolved root effect");
+        const auto plans=db.execute("SELECT p.id FROM dynamic_plans p JOIN dynamic_plan_owners o ON o.plan_id=p.id WHERE p.root_run_id=? AND p.state IN ('active','waiting_human') ORDER BY o.depth DESC,p.id",{root.id}).rows;
+        for(const auto& row:plans){const auto plan=dynamic_plan(text(row[0]));
+            for(const auto& h:dynamic_human_requests(plan.id))if(h.state=="waiting"){
+                const auto event=impl_->event(root.id,"plan.human.cancelled",Json{{"request_id",h.id},{"plan_id",plan.id},{"label",h.label}}.dump());
+                changed_one(db.execute("UPDATE dynamic_human_requests SET state='cancelled',input_event_seq=? WHERE id=? AND state='waiting'",{event.sequence,h.id}));
+                const auto outcome=Json{{"human_state","cancelled"},{"request_id",h.id}}.dump();const auto settled=impl_->event(root.id,"plan.human.settled",outcome);
+                changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='settled',outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND state='waiting_human'",{outcome,settled.sequence,plan.id,h.label}));
+            }
+            db.execute("UPDATE dynamic_plan_nodes SET state='cancelled',protected_definition=1 WHERE plan_id=? AND state IN ('pending','blocked')",{plan.id});
+            changed_one(db.execute("UPDATE dynamic_plans SET state=?,state_sequence=state_sequence+1,planned_children_reserved=0,planned_humans_reserved=0 WHERE id=?",{state_name(next),plan.id}));
+        }
+        for(auto owner=actual.owner_runs.rbegin();owner!=actual.owner_runs.rend();++owner){
+            impl_->root_boundary(run(*owner),RunState::cancelled);
+            changed_one(db.execute("UPDATE runs SET state='cancelled' WHERE id=? AND state='paused'",{*owner}));
+            impl_->event(*owner,"run.cancelled",Json{{"reason","paused_ancestor_retired"},{"root_run_id",root.id}}.dump());
+            (void)settle_dynamic_child_owned(*owner);
+        }
+    }
+    auto p=closed_pause?std::optional<DynamicPlanRecord>{}:dynamic_plan_for_root(root.id);if(p){for(const auto& h:dynamic_human_requests(p->id))if(h.state=="waiting"){const auto e=impl_->event(root.id,"plan.human.cancelled",Json{{"request_id",h.id},{"plan_id",p->id},{"label",h.label}}.dump());changed_one(db.execute("UPDATE dynamic_human_requests SET state='cancelled',input_event_seq=? WHERE id=? AND state='waiting'",{e.sequence,h.id}));const auto outcome=Json{{"human_state","cancelled"},{"request_id",h.id}}.dump();const auto settled=impl_->event(root.id,"plan.human.settled",outcome);changed_one(db.execute("UPDATE dynamic_plan_nodes SET state='settled',outcome_json=?,settled_event_seq=? WHERE plan_id=? AND label=? AND state='waiting_human'",{outcome,settled.sequence,p->id,h.label}));}
         db.execute("UPDATE dynamic_plan_nodes SET state='cancelled',protected_definition=1 WHERE plan_id=? AND state IN ('pending','blocked')",{p->id});changed_one(db.execute("UPDATE dynamic_plans SET state=?,state_sequence=state_sequence+1,planned_children_reserved=0,planned_humans_reserved=0 WHERE id=?",{state_name(next),p->id}));
     }
     const auto holds=integer(db.execute("SELECT count(*) FROM dynamic_plan_calls WHERE root_run_id=? AND continuation_attempt_id IS NULL AND state IN ('accepted','report_ready','turn_committed')",{root.id}).rows.at(0).at(0));db.execute("UPDATE dynamic_plan_calls SET state='cancelled' WHERE root_run_id=? AND state IN ('accepted','report_ready','turn_committed') AND continuation_attempt_id IS NULL",{root.id});
