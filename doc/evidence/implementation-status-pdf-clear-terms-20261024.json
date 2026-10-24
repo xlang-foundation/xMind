@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-24T21:07:21.751Z",
+  "path": "docs/xmind-implementation-status.pdf",
+  "sha256": "489a145a743eb7efca6ce6ff2f7ecbddb12fa1a4d3b75c427f961f18d1109def",
+  "bytes": 7842,
+  "pages": 2,
+  "areas": 14,
+  "source": "docs/xmind-delivery-acceptance.md",
+  "sourceSha256": "e236ca150c1b015b6e9079a96f00e9f15ac33d0a171a2a4b7f01106e9981cd86",
+  "previousPdfSha256": "2baa90e886194da93d7183429a8a46b4c921bfc0815218c49b6c76c2540aa936",
+  "installed": {
+    "version": "0.1.73",
+    "native": "12fc37cd",
+    "fullPassed": 178,
+    "fullTotal": 178
+  },
+  "startupFix": {
+    "native": "d2121db4",
+    "focusedPassed": 3,
+    "focusedFailed": 0,
+    "fullSuitePending": true,
+    "evidence": "doc/evidence/worker-startup-ownership-20261024.json"
+  },
+  "lastFullRun": {
+    "source": "ffe04c27",
+    "passed": 178,
+    "failed": 1,
+    "total": 179
+  },
+  "clientTests": {
+    "extension": 500,
+    "browser": 178
+  },
+  "wordingCorrections": [
+    "Node.js is the test-script runtime; four refers to assertions, not workers.",
+    "Standard SDK value transfer/method dispatch is implemented architecture, not remaining work.",
+    "Counts distinguish prior full failure from the focused startup fix."
+  ],
+  "allAreaLabelsAndHeadersExtracted": true,
+  "allPagesRenderedAndVisuallyChecked": true,
+  "rendering": "Bundled Poppler,1200-pixel page height; fallback font warnings produced no visible defect.",
+  "cpythonExecuted": false,
+  "goalComplete": false
+}
