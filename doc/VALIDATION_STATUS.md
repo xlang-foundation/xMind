@@ -1,3 +1,9 @@
+## Captured workspace commands pass native7 and client479/165 — 2026-10-24
+
+Commands.List/Invoke are registered SDK subobject methods on the captured connection. The platform-neutral command module owns catalog discovery, expansion and native single/graph admission. Compatibility HTTP routes reuse those functions; duplicate adapter logic is removed. Captured requests retain workspace authority, provider/graph revision and backend/profile lifetime guards. Templates remain prompt text.
+
+Separate xmind.exe clients discover a real Markdown command, reject foreign workspace authority, invoke its human-gated graph and complete an actual file read. Shared-client HTTP graph invocation and command template contracts pass. Native7/7 passes in86.45s; complete client479/165 passes with71 sources/18 assets unchanged. The initial compile error is retained. [Receipt](evidence/captured-commands-clients-20261024.json). Ordinary model-backed/rendered command acceptance, provider configuration mutation, general reads, remote/enrollment, deeper recovery/scheduling and rendered VS Code remain open. Installed65 unchanged.
+
 ## Positive cross-process model selection passes focused3 — 2026-10-23
 
 Six successful separate xmind.exe clients use the registered Models subobject to create/read/select/clear an actual provider-bound session model. Stale session/provider revisions reject. HTTP agrees with native SQLite state; a backend restart retains cleared selection revision2. No model inference occurs. The provider runtime fixture explicitly depends on the unified executable.

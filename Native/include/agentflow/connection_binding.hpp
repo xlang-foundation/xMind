@@ -22,6 +22,11 @@ struct BoundConnectionRunMessages {ConnectionBindingIdentity binding;std::string
 struct BoundConnectionChildHistory {ConnectionBindingIdentity binding;std::string session_id,parent_id,child_id;std::vector<Message> messages;};
 struct ConnectionModelSelectionRequest {std::optional<std::string> model;ProviderProfileAdmission provider;std::int64_t revision=0;};
 struct BoundConnectionModel {ConnectionBindingIdentity binding;std::string session_id;SessionModelState state;};
+struct ConnectionCommandCatalogue {ExecutionWorkspaceMetadata workspace;std::string json;};
+struct ConnectionCommandRequest {std::string id,session,command,arguments,model,graph;std::int64_t graph_revision=0;WorkspaceAdmission workspace;std::optional<ProviderProfileAdmission> provider;};
+struct BoundConnectionCommands {ConnectionBindingIdentity binding;ConnectionCommandCatalogue catalogue;};
+ConnectionCommandCatalogue read_local_connection_commands(RunExecutor&);
+Run submit_local_connection_command(PersistenceService&,RunExecutor&,GraphExecution*,ConnectionCommandRequest);
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
@@ -69,6 +74,8 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionCommands commands()const;
+    BoundConnectionRun invoke_command(ConnectionCommandRequest request)const;
     BoundConnectionModel session_model(const std::string& session)const;
     BoundConnectionModel select_session_model(const std::string& session,ConnectionModelSelectionRequest request)const;
     BoundConnectionSession open_session(std::string id)const;

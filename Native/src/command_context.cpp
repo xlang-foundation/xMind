@@ -1,4 +1,5 @@
 #include "agentflow/command_context.hpp"
+#include "agentflow/connection_binding.hpp"
 #include "nlohmann/json.hpp"
 #include <algorithm>
 #include <cctype>
@@ -150,4 +151,7 @@ std::string CommandContext::expand(const std::string& selected,const std::string
     if(prompt.size()>1024*1024)throw ToolFileError("Expanded command exceeds the run prompt limit");
     return prompt;
 }
+ConnectionCommandCatalogue read_local_connection_commands(RunExecutor& executor){if(!executor.supports_workspace_browsing())throw RunUnavailable("Workspace command inspection requires an opened workspace");const auto before=executor.execution_workspace();if(!before.configured)throw RunUnavailable("Workspace command inspection requires an opened workspace");WorkspaceTools workspace(before.root);auto catalogue=CommandContext(workspace).catalogue_json();validate_workspace_admission({before.workspace_id,before.authority_id},executor.execution_workspace());return {before,std::move(catalogue)};}
+Run submit_local_connection_command(PersistenceService& store,RunExecutor& executor,GraphExecution* graphs,ConnectionCommandRequest request){if(!executor.supports_workspace_browsing())throw RunUnavailable("Workspace commands require an opened workspace");const auto before=executor.execution_workspace();validate_workspace_admission(request.workspace,before);if(request.arguments.size()>8192||request.arguments.find('\0')!=std::string::npos)throw std::invalid_argument("Command arguments exceed their bounds");WorkspaceTools workspace(before.root);auto prompt=CommandContext(workspace).expand(request.command,request.arguments);validate_workspace_admission(request.workspace,executor.execution_workspace());(void)store.session(request.session).get();if(!request.graph.empty()){if(!graphs||request.graph_revision<1||request.graph_revision>=9007199254740991LL)throw std::invalid_argument("Invalid graph command selection");return graphs->submit_graph_workspace(std::move(request.id),std::move(request.session),std::move(request.graph),request.graph_revision,std::move(prompt),std::move(request.model),std::move(request.workspace),std::move(request.provider));}return executor.submit_workspace(std::move(request.id),std::move(request.session),std::move(prompt),std::move(request.model),std::move(request.workspace),std::move(request.provider));}
+
 }

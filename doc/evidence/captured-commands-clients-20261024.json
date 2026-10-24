@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured workspace command catalog and invocation through native services, registered xlang3 subobjects and shared clients",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T07:07:59.620Z",
+    "sourceParent": "d3235ce1e5f2d7ffee4390762e63f5bcb28037a8",
+    "sourcePatchSha256": "44c9bd620cf59c5ab65e9738a1bcbf6eddc7e0e058036314c2176ee2f65eedb6",
+    "build": {
+      "pid": 33472,
+      "launchedAt": "2026-10-24T07:04:40.313Z",
+      "completedAt": "2026-10-24T07:06:27.735Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c61a2661b934a2ee3d5539e520fee93f61447f848f0737e2d66200845880fbfa"
+    },
+    "test": {
+      "pid": 36152,
+      "launchedAt": "2026-10-24T07:06:30.523Z",
+      "completedAt": "2026-10-24T07:07:57.025Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9db5cac2c7891ccc7c058327c3198db26969c4ae516a5c0d122be89ab56273c7"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 86.45,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "f7507b0efa84c85aeba9403ae4ba7cc4459768ad523ef300b36e34be9cebc38c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "d3235ce1e5f2d7ffee4390762e63f5bcb28037a8",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 479,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 479,
+      "passed": 479,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "initialBuildFailure": {
+    "pid": 15572,
+    "launchedAt": "2026-10-24T07:03:34.199Z",
+    "completedAt": "2026-10-24T07:03:59.393Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "ec194c302a6ed4a05d6bbae8947f6fab187c91dcd6c3785fefc99c7c7dcdb636",
+    "reason": "Legacy adapter lambda referenced constructor graphs parameter; corrected to retained graph_executor"
+  },
+  "verified": [
+    "Independent xmind.exe clients call Commands.List/Invoke via SDK, reject foreign workspace authority and complete actual human-gated file read",
+    "Captured and compatibility catalog APIs agree with native workspace snapshots",
+    "Actual shared-client command invocation completes native tool-only graph read",
+    "Native template contract preserves literal placeholder arguments and never executes templates as code",
+    "Retained Commands object refuses reads after backend retirement",
+    "Shared clients refuse binding mismatch, negotiated downgrade, closure and admission error without legacy replay",
+    "Compatibility HTTP command routes use the same platform-neutral native read/expand/admit functions; duplicate adapter implementation removed"
+  ],
+  "limits": [
+    "Focused native7 only; no new complete173 qualification or installation",
+    "Positive command invocation uses graph-backed tool/human fixtures; ordinary model-backed and rendered command invocation remain separate",
+    "No paid inference or CPython; installed65 unchanged",
+    "Provider configuration mutation, general reads, remote/enrollment and deeper recovery/scheduling remain open"
+  ]
+}

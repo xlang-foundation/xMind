@@ -78,6 +78,7 @@ class BackendClient {
   #connectionTreeStreamSupported=false;
   #connectionRunStreamSupported=false;
   #connectionModelsSupported=false;
+  #connectionCommandsSupported=false;
   #connectionModelSelectionSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
@@ -132,6 +133,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_commands")){if(health.local_connection_commands!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured commands protocol.");this.#connectionCommandsSupported=true;}
+    else if(this.#connectionCommandsSupported)throw new Error("The backend command protocol changed. Reconnect before invoking commands.");
     if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
     else if(this.#connectionModelSelectionSupported)throw new Error("The backend model selection protocol changed. Reconnect before choosing models.");
     if(health&&Object.hasOwn(health,"local_connection_models")){if(health.local_connection_models!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured models protocol.");this.#connectionModelsSupported=true;}
@@ -349,11 +352,16 @@ class BackendClient {
   deleteSession(id) { executionIdentity(id);return this.request(`/v1/sessions/${encodeURIComponent(id)}`,undefined,15000,'DELETE'); }
   activeSessions() { return this.request('/v1/sessions/active'); }
   skills() { return this.request('/v1/workspace/skills'); }
-  commands() { return this.request('/v1/workspace/commands'); }
+  async commands() {
+    if(!this.#connectionCommandsSupported)return this.request('/v1/workspace/commands');const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured command connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/commands');exactFields(value,['binding','commands','workspace_id','authority_id']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Commands belong to another connection');if(!Array.isArray(value.commands)||typeof value.workspace_id!=='string'||!value.workspace_id||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id))throw new Error('Invalid command catalog');return {commands:value.commands,workspace_id:value.workspace_id,authority_id:value.authority_id};
+  }
+  async #invokeCommand(session,body) {
+    if(!this.#connectionCommandsSupported)return this.request('/v1/sessions/'+encodeURIComponent(session)+'/commands',body);const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured command connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(session)+'/commands',body);exactFields(value,['binding','run']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Command run belongs to another connection');validateRunDTO(value.run);if(value.run.session_id!==session)throw new Error('Command run belongs to another session');return value.run;
+  }
   command(sessionId,commandId,args,modelId,binding,workspace,graph) {
     executionIdentity(sessionId);if(typeof commandId!=='string'||!commandId||commandId.length>256||typeof args!=='string'||new TextEncoder().encode(args).length>8192||!workspace||typeof workspace.workspace_id!=='string'||!/^[a-f0-9]{32}$/.test(workspace.authority_id))throw new Error('Invalid workspace command request.');
     if(graph&&(!graph||typeof graph.id!=='string'||!Number.isSafeInteger(graph.revision)||graph.revision<1))throw new Error('Invalid workspace command graph selection.');
-    return this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/commands`,{command_id:commandId,arguments:args,...(modelId?{model_id:modelId}:{}),...profileBindingFields(binding),...(graph?{graph_id:graph.id,graph_revision:graph.revision}:{}),expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id});
+    return this.#invokeCommand(sessionId,{command_id:commandId,arguments:args,...(modelId?{model_id:modelId}:{}),...profileBindingFields(binding),...(graph?{graph_id:graph.id,graph_revision:graph.revision}:{}),expected_workspace_id:workspace.workspace_id,expected_workspace_authority_id:workspace.authority_id});
   }
   async runCommand(sessionId,commandId,args,modelId,binding,graph) {
     const workspace=await this.workspace();if(!workspace.configured)throw new Error('Workspace commands require an opened workspace.');
