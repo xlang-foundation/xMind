@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "c2c7a32e10744e3dbd37aaf1e007d7b080d92407",
+  "runId": 40039032034,
+  "jobId": 120711994365,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40039032034",
+  "status": "completed",
+  "conclusion": "failure",
+  "total": 170,
+  "passed": 167,
+  "failed": 3,
+  "totalSeconds": 875.74,
+  "officialLogSha256": "54d1e82d88518d93af1e8abaee0f836eeed5596fcc87a8d9f48fc93cd0d4058c",
+  "failures": [
+    {
+      "contract": "native_graph_runner_contract",
+      "seconds": 38.13,
+      "operationElapsedMs": 30050,
+      "operationBudgetMs": 30000,
+      "phases": [
+        "script_entered"
+      ],
+      "termination": "timed_out",
+      "operationState": "uncertain",
+      "processTreeRetired": true
+    },
+    {
+      "contract": "native_agent_worker_model_rpc_contract",
+      "seconds": 69.74,
+      "killed": true,
+      "signal": "SIGTERM",
+      "observedDiagnostic": "slow dump written; not evidence of a native crash"
+    },
+    {
+      "contract": "native_agent_worker_ledger_contract",
+      "seconds": 45.14,
+      "killed": true,
+      "signal": "SIGTERM",
+      "completedPhases": [
+        {
+          "phase": "planning-admission",
+          "elapsedMs": 17631
+        },
+        {
+          "phase": "main-process-planning",
+          "elapsedMs": 7309
+        }
+      ],
+      "lastPhase": "main-planning-delegation",
+      "lastPhaseCompletionObserved": false
+    }
+  ],
+  "scope": "Historical hosted source before canonical third-party launch correction; current local 172-contract acceptance and hosted corrected source are separate scopes.",
+  "deadlinesRelaxed": false,
+  "rerunRequested": false,
+  "fullGoalComplete": false
+}

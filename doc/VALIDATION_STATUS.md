@@ -1,3 +1,27 @@
+## Installed0.1.64 protected delivery checkpoint — 2026-10-23
+
+The qualified0.1.64 VSIX is installed without a visible window. All2440 raw
+payload files, normalized package metadata, complete2442-file installed set,
+installer manifest and2398 runtime files match the accepted package. Other
+extension registry entries and all five protected settings/profile/history/config
+roots retain identical file sets and hashes. The exact2442-file0.1.62 backup
+is preserved alongside earlier backups.
+
+An isolated installed-native smoke passes managed discovery/reuse and a graph
+read of exact seeded bytes, with no model calls. The owned backend birth/image
+was verified and physical exit observed. Session2037f67db5cc8c48fb4356d776388df6 /
+root20b0148f0d764ed440de34aa3f63ab50 completed; never replay. Runtime bytes
+were rechecked afterward. [Installation and smoke receipt](evidence/installed-0.1.64-d3fef238-20261023.json).
+Rendered VS Code/editor context, unfinished nested scheduling/recovery and remote
+authority remain open; this installation does not establish hosted CI acceptance.
+
+The [new nine-job startup diagnostic](evidence/hosted-process-startup-632d9ad0-20261023.json)
+shows system-module-only first graph still times out at30048ms. Explicit module
+qualification and copied-core search each pass their first graph near8.3s; warm
+defaults vary. All .NET controls pass. No production policy or deadline changes.
+[Historical c2c7a32e hosted native failure](evidence/hosted-native-c2c7a32e-20261023.json)
+is retained at167/170; corrected744d27a9 hosted native run remains separate.
+
 ## Hosted PowerShell discovery control — 2026-10-23
 
 The startup diagnostic matrix now exposes the existing native `system-modules`

@@ -1,9 +1,15 @@
 # xMind delivery acceptance audit
 
 This audit preserves the full recovered delivery objective; completion remains
-unproven. Candidate0.1.64 is [assembled and byte-verified](../doc/evidence/candidate-0.1.64-package-d3fef238-20261023.json) from the complete corrected172-contract gate; fresh packaged execution and installation remain pending. Installed 0.1.62 still uses Native2f105e11 and SDK499415d0. Its protected
-backup and user state remain separate from candidate qualification. Current
-source is not installed. Candidate0.1.63 is [assembled and byte-verified](../doc/evidence/candidate-0.1.63-package-3024124e-20261023.json); [Packaged CLI coding](../doc/evidence/candidate-0.1.63-cli-coding-20261023.json), [packaged browser coding](../doc/evidence/candidate-0.1.63-browser-coding-20261023.json) and [isolated managed handoff](../doc/evidence/candidate-0.1.63-managed-handoff-20261023.json) pass. Protected installation, rendered VS Code and the retained initial old-owner cold-start failure remain separate open gates.
+unproven. [Installed0.1.64](../doc/evidence/installed-0.1.64-d3fef238-20261023.json)
+uses the corrected172-qualified native runtime and SDK8c7972d1.
+[Packaged browser coding](../doc/evidence/candidate-0.1.64-browser-coding-20261023.json),
+[CLI coding](../doc/evidence/candidate-0.1.64-cli-coding-20261023.json),
+[managed handoff](../doc/evidence/candidate-0.1.64-managed-handoff-20261023.json)
+and installed managed read smoke pass. The exact0.1.62 backup and five protected
+user-state roots are preserved. Rendered VS Code, hosted CI acceptance and the
+implementation gaps below remain open. Earlier candidate receipts retain their
+original scope.
 
 The current [corrected native gate on sourced3fef238](../doc/evidence/native-delivery-d3fef238-full-20261023.json) passes172/172 in1311.69 seconds. It includes the canonical third-party launch correction and native owner/SDK-worker long-path handling. A fresh actual long-path coding task also passes on Native41bb202a; package/install and rendered VS Code remain separate. The dcb768d2 full failure stays retained.
 
@@ -46,7 +52,7 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 | Standard xlang3 root/subobjects and process workers | [Actual separate-process Connections API and lifetime tests](../doc/evidence/connection-catalog-sdk-api-20261022.json); SDK owns value/reference transfer. | [Scoped CLI run services](../doc/evidence/captured-cli-runs-20261023.json) pass actual separate-process completion/cancellation. SDK full run options now pass focused same-process/lifetime and separate-process tests; authenticated remote binding remains incomplete. |
 | Browser coding | [Current full-qualified browser coding](../doc/evidence/client-browser-coding-3024124e-20261023.json): actual read/edit/Node4, scoped approvals and exact eight-message reload. [Earlier captured operation browser proof](../doc/evidence/client-browser-http-operation-scope-20261023.json): actual Send, two scoped approvals, edit/Node4, identical eight-message rendered history after reload. Native source has focused4 acceptance; earlier b133 full172 proof retains its scope. | Preserve both completed tasks. Latest run-control routing has unit acceptance; no installed/current complete-suite claim. Rendered VS Code remains separate. |
 | CLI coding | [Current full-qualified SDK8c CLI coding](../doc/evidence/client-cli-coding-3024124e-20261023.json): real read/edit/Node4, two approvals, physical SDK worker retirement, exact history/watch and owned backend exit. | Preserve the completed task. Explicit loopback CLI attachment is proven; current managed installation and rendered VS Code remain separate. |
-| VS Code extension | [Protected installed62](../doc/evidence/installed-0.1.62-2f105e11-20261022.json): package/runtime bytes and installed native managed discovery/read smoke pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. Keep visible Code closed unless requested. |
+| VS Code extension | [Protected installed64](../doc/evidence/installed-0.1.64-d3fef238-20261023.json): complete installed file set, package/runtime bytes and installed native managed discovery/read smoke pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. Keep visible Code closed unless requested. |
 | Conversation/footer layout | [Current rendered browser screenshot](../doc/evidence/client-packaged-browser-2f105e11-20261022.png); packaged frontend bytes match the accepted client gate. | [Captured history rendering](../doc/evidence/rendered-captured-history-20261023.json) verifies paging, session switching/reload and visible footer at1280x720. Expanded-skills/long-draft and this viewport are bounded evidence, not a complete accessibility/viewport matrix. |
 | Workspace selection and isolation | [Rendered managed-workspace proof](../doc/evidence/client-managed-workspaces-b95abba9-20261022-gate.json) and native local-profile/view contracts. | Keep the source/runtime versions of rendered and native evidence distinct; never infer remote connection isolation from workspace switching. |
 | Single/graph agents, planning and delegation | Native graph, dynamic-plan, delegation, budget, context and worker contracts occur in the complete native inventory. | Captured child planning services, counted/compacted continuations and accepted native read plans have focused evidence. Automatic dynamic-process enrollment, multi-root scheduling and pause/recovery remain incomplete. |
@@ -55,13 +61,14 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 | Connection catalog | [Atomic catalog revisions](../doc/evidence/connection-catalog-concurrent-fixed-20261022.json) and [SDK API](../doc/evidence/connection-catalog-sdk-api-20261022.json). HTTP and SDK observe one native persisted catalog. | [Captured Local SDK/HTTP binding](../doc/evidence/captured-http-connection-binding-20261023.json), scoped event cursors and [session/prompt admission](../doc/evidence/captured-connection-run-options-qualified-20261023.json) pass focused contracts. Shared clients pass470 extension/165 browser tests, including captured operation inspection/decision and run status/cancellation. Historical SDK499 full172 and rendered browser coding pass. Current source3024124e has complete local172 acceptance; earlier b133a0ee remains a separate historical full pass. Hosted acceptance and rendered VS Code remain separate; SDK8c browser coding on b133a0ee passes. Graph/command/general read/stream adapters and authenticated remote routing remain unfinished. Basic operation approvals now have actual browser proof; saved permission grants and other controls retain separate APIs. |
 | Enrollment and distributed ownership | Catalog metadata and Local execution do not authorize distributed work. | Explicit workspace/effect authorization, expiring fenced leases, duplicate delivery, revocation, lost reply and receipt reconciliation need implementation and acceptance. Private Nexus server/database/scheduler stay excluded. |
 | Recovery and preservation | [Installed62 preservation/smoke](../doc/evidence/installed-0.1.62-2f105e11-20261022.json), owner/handoff contracts and historical managed upgrade receipts. | No claim of universal unattended/in-flight or nested-process recovery. Preserve original owner identity and reconcile effects before retry. |
-| Delivery checkpoint | Installed62 payload/runtime verified; exact previous61 backup retained; settings/profile/history/configuration file sets and hashes unchanged. | Do not replace installed62 until the actual candidate passes its complete required gates. |
+| Delivery checkpoint | Installed64 complete2442-file payload and2398-file runtime verified; exact previous62 backup2442 retained; five protected roots unchanged. Installed managed read smoke passes. | Rendered VS Code and remaining implementation/hosted gates remain open. Preserve completed task identities and backups. |
 
 ## Next implementation sequence
 
-The current source3024124e complete local gate passes172/172. Use its exact
-qualified binaries/runtime and frozen input closure for the next delivery
-checkpoint; do not rebuild or substitute artifacts without requalification.
+The corrected sourced3fef238 complete local gate passes172/172 and its exact
+qualified runtime is installed as0.1.64. Preserve this frozen delivery closure
+while implementing the remaining ownership/scheduling/remote protocol work; any
+new native binary requires its own qualification.
 Preserve the previous full failures and all completed coding task IDs.
 
 Current native qualification, byte-verified candidate package, isolated managed

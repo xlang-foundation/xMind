@@ -1,0 +1,663 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "632d9ad02b005efc63718a6cc8a81452f2346d16",
+  "runId": 40047554406,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40047554406",
+  "conclusion": "failure",
+  "freshHostedJobs": 9,
+  "totalCases": 36,
+  "scope": "Controlled actual native foreground adapter diagnostics; no agent acceptance or production environment change.",
+  "observations": {
+    "systemModulesFirstGraphTimedOutMs": 30048,
+    "systemModulesFirstPhases": [
+      "script_entered"
+    ],
+    "coreOnlyFirstGraphPassedMs": 8327,
+    "moduleQualifiedFirstGraphPassedMs": 8282,
+    "allDotnetControlsPassed": true,
+    "originalFirstGraphTimedOutMs": 30039,
+    "causeEstablished": false
+  },
+  "interpretation": "Restricting discovery to the system module directory does not resolve the cold timeout on this runner. Explicit module qualification and a minimal copied-core search path each complete their fresh first graph command. Warm defaults remain variable; no passing control qualifies a failed original command.",
+  "artifacts": [
+    {
+      "artifactId": 12542460205,
+      "name": "process-startup-diagnostics-original-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "4d5a6765557f1022ab375560f4d63fddeff680af884a3c23240e66f08f4e2d9e",
+      "firstCase": "original",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-default",
+          "passed": false,
+          "elapsedMs": 30039,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1789
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 29944,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 184,
+            "delay_completed": 29738,
+            "effect_completed": 29923
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 23021,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6200,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 187,
+            "delay_completed": 6184,
+            "effect_completed": 6184
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12542370195,
+      "name": "process-startup-diagnostics-precopy-core-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "e9baba7273d2944312c4dec49f8c2b2ad1a5d4e944e063873a8028ac9926c7b6",
+      "firstCase": "precopy-core",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-precopy-core",
+          "passed": false,
+          "elapsedMs": 30026,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1898
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 24520,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 142,
+            "delay_completed": 23918,
+            "effect_completed": 24494
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 18056,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6175,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 155,
+            "delay_completed": 6152,
+            "effect_completed": 6164
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12542226113,
+      "name": "process-startup-diagnostics-minimal-path-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "9fb4da818b24cdc1ca56d8d123d3eeadd4c3852d2b7b9493603651a5e42342f7",
+      "firstCase": "minimal-path",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": true,
+      "cases": [
+        {
+          "label": "01-graph-minimal-path",
+          "passed": true,
+          "elapsedMs": 25123,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1530,
+            "delay_completed": 24950,
+            "effect_completed": 25091
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 17744,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 125,
+            "delay_completed": 17682,
+            "effect_completed": 17728
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 11592,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6136,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 107,
+            "delay_completed": 6125,
+            "effect_completed": 6125
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12541868439,
+      "name": "process-startup-diagnostics-system-modules-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "6db5a771c9d34795cda7532e109eec752a6058b198a7fb82217e70db8b417b05",
+      "firstCase": "system-modules",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-system-modules",
+          "passed": false,
+          "elapsedMs": 30048,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1688
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 29721,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 185,
+            "delay_completed": 29510,
+            "effect_completed": 29686
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22506,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6224,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 194,
+            "delay_completed": 6196,
+            "effect_completed": 6208
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12541674284,
+      "name": "process-startup-diagnostics-private-cache-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "0f7872673abe7ee9ff34a03697ecb5cd1da92a4c2d383bd2ada5282f433dab77",
+      "firstCase": "private-cache",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-private-cache",
+          "passed": false,
+          "elapsedMs": 30052,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1716
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 29058,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 182,
+            "delay_completed": 28852,
+            "effect_completed": 29042
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22159,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6195,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 168,
+            "delay_completed": 6179,
+            "effect_completed": 6179
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12541634407,
+      "name": "process-startup-diagnostics-module-qualified-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "e336d416f94f4a40d819596e454801b8e333a7a663f680a44b9c650006519389",
+      "firstCase": "module-qualified",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-module-qualified-default",
+          "passed": true,
+          "elapsedMs": 8282,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1653,
+            "delay_completed": 8097,
+            "effect_completed": 8238
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": false,
+          "elapsedMs": 30040,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 161
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 19191,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6197,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 175,
+            "delay_completed": 6181,
+            "effect_completed": 6181
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12541609484,
+      "name": "process-startup-diagnostics-core-only-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "f2f9057cf7c82fe3912f47e1efe991a4c5be217d90bbcdf2b8a6b9734797c465",
+      "firstCase": "core-only",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-core-only",
+          "passed": true,
+          "elapsedMs": 8327,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1760,
+            "delay_completed": 8153,
+            "effect_completed": 8296
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": false,
+          "elapsedMs": 30038,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 166
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22184,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6197,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 169,
+            "delay_completed": 6181,
+            "effect_completed": 6181
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12541479965,
+      "name": "process-startup-diagnostics-cmdlet-phases-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "429af3d24d1a7db593ba4d7920e84cb0564b2631d2281393d7305e7456b6c3d6",
+      "firstCase": "cmdlet-phases",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-cmdlet-phases-default",
+          "passed": false,
+          "elapsedMs": 30046,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1434
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 23902,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 135,
+            "delay_completed": 23713,
+            "effect_completed": 23871
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 17676,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6157,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 141,
+            "delay_completed": 6157,
+            "effect_completed": 6157
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    },
+    {
+      "artifactId": 12541109222,
+      "name": "process-startup-diagnostics-cache-off-632d9ad02b005efc63718a6cc8a81452f2346d16",
+      "archiveSha256": "a3b19621dcd4f0a87ea89f8d8ab269090e45cf173eb4751222b987d8af966210",
+      "firstCase": "cache-off",
+      "sourceAndBinaryUnchanged": true,
+      "allCasesPassed": false,
+      "cases": [
+        {
+          "label": "01-graph-cache-off",
+          "passed": false,
+          "elapsedMs": 30035,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1604
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 29073,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 187,
+            "delay_completed": 28839,
+            "effect_completed": 29061
+          },
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22280,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "modulePathProbeSucceeded": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6207,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 183,
+            "delay_completed": 6194,
+            "effect_completed": 6194
+          },
+          "modulePathProbeSucceeded": true
+        }
+      ]
+    }
+  ],
+  "productionEnvironmentChanged": false,
+  "deadlinesRelaxed": false,
+  "paidInference": false,
+  "cpython": false,
+  "fullGoalComplete": false
+}
