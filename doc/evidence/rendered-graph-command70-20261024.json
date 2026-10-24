@@ -1,0 +1,229 @@
+{
+  "recordedAt": "2026-10-24T13:52:54.855Z",
+  "passed": true,
+  "mode": "graph",
+  "installedVersion": "0.1.70",
+  "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+  "runtimeFiles": 2398,
+  "runtimeAndInstalledFrontendUnchanged": true,
+  "proof": {
+    "passed": true,
+    "sessionId": "e807f82ae5ca4474bcce598fad62a50f",
+    "runId": "30f474528778dbce4bff1814577ba86e",
+    "submittedCommandOnce": true,
+    "humanInputSubmittedOnce": true,
+    "completedReadObserved": true,
+    "reloadedMessages": 2,
+    "reloadedWorkflowRetained": true,
+    "screenshot": "reloaded.png",
+    "neverReplay": true
+  },
+  "requests": 0,
+  "history": {
+    "binding": {
+      "backend_generation": "2340336912-2182495849-3757884301-317979494-",
+      "connection_id": "local",
+      "kind": "local",
+      "profile_revision": 1,
+      "protocol_version": 1,
+      "server_id": "local-2aa04241c8e24c6b4b785494f78f693e5ffeaf3e98373e7c5d36053c29f1995f"
+    },
+    "has_more": false,
+    "messages": [
+      {
+        "data": {
+          "content": "Review literal $2 through the rendered command.\n",
+          "model_id": "rendered-command-fixture"
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph command-human.\n\n```json\n[\n  {\n    \"id\": \"answer\",\n    \"output\": {\n      \"path\": \"input.txt\"\n    },\n    \"state\": \"completed\"\n  },\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Rendered graph command actual native bytes\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000\",\n      \"path\": \"input.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "command-human",
+          "nodes": [
+            {
+              "id": "answer",
+              "output": {
+                "path": "input.txt"
+              },
+              "state": "completed"
+            },
+            {
+              "id": "read",
+              "output": {
+                "content": "Rendered graph command actual native bytes\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000",
+                "path": "input.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "next_before": null,
+    "run_id": "30f474528778dbce4bff1814577ba86e",
+    "session_id": "e807f82ae5ca4474bcce598fad62a50f"
+  },
+  "graph": {
+    "binding": {
+      "backend_generation": "2340336912-2182495849-3757884301-317979494-",
+      "connection_id": "local",
+      "kind": "local",
+      "profile_revision": 1,
+      "protocol_version": 1,
+      "server_id": "local-2aa04241c8e24c6b4b785494f78f693e5ffeaf3e98373e7c5d36053c29f1995f"
+    },
+    "graph": {
+      "checkpoint": {
+        "nodes": [
+          {
+            "id": "answer",
+            "output": {
+              "path": "input.txt"
+            },
+            "state": "completed"
+          },
+          {
+            "id": "read",
+            "output": {
+              "content": "Rendered graph command actual native bytes\n",
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000",
+              "path": "input.txt",
+              "source": "graph_tool",
+              "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000",
+              "workspace_revision": 1
+            },
+            "state": "completed"
+          }
+        ],
+        "spec": {
+          "nodes": [
+            {
+              "id": "answer",
+              "prompt": "Choose the fixture file to read.",
+              "type": "human"
+            },
+            {
+              "arguments": {
+                "path": {
+                  "$ref": {
+                    "node": "answer",
+                    "path": [
+                      "path"
+                    ]
+                  }
+                }
+              },
+              "depends_on": [
+                "answer"
+              ],
+              "id": "read",
+              "tool": "read_file",
+              "type": "tool"
+            }
+          ]
+        },
+        "version": 1
+      },
+      "checkpoint_revision": 5,
+      "context": {
+        "enabled": false,
+        "remaining_active_ms": null,
+        "resumable": false
+      },
+      "graph_id": "command-human",
+      "graph_revision": 1,
+      "input": {
+        "content": "Review literal $2 through the rendered command.\n",
+        "model_id": "rendered-command-fixture"
+      },
+      "run": {
+        "graph_root": true,
+        "id": "30f474528778dbce4bff1814577ba86e",
+        "node_id": "",
+        "parent_id": "",
+        "session_id": "e807f82ae5ca4474bcce598fad62a50f",
+        "state": "completed"
+      },
+      "spec": {
+        "nodes": [
+          {
+            "id": "answer",
+            "prompt": "Choose the fixture file to read.",
+            "type": "human"
+          },
+          {
+            "arguments": {
+              "path": {
+                "$ref": {
+                  "node": "answer",
+                  "path": [
+                    "path"
+                  ]
+                }
+              }
+            },
+            "depends_on": [
+              "answer"
+            ],
+            "id": "read",
+            "tool": "read_file",
+            "type": "tool"
+          }
+        ]
+      }
+    }
+  },
+  "invocation": {
+    "path": "/v1/connection-bindings/9e68905d017b3a4b947bd2dec226f360/sessions/e807f82ae5ca4474bcce598fad62a50f/commands",
+    "method": "POST",
+    "status": 202,
+    "body": {
+      "command_id": "review",
+      "arguments": "literal $2",
+      "model_id": "rendered-command-fixture",
+      "graph_id": "command-human",
+      "graph_revision": 1,
+      "expected_workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000083ee0d0000000000",
+      "expected_workspace_authority_id": "7571ca1c5946ca7105b225c4ce459536"
+    },
+    "receipt": {
+      "binding": {
+        "backend_generation": "2340336912-2182495849-3757884301-317979494-",
+        "connection_id": "local",
+        "kind": "local",
+        "profile_revision": 1,
+        "protocol_version": 1,
+        "server_id": "local-2aa04241c8e24c6b4b785494f78f693e5ffeaf3e98373e7c5d36053c29f1995f"
+      },
+      "run": {
+        "graph_root": true,
+        "id": "30f474528778dbce4bff1814577ba86e",
+        "node_id": "",
+        "parent_id": "",
+        "session_id": "e807f82ae5ca4474bcce598fad62a50f",
+        "state": "queued"
+      }
+    }
+  },
+  "ownedBackendExited": true,
+  "scope": "Actual rendered slash command invokes captured native graph, pauses for one human input and completes a real native workspace read with zero model calls.",
+  "paidInference": false,
+  "neverReplay": true,
+  "harnessSha256": "3da84beab72cb846a6d0b2f8df19bfc80906cfa3e3e3c0f140b6c3a20f1b9b64",
+  "neverReplayNamespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/rendered-graph-command70-20261024",
+  "installedUserStateUsed": false,
+  "goalComplete": false,
+  "remaining": "Provider setup, rendered VS Code, generic authenticated remote/enrollment and deeper recovery/scheduling remain open."
+}
