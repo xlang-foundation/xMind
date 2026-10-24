@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-10-24T13:48:54.543Z",
+  "passed": true,
+  "installedVersion": "0.1.70",
+  "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+  "runtimeFiles": 2398,
+  "runtimeAndInstalledFrontendUnchanged": true,
+  "proof": {
+    "passed": true,
+    "sessionId": "3dc41dbcef3b4b47954c97f3b9b231ea",
+    "runId": "5fb897cd9bc139c3b46466512a1d0c84",
+    "submittedOnce": "/review literal $2",
+    "reloadedMessages": 2,
+    "literalArgumentRetained": true,
+    "expandedPromptVisible": true,
+    "screenshot": "reloaded.png",
+    "neverReplay": true
+  },
+  "requests": 1,
+  "history": {
+    "binding": {
+      "backend_generation": "2975919522-575335935-3937475223-3786632187-",
+      "connection_id": "local",
+      "kind": "local",
+      "profile_revision": 1,
+      "protocol_version": 1,
+      "server_id": "local-b192e0ac4018ce5942dd2d4675536375d9eb12ab7de0a1ab84cb041a2df3e70e"
+    },
+    "has_more": false,
+    "messages": [
+      {
+        "data": {
+          "content": "Review literal $2 through the rendered command.\n"
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "The native workspace command preserved literal $2 and expanded its registered template.",
+          "elapsed_ms": 19,
+          "first_token_ms": 17,
+          "model": "rendered-command-fixture",
+          "usage": {
+            "completion_tokens": 9,
+            "prompt_tokens": 11,
+            "total_tokens": 20
+          }
+        },
+        "id": "msg_2",
+        "role": "assistant",
+        "seq": 2
+      }
+    ],
+    "next_before": null,
+    "run_id": "5fb897cd9bc139c3b46466512a1d0c84",
+    "session_id": "3dc41dbcef3b4b47954c97f3b9b231ea"
+  },
+  "invocation": {
+    "path": "/v1/connection-bindings/c08b95515e391117d41177b832757401/sessions/3dc41dbcef3b4b47954c97f3b9b231ea/commands",
+    "method": "POST",
+    "status": 202,
+    "body": {
+      "command_id": "review",
+      "arguments": "literal $2",
+      "model_id": "rendered-command-fixture",
+      "expected_workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000074ed0d0000000000",
+      "expected_workspace_authority_id": "6f40400ebd53227bb4c67bc8c0543dbe"
+    },
+    "receipt": {
+      "binding": {
+        "backend_generation": "2975919522-575335935-3937475223-3786632187-",
+        "connection_id": "local",
+        "kind": "local",
+        "profile_revision": 1,
+        "protocol_version": 1,
+        "server_id": "local-b192e0ac4018ce5942dd2d4675536375d9eb12ab7de0a1ab84cb041a2df3e70e"
+      },
+      "run": {
+        "graph_root": false,
+        "id": "5fb897cd9bc139c3b46466512a1d0c84",
+        "node_id": "",
+        "parent_id": "",
+        "session_id": "3dc41dbcef3b4b47954c97f3b9b231ea",
+        "state": "queued"
+      }
+    }
+  },
+  "ownedBackendExited": true,
+  "scope": "Actual rendered slash command through captured native command API, literal argument preservation and native template expansion; controlled provider, real SQLite, installed distributable bytes copied to an isolated fixture.",
+  "paidInference": false,
+  "neverReplay": true,
+  "harnessSha256": "6dc2a4b8b78fe349ecc3558f2807995e7050651550d5573b6243f27cff061218",
+  "neverReplayNamespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/rendered-command70-20261024",
+  "installedUserStateUsed": false,
+  "goalComplete": false,
+  "remaining": "Provider setup, rendered VS Code, generic authenticated remote/enrollment and deeper recovery/scheduling remain open."
+}
