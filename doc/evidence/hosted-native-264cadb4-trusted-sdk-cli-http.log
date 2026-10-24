@@ -1,0 +1,22 @@
+Testing: native_mcp_oauth_trusted_contract
+78/176 Test: native_mcp_oauth_trusted_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.4/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/mcp_oauth_trusted_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_oauth_trusted_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "C:/Program Files/OpenSSL/bin/openssl.exe" "D:/a/xMind/xMind/xmind/Native/../Tools/ci-oauth-certificate.ps1" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_oauth_refresh_contract.exe" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_mcp_oauth_renewal_contract.exe" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_remote_authentication_sdk_contract.exe" "D:/a/xMind/xMind/xmind/build/native/Release/xmind.exe"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_mcp_oauth_trusted_contract" start time: Oct 24 19:20 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Actual native renewal service passed trusted discovery and single-use refresh dispatch, encrypted atomic rotation/retention, scope/JSON/HTTP/lost-reply/redirect rejection, cancellation after dispatch, publication rollback, durable duplicate/restart observations and no replay of uncertain exchanges. Synthetic authority; no automatic renewal or real-account acceptance.
+Actual native HTTP origin-bound view authentication passed trusted HTTPS, wrong-credential refusal, encrypted grant publication/reopen, stored status, stale-retry refusal without another peer request and Local selection retained. Remote routing remains disabled.
+Actual separate-process xlang3 SDK authentication passed trusted native HTTPS, wrong-credential refusal, one accepted grant, stale retry without another HTTP request, encrypted credential/grant database reopen and unchanged Local selection. Remote command routing remains disabled.
+Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.
+Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.
+Owned isolated-runner OAuth machine-root certificate removed and absence confirmed.
+<end of output>
+Test time =   5.66 sec
+----------------------------------------------------------
+Test Passed.
+"native_mcp_oauth_trusted_contract" end time: Oct 24 19:20 Coordinated Universal Time
+"native_mcp_oauth_trusted_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+79/176 

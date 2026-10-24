@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-10-24T19:41:44.359Z",
+  "source": "264cadb4",
+  "run": 40118270287,
+  "job": 120950618634,
+  "officialArtifact": {
+    "id": 12573725586,
+    "bytes": 120175,
+    "sha256": "49a346f9d51cda6732c7d42ef39252617463fe9cf9ef48b74d69b6f46a15e109"
+  },
+  "full": {
+    "passed": 172,
+    "total": 176,
+    "failed": 4
+  },
+  "failures": [
+    {
+      "contract": "graph_runner",
+      "seconds": 40.38
+    },
+    {
+      "contract": "agent_worker_model_rpc",
+      "seconds": 71.31
+    },
+    {
+      "contract": "agent_worker_ledger",
+      "seconds": 20.47
+    },
+    {
+      "contract": "agent_worker_nested_human",
+      "seconds": 45.02
+    }
+  ],
+  "trustedAuthentication": {
+    "sdk": true,
+    "cli": true,
+    "http": true,
+    "separateHosts": true,
+    "refusedNegotiations": 3,
+    "acceptedNegotiations": 3,
+    "encryptedGrantReopen": true,
+    "staleRetryNoExtraPeerRequest": true,
+    "localSelectionRetained": true,
+    "remoteCommandRouting": false,
+    "isolatedRunnerCertificateRemovedAndAbsenceConfirmed": true
+  },
+  "nestedTiming": {
+    "begins": 14,
+    "exits": 13,
+    "sumCompletedMs": 43723,
+    "last": {
+      "nested_case": "paused-root-coding-plain-cancel",
+      "phase": "begin"
+    },
+    "causalLimit": "Completed cases use 43.723 seconds of the 45-second cohort timeout; final case lacks terminal evidence. Individual-case stall is not established."
+  },
+  "installedVersion": "0.1.73",
+  "goalComplete": false
+}

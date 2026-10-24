@@ -48,7 +48,7 @@ struct NativeChildExecutor::Impl {
     std::size_t capacity,reserved=0;
     const std::size_t worker_limit;
     const std::shared_ptr<const void> identity=std::make_shared<const char>(0);
-    bool accepting=true,faulted=false;
+    bool accepting=true,faulted=false;std::exception_ptr first_failure;
     Impl(std::size_t count,std::size_t limit):capacity(limit),worker_limit(count){
         if(count<1||count>8||limit<4||limit>64)throw std::invalid_argument("Invalid native child executor capacity");
         try{for(std::size_t i=0;i<count;++i)workers.emplace_back([this]{work();});}catch(...){close();throw;}
@@ -75,7 +75,7 @@ struct NativeChildExecutor::Impl {
             if(snapshot.retired[i])snapshot.jobs[i]->promise.set_exception(std::make_exception_ptr(NativeChildOutcomeUnrecorded("Staged native child batch retired before dispatch")));}
         changed.notify_all();
     }
-    void fail(){StopSnapshot snapshot;{std::lock_guard lock(mutex);snapshot=stop_locked(true);}stop_observed(std::move(snapshot));}
+    void fail(std::exception_ptr failure={}){StopSnapshot snapshot;{std::lock_guard lock(mutex);if(!first_failure&&failure)first_failure=std::move(failure);snapshot=stop_locked(true);}stop_observed(std::move(snapshot));}
     std::shared_ptr<Job> take_locked(bool& child_slot,const std::shared_ptr<RootExecutionBudget>& budget={}){
         for(auto item=pending.begin();item!=pending.end();++item){
             if(budget&&(*item)->budget!=budget)continue;
@@ -95,7 +95,7 @@ struct NativeChildExecutor::Impl {
             job->promise.set_value(std::move(actual));
         }catch(...){
             const auto failure=std::current_exception();if(job->slot)NativeChildSlotAccess::retire(job->slot);if(child_slot){job->budget->release_leaf();child_slot=false;}
-            fail();job->promise.set_exception(failure);
+            fail(failure);job->promise.set_exception(failure);
         }
         {std::lock_guard lock(mutex);dispatched.erase(std::find(dispatched.begin(),dispatched.end(),job));}changed.notify_all();
     }
@@ -170,6 +170,7 @@ std::unique_ptr<NativeChildExecutor::Batch> NativeChildExecutor::stage(std::vect
 }
 bool NativeChildExecutor::assist(const std::shared_ptr<NativeChildSlot>& slot){auto owner=impl_;return owner->assist(slot);}
 bool NativeChildExecutor::healthy()const{std::lock_guard lock(impl_->mutex);return impl_->accepting&&!impl_->faulted;}
-void NativeChildExecutor::fail(){impl_->fail();}
+std::exception_ptr NativeChildExecutor::failure()const{std::lock_guard lock(impl_->mutex);return impl_->first_failure;}
+void NativeChildExecutor::fail(){impl_->fail(std::current_exception());}
 void NativeChildExecutor::close(){impl_->close();}
 }

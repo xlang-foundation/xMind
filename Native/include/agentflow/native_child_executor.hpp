@@ -66,6 +66,9 @@ public:
     // its exact shared budget. No new thread, admission or root authority.
     bool assist(const std::shared_ptr<NativeChildSlot>& slot);
     bool healthy() const;
+    // Backend-private first failure for diagnostics; never an SDK/UI value or
+    // authority to replay an uncertain job. Preserved across later cancellation.
+    std::exception_ptr failure() const;
     void fail();
     void close();
 private:
