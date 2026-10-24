@@ -63,6 +63,13 @@ int main(){try{
         const auto sealed=Json::parse(seal_dynamic_tool_catalogue(tools,bindings.dump()));
         require(sealed.at("tools").size()==3&&sealed.at("tools")[0].at("xlang3_binding")==callable&&sealed.at("tools")[1].at("mcp_binding")==remote,"Shared catalogue must retain exact native callable and remote bindings");
         for(const auto& tool:sealed.at("tools"))require(tool.at("input_schema_json")==exact,"Sealing must preserve numeric and escaped-key schema lexemes");
+        DynamicPlanCapabilities captured;captured.tool_catalog_json=sealed.dump();DynamicPresetCapability preset;preset.tools={"read_file","mcp_fixture","code_fixture"};
+        verify_dynamic_child_catalogue(tools,bindings.dump(),captured,preset);
+        auto names_only=captured;names_only.tool_catalog_json=Json{{"tools",Json::array({{{"name","read_file"}},{{"name","mcp_fixture"}},{{"name","code_fixture"}}})}}.dump();rejects<DynamicPlanUnavailable>([&]{verify_dynamic_child_catalogue(tools,bindings.dump(),names_only,preset);});
+        auto changed=tools;changed[0].input_schema_json="{}";rejects<DynamicPlanUnavailable>([&]{verify_dynamic_child_catalogue(changed,bindings.dump(),captured,preset);});
+        changed=tools;changed.push_back({"extra_file_tool","Not captured",exact});rejects<DynamicPlanUnavailable>([&]{verify_dynamic_child_catalogue(changed,bindings.dump(),captured,preset);});
+        auto rebound=bindings;rebound[0]["config_revision"]=8;rejects<DynamicPlanUnavailable>([&]{verify_dynamic_child_catalogue(tools,rebound.dump(),captured,preset);});
+        auto renamed=preset;renamed.tools.push_back("missing_tool");rejects<DynamicPlanUnavailable>([&]{verify_dynamic_child_catalogue(tools,bindings.dump(),captured,renamed);});
         auto duplicate=tools;duplicate.push_back(tools.front());rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(duplicate,bindings.dump());});
         rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,"[]");});
         auto altered=bindings;altered[0]["input_schema_json"]="{}";rejects<DynamicPlanUnavailable>([&]{seal_dynamic_tool_catalogue(tools,altered.dump());});

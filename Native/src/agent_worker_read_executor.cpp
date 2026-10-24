@@ -200,6 +200,14 @@ public:
             }
             if(allowed)for(const auto& name:*allowed)if(is_agent_remote_tool(name)&&!callable_tool(name)&&std::none_of(policy.tools.begin(),policy.tools.end(),[&](const auto& tool){return tool.name==name;}))throw std::invalid_argument("Requested worker remote tool was not discovered");
         }
+        if(dynamic_){
+            const auto admitted=store_.child_admission(request.run_id).get();const auto plan=store_.dynamic_plan(admitted.plan_id).get();
+            const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& value){return value.id==admitted.preset_id&&value.revision==admitted.preset_revision;});
+            if(preset==plan.capabilities.presets.end())throw DynamicPlanUnavailable("Dynamic process lost its sealed preset");
+            Json bindings=remote_tools?Json::parse(remote_tools->approval_bindings(policy.tools)):Json::array();
+            for(const auto& tool:settings_.xlang_python_tools)if(std::any_of(policy.tools.begin(),policy.tools.end(),[&](const auto& offered){return offered.name==tool.definition.name;}))bindings.push_back({{"kind","trusted_xlang3_callable"},{"alias",tool.definition.name},{"input_schema_json",tool.definition.input_schema_json},{"execution",tool.execution==XlangPythonExecution::worker?"worker":"in_process"}});
+            verify_dynamic_child_catalogue(policy.tools,bindings.dump(),plan.capabilities,*preset);
+        }
         std::optional<DynamicBudgetSegment> planning_segment;std::optional<DynamicResumeRecord> planning_resume;
         if(planning_root()){
             validator_->validate_dynamic_owner(root,model(request),request.agent_instructions,request.agent_tools,request.agent_permissions);auto caps=store_.dynamic_capabilities(root).get();auto presets=caps.presets;

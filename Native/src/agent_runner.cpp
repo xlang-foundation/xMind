@@ -93,13 +93,7 @@ std::optional<WorkspaceMembershipSnapshot> saved_workspace_membership(AgentRunJo
     }
     return result;
 }
-void verify_child_catalogue(const std::vector<ModelToolDefinition>& actual,const Json& bindings,const DynamicPlanCapabilities& caps,const DynamicPresetCapability& preset){
-    const auto sealed=Json::parse(caps.tool_catalog_json);Json expected={{"tools",Json::array()}};
-    const std::set<std::string> allowed(preset.tools.begin(),preset.tools.end());
-    for(const auto& definition:sealed.at("tools"))if(allowed.contains(definition.at("name").get<std::string>()))expected["tools"].push_back(definition);
-    if(expected["tools"].size()!=allowed.size()||Json::parse(seal_dynamic_tool_catalogue(actual,bindings.dump()))!=expected)
-        throw DynamicPlanUnavailable("Actual child catalogue differs from its sealed native preset");
-}
+
 }
 AgentRunner::AgentRunner(PersistenceService& persistence,AgentSettings settings,std::shared_ptr<DelegationExecutor> delegation,
     std::shared_ptr<DynamicPlanExecution> planning,bool preserve_dynamic_child_planning_policy,
@@ -682,7 +676,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
         auto seal_catalogue=[&]{
             Json offered_bindings=Json::array();
             for(const auto& binding:approval_bindings)if(std::any_of(request.tools.begin(),request.tools.end(),[&](const auto& tool){return tool.name==binding.at("alias").get<std::string>();}))offered_bindings.push_back(binding);
-            if(dynamic_child&&!read_workspace_)verify_child_catalogue(request.tools,offered_bindings,*child_caps,*child_preset);
+            if(dynamic_child&&!read_workspace_)verify_dynamic_child_catalogue(request.tools,offered_bindings.dump(),*child_caps,*child_preset);
             if(dynamic_root){
                 validate_dynamic_owner(id,provider.model,graph_instructions,tool_allowlist,agent_permission_rules);
                 auto presets=root_caps->presets;

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "scope": "Native process child construction and in-process AgentRunner share exact sealed preset catalogue verification before child worker launch.",
+  "gates": [
+    {
+      "recordedAt": "2026-10-24T02:30:46.290Z",
+      "sourceParent": "1db7c856396ee6abcc61ce56c9a98464abae7b0e",
+      "sourcePatchSha256": "d8e84b73b7f279d12d7103bc0f68ce4f2c372d3aec9017ea5b109b623d9ed32b",
+      "build": {
+        "pid": 13744,
+        "launchedAt": "2026-10-24T02:28:48.166Z",
+        "completedAt": "2026-10-24T02:29:53.813Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "68aea5bdd1abfe15be9bda0e006a590187d0f394350956c4593b18cd827b0068"
+      },
+      "test": {
+        "pid": 16240,
+        "launchedAt": "2026-10-24T02:29:56.390Z",
+        "completedAt": "2026-10-24T02:30:43.737Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "a360b2cccbab044a0dab05de4fee18fb1bbc4fc3183078b94b75a7b3bce8e6fe"
+      },
+      "total": 5,
+      "failed": 0,
+      "passed": 5,
+      "seconds": 47.31,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "85ad80b3610ba6fbc437f4ce97430f024e001ce00b099023842854a2d810a635",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    {
+      "recordedAt": "2026-10-24T02:33:25.171Z",
+      "sourceParent": "1db7c856396ee6abcc61ce56c9a98464abae7b0e",
+      "sourcePatchSha256": "d8e84b73b7f279d12d7103bc0f68ce4f2c372d3aec9017ea5b109b623d9ed32b",
+      "build": {
+        "pid": 22804,
+        "launchedAt": "2026-10-24T02:31:09.679Z",
+        "completedAt": "2026-10-24T02:32:05.441Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "5f477c6f7ec8e28b123d4f944f35f430e7a2163d8983096abb89eb0818fa5843"
+      },
+      "test": {
+        "pid": 37360,
+        "launchedAt": "2026-10-24T02:32:08.033Z",
+        "completedAt": "2026-10-24T02:33:22.603Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "07770999f2598a18ae7da9b8767925d2f557e742cfb377e8d6d0740b6fe26f94"
+      },
+      "total": 4,
+      "failed": 0,
+      "passed": 4,
+      "seconds": 74.53,
+      "projectFiles": 2815,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "85ad80b3610ba6fbc437f4ce97430f024e001ce00b099023842854a2d810a635",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    }
+  ],
+  "regression": {
+    "exactSchemaLexemesAndBindingsAccepted": true,
+    "changedSchemaRejected": true,
+    "changedRemoteBindingRevisionRejected": true,
+    "extraOrMissingToolRejected": true,
+    "nameOnlyCatalogueRejected": true,
+    "actualSdkReadAndCodingChildrenStillPass": true,
+    "inProcessDynamicEngineStillPasses": true
+  },
+  "implementation": {
+    "duplicateLocalVerifierRemoved": true,
+    "actualDiscoveryComparedToCapturedPreset": true,
+    "planningToolsNotNewlyGranted": true
+  },
+  "retainedInitialFailure": {
+    "sourcePatchSha256": "0c426420f3cdf769a292f00d170217fec07bb22e6de23c96688405fcb194d0d6",
+    "passed": 4,
+    "failed": 1,
+    "ctestLogSha256": "64c3c9a7dd3df082fc0ed84a12e9312743464c3fbb35863eae1a75dca4b547dd",
+    "observation": "Actual factory fixture used a name-only synthetic catalogue. Real-workspace fixtures now capture native schemas; the name-only form is retained as an explicit rejection test."
+  },
+  "automaticNestedProcessEnrollment": false,
+  "productionFactoryNestedResumeEnabled": false,
+  "fullNativeSuiteRun": false,
+  "installed64Unchanged": true,
+  "fullGoalComplete": false
+}

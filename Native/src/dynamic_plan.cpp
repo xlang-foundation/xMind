@@ -8,6 +8,14 @@
 #include <set>
 
 namespace agentflow {
+void verify_dynamic_child_catalogue(const std::vector<ModelToolDefinition>& actual,const std::string& bindings,const DynamicPlanCapabilities& caps,const DynamicPresetCapability& preset){
+    using Json=nlohmann::json;
+    const auto sealed=Json::parse(caps.tool_catalog_json);Json expected={{"tools",Json::array()}};
+    const std::set<std::string> allowed(preset.tools.begin(),preset.tools.end());
+    for(const auto& definition:sealed.at("tools"))if(allowed.contains(definition.at("name").get<std::string>()))expected["tools"].push_back(definition);
+    if(expected["tools"].size()!=allowed.size()||Json::parse(seal_dynamic_tool_catalogue(actual,bindings))!=expected)
+        throw DynamicPlanUnavailable("Actual child catalogue differs from its sealed native preset");
+}
 std::vector<std::string> dynamic_preset_tools(const DynamicPresetCapability& preset,const std::vector<ModelToolDefinition>& offered){
     if(preset.revision!=1||(preset.id!="workspace.inspect"&&preset.id!="workspace.coding")||preset.readonly!=(preset.id=="workspace.inspect"))throw DynamicPlanUnavailable("Unsupported native preset boundary");
     const std::set<std::string> readonly{"read_file","list_files","search_files","find_files","glob_files","read_repository_instructions","list_skills","load_skill"};

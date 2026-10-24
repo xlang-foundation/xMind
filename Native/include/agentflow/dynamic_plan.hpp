@@ -40,6 +40,9 @@ private:
 DynamicPlanDecision inspect_dynamic_plan(const DynamicPlanRecord& observed);
 DynamicPreparedNode prepare_dynamic_node(const DynamicPlanRecord& observed,const std::string& label);
 std::string dynamic_plan_report(const DynamicPlanRecord& observed);
+// Exact preset intersection shared by local and process child construction.
+void verify_dynamic_child_catalogue(const std::vector<ModelToolDefinition>& actual,
+    const std::string& approval_bindings_json,const DynamicPlanCapabilities&,const DynamicPresetCapability&);
 // Model-visible definitions expose registered agent/human tasks and exact
 // schema-bound deterministic, MCP and synchronous process tool nodes. This
 // function grants no authority; execution rechecks the frozen root bindings.

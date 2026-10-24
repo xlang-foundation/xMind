@@ -1,3 +1,22 @@
+## Process children verify the same sealed catalogue — 2026-10-23
+
+Native process child construction now verifies actual leaf tools, exact schema
+text and approval bindings against the captured preset before worker launch.
+The in-process runner uses the same helper; its old private duplicate is removed.
+Changed schemas/binding revisions, extra/missing tools and name-only catalogues
+reject without granting another capability.
+
+The initial actual-factory fixture exposed its synthetic name-only catalogue.
+Real-workspace fixtures now capture native definitions; the incomplete form
+remains an explicit rejection case. Dynamic-plan/context/pool/ledger5 pass
+in47.31s; repository/engine/graph/production-RPC4 pass in74.53s against the
+same source patch and binary. Actual SDK read/coding children remain checked.
+All input/binary file sets and hashes are unchanged.
+[Receipt and retained initial failure](evidence/sealed-process-child-catalogue-20261023.json).
+
+No nested planning tool is newly offered. Automatic nested process enrollment,
+factory resume and full172 remain open; installed64 is unchanged.
+
 ## Replacement SDK child adopts its accepted paused call — 2026-10-23
 
 Planning adoption now admits an exact typed dynamic child as well as the root.
