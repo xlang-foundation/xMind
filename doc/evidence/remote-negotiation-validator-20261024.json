@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-24T15:01:43.958Z",
+  "gate": {
+    "recordedAt": "2026-10-24T15:01:18.752Z",
+    "sourceParent": "5e1035e17cc6b1eebfe8d1602783bddb00abbc10",
+    "sourcePatchSha256": "f291a7e1f6e6e69b120e609ceb1c056a50b3f58dea7644aad42ec9b81c5c311f",
+    "build": {
+      "pid": 13752,
+      "launchedAt": "2026-10-24T15:01:01.874Z",
+      "completedAt": "2026-10-24T15:01:13.189Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a53fd4500fdf92626e84b4fdf813e98d07f15a4641da4ab9a3081c0ca09d03a2"
+    },
+    "test": {
+      "pid": 4912,
+      "launchedAt": "2026-10-24T15:01:15.933Z",
+      "completedAt": "2026-10-24T15:01:16.109Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8b838faa3a278c38a3480ce9eed91e9bb5c7742f036aba8b7af5d5725afcb7b5"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.14,
+    "projectFiles": 2825,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 138,
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Standalone C++ proposed-v1 negotiation response validator; positive pinned/first-contact grants, 58 malformed/incompatible peer-response refusals, future-version refusal and invalid local requirements.",
+  "nativeInventory": 174,
+  "fullInventoryRun": false,
+  "networkRequests": 0,
+  "authenticationProven": false,
+  "transportImplemented": false,
+  "persistenceImplemented": false,
+  "remoteProfileActivationEnabled": false,
+  "productionBackendLinkedToNewComponent": false,
+  "installed71Unchanged": true,
+  "productionBinaryMatchesInstalled71": true,
+  "goalComplete": false
+}

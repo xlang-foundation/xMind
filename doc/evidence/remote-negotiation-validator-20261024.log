@@ -1,0 +1,19 @@
+Start testing: Oct 24 08:01 Pacific Daylight Time
+----------------------------------------------------------
+4/174 Testing: native_remote_negotiation_contract
+4/174 Test: native_remote_negotiation_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_negotiation_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_negotiation_contract" start time: Oct 24 08:01 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native proposed remote negotiation validates pinned identity, exact offered versions/capabilities, expiry, authorized scope shape and bounded duplicate-free JSON; 58 malformed/incompatible responses rejected. No transport, authentication, persistence or remote activation claimed.
+<end of output>
+Test time =   0.12 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_negotiation_contract" end time: Oct 24 08:01 Pacific Daylight Time
+"native_remote_negotiation_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 24 08:01 Pacific Daylight Time

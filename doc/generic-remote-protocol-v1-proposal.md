@@ -1,6 +1,8 @@
 # Generic remote connection v1 proposal
 
-Status: proposed for architecture review, not implemented or deployed. This is
+Status: proposed for architecture review, not deployed. The bounded native
+negotiation-response validator is implemented as a standalone connector
+component; transport/authentication and runtime activation remain unimplemented. This is
 an OSS client/worker contract proposal. It makes no claim about any existing
 Nexus endpoint, authentication system, database or scheduler. An existing public
 server contract, if supplied, must be reconciled before implementation.
@@ -75,6 +77,16 @@ scope entries are opaque server-owned IDs with explicit permitted actions.
 The server chooses one offered version and must satisfy every required
 capability. Empty scopes, expired grants, malformed fields, a mismatched pin or
 unsupported version refuse activation. Capabilities never grant permission.
+
+The v1 response validator accepts only protocol1. Capability versions match
+exactly; a higher version is not assumed compatible. `expires_at` is a positive
+signed64-bit Unix UTC second strictly later than the supplied current time.
+Each authorized scope is exactly `{id, actions}`, with a nonempty action list.
+Identifiers/action/capability names use1..256 ASCII letters, digits, `_`, `-`,
+`.` or `:`. Limit responses to64KiB,128 scopes,64 actions per scope and128
+capabilities; reject duplicate keys, scope IDs/actions, unexpected fields and
+excessive nesting. Error text does not echo peer-provided values. These are
+proposed schema bounds, not assertions about an existing server.
 
 The local captured identity retains existing `connection_id`,
 `profile_revision`, `server_id`, `protocol_version` and `backend_generation`.
