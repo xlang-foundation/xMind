@@ -104,3 +104,7 @@ Actual SDK dynamic children now plan a native read and consume its report throug
 ## 2026-10-23 production nested human lifecycle
 
 The full production factory now has actual SDK evidence for child-owned human pause/reopen/resume in four read/coding and plain/counted cases. Original child identity, accepted reports, exact history and four model charges survive replacement worker generations. Focused regression5/5 (49.19s) and lifecycle group5/5 (15.37s) pass on the same frozen patch/binary. See [receipt](../doc/evidence/production-nested-human-20261023.json). Inventory173 is not a full-suite pass; installed64 is unchanged. Repeated/deeper lifecycle, recovery, full-suite and remaining product requirements remain open.
+
+## 2026-10-23 complete173 qualification remains failed
+
+Actual source84965636 complete inventory finishes172/173 in777.91s; the rust-analyzer workspace-text restore assertion fails. Worker ledger and nested human lifecycle pass within that run. The original failure remains authoritative; a diagnostic-only assertion and focused warm2/2 result do not qualify the full build. [Receipt and inventory](../doc/evidence/native-delivery-84965636-full-20261023.json). Installed64 remains unchanged. Hosted ed8e8dd2 separately fails169/170 on the ledger45-second wrapper; no CI-green claim.

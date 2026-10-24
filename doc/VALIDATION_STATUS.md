@@ -1,3 +1,22 @@
+## Complete173 gate retains a real language-server failure — 2026-10-23
+
+Source84965636 builds successfully and completes the actual173-contract
+inventory:172 pass, one fails, in777.91s. Worker ledger41.48s and the new
+production nested human contract5.71s pass inside this complete run. The
+real rust-analyzer contract fails55.06s at workspace-text restoration.
+All source/SDK/library/dependency/binary file sets and hashes are unchanged.
+[Complete failed receipt and inventory](evidence/native-delivery-84965636-full-20261023.json).
+
+The original assertion did not retain HTTP status/body, so the cause is
+unresolved. Its diagnostic-only replacement preserves that information on
+failure. A focused warm run passes2/2 in3.63s; that does not repair or qualify
+the failed full run. No new package/install; installed64 remains unchanged.
+
+Separately, hosted ed8e8dd2 run40054765780 finishes169/170 in736.38s.
+The ledger wrapper kills its process at45.10s after completing five named
+phases and entering restricted-catalogues. No individual IPC latency or
+crash cause is established. [Hosted receipt](evidence/hosted-native-ed8e8dd2-20261023.json).
+
 ## Production child-owned human pause and resume — 2026-10-23
 
 A separate production factory contract now proves four read/coding parent and

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "source": "ed8e8dd2",
+  "runId": 40054765780,
+  "jobId": 120756771205,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40054765780",
+  "conclusion": "failure",
+  "passed": 169,
+  "total": 170,
+  "seconds": 736.38,
+  "failure": {
+    "contract": "native_agent_worker_ledger_contract",
+    "seconds": 45.1,
+    "killed": true,
+    "signal": "SIGTERM",
+    "lastPhase": "restricted-catalogues",
+    "completedPhaseMilliseconds": {
+      "planning-admission": 13292,
+      "paused-child-drain": 3192,
+      "main-process-planning": 5260,
+      "main-planning-delegation": 17935,
+      "planned-read-permissions": 3722
+    }
+  },
+  "officialLogSha256": "1b94d6eb4271cdd07706b058c3b39388753fdde03ddff5204aef2999afbb9d77",
+  "scope": "Official hosted run; one wrapper timeout is not evidence of a specific slow IPC call or crash. No rerun/cancellation/deadline change requested."
+}

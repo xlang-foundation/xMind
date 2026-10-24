@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "scope": "Complete native173 inventory on84965636; terminal failure172/173. Diagnostic-only assertion improves future failing HTTP response evidence; focused warm pass does not qualify the failed complete run.",
+  "full": {
+    "recordedAt": "2026-10-24T03:48:37.388Z",
+    "sourceParent": "849656363a859aee53641cea7ad3bbff7ef77aec",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 34012,
+      "launchedAt": "2026-10-24T03:27:26.484Z",
+      "completedAt": "2026-10-24T03:35:34.190Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "bf45e7c02ecda9b0ce9e7841083b3468d1b2ad1a4fcd24718729d96012dfd2c0"
+    },
+    "test": {
+      "pid": 13640,
+      "launchedAt": "2026-10-24T03:35:36.818Z",
+      "completedAt": "2026-10-24T03:48:34.750Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "8ebd48b7c1f8e16703d33ddcbfe04e72b0b285a3a2eee3cadec6faaf3e1f8ab1"
+    },
+    "total": 173,
+    "failed": 1,
+    "passed": 172,
+    "seconds": 777.91,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "diagnostic": {
+    "recordedAt": "2026-10-24T03:49:53.769Z",
+    "sourceParent": "849656363a859aee53641cea7ad3bbff7ef77aec",
+    "sourcePatchSha256": "32eded2cefdb6050bd95f31519e695d46dce3d49cce18c26437085c426a2f5e4",
+    "build": {
+      "pid": 29980,
+      "launchedAt": "2026-10-24T03:49:29.028Z",
+      "completedAt": "2026-10-24T03:49:44.599Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "56c56af58eb0094cd3aa9b072fa1d46640d99b20b52b6071551c670a95a080e8"
+    },
+    "test": {
+      "pid": 6800,
+      "launchedAt": "2026-10-24T03:49:47.286Z",
+      "completedAt": "2026-10-24T03:49:50.955Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "04671d019b88d93b4a67762b000f27b35087e507293349497de28e63ed8e2d0a"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 3.63,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "failedContract": "native_language_server_rust_analyzer_contract",
+  "observedFailure": "Restoring the workspace file text must remove the unsaved symbol without changing the file",
+  "failureSeconds": 55.06,
+  "rustLogs": {
+    "rust-2390952144.log": "4f097ddacfdf84e6f72c065936c34645704c4609fdfd0a6056ee012b88065624",
+    "rust-3756105836.log": "0f23713ed8551629644974d7a3c8b4b9d119f81a9948efb6cfe4498561204b88"
+  },
+  "limitations": [
+    "The original full-run assertion did not retain HTTP status/body, so it does not establish stale symbols versus transport/protocol error.",
+    "Focused warm2/2 in3.63s did not reproduce the failure and is not a fix or complete-suite pass.",
+    "No retry, deadline widening, package or installation was used to conceal the full-run failure.",
+    "Installed0.1.64 and protected user state remain unchanged; goal remains incomplete."
+  ]
+}
