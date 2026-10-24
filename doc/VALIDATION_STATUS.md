@@ -1,3 +1,19 @@
+## Actual captured context-enabled graph resume — 2026-10-23
+
+The existing contextual graph-engine contract now performs its successful
+close/reopen continuation through a captured connection HTTP handle. It checks
+exact binding identity, stale checkpoint refusal without ledger mutation, same
+owner completion, one new closed segment using the original remaining allowance,
+and unchanged twelve model charges/two child runs. Native1/1 passes in1.60s
+with source/SDK/libraries/dependencies/binaries and file sets unchanged.
+[Receipt](evidence/captured-context-resume-20261023.json).
+
+This resolves the positive enabled-context HTTP resume evidence gap from the
+previous checkpoint. Separate-process SDK control dispatch, complete current
+native qualification, graph streams, remaining routing, remote/enrollment,
+deeper recovery and rendered VS Code retain their own requirements. Installed64
+is unchanged.
+
 ## Captured graph human input and resume dispatch — 2026-10-23
 
 Graphs.Input, TreeInput and Resume now use captured native connection subobjects.

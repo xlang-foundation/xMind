@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual context-enabled captured HTTP graph resume after backend close/reopen.",
+  "gate": {
+    "recordedAt": "2026-10-24T04:46:51.034Z",
+    "sourceParent": "b39a7685e85b06747761cd8c45ea42061c4fb054",
+    "sourcePatchSha256": "a9bfa5ebdba30fa0b7b23b887d30574a7af57851a77d81ceecc17af69709b8a6",
+    "build": {
+      "pid": 15312,
+      "launchedAt": "2026-10-24T04:46:27.824Z",
+      "completedAt": "2026-10-24T04:46:44.038Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "fda3fd7af19484ed3e5cb9d0b0edb0bf63aaac1efabd9bace46f72246b7e330a"
+    },
+    "test": {
+      "pid": 37572,
+      "launchedAt": "2026-10-24T04:46:46.741Z",
+      "completedAt": "2026-10-24T04:46:48.378Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9fac689e540272cdc9a7dc0d2d6c6c75cc10b1cfaa4aab12ad3cd346f5127e9a"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 1.6,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "68747eb56084484eaed8b062f70e768b1b01dc175b03b86695cb8b795f9971fb",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "checks": [
+    "Original paused graph and binding identity retained",
+    "Captured stale checkpoint refuses without changing closed budget revision",
+    "Original ready owner completes through captured resume",
+    "Exactly one new active segment closes with original remaining allowance",
+    "Twelve existing model charges and two original children remain unchanged",
+    "Original history joins once without fabricated usage"
+  ],
+  "limits": "Synthetic provider/count/compaction replies; real native engine, transports, file reads and xlang3 SQLite. Focused acceptance only; current full-native Rust failure, remote enrollment, deeper recovery and rendered VS Code remain open. Installed64 unchanged."
+}
