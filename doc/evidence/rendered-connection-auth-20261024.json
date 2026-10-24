@@ -1,0 +1,198 @@
+{
+  "native": {
+    "passed": true,
+    "scope": "Actual hidden browser Settings through native HTTP and verified TLS refusal; no trusted positive HTTP or remote routing claim",
+    "nativeSha256": "cf441f05018b543749175a7b7727cd8fca5845116ed7800f01a1a4efbe41dabf",
+    "routes": [
+      {
+        "path": "/v1/connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections/capabilities",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections/authentication",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections/authenticate",
+        "method": "POST",
+        "status": 502
+      },
+      {
+        "path": "/v1/connections/capabilities",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections/authentication",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections/capabilities",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/v1/connections/authentication",
+        "method": "POST",
+        "status": 200
+      }
+    ],
+    "catalog": {
+      "active_id": "local",
+      "profiles": [
+        {
+          "authenticated": true,
+          "command_routing": true,
+          "id": "local",
+          "kind": "local",
+          "name": "Local",
+          "origin": "",
+          "revision": 1,
+          "status": "connected"
+        },
+        {
+          "authenticated": false,
+          "command_routing": false,
+          "id": "nexus-b54522aa-3d69-416e-b3cc-b3946b76d43f",
+          "kind": "nexus",
+          "name": "Local TLS validation",
+          "origin": "https://127.0.0.1:58064",
+          "revision": 1,
+          "status": "not_connected"
+        }
+      ],
+      "revision": 2
+    },
+    "status": {
+      "command_routing": false,
+      "connection_id": "nexus-b54522aa-3d69-416e-b3cc-b3946b76d43f",
+      "credential_revision": 0,
+      "expires_at": null,
+      "profile_revision": 1,
+      "protocol_version": null,
+      "server_id": null,
+      "state": "absent"
+    },
+    "tls": {
+      "tcpConnections": 1,
+      "tlsConnections": 1,
+      "tlsFailures": 0
+    },
+    "remoteHttpRequests": {},
+    "modelRequests": 0,
+    "terminal": {
+      "code": null,
+      "signal": "SIGTERM"
+    },
+    "ownedBackendExited": true,
+    "sourceHashesUnchanged": true,
+    "paidInference": false,
+    "cpythonExecuted": false,
+    "installed": false
+  },
+  "rendered": {
+    "hiddenBrowserTab": 42,
+    "realSaveButtonWorked": true,
+    "credentialLengthAfterSubmit": 0,
+    "credentialEcho": false,
+    "credentialLengthAfterClose": 0,
+    "reloadedSavedProfile": true,
+    "reloadedActiveConnection": "Local",
+    "statusAfterExplicitRecheck": "No stored sign-in",
+    "authenticateAttempts": 1,
+    "formIdsUnique": true
+  },
+  "clients": {
+    "sourceRevision": "17fba962ef145a07c3f75355b4c8cdf13269c017",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 495,
+      "browser": 176
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 495,
+      "passed": 495,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 176,
+      "passed": 176,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "fix": "Unique runtime-connection-form ID prevents shared Settings submit handler from binding the browser Connect dialog. Regression uses a real submit-button click and verifies unique IDs.",
+  "originalFailure": {
+    "screenshotSha256": "c940833ad7e6653652c359e282d9082aee4b35285468254875e055da9b8d3c39",
+    "retirement": {
+      "pid": 35072,
+      "parentPid": 19712,
+      "identityVerified": true,
+      "imageVerified": true,
+      "parent": {
+        "ExecutablePath": "C:\\Program Files\\nodejs\\node.exe",
+        "CommandLine": "\"C:\\Program Files\\nodejs\\node.exe\" .agentflow/render-connection-auth-v3.mjs",
+        "CreationDate": "/Date(1792862828518)/"
+      },
+      "reason": "Rendered duplicate form ID blocks metadata save; no authentication/model task dispatched",
+      "retired": true
+    },
+    "authenticationAttempts": 0,
+    "modelTasks": 0
+  },
+  "launchFixtureCorrection": "Initial harness lacked required --model-tools supported; both early launches exited before database/readiness. No model/tool task replayed.",
+  "scope": "Actual hidden IAB Settings, metadata save, status, one native HTTP authentication attempt with verified TLS refusal, password clearing and browser reload. Not positive HTTP authentication, remote execution or rendered VS Code acceptance.",
+  "installedVersionUnchanged": "0.1.72"
+}

@@ -696,7 +696,7 @@ function showConnectionAuthentication(message){
 }
 settings.addEventListener('close',()=>{for(const input of settings.querySelectorAll('[data-connection-credential]'))input.value='';});
 byId('connections-refresh').onclick=()=>api.postMessage({type:'connections-refresh'});
-byId('connection-form').onsubmit=event=>{event.preventDefault();const name=byId('connection-name').value.trim(),origin=byId('connection-origin').value.trim();if(!name||!origin)return;const identity=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;byId('connection-add').disabled=true;byId('connections-status').textContent='Saving Nexus address…';api.postMessage({type:'connection-save',id:'nexus-'+identity,name,origin});};
+byId('runtime-connection-form').onsubmit=event=>{event.preventDefault();const name=byId('connection-name').value.trim(),origin=byId('connection-origin').value.trim();if(!name||!origin)return;const identity=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;byId('connection-add').disabled=true;byId('connections-status').textContent='Saving Nexus address…';api.postMessage({type:'connection-save',id:'nexus-'+identity,name,origin});};
 function renderMcpSettings(message){
   const list=byId('mcp-servers');list.replaceChildren();byId('mcp-refresh').disabled=!!message.busy;
   byId('mcp-status').textContent=message.error||(!message.available?'MCP sign-in is unavailable on this backend.':message.servers.length?'':'No MCP servers configured.');
