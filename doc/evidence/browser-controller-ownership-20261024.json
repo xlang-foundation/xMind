@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-24T23:35:47.845Z",
+  "originalHosted": {
+    "source": "f11370fc",
+    "run": 40137661232,
+    "job": 121008852749,
+    "overall": "failure",
+    "nativeContracts": {
+      "passed": 177,
+      "failed": 0,
+      "seconds": 586.28
+    },
+    "failedStep": "Verify browser view and native runtime separation",
+    "error": "This connection context was closed. Reconnect before admitting new work.",
+    "location": "views/browser/tests/native-contract.mjs:79",
+    "originalJobLogSha256": "b4f322801f9693c048297ca878558e3876f9e8518dd14e45031d22e4d9cd4759",
+    "artifact": {
+      "id": 12579073106,
+      "name": "native-windows-evidence-f11370fc0edbc5b29f89ea9a816e44af75523f6d",
+      "bytes": 4632757,
+      "sha256": "2092a0974339cfb6ef43502c4c9483574ce5217efa5aeeb3069db160a2c3855d"
+    }
+  },
+  "change": "Give each nested/human BrowserController its own BackendClient; retain the independent observation client across controller disposal. Production close-on-dispose unchanged.",
+  "focused": {
+    "began": "2026-10-24T23:35:33.651Z",
+    "ended": "2026-10-24T23:35:36.723Z",
+    "pid": 4580,
+    "exitCode": 0,
+    "passed": true,
+    "frontendAndNativeBytesUnchanged": true,
+    "paidInference": false,
+    "rendered": false
+  },
+  "installedProductChangedByThisFix": false,
+  "fullHostedAcceptance": false
+}
