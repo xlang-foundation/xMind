@@ -33,4 +33,5 @@ struct RemoteNegotiatedGrant {
 };
 RemoteNegotiatedGrant validate_remote_negotiation(std::string_view response,const RemoteNegotiationRequirements& requirements);
 std::string encode_remote_negotiation_request(const RemoteNegotiationRequirements& requirements);
+std::string encode_remote_negotiated_grant(const RemoteNegotiatedGrant& grant);
 }

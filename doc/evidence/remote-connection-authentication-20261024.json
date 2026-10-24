@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-10-24T15:14:25.984Z",
+  "gate": {
+    "recordedAt": "2026-10-24T15:14:09.150Z",
+    "sourceParent": "3d8e659781c2f8d4f10d9074a6fd92ff36818b0c",
+    "sourcePatchSha256": "dcfa143affd16c79de47e6f07604192f4793132b9845a59d87a3ee76f75f6a62",
+    "build": {
+      "pid": 1532,
+      "launchedAt": "2026-10-24T15:13:09.856Z",
+      "completedAt": "2026-10-24T15:14:02.422Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c5a645e918bfa08c242a4a396cc4a27903531982451605a0de93c43b748698ca"
+    },
+    "test": {
+      "pid": 20428,
+      "launchedAt": "2026-10-24T15:14:05.257Z",
+      "completedAt": "2026-10-24T15:14:06.379Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3568b45326e7c08262fc355e57dfa1f81f921463acd6191cf8200993e16e0689"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 1.08,
+    "projectFiles": 2834,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 141,
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Five focused contracts. New authentication service fixture injects nine controlled exchange outcomes into actual encrypted xlang3/SQLite publication; existing native HTTP peer remains a separate contract.",
+  "service": {
+    "defaultExchange": "native verified-HTTPS negotiation client",
+    "requiredCapabilities": {
+      "sessions": 1,
+      "runs": 1,
+      "events": 1,
+      "receipts": 1
+    },
+    "sameOriginRenewalRetainsServerPin": true,
+    "failedExchangeWrongServerMissingCapabilityAndCancellationPreservePriorRecord": true,
+    "staleCredentialAndProfileRefuseBeforeExchange": true,
+    "profileEditDuringExchangeRefusesPublication": true,
+    "changedOriginExplicitAuthenticationVerified": true,
+    "databaseReopenRetainsCredentialRevision": 4,
+    "receiptContainsNoCredentialOrGrantId": true
+  },
+  "actualTrustedTlsToStorageTested": false,
+  "serviceFixtureUsesInjectedExchange": true,
+  "registeredSdkExposure": false,
+  "remoteRoutingOrSelectionEnabled": false,
+  "nativeInventory": 177,
+  "fullNativeSuiteRun": false,
+  "productionExecutableRebuilt": false,
+  "installed71Unchanged": true,
+  "goalComplete": false
+}

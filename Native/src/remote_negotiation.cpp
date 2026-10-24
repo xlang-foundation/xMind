@@ -23,6 +23,7 @@ RemoteNegotiationError::RemoteNegotiationError(RemoteNegotiationFailure reason):
     reason==RemoteNegotiationFailure::missing_capability?"Required remote capability unavailable":
     reason==RemoteNegotiationFailure::expired_grant?"Remote grant expired":"Malformed remote negotiation response"),reason_(reason){}
 std::string encode_remote_negotiation_request(const RemoteNegotiationRequirements& requirements){requirements_valid(requirements);return Json{{"supported_versions",requirements.supported_versions},{"required_capabilities",requirements.required_capabilities},{"expected_server_id",requirements.expected_server_id?Json(*requirements.expected_server_id):Json(nullptr)}}.dump();}
+std::string encode_remote_negotiated_grant(const RemoteNegotiatedGrant& grant){Json scopes=Json::array();for(const auto& scope:grant.authorized_scopes)scopes.push_back({{"id",scope.id},{"actions",scope.actions}});return Json{{"server_id",grant.server_id},{"protocol_version",grant.protocol_version},{"grant_id",grant.grant_id},{"grant_revision",grant.grant_revision},{"expires_at",grant.expires_at},{"authorized_scopes",scopes},{"capabilities",grant.capabilities}}.dump();}
 RemoteNegotiatedGrant validate_remote_negotiation(std::string_view response,const RemoteNegotiationRequirements& requirements){
     requirements_valid(requirements);if(response.empty()||response.size()>65536)fail();
     try{
