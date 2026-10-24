@@ -1,3 +1,11 @@
+## Complete current-source native qualification — 2026-10-24
+
+Source1a06b833/Nativec5e772e3 with SDK8c7972d1 passes the complete177-contract native inventory in801.61s after all targets rebuild. All2834 project/16 SDK/1870 pure-library/30 SDK-runtime/18598 dependency/141 binary hashes and file sets remain unchanged. The sixteen-case nested-human contract passes30.55s; standard SDK authentication capability/refusal/lifetime and the separate-process IPC regression pass in the same complete run. No CPython or paid inference occurs. [Full receipt](evidence/native-delivery-1a06b833-full-20261024.json), [original log](evidence/native-delivery-1a06b833-full-ctest.log), [inventory](evidence/native-delivery-1a06b833-full-inventory.json).
+
+Hosted source1a06b833 run40106639011 is now in progress, not green. Older source738367ad run40101406811 completed168/171 in923.89s with failures in graph runner (actual30-second PowerShell timeout, effect uncertain), worker model transport (70-second wrapper) and worker ledger (planning owner expired). Original job-log SHA/summary and observed failure scope are retained in the [hosted failure receipt](evidence/hosted-native-738367ad-failure-20261024.json). The local177 pass does not repair or qualify that hosted failure.
+
+Installed71 remains Native51340e18. No current-source package, coding/handoff or installation claim is made. Trusted TLS-to-storage and positive separate-process authentication, remote binding/enrollment, rendered VS Code and broader recovery remain open. The complete objective stays active.
+
 ## Registered xlang3 SDK remote authentication — 2026-10-24
 
 Development Nativec5e772e3 registers Connections.Capabilities/Authenticate through the existing xmind root. Capabilities advertises remote_authentication:1; Authenticate takes a standard SDK dictionary, uses the configured HTTPS origin and returns a bounded receipt with command_routing:false and no credential/grant ID. Unknown fields/caller-selected endpoint, malformed revisions/credential/timeout, Local/missing profiles and retired owners refuse without credential publication. All seven focused contracts pass in8.62s, including existing separate-process IPC regression. [Receipt](evidence/remote-auth-sdk-20261024.json), [original log](evidence/remote-auth-sdk-20261024.log), [API](connection-profiles.md).

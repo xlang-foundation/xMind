@@ -1,5 +1,7 @@
 # xMind delivery acceptance audit
 
+Development source1a06b833/Nativec5e772e3 now passes the complete local177 contracts in801.61s with its full closure unchanged. This includes the registered SDK authentication foundation and sixteen-case nested-worker lifecycle. Current-source hosted CI is in progress; older738367ad hosted168/171 failure remains separate. Current-source packaging/coding/handoff and installed71 remain separate checkpoints. [Current full qualification](../doc/evidence/native-delivery-1a06b833-full-20261024.json).
+
 ## Current installed71 checkpoint
 
 Installed0.1.71 uses source738367ad/Native51340e18 and SDK8c7972d1. Full173 passes in788.31s with the complete frozen closure unchanged, including all eight one/two-pause nested-worker cases. Clients493/175 retain unchanged-source acceptance. Fresh packaged CLI and named-process browser read/edit/Node4, two approvals, eight-message reload and managed70-to71 handoff pass. All2442 installed files/2398 runtime files, other-extension entries, five protected user-state roots, exact70 backup and zero-model installed read/history smoke verify. Preserve every completed task; never replay it.
@@ -79,7 +81,7 @@ Latest installed checkpoint:0.1.71. [Full native evidence](../doc/evidence/nativ
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | Source738367ad passes173/173 in788.31s with complete frozen closure unchanged; installed71 matches Native51340e18. | Hosted results and each rendered acceptance retain separate scopes. |
+| Shared native C++ backend, embedded xlang3 and SQLite | Development source1a06b833 passes177/177 in801.61s with complete frozen closure unchanged. Installed71 remains separately qualified source738367ad/Native51340e18. | Hosted results and each rendered acceptance retain separate scopes. |
 | Standard xlang3 root/subobjects and process workers | Actual SDK service methods, captured identity/lifetime contracts and named process-agent browser coding pass. | Authenticated generic remote binding/enrollment remains incomplete. |
 | Browser coding | Packaged71 actual New/agent selection/Send/read/edit/Node4, two approvals and exact eight-message reload pass. | Provider/context/commands have separate controlled-peer receipts. Current-build external-browser acceptance remains separate. |
 | CLI coding | Packaged71 fresh is-positive read/edit/Node4, two approvals, four controlled calls and history/watch pass. Installed managed read smoke passes. | Never replay completed tasks; broader workflow cases retain their individual scopes. |

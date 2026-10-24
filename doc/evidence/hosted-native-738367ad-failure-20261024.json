@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-24T15:39:48.401Z",
+  "source": "738367ad",
+  "runId": 40101406811,
+  "jobId": 120897522716,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40101406811",
+  "jobLogSha256": "fd69f1e985b77d5e2f34225220af5587b7a16bbf59734f05cc01f85b7fb93ecf",
+  "jobLogBytes": 724652,
+  "nativeResult": {
+    "total": 171,
+    "passed": 168,
+    "failed": 3,
+    "seconds": 923.89
+  },
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 38.82,
+      "observed": "Actual PowerShell process timed out after30039ms under30000ms budget; only script_entered observed, effect uncertain and process tree retired."
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "seconds": 70.36,
+      "observed": "Failed at70-second wrapper; exact terminal child details need separate analysis."
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "seconds": 20.39,
+      "observed": "Planning owner expired; retained hosted fixture."
+    }
+  ],
+  "fixedByLocalPass": false,
+  "originalSummaryLines": [
+    "2026-10-24T14:41:59.5333187Z 100% tests passed, 0 tests failed out of 4",
+    "2026-10-24T14:41:59.5336054Z Total Test time (real) =   4.62 sec",
+    "2026-10-24T14:42:25.3009051Z 100% tests passed, 0 tests failed out of 1",
+    "2026-10-24T14:42:25.3012312Z Total Test time (real) =  25.72 sec",
+    "2026-10-24T15:05:09.1180484Z 100% tests passed, 0 tests failed out of 1",
+    "2026-10-24T15:05:09.1183406Z Total Test time (real) =  67.60 sec",
+    "2026-10-24T15:23:17.6892103Z  50/171 Test  #50: native_graph_runner_contract ..........................***Failed   38.82 sec",
+    "2026-10-24T15:26:55.0111847Z  86/171 Test  #86: native_agent_worker_model_rpc_contract ................***Failed   70.36 sec",
+    "2026-10-24T15:28:04.3716450Z  92/171 Test  #92: native_agent_worker_ledger_contract ...................***Failed   20.39 sec",
+    "2026-10-24T15:35:52.2732785Z 98% tests passed, 3 tests failed out of 171",
+    "2026-10-24T15:35:52.2735550Z Total Test time (real) = 923.89 sec",
+    "2026-10-24T15:35:52.2739554Z \t 50 - native_graph_runner_contract (Failed)",
+    "2026-10-24T15:35:52.2740519Z \t 86 - native_agent_worker_model_rpc_contract (Failed)",
+    "2026-10-24T15:35:52.2741311Z \t 92 - native_agent_worker_ledger_contract (Failed)"
+  ],
+  "currentRun": {
+    "source": "1a06b833",
+    "id": 40106639011,
+    "name": "Native Windows contracts",
+    "status": "in_progress",
+    "conclusion": null,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/40106639011"
+  },
+  "local177PassIsSeparate": true
+}

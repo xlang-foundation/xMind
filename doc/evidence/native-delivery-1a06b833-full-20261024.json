@@ -1,0 +1,97 @@
+{
+  "recordedAt": "2026-10-24T15:37:50.104Z",
+  "sourceParent": "1a06b8332ea96e662406656b0dda5772c3ee108d",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 7440,
+    "launchedAt": "2026-10-24T15:22:33.570Z",
+    "completedAt": "2026-10-24T15:24:23.013Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "82860d0d9982277f020503a1981f646a57dea71d59cba43b54ce21ddd3e604f6"
+  },
+  "test": {
+    "pid": 29160,
+    "launchedAt": "2026-10-24T15:24:25.689Z",
+    "completedAt": "2026-10-24T15:37:47.340Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "83aee6050265334c4dccede0db44672c61ae5af92e047783ce81691408901d0a"
+  },
+  "total": 177,
+  "failed": 0,
+  "passed": 177,
+  "seconds": 801.61,
+  "projectFiles": 2834,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 141,
+  "nativeSha256": "c5e772e3974af51e9867ee8281be367f3d8e920c25d7d14a02386b2c3ba22d34",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Complete local 177-contract inventory after all native targets rebuilt on source1a06b833; unchanged inputs and file sets, no package or install.",
+  "hostedSnapshot": {
+    "observedAt": "2026-10-24T15:38:01.398Z",
+    "runs": [
+      {
+        "source": "1a06b833",
+        "id": 40106639011,
+        "name": "Native Windows contracts",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40106639011"
+      },
+      {
+        "source": "738367ad",
+        "id": 40101406811,
+        "name": "Native Windows contracts",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40101406811"
+      }
+    ]
+  },
+  "olderHostedFailure": {
+    "source": "738367ad",
+    "runId": 40101406811,
+    "jobId": 120897522716,
+    "url": "https://github.com/xlang-foundation/xMind/actions/runs/40101406811",
+    "jobLogSha256": "fd69f1e985b77d5e2f34225220af5587b7a16bbf59734f05cc01f85b7fb93ecf",
+    "jobLogBytes": 724652,
+    "nativeResult": {
+      "total": 171,
+      "passed": 168,
+      "failed": 3,
+      "seconds": 923.89
+    },
+    "failures": [
+      {
+        "test": "native_graph_runner_contract",
+        "seconds": 38.82,
+        "observed": "Actual PowerShell process timed out after30039ms under30000ms budget; only script_entered observed, effect uncertain and process tree retired."
+      },
+      {
+        "test": "native_agent_worker_model_rpc_contract",
+        "seconds": 70.36,
+        "observed": "Failed at70-second wrapper; exact terminal child details need separate analysis."
+      },
+      {
+        "test": "native_agent_worker_ledger_contract",
+        "seconds": 20.39,
+        "observed": "Planning owner expired; retained hosted fixture."
+      }
+    ],
+    "fixedByLocalPass": false
+  },
+  "installed71Unchanged": true,
+  "packagedCodingAndHandoffOnThisSourceVerified": false,
+  "remoteTrustedTlsAndPositiveSdkAuthenticationVerified": false,
+  "renderedVsCodeVerified": false,
+  "goalComplete": false
+}
