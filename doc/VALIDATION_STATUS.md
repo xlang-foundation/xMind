@@ -1,3 +1,24 @@
+## Installed0.1.65 preservation and managed smoke pass — 2026-10-23
+
+Installed65 uses full173-qualified nativec68485ce/c1f1aa6b and SDK8c7972d1.
+All2442 installed files (2440 raw payload files plus package metadata/manifest),
+2398 runtime files and exact package bytes validate. The old64 installation has
+an exact2442-file backup;62 and older backups are retained. Other extension
+registry entries and five protected user-state roots have identical before/
+after file sets and hashes. No visible editor/browser window was opened.
+
+Managed64-to65 fixture rejects upgrade during the original paused graph, resumes
+it once and upgrades only when idle, preserving profile, endpoint and exact
+history. Fresh installed managed read/reuse/history smoke completes with0models.
+Both fixture owners are physically retired after exact birth/image checks.
+NEVER replay managed session7e0172a370da207641057d0ebc961874/roota43fb91aa8d9448771c7035aa446f03f
+or smoke sessioncf8ad86c1ce8a7bb031e4fb283c7f08b/roote5ec2f18422cf757ce2936d31ca8915c.
+[Installation, smoke and managed handoff receipt](evidence/installed-0.1.65-c68485ce-20261023.json).
+
+Rendered VS Code coding/context, hosted native qualification, remaining captured
+API/stream/remote enrollment and deeper/repeated recovery remain unfinished.
+No universal recovery or unexplained prior RPC cancellation fix is claimed.
+
 ## Candidate0.1.65 CLI and rendered browser coding pass — 2026-10-23
 
 The byte-verified candidate completes fresh CLI and hidden in-app browser coding
