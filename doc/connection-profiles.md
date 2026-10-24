@@ -306,3 +306,17 @@ the latest page and the sequence of its first message to request earlier records
 The command returns the native binding/session/page receipt; credentials remain
 in the existing XMIND_AUTH_TOKEN environment flow. Independent CLI processes
 verify pagination, cross-session cursor refusal and authentication.
+
+## Captured run-history paging
+
+The registered binding returns its existing `Runs()` subobject. `Runs.History(session_id, run_id, before_sequence, count)` reads through that captured native connection. Zero `before_sequence` starts at the newest page; count is1–1000. Results contain `binding`, `session_id`, `run_id`, chronological `messages`, `has_more` and `next_before` (`msg_N` or null). Use numeric N as the next before sequence. The cursor must belong to the selected run history, and the run must belong to the supplied session.
+
+This preserves repository semantics: an ordinary root reads its live session conversation, including later session messages; an admitted child reads its execution-owned history. A root history is not an immutable transcript of just one prompt. Reads create no inference or effects. Profile metadata changes retain existing captured reads; backend retirement fences them.
+
+The SDK CLI uses the same method:
+
+```text
+xmind ipc --endpoint lrpc:PORT connections run-history local PROFILE_REV SESSION RUN 0 100
+```
+
+The HTTP adapter is `POST /v1/connection-bindings/{binding}/sessions/{session}/runs/{run}/history` with `{ "before_sequence": 0, "count": 100 }`. Owner and origin-bound view handles remain principal-scoped. Its response matches the SDK page. [Focused evidence](evidence/captured-run-history-20261023.json) does not qualify a complete suite, installation or authenticated remote execution.

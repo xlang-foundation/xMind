@@ -40,6 +40,16 @@ BoundConnectionMessages CapturedLocalConnection::messages(std::string session,st
 }
 BoundConnectionSession CapturedLocalConnection::create_session(std::string id,std::string title)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();return {identity_,context_->store.create_session(id,title).get()};}
 BoundConnectionRun CapturedLocalConnection::open_run(std::string id)const{auto life=context_->enter();return {identity_,context_->store.run(id).get()};}
+BoundConnectionRunMessages CapturedLocalConnection::run_messages(std::string session,std::string run,std::int64_t before,std::int64_t count)const{
+    auto life=context_->enter();
+    if(before<0||before>9007199254740991LL||count<1||count>1000)throw std::invalid_argument("Invalid captured run message page");
+    if(context_->store.run(run).get().session_id!=session)throw Conflict("Run history differs from its captured session");
+    auto messages=context_->store.run_history(run).get();
+    if(before){const auto boundary=std::find_if(messages.begin(),messages.end(),[&](const auto& message){return message.sequence==before;});if(boundary==messages.end())throw Conflict("Message cursor belongs to another captured run");messages.erase(boundary,messages.end());}
+    MessagePage page;const auto retained=std::min(messages.size(),static_cast<std::size_t>(count));
+    if(messages.size()>retained){messages.erase(messages.begin(),messages.end()-retained);page.next_before_sequence=messages.front().sequence;}
+    page.messages=std::move(messages);return {identity_,std::move(session),std::move(run),std::move(page)};
+}
 Run submit_local_connection_run(RunExecutor& executor,ConnectionRunRequest request){
     if(!request.files.empty()&&(!request.workspace||request.workspace->revision<1))throw std::invalid_argument("File attachments require the observed workspace membership revision");
     if(request.workspace)validate_workspace_admission(*request.workspace,executor.execution_workspace());

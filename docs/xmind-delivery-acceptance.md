@@ -108,3 +108,7 @@ The full production factory now has actual SDK evidence for child-owned human pa
 ## 2026-10-23 complete173 qualification remains failed
 
 Actual source84965636 complete inventory finishes172/173 in777.91s; the rust-analyzer workspace-text restore assertion fails. Worker ledger and nested human lifecycle pass within that run. The original failure remains authoritative; a diagnostic-only assertion and focused warm2/2 result do not qualify the full build. [Receipt and inventory](../doc/evidence/native-delivery-84965636-full-20261023.json). Installed64 remains unchanged. Hosted ed8e8dd2 separately fails169/170 on the ledger45-second wrapper; no CI-green claim.
+
+## 2026-10-23 captured run-history adapter
+
+Captured native SDK/HTTP/CLI run-history paging now passes3/3 in3.66s with adjacent agent HTTP/local-view2/2 in72.02s. Root live-session and child execution-owned semantics remain unchanged; foreign ownership/cursors and retired SDK objects reject. [Receipt](../doc/evidence/captured-run-history-20261023.json). Remaining client graph/model/command/stream and remote/enrollment work stays open; prior full173 failure and rendered VS Code remain unqualified. Installed64 is unchanged.

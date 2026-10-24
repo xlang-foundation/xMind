@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured native Runs.History(session,run,before_sequence,count), shared SDK/HTTP values and SDK CLI adapter; paged reads validate native session/run ownership and cursor membership.",
+  "gates": [
+    {
+      "recordedAt": "2026-10-24T03:59:45.036Z",
+      "sourceParent": "24be14dec1172068edcc6187b0ed3999e35886bc",
+      "sourcePatchSha256": "dc1054ff575781606d7001399575f8978133366d51cb497a926f6eea12ae08ed",
+      "build": {
+        "pid": 21852,
+        "launchedAt": "2026-10-24T03:59:18.128Z",
+        "completedAt": "2026-10-24T03:59:36.248Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "8eb0c117476f33be224813a8e02ced012cabd9282dff24f6fe298cc345a2f0a2"
+      },
+      "test": {
+        "pid": 1100,
+        "launchedAt": "2026-10-24T03:59:38.787Z",
+        "completedAt": "2026-10-24T03:59:42.488Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "dba22d80035628f77e106f7845ae21e7931de01f4978dbb8dced7f039d53b1bf"
+      },
+      "total": 3,
+      "failed": 0,
+      "passed": 3,
+      "seconds": 3.66,
+      "projectFiles": 2816,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "897e841f911229a616bedfcfccba253c8ac2fee5c693333f6f5fa1fea0b27404",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    {
+      "recordedAt": "2026-10-24T04:02:29.299Z",
+      "sourceParent": "24be14dec1172068edcc6187b0ed3999e35886bc",
+      "sourcePatchSha256": "dc1054ff575781606d7001399575f8978133366d51cb497a926f6eea12ae08ed",
+      "build": {
+        "pid": 28472,
+        "launchedAt": "2026-10-24T04:00:45.359Z",
+        "completedAt": "2026-10-24T04:01:12.251Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "8bbc4c335a66d239954181a2ffd72311c5373b7b98ce9a7761d540d745038c96"
+      },
+      "test": {
+        "pid": 19152,
+        "launchedAt": "2026-10-24T04:01:14.704Z",
+        "completedAt": "2026-10-24T04:02:26.754Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "6da9ca484e0c23a633d4152c3b0d537b224e60ed29bc8be825eac44d9aa8beeb"
+      },
+      "total": 2,
+      "failed": 0,
+      "passed": 2,
+      "seconds": 72.02,
+      "projectFiles": 2816,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "897e841f911229a616bedfcfccba253c8ac2fee5c693333f6f5fa1fea0b27404",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    }
+  ],
+  "verified": [
+    "Actual separate-process SDK returns canonical completed-run context in ordered pages without inference replay.",
+    "Root history preserves existing live-session semantics, including a later session prompt.",
+    "HTTP owner and origin-bound view observe the same native page; view cannot borrow the owner binding.",
+    "Foreign session/cursor, invalid count and malformed CLI integer reject.",
+    "Captured reads retain identity after profile rename; retired SDK objects refuse.",
+    "Adjacent agent HTTP and local-view lifecycle contracts pass."
+  ],
+  "retainedFailures": [
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/captured-run-history-initial",
+      "sourcePatchSha256": "e137f69d2f96d89350541fe29787a16e3affc53e1828ac0b1f3b9fc83a3f3624",
+      "passed": 1,
+      "total": 3,
+      "ctestLogSha256": "ab492e7e5b32259e555dd0663b5420fce69e25c9071bdf70439c23c8b61806f5",
+      "scope": "Fixture assumptions about empty/frozen root history contradicted existing repository live-session semantics; final fixtures verify those semantics explicitly."
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/captured-run-history-qualified",
+      "sourcePatchSha256": "a4cd61fc7898dcd13fe66a4344387f7cebd24e679233d58acc10c3ffd3b1c62d",
+      "passed": 2,
+      "total": 3,
+      "ctestLogSha256": "f6dd3f66d3b8af2a4899435dd0ea11e0afd8938a46fa83e7b740f66d44ab37a3",
+      "scope": "Fixture assumptions about empty/frozen root history contradicted existing repository live-session semantics; final fixtures verify those semantics explicitly."
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/captured-run-history-view-regression",
+      "scope": "Private gate named nonexistent executable targets; no tests ran. Correct target gate is separately retained.",
+      "buildFailure": {
+        "pid": 36688,
+        "launchedAt": "2026-10-24T04:00:10.948Z",
+        "completedAt": "2026-10-24T04:00:17.740Z",
+        "exitCode": 1,
+        "signal": null,
+        "logSha256": "46c3e17e176533ec4f9f1afb152828ec360aa287fd0cc7e14da0d2bac2e31d55"
+      }
+    }
+  ],
+  "limitations": [
+    "Focused3/3 and2/2 are not a full173 pass. The prior full rust-analyzer failure remains unresolved.",
+    "No new package/install; installed0.1.64 and protected state remain unchanged.",
+    "Graph/model/command/stream client adapters, authenticated remote binding and enrollment still need completion.",
+    "No rendered VS Code acceptance or paid provider execution is claimed."
+  ]
+}

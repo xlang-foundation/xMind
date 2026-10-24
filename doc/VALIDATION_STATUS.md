@@ -1,3 +1,22 @@
+## Captured run-history reads across SDK, HTTP and CLI — 2026-10-23
+
+The captured Runs subobject now exposes paged History(session, run, before,
+count). Its native implementation verifies session/run ownership and cursor
+membership, retains captured connection identity and fences retired backends.
+HTTP and CLI use the same native contract and ordinary SDK values.
+
+Existing repository semantics are preserved: ordinary root history follows
+the live session conversation; child history remains execution-owned. Initial
+fixture assumptions about empty/frozen root history were wrong and are retained
+as failed evidence. Final fixtures explicitly verify live root context, paging,
+foreign cursor/session refusal, HTTP/SDK equality, origin-bound view isolation,
+profile-edit retained reads and retirement refusal. SDK/lifetime/HTTP3 pass
+in3.66s; adjacent agent HTTP/local-view2 pass in72.02s on the same frozen
+patch and binary. [Receipt](evidence/captured-run-history-20261023.json).
+
+No full173 claim or new installation. Prior full-run rust-analyzer failure,
+remaining client/protocol work and rendered VS Code acceptance stay open.
+
 ## Fresh Rust project does not reproduce the restore failure — 2026-10-23
 
 A newly created isolated project copies exactly Cargo.toml, Cargo.lock and

@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 130: native_agent_http_contract
+1/2 Test #130: native_agent_http_contract .......   Passed    9.19 sec
+    Start 148: native_local_view_contract
+2/2 Test #148: native_local_view_contract .......   Passed   62.81 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  72.02 sec
