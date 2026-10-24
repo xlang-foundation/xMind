@@ -1,0 +1,241 @@
+{
+  "recordedAt": "2026-10-24T12:59:00.899Z",
+  "native": {
+    "recordedAt": "2026-10-24T12:34:19.369Z",
+    "sourceParent": "c3bbdf216784ead2a4860837593bf47093685336",
+    "sourcePatchSha256": "d94bcafd257023a9720a92493718a71ad1b6940061058fb21d41200c5a0c8d70",
+    "build": {
+      "pid": 35568,
+      "launchedAt": "2026-10-24T12:31:39.480Z",
+      "completedAt": "2026-10-24T12:33:36.313Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "723021b1cf0aef066076d7c0bd79066ff396277579e7a5357b93a5fa6c6a2d17"
+    },
+    "test": {
+      "pid": 24908,
+      "launchedAt": "2026-10-24T12:33:38.982Z",
+      "completedAt": "2026-10-24T12:34:16.682Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "933d7b29af13f55b7c58be50392c9cb2514131c470c35fd1bef8c80f19c12e17"
+    },
+    "total": 8,
+    "failed": 0,
+    "passed": 8,
+    "seconds": 37.66,
+    "projectFiles": 2819,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": {
+    "sourceRevision": "c3bbdf216784ead2a4860837593bf47093685336",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 493,
+      "browser": 175
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 493,
+      "passed": 493,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 175,
+      "passed": 175,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "frontendChangesAfterNativeGate": [
+    "Tools/ci-views.mjs",
+    "views/browser/browser.js",
+    "views/browser/server.mjs",
+    "views/browser/tests/controller.test.cjs",
+    "views/browser/tests/server.test.cjs"
+  ],
+  "nativeProductionAndNativeTestsMatchFocusedGate": true,
+  "service": "SessionInboxService owns durable recovery, enqueue/cancel and one dispatcher shared by HTTP and registered Inbox(session) SDK objects. The HTTP scheduler implementation was removed.",
+  "lifetime": "Startup validates token/exclusive root ownership before dispatcher activation. Captured objects fence retired generations; HTTP adapters borrowing an external owner do not stop its queue. Native owner leases cover queue mutation/dispatch.",
+  "sdkSameProcessLifecycle": "Real SQLite input/claim/transition with controlled executor: exact duplicates retain original ID/run, mismatches/foreign sessions/stale membership refuse, cancelled identities cannot be reused, restart dispatches once without an HTTP listener even after a borrowing adapter stops; retired objects refuse.",
+  "independentProcesses": "Distinct xmind.exe clients perform actual native enqueue/list/cancel behind a paused graph. Origin-bound native HTTP verifies the same session scope, stale enqueue refusal and original scoped cancellation after profile metadata changes.",
+  "actualModelDispatch": "Existing native agent HTTP contract exercises real controlled model queue/file dispatch and durable restart through the shared service.",
+  "rendered": {
+    "passed": true,
+    "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+    "fullNativeQualification": false,
+    "installed": false,
+    "session": "ui-inbox-session",
+    "graphRoot": "ui-inbox-blocker",
+    "queuedInput": "inbox_5be170d8be44482eb035ca72333ef881",
+    "skillSelection": {
+      "binding": {
+        "backend_generation": "3181657211-1345733711-2764018264-3979890942-",
+        "connection_id": "local",
+        "kind": "local",
+        "profile_revision": 1,
+        "protocol_version": 1,
+        "server_id": "local-2851a9f39c7c597fbf0511d6442ecc6f8881fe85bf1a75ca3cd24fdc20c24270"
+      },
+      "skills": {
+        "authority_id": "662b3223ce2b97362acc6bd0b1a7cf92",
+        "editable": true,
+        "ids": [
+          "queue-reader"
+        ],
+        "manual_ids": [
+          "queue-reader"
+        ],
+        "revision": 1,
+        "session_id": "ui-inbox-session",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000aec80d0000000000"
+      }
+    },
+    "proof": {
+      "passed": true,
+      "session": "ui-inbox-session",
+      "graphRoot": "ui-inbox-blocker",
+      "skill": "queue-reader",
+      "skillAttachClicks": 1,
+      "queueSends": 1,
+      "cancelClicks": 1,
+      "queueReloadRestored": true,
+      "skillReloadRestored": true,
+      "visibleAcknowledgement": "Queued prompt cancelled.",
+      "tabClosed": true,
+      "screenshots": [
+        "queued.png",
+        "cancelled.png"
+      ]
+    },
+    "enqueue": {
+      "path": "/v1/connection-bindings/a978d2893d4389e7f3762e6d283713cf/sessions/ui-inbox-session/inbox",
+      "method": "POST",
+      "status": 202,
+      "body": {
+        "id": "inbox_5be170d8be44482eb035ca72333ef881",
+        "content": "Cancel this fresh queued metadata input before it runs."
+      },
+      "receipt": {
+        "binding": {
+          "backend_generation": "3181657211-1345733711-2764018264-3979890942-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-2851a9f39c7c597fbf0511d6442ecc6f8881fe85bf1a75ca3cd24fdc20c24270"
+        },
+        "item": {
+          "content": "Cancel this fresh queued metadata input before it runs.",
+          "created_ms": 1792846471103,
+          "id": "inbox_5be170d8be44482eb035ca72333ef881",
+          "session_id": "ui-inbox-session",
+          "state": "queued"
+        },
+        "session_id": "ui-inbox-session"
+      }
+    },
+    "cancel": {
+      "path": "/v1/connection-bindings/2da4888cff7744c6e8cd17a97d7d55b5/sessions/ui-inbox-session/inbox/inbox_5be170d8be44482eb035ca72333ef881",
+      "method": "DELETE",
+      "status": 200,
+      "receipt": {
+        "binding": {
+          "backend_generation": "3181657211-1345733711-2764018264-3979890942-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-2851a9f39c7c597fbf0511d6442ecc6f8881fe85bf1a75ca3cd24fdc20c24270"
+        },
+        "cancellation_requested": true,
+        "id": "inbox_5be170d8be44482eb035ca72333ef881",
+        "session_id": "ui-inbox-session"
+      }
+    },
+    "routes": 103,
+    "modelRequests": 0,
+    "sourceAssetsSdkAndNativeBytesUnchanged": true,
+    "scope": "Actual hidden browser skill selection, queued input/reload/cancel through captured native HTTP; paused graph prevents queued dispatch. SDK-only dispatch is covered separately.",
+    "neverReplay": true,
+    "ownedBackendExited": true
+  },
+  "retainedStartupFailure": {
+    "proof": {
+      "passed": false,
+      "reason": "Conversation restoration reports Agent executor is unavailable and hides skills despite successful native skill reads.",
+      "promptSubmitted": false
+    },
+    "retirement": {
+      "pid": 38508,
+      "identity": {
+        "process_birth": "134373190764883677",
+        "process_id": 38508
+      },
+      "birthAndImageVerified": true,
+      "exitObserved": false,
+      "modelRequests": 0
+    },
+    "note": "The raw exitObserved flag used exitCode rather than the signal result. The harness awaited the exit event; exact PID38508 was subsequently confirmed absent. Original receipt remains unmodified."
+  },
+  "retainedLostReply": {
+    "proof": {
+      "passed": false,
+      "reason": "Observer parsed an empty DELETE Buffer as JSON after native cancellation committed; live UI reconciled to empty queue without retry.",
+      "queueReloadRestored": true,
+      "skillReloadRestored": true,
+      "cancelClicks": 1,
+      "cancellationEffectObserved": true,
+      "queueEmptyAfterReadback": true,
+      "tabClosed": true
+    },
+    "retirement": {
+      "pid": 33152,
+      "identity": {
+        "process_birth": "134373197958200188",
+        "process_id": 33152
+      },
+      "birthAndImageVerified": true,
+      "exitObserved": true,
+      "modelRequests": 0
+    },
+    "input": "inbox_bfa65308fe18453f931b23b65cb3ebf2",
+    "cause": "The observer parsed empty DELETE Buffer text as JSON after native cancellation committed. UI readback reconciled to empty queue without a second cancel. Observer corrected in a fresh fixture; product cancellation was not retried."
+  },
+  "readOnlyHealthDiagnostic": "Fixture-only direct backend was healthy with provider_profile_admission:false and graph_provider_profile_admission:false. No model requests.",
+  "neverReplayFixtureNamespaces": [
+    ".agentflow/rendered-inbox-skills",
+    ".agentflow/rendered-inbox-skills-fixed",
+    ".agentflow/rendered-inbox-skills-verified"
+  ],
+  "installedVersion": "0.1.69",
+  "installedUnchanged": true,
+  "fullNativeQualification": false,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "remaining": "Current full-suite/package qualification, positive actual-provider/rendered context compaction, rendered setup/commands and VS Code coding, generic authenticated remote/enrollment and deeper recovery/scheduling remain open."
+}

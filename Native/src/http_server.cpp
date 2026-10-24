@@ -1,6 +1,7 @@
 #include "connection_binding_values.hpp"
 #include "connection_run_input.hpp"
 #include "agentflow/http_server.hpp"
+#include "agentflow/session_inbox.hpp"
 #include <initializer_list>
 #include <functional>
 #include <utility>
@@ -162,7 +163,7 @@ void validate_mcp_input_response(const McpInputRequest& pending,const std::strin
     }else if(response.size()!=1)throw std::invalid_argument("Declined MCP response cannot contain content");
 }
 Json encode(const Session& value) {Json result={{"id",value.id},{"title",value.title}};if(!value.parent_id.empty()){result["parent_id"]=value.parent_id;result["fork"]={{"session_id",value.parent_id},{"boundary_type",value.fork_boundary_type},{"message_id",value.fork_boundary_sequence?Json("msg_"+std::to_string(*value.fork_boundary_sequence)):Json(nullptr)}};}return result;}
-Json encode(const SessionInboxItem& value){Json result={{"id",value.id},{"session_id",value.session_id},{"content",value.content},{"state",value.state},{"created_ms",value.created_ms}};const auto files=Json::parse(value.files_json);if(!files.empty())result["files"]=files;if(!value.workspace_id.empty()){result["workspace_id"]=value.workspace_id;result["workspace_revision"]=value.workspace_revision;}if(!value.run_id.empty())result["run_id"]=value.run_id;return result;}
+Json encode(const SessionInboxItem& value){return connection_values::inbox_item(value);}
 Json encode(const Run& value) {Json result={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
     {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};if(!value.provider_context_json.empty())result["provider_context"]=Json::parse(value.provider_context_json);return result;}
 Json encode(const OwnedChildRecord& value){Json result={{"run",encode(value.run)},{"kind",value.kind},{"batch_id",value.batch_id},{"task_id",value.task_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};if(value.kind=="dynamic_agent"||value.kind=="dynamic_tool"){result["plan_id"]=value.plan_id;result["node_label"]=value.node_label;result["claim_id"]=value.claim_id;result["definition_revision"]=value.definition_revision;result["claim_revision"]=value.claim_revision;}return result;}
@@ -305,11 +306,7 @@ struct HttpServer::Impl {
     std::atomic<bool> stopping=false;
     ProviderSetup* provider_setup=nullptr;
     ProviderProfileSetup* provider_profiles=nullptr;
-    struct QueuedSession {std::uint64_t generation=0;std::chrono::steady_clock::time_point retry_at{};};
-    std::mutex queued_sessions_mutex;
-    std::condition_variable_any queued_sessions_changed;
-    std::map<std::string,QueuedSession> queued_sessions;
-    std::jthread queued_session_dispatcher;
+    std::shared_ptr<SessionInboxService> inbox_service;bool owns_inbox=false;
     std::mutex vcs_initialization_mutex;
     std::atomic<std::size_t> active_streams=0;
     struct StreamLease {
@@ -326,70 +323,7 @@ struct HttpServer::Impl {
 #endif
         return true;
     }
-    void enqueue_session_for_dispatch(const std::string& session,std::chrono::milliseconds delay=std::chrono::milliseconds::zero()){
-        {std::lock_guard lock(queued_sessions_mutex);auto& entry=queued_sessions[session];++entry.generation;entry.retry_at=std::chrono::steady_clock::now()+delay;}
-        queued_sessions_changed.notify_one();
-    }
-    bool session_has_active_root(const std::string& session){
-        const auto active=[](RunState state){return state==RunState::queued||state==RunState::running||state==RunState::paused;};
-        const auto runs=persistence.runs(session).get();return std::any_of(runs.begin(),runs.end(),[&](const auto& run){return run.parent_id.empty()&&active(run.state);});
-    }
-    void recover_queued_sessions(){
-        try{for(const auto& session:persistence.sessions().get()){
-            const auto items=persistence.session_inbox(session.id).get();
-            if(std::any_of(items.begin(),items.end(),[](const auto& item){return item.state=="queued";}))enqueue_session_for_dispatch(session.id);
-        }}catch(...){}
-    }
-    void dispatch_queued_session(const std::string& session,std::uint64_t generation){
-        bool retained=false;
-        try{
-            const auto items=persistence.session_inbox(session).get();
-            const auto next=std::find_if(items.begin(),items.end(),[](const auto& item){return item.state=="queued";});
-            if(next==items.end()){
-                std::lock_guard lock(queued_sessions_mutex);const auto found=queued_sessions.find(session);if(found!=queued_sessions.end()&&found->second.generation==generation)queued_sessions.erase(found);return;
-            }
-            retained=true;
-            if(stopping||!executor||!executor->healthy()||!executor->available()||!owner_admission_open())throw RunUnavailable("Queued session execution is not currently available");
-            std::optional<ProviderProfileAdmission> profile;std::string model;
-            if(executor->supports_profile_admission()){
-                if(!provider_profiles)throw RunUnavailable("Queued session provider binding is unavailable");
-                const auto state=provider_profiles->configuration();if(state.active.empty())throw RunUnavailable("Select a provider profile before queued input can run");
-                profile=ProviderProfileAdmission{state.active,state.revision};
-            }else if(provider_setup){
-                const auto state=provider_setup->configuration();if(!state.configured)throw RunUnavailable("Configure a provider before queued input can run");model=state.model;
-            }
-            std::vector<PromptFileAttachment> files;std::optional<WorkspaceAdmission> workspace;
-            if(!next->files_json.empty()&&next->files_json!="[]"){
-                const auto metadata=executor->execution_workspace();const auto membership=executor->workspace_membership_snapshot();
-                if(!metadata.configured||metadata.workspace_id!=next->workspace_id||membership.workspace_id!=next->workspace_id||membership.revision!=next->workspace_revision)throw Conflict("Queued attachments belong to a workspace membership that has changed");
-                workspace=WorkspaceAdmission{metadata.workspace_id,metadata.authority_id,next->workspace_revision};
-                files=prompt_file_attachments(Json{{"files",Json::parse(next->files_json)}});
-            }
-            executor->submit_queued(new_id(),session,next->content,model,next->id,workspace,profile,std::move(files));
-        }catch(...){}
-        if(retained){std::lock_guard lock(queued_sessions_mutex);const auto found=queued_sessions.find(session);if(found!=queued_sessions.end()&&found->second.generation==generation)found->second.retry_at=std::chrono::steady_clock::now()+std::chrono::milliseconds(500);}
-    }
-    void start_queued_session_dispatcher(){
-        if(!executor||queued_session_dispatcher.joinable())return;
-        queued_session_dispatcher=std::jthread([this](std::stop_token stop){
-            recover_queued_sessions();
-            while(!stop.stop_requested()){
-                std::vector<std::pair<std::string,std::uint64_t>> due;
-                {
-                    std::unique_lock lock(queued_sessions_mutex);
-                    queued_sessions_changed.wait_for(lock,stop,std::chrono::milliseconds(500),[&]{
-                        const auto now=std::chrono::steady_clock::now();return std::any_of(queued_sessions.begin(),queued_sessions.end(),[&](const auto& value){return value.second.retry_at<=now;});
-                    });
-                    if(stop.stop_requested())return;
-                    const auto now=std::chrono::steady_clock::now();for(const auto& [session,pending]:queued_sessions)if(pending.retry_at<=now)due.emplace_back(session,pending.generation);
-                }
-                for(const auto& [session,generation]:due){if(stop.stop_requested())return;dispatch_queued_session(session,generation);}
-            }
-        });
-    }
-    void stop_queued_session_dispatcher(){
-        if(!queued_session_dispatcher.joinable())return;queued_session_dispatcher.request_stop();queued_sessions_changed.notify_all();queued_session_dispatcher.join();
-    }
+
 #if defined(_WIN32)
     ConnectionRunRequest connection_run_request(const Request& request){
         if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Run admission does not accept query parameters");
@@ -471,7 +405,10 @@ struct HttpServer::Impl {
 #endif
 #if defined(_WIN32)
         view_sessions=std::make_unique<ViewSessions>(store,token);
-        if(bindings)connection_binding_service=bindings;else{owned_connection_bindings=std::make_unique<LocalConnectionBindings>(store,execution,owner,graphs);connection_binding_service=owned_connection_bindings.get();}
+        if(bindings){connection_binding_service=bindings;inbox_service=bindings->inbox_service();}else{inbox_service=std::make_shared<SessionInboxService>(store,execution,owner,setup,profile_setup);owns_inbox=true;owned_connection_bindings=std::make_unique<LocalConnectionBindings>(store,execution,owner,graphs,inbox_service);connection_binding_service=owned_connection_bindings.get();}
+#endif
+#if !defined(_WIN32)
+        inbox_service=std::make_shared<SessionInboxService>(store,execution,owner,setup,profile_setup);owns_inbox=true;
 #endif
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -509,9 +446,10 @@ struct HttpServer::Impl {
             const bool view_session_delete=request.method=="DELETE"&&std::regex_match(request.path,view_session_delete_route);
             const bool view_permission_grant_delete=request.method=="DELETE"&&std::regex_match(request.path,std::regex(R"(^/v1/(connection-bindings/[0-9a-f]{32}/)?sessions/[A-Za-z0-9_-]+/permission-grants/[A-Za-z0-9_-]+$)"));
             const bool view_session_fork=request.method=="POST"&&std::regex_match(request.path,session_fork_route);
+            const bool view_inbox=((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/inbox$)")))||(request.method=="DELETE"&&std::regex_match(request.path,std::regex(R"(^/v1/(connection-bindings/[0-9a-f]{32}/)?sessions/[A-Za-z0-9_-]+/inbox/[A-Za-z0-9_-]+$)")));
             const bool view_context_skills=(request.method=="GET"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/(skills|sessions/[A-Za-z0-9_-]+/(skills|context(/requests/[A-Za-z0-9_-]+)?))$)")))||(request.method=="POST"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/(skills|context/compact)$)")));
             const bool view_agents=(request.method=="GET"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/agents(/[A-Za-z0-9_.-]{1,64})?$)")))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/agent$)")));
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||nested_graph_input||view_agents||view_context_skills||(stream&&request.method=="GET")||view_session_delete||view_binding_delete||view_permission_grant_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||nested_graph_input||view_agents||view_context_skills||view_inbox||(stream&&request.method=="GET")||view_session_delete||view_binding_delete||view_permission_grant_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -655,7 +593,7 @@ struct HttpServer::Impl {
             auto health=Json{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"graph_tree_human_input",graphs&&graphs->supports_graph_tree_human_input()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()},{"mcp_elicitation",true}};
 #if defined(_WIN32)
             health["local_connection_admission"]=1;
-            health["local_connection_operations"]=1;health["local_connection_permission_catalog"]=1;health["local_connection_permission_reply"]=1;health["local_connection_tree_stream"]=1;health["local_connection_run_stream"]=1;health["local_connection_models"]=1;health["local_connection_agents"]=1;health["local_connection_context"]=1;health["local_connection_skills"]=1;health["local_connection_providers"]=1;health["local_connection_provider_setup"]=1;health["local_connection_model_selection"]=1;health["local_connection_commands"]=1;health["local_connection_workspace"]=1;health["local_connection_workspace_files"]=1;
+            health["local_connection_operations"]=1;health["local_connection_permission_catalog"]=1;health["local_connection_permission_reply"]=1;health["local_connection_tree_stream"]=1;health["local_connection_run_stream"]=1;health["local_connection_models"]=1;health["local_connection_agents"]=1;health["local_connection_context"]=1;health["local_connection_inbox"]=1;health["local_connection_skills"]=1;health["local_connection_providers"]=1;health["local_connection_provider_setup"]=1;health["local_connection_model_selection"]=1;health["local_connection_commands"]=1;health["local_connection_workspace"]=1;health["local_connection_workspace_files"]=1;
             if(graphs){health["local_connection_graph_admission"]=1;health["local_connection_graph_read"]=1;health["local_connection_graph_children"]=1;health["local_connection_graph_control"]=1;}health["local_connection_history"]=1;health["local_connection_child_history"]=1;
 #endif
             reply(response,health);
@@ -743,6 +681,9 @@ struct HttpServer::Impl {
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/graph-runs)",guard_errors([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");const auto result=connection_handle(request)->start_graph(connection_input::graph_request(body(request,{"id","session_id","graph_id","graph_revision","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"}),new_id()));reply(response,connection_values::bound(result),202);
         }));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/inbox)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Inbox does not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->inbox(identifier(request.matches[2]))));}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/inbox)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Inbox does not accept query parameters");const auto value=body(request,{"id","content","files","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"});reply(response,connection_values::bound(connection_handle(request)->enqueue_inbox(identifier(request.matches[2]),connection_input::inbox_request(value,new_id()))),202);}));
+        server.Delete(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/inbox/([A-Za-z0-9_-]+))",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||!request.body.empty())throw std::invalid_argument("Inbox cancellation does not accept parameters or a body");reply(response,connection_values::bound(connection_handle(request)->cancel_inbox(identifier(request.matches[2]),identifier(request.matches[3]))));}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/skills)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Skill catalogue does not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->skills()));}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/skills)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session skills do not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->session_skills(identifier(request.matches[2]))));}));
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/skills)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid session skill request target or size");const auto value=body(request,{"ids","expected_revision","expected_workspace_id","expected_workspace_authority_id"});reply(response,connection_values::bound(connection_handle(request)->select_session_skills(identifier(request.matches[2]),connection_input::skill_selection(value))));}));
@@ -1178,13 +1119,13 @@ struct HttpServer::Impl {
             const auto page=persistence.history_page(identifier(request.matches[1]),before,limit).get();Json messages=Json::array();for(const auto& item:page.messages)messages.push_back(encode(item));
             reply(response,{{"messages",std::move(messages)},{"has_more",page.next_before_sequence.has_value()},{"next_before",page.next_before_sequence?Json("msg_"+std::to_string(*page.next_before_sequence)):Json(nullptr)}});
         }));
-        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guarded([this](const Request& request,Response& response){if(!request.params.empty())throw std::invalid_argument("Session inbox does not accept query parameters");Json items=Json::array();for(const auto& item:persistence.session_inbox(identifier(request.matches[1])).get())items.push_back(encode(item));reply(response,{{"items",std::move(items)}});}));
-        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guarded([this](const Request& request,Response& response){const auto value=body(request,{"id","content","files","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"});const auto session=identifier(request.matches[1]);const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();const auto content=string_field(value,"content",1024*1024);const auto files=prompt_file_attachments(value);std::string workspace_id;std::int64_t workspace_revision=0;if(!files.empty()){const auto admission=workspace_admission(value);if(!admission||admission->revision<1)throw std::invalid_argument("Queued file attachments require observed workspace membership admission");if(!executor)throw RunUnavailable("Queued attachments require an opened workspace");validate_workspace_admission(*admission,executor->execution_workspace());const auto membership=executor->workspace_membership_snapshot();if(membership.workspace_id!=admission->workspace_id||membership.revision!=admission->revision)throw Conflict("Workspace membership changed while queuing file attachments");workspace_id=membership.workspace_id;workspace_revision=membership.revision;}auto files_metadata=Json::array();for(const auto& file:files)files_metadata.push_back({{"path",file.path},{"folder_id",file.folder_id},{"name",file.name}});const auto saved=persistence.enqueue_session_input(id,session,content,files_metadata.dump(),workspace_id,workspace_revision).get();reply(response,encode(saved),202);try{enqueue_session_for_dispatch(session,session_has_active_root(session)?std::chrono::milliseconds::zero():std::chrono::seconds(1));}catch(...){} }));
+        server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session inbox does not accept query parameters");Json items=Json::array();for(const auto& item:inbox_service->list(identifier(request.matches[1])))items.push_back(encode(item));reply(response,{{"items",std::move(items)}});}));
+        server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session inbox does not accept query parameters");const auto value=body(request,{"id","content","files","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"});reply(response,encode(inbox_service->enqueue(identifier(request.matches[1]),connection_input::inbox_request(value,new_id()))),202);}));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/permissions)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session permission requests do not accept query parameters");const auto session=identifier(request.matches[1]);reply(response,connection_values::permission_requests(session,AgentPermissionGrantStore(persistence).pending(session)));}));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/permission-grants)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session permission grants do not accept query parameters");const auto session=identifier(request.matches[1]);const auto snapshot=AgentPermissionGrantStore(persistence).list(session);auto result=encode(snapshot);result["session_id"]=session;reply(response,std::move(result));}));
         server.Delete(R"(/v1/sessions/([A-Za-z0-9_-]+)/permission-grants/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){if(!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Permission grant revocation exceeds limits");const auto value=body(request,{"expected_revision"});if(!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Invalid expected permission grant revision");const auto session=identifier(request.matches[1]),grant_id=identifier(request.matches[2]);auto result=encode(AgentPermissionGrantStore(persistence).revoke(session,grant_id,value["expected_revision"].get<std::int64_t>()));result["session_id"]=session;reply(response,std::move(result));}));
         server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/permissions/([A-Za-z0-9_-]+)/reply)",guarded([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Session permission reply exceeds limits");const auto value=body(request,{"decision","grant_resource"});const auto decision=string_field(value,"decision",8);if(value.contains("grant_resource")&&!value["grant_resource"].is_boolean())throw std::invalid_argument("Invalid grant_resource flag");const bool grant_resource=value.value("grant_resource",false);if((decision!="allow"&&decision!="deny")||(grant_resource&&decision!="allow"))throw std::invalid_argument("Invalid session permission reply");const auto session=identifier(request.matches[1]),operation_id=identifier(request.matches[2]);const auto operation=persistence.operation(operation_id).get();if(persistence.run(operation.spec.run_id).get().session_id!=session||operation.state!=OperationState::awaiting_approval)throw NotFound("Pending session permission request not found");reply(response,encode(AgentPermissionGrantStore(persistence).reply(session,operation_id,decision=="allow"?OperationDecision::allow:OperationDecision::deny,grant_resource)));}));
-        server.Delete(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response){if(!request.params.empty())throw std::invalid_argument("Session inbox cancellation does not accept query parameters");const auto session=identifier(request.matches[1]),input=identifier(request.matches[2]);persistence.cancel_session_input(session,input).get();response.status=204;}));
+        server.Delete(R"(/v1/sessions/([A-Za-z0-9_-]+)/inbox/([A-Za-z0-9_-]+))",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||!request.body.empty())throw std::invalid_argument("Session inbox cancellation does not accept parameters or a body");inbox_service->cancel(identifier(request.matches[1]),identifier(request.matches[2]));response.status=204;}));
         server.Get(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages/([A-Za-z0-9_-]+))",guarded([this](const Request& request,Response& response) {
             if(!request.params.empty())throw std::invalid_argument("Message lookup does not accept query parameters");
             const std::string message_id=request.matches[2];
@@ -1622,7 +1563,7 @@ struct HttpServer::Impl {
                 reply(response,{{"id",id},{"cancellation_requested",true}},202);
             }));
         }
-        start_queued_session_dispatcher();
+        inbox_service->start();
     }
 };
 HttpServer::HttpServer(PersistenceService& store,std::string token,RunExecutor* executor,EditRecoveryReader* recovery,std::vector<McpServerMetadata> configured,std::vector<ProcessProfileMetadata> profiles,AgentInstructionMetadata policy,ProviderSetup* setup,GraphExecution* graphs,ProviderProfileSetup* profile_setup,BackendOwnerControl* owner,McpOAuthSetup* oauth,PtySessions* terminals,McpResourceCatalog* resources,LocalConnectionBindings* bindings):impl_(std::make_unique<Impl>(store,std::move(token),executor,recovery,std::move(configured),std::move(profiles),policy,setup,graphs,profile_setup,owner,oauth,terminals,resources,bindings)) {}
@@ -1633,5 +1574,5 @@ int HttpServer::bind(int port) {
     if(bound<0) throw std::runtime_error("Cannot bind loopback server");impl_->port=bound;return bound;
 }
 bool HttpServer::listen() {if(impl_->port<0) throw std::logic_error("Bind before listen");return impl_->server.listen_after_bind();}
-void HttpServer::stop() {impl_->stopping=true;impl_->stop_queued_session_dispatcher();impl_->server.stop();}
+void HttpServer::stop() {impl_->stopping=true;if(impl_->owns_inbox)impl_->inbox_service->close();impl_->server.stop();}
 }

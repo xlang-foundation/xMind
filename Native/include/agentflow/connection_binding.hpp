@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/records.hpp"
+#include "agentflow/session_inbox.hpp"
 #include "agentflow/operation.hpp"
 #include "agentflow/run_executor.hpp"
 #include "agentflow/graph_service.hpp"
@@ -40,6 +41,9 @@ struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMem
 struct BoundConnectionProviderModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionProviders {ConnectionBindingIdentity binding;ProviderProfileRuntimeMetadata configuration;std::vector<ProviderProfileRouteMetadata> routes;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
+struct BoundConnectionInbox {ConnectionBindingIdentity binding;std::string session_id;std::vector<SessionInboxItem> items;};
+struct BoundConnectionInboxItem {ConnectionBindingIdentity binding;std::string session_id;SessionInboxItem item;};
+struct BoundConnectionInboxCancel {ConnectionBindingIdentity binding;std::string session_id,id;};
 struct BoundConnectionContext {ConnectionBindingIdentity binding;ContextControlSnapshot context;};
 struct BoundConnectionContextRequest {ConnectionBindingIdentity binding;std::string session_id;ContextManualStatus request;};
 struct ConnectionContextRequest {std::string id,model;std::int64_t head=0;std::optional<ProviderProfileAdmission> provider;};
@@ -122,6 +126,9 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionInbox inbox(const std::string& session)const;
+    BoundConnectionInboxItem enqueue_inbox(const std::string& session,SessionInboxRequest request)const;
+    BoundConnectionInboxCancel cancel_inbox(const std::string& session,const std::string& id)const;
     BoundConnectionContext context(const std::string& session,const std::string& model)const;
     BoundConnectionContextRequest context_request(const std::string& session,const std::string& id,const std::string& model)const;
     BoundConnectionContextRequest compact_context(const std::string& session,ConnectionContextRequest request)const;
@@ -175,7 +182,9 @@ private:
 // them before the backend's borrowed persistence/executor/control are destroyed.
 class LocalConnectionBindings {
 public:
-    LocalConnectionBindings(PersistenceService&,RunExecutor*,BackendOwnerControl* = nullptr,GraphExecution* = nullptr);
+    LocalConnectionBindings(PersistenceService&,RunExecutor*,BackendOwnerControl* = nullptr,GraphExecution* = nullptr,std::shared_ptr<SessionInboxService> = {});
+    std::shared_ptr<SessionInboxService> inbox_service()const;
+    void start();
     ~LocalConnectionBindings();
     LocalConnectionBindings(const LocalConnectionBindings&)=delete;
     LocalConnectionBindings& operator=(const LocalConnectionBindings&)=delete;

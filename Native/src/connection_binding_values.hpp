@@ -3,6 +3,10 @@
 #include "nlohmann/json.hpp"
 namespace agentflow::connection_values {
 inline nlohmann::json identity(const ConnectionBindingIdentity& value){return {{"connection_id",value.connection_id},{"profile_revision",value.profile_revision},{"server_id",value.server_id},{"backend_generation",value.backend_generation},{"protocol_version",value.protocol_version},{"kind","local"}};}
+inline nlohmann::json inbox_item(const SessionInboxItem& value){nlohmann::json result={{"id",value.id},{"session_id",value.session_id},{"content",value.content},{"state",value.state},{"created_ms",value.created_ms}};const auto files=nlohmann::json::parse(value.files_json);if(!files.empty())result["files"]=files;if(!value.workspace_id.empty()){result["workspace_id"]=value.workspace_id;result["workspace_revision"]=value.workspace_revision;}if(!value.run_id.empty())result["run_id"]=value.run_id;return result;}
+inline nlohmann::json bound(const BoundConnectionInbox& value){auto items=nlohmann::json::array();for(const auto& item:value.items)items.push_back(inbox_item(item));return {{"binding",identity(value.binding)},{"session_id",value.session_id},{"items",std::move(items)}};}
+inline nlohmann::json bound(const BoundConnectionInboxItem& value){return {{"binding",identity(value.binding)},{"session_id",value.session_id},{"item",inbox_item(value.item)}};}
+inline nlohmann::json bound(const BoundConnectionInboxCancel& value){return {{"binding",identity(value.binding)},{"session_id",value.session_id},{"id",value.id},{"cancellation_requested",true}};}
 inline nlohmann::json public_usage(const nlohmann::json& value){
     nlohmann::json result=nlohmann::json::object();if(!value.is_object())return result;
     for(const auto* field:{"input_tokens","output_tokens","total_tokens","prompt_tokens","completion_tokens","cached_tokens","reasoning_tokens","cache_read_input_tokens","cache_creation_input_tokens","promptTokenCount","candidatesTokenCount","totalTokenCount","thoughtsTokenCount","cachedContentTokenCount"})if(value.contains(field)&&value[field].is_number_integer()&&value[field]>=0&&value[field]<=9007199254740991)result[field]=value[field];

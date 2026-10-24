@@ -8,10 +8,11 @@
 namespace agentflow {
 struct LocalConnectionContext {
     PersistenceService& store;RunExecutor* executor;GraphExecution* graphs;BackendOwnerControl* owner;
-    ConnectionProfiles profiles;std::string generation;
+    ConnectionProfiles profiles;std::string generation;std::shared_ptr<SessionInboxService> inbox;
     mutable std::shared_mutex lifetime;bool active=true;
-    LocalConnectionContext(PersistenceService& persistence,RunExecutor* execution,BackendOwnerControl* control,GraphExecution* graph)
+    LocalConnectionContext(PersistenceService& persistence,RunExecutor* execution,BackendOwnerControl* control,GraphExecution* graph,std::shared_ptr<SessionInboxService> service)
         :store(persistence),executor(execution),graphs(graph?graph:dynamic_cast<GraphExecution*>(execution)),owner(control),profiles(persistence){
+        inbox=service?std::move(service):std::make_shared<SessionInboxService>(persistence,execution,control);
         if(owner)generation=owner->status().generation;
         else{std::random_device random;for(int i=0;i<4;++i)generation+=std::to_string(random())+"-";}
     }
@@ -21,12 +22,14 @@ struct LocalConnectionContext {
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("Captured connection backend retired");if(owner&&owner->status().generation!=generation)throw Conflict("Captured backend generation changed");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
 };
-LocalConnectionBindings::LocalConnectionBindings(PersistenceService& store,RunExecutor* executor,BackendOwnerControl* owner,GraphExecution* graph)
-    :context_(std::make_shared<LocalConnectionContext>(store,executor,owner,graph)){}
+LocalConnectionBindings::LocalConnectionBindings(PersistenceService& store,RunExecutor* executor,BackendOwnerControl* owner,GraphExecution* graph,std::shared_ptr<SessionInboxService> inbox)
+    :context_(std::make_shared<LocalConnectionContext>(store,executor,owner,graph,std::move(inbox))){}
+std::shared_ptr<SessionInboxService> LocalConnectionBindings::inbox_service()const{return context_->inbox;}
+void LocalConnectionBindings::start(){auto life=context_->enter();context_->inbox->start();}
 LocalConnectionBindings::~LocalConnectionBindings(){close();}
-void LocalConnectionBindings::close(){std::unique_lock lock(context_->lifetime);context_->active=false;}
+void LocalConnectionBindings::close(){{std::unique_lock lock(context_->lifetime);context_->active=false;}context_->inbox->close();}
 std::shared_ptr<CapturedLocalConnection> LocalConnectionBindings::open(std::string id,std::int64_t revision){
-    auto life=context_->enter();auto admission=context_->admit();const auto catalog=context_->profiles.load_or_initialize();
+    auto life=context_->enter();auto admission=context_->admit();context_->inbox->start();const auto catalog=context_->profiles.load_or_initialize();
     const auto selected=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[&](const auto& profile){return profile.id==id;});
     if(selected==catalog.profiles.end())throw NotFound("Connection profile not found");
     if(selected->kind!=ConnectionKind::local)throw RunUnavailable("Connection is not authenticated");
@@ -58,6 +61,9 @@ ContextManualStatus request_local_connection_context(RunExecutor& executor,const
     if(request.provider&&(request.provider->id.empty()||request.provider->id.size()>256||request.provider->id.find('\0')!=std::string::npos||request.provider->revision<0||request.provider->revision>9007199254740991LL))throw std::invalid_argument("Invalid context provider binding");
     return request.provider?executor.request_context_profile(session,request.id,"local-owner",request.head,request.model,*request.provider):executor.request_context(session,request.id,"local-owner",request.head,request.model);
 }
+BoundConnectionInbox CapturedLocalConnection::inbox(const std::string& session)const{auto life=context_->enter();return {identity_,session,context_->inbox->list(session)};}
+BoundConnectionInboxItem CapturedLocalConnection::enqueue_inbox(const std::string& session,SessionInboxRequest request)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);return {identity_,session,context_->inbox->enqueue(session,std::move(request))};}
+BoundConnectionInboxCancel CapturedLocalConnection::cancel_inbox(const std::string& session,const std::string& id)const{auto life=context_->enter();context_->inbox->cancel(session,id);return {identity_,session,id};}
 BoundConnectionContext CapturedLocalConnection::context(const std::string& session,const std::string& model)const{auto life=context_->enter();context_model(model);(void)context_->store.session(session).get();if(!context_->executor)throw RunUnavailable("Context controls are unavailable");return {identity_,context_->executor->context_status(session,model)};}
 BoundConnectionContextRequest CapturedLocalConnection::context_request(const std::string& session,const std::string& id,const std::string& model)const{auto life=context_->enter();context_model(model);if(id.empty()||id.size()>128||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::invalid_argument("Invalid context request identity");(void)context_->store.session(session).get();if(!context_->executor)throw RunUnavailable("Context controls are unavailable");return {identity_,session,context_->executor->context_request(session,id,model)};}
 BoundConnectionContextRequest CapturedLocalConnection::compact_context(const std::string& session,ConnectionContextRequest request)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();(void)context_->store.session(session).get();if(!context_->executor)throw RunUnavailable("Context controls are unavailable");return {identity_,session,request_local_connection_context(*context_->executor,session,std::move(request))};}

@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/connection_binding.hpp"
+#include "prompt_file_values.hpp"
 #include "nlohmann/json.hpp"
 #include <array>
 #include <initializer_list>
@@ -49,17 +50,7 @@ inline std::optional<WorkspaceAdmission> workspace_admission(const Json& value){
     std::int64_t revision=0;if(value.contains("expected_workspace_revision")){const auto& raw=value.at("expected_workspace_revision");if(!raw.is_number_integer()||raw<1||raw>9007199254740991LL)throw std::invalid_argument("Invalid workspace membership revision");revision=raw.get<std::int64_t>();}
     return WorkspaceAdmission{id,authority,revision};
 }
-inline std::vector<PromptFileAttachment> prompt_file_attachments(const Json& value){
-    std::vector<PromptFileAttachment> result;if(!value.contains("files"))return result;
-    const auto& files=value.at("files");if(!files.is_array()||files.size()>32)throw std::invalid_argument("Prompt files must be an array of at most 32 workspace files");
-    result.reserve(files.size());for(const auto& file:files){
-        if(!file.is_object()||file.empty()||file.size()>5)throw std::invalid_argument("Invalid prompt file attachment");
-        for(auto it=file.begin();it!=file.end();++it)if(it.key()!="path"&&it.key()!="folder_id"&&it.key()!="name"&&it.key()!="description"&&it.key()!="mention")throw std::invalid_argument("Unknown prompt file attachment field");
-        const auto field=[&](const char* key,std::size_t limit){if(!file.contains(key))return std::string{};if(!file.at(key).is_string())throw std::invalid_argument("Invalid prompt file attachment metadata");const auto text=file.at(key).get<std::string>();if(text.size()>limit||text.find('\0')!=std::string::npos)throw std::invalid_argument("Prompt file attachment metadata exceeds limits");return text;};
-        PromptFileAttachment parsed;parsed.path=field("path",4096);if(parsed.path.empty())throw std::invalid_argument("Prompt file attachment path is required");
-        parsed.folder_id=field("folder_id",256);parsed.name=field("name",512);parsed.description=field("description",4096);parsed.mention=field("mention",512);result.push_back(std::move(parsed));
-    }return result;
-}
+using prompt_input::prompt_file_attachments;
 inline std::string identifier(const std::string& value) {
     if(value.empty() || value.size()>128) throw std::invalid_argument("Invalid ID");
     for(unsigned char c:value) if(!((c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || c=='_' || c=='-')) throw std::invalid_argument("Invalid ID");
@@ -90,5 +81,9 @@ inline ConnectionContextRequest context_request(const Json& value,std::string de
 inline ConnectionSkillSelectionRequest skill_selection(const Json& value){
     if(!value.is_object()||value.size()!=4||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8||!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Skill changes require exact ids, revision and workspace authority");
     const auto workspace=workspace_admission(value);if(!workspace)throw std::invalid_argument("Skill changes require workspace authority");ConnectionSkillSelectionRequest result;result.workspace=*workspace;result.revision=value["expected_revision"].get<std::int64_t>();for(const auto& id:value["ids"]){if(!id.is_string())throw std::invalid_argument("Skill ids must be strings");result.ids.push_back(id.get<std::string>());}validate_skill_selections({result.workspace.workspace_id,result.ids,{}});return result;
+}
+inline SessionInboxRequest inbox_request(const Json& value,std::string default_id={}){
+    if(!value.is_object())throw std::invalid_argument("Invalid inbox request");for(const auto& item:value.items())if(item.key()!="id"&&item.key()!="content"&&item.key()!="files"&&item.key()!="expected_workspace_id"&&item.key()!="expected_workspace_authority_id"&&item.key()!="expected_workspace_revision")throw std::invalid_argument("Unknown inbox request field");
+    SessionInboxRequest request;request.id=identifier(value.contains("id")?string_field(value,"id",128):default_id);request.content=string_field(value,"content",1024*1024);request.files=prompt_file_attachments(value);request.workspace=workspace_admission(value);return request;
 }
 }

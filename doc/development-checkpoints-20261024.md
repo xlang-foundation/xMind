@@ -70,3 +70,7 @@ server/database/scheduler implementation remains excluded.
 ## Installed69 guidance before context/skills checkpoint (verbatim)
 
 - Installed69 Native249ce7d6/SDK8c passes full173, clients488/171, named-process browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.69-872f2585-20261024.json; NEVER replay. Remaining goal active.
+
+## Context/skills guidance before shared inbox (verbatim)
+
+- Context/skills pass native6/clients491-172; separate SDK/HTTP included. See doc/evidence/captured-context-skills-20261024.json. Installed69 preserved; full/rendered and remaining goal open. NEVER replay completed roots.

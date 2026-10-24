@@ -1,0 +1,21 @@
+✖ browser startup and capability refresh skip automatic unsupported saved-provider work (1.4513ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 75.2613
+
+✖ failing tests:
+
+test at views\browser\tests\controller.test.cjs:544:1
+✖ browser startup and capability refresh skip automatic unsupported saved-provider work (1.4513ms)
+  Error: Unsupported saved-provider catalogue
+      at Object.refresh (D:\CantorAI2026\xMind\views\browser\tests\controller.test.cjs:544:604)
+      at BrowserController.refreshCapabilities (D:\CantorAI2026\xMind\views\browser\browser.js:71:1526)
+      at async BrowserController.initialize (D:\CantorAI2026\xMind\views\browser\browser.js:72:105)
+      at async TestContext.<anonymous> (D:\CantorAI2026\xMind\views\browser\tests\controller.test.cjs:544:815)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)

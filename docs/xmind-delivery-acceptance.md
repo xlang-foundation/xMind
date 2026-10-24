@@ -72,35 +72,37 @@ Latest installed checkpoint:0.1.69. [Full native evidence](../doc/evidence/nativ
 | Single/graph agents, planning and delegation | Native173 includes nested human, ledger, planning and graph contracts. Named process-agent selection and actual coding pass in browser69. | Repeated/deeper pause segments, multibranch cancellation/recovery and multi-root production scheduling need acceptance. |
 | Providers, MCP and A2A | Native173 covers controlled provider/profile wire/history, MCP SDK/network/OAuth and A2A task/stream scenarios. | Not universal compatibility; rendered provider setup remains separate. No paid inference is needed for development. |
 | Coding tools | Native suite covers approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers; packaged browser/CLI69 run real Node4 checks. | Actual rendered VS Code actions/context remain separate. |
-| Connection catalog | Captured SDK/HTTP services cover sessions/runs/history/operations, permissions, graphs/events, models, commands, workspace/files, provider setup and named agents. | Context/skills/inbox services and rendered command/setup adapters remain unfinished. Inbox dispatch must be shared backend behavior. |
+| Connection catalog | Captured SDK/HTTP services cover sessions/runs/history/operations, permissions, graphs/events, models, commands, workspace/files, provider setup and named agents. | Development context/skills/inbox now pass focused8/clients493-175 and rendered skill/queue controls; current complete qualification, positive rendered context compaction and setup/commands remain open. |
 | Enrollment and distributed ownership | Local captured catalog and owner isolation are verified within their receipts. | Authenticated negotiation, explicit workspace/effect enrollment, expiring fenced leases, duplicate/revocation/lost-reply reconciliation remain required; private Nexus server stays excluded. |
 | Recovery and preservation | Managed68-to69 paused-upgrade refusal, continuation once, idle handoff and exact history pass with zero models. Five-root installation preservation passes. | Universal unattended/in-flight and repeated nested-process recovery remain unproven. |
 | Delivery checkpoint | Installed69:2442 files/2398 runtime files, exact68 backup, full173, clients488/171, packaged CLI/browser/handoff and installed read smoke. | The full objective remains active: general services, remote/enrollment, deeper recovery/scheduling and rendered VS Code are open. |
 
 ## Next implementation sequence
 
-Installed69 has complete173 native qualification, unchanged client488/171,
-packaged CLI and named-process browser coding/reload, managed handoff, exact
-installation/preservation and native smoke evidence. Preserve every completed
-task and its receipt; do not replay effects or use this delivery checkpoint as
-completion of the whole objective.
+Installed69 retains its complete173 qualification, packaged coding/handoff,
+preserved installation and read/history smoke. Development context/skills and
+shared backend inbox services now have focused native8, clients493/175 and actual
+rendered skill/queue reload/cancel evidence. [Precise scope and failures](../doc/evidence/captured-inbox-20261024.json).
+Do not replay any completed fixture or confuse this focused checkpoint with a
+current complete qualification or installation.
 
-Implement captured context and skill services together with their shared client
-adapters. Move inbox dispatch into a shared native backend service before exposing
-its SDK subobject; HTTP and IPC callers must have identical dispatch semantics.
-Retain captured binding identity, native admission/revisions and SDK-owned value
-transfer. Keep installed69 stable while the next coherent batch is implemented.
+Complete the current full native qualification before packaging. Verify positive
+actual-provider/rendered context compaction and remaining rendered provider/setup,
+commands and VS Code editor/sidebar coding with editor context. Keep visible
+windows closed unless requested; retain installed69 until any replacement has
+qualified coding/handoff/preservation evidence.
 
 Then complete authenticated generic remote negotiation and explicit workspace/
 effect enrollment, fenced lease/revocation/duplicate/lost-reply reconciliation,
 and deeper repeated nested-process recovery/multi-root scheduling. Unavailable,
-expired, incompatible and cross-profile refusals need actual evidence. Private
-Nexus implementation remains excluded.
+expired, incompatible and cross-profile refusals need actual evidence. The
+observer-induced local cancellation readback is bounded local evidence and does
+not establish the remote protocol. Private Nexus implementation stays excluded.
 
-Actual rendered provider/setup/commands and VS Code editor/sidebar coding with
-editor context remain separate acceptance gates. Keep visible windows closed
-unless requested. The root only registers service subobjects; standard xlang3
-method calls own cross-process transfer.
+The root only registers service subobjects. Standard xlang3 method calls own
+cross-process transfer; all domain execution, admission and SQLite ownership stay
+in the native backend. Preserve the original full objective and every retained
+owner/history/settings backup.
 
 ## 2026-10-23 automatic child planning checkpoint
 

@@ -260,3 +260,42 @@ admission without actual provider work. Positive independent-provider compaction
 and actual rendered controls remain separate, as do full native qualification
 and installation. The retained failed fixture incorrectly reused revision1 for
 a fresh CLI open after changing the profile to revision2. [Evidence and limits](evidence/captured-context-skills-20261024.json).
+
+## Captured inbox and shared backend dispatch (2026-10-24)
+
+binding.Inbox(session) is a standard registered xlang3 subobject. List() returns
+binding, session_id and items. Enqueue(request) accepts id, content, optional
+files and expected_workspace_id/expected_workspace_authority_id/
+expected_workspace_revision. SDK callers supply a unique id; HTTP can generate
+one. The backend validates attachment membership before persisting metadata.
+The result contains binding, session_id and item. Exact duplicate accepted input
+retains its original row/run; changed content/scope conflicts and cancelled IDs
+cannot be reused. Cancel(id) acknowledges cancellation_requested and the same
+binding/session/id. It removes queued input; it does not interrupt an already
+claimed run. Original captured cancellation remains permitted after connection
+metadata changes, as an authority-reducing operation. Native owner admission and
+backend generation still apply.
+
+HTTP GET/POST /v1/connection-bindings/{binding}/sessions/{session}/inbox and DELETE
+/inbox/{id} use exact method/query/body rules and origin-bound authorization.
+local_connection_inbox:1 negotiates client routing. The shared client validates
+binding/session/input/claim metadata, never falls back after negotiated refusal,
+and does not resend a mutation after a lost acknowledgement. CLI commands after
+xmind ipc --endpoint lrpc:PORT connections are inbox ID REV SESSION,
+inbox-enqueue ID REV SESSION JSON and inbox-cancel ID REV SESSION INPUT.
+
+SessionInboxService now owns scheduling/recovery outside HTTP. The old HTTP
+dispatcher is removed. IPC ownership is accepted before recovery starts; a
+duplicate wrapper cannot start work. HTTP borrows the accepted backend service;
+stopping that adapter leaves the externally owned IPC queue intact. Backend
+retirement closes admission and joins its dispatcher before borrowed persistence
+and executor objects are destroyed. Existing queue rows, provider/workspace
+checks, input claims and SQLite ownership rules remain native.
+
+Focused8 native and complete493/175 client contracts pass. The same-process SDK
+lifecycle fixture uses real SQLite with controlled execution to verify recovery
+and one claim without an HTTP listener. Separate CLI processes and actual native
+HTTP verify queue/control scope. A hidden rendered browser selects a skill,
+queues once behind a paused graph, restores both after reload and cancels once
+with an acknowledgement; zero model requests. A retained observer-induced lost
+reply reconciles via readback without replay. [Evidence and precise limits](evidence/captured-inbox-20261024.json).

@@ -1,4 +1,7 @@
 #include <chrono>
+#include <atomic>
+#include <thread>
+#include "agentflow/http_server.hpp"
 #include "agentflow/graph.hpp"
 #include "agentflow/execution_platform.hpp"
 #include "agentflow/agent_definitions.hpp"
@@ -16,6 +19,12 @@
 using namespace agentflow;
 namespace {
 void check(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+struct InboxExecutor:test::RecordingExecutor {
+    using RecordingExecutor::RecordingExecutor;std::atomic<bool> enabled=false;std::atomic<unsigned> dispatches=0;
+    bool available()const override{return enabled.load();}
+    WorkspaceMembershipSnapshot workspace_membership_snapshot()const override{return {"fixture-workspace",3,{}};}
+    Run submit_queued(std::string id,std::string session,std::string prompt,std::string,std::string inbox,std::optional<WorkspaceAdmission>,std::optional<ProviderProfileAdmission>,std::vector<PromptFileAttachment>)override{auto run=store.start_prompt_run(id,session,nlohmann::json{{"content",prompt}}.dump(),{},{},inbox).get();++dispatches;store.transition(id,RunState::queued,RunState::running).get();return store.transition(id,RunState::running,RunState::completed).get();}
+};
 struct ControlExecutor:test::RecordingGraphExecutor {
     using RecordingGraphExecutor::RecordingGraphExecutor;unsigned compactions=0;std::string compact_actor;
     bool supports_context()const override{return true;}
@@ -113,6 +122,22 @@ int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path folder;
                 auto cleared=call(agent_service["Select"],{text("agent-session"),request({{"agent_id",nullptr},{"agent_revision",0},{"expected_revision",1}})});check(cleared["revision"].ToInt64()==2&&agent_store.session_agent("agent-session").get().selected==std::nullopt,"SDK clear must publish revision2 in native persistence");auto desired=client.List(),local=client.Dict();local.Set("id",text("local"));local.Set("name",text("Renamed Local"));local.Set("kind",text("local"));desired.Append(local);call(connections["Save"],{desired,X::Value(client,1)});check(call(agent_service["Open"],{text("agent-session")})["binding"]["profile_revision"].ToInt64()==1,"Agent reads must retain original captured profile identity");refused(agent_service["Select"],{text("agent-session"),request({{"agent_id","reader.v1"},{"agent_revision",1},{"expected_revision",2}})});
             }refused(agent_service["List"],{});refused(agent_service["Definition"],{text("reader.v1")});refused(agent_service["Open"],{text("agent-session")});refused(agent_service["Select"],{text("agent-session"),sdk_values::to_value(client.host(),nlohmann::json{{"agent_id",nullptr},{"agent_revision",0},{"expected_revision",2}})});
         }PersistenceService reopened(database,std::vector<std::string>{argv[1],argv[2]});check(reopened.session_agent("agent-session").get().revision==2&&!reopened.session_agent("agent-session").get().selected,"Captured agent clear must survive SQLite restart");
+    }
+    {
+        PersistenceService inbox_store((folder/"inbox.sqlite").string(),std::vector<std::string>{argv[1],argv[2]});InboxExecutor execution(inbox_store);inbox_store.create_session("inbox-session","SDK-only durable queue").get();inbox_store.create_session("other-inbox","Foreign queue").get();X::Value retired_inbox;
+        {
+            XMindIpcServer owner(inbox_store,&execution,token_two);auto connections=call(root["Connections"],{text(token_two)});auto binding=call(connections["Open"],{text("local"),X::Value(client,1)});retired_inbox=call(binding["Inbox"],{text("inbox-session")});refused(binding["Inbox"],{text("missing-session")});
+            const auto request=[&](std::string id,std::string content){return sdk_values::to_value(client.host(),nlohmann::json{{"id",id},{"content",content}});};auto queued=call(retired_inbox["Enqueue"],{request("cancel-input","Cancelled before dispatch")});check(queued["item"]["state"].ToString()=="queued"&&queued["session_id"].ToString()=="inbox-session","SDK queue must retain binding and session");check(call(retired_inbox["Enqueue"],{request("cancel-input","Cancelled before dispatch")})["item"]["id"].ToString()=="cancel-input","Exact SDK duplicate must retain its original durable input");refused(retired_inbox["Enqueue"],{request("cancel-input","Changed input")});auto foreign=call(binding["Inbox"],{text("other-inbox")});refused(foreign["Cancel"],{text("cancel-input")});check(call(retired_inbox["Cancel"],{text("cancel-input")})["cancellation_requested"].ToInt64(),"SDK cancellation must acknowledge its original scope");call(retired_inbox["Cancel"],{text("cancel-input")});refused(retired_inbox["Enqueue"],{request("cancel-input","Cancelled before dispatch")});
+            nlohmann::json file_request={{"id","file-input"},{"content","Queue metadata only"},{"files",nlohmann::json::array({{{"path","input.txt"},{"folder_id","fixture-folder"},{"name","Input"}}})},{"expected_workspace_id","fixture-workspace"},{"expected_workspace_authority_id",std::string(32,'a')},{"expected_workspace_revision",2}};refused(retired_inbox["Enqueue"],{sdk_values::to_value(client.host(),file_request)});file_request["expected_workspace_revision"]=3;auto file=call(retired_inbox["Enqueue"],{sdk_values::to_value(client.host(),file_request)});check(file["item"]["files"].Size()==1&&file["item"]["workspace_revision"].ToInt64()==3,"SDK queued attachments must retain observed membership without file contents");call(retired_inbox["Cancel"],{text("file-input")});
+            call(retired_inbox["Enqueue"],{request("durable-input","Only one persisted queue claim")});bool duplicate=false;try{XMindIpcServer rejected(inbox_store,&execution,token_two);}catch(const Conflict&){duplicate=true;}check(duplicate&&execution.dispatches.load()==0,"Rejected duplicate API owner must not start queue work");
+        }
+        refused(retired_inbox["List"],{});refused(retired_inbox["Cancel"],{text("durable-input")});refused(retired_inbox["Enqueue"],{sdk_values::to_value(client.host(),nlohmann::json{{"id","retired-input"},{"content","Must not persist"}})});check(inbox_store.session_inbox("inbox-session").get().size()==1,"Owner retirement must preserve original queued input");
+        {
+            XMindIpcServer owner(inbox_store,&execution,token_two);{HttpServer adapter(inbox_store,token_two,&execution,nullptr,{},{},{},nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,&owner.connection_bindings());adapter.stop();}
+            execution.enabled=true;const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(4);std::string dispatched;
+            while(std::chrono::steady_clock::now()<deadline){const auto items=inbox_store.session_inbox("inbox-session").get();if(items.front().state=="claimed"&&inbox_store.run(items.front().run_id).get().state==RunState::completed){dispatched=items.front().run_id;break;}std::this_thread::sleep_for(std::chrono::milliseconds(10));}
+            check(!dispatched.empty()&&execution.dispatches.load()==1,"Restarted SDK backend must dispatch durable input once without an HTTP listener, even after an attached HTTP adapter stops");auto connections=call(root["Connections"],{text(token_two)});auto binding=call(connections["Open"],{text("local"),X::Value(client,1)});auto inbox=call(binding["Inbox"],{text("inbox-session")});auto same=call(inbox["Enqueue"],{sdk_values::to_value(client.host(),nlohmann::json{{"id","durable-input"},{"content","Only one persisted queue claim"}})});check(same["item"]["run_id"].ToString()==dispatched,"Repeated accepted input must retain its original run");std::this_thread::sleep_for(std::chrono::milliseconds(1100));check(execution.dispatches.load()==1&&inbox_store.runs("inbox-session").get().size()==1,"Duplicate queue delivery cannot create a second native run");
+        }
     }
     check(std::filesystem::weakly_canonical(folder).parent_path()==std::filesystem::weakly_canonical(std::filesystem::temp_directory_path())&&folder.filename().string().starts_with("xmind-api-lifetime-"),"Refusing fixture cleanup outside its known temporary directory");std::filesystem::remove_all(folder);
     std::cout<<"Native process root registration passed concurrent initialization, unbound service refusal, one listener, exclusive public ownership, stale object/token refusal, rebinding without re-registration, persisted data and refusal after backend destruction. Same-process SDK lifecycle fixture; separate xmind.exe calls are covered independently."<<std::endl;return 0;

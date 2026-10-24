@@ -84,6 +84,7 @@ class BackendClient {
   #connectionWorkspaceSupported=false;
   #connectionWorkspaceFilesSupported=false;
   #connectionModelSelectionSupported=false;
+  #connectionInboxSupported=false;
   #connectionContextSupported=false;
   #connectionSkillsSupported=false;
   #connectionAgentsSupported=false;
@@ -166,6 +167,8 @@ class BackendClient {
     else if(this.#connectionTreeStreamSupported)throw new Error("The backend tree stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
     else if(this.#connectionGraphControlSupported)throw new Error("The backend graph control protocol changed. Reconnect before continuing graphs.");
+    if(health&&Object.hasOwn(health,"local_connection_inbox")){if(health.local_connection_inbox!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured inbox protocol.");this.#connectionInboxSupported=true;}
+    else if(this.#connectionInboxSupported)throw new Error("The backend inbox protocol changed. Reconnect before queuing input.");
     if(health&&Object.hasOwn(health,"local_connection_context")){if(health.local_connection_context!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured context protocol.");this.#connectionContextSupported=true;}
     else if(this.#connectionContextSupported)throw new Error("The backend context protocol changed. Reconnect before inspecting context.");
     if(health&&Object.hasOwn(health,"local_connection_skills")){if(health.local_connection_skills!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured skill protocol.");this.#connectionSkillsSupported=true;}
@@ -460,9 +463,18 @@ class BackendClient {
     return validateSessionModel(await this.#sessionModelRequest(id,{model_id:model,provider_profile_id:providerBinding.provider_profile_id,expected_provider_revision:providerBinding.expected_provider_revision,expected_revision:observed.revision}),id);
   }
   createSession(title) { return this.#admitConnection('sessions', { title }); }
-  sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }
-  async enqueueSessionInput(session_id,content,id,files=[],expectedWorkspaceRevision) { const value={...(id?{id}:{}),content};if(files.length){const workspace=await this.workspace();if(!workspace.configured||typeof workspace.workspace_id!=='string'||typeof workspace.authority_id!=='string')throw new Error('Queued file attachments require an opened workspace.');const membership=await this.workspaceMembership(workspace);if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before queuing.');value.files=files;value.expected_workspace_id=workspace.workspace_id;value.expected_workspace_authority_id=workspace.authority_id;value.expected_workspace_revision=expectedWorkspaceRevision??membership.revision;}return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`,value); }
-  cancelSessionInput(session_id,input_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox/${encodeURIComponent(input_id)}`,undefined,15000,'DELETE'); }
+  async #inboxControl(session,body,cancel){
+    executionIdentity(session);if(cancel!==undefined)executionIdentity(cancel);if(body?.id!==undefined)executionIdentity(body.id);const path='/sessions/'+encodeURIComponent(session)+'/inbox'+(cancel===undefined?'':'/'+encodeURIComponent(cancel));
+    if(!this.#connectionInboxSupported)return this.request('/v1'+path,body,15000,cancel===undefined?undefined:'DELETE');
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured inbox connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+path,body,15000,cancel===undefined?undefined:'DELETE');if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured inbox connection changed.');
+    exactFields(value,cancel!==undefined?['binding','session_id','id','cancellation_requested']:body?['binding','session_id','item']:['binding','session_id','items']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key])||value.session_id!==session)throw new Error('Inbox response belongs to another connection or session.');
+    if(cancel!==undefined){if(value.id!==cancel||value.cancellation_requested!==true)throw new Error('Inbox cancellation belongs to another input.');return;}
+    if(body){const item=validateInboxItem(value.item,session);if(body.id!==undefined&&item.id!==body.id)throw new Error('Inbox receipt belongs to another input.');return item;}
+    if(!Array.isArray(value.items)||value.items.length>128||new Set(value.items.map(item=>item?.id)).size!==value.items.length)throw new Error('Invalid backend inbox list.');for(const item of value.items)validateInboxItem(item,session);return {items:value.items};
+  }
+  sessionInbox(session_id) { return this.#inboxControl(session_id); }
+  async enqueueSessionInput(session_id,content,id,files=[],expectedWorkspaceRevision) { const value={...(id?{id}:{}),content};if(files.length){const workspace=await this.workspace();if(!workspace.configured||typeof workspace.workspace_id!=='string'||typeof workspace.authority_id!=='string')throw new Error('Queued file attachments require an opened workspace.');const membership=await this.workspaceMembership(workspace);if(expectedWorkspaceRevision!==undefined&&membership.revision!==expectedWorkspaceRevision)throw new Error('Workspace membership changed. Remove and reattach these files before queuing.');value.files=files;value.expected_workspace_id=workspace.workspace_id;value.expected_workspace_authority_id=workspace.authority_id;value.expected_workspace_revision=expectedWorkspaceRevision??membership.revision;}return this.#inboxControl(session_id,value); }
+  cancelSessionInput(session_id,input_id) { return this.#inboxControl(session_id,undefined,input_id); }
   async terminals(session) {
     executionIdentity(session);
     const value=await this.request(`/v1/sessions/${encodeURIComponent(session)}/terminals`);
@@ -802,6 +814,12 @@ async function observeOwnedRun(client,run,session,after){
 // transitions. These validators never manufacture grants or metric totals.
 function planFields(value,required,optional=[]){if(!value||typeof value!=='object'||Array.isArray(value)||required.some(field=>!Object.hasOwn(value,field))||Object.keys(value).some(field=>!required.includes(field)&&!optional.includes(field)))throw new Error('Invalid public planning metadata');}
 function skillIds(ids){if(!Array.isArray(ids)||ids.length>8||new Set(ids).size!==ids.length||ids.some(id=>typeof id!=='string'||!id||new TextEncoder().encode(id).length>256||id==='.'||id==='..'||/[\/\\:\x00]/.test(id)))throw new Error('Choose at most eight distinct catalogue skills.');return ids;}
+function validateInboxItem(value,session){
+  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(key=>!['id','session_id','content','state','created_ms','files','workspace_id','workspace_revision','run_id'].includes(key)))throw new Error('Invalid backend inbox item.');executionIdentity(value.id);if(value.session_id!==session||typeof value.content!=='string'||!value.content||new TextEncoder().encode(value.content).length>1048576||!['queued','claimed'].includes(value.state)||!Number.isSafeInteger(value.created_ms)||value.created_ms<0)throw new Error('Invalid backend inbox scope or state.');
+  if(value.run_id!==undefined)executionIdentity(value.run_id);if((value.state==='claimed')!==(value.run_id!==undefined))throw new Error('Invalid inbox claim receipt.');
+  if(value.files!==undefined){if(!Array.isArray(value.files)||value.files.length>32)throw new Error('Invalid queued attachments.');for(const file of value.files){exactFields(file,['path','folder_id','name']);for(const [key,max]of [['path',4096],['folder_id',256],['name',512]])if(typeof file[key]!=='string'||new TextEncoder().encode(file[key]).length>max||file[key].includes('\0'))throw new Error('Invalid queued attachment metadata.');if(!file.path)throw new Error('Queued attachment path is empty.');}}
+  if(value.workspace_id!==undefined||value.workspace_revision!==undefined||value.files?.length){if(typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||!Number.isSafeInteger(value.workspace_revision)||value.workspace_revision<1)throw new Error('Invalid queued workspace binding.');}return value;
+}
 function validateSessionSkills(value,session){
   if(!value||typeof value!=='object'||Object.keys(value).length!==7||value.session_id!==session||typeof value.workspace_id!=='string'||!/^windows-local-file-v1:[A-Za-z0-9:._-]{1,200}$/.test(value.workspace_id)||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id)||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.editable!=='boolean')throw new Error('Invalid backend session skill scope.');
   skillIds(value.ids);skillIds(value.manual_ids);if(value.manual_ids.some(id=>!value.ids.includes(id)))throw new Error('Invalid backend skill attachment provenance.');return value;
