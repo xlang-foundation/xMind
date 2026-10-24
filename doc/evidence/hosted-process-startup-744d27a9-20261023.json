@@ -1,0 +1,776 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "744d27a9ee7100a3f798509e5669a05fdd5b5abc",
+  "runId": 40044529002,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40044529002",
+  "scope": "Official eight fresh hosted first-case diagnostic jobs plus explicitly warmed comparisons; actual native foreground adapter, not full graph/agent/release qualification.",
+  "successfulJobs": [
+    "diagnostics (core-only)"
+  ],
+  "failedJobs": [
+    "diagnostics (cmdlet-phases)",
+    "diagnostics (minimal-path)",
+    "diagnostics (precopy-core)",
+    "diagnostics (cache-off)",
+    "diagnostics (original)",
+    "diagnostics (private-cache)",
+    "diagnostics (module-qualified)"
+  ],
+  "allDotnetOnlyControlsPassed": true,
+  "rows": [
+    {
+      "firstCase": "cache-off",
+      "allCasesPassed": false,
+      "artifactId": 12540802623,
+      "artifactBytes": 8597,
+      "artifactSha256": "9a6be64b0a0d3d7e645f4e6826a3bcc4283b70575e624517c4a382a23165c583",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-graph-cache-off",
+          "passed": false,
+          "elapsedMs": 30055,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 4464
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 24275,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 167,
+            "delay_completed": 24082,
+            "effect_completed": 24240
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 18027,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6180,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 159,
+            "delay_completed": 6154,
+            "effect_completed": 6170
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "cmdlet-phases",
+      "allCasesPassed": false,
+      "artifactId": 12540123551,
+      "artifactBytes": 8612,
+      "artifactSha256": "bebbf834ffbedb2991c9983a0b0449091c0f707224308a0e777ab6fcf728979b",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-cmdlet-phases-default",
+          "passed": false,
+          "elapsedMs": 30042,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 3733
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": false,
+          "elapsedMs": 30048,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered",
+            "delay_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 197,
+            "delay_completed": 30018
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22615,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6206,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 180,
+            "delay_completed": 6194,
+            "effect_completed": 6194
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "core-only",
+      "allCasesPassed": true,
+      "artifactId": 12541095553,
+      "artifactBytes": 9285,
+      "artifactSha256": "abc6ebae5a51368627804c912ca1725eaf0fb4ab2455f12dc66a63f1fe0339dc",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-graph-core-only",
+          "passed": true,
+          "elapsedMs": 7580,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1141,
+            "delay_completed": 7471,
+            "effect_completed": 7549
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true,
+          "coreModuleCopy": {
+            "files": 3,
+            "unchanged": true,
+            "searchPathOverridden": true
+          }
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 21952,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 119,
+            "delay_completed": 21890,
+            "effect_completed": 21928
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 11572,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6142,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 126,
+            "delay_completed": 6127,
+            "effect_completed": 6127
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "minimal-path",
+      "allCasesPassed": false,
+      "artifactId": 12540698089,
+      "artifactBytes": 8455,
+      "artifactSha256": "5424444275151d18709b6cbc4ee11f41713e3d28857816678db920d019402f9e",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-graph-minimal-path",
+          "passed": false,
+          "elapsedMs": 30278,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1718
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": false,
+          "elapsedMs": 30052,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 211
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22501,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6210,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 186,
+            "delay_completed": 6198,
+            "effect_completed": 6198
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "module-qualified",
+      "allCasesPassed": false,
+      "artifactId": 12540766692,
+      "artifactBytes": 8630,
+      "artifactSha256": "072ea1712f2386a12565bfee0a2c9bca5793b02e47f11efd152b2780b8003655",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-module-qualified-default",
+          "passed": true,
+          "elapsedMs": 8329,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1696,
+            "delay_completed": 8146,
+            "effect_completed": 8305
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": false,
+          "elapsedMs": 30040,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 197
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22689,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6225,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 193,
+            "delay_completed": 6201,
+            "effect_completed": 6201
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "original",
+      "allCasesPassed": false,
+      "artifactId": 12540573292,
+      "artifactBytes": 8513,
+      "artifactSha256": "dee04220973f4582bc0f8e796c438c68aa9fb189360611065ad0a18d0226d9a8",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-graph-default",
+          "passed": false,
+          "elapsedMs": 30041,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1537
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 28623,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 175,
+            "delay_completed": 28430,
+            "effect_completed": 28608
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22472,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6192,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 169,
+            "delay_completed": 6180,
+            "effect_completed": 6180
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "precopy-core",
+      "allCasesPassed": false,
+      "artifactId": 12540493807,
+      "artifactBytes": 9394,
+      "artifactSha256": "8962df09010192df1739374bd5054f550d5e7f2bca4ee3bac0d273588a08f9c6",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-graph-precopy-core",
+          "passed": false,
+          "elapsedMs": 30041,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1596
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true,
+          "coreModuleCopy": {
+            "files": 3,
+            "unchanged": true,
+            "searchPathOverridden": false
+          }
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 28580,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 171,
+            "delay_completed": 28358,
+            "effect_completed": 28554
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22363,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6205,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 183,
+            "delay_completed": 6194,
+            "effect_completed": 6194
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    },
+    {
+      "firstCase": "private-cache",
+      "allCasesPassed": false,
+      "artifactId": 12540488886,
+      "artifactBytes": 8573,
+      "artifactSha256": "08fd83c481c03c4da63d53e4a4f7b8572f017e337aac4330ff5da3048fedb4bf",
+      "sourceAndBinaryUnchanged": true,
+      "committedSourceVerified": true,
+      "checkoutLineEndings": {
+        "Native/include/agentflow/process.hpp": "CRLF checkout of committed blob",
+        "Native/src/windows_process.cpp": "CRLF checkout of committed blob",
+        "Native/third_party/nlohmann/json.hpp": "exact committed blob",
+        "Native/tests/process_startup/CMakeLists.txt": "CRLF checkout of committed blob",
+        "Native/tests/process_startup/process_startup_diagnostic.cpp": "CRLF checkout of committed blob",
+        "Native/tests/graph_runner_contract.cpp": "CRLF checkout of committed blob",
+        "Native/tests/agent_runner_peer.mjs": "CRLF checkout of committed blob",
+        "Tools/ci-process-startup.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.mjs": "CRLF checkout of committed blob",
+        "Tools/owned-process-diagnostics.ps1": "CRLF checkout of committed blob",
+        ".github/workflows/process-startup.yml": "CRLF checkout of committed blob"
+      },
+      "cases": [
+        {
+          "label": "01-graph-private-cache",
+          "passed": false,
+          "elapsedMs": 30047,
+          "exitCode": 1,
+          "termination": "timed_out",
+          "phases": [
+            "script_entered"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 1681
+          },
+          "stderr": "",
+          "markerExists": false,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "02-graph-default",
+          "passed": true,
+          "elapsedMs": 29312,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 164,
+            "delay_completed": 29106,
+            "effect_completed": 29276
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "03-agent-default",
+          "passed": true,
+          "elapsedMs": 22305,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [],
+          "phaseElapsedMs": {},
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        },
+        {
+          "label": "04-dotnet-control-default",
+          "passed": true,
+          "elapsedMs": 6196,
+          "exitCode": 0,
+          "termination": "exited",
+          "phases": [
+            "script_entered",
+            "delay_completed",
+            "effect_completed"
+          ],
+          "phaseElapsedMs": {
+            "script_entered": 181,
+            "delay_completed": 6176,
+            "effect_completed": 6196
+          },
+          "stderr": "",
+          "markerExists": true,
+          "modulePathProbeSuccess": true
+        }
+      ]
+    }
+  ],
+  "inference": "Corrected artifacts have no observed .NET initialization failure. Controls point toward default PowerShell cmdlet discovery overhead; specific physical cause remains unproven. Passing controls do not qualify failed original commands.",
+  "provenance": "Hosted CRLF checkouts verified against committed744d27a9 blobs; not claimed byte-identical to local LF checkout. Each host freezes its own raw bytes.",
+  "productionModulePolicyChanged": false,
+  "processBudgetMs": 30000,
+  "deliberateGraphDelaySeconds": 6,
+  "nativeFullGateSeparate": true,
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "fullGoalComplete": false
+}

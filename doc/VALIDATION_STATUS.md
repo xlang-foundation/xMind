@@ -1,3 +1,23 @@
+## Corrected hosted startup matrix: discovery remains slow — 2026-10-23
+
+All eight official artifacts from run40044529002/source744d27a9 are downloaded
+and hashed. Inputs match committed blobs with explicitly recorded hosted CRLF
+checkout conversion; hosts retain separate raw-byte closures. The corrected
+launch no longer produces the initializer error: all eight .NET-only controls
+pass. The original cmdlet-discovery delay remains. First original graph times
+out30041ms with only script_entered; its warmed comparison passes28623ms. A
+fresh module-qualified graph passes8329ms, then default discovery times out.
+
+Fresh copied-core-only discovery passes7580ms and that job succeeds all four
+cases. Copying the same three core files without changing discovery still
+times out30041ms. Private/cache-off and minimal-PATH controls do not remove
+the first timeout. These observations point toward default cmdlet discovery,
+not a proven physical cause or acceptance of failed original commands. No
+product module policy, command text or budgets were changed to get a pass.
+Seven jobs fail and one succeeds. Complete local native d3fef238 validation
+is separately frozen/live.
+[All eight artifact summaries](evidence/hosted-process-startup-744d27a9-20261023.json).
+
 ## Corrected launch path: fresh long-runtime coding — 2026-10-23
 
 Native41bb202a/source744d27a9 completes a new sum-of-multiples-of-three task
