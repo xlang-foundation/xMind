@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Packaged browser identifies empty forwarded skills response — 2026-10-24
+
+Fresh packaged frontend023c5c7c/Native12fc task fixes product.cjs and runs four Node checks through the named process agent with two scoped approvals. First completion is clean; reload displays completed/all8 messages/selected agent, but metadata catches HTTP200 session-skills reply with bodyLength0 and Content-Length0. Native observation for the same binding/session skills path has498 valid JSON bytes. Candidate acceptance remains refused; explicit framing did not fix the loss. NEVER replay session ee2cd7fd669849ff966bdcf2039d02dd/root f58cfb96399b43d5bcdf695066fcc717. Host exits1 on explicit failed acceptance; owned native39488 confirmed absent. [Evidence](evidence/browser-empty-forwarded-skills-20261024.json), [first completion](evidence/browser-product-first-completion-20261024.png), [reload](evidence/browser-product-reload-20261024.png).
+
+Proxy now rejects empty or declared-length-mismatched finite JSON as502, without retrying requests. Complete clients497/178 pass with frozen source/assets unchanged. This prevents empty success forwarding but does not prove the loss mechanism resolved. Installed72 unchanged; full goal active.
+
 ## Finite JSON framing and parse diagnostics — 2026-10-24
 
 Finite browser-proxy JSON responses now declare their exact UTF-8 byte length, including locally generated refusal/session replies; event streams retain streaming semantics. Shared client explicitly reads text before JSON parsing and logs only response metadata on malformed successful replies. Existing HTTP-status preservation, AbortError propagation and no mutation retry remain. Fragmented Unicode upstream replies, repeated finite observations and local refusal framing are covered. Complete clients497/178 pass with frozen71 source/18 asset closures unchanged. Initial new-fixture failure omitted Sec-Fetch-Site same-origin and was corrected without weakening admission; original log retained. [Evidence](evidence/browser-json-framing-20261024.json).

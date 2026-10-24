@@ -264,15 +264,17 @@ test('captured context gateway forwards only one validated model query',async()=
 
 test('finite browser JSON responses declare exact UTF-8 framing across success and refusal',async()=>{
  const {createBrowserServer}=await import('../server.mjs'),assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets');
- const master='f'.repeat(64),credential='a'.repeat(64)+'.'+'b'.repeat(64),value={message:'雪 🌍',items:[1,2,3]},wire=Buffer.from(JSON.stringify(value));let view;
- const peer=createServer(async(request,response)=>{for await(const chunk of request){}response.setHeader('Content-Type','application/json');if(request.url==='/v1/view-sessions'){response.end(JSON.stringify({credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800}));return;}if(request.url==='/v1/health'){response.write(wire.subarray(0,13));response.end(wire.subarray(13));return;}response.writeHead(404);response.end('{}');});
+ const master='f'.repeat(64),credential='a'.repeat(64)+'.'+'b'.repeat(64),value={message:'雪 🌍',items:[1,2,3]},wire=Buffer.from(JSON.stringify(value));let view,empty=false;
+ const peer=createServer(async(request,response)=>{for await(const chunk of request){}response.setHeader('Content-Type','application/json');if(request.url==='/v1/view-sessions'){response.end(JSON.stringify({credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800}));return;}if(request.url==='/v1/health'){if(empty){response.end();return;}response.write(wire.subarray(0,13));response.end(wire.subarray(13));return;}response.writeHead(404);response.end('{}');});
  try{
   await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));view=await createBrowserServer({backend:'http://127.0.0.1:'+peer.address().port,assetRoot,localAccessToken:master});const origin=await view.listen();
   const login=await fetch(origin+'/ui/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'}),cookie=login.headers.get('set-cookie').split(';')[0];
   const verify=async(response,expected)=>{const bytes=Buffer.from(await response.arrayBuffer());assert.equal(Number(response.headers.get('content-length')),bytes.length);assert.equal(response.headers.get('transfer-encoding'),null);assert.deepEqual(JSON.parse(bytes.toString('utf8')),expected);};
   await verify(login,{connected:true});
   for(let i=0;i<3;i++)await verify(await fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}}),value);
+  empty=true;const incomplete=await fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}});assert.equal(incomplete.status,502);await verify(incomplete,{detail:'Native backend returned an incomplete JSON response'});
   const refused=await fetch(origin+'/not-an-api');assert.equal(refused.status,404);await verify(refused,{detail:'View route not found'});
  }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
 });
+
 

@@ -1,0 +1,127 @@
+{
+  "recordedAt": "2026-10-24T18:49:56.025Z",
+  "frontendSource": "023c5c7c",
+  "nativeSource": "264cadb4",
+  "installed": false,
+  "installedVersion": "0.1.72",
+  "packageAccepted": false,
+  "proof": {
+    "sessionId": "ee2cd7fd669849ff966bdcf2039d02dd",
+    "runId": "f58cfb96399b43d5bcdf695066fcc717",
+    "passed": false,
+    "cleanFirstCompletion": true,
+    "nativeTaskCompleted": true,
+    "historyMessagesRestored": 8,
+    "selectedAgentRetained": true,
+    "reloadStatusCompleted": true,
+    "reloadParseWarning": true,
+    "warnings": [
+      {
+        "level": "warn",
+        "message": "xMind incomplete response metadata {\"path\":\"/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/sessions/ee2cd7fd669849ff966bdcf2039d02dd/skills\",\"status\":200,\"bodyLength\":0,\"bodyUsedBefore\":false,\"contentLength\":\"0\",\"contentType\":\"application/json\",\"failure\":\"SyntaxError\"}",
+        "timestamp": "2026-10-24T18:48:20.322Z",
+        "url": "http://127.0.0.1:60320/ui/client.js"
+      }
+    ],
+    "commandExit": 0,
+    "stdout": "4 product checks passed",
+    "neverReplay": true
+  },
+  "browserWarnings": [
+    {
+      "level": "warn",
+      "message": "xMind incomplete response metadata {\"path\":\"/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/sessions/ee2cd7fd669849ff966bdcf2039d02dd/skills\",\"status\":200,\"bodyLength\":0,\"bodyUsedBefore\":false,\"contentLength\":\"0\",\"contentType\":\"application/json\",\"failure\":\"SyntaxError\"}",
+      "timestamp": "2026-10-24T18:48:20.322Z",
+      "url": "http://127.0.0.1:60320/ui/client.js"
+    }
+  ],
+  "nativeSkillsResponses": [
+    {
+      "path": "/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/sessions/ee2cd7fd669849ff966bdcf2039d02dd/skills",
+      "method": "GET",
+      "status": 200,
+      "type": "application/json",
+      "contentLength": "498",
+      "bodyBytes": 498,
+      "bodySha256": "5ebf0c75f57e0b2e36ff8dea84016663e38dade97b688c99d7b6a7c0ca66235a",
+      "validJson": true
+    },
+    {
+      "path": "/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/skills",
+      "method": "GET",
+      "status": 200,
+      "type": "application/json",
+      "contentLength": "411",
+      "bodyBytes": 411,
+      "bodySha256": "3d34ce68125d555287cc85cde8341b1b6dc0c8bec7ff2886b6adc3979e08b1b9",
+      "validJson": true
+    },
+    {
+      "path": "/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/sessions/ee2cd7fd669849ff966bdcf2039d02dd/skills",
+      "method": "GET",
+      "status": 200,
+      "type": "application/json",
+      "contentLength": "498",
+      "bodyBytes": 498,
+      "bodySha256": "5ebf0c75f57e0b2e36ff8dea84016663e38dade97b688c99d7b6a7c0ca66235a",
+      "validJson": true
+    },
+    {
+      "path": "/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/skills",
+      "method": "GET",
+      "status": 200,
+      "type": "application/json",
+      "contentLength": "411",
+      "bodyBytes": 411,
+      "bodySha256": "3d34ce68125d555287cc85cde8341b1b6dc0c8bec7ff2886b6adc3979e08b1b9",
+      "validJson": true
+    },
+    {
+      "path": "/v1/connection-bindings/5ed0e4a16763e17bad63acf458d0ce2e/sessions/ee2cd7fd669849ff966bdcf2039d02dd/skills",
+      "method": "GET",
+      "status": 200,
+      "type": "application/json",
+      "contentLength": "498",
+      "bodyBytes": 498,
+      "bodySha256": "5ebf0c75f57e0b2e36ff8dea84016663e38dade97b688c99d7b6a7c0ca66235a",
+      "validJson": true
+    }
+  ],
+  "causalLimit": "Browser observed zero-byte successful session-skills reply while native-boundary observation for same path has 498 valid JSON bytes. Exact mechanism remains unresolved; explicit-length framing did not prevent it.",
+  "followup": "Proxy now refuses empty or length-mismatched finite JSON with 502; no request replay",
+  "guardGate": {
+    "sourceRevision": "023c5c7c5f17e7de55eed9d48e408f32485690c1",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 497,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 497,
+      "passed": 497,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "ownedNativeProcessConfirmedAbsent": true,
+  "neverReplay": true
+}

@@ -194,6 +194,8 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
    if(upstream.status===204){response.writeHead(204,{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});response.end();return;}
    if(!(upstream.headers.get('content-type')||'').startsWith('application/json')){reply(502,{detail:'Native backend returned an invalid response'});return;}
    let length=0;const output=[];for await(const chunk of upstream.body){length+=chunk.length;if(length>16*1024*1024){controller.abort();reply(502,{detail:'Native response exceeds view limits'});return;}output.push(chunk);}
+   const declaredLength=upstream.headers.get('content-length');
+   if(length===0||declaredLength!==null&&(!/^\d+$/.test(declaredLength)||Number(declaredLength)!==length)){reply(502,{detail:'Native backend returned an incomplete JSON response'});return;}
    response.writeHead(upstream.status,{'Content-Type':'application/json','Content-Length':length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});response.end(Buffer.concat(output));
   }catch{if(!response.destroyed){if(response.headersSent)response.destroy();else reply(502,{detail:'Native backend is unavailable or the request was interrupted'});}}
  });server.requestTimeout=20000;server.headersTimeout=10000;server.keepAliveTimeout=1000;
