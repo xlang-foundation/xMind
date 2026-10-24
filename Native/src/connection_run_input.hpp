@@ -54,4 +54,9 @@ inline ConnectionRunRequest run_request(const Json& value,std::string default_id
     for(auto it=value.begin();it!=value.end();++it)if(std::find(fields.begin(),fields.end(),it.key())==fields.end())throw std::invalid_argument("Unknown run request field");
     ConnectionRunRequest result;result.id=value.contains("id")?identifier(string_field(value,"id",128)):identifier(default_id);result.session=identifier(string_field(value,"session_id",128));result.prompt=string_field(value,"prompt",1024*1024);result.model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};result.provider=profile_admission(value);result.workspace=workspace_admission(value);result.files=prompt_file_attachments(value);if(value.contains("inbox_id"))result.inbox=string_field(value,"inbox_id",128);return result;
 }
+inline ConnectionGraphRequest graph_request(Json value,std::string default_id={}){
+    if(!value.is_object())throw std::invalid_argument("Expected graph request object");
+    auto graph=string_field(value,"graph_id",64);if(!value.contains("graph_revision")||!value["graph_revision"].is_number_integer()||value["graph_revision"]<1||value["graph_revision"]>9007199254740991LL)throw std::invalid_argument("Invalid graph revision");
+    const auto revision=value["graph_revision"].get<std::int64_t>();value.erase("graph_id");value.erase("graph_revision");if(value.contains("inbox_id"))throw std::invalid_argument("Captured graph queue admission is unavailable");return {run_request(value,std::move(default_id)),std::move(graph),revision};
+}
 }

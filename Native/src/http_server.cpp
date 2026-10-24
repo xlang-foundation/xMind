@@ -504,7 +504,7 @@ struct HttpServer::Impl {
 #endif
 #if defined(_WIN32)
         view_sessions=std::make_unique<ViewSessions>(store,token);
-        if(bindings)connection_binding_service=bindings;else{owned_connection_bindings=std::make_unique<LocalConnectionBindings>(store,execution,owner);connection_binding_service=owned_connection_bindings.get();}
+        if(bindings)connection_binding_service=bindings;else{owned_connection_bindings=std::make_unique<LocalConnectionBindings>(store,execution,owner,graphs);connection_binding_service=owned_connection_bindings.get();}
 #endif
         server.new_task_queue=[] {return new httplib::ThreadPool(4,4,32);};
         server.set_payload_max_length(1024*1024);
@@ -523,7 +523,7 @@ struct HttpServer::Impl {
             bool authenticated=request.get_header_value_count("Authorization")==1 && equal_token(request.get_header_value("Authorization"),authorization);
 #if defined(_WIN32)
             const auto supplied=request.get_header_value("Authorization");
-            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|connection-bindings(/[0-9a-f]{32}(/(identity|sessions(/[A-Za-z0-9_-]+(/messages|/runs/[A-Za-z0-9_-]+/(history|children/[A-Za-z0-9_-]+/history|operations(/[A-Za-z0-9_-]+(/decision)?)?))?)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
+            static const std::regex view_route(R"(^/v1/(health|workspace(/(membership|skills|commands|files|file))?|workspaces|connections(/select)?|connection-bindings(/[0-9a-f]{32}(/(identity|graph-runs|sessions(/[A-Za-z0-9_-]+(/messages|/runs/[A-Za-z0-9_-]+/(history|children/[A-Za-z0-9_-]+/history|operations(/[A-Za-z0-9_-]+(/decision)?)?))?)?|runs(/[A-Za-z0-9_-]+(/cancel)?)?|events))?)?|models|language-servers|language-server/query|process/profiles|agents|graphs|mcp/resources|vcs/(init|status|info|branches|base|diff)|a2a/agents(/register|/[A-Za-z0-9_.-]{1,64}/(enabled|remove))?|agent/(delegation|planning)|provider/(configuration|models|profiles(/(select|models))?)|sessions/[A-Za-z0-9_-]+|sessions(/active|/import|/[A-Za-z0-9_-]+/(history|export|inbox|messages(/[A-Za-z0-9_-]+)?|runs|title|interrupt|skills|commands|agent(/events)?|permissions(/[A-Za-z0-9_-]+/reply)?|permission-grants(/[A-Za-z0-9_-]+)?|terminals(/[A-Za-z0-9a-f]{32})?|context(/(compact|requests/[A-Za-z0-9_-]+))?))?|terminals/[A-Za-z0-9a-f]{32}(/(output|input|resize|close))?|runs(/[A-Za-z0-9_-]+(/(events|tree-events|children(/[A-Za-z0-9_-]+/history)?|cancel|operations|plan(/(human/[A-Za-z0-9_-]+|resume))?))?)?|graph-runs(/[A-Za-z0-9_-]+(/(children(/[A-Za-z0-9_-]+/history)?|events|human/[A-Za-z0-9_.-]+|resume))?)?|operations/[A-Za-z0-9_-]+(/(output|inspection|decision|reconcile|restore|a2a/(inspect|resubscribe|cancel|follow-up)))?|view-sessions/(current|revoke))$)");
             static const std::regex session_model_route(R"(^/v1/sessions/[A-Za-z0-9_-]+/model$)");
             static const std::regex view_session_delete_route(R"(^/v1/sessions/[A-Za-z0-9_-]+$)");
             static const std::regex owned_read_route(R"(^/v1/(workspace/(membership|skills|commands|files|file)|agent/(delegation|planning)|runs/[A-Za-z0-9_-]+/(tree-events|children(/[A-Za-z0-9_-]+/history)?|plan)|sessions/[A-Za-z0-9_-]+/(messages(/[A-Za-z0-9_-]+)?|context(/requests/[A-Za-z0-9_-]+)?))$)");
@@ -686,7 +686,7 @@ struct HttpServer::Impl {
 #if defined(_WIN32)
             health["local_connection_admission"]=1;
             health["local_connection_operations"]=1;
-            health["local_connection_history"]=1;health["local_connection_child_history"]=1;
+            if(graphs)health["local_connection_graph_admission"]=1;health["local_connection_history"]=1;health["local_connection_child_history"]=1;
 #endif
             reply(response,health);
         }));
@@ -769,6 +769,9 @@ struct HttpServer::Impl {
         }));
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/runs/([A-Za-z0-9_-]+)/children/([A-Za-z0-9_-]+)/history)",guard_errors([this,connection_request](const Request& request,Response& response){
             connection_request(request);(void)body(request,{});reply(response,connection_values::bound(connection_handle(request)->child_history(identifier(request.matches[2]),identifier(request.matches[3]),identifier(request.matches[4]))));
+        }));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/graph-runs)",guard_errors([this](const Request& request,Response& response){
+            if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");const auto result=connection_handle(request)->start_graph(connection_input::graph_request(body(request,{"id","session_id","graph_id","graph_revision","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"}),new_id()));reply(response,connection_values::bound(result),202);
         }));
         const auto connection_operations=[this,connection_request](const Request& request){
             connection_request(request);

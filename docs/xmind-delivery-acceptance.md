@@ -116,3 +116,7 @@ Captured native SDK/HTTP/CLI run-history paging now passes3/3 in3.66s with adjac
 ## 2026-10-23 captured child-history client integration
 
 Shared browser/extension ordinary and graph child-history reads now use the captured native service with active session and parent/child receipt validation. Native3/3 (4.11s), extension471 and browser165 pass; [receipt](../doc/evidence/captured-child-history-clients-20261023.json) distinguishes SDK/HTTP and client fixture scopes. No rendered VS Code or full-suite/install acceptance is implied. Remaining command/graph/model/stream and remote/enrollment work stays open, as does the retained full173 rust-analyzer failure.
+
+## 2026-10-23 captured graph admission
+
+Captured SDK Graphs.Submit and shared HTTP/browser/extension admission now preserve native catalog revision and workspace/provider/attachment dispatch. A fresh actual tool-only graph completes a native read and returns captured child history without provider inference for that graph. Final native4/4 (19.01s), extension472 and browser165 pass; [receipt](../doc/evidence/captured-graph-admission-20261023.json) separates recording and real execution scopes. Graph catalog/detail/human/resume/stream, commands/models, remote/enrollment, full-suite Rust failure and rendered VS Code stay open. Installed64 remains unchanged.

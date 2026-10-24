@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured native Graphs.Submit SDK subobject and shared HTTP/browser/extension graph admission dispatch to the existing backend catalog/executor, with optional workspace/provider/attachments.",
+  "gate": {
+    "recordedAt": "2026-10-24T04:22:43.818Z",
+    "sourceParent": "7c7408ada0e59fecdcf86223e2c346925e2e1dd2",
+    "sourcePatchSha256": "80b0b7545d2bf82b84347b968462b95fa66a0d901d4650ea51860e2b2ea33e3a",
+    "build": {
+      "pid": 13680,
+      "launchedAt": "2026-10-24T04:21:04.723Z",
+      "completedAt": "2026-10-24T04:22:18.815Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "5b79e6e6b1a1ba3e719bd1d7fe0f507f9ffafe1a15f19b2a69dc5ef0ff566175"
+    },
+    "test": {
+      "pid": 41444,
+      "launchedAt": "2026-10-24T04:22:21.805Z",
+      "completedAt": "2026-10-24T04:22:40.855Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6acdb851e3ee39591de821cdcf6d15c86c50c8d38e71403cd51b767e7617a161"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 19.01,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "06857c895ca3dd0006c325cfe92577ab457914ef6795e86fff1900e51f5d7b11",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": [
+    {
+      "name": "extension",
+      "tests": 472,
+      "passed": 472,
+      "failed": 0,
+      "durationMs": 4084.7374,
+      "logSha256": "12188605251ba86391ef5d4402631e8ce4e3807c907bddc0bcbfda7d3b26e5d9"
+    },
+    {
+      "name": "browser",
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "durationMs": 17510.1734,
+      "logSha256": "adaaf4b590195c435bcce1ad6f4675aa93f3160dc2a0c8bff464072666ceb649"
+    }
+  ],
+  "clientFiles": {
+    "extensions/vscode/client.js": "a34f10da532f20e06f0e851f9ce4c08df5bdd11aa19024ffe60266cbf75d9a0c",
+    "extensions/vscode/tests/client.test.js": "b727fde6f8ce577f405827ac8e63319b15c0c93ee7da764c8e478f3e55ae30c4"
+  },
+  "verified": [
+    "SDK fixture verifies plain, provider, workspace and attachment dispatch; stale graph catalog revision, untrusted plan, queue field, stale profile and retired objects reject.",
+    "Origin-bound HTTP view preserves graph identity and workspace/provider/attachment fields, including a300000-byte prompt.",
+    "Actual graph-service contract uses the shared client to capture a Local binding, submit a fresh tool-only graph, complete a native file read and consume execution-owned child history without a provider call for that graph.",
+    "Client validates captured binding, session/run identity and graph-root receipt; protocol loss and closed handles do not retry graph admission through a legacy route."
+  ],
+  "retainedFailures": [
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/captured-graph-admission-initial",
+      "scope": "Recording HTTP fixture passed graph pointer in wrong constructor slot; build stopped and no tests ran.",
+      "build": {
+        "pid": 27676,
+        "launchedAt": "2026-10-24T04:14:42.389Z",
+        "completedAt": "2026-10-24T04:15:48.112Z",
+        "exitCode": 1,
+        "signal": null,
+        "logSha256": "6cc02ced4225fc2a173b60c5b19a4c2a88d262b105168ad897133a76f1f34583"
+      }
+    },
+    {
+      "directory": ".agentflow/workspace-switch-validation/native/captured-graph-admission-qualified",
+      "scope": "Recording fixtures did not settle roots between variants; existing active-root guard rejected later admission. Final fixtures persist actual graph roots and explicitly cancel each recorded root.",
+      "gate": {
+        "recordedAt": "2026-10-24T04:16:42.140Z",
+        "sourceParent": "7c7408ada0e59fecdcf86223e2c346925e2e1dd2",
+        "sourcePatchSha256": "aa2d8d8e6e74626a3cc2a93d96d0eecbf190de3ab4d62813e400433a658f89e0",
+        "build": {
+          "pid": 16508,
+          "launchedAt": "2026-10-24T04:16:04.187Z",
+          "completedAt": "2026-10-24T04:16:32.928Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "06aeb7344f2e80597ce5ed686660fa97c5357f386da7d7c8b1b4d338bf657f10"
+        },
+        "test": {
+          "pid": 36424,
+          "launchedAt": "2026-10-24T04:16:35.698Z",
+          "completedAt": "2026-10-24T04:16:39.384Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "6749f875783bdb2729dd8b5ceca5a9e4bb03190760ad8d2bfa78f96494c3f0f9"
+        },
+        "total": 3,
+        "failed": 2,
+        "passed": 1,
+        "seconds": 3.64,
+        "projectFiles": 2816,
+        "sdkSourceFiles": 16,
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 30,
+        "nodeDependencyFiles": 18598,
+        "nativeBinaries": 137,
+        "nativeSha256": "c95d9df524c104183d07dcfbf334e4df3abc3f94f28b973348fabcb770259d20",
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+        "cpythonExecuted": false,
+        "installed": false,
+        "scopePassed": false
+      }
+    }
+  ],
+  "limitations": [
+    "Recording dispatch fixtures, real native tool-only graph execution and client unit suites are separate scopes.",
+    "Graph catalog/detail, human-input/resume, command/model and stream adapters still need captured integration; authenticated remote routing/enrollment remain incomplete.",
+    "Focused4/4 and client472/165 do not qualify a full173 suite or rendered VS Code. Prior full-run rust-analyzer failure is retained.",
+    "No new package/install; installed0.1.64 and protected user state are unchanged. No paid inference or CPython."
+  ]
+}

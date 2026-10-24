@@ -4,7 +4,7 @@
 #include "agentflow/run_executor.hpp"
 #include <memory>
 namespace agentflow {
-class PersistenceService;class RunExecutor;class BackendOwnerControl;struct LocalConnectionContext;
+class PersistenceService;class RunExecutor;class GraphExecution;class BackendOwnerControl;struct LocalConnectionContext;
 struct ConnectionBindingIdentity {
     std::string connection_id,server_id,backend_generation;
     std::int64_t profile_revision=0,protocol_version=1;
@@ -41,6 +41,7 @@ struct ConnectionRunRequest {
     std::optional<WorkspaceAdmission> workspace;
     std::optional<ProviderProfileAdmission> provider;
 };
+struct ConnectionGraphRequest {ConnectionRunRequest run;std::string graph;std::int64_t revision=0;};
 Run submit_local_connection_run(RunExecutor&,ConnectionRunRequest);
 class ConnectionEventStream {
 public:
@@ -64,6 +65,7 @@ public:
     BoundConnectionChildHistory child_history(std::string session,std::string parent,std::string child)const;
     BoundConnectionRun start_run(std::string id,std::string session,std::string prompt)const;
     BoundConnectionRun start_run(ConnectionRunRequest request)const;
+    BoundConnectionRun start_graph(ConnectionGraphRequest request)const;
     void cancel_run(const std::string& id)const;
     std::shared_ptr<CapturedRunOperations> operations(std::string session,std::string run)const;
     std::shared_ptr<ConnectionEventStream> events(std::string session,std::string root)const;
@@ -77,7 +79,7 @@ private:
 // them before the backend's borrowed persistence/executor/control are destroyed.
 class LocalConnectionBindings {
 public:
-    LocalConnectionBindings(PersistenceService&,RunExecutor*,BackendOwnerControl* = nullptr);
+    LocalConnectionBindings(PersistenceService&,RunExecutor*,BackendOwnerControl* = nullptr,GraphExecution* = nullptr);
     ~LocalConnectionBindings();
     LocalConnectionBindings(const LocalConnectionBindings&)=delete;
     LocalConnectionBindings& operator=(const LocalConnectionBindings&)=delete;

@@ -2,23 +2,24 @@
 #include "agentflow/connection_profiles.hpp"
 #include "agentflow/backend_owner_control.hpp"
 #include "agentflow/run_executor.hpp"
+#include "agentflow/graph_service.hpp"
 #include <algorithm>
 #include <random>
 namespace agentflow {
 struct LocalConnectionContext {
-    PersistenceService& store;RunExecutor* executor;BackendOwnerControl* owner;
+    PersistenceService& store;RunExecutor* executor;GraphExecution* graphs;BackendOwnerControl* owner;
     ConnectionProfiles profiles;std::string generation;
     mutable std::shared_mutex lifetime;bool active=true;
-    LocalConnectionContext(PersistenceService& persistence,RunExecutor* execution,BackendOwnerControl* control)
-        :store(persistence),executor(execution),owner(control),profiles(persistence){
+    LocalConnectionContext(PersistenceService& persistence,RunExecutor* execution,BackendOwnerControl* control,GraphExecution* graph)
+        :store(persistence),executor(execution),graphs(graph?graph:dynamic_cast<GraphExecution*>(execution)),owner(control),profiles(persistence){
         if(owner)generation=owner->status().generation;
         else{std::random_device random;for(int i=0;i<4;++i)generation+=std::to_string(random())+"-";}
     }
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("Captured connection backend retired");if(owner&&owner->status().generation!=generation)throw Conflict("Captured backend generation changed");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
 };
-LocalConnectionBindings::LocalConnectionBindings(PersistenceService& store,RunExecutor* executor,BackendOwnerControl* owner)
-    :context_(std::make_shared<LocalConnectionContext>(store,executor,owner)){}
+LocalConnectionBindings::LocalConnectionBindings(PersistenceService& store,RunExecutor* executor,BackendOwnerControl* owner,GraphExecution* graph)
+    :context_(std::make_shared<LocalConnectionContext>(store,executor,owner,graph)){}
 LocalConnectionBindings::~LocalConnectionBindings(){close();}
 void LocalConnectionBindings::close(){std::unique_lock lock(context_->lifetime);context_->active=false;}
 std::shared_ptr<CapturedLocalConnection> LocalConnectionBindings::open(std::string id,std::int64_t revision){
@@ -69,6 +70,17 @@ Run submit_local_connection_run(RunExecutor& executor,ConnectionRunRequest reque
 }
 BoundConnectionRun CapturedLocalConnection::start_run(std::string id,std::string session,std::string prompt)const{return start_run(ConnectionRunRequest{std::move(id),std::move(session),std::move(prompt)});}
 BoundConnectionRun CapturedLocalConnection::start_run(ConnectionRunRequest request)const{auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");return {identity_,submit_local_connection_run(*context_->executor,std::move(request))};}
+BoundConnectionRun CapturedLocalConnection::start_graph(ConnectionGraphRequest request)const{
+    auto life=context_->enter();auto profile=context_->profiles.admit_local(identity_.profile_revision);auto admission=context_->admit();
+    if(!context_->graphs)throw RunUnavailable("Graph execution unavailable");auto& run=request.run;auto& graphs=*context_->graphs;
+    if(run.inbox||request.graph.empty()||request.graph.size()>64||request.graph.find('\0')!=std::string::npos||request.revision<1||request.revision>9007199254740991LL)throw std::invalid_argument("Invalid captured graph admission");
+    if(!run.files.empty()&&(!run.workspace||run.workspace->revision<1))throw std::invalid_argument("Graph attachments require the observed workspace membership revision");
+    if(run.workspace){if(!context_->executor)throw RunUnavailable("Graph workspace validation unavailable");validate_workspace_admission(*run.workspace,context_->executor->execution_workspace());}
+    auto result=!run.files.empty()?graphs.submit_graph_workspace_with_attachments(run.id,run.session,request.graph,request.revision,run.prompt,run.model,*run.workspace,run.provider,std::move(run.files)):
+        run.workspace?graphs.submit_graph_workspace(run.id,run.session,request.graph,request.revision,run.prompt,run.model,*run.workspace,run.provider):
+        run.provider?graphs.submit_graph_profile(run.id,run.session,request.graph,request.revision,run.prompt,run.model,*run.provider):graphs.submit_graph(run.id,run.session,request.graph,request.revision,run.prompt,run.model);
+    return {identity_,std::move(result)};
+}
 
 void CapturedLocalConnection::cancel_run(const std::string& id)const{auto life=context_->enter();auto admission=context_->admit();if(!context_->executor)throw RunUnavailable("Run execution unavailable");context_->executor->cancel(id);}
 namespace {

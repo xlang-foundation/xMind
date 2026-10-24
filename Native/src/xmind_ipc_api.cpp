@@ -101,6 +101,11 @@ struct BoundRunsApi {
     X::Value Submit(X::Value request){return api_call([&]{check();return bound_value(Host(),state->start_run(connection_input::run_request(sdk_values::from_value(request))));});}
     BEGIN_PACKAGE(BoundRunsApi) APISET().AddFunc<3>("ChildHistory",&BoundRunsApi::ChildHistory);APISET().AddFunc<4>("History",&BoundRunsApi::History);APISET().AddFunc<1>("Submit",&BoundRunsApi::Submit);APISET().AddFunc<1>("Open",&BoundRunsApi::Open);APISET().AddFunc<3>("Start",&BoundRunsApi::Start);APISET().AddFunc<1>("Cancel",&BoundRunsApi::Cancel); END_PACKAGE
 };
+struct BoundGraphsApi {
+    std::shared_ptr<CapturedLocalConnection> state;BoundGraphsApi()=default;explicit BoundGraphsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
+    X::Value Submit(X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound graph service");return bound_value(Host(),state->start_graph(connection_input::graph_request(sdk_values::from_value(request))));});}
+    BEGIN_PACKAGE(BoundGraphsApi) APISET().AddFunc<1>("Submit",&BoundGraphsApi::Submit); END_PACKAGE
+};
 struct BoundOperationsApi {
     std::shared_ptr<CapturedRunOperations> state;BoundOperationsApi()=default;explicit BoundOperationsApi(std::shared_ptr<CapturedRunOperations> value):state(std::move(value)){}
     void check()const{if(!state)throw RunUnavailable("Unbound operation scope");}
@@ -120,12 +125,13 @@ struct BoundConnectionApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundConnectionApi()=default;explicit BoundConnectionApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
     void check()const{if(!state)throw RunUnavailable("Unbound connection");}
     X::Value Identity(){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::identity(state->identity()));});}
-    X::Value Sessions();X::Value Runs();X::Value Events(std::string session,std::string root);X::Value Operations(std::string session,std::string run);
-    BEGIN_PACKAGE(BoundConnectionApi) APISET().AddFunc<0>("Identity",&BoundConnectionApi::Identity);APISET().AddFunc<0>("Sessions",&BoundConnectionApi::Sessions);APISET().AddFunc<0>("Runs",&BoundConnectionApi::Runs);APISET().AddFunc<2>("Events",&BoundConnectionApi::Events);APISET().AddFunc<2>("Operations",&BoundConnectionApi::Operations); END_PACKAGE
+    X::Value Sessions();X::Value Runs();X::Value Graphs();X::Value Events(std::string session,std::string root);X::Value Operations(std::string session,std::string run);
+    BEGIN_PACKAGE(BoundConnectionApi) APISET().AddFunc<0>("Graphs",&BoundConnectionApi::Graphs);APISET().AddFunc<0>("Identity",&BoundConnectionApi::Identity);APISET().AddFunc<0>("Sessions",&BoundConnectionApi::Sessions);APISET().AddFunc<0>("Runs",&BoundConnectionApi::Runs);APISET().AddFunc<2>("Events",&BoundConnectionApi::Events);APISET().AddFunc<2>("Operations",&BoundConnectionApi::Operations); END_PACKAGE
 };
-struct ConnectionObjects {BEGIN_PACKAGE(ConnectionObjects) APISET().AddClass<0,BoundConnectionApi>("Binding");APISET().AddClass<0,BoundSessionsApi>("Sessions");APISET().AddClass<0,BoundRunsApi>("Runs");APISET().AddClass<0,BoundEventsApi>("Events");APISET().AddClass<0,BoundOperationsApi>("Operations"); END_PACKAGE};
+struct ConnectionObjects {BEGIN_PACKAGE(ConnectionObjects) APISET().AddClass<0,BoundConnectionApi>("Binding");APISET().AddClass<0,BoundSessionsApi>("Sessions");APISET().AddClass<0,BoundRunsApi>("Runs");APISET().AddClass<0,BoundGraphsApi>("Graphs");APISET().AddClass<0,BoundEventsApi>("Events");APISET().AddClass<0,BoundOperationsApi>("Operations"); END_PACKAGE};
 ConnectionObjects& connection_objects(){static auto value=[] {auto owner=std::make_shared<ConnectionObjects>();retain_xmind_ipc_service(owner);(void)xmind_ipc_runtime().RegisterPackage("_xmind_connection_objects",*owner);return owner;}();return *value;}
 X::Value BoundConnectionApi::Sessions(){return api_call([&]{check();(void)state->identity();return connection_objects().__xlang3_package_->CreateInstance("Sessions",std::make_shared<BoundSessionsApi>(state));});}
+X::Value BoundConnectionApi::Graphs(){return api_call([&]{check();(void)state->identity();return connection_objects().__xlang3_package_->CreateInstance("Graphs",std::make_shared<BoundGraphsApi>(state));});}
 X::Value BoundConnectionApi::Runs(){return api_call([&]{check();(void)state->identity();return connection_objects().__xlang3_package_->CreateInstance("Runs",std::make_shared<BoundRunsApi>(state));});}
 X::Value BoundConnectionApi::Events(std::string session,std::string root){return api_call([&]{check();return connection_objects().__xlang3_package_->CreateInstance("Events",std::make_shared<BoundEventsApi>(state->events(session,root)));});}
 X::Value BoundConnectionApi::Operations(std::string session,std::string run){return api_call([&]{check();return connection_objects().__xlang3_package_->CreateInstance("Operations",std::make_shared<BoundOperationsApi>(state->operations(session,run)));});}

@@ -23,13 +23,13 @@ struct TemporaryDatabase {
 };
 // Recording execution peer: tests transport/native option dispatch only. No model
 // inference or real process effects are claimed by this fixture.
-using test::RecordingExecutor;
+using test::RecordingGraphExecutor;
 struct Access {
     HttpServer server;
     int port;
     std::thread worker;
     Access(PersistenceService& store,const std::string& token,RunExecutor* executor=nullptr)
-        :server(store,token,executor),port(server.bind(0)),worker([this]{server.listen();}){
+        :server(store,token,executor,nullptr,{},{},{},nullptr,dynamic_cast<GraphExecution*>(executor)),port(server.bind(0)),worker([this]{server.listen();}){
         require(port>0,"Connection profile HTTP server must bind");
     }
     ~Access(){server.stop();if(worker.joinable())worker.join();}
@@ -51,7 +51,7 @@ int main(int argc,char** argv){
         {
             PersistenceService store(database.path.string(),{argv[1],argv[2]});
             {
-            RecordingExecutor execution(store);Access access(store,token,&execution);
+            RecordingGraphExecutor execution(store);Access access(store,token,&execution);
             httplib::Client client("127.0.0.1",access.port);
             client.set_connection_timeout(2,0);client.set_read_timeout(3,0);
             const auto unauthorized=client.Get("/v1/connections");
@@ -131,6 +131,8 @@ int main(int argc,char** argv){
             options["id"]="captured-workspace";options["expected_workspace_id"]="fixture-workspace";options["expected_workspace_authority_id"]=std::string(32,'a');options["expected_workspace_revision"]=9;submit("workspace");require(execution.observed.workspace&&execution.observed.workspace->revision==9,"Workspace authority and membership revision must reach native admission");
             options["id"]="captured-files";options["files"]=Json::array({{{"path","input.txt"},{"folder_id","primary"},{"name","input.txt"},{"description","Observed attachment"},{"mention","@input"}}});submit("files");require(execution.observed.files.size()==1&&execution.observed.files[0].folder_id=="primary"&&execution.observed.files[0].description=="Observed attachment","File metadata must reach native admission intact");
             options["id"]="captured-inbox";options["inbox_id"]="queued-input";submit("queued");require(execution.observed.inbox==std::optional<std::string>{"queued-input"}&&execution.observed.files.size()==1&&execution.observed.provider&&execution.observed.workspace,"Queued admission must retain files, provider and workspace");
+            auto graph_options=options;graph_options.erase("inbox_id");graph_options["id"]="captured-http-graph";graph_options["prompt"]=std::string(300000,'p');graph_options["graph_id"]="fixture-graph";graph_options["graph_revision"]=7;const auto admitted_graph=client.Post(base+"/graph-runs",view_auth,graph_options.dump(),"application/json");require(admitted_graph&&admitted_graph->status==202&&Json::parse(admitted_graph->body).at("binding")==identity&&Json::parse(admitted_graph->body).at("run").at("graph_root")==true,"View graph admission must retain captured native identity");require(execution.graph_calls==1&&execution.observed_graph.run.prompt.size()==300000&&execution.graph_mode=="files"&&execution.observed_graph.run.files.size()==1&&execution.observed_graph.run.provider&&execution.observed_graph.run.workspace,"Graph HTTP options must preserve native workspace/provider/attachment dispatch");auto rejected_graph=graph_options;rejected_graph["graph_revision"]=6;const auto old_graph=client.Post(base+"/graph-runs",view_auth,rejected_graph.dump(),"application/json");require(old_graph&&old_graph->status==409&&execution.graph_calls==1,"Stale graph revision must reject without dispatch");rejected_graph=graph_options;rejected_graph["plan"]="untrusted";const auto supplied_plan=client.Post(base+"/graph-runs",view_auth,rejected_graph.dump(),"application/json");require(supplied_plan&&supplied_plan->status==400&&execution.graph_calls==1,"Graph clients may not supply executable plans");
+            const auto settled_graph=client.Post(base+"/runs/captured-http-graph/cancel",view_auth,"{}","application/json");require(settled_graph&&settled_graph->status==200,"Settle the recorded graph fixture before later session admission");
             auto invalid_options=options;invalid_options["id"]="captured-invalid";invalid_options.erase("expected_workspace_revision");const auto before_calls=execution.calls;const auto rejected_files=client.Post(base+"/runs",view_auth,invalid_options.dump(),"application/json");require(rejected_files&&rejected_files->status==400&&execution.calls==before_calls,"Missing attachment membership revision must reject before native dispatch");invalid_options=options;invalid_options["expected_workspace_authority_id"]=std::string(32,'b');const auto wrong_workspace=client.Post(base+"/runs",view_auth,invalid_options.dump(),"application/json");require(wrong_workspace&&wrong_workspace->status==409&&execution.calls==before_calls,"Changed workspace authority must reject before dispatch");
             store.create_session("ops-http","Operations").get();store.create_run("ops-http-root","ops-http").get();store.transition("ops-http-root",RunState::queued,RunState::running).get();
             const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+600000;

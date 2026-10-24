@@ -1,3 +1,25 @@
+## Captured graph admission reaches the actual native executor — 2026-10-23
+
+The registered binding adds a Graphs subobject with Submit(dictionary).
+Captured profile revision and backend lifetime checks surround the existing
+GraphExecution admission methods. Graph revision, provider, workspace and
+attachments remain native guards; executable plans and unsupported queue
+requests cannot be supplied through this API. HTTP uses the same native facade.
+The larger-prompt contract verifies300000 bytes without adding the unrelated
+binding-metadata request ceiling to graph admission.
+
+The shared browser/extension client negotiates captured graph admission,
+validates the graph-root receipt and does not retry on protocol/receipt drift.
+A production graph-service test captures Local, submits a fresh tool-only graph,
+reads actual workspace bytes and consumes captured child history with no
+provider call for that graph. Native4 pass in19.01s on the final frozen
+patch/binary; extension472 and browser165 tests pass on recorded source hashes.
+[Receipt and retained fixture failures](evidence/captured-graph-admission-20261023.json).
+
+These are focused scopes. Graph catalog/detail/human/resume/stream, commands,
+models and remote/enrollment remain unfinished. Prior full173 rust-analyzer
+failure and rendered VS Code acceptance stay open. Installed64 is unchanged.
+
 ## Shared browser/extension child history uses captured native services — 2026-10-23
 
 The captured Runs subobject adds ChildHistory(session, parent, child). Ordinary
