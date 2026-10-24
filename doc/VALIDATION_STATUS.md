@@ -1,3 +1,13 @@
+## Fresh Rust project does not reproduce the restore failure — 2026-10-23
+
+A newly created isolated project copies exactly Cargo.toml, Cargo.lock and
+src/lib.rs from the tracked fixture, then runs offline Cargo validation and
+the actual native rust-analyzer HTTP/agent contract. Both checks pass in3.82s,
+with source and binary closures unchanged. [Receipt](evidence/rust-restore-fresh-fixture-20261023.json).
+This excludes a fresh project alone as a sufficient reproduction; it does
+not isolate every machine cache/workload or repair the failed172/173 full run.
+Installed64 remains unchanged, and complete qualification stays open.
+
 ## Complete173 gate retains a real language-server failure — 2026-10-23
 
 Source84965636 builds successfully and completes the actual173-contract

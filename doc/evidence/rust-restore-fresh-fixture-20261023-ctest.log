@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/.agentflow/workspace-switch-validation/native/rust-restore-fresh-fixture-f97d82e1
+    Start 1: native_language_server_rust_fixture_check
+1/2 Test #1: native_language_server_rust_fixture_check .......   Passed    0.51 sec
+    Start 2: native_language_server_rust_analyzer_contract
+2/2 Test #2: native_language_server_rust_analyzer_contract ...   Passed    3.30 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   3.82 sec

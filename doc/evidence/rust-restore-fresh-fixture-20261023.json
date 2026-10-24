@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fresh isolated Cargo project copied from the three tracked Rust fixture sources, checked offline and queried through the actual native rust-analyzer HTTP/agent contract.",
+  "gate": {
+    "recordedAt": "2026-10-24T03:52:04.736Z",
+    "sourceParent": "f97d82e18edadff69355f099e1827dd040c591f3",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 37508,
+      "launchedAt": "2026-10-24T03:51:49.266Z",
+      "completedAt": "2026-10-24T03:51:55.543Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f75e4c6cab168ed79d7bb774f7c88772fa7ce3866eca5424476c4924506a6878"
+    },
+    "test": {
+      "pid": 11844,
+      "launchedAt": "2026-10-24T03:51:58.193Z",
+      "completedAt": "2026-10-24T03:52:02.053Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a60abbf6f5a4654f43b00e2dc42f5465cf1f79d3cd75d71d89cf8c953714a695"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 3.82,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "fixture": {
+    "path": "D:/CantorAI2026/xMind/../TestProj/xmind-delivery-validation/rust-restore-fresh-f97d82e1",
+    "files": {
+      "Cargo.toml": "2139d9d7a51573d13d928feb0a892fdbfaff452d35d118def7426d53e4dd586c",
+      "Cargo.lock": "fce0a07c144c9849c3fc9aab6f7de294164217711791517490ffd0d6c5c33735",
+      "src/lib.rs": "f53fe1011d2dfadfa68d47836e09023acb3a2590391fcc6605692357243d0305"
+    }
+  },
+  "interpretation": "A fresh project alone did not reproduce the prior full-run workspace-text restore failure. The failed172/173 complete run remains unqualified; no runtime fix is established.",
+  "limitations": [
+    "This isolates project build artifacts, not all OS/toolchain caches or prior machine workload.",
+    "The focused2/2 pass is not a full-suite pass or evidence that the original failure was harmless.",
+    "No package/install, paid inference, CPython or user task replay."
+  ]
+}
