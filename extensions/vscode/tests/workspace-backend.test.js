@@ -174,3 +174,13 @@ test('a published rendezvous directory alias is refused before authentication',a
  const h=harness({alias:value=>/\\native-view-[a-f0-9]{32}$/.test(value)?'C:\\Different':value});
  await assert.rejects(h.manager.connect(),/different directory/);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
 });
+
+
+test('loopback Code server connects to its local file workspace and still fences trust and host changes',async()=>{
+ const h=harness({remote:'127.0.0.1:50495'}),owner=await h.manager.connect();
+ assert.equal(h.launches.length,1);assert.equal(owner.canonical,'D:\\Projects\\Example');
+ const ticket=await h.manager.prepare();h.manager.assert(ticket);
+ h.vscode.env.remoteName='ssh-remote';assert.throws(()=>h.manager.assert(ticket),/workspace changed/);
+ h.vscode.env.remoteName='127.0.0.1:50495';h.vscode.workspace.isTrusted=false;assert.throws(()=>h.manager.assert(ticket),/workspace changed/);
+ const external=harness({remote:'127.0.0.1:50495',fetch:async()=>({ok:true,json:async()=>owner.metadata})});const attached=await external.manager.attach('http://127.0.0.1:19100','c'.repeat(64));assert.equal(attached.canonical,'D:\\Projects\\Example');assert.equal(external.launches.length,0);
+});

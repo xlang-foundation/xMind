@@ -1,4 +1,5 @@
 'use strict';
+const {isLocalHostConnection}=require('./native-runtime');
 // Thin editor access adapter. Native owns profile discovery, startup, process
 // identity, storage and execution. The host never receives backend credentials.
 const fs=require('node:fs/promises');
@@ -95,7 +96,7 @@ class WorkspaceBackend {
   dispose(){this.disposed=true;this.invalidate();for(const owner of this.adapters.values())this.closeAdapter(owner);this.adapters.clear();/* Only view adapters close; native backends persist. */}
   async selectedFolder(forcePick=false){
     if(!this.vscode.workspace.isTrusted)throw new Error('Trust the workspace before starting its local xMind backend.');
-    if(this.deps.platform!=='win32'||this.deps.arch!=='x64'||this.vscode.env?.remoteName)throw new Error('Managed local xMind currently requires a local Windows x64 extension host.');
+    if(this.deps.platform!=='win32'||this.deps.arch!=='x64'||!isLocalHostConnection(this.vscode.env?.remoteName))throw new Error('Managed local xMind currently requires a local Windows x64 extension host.');
     const folders=this.vscode.workspace.workspaceFolders||[];
     if(!folders.length)throw new Error('Open a folder in VS Code before using local xMind.');
     if(folders.length>32||folders.some(folder=>folder.uri.scheme!=='file'))throw new Error('Managed local xMind requires file workspace folders on this extension host.');
@@ -134,7 +135,7 @@ class WorkspaceBackend {
   }
   async open(forcePick,upgradeBackend=false){
     const epoch=this.epoch,selection=await this.selectedFolder(forcePick);
-    const current=()=>!this.disposed&&this.vscode.workspace.isTrusted&&!this.vscode.env?.remoteName&&this.epoch===epoch&&selection.signature===this.signature();
+    const current=()=>!this.disposed&&this.vscode.workspace.isTrusted&&isLocalHostConnection(this.vscode.env?.remoteName)&&this.epoch===epoch&&selection.signature===this.signature();
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const roots=await Promise.all(selection.roots.map(async root=>canonicalPath(await this.deps.fs.realpath(root.fsPath))));
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
@@ -246,7 +247,7 @@ class WorkspaceBackend {
     const canonical=canonicalPath(await this.deps.fs.realpath(selection.folder.uri.fsPath));
     const actual=await this.readWorkspace(origin,token);
     if(!actual.configured||keyPath(actual.root)!==keyPath(canonical))throw new Error('The attached backend workspace differs from the opened folder.');
-    if(epoch!==this.epoch||selection.signature!==this.signature()||this.disposed||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName)throw new Error('Workspace changed while attaching.');
+    if(epoch!==this.epoch||selection.signature!==this.signature()||this.disposed||!this.vscode.workspace.isTrusted||!isLocalHostConnection(this.vscode.env?.remoteName))throw new Error('Workspace changed while attaching.');
     const scope=crypto.createHash('sha256').update(keyPath(canonical)).digest('hex');
     this.active={origin,canonical,scope,metadata:actual,epoch,signature:selection.signature,roots:selection.roots};return this.active;
   }
@@ -259,7 +260,7 @@ class WorkspaceBackend {
   }
   assert(ticket){
     const active=this.active;
-    if(this.upgrading||this.disposed||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName||!active||ticket.owner!==active.scope||ticket.epoch!==this.epoch||ticket.origin!==active.origin||ticket.signature!==this.signature())throw new Error('The selected workspace changed before admission.');
+    if(this.upgrading||this.disposed||!this.vscode.workspace.isTrusted||!isLocalHostConnection(this.vscode.env?.remoteName)||!active||ticket.owner!==active.scope||ticket.epoch!==this.epoch||ticket.origin!==active.origin||ticket.signature!==this.signature())throw new Error('The selected workspace changed before admission.');
   }
   async prepare(){
     const active=this.active;if(!active)throw new Error('Connect the opened workspace before submitting work.');

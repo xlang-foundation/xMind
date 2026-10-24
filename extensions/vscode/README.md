@@ -27,8 +27,10 @@ Open a local folder and run **xMind: Open Workspace**. Managed mode uses the
 actual VS Code `workspaceFolders` and extension-host environment. A single
 folder is selected automatically; no `.code-workspace` file, separate server
 launch or manual server-token prompt is required. Managed local execution
-currently requires a local Windows x64 extension host. Remote and virtual
-workspace folders are rejected rather than passed to a local backend.
+currently requires a Windows x64 Node extension host and local file folders.
+The official VS Code Server is also supported when its connection authority is
+an exact loopback host and port (127.0.0.1, localhost or [::1]). SSH, container,
+non-loopback and virtual workspace connections remain unsupported.
 
 VS Code must trust the opened folder before enabling xMind. In Restricted Mode,
 VS Code disables this extension; trust only a folder whose contents you intend

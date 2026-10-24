@@ -116,8 +116,17 @@ async function verifyNativeRuntime(runtimeRoot, { io = fs } = {}) {
   check(raw.equals(await io.readFile(manifestPath)), 'The native runtime manifest changed during verification.');
   return { runtimeRoot, manifest, manifestSha256: crypto.createHash('sha256').update(raw).digest('hex') };
 }
+// Official serve-web uses its loopback authority as remoteName even though
+// the Node extension host and file workspace are on this Windows machine.
+// SSH, containers and non-loopback hosts remain unsupported.
+function isLocalHostConnection(remoteName) {
+  if(remoteName == null || remoteName === '')return true;
+  if(typeof remoteName !== 'string')return false;
+  const match=/^(?:127\.0\.0\.1|localhost|\[::1\]):([1-9][0-9]{0,4})$/.exec(remoteName);
+  return !!match && Number(match[1]) <= 65535;
+}
 async function resolveNativeRuntime(context, hostEnv, userSettings = {}, dependencies = {}) {
-  check(hostEnv?.platform === 'win32' && hostEnv?.arch === 'x64' && !hostEnv?.remoteName,
+  check(hostEnv?.platform === 'win32' && hostEnv?.arch === 'x64' && isLocalHostConnection(hostEnv?.remoteName),
     'Managed native xMind currently requires a local Windows x64 VS Code host.');
   const io = dependencies.io || fs;
   const extensionRoot = absolute(context?.extensionUri?.fsPath, 'Extension directory');
@@ -176,4 +185,4 @@ function nativeProgramEntry(runtime, role) {
   check(['serve', 'admin', 'console', 'schema-worker'].includes(role), 'Unsupported native entry role.');
   return {program:path.join(runtime.runtimeRoot,'xmind.exe'),arguments:role==='console'?[]:[role]};
 }
-module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, REQUIRED_NATIVE, REQUIRED_STDLIB, REQUIRED_BOOTSTRAP, MANIFEST_NAME };
+module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, isLocalHostConnection, REQUIRED_NATIVE, REQUIRED_STDLIB, REQUIRED_BOOTSTRAP, MANIFEST_NAME };

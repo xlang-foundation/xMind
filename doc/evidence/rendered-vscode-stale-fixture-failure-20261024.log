@@ -1,0 +1,22 @@
+# Subtest: connection sign-in form clears credentials and observes storage without switching workspace
+not ok 542 - connection sign-in form clears credentials and observes storage without switching workspace
+  ---
+  duration_ms: 29.2731
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\views\\browser\\tests\\connection.test.cjs:160:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot set properties of null (setting 'onsubmit')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    eval (eval at fixture (D:\CantorAI2026\xMind\views\browser\tests\connection.test.cjs:14:611), <anonymous>:699:41)
+    eval (<anonymous>)
+    fixture (D:\CantorAI2026\xMind\views\browser\tests\connection.test.cjs:14:611)
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\views\browser\tests\connection.test.cjs:162:16)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...

@@ -8,7 +8,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Installed73 Native12fc37cd/SDK8c passes full178, clients497/178, packaged browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.73-0201c326-20261024.json; NEVER replay. Remaining goal active.
 
-- Prior68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
+- Rendered loopback Code Server candidate passes selected-editor read/edit/Node4/reload8 with separate worker; clients500/178. NEVER replay sessionc81fc6637b564336bb2419f1929e1aae/root09841bb1abe94ec8a90b87c26715a1ea. Immediate editor refresh remains open; doc/evidence/rendered-vscode-loopback-coding-20261024.json. Installed73 unchanged.
 
 - Prior67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
 

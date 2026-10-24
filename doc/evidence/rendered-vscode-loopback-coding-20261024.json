@@ -1,0 +1,104 @@
+{
+  "recordedAt": "2026-10-24T20:25:12.476Z",
+  "sourceParent": "fb2ec44c64be618ec013ac9a5ce0539dcbff6e1e",
+  "sourcePatchSha256": "1af120f7f66f7ad8f02379422854815c311630b427ad88c089668ca095e4a623",
+  "clients": {
+    "passed": true,
+    "extension": {
+      "pid": 40240,
+      "began": "2026-10-24T20:19:28.948Z",
+      "ended": "2026-10-24T20:19:33.038Z",
+      "exitCode": 0,
+      "sha256": "cd7a4fc5edf54143a25910955c6e2bed9b1f65b4f5be043fe8d86ca95c83071c",
+      "summary": "\n1..500\n# tests 500\n# suites 0\n# pass 500\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 4020.5692\n"
+    },
+    "browser": {
+      "pid": 14956,
+      "began": "2026-10-24T20:19:33.038Z",
+      "ended": "2026-10-24T20:19:53.324Z",
+      "exitCode": 0,
+      "sha256": "f12e5d3ce614db210d70ff0caaee84ac50d7c5b89c6dcdad2b56e61c51bc5a01",
+      "summary": "\n1..178\n# tests 178\n# suites 0\n# pass 178\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 20223.7044\n"
+    },
+    "sourceDependencyFileSetsAndBytesUnchanged": true,
+    "nativeRun": false,
+    "renderedRun": false
+  },
+  "rendered": {
+    "passed": true,
+    "calls": 4,
+    "proof": {
+      "passed": true,
+      "sessionId": "c81fc6637b564336bb2419f1929e1aae",
+      "runId": "09841bb1abe94ec8a90b87c26715a1ea",
+      "selectedEditorContext": true,
+      "separateProcessAgent": true,
+      "cleanFirstCompletion": true,
+      "reloadRestoredEightMessages": true,
+      "approvedEditOnce": true,
+      "approvedCommandOnce": true,
+      "neverReplay": true
+    },
+    "nativeSha256": "12fc37cd1c24cee1336c8ba0876fabd853037a5bb2f50880ffe9fb0ff6bc2e94",
+    "ownedNativeExited": {
+      "code": null,
+      "signal": "SIGTERM"
+    },
+    "paidInference": false,
+    "installedExtensionUnchanged": true,
+    "scope": "Rendered actual Code editor selection and xMind native process coding through controlled local model peer",
+    "goalComplete": false
+  },
+  "worker": {
+    "pid": 6364,
+    "parentPid": 11812,
+    "generation": "ff782dc915fa6eb10869178ba79beb34",
+    "retiredReason": "completed",
+    "modelCalls": 4,
+    "historyMessages": 8,
+    "operations": [
+      {
+        "id": "0f6a1cc6c22fea1d4263da31312b00a8",
+        "state": "succeeded"
+      },
+      {
+        "id": "5a9965c290e2b592875d8310074cbaec",
+        "state": "succeeded"
+      }
+    ]
+  },
+  "candidateHostFiles": {
+    "native-runtime.js": "21c2c83016c77ae5b42ba89c1853a806d19652b5a3991ec78eac00edf07ed202",
+    "workspace-backend.js": "a03bf5006f617b153ce0f04037d0cac65451104d3936804085b8946fae03ea02",
+    "language-server-editor.js": "46c64cb4673b53f7914553941096d040ea0794ea487dd2413433b773fc07e416"
+  },
+  "installed73CompleteFilesVerified": 2442,
+  "installed73Unchanged": true,
+  "licenseAcceptance": "User explicitly approved isolated Microsoft Code Server test",
+  "editorServer": {
+    "version": "1.143.1",
+    "host": "Windows x64 Node extension host",
+    "connection": "token-protected loopback only",
+    "telemetry": "disabled",
+    "isolatedSettings": true,
+    "closedAfterTest": true
+  },
+  "scope": "Managed local connection plus external-backend editor selection/read/edit/Node approval/coding/reload; synthetic provider only",
+  "limitations": [
+    "Immediate editor-buffer refresh was not observed; reload showed the actual changed file. Official server logged a file-watcher regex error.",
+    "Production installed extension remains 0.1.73; this is a staged host-adapter candidate, not an installed release.",
+    "Original full179 native graph-MCP failure and four hosted failures remain unresolved.",
+    "Remote routing/enrollment/fenced execution still incomplete."
+  ],
+  "failedHarness": {
+    "wrongTestInventory": "Empty explicit browser list invoked broad Node discovery; 681/682 before failed fixture cleanup",
+    "originalError": "Stale generated HTML form ID with current chat script; fresh build and explicit inventory used by final gate",
+    "termination": "Only identity-bound JSDOM connection fixture from erroneous broad invocation was stopped after failure left its window timers active; no model/tool task retried"
+  },
+  "goalComplete": false,
+  "postGateDocumentationOnly": {
+    "AGENTS.md": "1db683fd2c12f2bfb623dea83e55f591604772648be5655e83dd1e0a5e2cb517",
+    "extensions/vscode/README.md": "6926edffadc1c43aebb130a3a947a155485ddd2ef44bfb36f27963d9fe13c8b4"
+  },
+  "editorRefreshObservation": "Original saved editor buffer remained visible immediately after completion; reload displayed changed bytes. No user buffer was overwritten by an adapter refresh."
+}

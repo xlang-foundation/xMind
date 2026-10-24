@@ -83,3 +83,10 @@ test('VS Code discards overlapping language-server formatting edits',async()=>{
  const f=fixture();await f.editor.connect(f.client);f.setAnswer(async query=>({server_id:'rust',language_id:'rust',path:query.path,method:query.method,result:[{range:{start:{line:0,character:0},end:{line:0,character:4}},newText:'x'},{range:{start:{line:0,character:3},end:{line:0,character:5}},newText:'y'}],diagnostics:[]}));
  assert.equal(await f.providers.formatting[0].provider.provideDocumentFormattingEdits(f.document,{tabSize:4,insertSpaces:true},{isCancellationRequested:false}),undefined);f.editor.dispose();
 });
+
+
+test('loopback Code server publishes native diagnostics and remote-host changes invalidate them',async()=>{
+ const f=fixture();f.vscode.env.remoteName='127.0.0.1:50495';await f.editor.connect(f.client);f.emit('save',f.document);await delay(20);
+ assert.equal(f.queries.length,1);assert.equal(f.items.size,1);
+ f.vscode.env.remoteName='ssh-remote';assert.equal(f.editor.active(),false);f.editor.disconnect();assert.equal(f.items.size,0);
+});

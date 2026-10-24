@@ -137,3 +137,14 @@ test('relative, controlled or malformed configuration paths are rejected without
   for (const setting of ['providerConfigPath','languageServerConfigPath','processConfigPath','mcpConfigPath'])for (const value of ['.config/config.yaml', path.join(f.root, 'config\nkey'), path.join(f.root, 'bad\ud800')])
     await assert.rejects(resolveNativeRuntime(f.context, f.host, { [setting]:value }), /absolute local path/);
 });
+
+
+test('official loopback Code server uses the same verified Windows native runtime',async t=>{
+ const f=await fixture(t);
+ for(const remoteName of ['127.0.0.1:50495','localhost:8000','[::1]:65535']){
+  const value=await resolveNativeRuntime(f.context,{...f.host,remoteName});
+  assert.equal(value.runtimeRoot,f.runtime);assert.equal(value.qualified,true);
+ }
+ const {isLocalHostConnection}=require('../native-runtime');
+ for(const remoteName of ['ssh-remote','dev-container','192.168.1.2:8000','127.0.0.2:8000','127.0.0.1:0','127.0.0.1:65536','127.0.0.1:080','127.0.0.1:80/path','user@localhost:80','localhost:80.evil',true])assert.equal(isLocalHostConnection(remoteName),false,String(remoteName));
+});

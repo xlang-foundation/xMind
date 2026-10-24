@@ -1,4 +1,5 @@
 'use strict';
+const {isLocalHostConnection}=require('./native-runtime');
 const path=require('node:path');
 
 function workspaceRelativePath(root,file){
@@ -16,11 +17,11 @@ class LanguageServerEditor {
   constructor(vscode,workspaceBackend){
     this.vscode=vscode;this.workspaceBackend=workspaceBackend;this.client=undefined;this.epoch=-1;this.profiles=[];this.folders=[];this.membershipRefreshedAt=0;this.disposables=[];this.timers=new Map();this.sequences=new Map();this.collection=vscode.languages.createDiagnosticCollection('xMind');
   }
-  active(client=this.client,epoch=this.epoch){return client&&this.client===client&&this.epoch===epoch&&this.workspaceBackend.epoch===epoch&&this.workspaceBackend.active?.origin===client.baseUrl&&this.vscode.workspace.isTrusted&&this.vscode.env?.remoteName===undefined;}
+  active(client=this.client,epoch=this.epoch){return client&&this.client===client&&this.epoch===epoch&&this.workspaceBackend.epoch===epoch&&this.workspaceBackend.active?.origin===client.baseUrl&&this.vscode.workspace.isTrusted&&isLocalHostConnection(this.vscode.env?.remoteName);}
   clear(){for(const timer of this.timers.values())clearTimeout(timer);this.timers.clear();this.sequences.clear();this.collection.clear();}
   disconnect(){for(const item of this.disposables.splice(0))item.dispose();this.clear();this.profiles=[];this.folders=[];this.membershipRefreshedAt=0;this.client=undefined;this.epoch=-1;}
   async connect(client){
-    this.disconnect();const owner=this.workspaceBackend.active;if(!owner||owner.origin!==client?.baseUrl||!this.vscode.workspace.isTrusted||this.vscode.env?.remoteName)return;
+    this.disconnect();const owner=this.workspaceBackend.active;if(!owner||owner.origin!==client?.baseUrl||!this.vscode.workspace.isTrusted||!isLocalHostConnection(this.vscode.env?.remoteName))return;
     const epoch=this.workspaceBackend.epoch;this.client=client;this.epoch=epoch;
     let profiles;try{profiles=await client.languageServerProfiles();}catch(error){if(!this.active(client,epoch))return;this.disconnect();if(error.status!==404)throw error;return;}
     let folders=[{folder_id:owner.metadata?.workspace_id,root:owner.canonical,ordinal:0}];
