@@ -1,0 +1,118 @@
+{
+  "recordedAt": "2026-10-24T23:31:35.047Z",
+  "prior": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:53095",
+    "process_id": 40096,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p74\\profiles\\80101d4a54753d858fcd7539bb993e54857ffc8cde968326787a2dc7b038c519",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff74",
+    "workspace_edits": "approved"
+  },
+  "owner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:53095",
+    "process_id": 30264,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p74\\profiles\\80101d4a54753d858fcd7539bb993e54857ffc8cde968326787a2dc7b038c519",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff74",
+    "workspace_edits": "approved"
+  },
+  "session": "afeb8d646548c58062e14735dbedf999",
+  "completedRoot": "4b0224790e27945fc26505408884e6ae",
+  "history": [
+    {
+      "data": {
+        "content": "Read the original managed marker",
+        "model_id": ""
+      },
+      "id": "msg_1",
+      "role": "user",
+      "seq": 1
+    },
+    {
+      "data": {
+        "content": "Completed graph managed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Native managed package handoff: exact original history.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000093400f0000000000\",\n      \"path\": \"managed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:000000000000000093400f0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "managed.read",
+        "nodes": [
+          {
+            "id": "read",
+            "output": {
+              "content": "Native managed package handoff: exact original history.\n",
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000093400f0000000000",
+              "path": "managed-marker.txt",
+              "source": "graph_tool",
+              "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:000000000000000093400f0000000000",
+              "workspace_revision": 1
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_4",
+      "role": "assistant",
+      "seq": 4
+    },
+    {
+      "data": {
+        "content": "Hold this exact graph during attempted package upgrade",
+        "model_id": ""
+      },
+      "id": "msg_5",
+      "role": "user",
+      "seq": 5
+    },
+    {
+      "data": {
+        "content": "Completed graph managed.pause.\n\n```json\n[\n  {\n    \"id\": \"approval\",\n    \"output\": {\n      \"approved\": true\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "managed.pause",
+        "nodes": [
+          {
+            "id": "approval",
+            "output": {
+              "approved": true
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_6",
+      "role": "assistant",
+      "seq": 6
+    }
+  ],
+  "migration": "Actual immutable 0.1.73 Native12fc37cd/SDK8c package to candidate 0.1.74 native qualified from5e5849cd/SDK8c",
+  "managedDiscovery": true,
+  "activeGraphUpgradeRefused": true,
+  "originalGraphResumedOnce": true,
+  "historyAndProfileExactAfterUpgrade": true,
+  "modelCalls": 0,
+  "paidInference": false,
+  "installed": false,
+  "passed": true,
+  "packageIntegrity": {
+    "oldExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "oldClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    }
+  },
+  "ownedOwnerRetirementObserved": true
+}
