@@ -1,3 +1,9 @@
+## Candidate0.1.67 browser, CLI and managed handoff pass — 2026-10-24
+
+The byte-verified2443-entry VSIX contains2398 runtime files and client485/168. Fresh CLI session41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b completes absolute-value read/edit/Node4 with two approvals, four controlled model calls and eight messages. Actual hidden-browser session157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b completes median read/edit/Node4 with both rendered approvals, automatic completion, actual file preview and reload of the same eight messages. The temporary tab is closed and its exact owned backend exited. NEVER replay these tasks.
+
+Managed66-to67 handoff session500cc07a8096747a157f468cb1b13f89/root9b490dc7a004889d2ad6fdfc46732dca refuses upgrade while paused, resumes the original graph once, then preserves profile/origin/history across idle handoff; both owned processes retire. Zero model calls. NEVER replay. [Qualified coding receipt](evidence/candidate-0.1.67-qualified-coding-20261024.json) and [rendered browser evidence](evidence/candidate-0.1.67-browser-coding-20261024.png). No paid inference. Installation/preservation, rendered VS Code and visible external-browser acceptance remain separate scopes; the complete goal remains open.
+
 ## Complete native173 qualification passes on eafe1b2e — 2026-10-24
 
 All native targets build and the complete173-contract inventory passes173/173 in817.90s. All2816 project inputs,16 SDK headers,1870 pure-library files,30 SDK runtime files,18598 Node dependency files,137 native binaries and their exact file sets remain unchanged. Native SHA11678c9a; SDK8c7972d1. The gate includes atomic captured permission replies and actual separate-process SDK approval/revocation. No paid inference or CPython.
