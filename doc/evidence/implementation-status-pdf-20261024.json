@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-10-24T08:47:05.315Z",
+  "output": "docs/xmind-implementation-status.pdf",
+  "sha256": "eaca5153c8485342c2415a8b0706dccf61d545ebfebd597d9e01770548f66479",
+  "previousPdfSha256": "4423d49b1b8c0911e4fd991e0fe588f357f36adaa52d3f91fd2e6166962df728",
+  "pages": 2,
+  "areas": 14,
+  "installedVersion": "0.1.66",
+  "source": "3c490dd9",
+  "fullNativeGate": "Still running; no terminal qualification claimed",
+  "evidenceIndex": "docs/xmind-delivery-acceptance.md",
+  "detailedEvidence": "doc/VALIDATION_STATUS.md",
+  "renderedWith": "Bundled Poppler pdftoppm; both pages visually reviewed at1300-pixel height",
+  "pageImages": [
+    {
+      "page": 1,
+      "sha256": "56d63c86daa4850c23dde023bbe65b7c50f2849f5486082b22713fd76981cdd8"
+    },
+    {
+      "page": 2,
+      "sha256": "d0e19905e3fe11ef36097c2d1806ec2a54b5b9b802ebf52b8f9582efe0d245bb"
+    }
+  ],
+  "textExtractionChecked": "Node PDF.js: both pages and all area labels",
+  "authoring": "Node pdf-lib; no CPython",
+  "gateInputsModified": false
+}
