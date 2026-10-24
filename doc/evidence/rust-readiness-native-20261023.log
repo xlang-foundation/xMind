@@ -1,0 +1,15 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 79: native_language_server_diagnostics_contract
+1/5 Test #79: native_language_server_diagnostics_contract .....   Passed    5.70 sec
+    Start 80: native_language_server_rust_fixture_check
+2/5 Test #80: native_language_server_rust_fixture_check .......   Passed    0.11 sec
+    Start 81: native_language_server_rust_analyzer_contract
+3/5 Test #81: native_language_server_rust_analyzer_contract ...   Passed   16.50 sec
+    Start 82: native_multifolder_language_server_contract
+4/5 Test #82: native_multifolder_language_server_contract .....   Passed    6.26 sec
+    Start 83: native_language_server_configuration_contract
+5/5 Test #83: native_language_server_configuration_contract ...   Passed    0.21 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =  28.81 sec

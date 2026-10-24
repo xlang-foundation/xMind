@@ -1,17 +1,20 @@
 // Explicit synthetic LSP peer. This tests native protocol behavior, not a real
 // TypeScript/Python language service or model inference.
 import assert from 'node:assert/strict';
-const mode=process.argv[2];assert.ok(['push','unversioned','suppress-clean','pull','pull-error','silent'].includes(mode));
+const mode=process.argv[2];assert.ok(['push','unversioned','suppress-clean','pull','pull-error','silent','rust-ready','rust-never-ready','rust-malformed'].includes(mode));
+let ready=false;
 let buffer=Buffer.alloc(0),clientPush=false,wasClean=false;
 const send=message=>{const body=Buffer.from(JSON.stringify({jsonrpc:'2.0',...message}));process.stdout.write('Content-Length: '+body.length+'\r\n\r\n');process.stdout.write(body);};
 const diagnostic=(version,uri)=>({range:{start:{line:0,character:6},end:{line:0,character:14}},severity:1,code:2322,message:'Explicit fixture type mismatch',data:{version,clientPush},source:'synthetic-language-peer'});
 function publish(uri,version,items){uri=uri.replace(/^file:\/\/\/([A-Za-z]):/,(_,drive)=>'file:///'+drive.toLowerCase()+'%3A');send({method:'textDocument/publishDiagnostics',params:{uri,...(mode==='unversioned'?{}:{version}),diagnostics:items}});}
 function accept(message){
  if(message.method==='initialize'){
+  if(mode.startsWith('rust-')){assert.equal(message.params.capabilities.experimental.serverStatusNotification,true);return send({id:message.id,result:{serverInfo:{name:'rust-analyzer'},capabilities:{textDocumentSync:1}}});}
   clientPush=message.params.capabilities?.textDocument?.publishDiagnostics?.versionSupport===true;
   return send({id:message.id,result:{capabilities:{textDocumentSync:1,...(mode.startsWith('pull')?{diagnosticProvider:{interFileDependencies:false,workspaceDiagnostics:false}}:{})}}});
  }
- if(message.method==='initialized')return;
+ if(message.method==='initialized'){if(mode.startsWith('rust-')){send({method:'experimental/serverStatus',params:{health:'ok',quiescent:mode==='rust-malformed'?'yes':false}});if(mode==='rust-ready')setTimeout(()=>{ready=true;send({method:'experimental/serverStatus',params:{health:'ok',quiescent:true}});},50);}return;}
+ if(mode.startsWith('rust-')&&message.method?.startsWith('textDocument/')){assert.equal(ready,true,'No document or semantic request may dispatch before observed quiescence');if(message.id!==undefined)return send({id:message.id,result:[{name:'actual-ready-fixture'}]});return;}
  if(message.method==='textDocument/didOpen'||message.method==='textDocument/didChange'){
   const doc=message.params.textDocument,uri=doc.uri,version=doc.version;
   if(mode==='silent')return;

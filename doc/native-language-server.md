@@ -153,3 +153,7 @@ symbol result, adds a third folder during the run, and confirms it is rejected
 by the pinned snapshot. A second AgentRunner run then uses revision 3 and returns
 the new folder's distinct Rust symbol. A live-model turn and rendered
 multi-folder VS Code session remain open.
+
+## Rust analyzer startup readiness
+
+The native client advertises the experimental serverStatusNotification capability. When the initialized server identifies itself as rust-analyzer for a Rust profile, it waits for an observed experimental/serverStatus notification with quiescent:true before document/query dispatch. Observed busy status on later requests uses the same readiness check. The existing request deadline and cancellation remain authoritative; malformed readiness fails, and missing readiness cannot produce an invented empty result. Other servers do not require this Rust-specific signal. Health is not used to fabricate analysis results. [Upstream extension](https://github.com/rust-lang/rust-analyzer/blob/master/docs/book/src/contributing/lsp-extensions.md), [focused evidence and limits](evidence/rust-readiness-20261023.json).

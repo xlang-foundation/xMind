@@ -8,6 +8,7 @@
 #include <limits>
 #include <map>
 #include <mutex>
+#include <optional>
 
 namespace agentflow {
 namespace {
@@ -69,11 +70,18 @@ struct LanguageServerClient::Impl {
     bool initialized=false;
     bool document_formatting=false;
     bool pull_diagnostics=false;
+    bool rust_status_required=false;
+    std::optional<bool> rust_quiescent;
 
     Impl(WorkspaceTools& value,const LanguageServerProfile& setting):workspace(value),profile(setting){}
 
     void observe(const Json& message,Clock::time_point deadline,std::stop_token cancel){
         if(!message.is_object())return;
+        if(message.value("method",std::string{})=="experimental/serverStatus"){
+            const auto params=message.value("params",Json::object());
+            if(!params.is_object()||!params.contains("quiescent")||!params["quiescent"].is_boolean())throw std::runtime_error("Invalid language-server readiness notification");
+            rust_quiescent=params["quiescent"].get<bool>();return;
+        }
         if(message.value("method",std::string{})=="textDocument/publishDiagnostics"){
             const auto payload=message.value("params",Json::object());const auto uri=diagnostic_uri_key(payload.value("uri",std::string{}));
             const auto document=documents.find(uri);if(document==documents.end())return;
@@ -137,10 +145,19 @@ struct LanguageServerClient::Impl {
         auto initialization=Json{{"processId",nullptr},{"rootUri",root_uri},{"workspaceFolders",Json::array({{{"uri",root_uri},{"name",root.filename().string()}}})},{"capabilities",{{"textDocument",{{"hover",{{"contentFormat",Json::array({"plaintext","markdown"})}}},{"definition",{{"linkSupport",true}}},{"references",{{"dynamicRegistration",false}}},{"documentSymbol",{{"hierarchicalDocumentSymbolSupport",true}}},{"formatting",{{"dynamicRegistration",false}}}}}}},{"clientInfo",{{"name","xMind"},{"version","native"}}}};
         initialization["capabilities"]["textDocument"]["publishDiagnostics"]={{"versionSupport",true}};
         initialization["capabilities"]["textDocument"]["diagnostic"]={{"dynamicRegistration",false},{"relatedDocumentSupport",false}};
+        initialization["capabilities"]["experimental"]={{"serverStatusNotification",true}};
         const auto capabilities=exchange("initialize",std::move(initialization),deadline,cancel);
+        const auto info=capabilities.is_object()?capabilities.value("serverInfo",Json::object()):Json::object();
+        rust_status_required=profile.language_id=="rust"&&info.is_object()&&info.value("name",std::string{})=="rust-analyzer";
         const auto formatting=capabilities.is_object()?capabilities.value("capabilities",Json::object()).value("documentFormattingProvider",Json()):Json();document_formatting=formatting.is_boolean()?formatting.get<bool>():formatting.is_object();
         const auto diagnostic=capabilities.is_object()?capabilities.value("capabilities",Json::object()).value("diagnosticProvider",Json()):Json();pull_diagnostics=diagnostic.is_object()||(diagnostic.is_boolean()&&diagnostic.get<bool>());
         channel->send(Json{{"jsonrpc","2.0"},{"method","initialized"},{"params",Json::object()}},deadline,cancel);initialized=true;
+    }
+    void await_ready(Clock::time_point deadline,std::stop_token cancel){
+        // rust-analyzer can answer semantic requests with an incomplete empty
+        // result during its initial workspace load. Use its advertised status
+        // extension before dispatch, within this request's existing deadline.
+        while(rust_status_required&&!rust_quiescent.value_or(false))observe(channel->receive(deadline,cancel),deadline,cancel);
     }
     void open(const std::string& uri,const std::string& language,const std::string& path,const std::string& text,Clock::time_point deadline,std::stop_token cancel){
         const auto key=diagnostic_uri_key(uri);const auto found=documents.find(key);
@@ -158,7 +175,7 @@ struct LanguageServerClient::Impl {
     }
     void stop()noexcept{
         if(process){try{const auto deadline=Clock::now()+std::chrono::seconds(2);(void)exchange("shutdown",nullptr,deadline,{});channel->send(Json{{"jsonrpc","2.0"},{"method","exit"},{"params",nullptr}},deadline,{});}catch(...){}process->shutdown();}
-        channel.reset();process.reset();initialized=false;document_formatting=false;pull_diagnostics=false;documents.clear();published_diagnostics.clear();
+        channel.reset();process.reset();initialized=false;document_formatting=false;pull_diagnostics=false;rust_status_required=false;rust_quiescent.reset();documents.clear();published_diagnostics.clear();
     }
 };
 
@@ -189,7 +206,7 @@ std::string LanguageServerClient::request(const LanguageServerRequest& call,std:
         const auto key=diagnostic_uri_key(uri);const auto document=impl_->documents.find(key);
         if(document!=impl_->documents.end()&&(document->second.second!=file.content||!impl_->published_diagnostics.contains(key)))impl_->stop();
     }
-    try{impl_->start(deadline,cancel);if(call.method=="formatting"&&!impl_->document_formatting)throw std::runtime_error("Configured language server does not support document formatting");impl_->open(uri,profile_.language_id,call.path,file.content,deadline,cancel);}
+    try{impl_->start(deadline,cancel);impl_->await_ready(deadline,cancel);if(call.method=="formatting"&&!impl_->document_formatting)throw std::runtime_error("Configured language server does not support document formatting");impl_->open(uri,profile_.language_id,call.path,file.content,deadline,cancel);}
     catch(...){impl_->stop();throw;}
     try{
     Json params={{"textDocument",{{"uri",uri}}}};

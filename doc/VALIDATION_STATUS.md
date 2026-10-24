@@ -1,3 +1,21 @@
+## Rust startup readiness coordination passes focused5 — 2026-10-23
+
+The native client now advertises server-status notifications and, for an
+initialized Rust server identifying itself as rust-analyzer, waits for observed
+quiescence before document/query dispatch within the existing request deadline.
+A controlled replay of the captured messages returns empty definitions while
+status is busy; waiting for the actual first quiescent notification produces
+valid definitions throughout. This supports startup analysis as the observed
+cause, rather than a request-authentication problem.
+
+New peer cases cover delayed readiness, malformed status and no-readiness
+deadline failure. Actual Rust, synthetic diagnostics, multifolder and config
+contracts pass5/5 in28.81s with frozen closures unchanged. No existing retries,
+expected results or deadlines were loosened. This is focused evidence only;
+full-native168/173 and its RPC cancellation failure remain retained pending
+complete requalification. Installed64 is unchanged.
+[Receipt](evidence/rust-readiness-20261023.json).
+
 ## Rust null-navigation failure captured on the wire — 2026-10-23
 
 Unproxied focused Rust fails1/2 (cargo fixture passes) in3.09s. The browser-view

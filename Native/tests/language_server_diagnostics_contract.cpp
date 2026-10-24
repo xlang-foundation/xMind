@@ -29,6 +29,11 @@ int main(int argc,char** argv){if(argc!=3&&argc!=4)return 2;try{
         }
         return 0;
     }
+    for(const std::string mode:{"rust-ready","rust-never-ready","rust-malformed"}){
+        auto setting=profile(argv[1],argv[2],mode);setting.language_id="rust";LanguageServerClient client(workspace,setting);LanguageServerRequest request;request.path="check.ts";request.method="documentSymbol";
+        bool refused=false;try{const auto value=Json::parse(client.request(request));require(mode=="rust-ready"&&value["result"][0]["name"]=="actual-ready-fixture","Readiness must precede actual semantic dispatch");}catch(const std::runtime_error& error){if(mode=="rust-ready")throw;refused=true;require(std::string(error.what()).find(mode=="rust-malformed"?"readiness":"deadline")!=std::string::npos,"Missing/malformed readiness must retain its explicit failure");}
+        require(refused==(mode!="rust-ready"),"Only a real quiescent notification permits dispatch");
+    }
     for(const std::string mode:{"push","unversioned","suppress-clean"}){
         LanguageServerClient client(workspace,profile(argv[1],argv[2],mode));LanguageServerRequest request;request.path="check.ts";request.method="diagnostics";
         const auto first=Json::parse(client.request(request));require(first["result"]["kind"]=="full"&&first["result"]["items"].size()==1,"Push-only server must return its actual diagnostics without a pull request");

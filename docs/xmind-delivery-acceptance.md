@@ -140,3 +140,7 @@ Native contextual engine1/1 passes in1.60s. Its successful close/reopen continua
 ### Captured browser gateway regression repair — 2026-10-23
 
 The missing captured graph/history gateway routes caused actual local-view reattachment failure. Exact route/method forwarding now passes actual native local-view human/tool completion plus delegation and worker-server contracts. Client474/165 passes. Targeted native5/6 still fails Rust; the full168/173 result and unexplained full-run RPC cancellation failure remain open. [Receipt](../doc/evidence/captured-browser-gateway-repair-20261023.json).
+
+### Rust analyzer readiness — 2026-10-23
+
+Native startup dispatch now waits for observed rust-analyzer quiescence inside the existing request deadline. Controlled replay isolates busy versus ready behavior; native language contracts pass5/5 in28.81s, including actual Rust editor/view comparisons and malformed/missing-readiness checks. This is not a replacement for the retained full168/173 result or proof that the earlier RPC cancellation issue is fixed. [Receipt](../doc/evidence/rust-readiness-20261023.json).

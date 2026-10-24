@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "scope": "Coordinate native rust-analyzer request dispatch with observed server-status quiescence using the existing request deadline.",
+  "gate": {
+    "recordedAt": "2026-10-24T05:19:57.189Z",
+    "sourceParent": "b52404c4cd5078478e9c982441191add1d1bb990",
+    "sourcePatchSha256": "c721850aece7d03ac504d51c2c1377f40d7e9c9fec0435e836d464feadff16fb",
+    "build": {
+      "pid": 30960,
+      "launchedAt": "2026-10-24T05:17:37.512Z",
+      "completedAt": "2026-10-24T05:19:23.065Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8eaf2edc4444cd22fe0220041af98b3d3197426533c24417ac6357b03a91336d"
+    },
+    "test": {
+      "pid": 41624,
+      "launchedAt": "2026-10-24T05:19:25.743Z",
+      "completedAt": "2026-10-24T05:19:54.594Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ec7d8bb38ba4b78c1bdf7397f11507daa9753aee59bce144b1dcb214037e9fc3"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 28.81,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "c1f1aa6bae0081679f9fdb044ae42215db71ee73ca441f2a600d081dd611b49b",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "diagnosticReplay": {
+    "provenance": {
+      "source": ".agentflow/rust-symbol-null-wire-diagnostic/rust-logs/rust-3885337666.log.client.lsp",
+      "sourceSha256": "f0be9e88594057d2d49f200b583e98d076f7055463fcefbe830bb004872728dc",
+      "exe": "C:/Users/shaw9/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rust-analyzer.exe",
+      "exeHash": "175d90eec94f4d34ed9401fadae7f0faf61560c539f9d5f09f930523036aac27",
+      "diagnosticOnly": true,
+      "description": "Replay recorded HTTP fixture LSP messages directly, first without readiness gate then awaiting first advertised quiescence. Both advertise status, prepend installed stable toolchain PATH and alter timing. No native acceptance or installed change."
+    },
+    "control": {
+      "sha256": "badadd7f65abc5166b4fa39c93f97d9bfb310584fec77efe28113d12628559ca",
+      "terminal": {
+        "code": 0,
+        "signal": null
+      },
+      "status": [
+        {
+          "health": "ok",
+          "quiescent": false,
+          "message": null
+        }
+      ],
+      "definitions": [
+        {
+          "id": "xmind-3",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-3",
+            "result": []
+          }
+        },
+        {
+          "id": "xmind-4",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-4",
+            "result": []
+          }
+        },
+        {
+          "id": "xmind-5",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-5",
+            "result": []
+          }
+        },
+        {
+          "id": "xmind-10",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-10",
+            "result": []
+          }
+        },
+        {
+          "id": "xmind-11",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-11",
+            "result": []
+          }
+        }
+      ]
+    },
+    "ready": {
+      "sha256": "d05bb18907ad6b7e83dd45ffc49e2dc3d85087a656efe9821888fedaa9011773",
+      "terminal": {
+        "code": 0,
+        "signal": null
+      },
+      "status": [
+        {
+          "health": "ok",
+          "quiescent": false,
+          "message": null
+        },
+        {
+          "health": "ok",
+          "quiescent": true,
+          "message": null
+        }
+      ],
+      "definitions": [
+        {
+          "id": "xmind-3",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-3",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "xmind-4",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-4",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "xmind-5",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-5",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "xmind-10",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-10",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "xmind-11",
+          "response": {
+            "jsonrpc": "2.0",
+            "id": "xmind-11",
+            "result": [
+              {
+                "originSelectionRange": {
+                  "start": {
+                    "line": 5,
+                    "character": 4
+                  },
+                  "end": {
+                    "line": 5,
+                    "character": 7
+                  }
+                },
+                "targetUri": "file:///d:/CantorAI2026/xMind/Native/tests/fixtures/lsp-rust/src/lib.rs",
+                "targetRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 2,
+                    "character": 1
+                  }
+                },
+                "targetSelectionRange": {
+                  "start": {
+                    "line": 0,
+                    "character": 7
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 10
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "checks": [
+    "Only initialized Rust serverInfo.name rust-analyzer requires readiness; other language servers retain their paths",
+    "Synthetic ready peer refuses premature document/semantic dispatch; native client waits for actual quiescent notification",
+    "Never-ready peer reaches existing request deadline; malformed status fails explicitly",
+    "Actual rust-analyzer symbols/navigation/unsaved restoration/formatting and authenticated view queries pass",
+    "Multifolder and configuration contracts pass"
+  ],
+  "limitations": "Focused5/5 only. Prior complete168/173 and all diagnostics retained; full native requalification still required. Prior full RPC cancellation failure remains unexplained. Replay directly uses installed analyzer with stable toolchain PATH and altered timing, not native qualification. No installed change or paid inference.",
+  "protocol": "https://github.com/rust-lang/rust-analyzer/blob/master/docs/book/src/contributing/lsp-extensions.md"
+}
