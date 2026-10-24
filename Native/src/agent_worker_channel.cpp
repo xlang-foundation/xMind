@@ -194,19 +194,26 @@ std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::ui
     channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",parent_pid},{"port",ipc_host().port}}.dump()},deadline,stop);return channel;
 }
 struct AgentWorkerProcess::Impl {
-    Handle process,job;std::shared_ptr<const BoundProcessExecutable> executable;std::unique_ptr<AgentWorkerChannel> channel;std::uint32_t pid=0;std::uint64_t created=0;bool assigned=false;
+    Handle process,job;std::shared_ptr<const BoundProcessExecutable> executable;std::unique_ptr<AgentWorkerChannel> channel;AgentWorkerScope scope;std::string worker_route;std::uint32_t pid=0;std::uint64_t created=0;bool assigned=false,start_attempted=false;
     ~Impl(){if(assigned&&job.value)TerminateJobObject(job.value,1);if(process.value&&WaitForSingleObject(process.value,0)==WAIT_TIMEOUT){if(!assigned)TerminateProcess(process.value,1);WaitForSingleObject(process.value,5000);}}
 };
 AgentWorkerProcess::AgentWorkerProcess(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
 AgentWorkerProcess::~AgentWorkerProcess()=default;
 std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<const BoundProcessExecutable> executable,AgentWorkerScope scope,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
-    check(deadline,stop);scope_json(scope);if(!executable||executable->identity().empty())throw std::invalid_argument("Worker requires a retained executable binding");
+    check(deadline,stop);auto worker=prepare(std::move(executable),std::move(scope));worker->start(deadline,stop);return worker;
+}
+std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::prepare(std::shared_ptr<const BoundProcessExecutable> executable,AgentWorkerScope scope){
+    scope_json(scope);if(!executable||executable->identity().empty())throw std::invalid_argument("Worker requires a retained executable binding");
+    auto state=std::make_unique<Impl>();state->executable=std::move(executable);state->scope=std::move(scope);state->worker_route=new_route();
+    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(state->scope,new_route())));
+    return std::unique_ptr<AgentWorkerProcess>(new AgentWorkerProcess(std::move(state)));
+}
+void AgentWorkerProcess::start(AgentWorkerChannel::Deadline deadline,std::stop_token stop){
+    auto* state=impl_.get();if(state->start_attempted)throw AgentWorkerProtocolError("Worker startup cannot be repeated");state->start_attempted=true;check(deadline,stop);
     // Recheck the retained identity before launch; the capability pins bytes and
     // the directory chain, so no unbound replacement path may be substituted.
-    if(ForegroundProcess::executable_identity(executable->path())!=executable->identity())throw ProcessBeforeDispatchError("Worker image binding changed");
-    auto state=std::make_unique<Impl>();state->executable=std::move(executable);
-    const auto parent_route=new_route(),worker_route=new_route();
-    state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(scope,parent_route)));
+    if(ForegroundProcess::executable_identity(state->executable->path())!=state->executable->identity())throw ProcessBeforeDispatchError("Worker image binding changed");
+    const auto& scope=state->scope;const auto& parent_route=state->channel->impl_->local;const auto& worker_route=state->worker_route;
     SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
     Handle child(CreateFileMappingW(INVALID_HANDLE_VALUE,&security,PAGE_READWRITE,0,8192,nullptr));if(!child.value)throw std::runtime_error("Cannot create private worker bootstrap");
     {MappingView view(child.value,FILE_MAP_WRITE);std::string bootstrap=Json{{"version",1},{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()},{"parent_birth",birth(GetCurrentProcess())},{"parent_port",ipc_host().port},{"parent_route",parent_route},{"worker_route",worker_route}}.dump();
@@ -226,15 +233,31 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
     child=Handle();input=Handle();output=Handle();
     const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=4||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
     state->channel->impl_->attach(identity.at("port").get<std::uint32_t>(),worker_route,state->process.value);
-    return std::unique_ptr<AgentWorkerProcess>(new AgentWorkerProcess(std::move(state)));
 }
 AgentWorkerChannel& AgentWorkerProcess::channel()noexcept{return *impl_->channel;}
 std::uint32_t AgentWorkerProcess::pid()const noexcept{return impl_->pid;}
 std::uint64_t AgentWorkerProcess::creation_time()const noexcept{return impl_->created;}
 const std::string& AgentWorkerProcess::executable_identity()const noexcept{return impl_->executable->identity();}
-bool AgentWorkerProcess::alive()const{const auto result=WaitForSingleObject(impl_->process.value,0);if(result==WAIT_FAILED)throw std::runtime_error("Cannot observe owned worker");return result==WAIT_TIMEOUT;}
+bool AgentWorkerProcess::alive()const{if(!impl_->process.value)return false;const auto result=WaitForSingleObject(impl_->process.value,0);if(result==WAIT_FAILED)throw std::runtime_error("Cannot observe owned worker");return result==WAIT_TIMEOUT;}
 std::uint32_t AgentWorkerProcess::wait(AgentWorkerChannel::Deadline deadline,std::stop_token stop){
+    if(!impl_->process.value)return 0;
     while(alive()){check(deadline,stop);WaitForSingleObject(impl_->process.value,10);}DWORD code=0;if(!GetExitCodeProcess(impl_->process.value,&code))throw std::runtime_error("Cannot read owned worker exit");for(;;){JOBOBJECT_BASIC_ACCOUNTING_INFORMATION accounting{};if(!QueryInformationJobObject(impl_->job.value,JobObjectBasicAccountingInformation,&accounting,sizeof(accounting),nullptr))throw std::runtime_error("Cannot observe worker descendants");if(!accounting.ActiveProcesses)return code;check(deadline,stop);Sleep(5);}
 }
-void AgentWorkerProcess::terminate(){if(!TerminateJobObject(impl_->job.value,1))throw std::runtime_error("Cannot retire owned worker job");const auto until=Clock::now()+std::chrono::seconds(5);for(;;){JOBOBJECT_BASIC_ACCOUNTING_INFORMATION accounting{};if(!QueryInformationJobObject(impl_->job.value,JobObjectBasicAccountingInformation,&accounting,sizeof(accounting),nullptr))throw std::runtime_error("Cannot observe owned worker job");if(!accounting.ActiveProcesses)break;if(Clock::now()>=until)throw std::runtime_error("Owned worker retirement is unconfirmed");Sleep(5);}const auto remaining=std::clamp<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(until-Clock::now()).count(),0,5000);if(WaitForSingleObject(impl_->process.value,static_cast<DWORD>(remaining))!=WAIT_OBJECT_0)throw std::runtime_error("Owned worker retirement is unconfirmed");}
+void AgentWorkerProcess::terminate(){
+    impl_->start_attempted=true;
+    if(!impl_->process.value)return;
+    if(impl_->assigned){
+        if(!TerminateJobObject(impl_->job.value,1))throw std::runtime_error("Cannot retire owned worker job");
+    }else if(alive()&&!TerminateProcess(impl_->process.value,1))throw std::runtime_error("Cannot retire unassigned owned worker");
+    const auto until=Clock::now()+std::chrono::seconds(5);
+    if(impl_->assigned)for(;;){
+        JOBOBJECT_BASIC_ACCOUNTING_INFORMATION accounting{};
+        if(!QueryInformationJobObject(impl_->job.value,JobObjectBasicAccountingInformation,&accounting,sizeof(accounting),nullptr))throw std::runtime_error("Cannot observe owned worker job");
+        if(!accounting.ActiveProcesses)break;
+        if(Clock::now()>=until)throw std::runtime_error("Owned worker retirement is unconfirmed");
+        Sleep(5);
+    }
+    const auto remaining=std::clamp<std::int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(until-Clock::now()).count(),0,5000);
+    if(WaitForSingleObject(impl_->process.value,static_cast<DWORD>(remaining))!=WAIT_OBJECT_0)throw std::runtime_error("Owned worker retirement is unconfirmed");
+}
 }

@@ -35,7 +35,8 @@ struct AgentWorkerSupervisor::Impl {
     void launch(){
         if(launch_attempted||draining)throw Conflict("Worker supervisor cannot relaunch");
         launch_attempted=true;
-        worker=AgentWorkerProcess::launch(image,scope,deadline);
+        worker=AgentWorkerProcess::prepare(image,scope);
+        worker->start(deadline);
         lease=store.admit_agent_worker({scope.generation,scope.root_id,scope.run_id,scope.workspace_id,
             scope.workspace_revision,worker->pid(),std::to_string(worker->creation_time()),worker->executable_identity(),identity}).get().spec;
         lease_admitted=true;
@@ -135,7 +136,12 @@ bool AgentWorkerSupervisor::alive()const{return impl_->worker&&impl_->worker->al
 bool AgentWorkerSupervisor::admitted()const{std::lock_guard lock(impl_->mutex);return impl_->lease_admitted;}
 std::uint32_t AgentWorkerSupervisor::drain_physical(AgentWorkerChannel::Deadline deadline){
     std::lock_guard lock(impl_->mutex);if(impl_->callers)throw Conflict("Worker physical drain requires joined callers");impl_->draining=true;
-    if(!impl_->worker){if(impl_->launch_attempted)throw AgentWorkerProtocolError("Worker launch requires physical reconciliation");return 0;}
+    // Preparation cannot create a process; start runs only after worker is
+    // retained here. A missing owner therefore proves no child was created.
+    if(!impl_->worker)return 0;
+    // A failed startup has no admitted execution authority. Retire its exact
+    // retained handle/job before closing IPC; never replace the failed launch.
+    if(!impl_->lease_admitted)impl_->worker->terminate();
     if(impl_->control)impl_->control->close();
     impl_->worker->channel().close();return impl_->worker->wait(deadline);
 }

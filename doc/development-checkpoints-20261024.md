@@ -137,3 +137,8 @@ cross-process transfer; all domain execution, admission and SQLite ownership sta
 in the native backend. Preserve the original full objective and every retained
 owner/history/settings backup.
 
+
+
+## Prior67 guidance archived for worker startup fix
+
+- Prior67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.

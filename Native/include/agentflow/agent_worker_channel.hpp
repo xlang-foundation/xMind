@@ -55,6 +55,10 @@ public:
     ~AgentWorkerProcess();
     AgentWorkerProcess(const AgentWorkerProcess&)=delete;
     AgentWorkerProcess& operator=(const AgentWorkerProcess&)=delete;
+    // Retain ownership before startup can create a child or fail. A failed
+    // start cannot be retried; its same owner supports explicit retirement.
+    static std::unique_ptr<AgentWorkerProcess> prepare(std::shared_ptr<const BoundProcessExecutable>,AgentWorkerScope);
+    void start(AgentWorkerChannel::Deadline,std::stop_token={});
     static std::unique_ptr<AgentWorkerProcess> launch(std::shared_ptr<const BoundProcessExecutable>,AgentWorkerScope,AgentWorkerChannel::Deadline,std::stop_token={});
     AgentWorkerChannel& channel()noexcept;
     std::uint32_t pid()const noexcept;

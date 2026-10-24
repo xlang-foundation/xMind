@@ -1,0 +1,133 @@
+{
+  "recordedAt": "2026-10-24T21:04:56.592Z",
+  "scope": "Failed-startup physical ownership and drain; focused qualification only",
+  "originalRegression": {
+    "recordedAt": "2026-10-24T20:58:20.468Z",
+    "sourceParent": "e31adab717651c212b005ec334fc9ce0bc9bc8c6",
+    "sourcePatchSha256": "20aa80e8ff9783203d142894621e30c6448102f983f749b07a25df0525d5211e",
+    "build": {
+      "pid": 39144,
+      "launchedAt": "2026-10-24T20:55:57.563Z",
+      "completedAt": "2026-10-24T20:58:14.632Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "120815fedf4715f8183c847049619c7d670f2f5c103af7b8b420a6908a40bac1"
+    },
+    "test": {
+      "pid": 34092,
+      "launchedAt": "2026-10-24T20:58:17.349Z",
+      "completedAt": "2026-10-24T20:58:17.884Z",
+      "exitCode": 1,
+      "signal": null,
+      "logSha256": "87fa2d82d89e4fe5f409d09389dd5f8edd93fe6db5d6be1e76a4b2cc60b93c6d"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 0.535,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d4c4b94219af7368799b956dab51adafc1ee040f0540d3e7a4b781dfa3d878e6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "scope": "Direct expired-startup regression against original production code; expected negative",
+    "expectedFailure": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "originalFailure": "Worker launch requires physical reconciliation",
+  "fixedQualification": {
+    "recordedAt": "2026-10-24T21:02:56.683Z",
+    "sourceParent": "e31adab717651c212b005ec334fc9ce0bc9bc8c6",
+    "sourcePatchSha256": "219374d072ca98de7e34f5d290a47ac583b50e88f2a8908aa395de22590cc6be",
+    "build": {
+      "pid": 40056,
+      "launchedAt": "2026-10-24T20:58:49.451Z",
+      "completedAt": "2026-10-24T21:01:41.492Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8071a9a25584c2892256f55013a29d41faf2aa90321081f1375d46c17e467a76"
+    },
+    "test": {
+      "pid": 26972,
+      "launchedAt": "2026-10-24T21:01:44.595Z",
+      "completedAt": "2026-10-24T21:02:53.946Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a04e1a9ab948e38d407f97a1be5b663fa32210126547b2775d0839c7b460f4ea"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 69.31,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d2121db4fba105fc7e3c45a3dc88289dc18fa060f4f452081da6dbfc4073d119",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "expiredStartupRegression": {
+      "pid": 30380,
+      "launchedAt": "2026-10-24T21:01:44.240Z",
+      "completedAt": "2026-10-24T21:01:44.595Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ec59abecd70c305065988beaf5e9057146a31788be77bf552ff8dc1935f561a8"
+    },
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "changedSourceSha256": {
+    "Native/include/agentflow/agent_worker_channel.hpp": "461ea9ac3cab68dd1476fab7e426bb3c6b41db645ff7022dd1c48582853b489b",
+    "Native/src/agent_worker_channel.cpp": "90306ea34b35906f29641c92aa7aee47442e8dab74873ee12434860434e90eee",
+    "Native/src/agent_worker_supervisor.cpp": "7e4663fa18bbad18d83ac84c259d70d92c2af54ce09689e44a36f45de90f8613",
+    "Native/tests/agent_worker_channel_contract.cpp": "c483a25166b282294969c500a6b3aca0cdc1c20aaf5f099c5f27faf66d0b49a9",
+    "Native/tests/agent_worker_model_rpc_contract.cpp": "fdb808d9cc7cbd15ac5b8121b6a031020ba94d562c66c4bdd0a8d8d38734296d",
+    "Native/tests/agent_worker_supervisor_fixture.hpp": "db2869e93e72d1ca559dd234eb71e2d7cc4489a8e94407413527896b83dcd915"
+  },
+  "retainedDumpMapping": {
+    "passed": true,
+    "pid": 41432,
+    "began": "2026-10-24T20:49:20.603Z",
+    "ended": "2026-10-24T20:49:22.604Z",
+    "originalSha256": "e557a893f106aa96a64e1c3124e71650525f595acd02bea2834e5d9083dea3ec",
+    "originalUnchanged": true,
+    "textSection": {
+      "rva": 4096,
+      "size": 7037952,
+      "sha256": "4cc0fe16d051ab0550ea8e8da3debb6f25b54fc1c741c12879f3ed367370c8e8"
+    },
+    "codeSectionAndRelativeAddressesMatch": true,
+    "fixtureExecuted": false
+  },
+  "diagnosis": "Original failed launch discarded its locally created owner before returning it. Supervisor remembered launch_attempted but no worker, so every physical-drain observation threw and the executor loop could not finish. The expired-before-process regression reproduces that state without model or tool execution.",
+  "change": "Prepare and retain the same native process owner before start. Failed pre-process launch observes no child; failed readiness retains its actual handle/job for explicit retirement and confirmed physical exit. Relaunch remains forbidden. No admitted worker is force-retired by this new path.",
+  "coverage": [
+    "Expired deadline before process creation: no child or lease, zero model charges, original queued prompt unchanged; physical drain returns and relaunch rejects.",
+    "Actual child deliberately never reports readiness: startup times out; owner retains PID/birth and live process; observation timeout does not imply exit; explicit owned-job retirement confirms exit; restart rejects.",
+    "Normal native worker RPC, registered MCP/A2A graph method calls and short/long-path SDK channels pass."
+  ],
+  "initialStartupFailureCause": "Still unproven; this fixes demonstrated failed-startup drain behavior, not a claimed cause for every startup failure.",
+  "testInventoryUnchanged": {
+    "local": 179,
+    "hosted": 177
+  },
+  "deadlinesChanged": false,
+  "effectReplay": false,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "installed73Unchanged": true,
+  "fullSuiteQualificationPending": true,
+  "goalComplete": false
+}

@@ -10,7 +10,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Rendered loopback Code Server candidate passes selected-editor read/edit/Node4/reload8 with separate worker; clients500/178. NEVER replay sessionc81fc6637b564336bb2419f1929e1aae/root09841bb1abe94ec8a90b87c26715a1ea. Immediate editor refresh remains open; doc/evidence/rendered-vscode-loopback-coding-20261024.json. Installed73 unchanged.
 
-- Prior67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
+- Worker startup ownership fix passes direct expired-launch regression and RPC/remote/channel3. Native d2121db4 is uninstalled; full179 required. See doc/evidence/worker-startup-ownership-20261024.json; original failures retained.
 
 - Candidate67 completed coding/handoff roots remain in doc/development-checkpoints-20261024.md verbatim; NEVER replay.
 

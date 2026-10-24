@@ -2,12 +2,25 @@
 namespace worker_supervisor_fixture {
 using namespace agentflow;using Json=nlohmann::json;using Clock=std::chrono::steady_clock;using namespace std::chrono_literals;
 using worker_read_fixture::check;using worker_read_fixture::rejects;using worker_read_fixture::write;
+inline void expired_prelaunch(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& workspace_id,const std::string& identity){
+        const std::string id="rpc-supervisor-expired-before-launch";
+        store.create_session(id,"Expired supervisor launch ownership").get();
+        store.start_prompt_run(id,id,Json{{"content","No model or tool may execute."}}.dump(),RootBudgetSpec{"native.direct-agent",1,workspace_id,identity,0,0,8,600000}).get();
+        auto supervisor=AgentWorkerSupervisor::prepare(store,image,{id,id,workspace_id,"generation-"+id,1},identity,Clock::now()-1ms);
+        rejects<AgentWorkerChannelTimeout>([&]{supervisor->launch();});
+        check(!supervisor->alive()&&!supervisor->admitted(),"Expired startup must create no physical worker or durable lease");
+        check(supervisor->drain_physical(Clock::now()+1s)==0,"Failed pre-process startup must reconcile without an impossible lost-handle wait");
+        rejects<Conflict>([&]{supervisor->launch();});
+        check(store.run(id).get().state==RunState::queued&&store.run_history(id).get().size()==1&&store.root_budget(id).get().model_calls_reserved==0,"Physical-only reconciliation cannot invent a terminal outcome, model charge or replacement history");
+        std::cout<<"Expired pre-process launch drained without a lease, replay or invented terminal outcome."<<std::endl;
+}
 inline void parent(PersistenceService& store,const std::shared_ptr<const BoundProcessExecutable>& image,const std::string& endpoint,const std::filesystem::path& folder){
     const auto directory=folder/"product_supervised";check(std::filesystem::create_directory(directory),"Supervisor needs a fresh workspace");
     write(directory/"AGENTS.md","SUPERVISOR_GUIDANCE\n");WorkspaceTools workspace(directory.string());
     RepositoryInstructionContext guidance(workspace,workspace.repository_instructions("."));
     const std::string identity=R"({"wire":"chat-completions","model_id":"worker-rpc-fixture"})";
     const auto gateway=make_persistence_agent_model_gateway(store,CredentialReference{"worker","rpc-model","provider:chat"});
+    expired_prelaunch(store,image,workspace.identity(),identity);
     for(const bool startup_failure:{false,true}){
         const std::string id=startup_failure?"rpc-supervisor-startup-failure":"rpc-product_supervised";
         const auto deadline=Clock::now()+20s;

@@ -19,6 +19,7 @@ template<class Error,class Function> void rejects(Function action){try{action();
 AgentWorkerScope scope(){return {"root-fixture","run-fixture","workspace-fixture","generation-fixture",7};}
 std::string executable(){std::wstring value(32768,L'\0');const auto size=GetModuleFileNameW(nullptr,value.data(),static_cast<DWORD>(value.size()));require(size&&size<value.size(),"Fixture image path unavailable");value.resize(size);auto path=std::filesystem::path(value).u8string();return {reinterpret_cast<const char*>(path.data()),path.size()};}
 int child(int argc,char** argv){
+    if(std::filesystem::path(executable()).stem()=="startup-no-ready"){Sleep(INFINITE);return 1;}
     require(argc==4&&std::string(argv[2])=="--channel-handle","Private child arguments must contain only an inherited handle");std::uintptr_t handle=0;const std::string text=argv[3];const auto parsed=std::from_chars(text.data(),text.data()+text.size(),handle);require(parsed.ec==std::errc{}&&parsed.ptr==text.data()+text.size(),"Invalid fixture channel handle");
     auto channel=AgentWorkerChannel::accept_inherited(handle,Clock::now()+10s);require(channel->scope()==scope(),"Child must receive its captured scope");
     for(;;){const auto request=channel->receive(Clock::now()+20s);
@@ -50,6 +51,26 @@ void process_contract(const std::string& image){
     for(bool oversized:{false,true}){auto bounded=launch();rejects<AgentWorkerProtocolError>([&]{bounded->channel().send({oversized?"test.echo":"invalid operation",oversized?std::string(AgentWorkerChannel::max_message_bytes,'x'):""},Clock::now()+5s);});require(bounded->alive(),"Rejected local message must not fabricate process exit");bounded->terminate();}
     std::stop_source cancelled;cancelled.request_stop();rejects<AgentWorkerChannelCancelled>([&]{AgentWorkerProcess::launch(bound,scope(),Clock::now()+5s,cancelled.get_token());});SetEnvironmentVariableW(L"XMIND_CHANNEL_TEST_PRIVATE",nullptr);
 }
+void failed_startup_contract(){
+    const auto source=std::filesystem::u8path(executable());
+    const auto root=std::filesystem::temp_directory_path()/(L"xmind-channel-startup-"+std::to_wstring(GetCurrentProcessId())+L"-"+std::to_wstring(GetTickCount64()));
+    require(std::filesystem::create_directory(root),"Fresh failed-startup fixture required");
+    try{
+        const auto image=root/L"startup-no-ready.exe";
+        std::filesystem::copy_file(source,image);
+        std::filesystem::copy_file(source.parent_path()/L"xlang3_runtime.dll",root/L"xlang3_runtime.dll");
+        const auto text=image.u8string();auto worker=AgentWorkerProcess::prepare(ForegroundProcess::bind_executable({reinterpret_cast<const char*>(text.data()),text.size()}),scope());
+        require(worker->pid()==0&&!worker->alive(),"Preparation must create no process");
+        rejects<AgentWorkerChannelTimeout>([&]{worker->start(Clock::now()+500ms);});
+        require(worker->pid()!=0&&worker->pid()!=GetCurrentProcessId()&&worker->creation_time()!=0&&worker->alive(),"Readiness failure must retain its exact live child");
+        rejects<AgentWorkerChannelTimeout>([&]{worker->wait(Clock::now()+1ms);});
+        require(worker->alive(),"Observation timeout cannot infer physical exit");
+        worker->terminate();require(!worker->alive()&&worker->wait(Clock::now()+1s)==1,"Explicit startup retirement must confirm the same owned job exited");
+        rejects<AgentWorkerProtocolError>([&]{worker->start(Clock::now()+1s);});
+        worker.reset();std::filesystem::remove_all(root);
+        std::cout<<"Failed readiness retained exact child; observation timeout preserved it; explicit job retirement confirmed exit without restart."<<std::endl;
+    }catch(...){std::cerr<<"Retained startup fixture: "<<root<<'\n';throw;}
+}
 void long_image_contract(){
     const auto source=std::filesystem::u8path(executable());
     const auto root=std::filesystem::temp_directory_path()/(L"xmind-channel-path-"+std::to_wstring(GetCurrentProcessId())+L"-"+std::to_wstring(GetTickCount64()));
@@ -67,4 +88,4 @@ void long_image_contract(){
     }catch(...){std::cerr<<"Retained long-image channel fixture: "<<root<<'\n';throw;}
 }
 }
-int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc==2&&std::string(argv[1])=="channel-fixture-hold"){Sleep(INFINITE);return 1;}require(argc==1,"Unexpected fixture arguments");process_contract(executable());long_image_contract();std::cout<<"Native SDK worker links, captured scope, distinct PID, cancellation and owned tree retirement passed at short and long image paths.\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
+int main(int argc,char** argv){try{if(argc>1&&std::string(argv[1])=="agent-channel-worker")return child(argc,argv);if(argc==2&&std::string(argv[1])=="channel-fixture-hold"){Sleep(INFINITE);return 1;}require(argc==1,"Unexpected fixture arguments");process_contract(executable());failed_startup_contract();long_image_contract();std::cout<<"Native SDK worker links, captured scope, distinct PID, cancellation and owned tree retirement passed at short and long image paths.\n";return 0;}catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}
