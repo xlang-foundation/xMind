@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "scope": "Counted read/coding dynamic-child owners may retain context and planning services only when both reference the exact original shared budget.",
+  "gate": {
+    "recordedAt": "2026-10-24T01:36:05.034Z",
+    "sourceParent": "8d262f9bf485c61f49d93885c17401a1f13df2f1",
+    "sourcePatchSha256": "d3fd158e211652d41082005915249040c99276722016e3254b737d1156ce03c0",
+    "build": {
+      "pid": 26636,
+      "launchedAt": "2026-10-24T01:34:12.069Z",
+      "completedAt": "2026-10-24T01:35:13.243Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "7b3d8da8539b6d846e333f3b48e57f03051eb60607e6d539a5b08028f118e4dd"
+    },
+    "test": {
+      "pid": 37500,
+      "launchedAt": "2026-10-24T01:35:15.770Z",
+      "completedAt": "2026-10-24T01:36:02.448Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "01a766a3365217ad367dcf6f34e0ff36fd1a780871176537545a87d52ba2fbf0"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 46.63,
+    "projectFiles": 2815,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "81ddc0a4b21a959f4850fa8b3f23593a6b050cf2b9057ce4d27b1bd776089080",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "modelRpcDiagnosticRepetitions": 1,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "regression": {
+    "sameSharedBudgetAccepted": true,
+    "sameRootReconstructedContextBudgetRejected": true,
+    "rejectionPreservesBudgetRevisionAndChildEvents": true,
+    "readAndCodingOwnersChecked": true,
+    "actualSdkChildCompletionPassed": true,
+    "parentRootHistoryLeaseAndOpenSegmentPreserved": true,
+    "noCompletionInferenceReplay": true
+  },
+  "automaticNestedProcessEnrollment": false,
+  "nestedProcessResumeSupported": false,
+  "fullNativeSuiteRun": false,
+  "installed64Unchanged": true,
+  "fullGoalComplete": false
+}

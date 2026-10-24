@@ -1,3 +1,19 @@
+## Counted child context and planning share one owner budget — 2026-10-23
+
+The native read context now permits a counted dynamic child to retain both
+context_budget and planning services when they reference the exact same shared
+budget. A reconstructed same-root context budget is rejected before charges
+or events. Ordinary-root restrictions and typed child/segment validation remain.
+
+Read and coding owner fixtures construct the combined services and complete
+the exact child through actual SDK IPC without inference replay, preserving
+the running parent, history, lease and open segment. This establishes service
+coexistence and completion, not new end-to-end nested process planning.
+Pool, ledger and context4 pass in46.63s; frozen input/binary sets and hashes
+remain exact. [Receipt](evidence/counted-child-planning-owner-20261023.json).
+Automatic enrollment, nested process resume and full172 remain open; installed64
+is unchanged.
+
 ## Dynamic process factory receives its acquired slot — 2026-10-23
 
 DynamicPlanExecutor now captures the pool-acquired slot per dispatched agent
