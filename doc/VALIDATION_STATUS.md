@@ -1,3 +1,9 @@
+## Ordinary SDK command completion and duplicate refusal pass focused3 — 2026-10-24
+
+A distinct xmind.exe client invokes Commands.Invoke without a graph. The native backend expands the actual Markdown template, preserves literal $2 arguments, makes exactly one controlled model request and persists the user/assistant pair. Reusing the completed command run ID refuses and makes no second model request.
+
+Native3/3 passes in10.41s with closures/file sets unchanged and the same f7507b0e production binary as the earlier native7 gate. Complete client479/165 source scope is unchanged and not rerun for this fixture-only addition. [Receipt](evidence/captured-ordinary-command-sdk-20261024.json). This closes ordinary SDK command acceptance; rendered command use and wider delivery requirements remain open. Installed65 remains unchanged.
+
 ## Captured workspace commands pass native7 and client479/165 — 2026-10-24
 
 Commands.List/Invoke are registered SDK subobject methods on the captured connection. The platform-neutral command module owns catalog discovery, expansion and native single/graph admission. Compatibility HTTP routes reuse those functions; duplicate adapter logic is removed. Captured requests retain workspace authority, provider/graph revision and backend/profile lifetime guards. Templates remain prompt text.

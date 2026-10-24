@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "scope": "Ordinary agent command through a distinct xmind.exe standard SDK client and actual native provider/history",
+  "gate": {
+    "recordedAt": "2026-10-24T07:11:09.307Z",
+    "sourceParent": "4adf7841c67e39bb5643a3b2cdb41af485c2fdcb",
+    "sourcePatchSha256": "b90039c978a7c57e16f9400ce19bf630a326d25c9cb4739eed8479810327d3fe",
+    "build": {
+      "pid": 29012,
+      "launchedAt": "2026-10-24T07:10:09.470Z",
+      "completedAt": "2026-10-24T07:10:53.629Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "027a207c442b83fc39b58091fa1e1fbb9515842e228d5634eab9086596278ec0"
+    },
+    "test": {
+      "pid": 13496,
+      "launchedAt": "2026-10-24T07:10:56.234Z",
+      "completedAt": "2026-10-24T07:11:06.680Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4fbb3829804bb1145e1cb431c1542ce774ea0ec5e2a040bc272cd28912c66266"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 10.41,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "f7507b0efa84c85aeba9403ae4ba7cc4459768ad523ef300b36e34be9cebc38c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "observation": {
+    "actualOrdinarySdkCommand": true,
+    "commandRunId": "sdk-direct-command",
+    "sessionId": "sdk-direct-command-session",
+    "controlledModelRequests": 1,
+    "persistedMessages": 2,
+    "duplicateDispatchRefused": true,
+    "literalArgumentsRetained": true
+  },
+  "verified": [
+    "Commands.Invoke without a graph expands actual Markdown template in native backend",
+    "Exactly one controlled provider request returns the persisted assistant response",
+    "Literal dollar-placeholder argument remains literal in provider input and persisted user message",
+    "Duplicate completed command run ID refuses and makes no additional provider call"
+  ],
+  "limits": [
+    "Synthetic provider socket/response only; no paid inference",
+    "Focused3 gate only; production binary unchanged from previous native7 checkpoint",
+    "Existing complete client479/165 scope unchanged, not rerun for this fixture-only change",
+    "Rendered browser/editor command invocation, provider configuration mutation, general reads and remote/enrollment remain open",
+    "Installed65 unchanged; no CPython"
+  ]
+}
