@@ -322,8 +322,8 @@ DynamicExecutionResult DynamicPlanExecutor::resume(const std::string& parent,con
     }
     return execute(accepted,frozen,caps,std::move(budget),cancel,std::move(guidance));
 }
-std::shared_ptr<DynamicPlanExecutor> DynamicPlanExecutor::for_child(std::shared_ptr<NativeChildSlot> slot)const{
-    if(!slot)throw DynamicPlanUnavailable("Nested scheduling requires its exact native child slot");
+std::shared_ptr<DynamicPlanExecutor> DynamicPlanExecutor::for_child(std::shared_ptr<NativeChildSlot> slot,const std::shared_ptr<RootExecutionBudget>& budget)const{
+    if(!slot||!budget||!slot->shares_budget(budget))throw DynamicPlanUnavailable("Nested scheduling requires its exact shared child budget and slot");
     auto bound=std::make_shared<DynamicPlanExecutor>(store_,children_,agent_execution_);bound->scheduling_slot_=std::move(slot);return bound;
 }
 DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord& accepted,const AgentSettings& frozen,const DynamicPlanCapabilities& caps,

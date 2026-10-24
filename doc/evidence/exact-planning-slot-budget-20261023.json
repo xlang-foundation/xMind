@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "scope": "Native planning callback and scheduler slot require exact shared RootExecutionBudget identity, rather than matching root IDs alone.",
+  "gate": {
+    "recordedAt": "2026-10-24T01:26:42.727Z",
+    "sourceParent": "d1412b6e8a6e1abebc626aeafc3aa1fd16b4cc86",
+    "sourcePatchSha256": "8da6318618d1aaa9592f9052dbe3b552500507ed7a9c243e74a8ba8fbd551001",
+    "build": {
+      "pid": 39536,
+      "launchedAt": "2026-10-24T01:23:08.655Z",
+      "completedAt": "2026-10-24T01:25:50.579Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "db5af3ec028330e355233f795ba37fd3d88a0b53d83b57c6b41a8097b61e5f21"
+    },
+    "test": {
+      "pid": 19248,
+      "launchedAt": "2026-10-24T01:25:53.162Z",
+      "completedAt": "2026-10-24T01:26:40.128Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "06ec7263fee02bb831d4b245b59121c229d10dc35f1e831c875a356a4b1618a9"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 46.92,
+    "projectFiles": 2815,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "698999190a5a9a4436066e2ab91c3385c2b1615f568fd67e5d34f4fae478d66f",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "modelRpcDiagnosticRepetitions": 1,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "regression": {
+    "sameRootSameSegmentReconstructedBudgetRejected": true,
+    "mockedAndNativePlanningExecutionChecked": true,
+    "rejectedBeforeClaimsEventsOrSlotRelease": true,
+    "originalPhysicalLeafRemainedOccupied": true,
+    "reconstructedBudgetHadIndependentLeafCounter": true,
+    "existingExactBudgetSdkAcceptedReadPlanStillPassed": true
+  },
+  "automaticNestedProcessEnrollment": false,
+  "fullNativeSuiteRun": false,
+  "installed64Unchanged": true,
+  "fullGoalComplete": false
+}

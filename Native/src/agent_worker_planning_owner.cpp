@@ -32,7 +32,7 @@ struct Owner {
     void check(std::stop_token stop={})const{
         if(cancel.stop_requested()||stop.stop_requested())throw TransportCancelled("Planning owner cancelled");
         if(std::chrono::steady_clock::now()>=deadline)throw TransportTimeout("Planning owner expired");
-        if((slot&&lease.root_run_id==lease.owner_run_id)||!execution||!budget||!settings.planning||!settings.workspace||budget->root_id()!=lease.root_run_id||budget->deadline()!=deadline||!budget->segment_open())throw DynamicPlanUnavailable("Planning requires its captured dynamic owner");
+        if((slot&&(lease.root_run_id==lease.owner_run_id||!slot->shares_budget(budget)))||!execution||!budget||!settings.planning||!settings.workspace||budget->root_id()!=lease.root_run_id||budget->deadline()!=deadline||!budget->segment_open())throw DynamicPlanUnavailable("Planning requires its captured dynamic owner");
         budget->check(stop);
         (void)store.read_agent_worker_journal(lease,{AgentWorkerJournalReadKind::run,lease.owner_run_id}).get();
         const auto segment=store.dynamic_budget_segment(lease.root_run_id).get();
@@ -96,7 +96,7 @@ NativePlanningCallbacks callbacks_for(std::shared_ptr<Owner> owner){
 NativePlanningCallbacks make_agent_worker_planning_callbacks(PersistenceService& store,AgentWorkerLeaseSpec lease,AgentSettings settings,
     std::shared_ptr<DynamicPlanExecution> execution,std::shared_ptr<RootExecutionBudget> budget,
     AgentWorkerChannel::Deadline deadline,std::stop_token cancel,DynamicInstructionPrecondition guidance,std::shared_ptr<NativeChildSlot> slot){
-    if(slot)if(auto native=std::dynamic_pointer_cast<DynamicPlanExecutor>(execution))execution=native->for_child(slot);
+    if(slot)if(auto native=std::dynamic_pointer_cast<DynamicPlanExecutor>(execution))execution=native->for_child(slot,budget);
     auto owner=std::make_shared<Owner>(Owner{store,std::move(lease),std::move(settings),{},std::move(execution),std::move(budget),deadline,cancel,std::move(guidance),std::move(slot)});
     owner->capabilities=store.dynamic_capabilities(owner->lease.root_run_id).get();owner->check();
     return callbacks_for(std::move(owner));

@@ -14,11 +14,12 @@ class NativeChildSlot {
 public:
     bool yield();
     void reacquire(std::stop_token cancel={});
+    bool shares_budget(const std::shared_ptr<RootExecutionBudget>& budget) const noexcept {return budget_==budget;}
 private:
     friend struct NativeChildSlotAccess;
     NativeChildSlot(std::shared_ptr<RootExecutionBudget>,std::stop_token,std::shared_ptr<const void>);
     void retire() noexcept;
-    std::shared_ptr<RootExecutionBudget> budget_;
+    const std::shared_ptr<RootExecutionBudget> budget_;
     std::stop_token cancel_;
     std::mutex mutex_;
     enum class State {held,yielded,retired};

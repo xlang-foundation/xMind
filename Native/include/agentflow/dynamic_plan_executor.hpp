@@ -16,7 +16,7 @@ AgentSettings dynamic_child_settings(const AgentSettings& parent,
 class DynamicPlanExecutor final:public DynamicPlanExecution {
 public:
     DynamicPlanExecutor(PersistenceService& store,std::shared_ptr<NativeChildExecutor> children,DynamicAgentExecution agent_execution={});
-    std::shared_ptr<DynamicPlanExecutor> for_child(std::shared_ptr<NativeChildSlot> slot) const;
+    std::shared_ptr<DynamicPlanExecutor> for_child(std::shared_ptr<NativeChildSlot> slot,const std::shared_ptr<RootExecutionBudget>& budget) const;
     DynamicExecutionResult invoke(const std::string& parent,const ModelToolCall& call,
         const std::string& actual_assistant_json,const std::string& originating_model_attempt,
         const AgentSettings& frozen,const DynamicPlanCapabilities& capabilities,

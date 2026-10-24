@@ -1,3 +1,17 @@
+## Exact planning slot and budget identity — 2026-10-23
+
+Planning callbacks and native scheduler binding now require the slot's original
+shared RootExecutionBudget object. Matching root ID, segment and deadline are
+insufficient: reconstructing that object creates independent leaf counters.
+The regression rejects a same-root reconstruction before claims, events or
+releasing the held parent leaf, through both mock and native planning ports.
+The original shared-budget SDK accepted read plan still passes.
+
+Pool, ledger and context contracts pass4/4 in46.92s with complete input/binary
+file sets and hashes unchanged. [Receipt](evidence/exact-planning-slot-budget-20261023.json).
+This is focused acceptance; automatic nested process enrollment, full-suite
+qualification and pause/recovery remain separate. Installed64 is unchanged.
+
 ## Bounded nested-planner callback scheduling — 2026-10-23
 
 A yielded child slot can now lend its existing native IPC callback thread to
