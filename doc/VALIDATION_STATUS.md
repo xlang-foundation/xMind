@@ -1,3 +1,24 @@
+## Replacement SDK child adopts its accepted paused call — 2026-10-23
+
+Planning adoption now admits an exact typed dynamic child as well as the root.
+Current worker scope, same original owner/provider/membership, retired paused
+source, immutable origin binding and exact next segment checks remain in place.
+
+A controlled human answer resumes the owner chain; a distinct actual SDK client
+process adopts and resumes the original child call. Failed insertion rolls back,
+duplicate adoption publishes once, and stale/forged/foreign-owner leases reject.
+The returned human report consumes no inference; one final synthetic child
+continuation is charged to the replacement generation. Old paused and new
+completed lease receipts remain intact; physical exit precedes pool release.
+Root lease/model facts are synthetic. Pool/ledger/context4 pass in47.39s with
+frozen input/binary file sets and hashes.
+[Receipt](evidence/resumed-child-adoption-20261023.json).
+
+This qualifies the scoped adoption/resume service, not automatic production
+nested-worker enrollment. The process factory still rejects nested resume;
+counted child resume, repeated pause segments and full172 remain open.
+Installed64 is unchanged.
+
 ## Atomic cancellation of a drained paused child chain — 2026-10-23
 
 A fresh AgentService can now cancel a validated closed paused owner chain once

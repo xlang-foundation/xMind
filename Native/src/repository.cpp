@@ -3287,7 +3287,7 @@ constexpr const char* worker_planning_adoption_category="native-agent-worker-pla
 std::string planning_adoption_key(const std::string& call,const std::string& generation){return context_digest(Json::array({call,generation}).dump());}
 Json planning_adoption(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& lease,const DynamicPlanCallRecord& call,const AgentWorkerPlanningClaimRecord& origin){
     worker_current_scope(repository,db,lease);
-    if(lease.root_run_id!=lease.owner_run_id||call.root_run_id!=lease.root_run_id||call.owner_run_id!=lease.owner_run_id||origin.state!="accepted"||origin.native_call_id!=call.id||origin.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Planning adoption differs from its captured root");
+    if(call.root_run_id!=lease.root_run_id||call.owner_run_id!=lease.owner_run_id||origin.state!="accepted"||origin.native_call_id!=call.id||origin.backend_identity!=repository.dynamic_capabilities(call.root_run_id).backend_identity)throw Conflict("Planning adoption differs from its captured owner");
     const auto pause=db.execute("SELECT segment_id FROM dynamic_owner_pauses WHERE root_run_id=? AND state='resumed'",{lease.root_run_id}).rows;
     if(pause.size()!=1)throw Conflict("Planning adoption requires a typed resumed pause");const auto source_segment=text(pause[0][0]);
     const auto old=db.execute("SELECT ordinal,state FROM agent_budget_segments WHERE root_run_id=? AND id=?",{lease.root_run_id,source_segment}).rows;const auto current=repository.dynamic_budget_segment(lease.root_run_id);
