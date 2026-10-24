@@ -136,3 +136,7 @@ Captured SDK Input/TreeInput/Resume dispatch and shared client routing pass nati
 ### Actual captured context-enabled resume — 2026-10-23
 
 Native contextual engine1/1 passes in1.60s. Its successful close/reopen continuation now uses the captured HTTP binding and preserves the original owner, physical model/child counts and remaining budget. This supersedes the previous positive HTTP resume evidence gap, without qualifying a full suite or installation. [Receipt](../doc/evidence/captured-context-resume-20261023.json).
+
+### Captured browser gateway regression repair — 2026-10-23
+
+The missing captured graph/history gateway routes caused actual local-view reattachment failure. Exact route/method forwarding now passes actual native local-view human/tool completion plus delegation and worker-server contracts. Client474/165 passes. Targeted native5/6 still fails Rust; the full168/173 result and unexplained full-run RPC cancellation failure remain open. [Receipt](../doc/evidence/captured-browser-gateway-repair-20261023.json).

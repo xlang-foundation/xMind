@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "scope": "Repair browser gateway routing for implemented captured graph and history APIs; update native integration callers to the captured session/lifetime contract.",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T05:11:25.149Z",
+    "sourceParent": "4a0413eed715c725cc0308509679d527046e9049",
+    "sourcePatchSha256": "e4509e769dae7f254b08c9174f6d97e97791b10a20d03b5244b0cc39ce0e0ec0",
+    "build": {
+      "pid": 36716,
+      "launchedAt": "2026-10-24T05:08:35.246Z",
+      "completedAt": "2026-10-24T05:09:21.707Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "08b99e589a79e9a4b3d3f15e928cc3fcabab535c316b965fc1421e6e367cf5c4"
+    },
+    "test": {
+      "pid": 24108,
+      "launchedAt": "2026-10-24T05:09:24.379Z",
+      "completedAt": "2026-10-24T05:11:22.626Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "4b9b41e5a0b36490f02c0b48886aac2aa2d11ae7bea8878444004b0c6c5661a7"
+    },
+    "total": 6,
+    "failed": 1,
+    "passed": 5,
+    "seconds": 118.2,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "9300c71dda2aa4fadd36917602c3a121b4c3b89a8597f41405063de91dd4313c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "clientGate": {
+    "sourceRevision": "4a0413eed715c725cc0308509679d527046e9049",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 474,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 474,
+      "passed": 474,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "passed": [
+    "Delegation HTTP using session-scoped child history before controller disposal; fresh reopened client negotiates captured support",
+    "Worker-server child history carries graph session identity",
+    "Actual local-view contract passes paused graph reattachment, gateway restart, human input and real native effects",
+    "Gateway route checks preserve method/shape boundaries for graph submit/read/control and session/run/child history"
+  ],
+  "remaining": [
+    "Rust analyzer trusted server-selection symbol comparison fails in final targeted run; diagnostic run failed later semantic-navigation comparison",
+    "RPC approval-cancellation assertion from full run does not reproduce in two focused runs; no root-cause/fix claim",
+    "Full native result remains failed168/173; focused5/6 is not a complete qualification",
+    "No installed update or rendered VS Code acceptance"
+  ],
+  "diagnostics": {
+    "first": {
+      "recordedAt": "2026-10-24T05:07:59.475Z",
+      "sourceParent": "4a0413eed715c725cc0308509679d527046e9049",
+      "sourcePatchSha256": "0ebb61894e0d975cc3fdd5053b614a0af4197f6aefb31927312c8773972617e6",
+      "build": {
+        "pid": 12036,
+        "launchedAt": "2026-10-24T05:05:21.630Z",
+        "completedAt": "2026-10-24T05:06:27.618Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "62d3bc66b61bf9540bd3b11ca6e3f7f1b0d2137a558ff4363efc15a23a03d941"
+      },
+      "test": {
+        "pid": 6912,
+        "launchedAt": "2026-10-24T05:06:30.223Z",
+        "completedAt": "2026-10-24T05:07:56.904Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "dda996168b8869bf26ec035985fddacd6c7b1e635bf932a501791da5489f15a1"
+      },
+      "total": 6,
+      "failed": 3,
+      "passed": 3,
+      "seconds": 86.64,
+      "projectFiles": 2816,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "9300c71dda2aa4fadd36917602c3a121b4c3b89a8597f41405063de91dd4313c",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": false
+    },
+    "localViewCause": "Reattached paused graph snapshot missing: View route not found",
+    "changes": "Rust view query/navigation assertions now retain status/body/expected value; RPC cancellation assertion retains individual state terms; local-view assertion preserves controller errors. No deadlines or expected outcomes weakened."
+  }
+}

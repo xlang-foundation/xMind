@@ -1,3 +1,21 @@
+## Browser captured-route regression repaired — 2026-10-23
+
+The gateway did not forward captured graph catalog/detail/control or run/child
+history routes, producing View route not found and an absent paused graph
+snapshot. It now permits the exact implemented paths and HTTP methods. Actual
+local-view reattachment, gateway restart, human input and native tool completion
+pass in60.17s. Delegation/worker-server fixtures now pass session identities;
+the delegation fixture records history before controller disposal and negotiates
+a fresh client after restart. Complete local client474/165 passes.
+
+The targeted native run is5/6, not a qualification: Rust fails its trusted
+server-selection symbol comparison. Earlier diagnostic Rust failed semantic
+navigation comparison. RPC cancellation passes both focused runs but its full
+run failure remains unexplained. Diagnostics now preserve individual state or
+response details without weakening assertions. The full168/173 failure remains
+authoritative; no package/install is qualified.
+[Repair and retained diagnostic evidence](evidence/captured-browser-gateway-repair-20261023.json).
+
 ## Current full native gate fails168/173 — 2026-10-23
 
 Sourcef6110c98 completes all173 contracts in624.45s:168 pass and5 fail. All

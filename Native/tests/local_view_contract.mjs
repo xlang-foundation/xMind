@@ -124,6 +124,7 @@ try{
  const detachedFeedCount=feeds.length;
  const resumedMessages=[],resumedView=new BrowserController(observedClientForView(),message=>resumedMessages.push(message));
  try{await resumedView.initialize({session:streamSession.id,run:waiting.id});await waitFor(()=>feeds.length===detachedFeedCount+1,'reattached native browser feed');const before=await native.graphEvents(waiting.id,0);await waitFor(()=>resumedView.subscription?.cursor===before.at(-1).seq,'reattached paused feed replay');
+  assert.ok(resumedView.graph,'Reattached paused graph snapshot missing: '+JSON.stringify(resumedMessages.filter(message=>message.type==='error')));
   await resumedView.handle({type:'graph-input',root:waiting.id,owner:waiting.id,node:'gate',input_json:'{"continue":true}',revision:resumedView.graph.checkpoint_revision});
   assert.deepEqual(resumedMessages.filter(message=>message.type==='error'),[],'The displayed root-owned human answer must be accepted before waiting for its tool');
   const finished=await waitFor(async()=>{const value=await native.graph(waiting.id);return value.run.state==='completed'&&value;},'actual graph tool completion');assert.equal(finished.checkpoint.nodes.find(node=>node.id==='read').output.content,'Actual managed native workspace\n');
