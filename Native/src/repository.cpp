@@ -26,7 +26,7 @@ bool ordinary_worker_policy(const std::string& policy){return policy=="native.di
 Json worker_provider_identity(Repository&,const std::string&,const std::string&);
 bool worker_delegated_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
-bool worker_dynamic_owner(Repository&,const AgentWorkerLeaseSpec&,bool effects=false);
+bool worker_dynamic_owner(Repository&,const AgentWorkerLeaseSpec&,bool effects=false,bool paused=false);
 bool worker_uncounted_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_effect_owner(Repository&,const AgentWorkerLeaseSpec&,const std::string& tool={});
 bool worker_planning_root_owner(Repository&,const AgentWorkerLeaseSpec&);
@@ -3536,14 +3536,15 @@ bool worker_graph_owner(Repository& repository,const AgentWorkerLeaseSpec& lease
     const auto capture=repository.graph_context_owner(root.id);if(!capture.segment||capture.segment->state!="open")return false;
     return std::any_of(capture.authority.agents.begin(),capture.authority.agents.end(),[&](const auto& node){return node.node_id==admission.graph_node_path&&Json::parse(node.provider_identity_json)==Json::parse(lease.provider_identity_json);});
 }
-bool worker_dynamic_owner(Repository& repository,const AgentWorkerLeaseSpec& lease,bool effects){
+bool worker_dynamic_owner(Repository& repository,const AgentWorkerLeaseSpec& lease,bool effects,bool paused){
     if(lease.owner_run_id==lease.root_run_id)return false;const auto root=repository.run(lease.root_run_id),owner=repository.run(lease.owner_run_id);const auto budget=repository.root_budget(root.id);
     if(root.graph_root||!root.parent_id.empty()||owner.graph_root||owner.session_id!=root.session_id||budget.spec.policy_id!="native.dynamic-plan"||budget.spec.policy_revision!=1)return false;
+    if(paused&&(root.state!=RunState::paused||owner.state!=RunState::paused))return false;
     const auto admitted=repository.child_admission(owner.id);if(admitted.kind!=ChildAdmissionKind::dynamic_agent||admitted.root_run_id!=root.id)return false;const auto plan=repository.dynamic_plan(admitted.plan_id);
-    if(plan.root_run_id!=root.id||plan.state!="active"||owner.parent_id!=root.id||repository.run(plan.owner_run_id).state!=RunState::running||!plan.capabilities.catalogue_finalized||plan.capabilities.workspace_identity!=lease.workspace_id||Json::parse(plan.capabilities.provider_identity_json)!=Json::parse(lease.provider_identity_json))return false;
+    if(plan.root_run_id!=root.id||plan.state!="active"||owner.parent_id!=root.id||repository.run(plan.owner_run_id).state!=(paused?RunState::paused:RunState::running)||!plan.capabilities.catalogue_finalized||plan.capabilities.workspace_identity!=lease.workspace_id||Json::parse(plan.capabilities.provider_identity_json)!=Json::parse(lease.provider_identity_json))return false;
     const auto node=std::find_if(plan.nodes.begin(),plan.nodes.end(),[&](const auto& n){return n.child_run_id==owner.id;});const auto preset=std::find_if(plan.capabilities.presets.begin(),plan.capabilities.presets.end(),[&](const auto& p){return p.id==admitted.preset_id&&p.revision==admitted.preset_revision;});
     if(node==plan.nodes.end()||preset==plan.capabilities.presets.end()||node->state!=DynamicNodeState::claimed||node->claim_id!=admitted.claim_id||node->definition_revision!=admitted.definition_revision||node->claim_revision!=admitted.claim_revision||node->definition.label!=admitted.node_label||node->definition.preset_id!=preset->id||node->definition.preset_revision!=preset->revision||admitted.backend_identity!=preset->backend_identity||(effects&&preset->readonly))return false;
-    const auto segment=repository.dynamic_budget_segment(root.id);return segment.state=="open";
+    const auto segment=repository.dynamic_budget_segment(root.id);return segment.state==(paused?"closed":"open");
 }
 bool worker_uncounted_graph_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){return worker_graph_owner(repository,lease)&&!repository.graph_context_owner(lease.root_run_id).authority.token_context;}
 bool worker_delegated_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
@@ -3987,15 +3988,16 @@ AgentWorkerLeaseRecord Repository::Impl::retire_worker(const std::string& genera
 AgentWorkerLeaseRecord Repository::retire_agent_worker(const std::string& generation,const std::string& reason){if(reason=="paused")throw Conflict("Paused retirement requires its exact durable handoff");Transaction tx(impl_->database);auto record=impl_->retire_worker(generation,reason);tx.commit();return record;}
 Run Repository::paused_agent_worker(const AgentWorkerLeaseSpec& expected,const std::string& segment_id){
     auto& db=impl_->database;const auto lease=read_worker_lease(db,expected.generation);
-    if(lease.spec!=expected||(lease.state!="active"&&!(lease.state=="retired"&&lease.retirement_reason=="paused"))||expected.root_run_id!=expected.owner_run_id)throw Conflict("Paused handoff requires its exact root worker lease");
+    if(lease.spec!=expected||(lease.state!="active"&&!(lease.state=="retired"&&lease.retirement_reason=="paused")))throw Conflict("Paused handoff requires its exact worker lease");
     const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
     if(current.size()!=1||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Paused worker generation changed");
     const auto root=run(expected.root_run_id);const auto caps=dynamic_capabilities(root.id);const auto segment=dynamic_budget_segment(root.id);
     if(root.state!=RunState::paused||root.graph_root||!root.parent_id.empty()||root_budget(root.id).spec.policy_id!="native.dynamic-plan"||!caps.catalogue_finalized||caps.workspace_identity!=expected.workspace_id||Json::parse(caps.provider_identity_json)!=Json::parse(expected.provider_identity_json)||segment.id!=segment_id||segment.state!="closed")throw Conflict("Worker has no exact closed planning pause");
-    (void)dynamic_owner_pause(root.id);
+    const auto chain=dynamic_owner_pause(root.id);
+    if(expected.owner_run_id!=root.id&&(!worker_dynamic_owner(*this,expected,false,true)||std::find(chain.owner_runs.begin(),chain.owner_runs.end(),expected.owner_run_id)==chain.owner_runs.end()))throw Conflict("Paused child is outside its exact dynamic owner chain");
     const auto pause=db.execute("SELECT segment_id,state FROM dynamic_owner_pauses WHERE root_run_id=?",{root.id}).rows;
     if(pause.size()!=1||text(pause[0][0])!=segment_id||text(pause[0][1])!="paused"||!db.execute("SELECT attempt_id FROM agent_model_call_reservations WHERE root_run_id=? AND state IN ('reserved','started') LIMIT 1",{root.id}).rows.empty())throw Conflict("Paused worker lost its durable segment binding or owns model transport");
-    const auto admitted=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{root.id,expected.generation}).rows;
+    const auto admitted=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{expected.owner_run_id,expected.generation}).rows;
     const auto membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{root.id}).rows;
     if(admitted.size()!=1||integer(admitted[0][0])<segment.opened_event_seq||membership.size()!=1||Json::parse(text(membership[0][0])).at("workspace_id")!=expected.workspace_id||Json::parse(text(membership[0][0])).at("revision")!=expected.workspace_revision)throw Conflict("Paused worker lost its captured membership or segment epoch");
     for(const auto* category:{worker_read_category,worker_file_category,worker_process_category,worker_remote_category,worker_callable_category})if(!db.execute("SELECT id FROM information WHERE category=? AND json_extract(payload,'$.model.generation')=? AND json_extract(payload,'$.state')!='returned' LIMIT 1",{std::string(category),expected.generation}).rows.empty())throw Conflict("Paused worker has unresolved tool dispatch");

@@ -1,3 +1,25 @@
+## Paused child SDK handoff and physical retirement — 2026-10-23
+
+A child planning callback now projects its exact durable paused child to the
+SDK; the controller retains the root pause. Repository pause inspection accepts
+a child only in the validated closed root/ancestor chain, retaining typed claim,
+preset, membership, generation, segment and unresolved-work checks. Retirement
+still requires exact process exit and repeated observation adds no effects.
+
+An actual SDK child publishes a human wait, remains live while retirement is
+refused, then exits and retires with reason paused. Forged PID/foreign segment
+checks, parent lease/history/budget preservation and yielded-slot drain pass.
+Root lease/model facts are synthetic. The retained paused fixture uses a separate
+database so unrelated service idle assertions remain meaningful. Pool, ledger
+and context4 pass in46.59s with frozen closures.
+[Receipt and retained failure summaries](evidence/paused-child-worker-drain-20261023.json).
+
+Earlier projection, stack overflow and fixture-interference failures remain
+retained. A cancellation probe also exposed an unfinished path: cancelling the
+paused root still rejects its nonterminal child despite a retired worker lease.
+Nested cancellation, automatic process enrollment, resume/recovery and full172
+qualification remain open. Installed64 is unchanged.
+
 ## Counted child context and planning share one owner budget — 2026-10-23
 
 The native read context now permits a counted dynamic child to retain both

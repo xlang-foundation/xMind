@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact paused dynamic-child handoff through actual SDK IPC and identity-bound process retirement; root lease/model facts remain explicit synthetic fixture metadata.",
+  "gate": {
+    "recordedAt": "2026-10-24T01:52:55.881Z",
+    "sourceParent": "0de000fe93f220e0b054fdbad962a454b64cb9d5",
+    "sourcePatchSha256": "a7ec3852b1a7742d2b834bc5f3b13ef487a94510d9563452a6d5b00a2fdcf6d7",
+    "build": {
+      "pid": 34608,
+      "launchedAt": "2026-10-24T01:51:10.587Z",
+      "completedAt": "2026-10-24T01:52:04.000Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "22ccd75f2c713244b0936be960505c8570874dff0e726bb3dded2f01318bd1be"
+    },
+    "test": {
+      "pid": 36388,
+      "launchedAt": "2026-10-24T01:52:06.670Z",
+      "completedAt": "2026-10-24T01:52:53.302Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f4cad5c36d69df6076975b5567a12221c32dc05f01f2e0064a216738aa76b969"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 46.59,
+    "projectFiles": 2815,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "4ff3bf3001a3f57831e9e16fe65ee657889450b2cea5c094b0149c4424845056",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "modelRpcDiagnosticRepetitions": 1,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "regression": {
+    "childSdkPauseProjectsOnlyItsOwnDurableRun": true,
+    "rootPauseAndExactAncestorChainValidated": true,
+    "typedChildClaimPresetMembershipSegmentEpochRetained": true,
+    "forgedPidAndForeignSegmentRejected": true,
+    "liveExactProcessRetirementRejected": true,
+    "actualProcessExitObservedBeforeRetirement": true,
+    "repeatedRetirementHasNoNewEventsOrCharges": true,
+    "acceptedPlanParentLeaseHistoryAndBudgetPreserved": true,
+    "yieldedSlotRetirementDoesNotReleaseAnotherLeaf": true,
+    "pausedDatabaseIsolatedFromOtherServiceFixtures": true
+  },
+  "retainedFailures": [
+    {
+      "stage": "initial",
+      "sourcePatchSha256": "aa93615f11da3ecbcb81297bb97aa4c8e65f31add53d0b8ad4ca835eb10ff1c3",
+      "passed": 3,
+      "failed": 1,
+      "seconds": 29.36,
+      "ctestLogSha256": "6586d335ad674132e152556a91cea9f44dda4cc75a02eb668e5a70477579cbc8",
+      "allInputAndBinarySetsUnchanged": true
+    },
+    {
+      "stage": "owner-projection",
+      "sourcePatchSha256": "260f4e16a74c9aced08df58b0ae99bab9cbcc304587a8bece25a1c3413ce138e",
+      "passed": 3,
+      "failed": 1,
+      "seconds": 18,
+      "ctestLogSha256": "3f9691f18fc5d0a638c084e26ff20d6187a7cb7b080b5fbda3a06cedcac92965",
+      "allInputAndBinarySetsUnchanged": true
+    },
+    {
+      "stage": "heap-fixture",
+      "sourcePatchSha256": "b6759ede280df0dc05a681d12aa3864d964817ae6e84a4ed40e33829e1e04f34",
+      "passed": 3,
+      "failed": 1,
+      "seconds": 55.39,
+      "ctestLogSha256": "fa2740a6ec5675bfa225f8a84c5a219d09a7206a4db9003d40faf8be0a6ef245",
+      "allInputAndBinarySetsUnchanged": true
+    },
+    {
+      "stage": "qualified",
+      "sourcePatchSha256": "5444c8af2ef7ce71307ef0d227a356c6d94a97339e6694a3b71cb21924f64b11",
+      "passed": 3,
+      "failed": 1,
+      "seconds": 10.48,
+      "ctestLogSha256": "38e683ca855230523a2770b8e3a6c601ce4c8c919b68bdbe074f2ed3419ccc41",
+      "allInputAndBinarySetsUnchanged": true
+    }
+  ],
+  "diagnostics": {
+    "initial": "SDK paused acknowledgment absent; strict owner projection boundary identified and corrected.",
+    "ownerProjection": "Later ledger stage exited with Windows STATUS_STACK_OVERFLOW (3221225725). No crash dump captured; exact stack attribution unproven.",
+    "heapFixture": "New64KiB image buffer moved to heap; ledger progressed through planning admission, then wrapper SIGTERM at45s while subsequent service adopted the deliberately retained pause.",
+    "cancellationProbe": "Normal service cancellation rejected with Dynamic owner still has a physical child after the SDK child lease retired; nested cancellation remains unfinished."
+  },
+  "productionDeadlinesChanged": false,
+  "automaticNestedProcessEnrollment": false,
+  "nestedProcessResumeQualified": false,
+  "nestedPauseCancellationQualified": false,
+  "fullNativeSuiteRun": false,
+  "installed64Unchanged": true,
+  "fullGoalComplete": false
+}

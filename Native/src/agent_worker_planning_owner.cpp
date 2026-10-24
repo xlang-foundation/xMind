@@ -29,6 +29,16 @@ struct Owner {
         if(!result.paused)slot->reacquire(stop);return result;
     }
 
+    DynamicExecutionResult owner_result(DynamicExecutionResult result){
+        if(result.paused&&lease.owner_run_id!=lease.root_run_id){
+            if(result.root.id!=lease.root_run_id||result.root.state!=RunState::paused||!result.root.parent_id.empty()||result.root.graph_root)throw DynamicOutcomeUnrecorded("Nested pause lost its ordinary root");
+            const auto chain=store.dynamic_owner_pause(lease.root_run_id).get();
+            if(std::find(chain.owner_runs.begin(),chain.owner_runs.end(),lease.owner_run_id)==chain.owner_runs.end())throw DynamicOutcomeUnrecorded("Nested pause lost its admitted owner chain");
+            result.root=store.run(lease.owner_run_id).get();
+            if(result.root.state!=RunState::paused||result.root.parent_id!=lease.root_run_id||result.root.graph_root)throw DynamicOutcomeUnrecorded("Nested pause lost its exact child state");
+        }
+        return result;
+    }
     void check(std::stop_token stop={})const{
         if(cancel.stop_requested()||stop.stop_requested())throw TransportCancelled("Planning owner cancelled");
         if(std::chrono::steady_clock::now()>=deadline)throw TransportTimeout("Planning owner expired");
@@ -66,7 +76,7 @@ struct Owner {
                 const auto report=store.commit_agent_worker_plan_inspection(lease,attempt,deadline,cancel,linked.get_token()).get();
                 return {store.run(lease.owner_run_id).get(),{},report,false};
             }
-            return execute_with_slot([&]{return execution->invoke(lease.owner_run_id,{claim.call_id,claim.tool_name,claim.arguments_json},model.actual_assistant_json,attempt,settings,capabilities,budget,linked.get_token(),guidance);},linked.get_token());
+            return owner_result(execute_with_slot([&]{return execution->invoke(lease.owner_run_id,{claim.call_id,claim.tool_name,claim.arguments_json},model.actual_assistant_json,attempt,settings,capabilities,budget,linked.get_token(),guidance);},linked.get_token()));
         }catch(const DynamicPlanRejected& error){
             try{store.record_rejected_dynamic_tool_turn(lease.owner_run_id,attempt,model.actual_assistant_json,error.code).get();}
             catch(...){throw DynamicOutcomeUnrecorded("Planning rejection was not durably committed");}
@@ -80,7 +90,7 @@ struct Owner {
         if(accepted.root_run_id!=lease.root_run_id||accepted.owner_run_id!=lease.owner_run_id||claim.state!="accepted"||claim.native_call_id!=call)throw DynamicPlanUnavailable("Planning resume differs from its captured accepted call");
         if(claim.model.generation!=lease.generation)claim=store.adopt_agent_worker_planning(lease,call).get();
         else if(claim.segment_id!=budget->segment_id())throw DynamicPlanUnavailable("Planning resume lost its original segment");
-        return execute_with_slot([&]{return execution->resume(lease.owner_run_id,call,settings,capabilities,budget,linked.get_token(),guidance);},linked.get_token());
+        return owner_result(execute_with_slot([&]{return execution->resume(lease.owner_run_id,call,settings,capabilities,budget,linked.get_token(),guidance);},linked.get_token()));
     }
 };
 NativePlanningCallbacks callbacks_for(std::shared_ptr<Owner> owner){

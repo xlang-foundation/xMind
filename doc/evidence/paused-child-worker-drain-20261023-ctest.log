@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 26: native_context_repository_contract
+1/4 Test #26: native_context_repository_contract ....   Passed    3.43 sec
+    Start 32: native_context_engine_contract
+2/4 Test #32: native_context_engine_contract ........   Passed    4.79 sec
+    Start 38: native_child_executor_contract
+3/4 Test #38: native_child_executor_contract ........   Passed    0.41 sec
+    Start 94: native_agent_worker_ledger_contract
+4/4 Test #94: native_agent_worker_ledger_contract ...   Passed   37.94 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  46.59 sec
