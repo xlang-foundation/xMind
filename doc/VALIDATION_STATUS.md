@@ -1,5 +1,13 @@
 ## Captured named-agent SDK/HTTP and rendered selection pass — 2026-10-24
 
+## Candidate70 full qualification (2026-10-24)
+
+Source06a0c815/Native03dd5e5d with SDK8c7972d1 passes all173 native contracts in795.61s. The complete2819 project/16 SDK/1870 pure-library/30 SDK-runtime/18598 dependency/137 binary closure and file sets remain unchanged. [Full gate](evidence/native-delivery-06a0c815-full-20261024.json), [original log](evidence/native-delivery-06a0c815-full-ctest.log) and [inventory](evidence/native-delivery-06a0c815-full-inventory.json).
+
+Candidate0.1.70 packages2398 runtime files and2443 archive entries with clients493/175. Fresh packaged CLI sessionf2847dab38688a80df2cace99063b372/root163c1e31fd772c79eb77ef1ad96eb9ab completes an is-negative read/edit/Node4 with two approvals and eight messages. Actual hidden browser sessionede1695abad7409fa97a981461d44839/root30e7a68a238b41f3be1a6410c23b8b82 selects the named process agent, performs a minimum read/edit/Node4 with two approvals, then restores all eight messages and the agent selection on reload. Each uses four controlled model calls and no paid inference. Both owned backends exit; IAB30 closes. NEVER replay these completed tasks.
+
+Managed69-to70 handoff session80db7507ee456b2664a297ffacf6a816/rootc7d997927b376b24c8b29e225370b61b verifies active-upgrade refusal, original paused graph resumed once, idle handoff and exact history/profile preservation with zero models and owned-owner retirement. NEVER replay. [Candidate receipt](evidence/candidate-0.1.70-qualified-coding-20261024.json), [rendered reload](evidence/candidate-0.1.70-browser-20261024.png). Installation/preservation and installed smoke require separate terminal evidence. The complete goal remains active; positive provider/rendered context compaction, generic authenticated remote/enrollment, deeper recovery/scheduling, rendered provider/setup/commands and rendered VS Code remain open.
+
 ## Shared inbox and rendered skills/queue checkpoint (2026-10-24)
 
 Native03dd5e5d passes8/8 focused contracts in37.66s with the2819 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/137 binary closure unchanged. SessionInboxService replaces the HTTP-owned scheduler and is shared with Inbox(session) SDK objects. Startup accepts exclusive ownership before recovery; duplicate wrappers cannot dispatch. SDK lifecycle checks actual SQLite recovery/claim once without an HTTP listener and after an attached HTTP adapter stops. Independent clients and origin-bound HTTP cover queue/list/cancel scope. Existing HTTP model/file queue dispatch and native owner/handoff pass.
