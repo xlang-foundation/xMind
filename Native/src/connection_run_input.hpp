@@ -21,6 +21,10 @@ inline std::optional<ProviderProfileAdmission> profile_admission(const Json& val
     if(id.empty()||id.size()>256||id.starts_with("sk-")||id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.:/-")!=std::string::npos)throw std::invalid_argument("Invalid provider profile admission identity");
     return ProviderProfileAdmission{id,value["expected_provider_revision"].get<std::int64_t>()};
 }
+inline ConnectionModelSelectionRequest model_selection(const Json& value){
+    if(!value.is_object()||value.size()!=4||!value.contains("model_id")||(!value["model_id"].is_null()&&!value["model_id"].is_string())||!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Model selection requires model, provider binding and session revision");
+    const auto profile=profile_admission(value);if(!profile)throw std::invalid_argument("Model selection requires provider binding");std::optional<std::string> model;if(value["model_id"].is_string())model=string_field(value,"model_id",256);return {std::move(model),*profile,value["expected_revision"].get<std::int64_t>()};
+}
 inline std::optional<WorkspaceAdmission> workspace_admission(const Json& value){
     const bool named=value.contains("expected_workspace_id"),versioned=value.contains("expected_workspace_authority_id");
     if(named!=versioned)throw std::invalid_argument("Workspace identity and authority must be supplied together");

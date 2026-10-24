@@ -20,6 +20,8 @@ struct BoundConnectionSession {ConnectionBindingIdentity binding;Session session
 struct BoundConnectionMessages {ConnectionBindingIdentity binding;std::string session_id;MessagePage page;};
 struct BoundConnectionRunMessages {ConnectionBindingIdentity binding;std::string session_id,run_id;MessagePage page;};
 struct BoundConnectionChildHistory {ConnectionBindingIdentity binding;std::string session_id,parent_id,child_id;std::vector<Message> messages;};
+struct ConnectionModelSelectionRequest {std::optional<std::string> model;ProviderProfileAdmission provider;std::int64_t revision=0;};
+struct BoundConnectionModel {ConnectionBindingIdentity binding;std::string session_id;SessionModelState state;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
@@ -67,6 +69,8 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionModel session_model(const std::string& session)const;
+    BoundConnectionModel select_session_model(const std::string& session,ConnectionModelSelectionRequest request)const;
     BoundConnectionSession open_session(std::string id)const;
     BoundConnectionSession create_session(std::string id,std::string title)const;
     BoundConnectionMessages messages(std::string session,std::int64_t before_sequence,std::int64_t count)const;

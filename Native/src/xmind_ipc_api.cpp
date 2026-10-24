@@ -104,7 +104,9 @@ struct BoundRunsApi {
 struct BoundModelsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundModelsApi()=default;explicit BoundModelsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
     X::Value List(){return api_call([&]{if(!state)throw RunUnavailable("Unbound model service");return sdk_values::to_value(Host(),connection_values::bound(state->models()));});}
-    BEGIN_PACKAGE(BoundModelsApi) APISET().AddFunc<0>("List",&BoundModelsApi::List); END_PACKAGE
+    X::Value Open(std::string session){return api_call([&]{if(!state)throw RunUnavailable("Unbound model service");return sdk_values::to_value(Host(),connection_values::bound(state->session_model(session)));});}
+    X::Value Select(std::string session,X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound model service");return sdk_values::to_value(Host(),connection_values::bound(state->select_session_model(session,connection_input::model_selection(sdk_values::from_value(request)))));});}
+    BEGIN_PACKAGE(BoundModelsApi) APISET().AddFunc<0>("List",&BoundModelsApi::List);APISET().AddFunc<1>("Open",&BoundModelsApi::Open);APISET().AddFunc<2>("Select",&BoundModelsApi::Select); END_PACKAGE
 };
 struct BoundGraphsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundGraphsApi()=default;explicit BoundGraphsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}

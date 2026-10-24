@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured session model selection in registered xlang3 Models subobject and shared HTTP/client adapters",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T06:56:05.239Z",
+    "sourceParent": "7b8d73c59386632cb7b64f7002aa3b870f54d303",
+    "sourcePatchSha256": "59d45641bca8918437855ca68a460cc0bbe0e0eccfb6bf7ec07926292d78f1e8",
+    "build": {
+      "pid": 4992,
+      "launchedAt": "2026-10-24T06:53:36.461Z",
+      "completedAt": "2026-10-24T06:54:32.305Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4827161b4d0803650412680c4b939ed5659962577ca842762cbaabd81f3a8e37"
+    },
+    "test": {
+      "pid": 9872,
+      "launchedAt": "2026-10-24T06:54:34.942Z",
+      "completedAt": "2026-10-24T06:56:02.547Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "5f1e080dfb3d03bec475c6313d1204958635de9c5458b0ba46d58baeca32c600"
+    },
+    "total": 6,
+    "failed": 0,
+    "passed": 6,
+    "seconds": 87.55,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "d25d4340761d9786cc773a85c532815eb47c192679a234b5151f97dea05c38cb",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "7b8d73c59386632cb7b64f7002aa3b870f54d303",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 478,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 478,
+      "passed": 478,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "initialBuildFailure": {
+    "pid": 39036,
+    "launchedAt": "2026-10-24T06:51:34.785Z",
+    "completedAt": "2026-10-24T06:53:16.699Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "4016746cda57eef3d854aec64aea3923e187328d0b0cb09ae012d6927f4a22e8",
+    "reason": "Duplicate stale_provider fixture variable; renamed captured_stale_provider before final gate"
+  },
+  "verified": [
+    "Models.Open and Models.Select use typed native service, shared request parser and shared session-model value encoder",
+    "Actual ProviderProfileRuntime selection persists in SQLite and legacy read agrees with captured receipt",
+    "Stale provider and session revisions reject409 without changing the saved model",
+    "Standard separate-process SDK method dispatch refuses unsupported selection; retired retained Open refuses",
+    "Shared client pins connection and session identity and refuses negotiated downgrade, closed handle and error without fallback"
+  ],
+  "limits": [
+    "Positive provider selection is native HTTP/ProviderProfileRuntime evidence; positive separate-process SDK selection and rendered UI selection remain unproven",
+    "Focused native6 only; no new complete173 or installed qualification",
+    "No paid inference or CPython; installed65 unchanged",
+    "Provider configuration mutation, commands, general reads, remote/enrollment and deeper recovery remain open"
+  ]
+}

@@ -133,3 +133,9 @@ Independent clients can use `xmind ipc --endpoint lrpc:PORT connections run-even
 ## Captured model catalog
 
 `binding.Models().List()` reads the captured backend model catalog through ordinary xlang3 SDK calls. It returns binding identity, default_model and models (id entries); no provider credentials are exposed. Independent clients use `xmind ipc --endpoint lrpc:PORT connections models local PROFILE_REV`. The HTTP adapter is `GET /v1/connection-bindings/{binding}/models`, negotiated by `local_connection_models:1`. Existing Local `/v1/models` and the captured adapter share the native encoder. Reads retain the original generation and reject backend retirement. Session model selection/provider changes remain separate APIs. [Validation](evidence/captured-model-catalog-clients-20261023.json).
+
+## Captured session model choice
+
+`binding.Models().Open(session)` returns `{binding, model}` with the existing session model state. `Select(session, request)` uses exactly `{model_id, provider_profile_id, expected_provider_revision, expected_revision}`. A null model_id clears the override. Session and active provider revisions must match; the native provider runtime retains idle-state and route/catalog admission rules. The connection profile revision must also remain admitted before a mutation. Read-only observation retains its original backend generation.
+
+The HTTP adapter is GET/POST `/v1/connection-bindings/{binding}/sessions/{session}/model`, negotiated by `local_connection_model_selection:1`. CLI SDK calls are `connections model-open ID REV SESSION` and `connections model-select ID REV SESSION JSON_OBJECT` after `xmind ipc --endpoint lrpc:PORT`. The SDK uses registered Models methods and native list/dictionary conversion. [Evidence and limits](evidence/captured-model-selection-clients-20261023.json) distinguish actual native HTTP selection from positive separate-process SDK/rendered selection still needing acceptance.

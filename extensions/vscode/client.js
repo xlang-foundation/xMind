@@ -78,6 +78,7 @@ class BackendClient {
   #connectionTreeStreamSupported=false;
   #connectionRunStreamSupported=false;
   #connectionModelsSupported=false;
+  #connectionModelSelectionSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
@@ -131,6 +132,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
+    else if(this.#connectionModelSelectionSupported)throw new Error("The backend model selection protocol changed. Reconnect before choosing models.");
     if(health&&Object.hasOwn(health,"local_connection_models")){if(health.local_connection_models!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured models protocol.");this.#connectionModelsSupported=true;}
     else if(this.#connectionModelsSupported)throw new Error("The backend model catalog protocol changed. Reconnect before reading models.");
     if(health&&Object.hasOwn(health,"local_connection_run_stream")){if(health.local_connection_run_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured run stream protocol.");this.#connectionRunStreamSupported=true;}
@@ -371,12 +374,16 @@ class BackendClient {
     const result=await this.request(`/v1/sessions/${encodeURIComponent(id)}/agent`,{agent_id:selected?.id??null,agent_revision:selected?.revision??0,expected_revision:observed.revision});
     return validateSessionAgent(result,id,catalogue);
   }
-  async sessionModel(id) { executionIdentity(id);return validateSessionModel(await this.request(`/v1/sessions/${encodeURIComponent(id)}/model`),id); }
+  async #sessionModelRequest(id,body) {
+    if(!this.#connectionModelSelectionSupported)return this.request('/v1/sessions/'+encodeURIComponent(id)+'/model',body);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured model selection connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(id)+'/model',body);exactFields(value,['binding','model']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Model selection belongs to another connection');return value.model;
+  }
+  async sessionModel(id) { executionIdentity(id);return validateSessionModel(await this.#sessionModelRequest(id),id); }
   async replaceSessionModel(id,model,providerBinding,observed) {
     executionIdentity(id);profileIdentity(model);validateSessionModel(observed,id);
     if(!observed.editable)throw new Error('Wait for this conversation to become idle before changing its model.');
     if(!providerBinding||typeof providerBinding.provider_profile_id!=='string'||!Number.isSafeInteger(providerBinding.expected_provider_revision)||providerBinding.expected_provider_revision<0)throw new Error('Refresh the provider profile before choosing a conversation model.');
-    return validateSessionModel(await this.request(`/v1/sessions/${encodeURIComponent(id)}/model`,{model_id:model,provider_profile_id:providerBinding.provider_profile_id,expected_provider_revision:providerBinding.expected_provider_revision,expected_revision:observed.revision}),id);
+    return validateSessionModel(await this.#sessionModelRequest(id,{model_id:model,provider_profile_id:providerBinding.provider_profile_id,expected_provider_revision:providerBinding.expected_provider_revision,expected_revision:observed.revision}),id);
   }
   createSession(title) { return this.#admitConnection('sessions', { title }); }
   sessionInbox(session_id) { return this.request(`/v1/sessions/${encodeURIComponent(session_id)}/inbox`); }

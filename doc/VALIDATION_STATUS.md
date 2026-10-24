@@ -1,3 +1,9 @@
+## Captured session model selection passes native6 and client478/165 — 2026-10-23
+
+The registered Models subobject now exposes Open(session) and Select(session, request). Typed native reads/mutations retain backend lifetime and admission checks. The captured HTTP adapter and compatibility route share the selection parser and value encoder. Actual ProviderProfileRuntime selection persists, legacy reads agree, and stale provider/session revisions reject409. Shared clients verify captured identity/session and refuse errors/downgrade without fallback.
+
+Native6/6 passes in87.55s; complete client478/165 passes with71 sources/18 assets unchanged. The first build failed on a duplicate test variable and is retained. [Receipt](evidence/captured-model-selection-clients-20261023.json). Positive provider mutation is native HTTP evidence; SDK positive selection and rendered selection remain unverified. Installed65 remains unchanged. Commands, provider mutations, general reads, remote/enrollment, deeper recovery/scheduling and rendered VS Code remain open.
+
 ## Hosted native inventory failure identified and corrected — 2026-10-23
 
 Hosted native run40065884877 on c68485ce failed before the full native CTest invocation: its expected set omitted native_agent_worker_nested_human_contract. Official artifact12550274530 records exactly that one additional test (171 actual,170 expected). The corrected explicit expected set matches all171 hosted names without duplicates. PowerShell syntax is checked separately; no deadline or runtime assertion changes. This is inventory repair, not hosted native acceptance. Earlier run logs/artifacts and local complete173 qualification remain distinct. [Receipt](evidence/hosted-native-c68485ce-inventory-failure-20261023.json).
