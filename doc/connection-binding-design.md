@@ -8,6 +8,11 @@ extends that public contract; it does not include private Nexus implementation.
 Installation and source qualification remain separate checkpoints. Current
 evidence and its limitations are recorded in VALIDATION_STATUS.md.
 
+The [generic remote v1 proposal](generic-remote-protocol-v1-proposal.md) makes
+negotiation, authentication, receipts, enrollment and lease boundaries concrete
+for architecture review. It is not a deployed endpoint or Nexus compatibility
+claim; remote runtime capability remains unavailable.
+
 ## Public native objects
 
 Keep the registered xmind root and its authenticated Connections(owner_token)
