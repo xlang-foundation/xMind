@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "gate": {
+    "recordedAt": "2026-10-24T05:04:02.021Z",
+    "sourceParent": "f6110c981f2341da450731babd9c60de3f353f09",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 7916,
+      "launchedAt": "2026-10-24T04:51:45.367Z",
+      "completedAt": "2026-10-24T04:53:30.907Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2280c4fd003979d7b2b3db932577d4f5b9e14e6b8f685b29c63bd77048d697fb"
+    },
+    "test": {
+      "pid": 39440,
+      "launchedAt": "2026-10-24T04:53:34.296Z",
+      "completedAt": "2026-10-24T05:03:58.786Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "6757914d4ab0f7e7b9fe952744b6717d23daf0fc9ddc7c4d2802fe7aef48bf56"
+    },
+    "total": 173,
+    "failed": 5,
+    "passed": 168,
+    "seconds": 624.45,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "9300c71dda2aa4fadd36917602c3a121b4c3b89a8597f41405063de91dd4313c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "failures": [
+    {
+      "test": "native_delegation_http_contract",
+      "observed": "Captured child-history caller omits required session identity."
+    },
+    {
+      "test": "native_language_server_rust_analyzer_contract",
+      "observed": "Authorized local-view query comparison fails; original workspace-text restore assertion passed this time. Status/body absent at new failure, cause unproven."
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "observed": "Product read approval cancellation conjunction fails before drain; individual false term not yet recorded."
+    },
+    {
+      "test": "native_agent_worker_server_contract",
+      "observed": "Captured graph-child-history caller omits required session identity."
+    },
+    {
+      "test": "native_local_view_contract",
+      "observed": "After paused browser controller reattachment, graph snapshot is undefined when answering human node; underlying cause unproven."
+    }
+  ],
+  "rustLogs": {
+    "rust-244637986.log": "1efaa754963b24bce520ce6d176041796bf05a44354c5164e99757427f03eb00",
+    "rust-3747655642.log": "1e86219a19f2985cf4f4a70507cfc6598cafd8dea823d2d67d19f32a41aeeb27"
+  },
+  "qualification": "Failed full run retained; no installation or release qualification. Earlier 84965636 full172/173 failure remains independent evidence."
+}

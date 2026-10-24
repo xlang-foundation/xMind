@@ -1,3 +1,20 @@
+## Current full native gate fails168/173 — 2026-10-23
+
+Sourcef6110c98 completes all173 contracts in624.45s:168 pass and5 fail. All
+frozen input/binary closures and file sets remain unchanged. Failures are two
+captured child-history fixture callers missing session identities, Rust local
+view query comparison, product read approval-cancellation state conjunction,
+and paused local-view reattachment with undefined graph snapshot. Causes of
+the latter three are not yet established. The prior Rust text-restore assertion
+passes this run, which does not resolve its intermittent earlier failure.
+[Complete result](evidence/native-delivery-f6110c98-full-20261023.json).
+
+Official hosted views onb39a7685 pass474 extension/165 browser cases with source
+and assets unchanged. [Receipt](evidence/hosted-views-b39a7685-20261023.json).
+This does not qualify native source or rendered IDE behavior. No release or
+installation is qualified; installed64 and completed task identities remain
+untouched.
+
 ## Separate-process captured graph SDK controls — 2026-10-23
 
 Independent unified xmind.exe clients now expose Graphs.List/Open/Submit/Input/
