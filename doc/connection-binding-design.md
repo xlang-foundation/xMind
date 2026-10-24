@@ -5,7 +5,7 @@ extension prompt admission are implemented. Authenticated remote functionality
 and the remaining client operations are proposed.
 The implemented catalog API is documented in connection-profiles.md. This design
 extends that public contract; it does not include private Nexus implementation.
-The installed 0.1.65 checkpoint remains separate from source validation. Current
+Installation and source qualification remain separate checkpoints. Current
 evidence and its limitations are recorded in VALIDATION_STATUS.md.
 
 ## Public native objects
@@ -13,8 +13,9 @@ evidence and its limitations are recorded in VALIDATION_STATUS.md.
 Keep the registered xmind root and its authenticated Connections(owner_token)
 subobject. Open(profile_id, expected_profile_revision) returns a captured
 binding object. Root remains a registration surface, not a command dispatcher.
-The Local binding exposes Identity(), Sessions(), Runs() and
-Events(session_id, root_run_id) and RunEvents(session_id, run_id) as scoped service objects.
+The Local binding exposes Identity() and scoped Sessions, Runs, Graphs, Models,
+Commands and Workspace service objects, plus Events(session_id, root_run_id)
+and RunEvents(session_id, run_id).
 Use ordinary SDK method calls and SDK list/dictionary values for local IPC.
 Do not add peer.call routes, custom remote-value envelopes or a second serializer.
 
@@ -91,15 +92,21 @@ identity and ownership. CLI scoped session/run/event commands use SDK subobjects
 Operation inspection and decisions use native captured run-scoped services via
 SDK and HTTP. Browser/extension clients pass the observed session/run and validate
 binding receipts; run inspection and cancellation use the same captured handle.
-Model, graph, stream and other client operations still require integration.
+Captured model catalog/selection, graph controls/tree streams, commands and
+workspace metadata/membership/file reads now have native SDK/HTTP and shared-client
+integration. Provider configuration mutation and other general operations still
+require integration.
 Actual browser and CLI coding receipts exist; actual rendered VS Code
 coding remains unverified. These results do not establish remote execution.
 
-The latest SDK lifetime fix passed SDK contracts, repeated runtime isolation and
-the required performance gate. The complete b133a0ee local xMind run passed
-172/172; later SDK/HTTP operation adapters have focused acceptance and actual
-browser/CLI proof. Earlier failed Rust and hosted runs remain recorded. Hosted
-validation is tracked separately; no new package is qualified by focused results.
+The current production source2d98bdde passes the complete173-contract native
+inventory with frozen source/runtime/dependency closures. Accepted client481/165
+assets and the exact qualified0.1.66 runtime pass separate actual browser coding,
+CLI coding and managed package handoff checks. The installed66 isolated smoke
+also passes; protected-user-state verification remains pending. These receipts
+do not prove authenticated remote routing or rendered VS Code coding. See
+[evidence and scope](evidence/candidate-0.1.66-qualified-coding-20261024.json)
+and [installed smoke](evidence/installed-0.1.66-smoke-20261024.json).
 
 1. Add captured Local binding and scoped service objects to the registered root.
    Exercise actual independent SDK processes, HTTP/SDK agreement, wrong token,
