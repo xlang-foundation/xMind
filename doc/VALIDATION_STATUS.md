@@ -1,3 +1,17 @@
+## Candidate0.1.64 packaged browser coding — 2026-10-23
+
+The exact packaged adapter/assets and copied distributable runtime pass an actual
+hidden browser task: native read, reviewed arithmetic-mean edit, approved Node
+command and four assertions. Both approval decisions use connection/session/run
+bindings. All eight messages and selected run restore exactly after reload.
+Runtime file sets/bytes and packaged browser bytes remain unchanged; the temporary
+tab closes and owned backend exits. Controlled provider only, no paid inference.
+Session39e1810029b24685af0177de1c5b5687 / root09e47d2f17d140388acf580097182423
+are complete; never replay. This does not prove installation, rendered VS Code,
+hosted CI acceptance or the full goal.
+[Receipt](evidence/candidate-0.1.64-browser-coding-20261023.json) ·
+[Rendered result](evidence/candidate-0.1.64-browser-coding-20261023.png).
+
 ## Candidate0.1.64 managed handoff and packaged CLI — 2026-10-23
 
 Isolated managed handoff from the original0.1.62 bundle to corrected0.1.64
@@ -17,7 +31,7 @@ roote25733fc541a370922191af8dcfe3fd3 are complete; never replay.
 [CLI receipt](evidence/candidate-0.1.64-cli-coding-20261023.json).
 
 No paid inference, CPython, visible window, user-profile operation or actual
-installation. Packaged browser, protected install and rendered VS Code remain
+installation. Protected install and rendered VS Code remain
 separate, along with unfinished scheduling/recovery/remote authority work.
 
 ## Candidate0.1.64 assembled from complete corrected gate — 2026-10-23
