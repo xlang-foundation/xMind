@@ -3,6 +3,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/http_server.hpp"
 #include "agentflow/connection_binding.hpp"
+#include "agentflow/xmind_ipc_api.hpp"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
 #include <filesystem>
@@ -388,6 +389,7 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
         const auto saved=client.Post(path+"/save",auth,R"({"id":"openai","route_id":"openai.chat","model":"fixture-openai","expected_revision":3})","application/json");require(saved&&saved->status==200&&Json::parse(saved->body).at("providers").at("revision")==4,"Captured save must retain omitted encrypted credentials");require(client.Post(path+"/save",auth,R"({"id":"openai","route_id":"openai.chat","model":"fixture-openai","expected_revision":3})","application/json")->status==409,"Stale captured save cannot mutate");
         const auto import_file=std::filesystem::u8path(argv[1])/"captured-provider-import.yaml";{std::ofstream out(import_file);out<<"version: 1\nactive_profile: openai\nprofiles:\n  openai: {route: openai.chat, model: fixture-openai}\n";}const auto imported=client.Post(path+"/import",auth,Json{{"path",import_file.string()},{"expected_revision",4}}.dump(),"application/json");require(imported&&imported->status==200&&Json::parse(imported->body).at("providers").at("revision")==4,"Captured identical import must retain the saved revision and credential");
         require(client.Post(path+"/models",auth,R"({"id":"openai","route_id":"openai.chat","expected_revision":4,"endpoint":"http://foreign"})","application/json")->status==400,"Captured discovery cannot accept a caller destination");
+        {XMindIpcServer ipc(store,&runtime,"synthetic-captured-discovery-owner-token");std::cout<<"fixture-captured-provider-endpoint "<<ipc.endpoint()<<std::endl;std::string observed;require(static_cast<bool>(std::getline(std::cin,observed))&&observed=="fixture-captured-sdk-discovery-complete","Independent SDK process must confirm captured discovery");require(runtime.configuration().revision==4,"SDK discovery must not mutate provider state");}
         bindings.close();rejects<RunUnavailable>([&]{binding->save_provider("openai","openai.chat","fixture-openai",key(""),4,false);});rejects<RunUnavailable>([&]{binding->discover_provider_models("openai","openai.chat",key(""),4);});rejects<RunUnavailable>([&]{binding->import_providers(import_file.string(),4);});rejects<RunUnavailable>([&]{binding->providers();});rejects<RunUnavailable>([&]{binding->select_provider("openai",3);});require(store.information("native-provider-profiles","registry").get().find("runtime-openai-fixture-key")==std::string::npos,"Captured selection must preserve encrypted credentials");
     }
     workspace_binding_contract(std::filesystem::u8path(argv[1]),imports,origin);

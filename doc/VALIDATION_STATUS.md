@@ -1,3 +1,9 @@
+## Positive separate-process SDK provider discovery passes focused3 — 2026-10-24
+
+An actual xmind.exe client opens Providers on the authenticated registered root, then a distinct client calls Discover using an already saved backend credential. The actual controlled catalogue returns two deduplicated/sorted model IDs and the captured binding agrees with List. The parent peer checks exactly one additional discovery request; the provider revision remains4 and no credential is forwarded in request arguments. No inference is added.
+
+Focused3/3 passes in11.20s with all frozen closures unchanged. Production Nativee2638e65 and the accepted483/166 client scope remain unchanged; only the verification fixture/link changes. [Receipt](evidence/captured-provider-sdk-discovery-20261024.json). Complete native qualification is next, and installed66/rendered setup/remote/enrollment/recovery/VS Code remain separate.
+
 ## Captured provider setup passes native7 and clients483/166 — 2026-10-24
 
 Providers.Save/Discover/Import are registered xlang3 subobject methods. Native request validation and backend policy own credential reuse, catalog destinations, expected revision and local YAML import. Captured HTTP and SDK share parsing/admission. Browser/extension setup uses captured binding routes after negotiation, checks returned identity and refuses downgrade or compatibility replay. Existing compatibility APIs remain available for older clients.

@@ -1,0 +1,66 @@
+{
+  "recordedAt": "2026-10-24T08:36:30.197Z",
+  "native": {
+    "recordedAt": "2026-10-24T08:35:51.143Z",
+    "sourceParent": "4b201b68161c5d128d735770dd3a15df8a605b3b",
+    "sourcePatchSha256": "4cf4025e5a9658f6a466f21bc296f185d7b8523877a649c2cfdd22c43e7bd4e2",
+    "build": {
+      "pid": 39092,
+      "launchedAt": "2026-10-24T08:34:32.694Z",
+      "completedAt": "2026-10-24T08:35:34.647Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d7f41e2fc526056b810ddc0cdf88fee7ce50ecc1ca3bc5796bf4b5af15de4a1e"
+    },
+    "test": {
+      "pid": 29012,
+      "launchedAt": "2026-10-24T08:35:37.289Z",
+      "completedAt": "2026-10-24T08:35:48.524Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d37b7dfc92357e97963a972510c10b907b1196a8e0e5cf1b6b412822551be1c8"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 11.2,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "e2638e65602a3de6ca859f6ae1c0c2586cc4c49f62f73fc76377ec88633a762c",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "actualSdkDiscovery": {
+    "actualSeparateProcessSdkDiscovery": true,
+    "backendPid": 23104,
+    "clientPids": [
+      28792,
+      35944
+    ],
+    "models": [
+      {
+        "id": "fixture-openai"
+      },
+      {
+        "id": "fixture-openai-updated"
+      }
+    ],
+    "providerRevision": 4,
+    "credentialForwarded": false
+  },
+  "productionNativeUnchangedFromProviderSetup": true,
+  "completeClient483And166SourceScopeUnchanged": true,
+  "limitations": [
+    "Focused3 is not full native qualification",
+    "No rendered setup or live provider acceptance",
+    "Installed66 remains unchanged; remaining delivery scope stays open"
+  ]
+}

@@ -10,7 +10,7 @@ import {tmpdir} from 'node:os';
 const execute=promisify(execFile),root=await mkdtemp(join(tmpdir(),'xmind-profile-runtime-'));
 const [binary,modules,stdlib]=process.argv.slice(2);
 let failure;const observed=[];const workspaceTurns=new Map(),workspaceBindings=new Map();
-let openaiDiscoveries=0,claudePages=0,pageLimitPages=0,child,stalledDiscovery,discoveryReleased=false,aliasRetargeted=false;
+let openaiDiscoveries=0,claudePages=0,pageLimitPages=0,child,stalledDiscovery,discoveryReleased=false,aliasRetargeted=false,sdkDiscoveryStarted=false,sdkDiscoveryProven=false;
 const event=value=>`event: ${value.type}\ndata: ${JSON.stringify(value)}\n\n`;
 async function startup(database,check,extra=[]){
   const token='synthetic-profile-startup-owner-access-token';
@@ -106,6 +106,11 @@ try{
   const running=execute(binary,[root,modules,stdlib,`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:35000});child=running.child;
   let output='';child.stdout.on('data',chunk=>{
     output+=chunk;
+    const captured=output.match(/fixture-captured-provider-endpoint (lrpc:\d+)/);
+    if(captured&&!sdkDiscoveryStarted){sdkDiscoveryStarted=true;(async()=>{
+      const call=async args=>{const pending=execute(join(dirname(binary),'xmind.exe'),['ipc','--endpoint',captured[1],'connections',...args],{windowsHide:true,env:{...process.env,XMIND_AUTH_TOKEN:'synthetic-captured-discovery-owner-token'},timeout:10000});assert(pending.child.pid&&pending.child.pid!==child.pid);const result=await pending;return {pid:pending.child.pid,value:JSON.parse(result.stdout)};};
+      const catalog=await call(['providers','local','1']);assert.equal(catalog.value.providers.revision,4);const found=await call(['provider-models','local','1',JSON.stringify({id:'openai',route_id:'openai.chat',expected_revision:4})]);assert.deepEqual(found.value.binding,catalog.value.binding);assert.deepEqual(found.value.models,[{id:'fixture-openai'},{id:'fixture-openai-updated'}]);assert.notEqual(found.pid,catalog.pid);sdkDiscoveryProven=true;console.log(JSON.stringify({actualSeparateProcessSdkDiscovery:true,backendPid:child.pid,clientPids:[catalog.pid,found.pid],models:found.value.models,providerRevision:4,credentialForwarded:false}));child.stdin.write('fixture-captured-sdk-discovery-complete\n');
+    })().catch(error=>{failure=error;child.stdin.write('fixture-captured-sdk-discovery-failed\n');});}
     if(!aliasRetargeted&&output.includes('fixture-workspace-alias-captured')){
       aliasRetargeted=true;
       (async()=>{await unlink(join(root,'workspace-startup-alias'));await symlink(join(root,'workspace-right'),join(root,'workspace-startup-alias'),'junction');child.stdin.write('fixture-workspace-alias-retargeted\n');})().catch(error=>{failure=error;child.stdin.write('fixture-workspace-alias-failed\n');});
@@ -118,7 +123,7 @@ try{
   if(failure)throw failure;
   assert.deepEqual(observed,[{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-updated'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai'},{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'fixture-claude'},{route:'/chat',model:'fixture-openai-alternate'},{route:'/chat',model:'fixture-openai-alternate'},{route:'/chat',model:'fixture-openai-alternate'},{route:'/chat',model:'fixture-openai'},{route:'/chat',model:'fixture-openai'},{route:'/messages',model:'claude-sonnet-5-fixture'},{route:'/messages',model:'claude-sonnet-4-6-fixture'},{route:'/messages',model:'claude-sonnet-4-6-fixture'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'},{route:'/workspace-messages',model:'fixture-claude'}]);
   assert.deepEqual([...workspaceTurns],[['left',2],['right',2]]);assert.equal(aliasRetargeted,true);
-  assert.equal(openaiDiscoveries,6);assert.equal(claudePages,2);assert.equal(pageLimitPages,8);assert.equal(discoveryReleased,true);
+  assert.equal(openaiDiscoveries,7);assert.equal(sdkDiscoveryProven,true);assert.equal(claudePages,2);assert.equal(pageLimitPages,8);assert.equal(discoveryReleased,true);
   const sdkModelPids=[],beforeSdkModels=observed.length;
   await startup('startup-valid.sqlite',async(api,ipc)=>{const profiles=await api('/v1/provider/profiles');assert.equal(profiles.revision,1);assert.equal(profiles.active,'openai');assert.equal(profiles.profiles[0].model,'gpt-4.1');assert.equal((await api('/v1/health')).agent_execution,true);
     const call=async args=>{const result=await ipc(['connections',...args]);sdkModelPids.push(result.pid);return result.value;};
