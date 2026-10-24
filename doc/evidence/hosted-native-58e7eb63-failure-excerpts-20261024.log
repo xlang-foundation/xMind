@@ -1,0 +1,64 @@
+2026-10-24T18:09:14.5337799Z  54/176 Test  #54: native_graph_runner_contract ..........................***Failed   40.41 sec
+2026-10-24T18:09:14.5339444Z Graph runner failure evidence retained at C:\Users\RUNNER~1\AppData\Local\Temp\xmind-graph-runner-mRt9eq
+2026-10-24T18:09:14.5340811Z node:internal/errors:983
+2026-10-24T18:09:14.5341411Z   const err = new Error(message);
+2026-10-24T18:09:14.5342293Z               ^
+2026-10-24T18:09:14.5342613Z 
+2026-10-24T18:09:14.5346593Z Error: Command failed: D:/a/xMind/xMind/xmind/build/native/Release/agentflow_graph_runner_contract.exe C:\Users\RUNNER~1\AppData\Local\Temp\xmind-graph-runner-mRt9eq D:/a/xMind/xMind/xlang3/build/Release/modules D:/a/xMind/xMind/stdlib-source/Lib http://127.0.0.1:62589/chat
+2026-10-24T18:09:14.5379201Z Multi-folder graph failed: {"checkpoint":"{\"nodes\":[{\"id\":\"process\",\"state\":\"uncertain\"}],\"spec\":{\"nodes\":[{\"arguments\":{\"arguments\":[\"[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')\"],\"folder_id\":\"windows-local-file-v1:662eab0b2eaad2fb:0b34090000002d000000000000000000\",\"profile\":\"powershell\",\"workdir\":\".\"},\"id\":\"process\",\"tool\":\"run_process\",\"type\":\"tool\"}]},\"version\":1}","children":[{"events":[{"json":"{\"node_id\":\"process\",\"parent_run_id\":\"multi-process-root\"}","kind":"run.queued"},{"json":"{}","kind":"run.running"},{"json":"{\"arguments\":{\"arguments\":[\"[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('graph-process-folder.txt',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')\"],\"folder_id\":\"windows-local-file-v1:662eab0b2eaad2fb:0b34090000002d000000000000000000\",\"profile\":\"powershell\",\"workdir\":\".\"},\"name\":\"run_process\",\"source\":\"graph\"}","kind":"tool.started"},{"json":"{\"operation_id\":\"572139f5df06c1ac02b16bafbd325250\",\"tool\":\"run_process\"}","kind":"operation.awaiting_approval"},{"json":"{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"572139f5df06c1ac02b16bafbd325250\",\"tool\":\"run_process\"}","kind":"operation.ready"},{"json":"{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"572139f5df06c1ac02b16bafbd325250\",\"tool\":\"run_process\"}","kind":"operation.executing"},{"json":"{\"channel\":\"stdout\",\"data\":\"786d696e642d67726170682d70686173653a7363726970745f656e74657265640d0a\",\"encoding\":\"hex\",\"offset\":0,\"operation_id\":\"572139f5df06c1ac02b16bafbd325250\",\"profile_id\":\"powershell\",\"retained_bytes\":34}","kind":"process.output"},{"json":"{\"decision_actor\":\"trusted-process-profile:powershell\",\"operation_id\":\"572139f5df06c1ac02b16bafbd325250\",\"tool\":\"run_process\"}","kind":"operation.uncertain"},{"json":"{\"reason\":\"graph_process_effect_uncertain\"}","kind":"run.failed"}],"id":"d9eb8bfe7df6c1fc0bb68450f19039f1","operations":[{"elapsed_ms":30043,"exit_code":1,"id":"572139f5df06c1ac02b16bafbd325250","output_artifact":{"operation_id":"572139f5df06c1ac02b16bafbd325250","state":"complete","stderr_bytes":0,"stdout_bytes":34},"process_tree_retired":true,"profile_id":"powershell","startup_phases":["script_entered"],"state":"uncertain","termination":"timed_out","timeout_ms":30000,"tool":"run_process"}],"state":"failed"}],"events":[{"json":"{\"folders\":[{\"folder_id\":\"windows-local-file-v1:662eab0b2eaad2fb:646c04000000b5000000000000000000\",\"root\":\"C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\xmind-graph-runner-mRt9eq\"},{\"folder_id\":\"windows-local-file-v1:662eab0b2eaad2fb:0b34090000002d000000000000000000\",\"root\":\"C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\xmind-graph-runner-mRt9eq\\\\attached\"}],\"primary_folder_id\":\"windows-local-file-v1:662eab0b2eaad2fb:646c04000000b5000000000000000000\",\"revision\":2,\"snapshot\":\"graph_admission\",\"workspace_id\":\"windows-local-file-v1:662eab0b2eaad2fb:646c04000000b5000000000000000000\"}","kind":"agent.workspace_membership"},{"json":"{\"graph_id\":\"secondary-process\",\"graph_revision\":1,\"kind\":\"graph\"}","kind":"run.queued"},{"json":"{}","kind":"run.running"},{"json":"{\"child_run_id\":\"d9eb8bfe7df6c1fc0bb68450f19039f1\",\"node_id\":\"process\"}","kind":"graph.child.queued"},{"json":"{\"checkpoint_revision\":3,\"child_run_id\":\"d9eb8bfe7df6c1fc0bb68450f19039f1\",\"child_state\":\"failed\",\"node_id\":\"process\"}","kind":"graph.child.settled"},{"json":"{\"reason\":\"graph_child_failed\"}","kind":"run.failed"}],"state":"failed"}
+2026-10-24T18:09:14.5399361Z 
+2026-10-24T18:09:14.5399613Z     at genericNodeError (node:internal/errors:983:15)
+2026-10-24T18:09:14.5400066Z     at wrappedFn (node:internal/errors:537:14)
+2026-10-24T18:09:14.5400519Z     at ChildProcess.exithandler (node:child_process:417:12)
+2026-10-24T18:09:14.5400970Z     at ChildProcess.emit (node:events:531:35)
+2026-10-24T18:09:14.5401388Z     at maybeClose (node:internal/child_process:1101:16)
+2026-10-24T18:09:14.5401967Z     at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+2026-10-24T18:09:14.5402390Z   code: 1,
+2026-10-24T18:12:58.3959135Z  91/176 Test  #91: native_agent_worker_model_rpc_contract ................***Failed   70.92 sec
+2026-10-24T18:12:58.3961687Z AgentService supervised child dispatch verified: pre-admission profile validation, captured named-agent settings, actual distinct child, canonical completion and physical drain before service idle.
+2026-10-24T18:12:58.3964666Z AgentService shared physical worker verified: canonical completion held exact live child and one occupied slot; next queued action started only after exact child exit and supervisor drain.
+2026-10-24T18:12:58.3968631Z AgentService queued placement verified: catalogue changed process to thread while queued; pinned prompt and job still dispatched one actual process child.
+2026-10-24T18:12:58.3972185Z AgentService immutable workspace capture verified: one admission snapshot, queued callback changed to revision eight, actual child retained revision seven and its exact original folder set.
+2026-10-24T18:12:58.3976009Z Low-level placement boundary verified: inline process execution, mismatched worker prompt and unknown placement rejected before model/worker dispatch; admitted prompt retained without a model charge.
+2026-10-24T18:12:58.3979886Z Production worker factory product_factory verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+2026-10-24T18:12:58.3983798Z Production worker factory product_factory_read verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+2026-10-24T18:12:58.3987960Z Production worker factory product_factory_denied verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+2026-10-24T18:12:58.3992500Z Production worker factory product_factory_attached verified: actual ExecutionPlatform/AgentService child, captured generation settings, tools and inherited permissions, exact canonical history, instruction ordering, output control, full provider identity and physical drain.
+2026-10-24T18:12:58.3995433Z Explicit thread placement verified: configured worker bypassed, no worker lease, actual native model result retained.
+2026-10-24T18:12:58.3998590Z Busy profile worker cancellation verified: mutation rejected before factory invocation, exact child PID/birth exited before idle, one model charge and uncertain cancelled receipt retained without fabricated completion.
+2026-10-24T18:12:58.4002587Z Provider-profile worker factory verified: inactive candidate retained old owner; selected second profile then restored first; three actual child roots, four prepared executors, distinct encrypted credential references and exact immutable profile provenance.
+2026-10-24T18:12:58.4005685Z Native supervisor completion verified: actual xmind child, captured backend policy, one execution, canonical facts, exact physical drain and read-only reobservation.
+2026-10-24T18:12:58.4007968Z Native supervisor startup failure verified: retained child and lease, no restart or model, exact physical exit before durable dispatch_error.
+2026-10-24T18:12:58.4010432Z Native supervisor concurrent cancellation verified: live provider stream, joined-caller drain guard, exact ownership retained, HTTP abort, durable cancelled cause and post-exit retirement.
+2026-10-24T18:14:13.5857544Z  97/176 Test  #97: native_agent_worker_ledger_contract ...................***Failed   20.64 sec
+2026-10-24T18:14:13.5858609Z node:internal/errors:983
+2026-10-24T18:14:13.5863010Z   const err = new Error(message);
+2026-10-24T18:14:13.5864274Z               ^
+2026-10-24T18:14:13.5864520Z 
+2026-10-24T18:14:13.5866940Z Error: Command failed: D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_worker_ledger_contract.exe D:/a/xMind/xMind/xlang3/build/Release/modules D:/a/xMind/xMind/stdlib-source/Lib http://127.0.0.1:64116
+2026-10-24T18:14:13.5869775Z Agent worker channel deadline elapsed; retained fixture C:\Users\RUNNER~1\AppData\Local\Temp\xmind-worker-ledger-405422628-467886869
+2026-10-24T18:14:13.5871352Z 
+2026-10-24T18:14:13.5872684Z     at genericNodeError (node:internal/errors:983:15)
+2026-10-24T18:14:13.5873425Z     at wrappedFn (node:internal/errors:537:14)
+2026-10-24T18:14:13.5874839Z     at ChildProcess.exithandler (node:child_process:417:12)
+2026-10-24T18:14:13.5875687Z     at ChildProcess.emit (node:events:519:28)
+2026-10-24T18:14:13.5877108Z     at maybeClose (node:internal/child_process:1101:16)
+2026-10-24T18:14:13.5878212Z     at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+2026-10-24T18:14:13.5879276Z   code: 1,
+2026-10-24T18:14:13.5879727Z   killed: false,
+2026-10-24T18:14:58.6040401Z  98/176 Test  #98: native_agent_worker_nested_human_contract .............***Timeout  45.02 sec
+2026-10-24T18:14:58.6041233Z 
+2026-10-24T18:14:58.6041551Z         Start  99: native_agent_worker_channel_contract
+2026-10-24T18:15:00.5965981Z  99/176 Test  #99: native_agent_worker_channel_contract ..................   Passed    1.99 sec
+2026-10-24T18:15:00.5970720Z         Start 100: native_xlang3_shared_memory_worker_contract
+2026-10-24T18:15:02.0527950Z 100/176 Test #100: native_xlang3_shared_memory_worker_contract ...........   Passed    1.46 sec
+2026-10-24T18:15:02.0531971Z         Start 101: native_agent_service_contract
+2026-10-24T18:15:04.2679891Z 101/176 Test #101: native_agent_service_contract .........................   Passed    2.21 sec
+2026-10-24T18:15:04.2684308Z         Start 102: native_agent_runner_contract
+2026-10-24T18:15:40.6675477Z 102/176 Test #102: native_agent_runner_contract ..........................   Passed   36.40 sec
+2026-10-24T18:15:40.6676487Z         Start 103: native_gemini_agent_contract
+2026-10-24T18:15:41.6609281Z 103/176 Test #103: native_gemini_agent_contract ..........................   Passed    0.99 sec
+2026-10-24T18:15:41.6613353Z         Start 104: native_anthropic_agent_contract
+2026-10-24T18:15:43.2680650Z 104/176 Test #104: native_anthropic_agent_contract .......................   Passed    1.61 sec
+2026-10-24T18:15:43.2681914Z         Start 105: native_file_patch_contract
+2026-10-24T18:15:43.2873601Z 105/176 Test #105: native_file_patch_contract ............................   Passed    0.02 sec

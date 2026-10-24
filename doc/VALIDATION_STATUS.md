@@ -1,5 +1,9 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Hosted CLI-authentication checkpoint terminal failure — 2026-10-24
+
+Source58e7eb63 run40113548336/job120934507845 completes172/176. Graph runner fails40.41s, model RPC70.92s, ledger20.64s with worker-channel deadline, and nested human times out45.02s. These unresolved hosted failures are not erased by local green. Original728999-byte job log is retained privately with SHA in the [receipt](evidence/hosted-native-58e7eb63-result-20261024.json); [failure excerpts](evidence/hosted-native-58e7eb63-failure-excerpts-20261024.log) preserve observed errors. Newer source264cadb4 run40118270287 is confirmed in progress; no duplicate dispatch. Installed72 unchanged; goal active.
+
 ## Browser response reader diagnostic; installation still held — 2026-10-24
 
 A second candidate73 task completed minimum.cjs read/edit/Node4 with two approvals, four controlled replies and eight messages. First completion was clean, but reload reported an incomplete response. All391 observed native responses contained valid JSON. NEVER replay session ecf195f304c94eca95da27c9babc5947/root adc5a5b0794240b58061aef38a0fc7c8.

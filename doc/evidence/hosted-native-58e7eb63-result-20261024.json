@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-10-24T18:44:01.686Z",
+  "source": "58e7eb63",
+  "run": 40113548336,
+  "job": 120934507845,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40113548336",
+  "conclusion": "failure",
+  "inventory": 176,
+  "passed": 172,
+  "failed": 4,
+  "jobLog": {
+    "bytes": 728999,
+    "sha256": "c08c5422e641ca493ee63df313250602d4a502b4d61e2e043c2a21c231d9a14f"
+  },
+  "failedContracts": [
+    "2026-10-24T17:27:23.6064161Z Total Test time (real) =   4.67 sec\r",
+    "2026-10-24T17:27:50.6176645Z Total Test time (real) =  26.97 sec\r",
+    "2026-10-24T17:50:29.9356518Z Total Test time (real) =  68.98 sec\r",
+    "2026-10-24T18:09:14.5337799Z  54/176 Test  #54: native_graph_runner_contract ..........................***Failed   40.41 sec\r",
+    "2026-10-24T18:12:58.3959135Z  91/176 Test  #91: native_agent_worker_model_rpc_contract ................***Failed   70.92 sec\r",
+    "2026-10-24T18:14:13.5857544Z  97/176 Test  #97: native_agent_worker_ledger_contract ...................***Failed   20.64 sec\r",
+    "2026-10-24T18:14:58.6040401Z  98/176 Test  #98: native_agent_worker_nested_human_contract .............***Timeout  45.02 sec\r",
+    "2026-10-24T18:22:35.7874516Z 98% tests passed, 4 tests failed out of 176\r",
+    "2026-10-24T18:22:35.7878993Z Total Test time (real) = 985.94 sec\r"
+  ],
+  "causalLimit": "Hosted deadlines/channel failures remain unresolved; local green does not establish their cause. This source predates nested timing markers and native HTTP authentication.",
+  "newerRun": {
+    "source": "264cadb4",
+    "run": 40118270287,
+    "observedStatus": "in_progress"
+  },
+  "installedVersion": "0.1.72"
+}
