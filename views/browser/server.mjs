@@ -185,7 +185,8 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
    // Only the configured native origin receives the supplied access credential. Browser
    // origin enforcement belongs here; native Host/auth guards remain active.
    const streaming=/^\/v1\/(?:connection-bindings\/[a-f0-9]{32}\/sessions\/[A-Za-z0-9_-]+\/runs\/[A-Za-z0-9_-]+\/(?:events|graph-events|tree-events)|runs\/[A-Za-z0-9_-]+\/(?:events|tree-events)|graph-runs\/[A-Za-z0-9_-]+\/events)\/stream$/.test(url.pathname),timeoutMs=streaming?30000:url.pathname.endsWith('/a2a/follow-up')?45000:15000;
-   const upstream=await fetch(destination+url.pathname+url.search,{method:request.method,headers:{...access,...(['POST','DELETE'].includes(request.method)?{'Content-Type':'application/json'}:{}),...(streaming&&request.headers['last-event-id']?{'Last-Event-ID':request.headers['last-event-id']}:{})},body:['POST','DELETE'].includes(request.method)?Buffer.concat(chunks):undefined,redirect:'error',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(timeoutMs)])});
+   const upstreamSignal=AbortSignal.any([controller.signal,AbortSignal.timeout(timeoutMs)]);
+   const upstream=await fetch(destination+url.pathname+url.search,{method:request.method,headers:{...access,...(['POST','DELETE'].includes(request.method)?{'Content-Type':'application/json'}:{}),...(streaming&&request.headers['last-event-id']?{'Last-Event-ID':request.headers['last-event-id']}:{})},body:['POST','DELETE'].includes(request.method)?Buffer.concat(chunks):undefined,redirect:'error',signal:upstreamSignal});
    if(streaming&&upstream.status===200){
     if(upstream.headers.get('content-type')!=='text/event-stream'){controller.abort();reply(502,{detail:'Invalid native event response'});return;}
     response.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Accel-Buffering':'no'});response.flushHeaders();
@@ -194,6 +195,9 @@ export async function createBrowserServer({backend,assetRoot,localAccessToken}){
    if(upstream.status===204){response.writeHead(204,{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});response.end();return;}
    if(!(upstream.headers.get('content-type')||'').startsWith('application/json')){reply(502,{detail:'Native backend returned an invalid response'});return;}
    let length=0;const output=[];for await(const chunk of upstream.body){length+=chunk.length;if(length>16*1024*1024){controller.abort();reply(502,{detail:'Native response exceeds view limits'});return;}output.push(chunk);}
+   // Node fetch can end an aborted body iterator without throwing, even when
+   // headers already reported success. Never publish that as a complete reply.
+   upstreamSignal.throwIfAborted();
    const declaredLength=upstream.headers.get('content-length');
    if(length===0||declaredLength!==null&&(!/^\d+$/.test(declaredLength)||Number(declaredLength)!==length)){reply(502,{detail:'Native backend returned an incomplete JSON response'});return;}
    response.writeHead(upstream.status,{'Content-Type':'application/json','Content-Length':length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});response.end(Buffer.concat(output));

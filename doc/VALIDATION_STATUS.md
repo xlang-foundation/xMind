@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Node fetch silently empty aborted-body mechanism reproduced — 2026-10-24
+
+A local real HTTP peer returns complete50-byte JSON. Reading a cloned response then iterating the original yields50 bytes without cancellation, but aborting after the clone read makes original iteration finish with0 bytes and no exception on Node22.19.0. This matches the empty forwarded-body mechanism; it does not identify which disconnect/deadline signal fired in the packaged browser case. [Probe source](evidence/browser-response-abort-reproduction-20261024.mjs), [raw output](evidence/browser-response-abort-reproduction-20261024.log), [receipt](evidence/browser-response-abort-mechanism-20261024.json).
+
+Browser proxy now retains its combined signal and explicitly checks cancellation after finite body iteration, before publishing success. Empty/length mismatch refusal remains; no retries or timeout changes. Complete clients497/178 pass with frozen source/assets unchanged. Rendered package acceptance remains open; installed72 unchanged. Full goal active.
+
 ## Packaged browser identifies empty forwarded skills response — 2026-10-24
 
 Fresh packaged frontend023c5c7c/Native12fc task fixes product.cjs and runs four Node checks through the named process agent with two scoped approvals. First completion is clean; reload displays completed/all8 messages/selected agent, but metadata catches HTTP200 session-skills reply with bodyLength0 and Content-Length0. Native observation for the same binding/session skills path has498 valid JSON bytes. Candidate acceptance remains refused; explicit framing did not fix the loss. NEVER replay session ee2cd7fd669849ff966bdcf2039d02dd/root f58cfb96399b43d5bcdf695066fcc717. Host exits1 on explicit failed acceptance; owned native39488 confirmed absent. [Evidence](evidence/browser-empty-forwarded-skills-20261024.json), [first completion](evidence/browser-product-first-completion-20261024.png), [reload](evidence/browser-product-reload-20261024.png).

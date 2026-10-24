@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-24T18:51:31.375Z",
+  "sourceParent": "d3a15765",
+  "scope": "Local Node fetch cancellation mechanism and thin browser proxy guard",
+  "nodeVersion": "v22.19.0",
+  "reproduction": [
+    {
+      "abort": false,
+      "cloneBytes": 50,
+      "forwardedBytes": 50
+    },
+    {
+      "abort": true,
+      "cloneBytes": 50,
+      "forwardedBytes": 0
+    }
+  ],
+  "interpretation": "Abort after reading a complete cloned response can make the original async body iterator finish silently with zero bytes. The proxy must inspect the combined signal as well as body length before sending success.",
+  "change": "Retain combined disconnect/deadline signal and throwIfAborted after finite JSON body iteration, before writing response headers.",
+  "causalLimit": "Matches observed body-loss mechanism but does not establish which signal caused the packaged browser failure. No rendered acceptance or installation claim.",
+  "gate": {
+    "sourceRevision": "d3a1576554cb70a15c197c2ace5827578df97b83",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 497,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 497,
+      "passed": 497,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "installedVersion": "0.1.72",
+  "candidate73Accepted": false
+}

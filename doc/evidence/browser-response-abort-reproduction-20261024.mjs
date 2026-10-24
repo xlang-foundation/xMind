@@ -1,0 +1,3 @@
+import {createServer} from 'node:http';
+const peer=createServer((q,r)=>{r.setHeader('Content-Type','application/json');r.end(JSON.stringify({message:'complete native JSON',items:[1,2,3]}));});await new Promise(r=>peer.listen(0,'127.0.0.1',r));
+for(const abort of [false,true]){const controller=new AbortController(),response=await fetch('http://127.0.0.1:'+peer.address().port,{signal:controller.signal});const cloned=Buffer.from(await response.clone().arrayBuffer());if(abort)controller.abort();let bytes=0,error;try{for await(const chunk of response.body)bytes+=chunk.length;}catch(e){error=e.name;}console.log(JSON.stringify({abort,cloneBytes:cloned.length,forwardedBytes:bytes,error}));}peer.closeAllConnections();await new Promise(r=>peer.close(r));
