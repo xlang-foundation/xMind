@@ -69,6 +69,18 @@ function validateEditInspection(proposal,inspection) {
   return true;
 }
 class BackendClient {
+  static async responseJson(response) {
+    if(response.status===204)return {};
+    try{return await response.json();}
+    catch(cause){
+      if(cause?.name==='AbortError')throw cause;
+      // Error status remains authoritative even if its optional detail is
+      // empty or truncated. In particular, stream lease backoff needs 503.
+      if(!response.ok)return {};
+      const error=new Error('The backend response was incomplete. Refresh saved status before retrying an action.');
+      error.code='invalid_backend_json';error.status=response.status;throw error;
+    }
+  }
   #tokenProvider;
   #workspaceGuard;
   #connectionAdmissionSupported=false;
@@ -123,8 +135,8 @@ class BackendClient {
       signal: AbortSignal.timeout(timeoutMs),
       redirect: 'error'
     });
-    const data = response.status===204?{}:await response.json();
-    if (!response.ok) { const error=new Error(typeof data.detail === 'string' ? data.detail : `Backend returned ${response.status}`);error.status=response.status;throw error; }
+    const data = await BackendClient.responseJson(response);
+    if (!response.ok) { const error=new Error(typeof data?.detail === 'string' ? data.detail : `Backend returned ${response.status}`);error.status=response.status;throw error; }
     return data;
   }
   async health() {
@@ -578,7 +590,7 @@ class BackendClient {
     let capture;let route=scope==='graph'?`/v1/graph-runs/${id}/events/stream`:`/v1/runs/${id}/${scope==='tree'?'tree-events':'events'}/stream`;
     if(scope==="run"?this.#connectionRunStreamSupported:this.#connectionTreeStreamSupported){capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured tree stream connection changed.");route="/v1/connection-bindings/"+capture.id+"/sessions/"+session_id+"/runs/"+id+"/"+(scope==="graph"?"graph-events":scope==="tree"?"tree-events":"events")+"/stream";}
     let response;try{response=await this.openEventStream(route+'?after='+after,signal);}catch(error){if(error?.name==='TypeError'||error?.name==='TimeoutError')error.eventTransportUnavailable=true;throw error;}
-    if(!response.ok){const value=await response.json();const error=new Error(typeof value.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
+    if(!response.ok){const value=await BackendClient.responseJson(response);const error=new Error(typeof value?.detail==='string'?value.detail:'Native event observation unavailable');error.status=response.status;throw error;}
     const known=new Set([id]);
     return readCommittedEventStream(response,{root:id,session:session_id,scope,after,binding:capture?.identity,signal,onEvent,onObservation,authorizeEvent:async event=>{
       if(known.has(event.run_id))return true;

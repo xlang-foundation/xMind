@@ -21,6 +21,7 @@ function harness(options={}) {
   const transcript=[{seq:1,role:'user',data:{content:'Earlier user prompt'}},{seq:2,role:'assistant',data:{content:'Persisted synthetic response'}}];
   const inboxItems=options.inboxItems||[];
   const pagedHistory=async value=>({messages:(await value).map((message,index)=>({...message,id:message.id||`msg_${message.seq??index+1}`})),has_more:false,next_before:null});
+  const profileResponse=async(callback)=>{try{const data=await callback();return{ok:true,status:200,json:async()=>data};}catch(error){if(!Number.isInteger(error.status))throw error;return{ok:false,status:error.status,json:async()=>({detail:error.message})};}};
   const fetchImpl=async (url,requestOptions)=>{
     assert.equal(requestOptions.headers.Authorization,`Bearer ${token}`);
     const target=new URL(url);requests.push(target.pathname+target.search);
@@ -63,8 +64,8 @@ function harness(options={}) {
     else if(options.plan&&target.pathname===`/v1/runs/${options.plan.run.id}/plan/resume`){planResumes.push(JSON.parse(requestOptions.body));data={...options.plan.run,state:'running'};}
     else if(target.pathname==='/v1/provider/profiles')return options.profileRegistry?{ok:true,json:async()=>requestOptions.method==='POST'?options.profileSave(JSON.parse(requestOptions.body)):options.profileRegistry()}:{ok:false,status:404,json:async()=>({detail:'Legacy backend has no profile API'})};
     if(data!==undefined)return {ok:true,json:async()=>data};
-    if(target.pathname==='/v1/provider/profiles/models')return {ok:true,json:async()=>({models:options.profileDiscovery?await options.profileDiscovery(JSON.parse(requestOptions.body)):options.profileModels||options.catalogue.models})};
-    if(target.pathname==='/v1/provider/profiles/select')return {ok:true,json:async()=>options.profileSelect(JSON.parse(requestOptions.body))};
+    if(target.pathname==='/v1/provider/profiles/models')return profileResponse(async()=>({models:options.profileDiscovery?await options.profileDiscovery(JSON.parse(requestOptions.body)):options.profileModels||options.catalogue.models}));
+    if(target.pathname==='/v1/provider/profiles/select')return profileResponse(()=>options.profileSelect(JSON.parse(requestOptions.body)));
     if(target.pathname==='/v1/runs'&&options.onAdmission)return options.onAdmission(JSON.parse(requestOptions.body));
     if(target.pathname==='/v1/health') data=options.health||{agent_execution:true,status:'ok'};
     else if(target.pathname==='/v1/graphs')data={graphs:options.graphs||[]};

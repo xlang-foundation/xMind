@@ -1,0 +1,30 @@
+TAP version 13
+# Subtest: empty error bodies preserve event observation HTTP status
+not ok 1 - empty error bodies preserve event observation HTTP status
+  ---
+  duration_ms: 15.5324
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\extensions\\vscode\\tests\\client.test.js:673:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The validation function is expected to return "true". Received false
+    
+    Caught error:
+    
+    SyntaxError: Unexpected end of JSON input
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    async TestContext.<anonymous> (D:\CantorAI2026\xMind\extensions\vscode\tests\client.test.js:674:216)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 90.4135

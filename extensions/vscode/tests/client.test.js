@@ -669,3 +669,11 @@ test('remote authentication client pins profile revisions and masks credential-b
 test('remote authentication handler clears credential messages and discards retired-view replies',async()=>{
  const {handleConnectionAuthentication}=require('../client'),posted=[];let current=true,release;const message={type:'connection-authenticate',id:'remote',revision:2,credential_revision:0,credential:'synthetic-message-secret'};const client={authenticateConnection:async()=>{await new Promise(resolve=>release=resolve);},connectionAuthentication:async()=>({state:'stored'})};const work=handleConnectionAuthentication(client,message,value=>posted.push(value),()=>current);await new Promise(resolve=>setImmediate(resolve));current=false;release();await work;assert.equal(message.credential,undefined);assert.equal(posted.length,1);assert.equal(posted[0].busy,true);assert.ok(!JSON.stringify(posted).includes('synthetic-message-secret'));
 });
+
+test('empty error bodies preserve event observation HTTP status',async()=>{
+ for(const status of [503,401,403,500]){let calls=0;const client=new BackendClient('http://localhost:8765',()=>token,async()=>{calls++;return new Response('',{status,headers:{'Content-Type':'application/json'}});});await assert.rejects(client.eventStream('root',{session_id:'session',onEvent(){throw Error('No event permitted');}}),error=>error.status===status&&!/Unexpected end/.test(error.message));assert.equal(calls,1);}
+});
+test('empty stream-busy response uses existing observation backoff and reaches terminal without mutation',async()=>{
+ let calls=0;const methods=[],client=new BackendClient('http://localhost:8765',()=>token,async(url,options)=>{methods.push(options.method);return ++calls===1?new Response('',{status:503,headers:{'Content-Type':'application/json'}}):streamResponse(streamWire());}),h=subscriptionHarness((id,options)=>client.eventStream(id,options));
+ try{h.subscription.watch(h.binding);await subscriptionTick();await subscriptionTick();assert.equal(h.errors.length,0);assert.equal(h.tasks.length,1);assert.equal(h.tasks[0].delay,500);h.tasks.shift().callback();for(let n=0;n<20&&!h.ended.length;n++)await subscriptionTick();assert.equal(h.ended.length,1);assert.equal(calls,2);assert.deepEqual(methods,['GET','GET']);assert.equal(h.errors.length,0);}finally{h.subscription.dispose();}
+});

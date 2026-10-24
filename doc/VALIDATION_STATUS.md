@@ -1,3 +1,11 @@
+## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
+
+A model-free regression reproduces the candidate73 error class: an empty503 body throws SyntaxError before event observation attaches the HTTP status, bypassing existing lease-busy backoff. The shared browser/extension response reader now preserves non-success status despite missing/malformed optional detail. Successful malformed JSON still fails explicitly and never repeats a mutation. Complete clients497/177 pass with frozen source/assets unchanged. Three provider fixtures were corrected to represent HTTP status on the response rather than throwing it from successful JSON parsing; assertions remain. [Evidence](evidence/browser-error-response-status-20261024.json), [old negative test](evidence/browser-empty-error-json-reproduction-20261024.log).
+
+A preserved copy of completed browser task9ec9e7e770a44c11a19ebe1bc7370b96/7a47460665ab4d92840b832c73c23da0 reopens through the actual native backend and hidden browser, retaining eight messages, selected process agent and Node exit0. Read-only response tracing reports no invalid native JSON and zero model calls; the original DB/WAL/SHM hashes remain unchanged. Owned diagnostic backend retires and tab44 closes. [Restore screenshot](evidence/browser-status-readonly-restore-20261024.png). NEVER resubmit the completed task.
+
+This does not identify the original empty-response endpoint or erase candidate73 failure. Fresh packaged rendered coding acceptance is required before installation. Native12fc37cd/full178 remains separately qualified and unchanged. Installed72 preserved; full objective active.
+
 ## Complete178 on CLI EOF correction; candidate73 browser not accepted — 2026-10-24
 
 Source264cadb4/Native12fc37cd passes all178 contracts in754.01s, including console buffered input, with the complete2837 project/16 SDK/1870 pure-library/30 SDK-runtime/18598 dependency/142 binary closure unchanged. This does not erase the prior177/178 failure or prove its precise cause. [Full receipt](evidence/native-delivery-264cadb4-full-20261024.json), [original log](evidence/native-delivery-264cadb4-full-ctest.log), [inventory](evidence/native-delivery-264cadb4-full-inventory.json).
