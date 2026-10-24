@@ -1,0 +1,47 @@
+{
+  "recordedAt": "2026-10-24T19:12:27.913Z",
+  "source": "58e7eb63",
+  "run": 40113548336,
+  "job": 120934507845,
+  "fullResult": {
+    "passed": 172,
+    "total": 176,
+    "failed": 4
+  },
+  "officialArtifact": {
+    "id": 12570054817,
+    "bytes": 117338,
+    "sha256": "0f36179c822d33380f4f30b1a1643eb582666438a66e66bf857ad46b8baf1940"
+  },
+  "lastTestLogSha256": "224b7577ec39a38a5d8b6e69bd137b5faa21cd8b2a97919ba28fc2f529ac8d27",
+  "trustedSdkAndCli": {
+    "passed": true,
+    "test": "native_mcp_oauth_trusted_contract",
+    "driverSeparateNamespaces": true,
+    "aggregateNegotiations": {
+      "refused": 2,
+      "accepted": 2
+    },
+    "verified": [
+      "actual native trusted HTTPS",
+      "wrong credential refusal",
+      "one accepted grant per host",
+      "stale retry without another negotiation",
+      "encrypted credential/grant database reopen",
+      "Local selection retained"
+    ],
+    "httpAdapterPositiveVerified": false,
+    "remoteCommandRouting": false
+  },
+  "ledgerFinding": {
+    "planningFixtureDeadlineMs": 20000,
+    "lastCase": "owner-code-human-counted",
+    "lastCaseStartedMs": 19449,
+    "remainingMs": 550,
+    "terminal": "Agent worker channel deadline elapsed",
+    "interpretation": "Shared planning-fixture deadline depleted across independent roots; this does not establish slow cold worker startup.",
+    "productionTimeoutsChanged": false,
+    "effectsReplayed": false
+  },
+  "goalComplete": false
+}

@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Hosted trusted CLI authentication and ledger deadline depletion identified — 2026-10-24
+
+Official source58e7eb63 artifact12570054817 verifies native_mcp_oauth_trusted_contract passed. The exact source driver calls separate SDK and CLI hosts and asserts two refused/two accepted negotiations before its successful terminal marker. Each host covers wrong credential, accepted grant, stale retry without extra HTTP, encrypted database reopen and Local retention. Positive CLI authentication is now observed; positive HTTP and remote routing remain open. Full hosted suite remains172/176. [Receipt](evidence/hosted-native-58e7eb63-sdk-cli-and-deadline-20261024.json), [trusted test log](evidence/hosted-native-58e7eb63-trusted-sdk-cli.log).
+
+Complete ledger stdout starts owner-code-human-counted at19449ms with550ms remaining on the shared20000ms planning-fixture deadline, followed by channel deadline expiry. This identifies deadline depletion across independent cases rather than proving cold worker startup stalled. [Planning trace](evidence/hosted-native-58e7eb63-ledger-deadline.log). Review fixture ownership/deadline scopes next; no production timeout, process budget or retry changed. Newer run40118270287/job120950618634 remains confirmed live in its native build/test step. Installed73 unchanged; full goal active.
+
 ## Installed73 preserved-state checkpoint and refreshed PDF — 2026-10-24
 
 Qualified candidate installs0.1.73 with Native12fc37cd/source264cadb4, frontend0201c326 and SDK8c7972d1. All2442 installed files/2398 runtime files, package metadata/other-extension registry and five protected user-state roots verify. Exact72 backup retained. Fresh installed managed native read/history smoke passes with zero models and owned backend exit. NEVER replay session96aec77923c29880d20c2f11ae21ef1b/root a85e719f7ada4c43df3913e790c965c9. [Installed receipt](evidence/installed-0.1.73-0201c326-20261024.json). No visible windows or user-profile backend started.
