@@ -29,8 +29,7 @@ command_routing:false. No credential or grant ID is returned. This stores an
 authorization; it does not select a connection or open a remote execution
 binding. Catalog status/authenticated fields still describe current usable
 bindings, so remote entries remain not_connected with routing/authenticated
-false until remote binding/status integration is implemented. Browser/CLI
-authentication adapters and deployed Nexus compatibility remain unimplemented.
+false until remote binding/status integration is implemented. Browser authentication and deployed Nexus compatibility remain unimplemented.
 
 SDK capability discovery, malformed/refused calls and retired-owner refusal
 have [focused evidence](evidence/remote-auth-sdk-20261024.json). Positive
@@ -453,3 +452,17 @@ CLI methods are `connections workspace-info ID REV` and `connections workspace-m
 CLI methods are `connections workspace-files ID REV FOLDER MEMBERSHIP_REV PATH`, `workspace-file` with the same arguments, and `workspace-find ID REV FOLDER MEMBERSHIP_REV JSON_OBJECT`. HTTP read-only POST routes are `/v1/connection-bindings/{binding}/workspace/files`, `/file`, `/find`, with folder_id/expected_workspace_revision plus path or search fields. `local_connection_workspace_files:1` advertises the native protocol. Results include binding, workspace_id, folder_id, revision and path. [Focused SDK/HTTP evidence](evidence/captured-workspace-files-sdk-20261024.json); browser integration remains separate.
 
 The shared client now routes explorer listing/preview/search through captured Files/File/Find after native capability negotiation. The browser renderer calls those methods instead of constructing read URLs. Membership/folder/revision and binding are validated; protocol/identity errors never retry a compatibility route. Actual managed-view/gateway file operations and complete client481/165 pass. [Integration evidence](evidence/captured-workspace-files-clients-20261024.json) retains actual rendered acceptance as separate work.
+
+## CLI authentication adapter
+
+Development CLI commands use the same registered Connections SDK object:
+
+```text
+xmind ipc --endpoint lrpc:PORT connections capabilities
+xmind ipc --endpoint lrpc:PORT connections authentication ID PROFILE_REV
+xmind ipc --endpoint lrpc:PORT connections authenticate ID PROFILE_REV CREDENTIAL_REV [TIMEOUT_MS]
+```
+
+Local owner authentication uses XMIND_AUTH_TOKEN. Supply the remote credential only through redirected stdin, then close the stream. The reader accepts 1..8192 printable non-space ASCII bytes with an optional final LF or CRLF. Interactive stdin, control bytes (including Ctrl-Z), extra lines and oversized input refuse before remote authentication. Never put the credential in command arguments. Authentication errors use fixed text without echoing input. The native backend owns HTTPS negotiation, profile fencing and encrypted publication; the CLI only calls SDK methods. Authentication does not select or enable remote routing.
+
+[Focused nine-contract evidence](evidence/remote-auth-cli-stdin-20261024.json) includes actual CLI untrusted-TLS refusal and the reproduced/fixed Windows stdin truncation. Positive CLI trusted TLS is wired into the isolated hosted fixture but remains unverified. Installed0.1.72 does not contain this development adapter.

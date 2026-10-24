@@ -1,0 +1,33 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 76: native_remote_authentication_sdk_untrusted_contract
+1/1 Test #76: native_remote_authentication_sdk_untrusted_contract ...***Failed    1.09 sec
+{"nativeTlsObservation":{"tcpConnections":1,"tlsConnections":1,"tlsFailures":0}}
+{"finalNativeTlsObservation":{"tcpConnections":3,"tlsConnections":3,"tlsFailures":0}}
+Retained failed remote SDK fixture: D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-remote-sdk-untrusted-3pJUxR
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Only the well-formed CLI authentication should reach native TLS
+
+3 !== 2
+
+    at file:///D:/CantorAI2026/xMind/Native/tests/remote_authentication_sdk_untrusted.mjs:13:160 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 3,
+  expected: 2,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   1.11 sec
+
+The following tests FAILED:
+	 76 - native_remote_authentication_sdk_untrusted_contract (Failed)
+Errors while running CTest

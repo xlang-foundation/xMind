@@ -1,3 +1,7 @@
+## Development CLI authentication stdin — 2026-10-24
+
+The actual native CLI now calls Connections capabilities/authentication methods through ordinary xlang3 SDK values. A new Ctrl-Z regression first reproduced Windows text-mode truncation and an extra TLS attempt; binary stdin fixes it. All nine focused contracts pass in10.06s with frozen source, SDK, libraries, dependencies and binary file sets unchanged. Malformed stdin never dispatches remote authentication; valid untrusted TLS refuses without HTTP credential exposure or persisted grant. [Evidence](evidence/remote-auth-cli-stdin-20261024.json), [final log](evidence/remote-auth-cli-stdin-ctest.log), [original failure](evidence/remote-auth-cli-control-byte-failure.log). Positive CLI trusted TLS remains pending hosted execution. This development binary is not fully qualified or installed; installed72 remains preserved. Full goal active.
+
 ## Installed72 preserved delivery checkpoint — 2026-10-24
 
 Installed0.1.72 matches sourcebc2de6f2/Native88a6dad3/SDK8c7972d1. All2442 installed files and2398 runtime files verify against the qualified package; installer manifest/package metadata and other extension registry entries match. The exact71 backup is retained at .agentflow/installation-backups/0.1.71-before-bc2de6f2/extension. All five protected roots retain identical file sets and hashes. Full178 in764.76s, clients493/175, actual packaged CLI/browser coding and managed71-to72 handoff retain their separate receipts. [Installed verification](evidence/installed-0.1.72-bc2de6f2-20261024.json).

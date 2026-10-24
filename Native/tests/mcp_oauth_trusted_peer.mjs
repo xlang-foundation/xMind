@@ -92,7 +92,7 @@ export function trustedRequest(url,ca,{method='GET',body,headers={}}={}){
 }
 async function hosted(){
  if(process.platform!=='win32'||process.env.GITHUB_ACTIONS!=='true'||process.env.RUNNER_ENVIRONMENT!=='github-hosted'||process.env.RUNNER_OS!=='Windows'||!/^\d+$/.test(process.env.GITHUB_RUN_ID||''))throw Error('Trusted OAuth acceptance requires an isolated GitHub-hosted Windows runner. Never impersonate its environment locally.');
- const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable,remoteSdkExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
+ const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable,remoteSdkExecutable,cliExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
  assert.equal(dirname(await realpath(directory)),tempRoot);let peer,child,exited,timer,installed=false,thumbprint,registeredReservation,occupiedReservation;
  const caFile=join(directory,'ca.cer'),provision=action=>execute('pwsh.exe',['-NoProfile','-NonInteractive','-File',certificateHelper,'-Action',action,'-CertificateFile',caFile,'-Thumbprint',thumbprint],{windowsHide:true,timeout:20000});
  try{
@@ -132,6 +132,7 @@ async function hosted(){
   await runRenewalAcceptance(renewalExecutable,modules,stdlib,origin,{peer});
   assert.deepEqual(peer.counts.renewal,Object.fromEntries(renewalModes.map(mode=>[mode,1])));assert.equal(peer.counts.refresh.forwarded,undefined);
   await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:1,accepted:1});
+  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true,cliExecutable});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:2,accepted:2});
   process.stdout.write('Actual separate-process xlang3 SDK authentication passed trusted native HTTPS, wrong-credential refusal, one accepted grant, stale retry without another HTTP request, encrypted credential/grant database reopen and unchanged Local selection. Remote command routing remains disabled.\n');
   process.stdout.write('Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.\n');
   process.stdout.write('Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.\n');

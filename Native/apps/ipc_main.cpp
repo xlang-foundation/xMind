@@ -7,10 +7,23 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <io.h>
+#include <fcntl.h>
 namespace agentflow {
+namespace {
+struct WipingCredentialText {std::string value;~WipingCredentialText(){volatile char* data=value.data();for(std::size_t i=0;i<value.size();++i)data[i]=0;}};
+X::Value authentication_credential_stdin(X::Runtime& runtime){
+    if(_isatty(_fileno(stdin)))throw std::invalid_argument("Authentication requires redirected credential stdin");
+    if(_setmode(_fileno(stdin),_O_BINARY)==-1)throw std::invalid_argument("Credential stdin mode failed");
+    WipingCredentialText input;input.value.reserve(8194);char byte;while(std::cin.get(byte)){if(input.value.size()==8194)throw std::invalid_argument("Invalid credential stdin");input.value.push_back(byte);}
+    if(!std::cin.eof())throw std::invalid_argument("Credential stdin failed");if(!input.value.empty()&&input.value.back()=='\n'){input.value.pop_back();if(!input.value.empty()&&input.value.back()=='\r')input.value.pop_back();}
+    if(input.value.empty()||input.value.size()>8192)throw std::invalid_argument("Invalid credential stdin");for(const auto c:input.value)if(static_cast<unsigned char>(c)<33||static_cast<unsigned char>(c)>126)throw std::invalid_argument("Invalid credential stdin");return X::Value(runtime,input.value);
+}
+}
 int run_xmind_ipc_client(int argc,char** argv){
+    const bool sensitive_authentication=argc>4&&std::string(argv[3])=="connections"&&std::string(argv[4])=="authenticate";
     try{
-        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections messages ID REV SESSION BEFORE_SEQUENCE COUNT | connections run-submit ID REV JSON_OBJECT | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-history ID REV SESSION RUN BEFORE_SEQUENCE COUNT | connections run-cancel ID REV RUN | connections operations ID REV SESSION RUN | connections operation ID REV SESSION RUN OPERATION | connections operation-decide ID REV SESSION RUN OPERATION allow|deny | connections graphs ID REV | connections graph-children ID REV ROOT | connections graph-open ID REV ROOT | connections graph-submit ID REV JSON_OBJECT | connections graph-input ID REV ROOT NODE JSON_INPUT CHECKPOINT_REV | connections graph-tree-input ID REV ROOT OWNER NODE JSON_INPUT ROOT_REV OWNER_REV | connections graph-resume ID REV ROOT CHECKPOINT_REV | connections workspace-files ID REV FOLDER MEMBERSHIP_REV PATH | connections workspace-file ID REV FOLDER MEMBERSHIP_REV PATH | connections workspace-find ID REV FOLDER MEMBERSHIP_REV JSON_OBJECT | connections workspace-info ID REV | connections workspace-membership ID REV | connections commands ID REV | connections command-invoke ID REV SESSION JSON_OBJECT | connections agents ID REV | connections agent-definition ID REV AGENT | connections agent-open ID REV SESSION | connections agent-select ID REV SESSION JSON_OBJECT | connections models ID REV | connections model-open ID REV SESSION | connections model-select ID REV SESSION JSON_OBJECT | connections run-events ID REV SESSION RUN JSON_CURSOR | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
+        if(argc<4||std::string(argv[1])!="--endpoint")throw std::invalid_argument("Usage: xmind ipc --endpoint lrpc:PORT host | connections capabilities | connections authentication ID REV | connections authenticate ID REV CREDENTIAL_REV [TIMEOUT_MS] (credential on redirected stdin only) | connections list | connections save REV JSON_ARRAY | connections select ID REV | connections open ID REV | connections session-create ID REV SESSION TITLE | connections session-open ID REV SESSION | connections messages ID REV SESSION BEFORE_SEQUENCE COUNT | connections run-submit ID REV JSON_OBJECT | connections run-start ID REV RUN SESSION PROMPT | connections run-open ID REV RUN | connections run-history ID REV SESSION RUN BEFORE_SEQUENCE COUNT | connections run-cancel ID REV RUN | connections operations ID REV SESSION RUN | connections operation ID REV SESSION RUN OPERATION | connections operation-decide ID REV SESSION RUN OPERATION allow|deny | connections graphs ID REV | connections graph-children ID REV ROOT | connections graph-open ID REV ROOT | connections graph-submit ID REV JSON_OBJECT | connections graph-input ID REV ROOT NODE JSON_INPUT CHECKPOINT_REV | connections graph-tree-input ID REV ROOT OWNER NODE JSON_INPUT ROOT_REV OWNER_REV | connections graph-resume ID REV ROOT CHECKPOINT_REV | connections workspace-files ID REV FOLDER MEMBERSHIP_REV PATH | connections workspace-file ID REV FOLDER MEMBERSHIP_REV PATH | connections workspace-find ID REV FOLDER MEMBERSHIP_REV JSON_OBJECT | connections workspace-info ID REV | connections workspace-membership ID REV | connections commands ID REV | connections command-invoke ID REV SESSION JSON_OBJECT | connections agents ID REV | connections agent-definition ID REV AGENT | connections agent-open ID REV SESSION | connections agent-select ID REV SESSION JSON_OBJECT | connections models ID REV | connections model-open ID REV SESSION | connections model-select ID REV SESSION JSON_OBJECT | connections run-events ID REV SESSION RUN JSON_CURSOR | connections events ID REV SESSION RUN JSON_CURSOR | session create ID TITLE | session open ID | run open ID | run start ID SESSION PROMPT | run cancel ID");
         const std::string endpoint=argv[2];if(!endpoint.starts_with("lrpc:"))throw std::invalid_argument("xMind IPC requires an xlang3 LRPC endpoint");
         X::Runtime runtime;auto root=runtime.ImportRemote("xmind",endpoint.c_str());
         auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;if(!method.Call(args,result))throw std::runtime_error("xMind IPC call failed: "+runtime.LastError());return result;};
@@ -24,6 +37,12 @@ int run_xmind_ipc_client(int argc,char** argv){
                 const auto number=[](const char* input,const char* field){const std::string value=input;std::int64_t number=0;const auto parsed=std::from_chars(value.data(),value.data()+value.size(),number);if(parsed.ec!=std::errc{}||parsed.ptr!=value.data()+value.size()||number<0||number>9007199254740991LL)throw std::invalid_argument(std::string("Invalid ")+field);return X::Value(number);};
                 const auto revision=[&](const char* input){return number(input,"connection revision");};
                 if(argc==5&&std::string(argv[4])=="list")result=call(service["List"],{});
+                else if(argc==5&&std::string(argv[4])=="capabilities")result=call(service["Capabilities"],{});
+                else if(argc==7&&std::string(argv[4])=="authentication")result=call(service["Authentication"],{text(argv[5]),revision(argv[6])});
+                else if(argc>4&&std::string(argv[4])=="authenticate"){
+                    if(argc!=8&&argc!=9)throw std::invalid_argument("Usage: connections authenticate ID PROFILE_REV CREDENTIAL_REV [TIMEOUT_MS]; credential on redirected stdin only");
+                    auto request=runtime.Dict();request.Set("expected_credential_revision",number(argv[7],"credential revision"));if(argc==9)request.Set("timeout_ms",number(argv[8],"authentication timeout"));request.Set("credential",authentication_credential_stdin(runtime));result=call(service["Authenticate"],{text(argv[5]),revision(argv[6]),request});
+                }
                 else if(argc==7&&std::string(argv[4])=="save")result=call(service["Save"],{sdk_values::to_value(runtime.host(),nlohmann::json::parse(argv[6])),revision(argv[5])});
                 else if(argc==7&&std::string(argv[4])=="select")result=call(service["Select"],{text(argv[5]),revision(argv[6])});
                 else if(argc>=7){
@@ -74,6 +93,6 @@ int run_xmind_ipc_client(int argc,char** argv){
             if(result.IsValid()){if(command=="session")output={{"id",result["id"].ToString()},{"title",result["title"].ToString()},{"parent_id",result["parent_id"].ToString()}};else output={{"id",result["id"].ToString()},{"session_id",result["session_id"].ToString()},{"state",result["state"].ToString()},{"parent_id",result["parent_id"].ToString()},{"node_id",result["node_id"].ToString()}};}
         }
         std::cout<<output.dump()<<std::endl;return 0;
-    }catch(const std::exception& error){std::cerr<<error.what()<<std::endl;return 1;}
+    }catch(const std::exception& error){if(sensitive_authentication)std::cerr<<"Connection authentication failed; check profile, revisions, stdin credential and transport."<<std::endl;else std::cerr<<error.what()<<std::endl;return 1;}
 }
 }

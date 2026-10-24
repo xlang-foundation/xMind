@@ -1,0 +1,93 @@
+{
+  "scope": "Development CLI adapter using ordinary xlang3 Connections SDK method calls; not installed",
+  "passed": {
+    "recordedAt": "2026-10-24T16:51:55.799Z",
+    "sourceParent": "f44b772bc437273a0b92a41103263a136dd2cb65",
+    "sourcePatchSha256": "18f4f48d2dbc92aa58b50daf12de4d655155b304fa11ce76fb9a35daaf5490f7",
+    "build": {
+      "pid": 18344,
+      "launchedAt": "2026-10-24T16:50:48.022Z",
+      "completedAt": "2026-10-24T16:51:40.154Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "61a2780127a8e9d718dca9d246d0f38de64a5c7c5093ddd478a62d7cd9489445"
+    },
+    "test": {
+      "pid": 40664,
+      "launchedAt": "2026-10-24T16:51:42.894Z",
+      "completedAt": "2026-10-24T16:51:52.989Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f13fba736623a137ebbe3c2b611274480f9ec98e8cb3d783e23562578a28ca48"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 10.06,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "bfc50e53329d9a4070889e81bb5f0377f732cad2d2aa861fcfca255d007c6c6f",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "reproduction": {
+    "recordedAt": "2026-10-24T16:47:32.964Z",
+    "sourceParent": "f44b772bc437273a0b92a41103263a136dd2cb65",
+    "sourcePatchSha256": "b1e48f8b5a1b9be4f53dda86ac1f79b2f136655d4cd47f94773f47299f4e7cc4",
+    "build": {
+      "pid": 24588,
+      "launchedAt": "2026-10-24T16:46:40.184Z",
+      "completedAt": "2026-10-24T16:47:26.362Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dfd93a60d5d6391f6164ffcdab7c2e539e792e843cf3867866ca21a85267c64f"
+    },
+    "test": {
+      "pid": 34588,
+      "launchedAt": "2026-10-24T16:47:29.100Z",
+      "completedAt": "2026-10-24T16:47:30.243Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "efd20400cec24d3428e51666c797b5bd6f7e496f045a39e3eb4525c2f4c1a754"
+    },
+    "total": 1,
+    "failed": 1,
+    "passed": 0,
+    "seconds": 1.11,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "2905a8099b1832fbd9d5d2c2ab397f4cf61ce21cb61beb5397611d31ef2b5bd9",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "regression": "Windows CRT text-mode Ctrl-Z truncated the input and caused an extra TLS attempt. Binary stdin now exposes control bytes to validation.",
+  "coverage": [
+    "Capabilities and cached Authentication through actual CLI process",
+    "Empty, multiline, Ctrl-Z, oversized and extra-argument refusal",
+    "No credential in argv/stdout/stderr",
+    "Exactly one well-formed CLI untrusted TLS attempt, no HTTP credential request or persisted grant",
+    "Separate SDK regression and native encrypted storage/revision contracts"
+  ],
+  "limitations": [
+    "Positive CLI trusted TLS awaits hosted execution",
+    "Remote command routing remains disabled",
+    "Focused nine contracts are not a full-suite qualification"
+  ],
+  "installedVersionUnchanged": "0.1.72"
+}
