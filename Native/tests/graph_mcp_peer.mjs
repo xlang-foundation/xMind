@@ -14,7 +14,7 @@ if (process.argv[2] === '--peer') {
   const [mode, root] = process.argv.slice(3);
   assert.ok(root && resolve(root) === root, 'The native owner must bind an absolute fixture workspace');
   const audit = join(root, 'peer-audit.jsonl');
-  const record = event => fs.appendFileSync(audit, JSON.stringify({event}) + '\n');
+  const record = event => fs.appendFileSync(audit, JSON.stringify({event, at_unix_ms: Date.now(), pid: process.pid}) + '\n');
   const send = value => process.stdout.write(JSON.stringify({jsonrpc: '2.0', ...value}) + '\n');
   const input = createInterface({input: process.stdin});
   let listed = false, called = false;
@@ -86,6 +86,7 @@ if (process.argv[2] === '--peer') {
   const [binary, modules, stdlib] = process.argv.slice(2);
   assert.ok(binary && modules && stdlib, 'Expected native contract, xlang3 modules and source standard library');
   const root = await mkdtemp(join(tmpdir(), 'xmind-graph-mcp-'));
+  process.stdout.write(JSON.stringify({graph_mcp_fixture: root, phase: 'created'}) + '\n');
   let result, passed = false;
   try {
     result = await promisify(execFile)(binary,

@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-24T20:23:50.011Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T20:08:34.182Z",
+    "sourceParent": "5da4642f94a01778cf2d62987932bc3d01496c9e",
+    "sourcePatchSha256": "64c8063b67be0ce5f5fb0058797eda5fd1cc74c7ecb5cc89bfa508dea6193a63",
+    "build": {
+      "pid": 24948,
+      "launchedAt": "2026-10-24T20:07:48.968Z",
+      "completedAt": "2026-10-24T20:07:54.751Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d9a738c20683a9982a56631721995423cace8ab2fe3393a013968169030d0725"
+    },
+    "test": {
+      "pid": 27076,
+      "launchedAt": "2026-10-24T20:07:57.559Z",
+      "completedAt": "2026-10-24T20:08:31.452Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a91bf8d99d5d180c42aef5ca03ed192bda2d98d46b9b5826e2054b3e12e5b89f"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 33.84,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "57beac318f32155a0684f578e744ab4bcd97d853c7653500194b1fdcc1d1305a",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "executions": 4,
+  "uniqueNamespaces": [
+    "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-mcp-cd3FX1",
+    "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-mcp-48Shf0",
+    "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-mcp-1FvtWR",
+    "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-graph-mcp-tolyEf"
+  ],
+  "mode": "CTest repeat until-fail:4, fresh disposable fixture per execution, stops on first failure",
+  "originalFullFailureRemainsUnresolved": true,
+  "deadlinesChanged": false,
+  "retryOfEffects": false,
+  "goalComplete": false
+}
