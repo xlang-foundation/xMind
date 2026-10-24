@@ -1,0 +1,87 @@
+{
+  "recordedAt": "2026-10-24T18:45:50.902Z",
+  "sourceParent": "c88175e2",
+  "scope": "Finite JSON HTTP framing and metadata-only client parse diagnostics; not rendered package acceptance",
+  "changes": [
+    "Finite JSON responses declare exact UTF-8 Content-Length; event streams remain streamed",
+    "Explicit text-to-JSON parsing records path/status/size/type/failure name only; no body or credential logging",
+    "Malformed mutation replies are not retried"
+  ],
+  "sourceHashes": {
+    "extensions/vscode/client.js": "1371fffa478ecf85bf8a9d1d91176aa6612e1ccf483d08ca5cdcf9790becde7b",
+    "views/browser/server.mjs": "5518a56241a7fc887129478d7a4859ad6ca367f756777437ebce16401442abd2",
+    "views/browser/tests/server.test.cjs": "241d7e9a99b931a1d8b49be2cf9ca37c5f2649b822769d6f6d1207dbe7280559",
+    "Tools/ci-views.mjs": "5d8d16bf69b9f4f7f30e82cb3d8ff623d2d5d684b0efa0b9d94d49c433ed1880"
+  },
+  "initialGate": {
+    "sourceRevision": "c88175e20dbd4cbd57ca6a932544004ede82e003",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 497,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 497,
+      "passed": 497,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 1,
+      "tests": 178,
+      "passed": 177,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": false
+  },
+  "initialFailure": "New fixture omitted Sec-Fetch-Site same-origin; existing access refusal correctly blocked it. Fixture corrected without changing access policy.",
+  "finalGate": {
+    "sourceRevision": "c88175e20dbd4cbd57ca6a932544004ede82e003",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 497,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 497,
+      "passed": 497,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "causalLimit": "Intermittent browser incomplete-response cause remains unproven. Clean read-only restores and suite results do not authorize installation.",
+  "nativeChanged": false,
+  "installedVersion": "0.1.72",
+  "candidate73Accepted": false
+}

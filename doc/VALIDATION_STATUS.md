@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Finite JSON framing and parse diagnostics — 2026-10-24
+
+Finite browser-proxy JSON responses now declare their exact UTF-8 byte length, including locally generated refusal/session replies; event streams retain streaming semantics. Shared client explicitly reads text before JSON parsing and logs only response metadata on malformed successful replies. Existing HTTP-status preservation, AbortError propagation and no mutation retry remain. Fragmented Unicode upstream replies, repeated finite observations and local refusal framing are covered. Complete clients497/178 pass with frozen71 source/18 asset closures unchanged. Initial new-fixture failure omitted Sec-Fetch-Site same-origin and was corrected without weakening admission; original log retained. [Evidence](evidence/browser-json-framing-20261024.json).
+
+The intermittent rendered response failure remains causally unresolved. These changes improve framing and diagnosis, not package acceptance. Native binaries unchanged; installed72 unchanged and candidate73 held. Full goal active.
+
 ## Hosted CLI-authentication checkpoint terminal failure — 2026-10-24
 
 Source58e7eb63 run40113548336/job120934507845 completes172/176. Graph runner fails40.41s, model RPC70.92s, ledger20.64s with worker-channel deadline, and nested human times out45.02s. These unresolved hosted failures are not erased by local green. Original728999-byte job log is retained privately with SHA in the [receipt](evidence/hosted-native-58e7eb63-result-20261024.json); [failure excerpts](evidence/hosted-native-58e7eb63-failure-excerpts-20261024.log) preserve observed errors. Newer source264cadb4 run40118270287 is confirmed in progress; no duplicate dispatch. Installed72 unchanged; goal active.

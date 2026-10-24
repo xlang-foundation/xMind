@@ -71,12 +71,18 @@ function validateEditInspection(proposal,inspection) {
 class BackendClient {
   static async responseJson(response) {
     if(response.status===204)return {};
-    try{return await response.json();}
+    const bodyUsedBefore=response.bodyUsed;let bodyLength;
+    try{
+      if(typeof response.text==='function'){const text=await response.text();bodyLength=text.length;return JSON.parse(text);}
+      return await response.json();
+    }
     catch(cause){
       if(cause?.name==='AbortError')throw cause;
       // Error status remains authoritative even if its optional detail is
       // empty or truncated. In particular, stream lease backoff needs 503.
       if(!response.ok)return {};
+      let path;try{path=new URL(response.url).pathname.slice(0,512);}catch{}
+      console.warn('xMind incomplete response metadata',JSON.stringify({path,status:response.status,bodyLength,bodyUsedBefore,contentLength:response.headers?.get?.('content-length'),contentType:response.headers?.get?.('content-type')?.slice(0,80),failure:cause?.name}));
       const error=new Error('The backend response was incomplete. Refresh saved status before retrying an action.');
       error.code='invalid_backend_json';error.status=response.status;throw error;
     }
