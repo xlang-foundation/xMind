@@ -1,0 +1,63 @@
+{
+  "version": "0.1.73",
+  "sourceNative": "264cadb4bd00d54868076cb64c8e4acdb05fd8e6",
+  "nativeSha256": "12fc37cd1c24cee1336c8ba0876fabd853037a5bb2f50880ffe9fb0ff6bc2e94",
+  "package": {
+    "archiveSha256": "1c6f3f75812300194c205f42a44264567dfe1f3c3e18cb980b6bafe2253e56d6",
+    "entries": 2443,
+    "runtimeManifestSha256": "47ac3b2c65def44ad920ccf77670d63ce41a9e538ec617b07110984a0867362b",
+    "clientTests": {
+      "extension": 495,
+      "browser": 176
+    }
+  },
+  "cli": {
+    "passed": true,
+    "session": "6e35a1511fd2d237439dcca77b0b350f",
+    "root": "6e639e8c1d25cbc867fe903f0701f175",
+    "state": "completed",
+    "modelCalls": 4,
+    "historyMessages": 8,
+    "approvals": 2,
+    "paidInference": false,
+    "runtimeFilesAndHashesUnchanged": true
+  },
+  "handoff": {
+    "passed": true,
+    "session": "6ca585bd3c243003ce10694bf58c35d3",
+    "root": "dba3c3a5fa6e83569d2b22711900a835",
+    "activeUpgradeRefused": true,
+    "originalGraphResumedOnce": true,
+    "historyAndProfileExact": true,
+    "modelCalls": 0,
+    "ownedOwnerRetirementObserved": true
+  },
+  "browser": {
+    "runId": "7a47460665ab4d92840b832c73c23da0",
+    "sessionId": "9ec9e7e770a44c11a19ebe1bc7370b96",
+    "passed": false,
+    "nativeTaskCompleted": true,
+    "historyMessagesRestored": 8,
+    "agentRetained": "Native Process Coder",
+    "commandExit": 0,
+    "stdout": "4 maximum checks passed",
+    "initialStatusError": "Failed to execute 'json' on 'Response': Unexpected end of JSON input",
+    "reloadStatus": "completed",
+    "neverReplay": true,
+    "hostExitCode": 1,
+    "nativeOwner": {
+      "observedAt": "2026-10-24T18:18:03.904Z",
+      "pid": 5172,
+      "absentAfterHostFailure": true,
+      "matchingCandidateImageProcessesAbsent": true,
+      "forcedRetirementPerformed": false,
+      "hostExitCode": 1,
+      "reason": "Browser acceptance rejected initial status JSON error; owned native child already absent on inspection"
+    },
+    "scope": "Native coding completed and reload restored history/agent/exit0. First-completion status JSON error is unresolved, so browser acceptance and installation are refused. Never resubmit this completed task."
+  },
+  "installed": false,
+  "releaseAccepted": false,
+  "installedVersionPreserved": "0.1.72",
+  "fullGoalComplete": false
+}
