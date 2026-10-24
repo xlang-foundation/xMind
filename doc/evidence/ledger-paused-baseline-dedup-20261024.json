@@ -1,0 +1,135 @@
+{
+  "recordedAt": "2026-10-24T22:13:44.326Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T22:12:32.824Z",
+    "sourceParent": "e0339e9f18d6a09c803184738acd4031c0353cee",
+    "sourcePatchSha256": "46df357136ccb227c3754c577dbe3c5e47089e9ca8516ad2132d53d268cf9874",
+    "build": {
+      "pid": 35288,
+      "launchedAt": "2026-10-24T22:10:49.399Z",
+      "completedAt": "2026-10-24T22:11:42.442Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8546e7f2407d678d75e596345dbeb42a64f84808c0a95314b51e0716faf45239"
+    },
+    "test": {
+      "pid": 37220,
+      "launchedAt": "2026-10-24T22:11:45.299Z",
+      "completedAt": "2026-10-24T22:12:29.874Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ef1dbb715ebebd3287459e45e7338bfda0c6f84a81d507379422c50926a9d6c3"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 44.52,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "fe6010fb5c4cd419955368f93d0c25910839b583697297904d4ba4ede98ed5e5",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "change": "Main planning fixture executes every original baseline assertion. Separate paused-child-only fixture skips those duplicated baseline executions and runs its distinct paused/resumed slot cases.",
+  "runtimeCoverage": {
+    "beforePausedSeeds": [
+      "terminal-failure",
+      "terminal-cancel",
+      "root-plain-funding",
+      "root-read-epoch",
+      "root-read-catalogue",
+      "root-delegation-unsealed",
+      "once",
+      "unfinished",
+      "no-assistant",
+      "multiple",
+      "ordinary-tool",
+      "wrong-call",
+      "cancelled",
+      "expired",
+      "stale-attempt",
+      "root-file-unsealed",
+      "root-file-sealed",
+      "provisional",
+      "inspect_plan",
+      "revise_plan",
+      "owner-inspection",
+      "owner-rejection",
+      "owner-runner",
+      "slot-owner-paused",
+      "slot-owner-resumed"
+    ],
+    "afterPausedSeeds": [
+      "slot-owner-paused",
+      "slot-owner-resumed"
+    ],
+    "removedDuplicateSeeds": [
+      "terminal-failure",
+      "terminal-cancel",
+      "root-plain-funding",
+      "root-read-epoch",
+      "root-read-catalogue",
+      "root-delegation-unsealed",
+      "once",
+      "unfinished",
+      "no-assistant",
+      "multiple",
+      "ordinary-tool",
+      "wrong-call",
+      "cancelled",
+      "expired",
+      "stale-attempt",
+      "root-file-unsealed",
+      "root-file-sealed",
+      "provisional",
+      "inspect_plan",
+      "revise_plan",
+      "owner-inspection",
+      "owner-rejection",
+      "owner-runner"
+    ],
+    "removedSeedsAllObservedInMainPhase": true,
+    "mainSlotCases": [
+      "slot-owner",
+      "slot-owner-accepted"
+    ],
+    "pausedSlotCases": [
+      "slot-owner-paused",
+      "slot-owner-resumed"
+    ]
+  },
+  "assertionSourceCounts": {
+    "before": {
+      "require": 408,
+      "rejects": 347
+    },
+    "after": {
+      "require": 408,
+      "rejects": 347
+    },
+    "allAssertionsRetained": true,
+    "onlyChange": "Skip repeated baseline setup in paused_child_only; main baseline and all four slot cases remain"
+  },
+  "phaseObservations": {
+    "beforePausedChildMilliseconds": 1567,
+    "afterPausedChildMilliseconds": 752,
+    "afterMainLedgerMilliseconds": 43891,
+    "afterFullFixtureMilliseconds": 44270
+  },
+  "limitations": "Single fresh observations, not a controlled performance benchmark. Overall fixture still has narrow headroom under unchanged45000ms wrapper; robust full qualification remains unresolved. Prior failed full179 is retained and not reinterpreted.",
+  "deadlinesChanged": false,
+  "retriesAdded": false,
+  "productionCodeChanged": false,
+  "installed": false,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "goalComplete": false
+}

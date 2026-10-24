@@ -1,3 +1,9 @@
+## Paused-child fixture avoids duplicate baseline execution — 2026-10-24
+
+The paused-child-only ledger pass previously reran23 baseline seeds already covered by the main planning phase before reaching its two distinct slot cases. It now leaves baseline execution in the main phase and retains paused/resumed child coverage in the separate database. All408 require and347 rejection assertion occurrences remain unchanged; runtime trace confirms every removed duplicate seed still executes in the main phase, alongside ordinary slot0/1 and paused slot2/3. No production code, process deadlines, retries or contract inventory changes.
+
+One fresh focused ledger gate passes44.51s (CTest44.52s), with complete2838/16/1870/30/18598/142 closure and file sets unchanged and Native fe6010fb unchanged. Paused-child phase records752ms versus1567ms in the earlier instrumented control; these single observations are not a performance benchmark. Full fixture remains close to45s, and the original failed full179 qualification remains unresolved. No package/install. [Coverage and timing receipt](evidence/ledger-paused-baseline-dedup-20261024.json), [full focused output](evidence/ledger-paused-baseline-dedup-20261024.log).
+
 ## Full179 terminal178/179; ledger wrapper boundary located — 2026-10-24
 
 Source37becbf1/Native fe6010fb completes178/179 in801.32s with all2838 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/142 binary hashes and file sets unchanged. Only worker ledger exceeds its unchanged45s Node wrapper (45.20s). Graph-worker12.03s, RPC55.47s, nested32.18s, deep7.55s and HTTP agent8.81s pass. This is failed full qualification; no package/install. [Full result and retained-original receipt](evidence/native-delivery-37becbf1-ledger-20261024.json), [full log](evidence/native-delivery-37becbf1-full-20261024.log).
