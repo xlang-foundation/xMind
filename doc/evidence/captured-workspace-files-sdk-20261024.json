@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "scope": "Native captured workspace Files/File/Find through standard xlang3 methods and backend HTTP",
+  "gate": {
+    "recordedAt": "2026-10-24T07:28:02.291Z",
+    "sourceParent": "9a920cfb57952728ae6bb12e5377a61c093d20fa",
+    "sourcePatchSha256": "51f1b65217249e7d95723c56cdd3b354e63b1740441e18307de96c2cb4a23f29",
+    "build": {
+      "pid": 8004,
+      "launchedAt": "2026-10-24T07:24:35.099Z",
+      "completedAt": "2026-10-24T07:26:28.851Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "290b62684ffe86a4c43fa189022863142167a1cd810fb7b9e681a1a28a50a069"
+    },
+    "test": {
+      "pid": 23404,
+      "launchedAt": "2026-10-24T07:26:31.675Z",
+      "completedAt": "2026-10-24T07:27:59.563Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "aea03419bbde1c5dbd96c8584f17b37f7ff55659612096ca49dc173f86b12874"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 87.84,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "3d727450756c3c9287a87b7bdfb8dfb56e960bbcb2821b559e5c03dd88e9a5eb",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "verified": [
+    "Separate xmind.exe clients list and preview actual input.txt and find it by filename",
+    "File HTTP result equals SDK result for same immutable connection/folder/revision",
+    "Stale membership revision, foreign folder and traversal refuse",
+    "WorkspaceToolSet opens and verifies admitted native folder identities; membership is checked before and after reads",
+    "Retired retained workspace object refuses listing/preview"
+  ],
+  "limits": [
+    "Focused native7 only; no full173 or installation qualification",
+    "Browser explorer/gateway integration with captured Files/File/Find remains unfinished; existing explorer routes preserved",
+    "No frontend source changes; earlier client480/165 scope retained, not rerun",
+    "No paid inference or CPython; installed65 unchanged",
+    "Provider configuration mutation, remaining general reads, remote/enrollment and rendered editor remain open"
+  ]
+}

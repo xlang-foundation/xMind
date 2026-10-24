@@ -1,3 +1,9 @@
+## Captured native file browsing passes focused7 — 2026-10-24
+
+The registered Workspace subobject now exposes Files(folder, revision, path), File(folder, revision, path) and Find(folder, revision, request). Native reads construct the existing verified WorkspaceToolSet from backend membership, retain lifetime guards, and recheck membership identity/revision after reading. Values include immutable binding, workspace/folder ID and revision.
+
+Separate xmind.exe clients list/read/find a real fixture file; HTTP preview agrees. Stale revision, foreign folder, traversal and backend retirement refuse. Native7/7 passes in87.84s with closures/file sets unchanged. [Receipt](evidence/captured-workspace-files-sdk-20261024.json). Browser explorer/gateway migration remains open; existing explorer routes are preserved. Installed65 unchanged.
+
 ## Captured workspace metadata/membership pass native7 and client480/165 — 2026-10-24
 
 Workspace.Info/Membership are registered xlang3 subobject methods. Captured HTTP and shared browser/extension reads retain immutable backend identity; membership revalidates workspace authority and snapshot identity. Compatibility metadata routes share the same native encoders. Separate xmind.exe SDK reads agree with HTTP and the actual native managed-view/browser gateway reads both captured routes. Lifetime tests verify configured/no-executor cases and retired-object refusal.

@@ -27,6 +27,11 @@ struct ConnectionCommandRequest {std::string id,session,command,arguments,model,
 struct BoundConnectionCommands {ConnectionBindingIdentity binding;ConnectionCommandCatalogue catalogue;};
 ConnectionCommandCatalogue read_local_connection_commands(RunExecutor&);
 Run submit_local_connection_command(PersistenceService&,RunExecutor&,GraphExecution*,ConnectionCommandRequest);
+struct ConnectionFolderScope {ConnectionBindingIdentity binding;std::string workspace_id,folder_id,path;std::int64_t revision=0;};
+struct BoundConnectionFiles {ConnectionFolderScope scope;WorkspaceListing listing;};
+struct BoundConnectionFile {ConnectionFolderScope scope;WorkspaceFile file;};
+struct ConnectionFindRequest {std::string query,path=".",type="file";std::size_t limit=100;bool hidden=false,respect_ignore=true;};
+struct BoundConnectionFind {ConnectionFolderScope scope;WorkspaceFind found;};
 struct BoundConnectionWorkspace {ConnectionBindingIdentity binding;ExecutionWorkspaceMetadata workspace;};
 struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMembershipSnapshot membership;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
@@ -78,6 +83,9 @@ public:
     BoundConnectionModels models()const;
     BoundConnectionWorkspace workspace()const;
     BoundConnectionMembership membership()const;
+    BoundConnectionFiles files(std::string folder,std::int64_t revision,std::string path)const;
+    BoundConnectionFile file(std::string folder,std::int64_t revision,std::string path)const;
+    BoundConnectionFind find(std::string folder,std::int64_t revision,ConnectionFindRequest request)const;
     BoundConnectionCommands commands()const;
     BoundConnectionRun invoke_command(ConnectionCommandRequest request)const;
     BoundConnectionModel session_model(const std::string& session)const;

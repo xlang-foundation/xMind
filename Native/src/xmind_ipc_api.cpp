@@ -105,7 +105,10 @@ struct BoundWorkspaceApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundWorkspaceApi()=default;explicit BoundWorkspaceApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
     X::Value Info(){return api_call([&]{if(!state)throw RunUnavailable("Unbound workspace service");return sdk_values::to_value(Host(),connection_values::bound(state->workspace()));});}
     X::Value Membership(){return api_call([&]{if(!state)throw RunUnavailable("Unbound workspace service");return sdk_values::to_value(Host(),connection_values::bound(state->membership()));});}
-    BEGIN_PACKAGE(BoundWorkspaceApi) APISET().AddFunc<0>("Info",&BoundWorkspaceApi::Info);APISET().AddFunc<0>("Membership",&BoundWorkspaceApi::Membership); END_PACKAGE
+    X::Value Files(std::string folder,std::int64_t revision,std::string path){return api_call([&]{if(!state)throw RunUnavailable("Unbound workspace service");return sdk_values::to_value(Host(),connection_values::bound(state->files(std::move(folder),revision,std::move(path))));});}
+    X::Value File(std::string folder,std::int64_t revision,std::string path){return api_call([&]{if(!state)throw RunUnavailable("Unbound workspace service");return sdk_values::to_value(Host(),connection_values::bound(state->file(std::move(folder),revision,std::move(path))));});}
+    X::Value Find(std::string folder,std::int64_t revision,X::Value request){return api_call([&]{if(!state)throw RunUnavailable("Unbound workspace service");return sdk_values::to_value(Host(),connection_values::bound(state->find(std::move(folder),revision,connection_input::find_request(sdk_values::from_value(request)))));});}
+    BEGIN_PACKAGE(BoundWorkspaceApi) APISET().AddFunc<0>("Info",&BoundWorkspaceApi::Info);APISET().AddFunc<0>("Membership",&BoundWorkspaceApi::Membership);APISET().AddFunc<3>("Files",&BoundWorkspaceApi::Files);APISET().AddFunc<3>("File",&BoundWorkspaceApi::File);APISET().AddFunc<3>("Find",&BoundWorkspaceApi::Find); END_PACKAGE
 };
 struct BoundCommandsApi {
     std::shared_ptr<CapturedLocalConnection> state;BoundCommandsApi()=default;explicit BoundCommandsApi(std::shared_ptr<CapturedLocalConnection> value):state(std::move(value)){}
