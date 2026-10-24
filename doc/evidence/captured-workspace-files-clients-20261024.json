@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured browser explorer listing preview and filename search through shared client, browser gateway, native managed view and C++ backend",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T07:32:33.350Z",
+    "sourceParent": "b1aed5bf7ed867f78b2282526932e825c6c51249",
+    "sourcePatchSha256": "9213da7c9c7d86c439b3c260bd58eead05479f043bdc57af23655de131db78ec",
+    "build": {
+      "pid": 1112,
+      "launchedAt": "2026-10-24T07:30:12.259Z",
+      "completedAt": "2026-10-24T07:30:59.768Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "544a35da9e12dffab278804c9dce61b6da5348c051669ac6e5c8b42937cfcbb5"
+    },
+    "test": {
+      "pid": 19672,
+      "launchedAt": "2026-10-24T07:31:02.419Z",
+      "completedAt": "2026-10-24T07:32:30.647Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e596abb3f13d980f5274770c5147cba4f5a33bc65313a0c726bf9228f75f65a0"
+    },
+    "total": 7,
+    "failed": 0,
+    "passed": 7,
+    "seconds": 88.19,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "3d727450756c3c9287a87b7bdfb8dfb56e960bbcb2821b559e5c03dd88e9a5eb",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "b1aed5bf7ed867f78b2282526932e825c6c51249",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 481,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 481,
+      "passed": 481,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "postNativeFixtureOnlyCorrection": {
+    "files": [
+      "extensions/vscode/tests/client.test.js"
+    ],
+    "reason": "New unit assertion included connection setup requests; filter corrected to inspect file requests only and explicitly reject legacy file routes",
+    "failedUnitLogSha256": "8ad7f2ee728b3f11508274a374ca8e1172ba0948dbeff6b5c459434eb63301fc",
+    "productionSourceBytesUnchanged": true,
+    "correctedFixtureVerifiedInCompleteClientGate": true
+  },
+  "verified": [
+    "Browser explorer listing, preview and search use shared client methods",
+    "Negotiated native reads carry captured handle, admitted folder and membership revision",
+    "Actual managed native view/browser gateway lists and previews note.txt and finds it by filename",
+    "Shared client rejects binding/folder/revision mismatch and closure/downgrade without legacy retry",
+    "Compatibility requests remain for servers that never advertised captured file support"
+  ],
+  "limits": [
+    "Native/controller/gateway and synthetic DOM suites, not a new actual rendered browser/editor acceptance",
+    "Focused native7 only; no full173, package or installation update",
+    "Other existing general reads/provider configuration mutations and authenticated remote/enrollment remain open",
+    "No paid inference or CPython; installed65 unchanged"
+  ]
+}

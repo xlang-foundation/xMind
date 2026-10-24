@@ -1,3 +1,9 @@
+## Captured browser explorer reads pass native7 and client481/165 — 2026-10-24
+
+Browser listing, preview and filename search now use shared captured-file methods. They read current native membership, carry folder/revision to the captured backend route and verify returned binding/workspace/folder/revision. Negotiated mismatch, closure or downgrade cannot fall back. The gateway admits the exact read-only POST routes; servers that never advertised support retain compatibility reads.
+
+Actual managed native-view/browser gateway reads list/read/find note.txt. Native7/7 passes in88.19s; complete client481/165 passes with71 sources/18 assets unchanged. An initial Node unit assertion mistakenly included connection setup requests; its assertion-only correction is identified by hash, and all native/production frontend source bytes match the native gate. [Receipt](evidence/captured-workspace-files-clients-20261024.json). Actual rendered browser/editor acceptance remains separate. Installed65 unchanged; remaining reads/provider mutation/remote/enrollment and deeper recovery remain open.
+
 ## Captured native file browsing passes focused7 — 2026-10-24
 
 The registered Workspace subobject now exposes Files(folder, revision, path), File(folder, revision, path) and Find(folder, revision, request). Native reads construct the existing verified WorkspaceToolSet from backend membership, retain lifetime guards, and recheck membership identity/revision after reading. Values include immutable binding, workspace/folder ID and revision.

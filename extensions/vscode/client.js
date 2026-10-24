@@ -80,6 +80,7 @@ class BackendClient {
   #connectionModelsSupported=false;
   #connectionCommandsSupported=false;
   #connectionWorkspaceSupported=false;
+  #connectionWorkspaceFilesSupported=false;
   #connectionModelSelectionSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
@@ -134,6 +135,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_workspace_files")){if(health.local_connection_workspace_files!==1||health.local_connection_workspace!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured workspace file protocol.");this.#connectionWorkspaceFilesSupported=true;}
+    else if(this.#connectionWorkspaceFilesSupported)throw new Error("The backend workspace file protocol changed. Reconnect before browsing files.");
     if(health&&Object.hasOwn(health,"local_connection_workspace")){if(health.local_connection_workspace!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured workspace protocol.");this.#connectionWorkspaceSupported=true;}
     else if(this.#connectionWorkspaceSupported)throw new Error("The backend workspace protocol changed. Reconnect before reading workspace state.");
     if(health&&Object.hasOwn(health,"local_connection_commands")){if(health.local_connection_commands!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured commands protocol.");this.#connectionCommandsSupported=true;}
@@ -187,6 +190,13 @@ class BackendClient {
   }
   async workspace() { return validateWorkspace(await this.#workspaceRead()); }
   async workspaceMembership(workspace) { const identity=workspace||await this.workspace();return validateWorkspaceMembership(await this.#workspaceRead(true),identity); }
+  async #workspaceFileRead(kind,path,folder,folderAware,options={}) {
+    if(!this.#connectionWorkspaceFilesSupported){const query=new URLSearchParams(kind==='find'?{query:options.query,path,type:options.type??'file',limit:String(options.limit??100)}:{path});if(folderAware)query.set('folder_id',folder);return this.request('/v1/workspace/'+(folderAware?'folders/':'')+kind+'?'+query);}
+    const capture=await this.#captureConnection(),workspace=await this.workspace(),membership=await this.workspaceMembership(workspace);const folderId=folder||membership.primary_folder_id;if(!membership.folders.some(value=>value.folder_id===folderId))throw new Error('Folder is outside the captured workspace membership');if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured file connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/workspace/'+kind,{folder_id:folderId,expected_workspace_revision:membership.revision,path,...options});exactFields(value,['binding','workspace_id','folder_id','revision','path',...(kind==='file'?['content']:kind==='find'?['entries','truncated','limits']:['entries','truncated'])]);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Workspace files belong to another connection');if(value.workspace_id!==workspace.workspace_id||value.folder_id!==folderId||value.revision!==membership.revision||value.path!==path)throw new Error('Workspace file scope changed');if(kind==='file'?typeof value.content!=='string':!Array.isArray(value.entries)||typeof value.truncated!=='boolean'||kind==='find'&&!Array.isArray(value.limits))throw new Error('Invalid workspace file response');const {binding,...result}=value;return result;
+  }
+  workspaceFiles(path='.',folder,folderAware=false){return this.#workspaceFileRead('files',path,folder,folderAware);}
+  workspaceFile(path,folder,folderAware=false){return this.#workspaceFileRead('file',path,folder,folderAware);}
+  workspaceFind(query,path='.',folder,folderAware=false,options={}){return this.#workspaceFileRead('find',path,folder,folderAware,{query,type:'file',limit:100,...options});}
   async addWorkspaceFolder(root) {
     if(typeof root!=='string'||!root||root.length>32760||/[\x00-\x1f]/.test(root)||!(/^[A-Za-z]:[\\/]/.test(root)||/^\\\\[^\\/]+\\[^\\/]+(?:\\|$)/.test(root)))throw new Error('Choose an absolute local or UNC workspace folder.');
     const workspace=await this.workspace();return validateWorkspaceMembership(await this.request('/v1/workspaces/add',{workspace_id:workspace.workspace_id,root},30000),workspace);
