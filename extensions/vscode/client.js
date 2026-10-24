@@ -77,6 +77,7 @@ class BackendClient {
   #connectionGraphChildrenSupported=false;
   #connectionTreeStreamSupported=false;
   #connectionRunStreamSupported=false;
+  #connectionModelsSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionHistorySupported=false;
@@ -130,6 +131,8 @@ class BackendClient {
     else if(this.#connectionGraphReadSupported)throw new Error("The backend graph read protocol changed. Reconnect before reading graphs.");
     if(health&&Object.hasOwn(health,"local_connection_graph_children")){if(health.local_connection_graph_children!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph children protocol.");this.#connectionGraphChildrenSupported=true;}
     else if(this.#connectionGraphChildrenSupported)throw new Error("The backend graph children protocol changed. Reconnect before reading graph owners.");
+    if(health&&Object.hasOwn(health,"local_connection_models")){if(health.local_connection_models!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured models protocol.");this.#connectionModelsSupported=true;}
+    else if(this.#connectionModelsSupported)throw new Error("The backend model catalog protocol changed. Reconnect before reading models.");
     if(health&&Object.hasOwn(health,"local_connection_run_stream")){if(health.local_connection_run_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured run stream protocol.");this.#connectionRunStreamSupported=true;}
     else if(this.#connectionRunStreamSupported)throw new Error("The backend run stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_tree_stream")){if(health.local_connection_tree_stream!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured tree stream protocol.");this.#connectionTreeStreamSupported=true;}
@@ -206,7 +209,12 @@ class BackendClient {
     const query=new URLSearchParams({mode,context:String(context)});if(base!==undefined)query.set('base',base);if(folderId!==undefined)query.set('folder_id',validateVcsFolderId(folderId));
     return validateVcsDiff(await this.request('/v1/vcs/diff?'+query.toString()));
   }
-  models() { return this.request('/v1/models'); }
+  async models() {
+    if(!this.#connectionModelsSupported)return this.request('/v1/models');
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured model connection changed.');
+    const value=await this.request('/v1/connection-bindings/'+capture.id+'/models');exactFields(value,['binding','default_model','models']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Model catalog belongs to another connection');
+    if(typeof value.default_model!=='string'||!Array.isArray(value.models)||value.models.length>10000)throw new Error('Invalid model catalog');const ids=new Set();for(const model of value.models){exactFields(model,['id']);if(typeof model.id!=='string'||!model.id||model.id.length>256||/[\x00-\x1f\x7f]/.test(model.id)||ids.has(model.id))throw new Error('Invalid model catalog entry');ids.add(model.id);}if(value.default_model!==(value.models[0]?.id??''))throw new Error('Model catalog default differs');return {default_model:value.default_model,models:value.models};
+  }
   async #readCapturedGraph(id){
     if(id!==undefined)executionIdentity(id);const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured graph connection changed.");
     const detail=id!==undefined,value=await this.request('/v1/connection-bindings/'+capture.id+(detail?'/graph-runs/'+encodeURIComponent(id):'/graphs'));exactFields(value,detail?['binding','graph']:['binding','graphs']);validateConnectionBindingIdentity(value.binding);

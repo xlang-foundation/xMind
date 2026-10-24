@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "scope": "Captured model catalog SDK subobject, native HTTP, gateway and shared clients",
+  "nativeGate": {
+    "recordedAt": "2026-10-24T06:47:30.372Z",
+    "sourceParent": "2edb72846c1cd8921f5c0377b1b00c596f577e73",
+    "sourcePatchSha256": "38221f7cb6020657c39518d6f87f7958688c7dbce5f0a139f66ce7324e07290d",
+    "build": {
+      "pid": 36944,
+      "launchedAt": "2026-10-24T06:44:29.523Z",
+      "completedAt": "2026-10-24T06:46:03.089Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e6a2bb92d591b8ac2db382e9a1237d8ee45d304ceea4d2cba198a9750efa098e"
+    },
+    "test": {
+      "pid": 31364,
+      "launchedAt": "2026-10-24T06:46:05.720Z",
+      "completedAt": "2026-10-24T06:47:27.762Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ac063abd773139b658e0b5505a4e92bff1856a618bc3eacb0f86a130760b90a1"
+    },
+    "total": 5,
+    "failed": 0,
+    "passed": 5,
+    "seconds": 82,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "c81e71a655f98209584235ab95708b9829e6ca92255a9f2776179b0708148a05",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clientGate": {
+    "sourceRevision": "2edb72846c1cd8921f5c0377b1b00c596f577e73",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 477,
+      "browser": 165
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 477,
+      "passed": 477,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 165,
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "verified": [
+    "Separate xmind.exe calls Models().List() and compares configured sdk-fixture with legacy HTTP catalog",
+    "Retained model object refuses access after backend retirement",
+    "Actual managed browser gateway reads the captured model route with View credentials",
+    "Shared client rejects wrong identity, duplicate/invalid entries, inconsistent default and protocol downgrade without fallback"
+  ],
+  "limits": [
+    "Model selection/provider mutation and command APIs remain separate work",
+    "Focused native5 only; no new full173, install or rendered IDE acceptance",
+    "Installed65 unchanged; no paid inference or CPython"
+  ]
+}

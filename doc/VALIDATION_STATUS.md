@@ -1,3 +1,9 @@
+## Captured model catalog passes native5 and client477/165 — 2026-10-23
+
+Models().List() is a registered xlang3 subobject of the captured connection. SDK and HTTP use the same native model list and value encoder. Shared browser/extension reads retain binding identity and validate default/entry uniqueness; a negotiated error or downgrade cannot fall back. Actual separate xmind.exe calls agree with the configured HTTP catalog. Actual managed-view/browser gateway reads and retired-object refusal pass.
+
+Native5/5 passes in82.00s; complete client477/165 passes with71 sources/18 assets unchanged. [Receipt](evidence/captured-model-catalog-clients-20261023.json). This is focused development acceptance only. Session model selection/provider mutations, commands, general reads, remote/enrollment and rendered VS Code remain open. Installed65 is unchanged.
+
 ## Captured single-run event streams pass native5 and client476/165 — 2026-10-23
 
 Connection.RunEvents(session, run) returns the registered SDK Events subobject with Cursor()/Read(cursor). The C++ service validates the owning session, reads only that run and rejects retired backend objects. It supports child runs independently; existing Events(session, root) remains the complete root-tree observer. The captured HTTP events/stream route, gateway and shared clients use the same native service and verify immutable binding identity.

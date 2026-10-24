@@ -31,6 +31,7 @@ std::shared_ptr<CapturedLocalConnection> LocalConnectionBindings::open(std::stri
     captured->identity_={"local",context_->profiles.local_server_identity(),context_->generation,revision,1};return captured;
 }
 ConnectionBindingIdentity CapturedLocalConnection::identity()const{auto life=context_->enter();return identity_;}
+BoundConnectionModels CapturedLocalConnection::models()const{auto life=context_->enter();return {identity_,context_->executor?context_->executor->models():std::vector<std::string>{}};}
 BoundConnectionSession CapturedLocalConnection::open_session(std::string id)const{auto life=context_->enter();return {identity_,context_->store.session(id).get()};}
 BoundConnectionMessages CapturedLocalConnection::messages(std::string session,std::int64_t before,std::int64_t count)const{
     auto life=context_->enter();
