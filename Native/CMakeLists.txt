@@ -537,7 +537,7 @@ if(BUILD_TESTING)
     set_tests_properties(native_context_repository_contract PROPERTIES TIMEOUT 90)
     add_executable(agentflow_context_control_contract tests/context_control_contract.cpp)
     target_include_directories(agentflow_context_control_contract PRIVATE third_party third_party/cpp-httplib)
-    target_link_libraries(agentflow_context_control_contract PRIVATE agentflow_agent agentflow_http agentflow_runtime)
+    target_link_libraries(agentflow_context_control_contract PRIVATE agentflow_agent agentflow_http agentflow_runtime agentflow_ipc_api)
     add_custom_command(TARGET agentflow_context_control_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
       "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_context_control_contract>")
     add_executable(agentflow_agent_worker_native_execution_contract tests/agent_worker_native_execution_contract.cpp)

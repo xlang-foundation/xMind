@@ -1,0 +1,222 @@
+{
+  "recordedAt": "2026-10-24T13:45:40.505Z",
+  "scope": "Actual separate xmind.exe clients invoke standard registered xlang3 root and Contexts methods; real native execution/maintenance/SQLite, controlled provider; test service host.",
+  "acceptance": {
+    "passed": true,
+    "scope": "Actual separate xmind.exe clients invoke standard registered xlang3 root and Contexts methods; real native execution/maintenance/SQLite, controlled provider; test service host.",
+    "counts": {
+      "inference": 3,
+      "count": 2,
+      "compact": 1
+    },
+    "routes": [],
+    "contractSha256": "21d119b8bb7a05d6cb203011a626453eef36cf165cfe66c633177b4cf0ae82ba",
+    "paidInference": false,
+    "installed": false,
+    "neverReplay": true,
+    "ownedNativeExited": true
+  },
+  "proof": {
+    "passed": true,
+    "transport": "Separate xmind.exe processes using registered xlang3 root/Contexts subobject methods",
+    "request": "independent-sdk-compaction",
+    "headRevision": 1,
+    "neverReplay": true
+  },
+  "calls": [
+    {
+      "args": [
+        "context-open",
+        "local",
+        "1",
+        "owned",
+        "synthetic-control-a"
+      ],
+      "receipt": {
+        "binding": {
+          "backend_generation": "1859443428-1253264364-3794800565-3942564902-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-f10b865b2438dd5e8ef676c33c9bab36da87742977c5a1bc3687f70509d158f2"
+        },
+        "context": {
+          "automatic": false,
+          "checkpoint": null,
+          "enabled": true,
+          "head_revision": 0,
+          "manual": null,
+          "model_id": "synthetic-control-a",
+          "session_id": "owned",
+          "source_watermark": 6
+        }
+      }
+    },
+    {
+      "args": [
+        "context-compact",
+        "local",
+        "1",
+        "owned",
+        "{\"id\":\"independent-sdk-compaction\",\"model_id\":\"synthetic-control-a\",\"expected_head_revision\":0}"
+      ],
+      "receipt": {
+        "binding": {
+          "backend_generation": "1859443428-1253264364-3794800565-3942564902-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-f10b865b2438dd5e8ef676c33c9bab36da87742977c5a1bc3687f70509d158f2"
+        },
+        "request": {
+          "id": "independent-sdk-compaction",
+          "state": "pending"
+        },
+        "session_id": "owned"
+      }
+    },
+    {
+      "args": [
+        "context-request",
+        "local",
+        "1",
+        "owned",
+        "independent-sdk-compaction",
+        "synthetic-control-a"
+      ],
+      "receipt": {
+        "binding": {
+          "backend_generation": "1859443428-1253264364-3794800565-3942564902-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-f10b865b2438dd5e8ef676c33c9bab36da87742977c5a1bc3687f70509d158f2"
+        },
+        "request": {
+          "id": "independent-sdk-compaction",
+          "state": "claimed"
+        },
+        "session_id": "owned"
+      }
+    },
+    {
+      "args": [
+        "context-request",
+        "local",
+        "1",
+        "owned",
+        "independent-sdk-compaction",
+        "synthetic-control-a"
+      ],
+      "receipt": {
+        "binding": {
+          "backend_generation": "1859443428-1253264364-3794800565-3942564902-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-f10b865b2438dd5e8ef676c33c9bab36da87742977c5a1bc3687f70509d158f2"
+        },
+        "request": {
+          "id": "independent-sdk-compaction",
+          "state": "completed"
+        },
+        "session_id": "owned"
+      }
+    },
+    {
+      "args": [
+        "context-open",
+        "local",
+        "1",
+        "owned",
+        "synthetic-control-a"
+      ],
+      "receipt": {
+        "binding": {
+          "backend_generation": "1859443428-1253264364-3794800565-3942564902-",
+          "connection_id": "local",
+          "kind": "local",
+          "profile_revision": 1,
+          "protocol_version": 1,
+          "server_id": "local-f10b865b2438dd5e8ef676c33c9bab36da87742977c5a1bc3687f70509d158f2"
+        },
+        "context": {
+          "automatic": false,
+          "checkpoint": {
+            "id": "db0b531313f256c4f3232544ff8ec653",
+            "preparation_elapsed_ms": 57,
+            "provider_elapsed_ms": 13,
+            "usage": {
+              "input_tokens": 31,
+              "output_tokens": 7,
+              "total_tokens": 38
+            }
+          },
+          "enabled": true,
+          "head_revision": 1,
+          "manual": null,
+          "model_id": "synthetic-control-a",
+          "session_id": "owned",
+          "source_watermark": 6
+        }
+      }
+    }
+  ],
+  "nativeRegression": {
+    "recordedAt": "2026-10-24T13:44:45.849Z",
+    "sourceParent": "616287cd4481b5be2b6c43ffbf584f738ec52db5",
+    "sourcePatchSha256": "685eed3e907e9a316cd4ee6f540299dcb1e343368fe570589461ba570109a634",
+    "build": {
+      "pid": 10096,
+      "launchedAt": "2026-10-24T13:44:20.206Z",
+      "completedAt": "2026-10-24T13:44:36.434Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "e652e69742a2996e527a2868f15024e93197fe8ecacb097a55392752cf5509f8"
+    },
+    "test": {
+      "pid": 8048,
+      "launchedAt": "2026-10-24T13:44:39.061Z",
+      "completedAt": "2026-10-24T13:44:43.176Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "a18c8d01a5912c60042d319f0bb68dacd5faf44667993d46a67cabbcf506aba5"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 4.08,
+    "projectFiles": 2820,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "sdkClientNativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+  "allFrozenProjectSourcesStillMatch": true,
+  "installed70Unchanged": true,
+  "neverReplay": {
+    "namespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/independent-sdk-context-20261024",
+    "session": "owned",
+    "roots": [
+      "owned_seed_0",
+      "owned_seed_1",
+      "owned_seed_2"
+    ],
+    "request": "independent-sdk-compaction"
+  },
+  "productionProviderSetup": false,
+  "goalComplete": false
+}

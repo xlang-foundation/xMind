@@ -3,6 +3,7 @@
 // No run/compaction lifecycle is advanced through fixture state setters.
 #include "agentflow/agent_service.hpp"
 #include "agentflow/execution_platform.hpp"
+#include "agentflow/xmind_ipc_api.hpp"
 #include "agentflow/http_server.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "httplib.h"
@@ -78,11 +79,11 @@ struct Owned {
 void rendered_controller(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& base){
     PersistenceService store((root/"state.sqlite").string(),imports);put_key(store);
     auto configured=settings(base,"rendered");std::filesystem::create_directory(root/"workspace");configured.workspace=(root/"workspace").string();configured.provider.tools=Capability::supported;
-    ExecutionPlatform service(store,std::move(configured),1,8);HttpServer server(store,token,&service);const auto port=server.bind(0);Serving serving(server);Http http(port);stage="rendered_seed";
+    ExecutionPlatform service(store,std::move(configured),1,8);XMindIpcServer ipc(store,&service,token);HttpServer server(store,token,&service);const auto port=server.bind(0);Serving serving(server);Http http(port);stage="rendered_seed";
     seed(store,service,http,"rendered");
     const auto original=store.history("owned").get();
     public_context(http.get("/v1/sessions/owned/context"),false);
-    {std::ofstream ready(root/"rendered-ready.json",std::ios::binary);ready<<Json{{"origin","http://127.0.0.1:"+std::to_string(port)},{"session","owned"},{"model",model_a}}.dump();require(static_cast<bool>(ready),"Rendered readiness publication failed");}
+    {std::ofstream ready(root/"rendered-ready.json",std::ios::binary);ready<<Json{{"origin","http://127.0.0.1:"+std::to_string(port)},{"endpoint",ipc.endpoint()},{"session","owned"},{"model",model_a}}.dump();require(static_cast<bool>(ready),"Rendered readiness publication failed");}
     stage="rendered_browser_compaction";
     const auto deadline=std::chrono::steady_clock::now()+std::chrono::minutes(20);
     while(!std::filesystem::is_regular_file(root/"rendered-complete.json")){
