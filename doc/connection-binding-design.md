@@ -103,7 +103,7 @@ The current production source2d98bdde passes the complete173-contract native
 inventory with frozen source/runtime/dependency closures. Accepted client481/165
 assets and the exact qualified0.1.66 runtime pass separate actual browser coding,
 CLI coding and managed package handoff checks. The installed66 isolated smoke
-also passes; protected-user-state verification remains pending. These receipts
+also passes; protected-user-state verification passes with all five roots unchanged. These receipts
 do not prove authenticated remote routing or rendered VS Code coding. See
 [evidence and scope](evidence/candidate-0.1.66-qualified-coding-20261024.json)
 and [installed smoke](evidence/installed-0.1.66-smoke-20261024.json).

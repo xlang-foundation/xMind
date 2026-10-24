@@ -6,11 +6,11 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Candidate66 CLI session773ac2efc0558863ad0cc629ace7e211/root e209f03d19e58216c40e4e22e06eb968; browser6a9cd04098714dbfa559e149dbd3715b/root3ec2da626b0d4d9e99acb4d8e0d85e13; handoff89727aa7415090fb464ae470a0f37e0d/root1d19ae73fa6583c89e786af1e1277a7c completed. Failed browser6aa83bfd30a045fd96ed5ec0b8efe1f2/root5bf575aa1b5748349143430abeac6afa retained. NEVER replay. Fixtures exited; installation verifier pending. See candidate-0.1.66-qualified-coding-20261024.json in doc/evidence.
+- Candidate66 CLI session773ac2efc0558863ad0cc629ace7e211/root e209f03d19e58216c40e4e22e06eb968; browser6a9cd04098714dbfa559e149dbd3715b/root3ec2da626b0d4d9e99acb4d8e0d85e13; handoff89727aa7415090fb464ae470a0f37e0d/root1d19ae73fa6583c89e786af1e1277a7c completed. Failed browser6aa83bfd30a045fd96ed5ec0b8efe1f2/root5bf575aa1b5748349143430abeac6afa retained. NEVER replay. Fixtures exited; installed66 preservation passes. See candidate-0.1.66-qualified-coding-20261024.json in doc/evidence.
 
-- Installed66 smoke sessione396142dfae23f973429a308f3c264c4/root430c3d73de6b88e377abcc6c9f92e51f completed read/history, zero models; NEVER replay. Owner exited. Preservation verifier pending.
+- Installed66 smoke sessione396142dfae23f973429a308f3c264c4/root430c3d73de6b88e377abcc6c9f92e51f completed read/history, zero models; NEVER replay. Owner exited. Five protected roots unchanged;2442 installed/2398 runtime exact.
 
-- Installed65 Nativec68485ce/c1f1aa6b, SDK8c7972d1: full173;2442 installed/2398 runtime exact. Five protected roots unchanged;64 backup2442,62/older retained. Smoke sessioncf8ad86c1ce8a7bb031e4fb283c7f08b/roote5ec2f18422cf757ce2936d31ca8915c completed read, NEVER replay. Owner exited; rendered Code unverified. Receipts: doc/VALIDATION_STATUS.md.
+- Installed66 Native2d98bdde/3d727450, SDK8c7972d1: full173 and browser/CLI/handoff pass; exact65 backup retained. Receipt doc/evidence/installed-0.1.66-2d98bdde-20261024.json. Installed65 history archived in doc/development-checkpoints-20261024.md; NEVER replay its completed smoke. Rendered Code remains unverified.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 

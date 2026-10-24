@@ -2,7 +2,7 @@
 
 Qualified66 passed actual rendered browser list/preview/search, approved edit and Node checks, automatic completion and reload history; CLI coding and managed65-to66 handoff passed. [Aggregate receipt](evidence/candidate-0.1.66-qualified-coding-20261024.json). The earlier browser fixture failure remains separately recorded; it is not acceptance. Completed tasks must never be replayed.
 
-The installer exited zero and the installed66 payload/runtime match the qualified package. Its isolated native smoke passed managed discovery/reuse, one file read and retained history with zero model calls; exact owned process exit was observed. [Smoke receipt](evidence/installed-0.1.66-smoke-20261024.json). Five protected user roots are still being hashed by the existing verifier; preservation acceptance is pending. Rendered VS Code coding, authenticated remote/enrollment, remaining adapters and deeper scheduling/recovery remain open.
+The installer exited zero and the installed66 payload/runtime match the qualified package. Its isolated native smoke passed managed discovery/reuse, one file read and retained history with zero model calls; exact owned process exit was observed. [Smoke receipt](evidence/installed-0.1.66-smoke-20261024.json). All five protected user roots have unchanged file sets/hashes;2442 installed files and2398 runtime files match, other extension registry entries are unchanged, and exact65 backup is retained. [Installation receipt](evidence/installed-0.1.66-2d98bdde-20261024.json). Rendered VS Code coding, authenticated remote/enrollment, remaining adapters and deeper scheduling/recovery remain open.
 
 ## Current captured-service checkpoint passes complete173 — 2026-10-24
 
