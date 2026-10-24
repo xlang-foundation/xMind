@@ -1,5 +1,11 @@
 ## Preserve error HTTP status without JSON-parser leakage — 2026-10-24
 
+## Installed73 preserved-state checkpoint and refreshed PDF — 2026-10-24
+
+Qualified candidate installs0.1.73 with Native12fc37cd/source264cadb4, frontend0201c326 and SDK8c7972d1. All2442 installed files/2398 runtime files, package metadata/other-extension registry and five protected user-state roots verify. Exact72 backup retained. Fresh installed managed native read/history smoke passes with zero models and owned backend exit. NEVER replay session96aec77923c29880d20c2f11ae21ef1b/root a85e719f7ada4c43df3913e790c965c9. [Installed receipt](evidence/installed-0.1.73-0201c326-20261024.json). No visible windows or user-profile backend started.
+
+Acceptance matrix and14-area/two-page status PDF now reflect installed73, full178/754.01s and clients497/178; both pages rendered and visually checked, labels/headers extracted. [PDF receipt](evidence/implementation-status-pdf-installed73-20261024.json). Rendered VSCode, hosted full pass/positive CLI-HTTP TLS, generic remote routing/enrollment and broader recovery/fairness remain open. Full goal remains active.
+
 ## Candidate73 fresh packaged browser coding passes with passive observation — 2026-10-24
 
 Current frontend0201c326/Native12fc candidate completes actual hidden-browser spread.cjs read/edit/Node4 through named Native Process Coder, two scoped approvals, four controlled replies and eight messages. First completion is clean without reload; reload restores completed/all8 messages/selected agent with zero warnings. Passive HTTP finish listener never reads, clones or delays fetch responses. Terminal host0 verifies native saved history, two succeeded operations, four model charges, retired worker lease, exact runtime/assets and owned backend exit. NEVER replay session cc80bda7c19447679d681f75543c4b29/root ac112ee9b337415f9e0ee7d330302196. [Receipt](evidence/candidate73-passive-browser-coding-20261024.json), [first completion](evidence/candidate73-passive-browser-first-completion-20261024.png), [reload](evidence/candidate73-passive-browser-reload-20261024.png).

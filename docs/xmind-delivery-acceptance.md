@@ -1,12 +1,19 @@
 # xMind delivery acceptance audit
 
-## Current installed72 checkpoint
+## Current installed73 checkpoint
+
+Installed0.1.73 combines Native12fc37cd/source264cadb4/SDK8c7972d1 with frontend0201c326. Complete native178 passes754.01s; clients497/178 pass with frozen source/assets. Fresh packaged process-agent browser spread read/edit/Node4, clean first completion and eight-message reload pass using passive HTTP observation. Exact2398 runtime/helper hashes reuse accepted CLI and72-to73 managed handoff without task replay. Installed payload/registry, five protected roots, exact72 backup and isolated zero-model installed read/history smoke verify. [Installed receipt](../doc/evidence/installed-0.1.73-0201c326-20261024.json), [packaged browser](../doc/evidence/candidate73-passive-browser-coding-20261024.json).
+
+Earlier browser body-loss observations remain retained. Node cancellation can silently empty response iterators; proxy checks now refuse incomplete/canceled finite replies. Current clean acceptance does not establish the earlier exact trigger. Hosted full-suite failures, rendered VSCode, remote enrollment/routing and deeper recovery remain open.
+
+
+## Prior installed72 checkpoint
 
 Installed0.1.72 matches sourcebc2de6f2/Native88a6dad3/SDK8c7972d1. Complete178 passes in764.76s; clients493/175 remain source/asset verified. Actual packaged browser/CLI read-edit-Node4/reload and managed71-to72 handoff pass. All2442 installed files/2398 runtime files, installer metadata/other-extension registry, exact71 backup and five protected roots verify. Fresh installed managed read/history smoke passes with zero models and owned-backend exit. [Installed evidence](../doc/evidence/installed-0.1.72-bc2de6f2-20261024.json). Never replay completed tasks; hosted TLS, remote/enrollment, rendered VS Code and broader recovery remain open.
 
 Development sourcebc2de6f2/Native88a6dad3 passes the complete local178 contracts in764.76s with its full closure unchanged. Candidate72 package/CLI and actual hidden-browser read-edit-Node4/reload plus managed71-to72 handoff pass; installation remains separate. Hosted sourcebc2de6f2 is in progress; older hosted failures retain their own scope. [Current full qualification](../doc/evidence/native-delivery-bc2de6f2-full-20261024.json), [candidate coding/handoff](../doc/evidence/candidate-0.1.72-qualified-coding-20261024.json).
 
-## Current installed71 checkpoint
+## Prior installed71 checkpoint
 
 Installed0.1.71 uses source738367ad/Native51340e18 and SDK8c7972d1. Full173 passes in788.31s with the complete frozen closure unchanged, including all eight one/two-pause nested-worker cases. Clients493/175 retain unchanged-source acceptance. Fresh packaged CLI and named-process browser read/edit/Node4, two approvals, eight-message reload and managed70-to71 handoff pass. All2442 installed files/2398 runtime files, other-extension entries, five protected user-state roots, exact70 backup and zero-model installed read/history smoke verify. Preserve every completed task; never replay it.
 
@@ -81,24 +88,24 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 
 ## Current requirement matrix
 
-Latest installed checkpoint:0.1.72. Detailed scopes and receipts are recorded in doc/VALIDATION_STATUS.md. The full objective remains active.
+Latest installed checkpoint:0.1.73. Detailed receipts are in doc/VALIDATION_STATUS.md. Full goal active.
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | Installed72 Native88a6dad3 matches sourcebc2de6f2. Complete178/178 passes in764.76s with all inputs/binaries unchanged. | Hosted CI and actual rendered acceptance retain separate scopes. |
-| Standard xlang3 root/subobjects and process workers | Registered SDK service objects and actual separate workers pass. Authentication/status methods, encrypted storage and separate-process TLS refusal are verified. | Positive trusted-TLS authentication and generic remote binding remain open. |
-| Browser coding | Packaged72 actual New/agent selection/Send/read/edit/Node4 passes: two approvals, four controlled replies, eight-message reload and selected process agent retained. | Provider/context/commands retain separate controlled-peer evidence. External-browser acceptance is separate. |
-| CLI coding | Packaged72 fresh is-zero read/edit/Node4, two approvals and eight-message history/watch pass. Installed managed read/history smoke passes with zero models. | Broader workflows retain their own scopes. Never replay completed tasks. |
-| VS Code extension | Installed72 exact2442-file payload,2398 runtime files, extension registry and protected state verify.493 client tests retain source/asset acceptance. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. |
-| Conversation/footer layout | Current72 rendered reload shows command exit/output, selected agent, completed history and visible composer/footer at1280x720. Earlier paging/switch/long-draft evidence remains. | A complete accessibility/viewport matrix is not established by these observations. |
-| Workspace selection and isolation | Earlier rendered switching and native profile/view isolation pass. Current captured file browsing and five-root installation preservation verify. | Local workspace evidence does not establish remote isolation. |
-| Single/graph agents, planning and delegation | Full178 includes graph/planning/ledger contracts. Sixteen SDK-worker cases cover repeated human pause/reopen, independent root progress, cancellation isolation and late-input refusal. | Deeper multibranch recovery and sustained many-root scheduling need acceptance. |
-| Providers, MCP and A2A | Native178 covers controlled provider/history, MCP network/OAuth and A2A task/stream scenarios. Rendered provider setup/discovery/inference/reload has controlled-peer evidence. | Universal live vendor compatibility and every rendered MCP/A2A flow are not proven. |
-| Coding tools | Native contracts cover approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers. Packaged browser/CLI72 run actual Node4 checks. | Actual rendered VS Code actions and editor context remain separate. |
-| Connection catalog and authentication | Captured Local SDK/HTTP context/skills/inbox and provider controls pass. Native authentication/storage/status and separate SDK TLS refusal pass. | Stored grants do not enable remote routing or prove live server authorization. |
-| Enrollment and distributed ownership | Public generic v1 proposal defines authentication, enrollment, receipts and worker fencing. Native client/authentication foundations are implemented with bounded evidence. | Enrollment, fenced leases, revocation, duplicates and lost-effect reconciliation remain required. |
-| Recovery and preservation | Managed71-to72 handoff, repeated nested pauses/reopens, cancellation isolation, exact histories/charges and five-root preservation pass. Installed smoke owner retires. | Unattended in-flight crash recovery, arbitrary depth and sustained many-root fairness remain unproven. |
-| Delivery checkpoint | Installed72: full178, clients493/175, packaged browser/CLI/handoff, exact71 backup,2442 installed files/2398 runtime files and zero-model installed smoke. | Hosted trusted TLS, rendered VS Code, remote/enrollment and deeper recovery remain open. |
+| Shared native C++ backend, embedded xlang3 and SQLite | Installed73 Native12fc37cd matches source264cadb4. Full178/178 passes754.01s with source/runtime closure unchanged. | Hosted CI and rendered acceptance retain separate scopes. |
+| Standard xlang3 root/subobjects and process workers | Registered SDK objects and separate workers pass. SDK trusted-TLS authentication, encrypted storage, CLI/HTTP refusal and cached status are verified. | Positive trusted CLI/HTTP authentication and generic remote binding remain open. |
+| Browser coding | Packaged73 New/agent selection/Send/read/edit/Node4 passes: two approvals, four controlled replies, clean first completion and eight-message reload. | Passive observation avoids body reads. Earlier failures remain retained; external-browser acceptance is separate. |
+| CLI coding | Exact73 runtime/helper hashes match accepted read/edit/Node4, two approvals and eight-message history. Installed managed read/history smoke passes with zero models. | Broader workflows retain their own scopes. Never replay completed tasks. |
+| VS Code extension | Installed73 exact2442-file payload,2398 runtime files, registry and protected state verify.497 client tests pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven. |
+| Conversation/footer layout | Current73 browser shows completed history, command result, selected agent and visible composer/footer at1280x720. Earlier paging/switch/long-draft evidence remains. | Complete accessibility/viewport coverage is not established. |
+| Workspace selection and isolation | Rendered switching and native profile/view isolation pass. Captured file browsing and five-root installation preservation verify. | Local evidence does not establish remote isolation. |
+| Single/graph agents, planning and delegation | Full178 includes graph/planning/ledger. Sixteen SDK-worker cases cover repeated pause/reopen, independent-root progress and cancellation isolation. | Deeper multibranch recovery and sustained many-root scheduling need acceptance. |
+| Providers, MCP and A2A | Native178 covers controlled provider/history, MCP network/OAuth and A2A task/stream cases. Rendered provider setup/discovery/inference/reload has controlled-peer evidence. | Live vendor breadth and every rendered MCP/A2A flow remain unproven. |
+| Coding tools | Native contracts cover approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers. Packaged browser/CLI run actual Node4 checks. | Rendered VSCode actions and editor context remain separate. |
+| Connection catalog and authentication | Captured Local SDK/HTTP services pass. Shared sign-in Settings and native SDK/CLI/HTTP authentication/status exist; trusted SDK TLS has hosted evidence. | Stored grants do not enable remote routing or prove live server authorization. |
+| Enrollment and distributed ownership | Generic v1 proposal defines authentication, enrollment, receipts and worker fencing. Native client/authentication foundations have bounded evidence. | Enrollment, fenced leases, revocation, duplicates and lost-effect reconciliation remain required. |
+| Recovery and preservation | Managed72-to73 handoff, repeated nested pauses/reopens, cancellation isolation and exact histories/charges pass. Five protected roots and installed smoke owner retirement verify. | Unattended in-flight crash recovery, arbitrary depth and sustained fairness remain unproven. |
+| Delivery checkpoint | Installed73: full178, clients497/178, packaged browser/CLI/handoff, exact72 backup,2442 installed files/2398 runtime files and zero-model smoke. | Hosted full pass, trusted CLI/HTTP TLS, rendered VSCode, remote/enrollment and deeper recovery remain open. |
 
 ## Next implementation sequence
 

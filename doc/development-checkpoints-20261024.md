@@ -86,3 +86,8 @@ server/database/scheduler implementation remains excluded.
 ## Superseded installed71 guidance (installed72 checkpoint)
 
 - Installed71 Native51340e18/SDK8c passes full173, clients493/175, named-process browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.71-738367ad-20261024.json; NEVER replay. Remaining goal active.
+
+
+## Installed72 guidance superseded by installed73
+
+- Installed72 Native88a6dad3/SDK8c passes full178, clients493/175, packaged browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.72-bc2de6f2-20261024.json; NEVER replay. Remaining goal active.
