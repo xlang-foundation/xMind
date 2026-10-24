@@ -1,0 +1,85 @@
+{
+  "recordedAt": "2026-10-24T16:17:56.470Z",
+  "version": "0.1.72",
+  "source": "bc2de6f248b37b0aec6b42195ef25f10975311ee",
+  "nativeSha256": "88a6dad3815e139e5b831357d0824097178e728b83998f600577735554136415",
+  "fullNative": {
+    "passed": 178,
+    "failed": 0,
+    "seconds": 764.76
+  },
+  "stage": {
+    "runtimeFiles": 2398,
+    "manifestSha256": "1351d363b586b4702b3c1b8d65ba65d8ee17effa0cba21c54aced7ec34643148"
+  },
+  "archive": {
+    "sha256": "666bbe34be04155260794f4af3af09fa6b8a1e586e48f52904d08292930c5b0c",
+    "bytes": 35422108,
+    "entries": 2443
+  },
+  "frontend": {
+    "extensionTests": 493,
+    "browserTests": 175,
+    "sourceFilesMatched": 64,
+    "sourceAndAssetBytesVerified": true,
+    "repeatedUnitSuites": false
+  },
+  "cli": {
+    "session": "6afcf2b9da41d9f61421ab42ed14866b",
+    "root": "aaa81539d27f3009b9d8e1c1a6accc16",
+    "task": "Fresh is-zero read/edit/Node4",
+    "modelCalls": 4,
+    "approvals": 2,
+    "historyMessages": 8,
+    "runtimeUnchanged": true,
+    "passed": true,
+    "ownedBackendExit": {
+      "observed": true,
+      "code": null,
+      "pid": 38444,
+      "birthAndImageVerified": true
+    }
+  },
+  "handoff": {
+    "session": "ae0bf98b202889e1783d6e8f1cc2b180",
+    "root": "c7798c73d8da3b7f6c9f626c140b785d",
+    "from": "0.1.71",
+    "to": "0.1.72",
+    "activeUpgradeRefused": true,
+    "originalResumedOnce": true,
+    "historyAndProfileExact": true,
+    "modelCalls": 0,
+    "packageIntegrity": {
+      "oldExecution": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      },
+      "newExecution": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      },
+      "oldClean": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      },
+      "newClean": {
+        "coveredFiles": 2398,
+        "coveredBytesUnchanged": true,
+        "addedFiles": []
+      }
+    },
+    "ownedOwnerRetirementObserved": true,
+    "passed": true
+  },
+  "neverReplayCompletedCliOrHandoff": true,
+  "candidateBrowserCodingVerified": false,
+  "installed": false,
+  "installed71Unchanged": true,
+  "paidInference": false,
+  "renderedVsCodeVerified": false,
+  "hostedPositiveTlsVerified": false,
+  "goalComplete": false
+}

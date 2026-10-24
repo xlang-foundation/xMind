@@ -1,0 +1,61 @@
+{
+  "recordedAt": "2026-10-24T16:14:05.285Z",
+  "sourceParent": "bc2de6f248b37b0aec6b42195ef25f10975311ee",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 24460,
+    "launchedAt": "2026-10-24T15:59:33.697Z",
+    "completedAt": "2026-10-24T16:01:14.630Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+  },
+  "test": {
+    "pid": 35116,
+    "launchedAt": "2026-10-24T16:01:17.278Z",
+    "completedAt": "2026-10-24T16:14:02.062Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "9dcb8936d3b151cd1baade9d27687be4d4931e547ed52242bf921b82cee9d8b1"
+  },
+  "total": 178,
+  "failed": 0,
+  "passed": 178,
+  "seconds": 764.76,
+  "projectFiles": 2837,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "88a6dad3815e139e5b831357d0824097178e728b83998f600577735554136415",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "hostedSnapshot": {
+    "observedAt": "2026-10-24T16:17:02.329Z",
+    "runs": [
+      {
+        "source": "bc2de6f2",
+        "id": 40109419472,
+        "name": "Native Windows contracts",
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40109419472"
+      },
+      {
+        "source": "1a06b833",
+        "id": 40106639011,
+        "name": "Native Windows contracts",
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/xlang-foundation/xMind/actions/runs/40106639011"
+      }
+    ]
+  },
+  "installed71Unchanged": true,
+  "goalComplete": false
+}

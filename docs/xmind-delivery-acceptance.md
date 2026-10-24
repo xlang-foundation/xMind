@@ -1,6 +1,6 @@
 # xMind delivery acceptance audit
 
-Development source1a06b833/Nativec5e772e3 now passes the complete local177 contracts in801.61s with its full closure unchanged. This includes the registered SDK authentication foundation and sixteen-case nested-worker lifecycle. Current-source hosted CI is in progress; older738367ad hosted168/171 failure remains separate. Current-source packaging/coding/handoff and installed71 remain separate checkpoints. [Current full qualification](../doc/evidence/native-delivery-1a06b833-full-20261024.json).
+Development sourcebc2de6f2/Native88a6dad3 passes the complete local178 contracts in764.76s with its full closure unchanged. Candidate72 package/CLI read-edit-Node4 and managed71-to72 handoff pass; browser coding and installation remain separate. Hosted sourcebc2de6f2 is in progress; older hosted failures retain their own scope. [Current full qualification](../doc/evidence/native-delivery-bc2de6f2-full-20261024.json), [candidate CLI/handoff](../doc/evidence/candidate-0.1.72-cli-handoff-20261024.json).
 
 ## Current installed71 checkpoint
 
@@ -81,7 +81,7 @@ Latest installed checkpoint:0.1.71. [Full native evidence](../doc/evidence/nativ
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | Development source1a06b833 passes177/177 in801.61s with complete frozen closure unchanged. Installed71 remains separately qualified source738367ad/Native51340e18. | Hosted results and each rendered acceptance retain separate scopes. |
+| Shared native C++ backend, embedded xlang3 and SQLite | Development sourcebc2de6f2 passes178/178 in764.76s with complete frozen closure unchanged. Installed71 remains separately qualified source738367ad/Native51340e18. | Hosted results and each rendered acceptance retain separate scopes. |
 | Standard xlang3 root/subobjects and process workers | Actual SDK service methods, captured identity/lifetime contracts and named process-agent browser coding pass. | Authenticated generic remote binding/enrollment remains incomplete. |
 | Browser coding | Packaged71 actual New/agent selection/Send/read/edit/Node4, two approvals and exact eight-message reload pass. | Provider/context/commands have separate controlled-peer receipts. Current-build external-browser acceptance remains separate. |
 | CLI coding | Packaged71 fresh is-positive read/edit/Node4, two approvals, four controlled calls and history/watch pass. Installed managed read smoke passes. | Never replay completed tasks; broader workflow cases retain their individual scopes. |
