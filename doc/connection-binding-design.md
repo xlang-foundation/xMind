@@ -1,8 +1,10 @@
 # Captured connection binding design
 
 Status: captured Local SDK objects, the shared native HTTP adapter and browser/
-extension prompt admission are implemented. Authenticated remote functionality
-and the remaining client operations are proposed.
+extension prompt admission are implemented. The development candidate also
+implements authenticated negotiation, cached scope discovery and an explicit
+read-only remote session metadata binding. Remote command/event routing,
+durable mutation receipts, enrollment and worker fencing remain proposed.
 The implemented catalog API is documented in connection-profiles.md. This design
 extends that public contract; it does not include private Nexus implementation.
 Installation and source qualification remain separate checkpoints. Current
@@ -11,7 +13,8 @@ evidence and its limitations are recorded in VALIDATION_STATUS.md.
 The [generic remote v1 proposal](generic-remote-protocol-v1-proposal.md) makes
 negotiation, authentication, receipts, enrollment and lease boundaries concrete
 for architecture review. It is not a deployed endpoint or Nexus compatibility
-claim; remote runtime capability remains unavailable.
+claim; remote execution capability remains unavailable. The scoped metadata
+read is verified with controlled peers and has separate TLS acceptance limits.
 
 ## Public native objects
 
@@ -23,6 +26,14 @@ Commands and Workspace service objects, plus Events(session_id, root_run_id)
 and RunEvents(session_id, run_id).
 Use ordinary SDK method calls and SDK list/dictionary values for local IPC.
 Do not add peer.call routes, custom remote-value envelopes or a second serializer.
+
+`Connections.OpenScope(profile_id, expected_profile_revision, scope_id)` creates
+a distinct captured remote object with Identity and Sessions subobjects.
+`Sessions().Open(session_id)` observes only remote metadata (id, title, revision).
+The native connector validates the encrypted grant and typed HTTPS protocol;
+the SDK owns IPC value transfer and method dispatch. This does not change the
+Local Open API or activate remote mutation routing. See the exact wire schema
+and limitations in the [generic remote contract](generic-remote-protocol-v1-proposal.md).
 
 Identity contains the stable connection/profile ID, profile revision, verified
 server identity, negotiated protocol version and captured backend generation.

@@ -231,6 +231,23 @@ X::Value BoundConnectionApi::Runs(){return api_call([&]{check();(void)state->ide
 X::Value BoundConnectionApi::RunEvents(std::string session,std::string run){return api_call([&]{check();return connection_objects().__xlang3_package_->CreateInstance("Events",std::make_shared<BoundEventsApi>(state->run_events(session,run)));});}
 X::Value BoundConnectionApi::Events(std::string session,std::string root){return api_call([&]{check();return connection_objects().__xlang3_package_->CreateInstance("Events",std::make_shared<BoundEventsApi>(state->events(session,root)));});}
 X::Value BoundConnectionApi::Operations(std::string session,std::string run){return api_call([&]{check();return connection_objects().__xlang3_package_->CreateInstance("Operations",std::make_shared<BoundOperationsApi>(state->operations(session,run)));});}
+nlohmann::json remote_scope_identity(const std::shared_ptr<ApiContext>& context,const RemoteCapturedScope& scope){return {{"connection_id",scope.profile.id},{"profile_revision",scope.profile.revision},{"credential_revision",scope.credential_revision},{"server_id",scope.grant.server_id},{"protocol_version",scope.grant.protocol_version},{"scope_id",scope.scope_id},{"backend_generation",context->bindings.backend_generation()},{"command_routing",false}};}
+struct RemoteScopeSessionsApi {
+    std::shared_ptr<ApiContext> context;RemoteCapturedScope scope;
+    RemoteScopeSessionsApi()=default;RemoteScopeSessionsApi(std::shared_ptr<ApiContext> owner,RemoteCapturedScope captured):context(std::move(owner)),scope(std::move(captured)){}
+    X::Value Open(std::string id){return authentication_call([&]{if(!context)throw RunUnavailable("Captured remote connection unavailable");auto life=context->enter();auto admission=context->admit();const auto generation=context->bindings.backend_generation();const auto session=context->authentication.read_session(scope,id,std::chrono::seconds(15));const auto identity=remote_scope_identity(context,scope);if(identity.at("backend_generation")!=generation)throw Conflict("Captured remote backend generation changed");return sdk_values::to_value(Host(),nlohmann::json{{"binding",identity},{"session",{{"id",session.id},{"title",session.title},{"revision",session.revision}}}});});}
+    BEGIN_PACKAGE(RemoteScopeSessionsApi) APISET().AddFunc<1>("Open",&RemoteScopeSessionsApi::Open); END_PACKAGE
+};
+struct RemoteScopeApi {
+    std::shared_ptr<ApiContext> context;RemoteCapturedScope scope;
+    RemoteScopeApi()=default;RemoteScopeApi(std::shared_ptr<ApiContext> owner,RemoteCapturedScope captured):context(std::move(owner)),scope(std::move(captured)){}
+    X::Value Identity(){return authentication_call([&]{if(!context)throw RunUnavailable("Captured remote connection unavailable");auto life=context->enter();auto admission=context->admit();context->authentication.validate_scope(scope);return sdk_values::to_value(Host(),remote_scope_identity(context,scope));});}
+    X::Value Sessions();
+    BEGIN_PACKAGE(RemoteScopeApi) APISET().AddFunc<0>("Identity",&RemoteScopeApi::Identity);APISET().AddFunc<0>("Sessions",&RemoteScopeApi::Sessions); END_PACKAGE
+};
+struct RemoteConnectionObjects {BEGIN_PACKAGE(RemoteConnectionObjects) APISET().AddClass<0,RemoteScopeApi>("Binding");APISET().AddClass<0,RemoteScopeSessionsApi>("Sessions"); END_PACKAGE};
+RemoteConnectionObjects& remote_connection_objects(){static auto value=[] {auto owner=std::make_shared<RemoteConnectionObjects>();retain_xmind_ipc_service(owner);(void)xmind_ipc_runtime().RegisterPackage("_xmind_remote_connection_objects",*owner);return owner;}();return *value;}
+X::Value RemoteScopeApi::Sessions(){return authentication_call([&]{if(!context)throw RunUnavailable("Captured remote connection unavailable");auto life=context->enter();auto admission=context->admit();(void)context->bindings.backend_generation();context->authentication.validate_scope(scope);return remote_connection_objects().__xlang3_package_->CreateInstance("Sessions",std::make_shared<RemoteScopeSessionsApi>(context,scope));});}
 struct ConnectionsApi {
     std::shared_ptr<ApiContext> context;
     ConnectionsApi(RootApi*,std::string token);
@@ -242,10 +259,11 @@ struct ConnectionsApi {
         auto result=X::Value::Dict(Host());set(result,"revision",X::Value(catalog.revision));set(result,"active_id",X::Value::String(Host(),catalog.active_id));set(result,"profiles",profiles);return result;
     }
     X::Value Open(std::string id,std::int64_t revision){return api_call([&]{auto life=context->enter();return connection_objects().__xlang3_package_->CreateInstance("Binding",std::make_shared<BoundConnectionApi>(context->bindings.open(id,revision)));});}
+    X::Value OpenScope(std::string id,std::int64_t revision,std::string scope){return authentication_call([&]{auto life=context->enter();auto admission=context->admit();(void)context->bindings.backend_generation();auto captured=context->authentication.open_scope(id,revision,scope);return remote_connection_objects().__xlang3_package_->CreateInstance("Binding",std::make_shared<RemoteScopeApi>(context,std::move(captured)));});}
     X::Value List(){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.load_or_initialize());});}
     X::Value Save(X::Value profiles,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();if(!profiles.IsList()||profiles.Size()>32)throw std::invalid_argument("Connection profiles require a bounded list");return value(context->connections.apply(nlohmann::json{{"profiles",sdk_values::from_value(profiles)}}.dump(),revision));});}
     X::Value Select(std::string id,std::int64_t revision){return api_call([&]{auto life=context->enter();auto admission=context->admit();return value(context->connections.select(id,revision));});}
-    X::Value Capabilities(){return api_call([&]{auto life=context->enter();auto admission=context->admit();auto result=X::Value::Dict(Host());set(result,"remote_authentication",X::Value(1));set(result,"remote_authentication_status",X::Value(1));set(result,"remote_authorized_scopes",X::Value(1));return result;});}
+    X::Value Capabilities(){return api_call([&]{auto life=context->enter();auto admission=context->admit();auto result=X::Value::Dict(Host());set(result,"remote_authentication",X::Value(1));set(result,"remote_authentication_status",X::Value(1));set(result,"remote_authorized_scopes",X::Value(1));set(result,"remote_scoped_session_read",X::Value(1));return result;});}
     X::Value Authentication(std::string id,std::int64_t revision){return authentication_call([&]{auto life=context->enter();auto admission=context->admit();const auto status=context->authentication.inspect(id,revision);auto result=X::Value::Dict(Host());set(result,"connection_id",X::Value::String(Host(),status.connection_id));set(result,"profile_revision",X::Value(status.profile_revision));set(result,"credential_revision",X::Value(status.credential_revision));set(result,"state",X::Value::String(Host(),status.state));set(result,"server_id",status.server_id?X::Value::String(Host(),*status.server_id):X::Value(nullptr));set(result,"protocol_version",status.protocol_version?X::Value(*status.protocol_version):X::Value(nullptr));set(result,"expires_at",status.expires_at?X::Value(*status.expires_at):X::Value(nullptr));set(result,"command_routing",X::Value(false));return result;});}
     X::Value AuthorizedScopes(std::string id,std::int64_t revision){return authentication_call([&]{
         auto life=context->enter();auto admission=context->admit();const auto status=context->authentication.inspect(id,revision);
@@ -262,6 +280,7 @@ struct ConnectionsApi {
         const auto receipt=context->authentication.authenticate(id,revision,expected,credential,std::chrono::milliseconds(timeout));auto result=X::Value::Dict(Host());set(result,"connection_id",X::Value::String(Host(),receipt.connection_id));set(result,"server_id",X::Value::String(Host(),receipt.server_id));set(result,"profile_revision",X::Value(receipt.profile_revision));set(result,"credential_revision",X::Value(receipt.credential_revision));set(result,"protocol_version",X::Value(receipt.protocol_version));set(result,"expires_at",X::Value(receipt.expires_at));set(result,"command_routing",X::Value(false));return result;
     });}
     BEGIN_PACKAGE(ConnectionsApi)
+        APISET().AddFunc<3>("OpenScope",&ConnectionsApi::OpenScope);
         APISET().AddFunc<2>("AuthorizedScopes",&ConnectionsApi::AuthorizedScopes);
         APISET().AddFunc<2>("Authentication",&ConnectionsApi::Authentication);
         APISET().AddFunc<0>("Capabilities",&ConnectionsApi::Capabilities);

@@ -11,4 +11,9 @@ enum class RemoteTransportPolicy {verified_https,isolated_loopback_test};
 RemoteNegotiatedGrant negotiate_remote_connection(const std::string& origin,const SecretBytes& credential,
     RemoteNegotiationRequirements requirements,std::chrono::milliseconds timeout,
     RemoteTransportPolicy policy=RemoteTransportPolicy::verified_https,std::stop_token stop={});
+struct RemoteObservedSession {std::string id,title;std::int64_t revision=0;};
+void validate_remote_session_scope(const RemoteNegotiatedGrant&,const std::string& scope_id,std::int64_t now_unix_seconds);
+RemoteObservedSession read_remote_session(const std::string& origin,const SecretBytes& credential,
+    const RemoteNegotiatedGrant&,const std::string& scope_id,const std::string& session_id,std::chrono::milliseconds timeout,
+    RemoteTransportPolicy policy=RemoteTransportPolicy::verified_https,std::stop_token stop={});
 }

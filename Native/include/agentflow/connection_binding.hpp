@@ -184,6 +184,7 @@ class LocalConnectionBindings {
 public:
     LocalConnectionBindings(PersistenceService&,RunExecutor*,BackendOwnerControl* = nullptr,GraphExecution* = nullptr,std::shared_ptr<SessionInboxService> = {});
     std::shared_ptr<SessionInboxService> inbox_service()const;
+    std::string backend_generation()const;
     void start();
     ~LocalConnectionBindings();
     LocalConnectionBindings(const LocalConnectionBindings&)=delete;

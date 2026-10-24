@@ -11,6 +11,17 @@ the cached authentication state and a scope ID/action list only for a matching,
 unexpired stored grant. No credentials or grant ID are returned. Scope discovery
 does not prove live authorization or enable remote command routing.
 
+The development native API also advertises `remote_scoped_session_read:1`.
+Use `Connections(owner_token).OpenScope(id, profile_revision, scope_id)` and
+then `binding.Sessions().Open(session_id)` for a metadata snapshot. The CLI
+commands are `connections scope-open ID REV SCOPE` and
+`connections scope-session-open ID REV SCOPE SESSION`; the local HTTP adapter
+is POST `/v1/connections/scope-session` with `id`, `expected_profile_revision`,
+`scope_id` and `session_id`. An exact current grant, sessions capability and
+scope permission are required. Returned public fields contain no credential
+or grant reference. Mutation routing, remote activation and enrollment remain
+unavailable. This source feature is not yet an installed release.
+
 This is the target connection contract. The native SQLite catalog is exposed
 through the authenticated local backend at `GET /v1/connections` and
 `POST /v1/connections`; it stores Local/Nexus profile metadata and active
@@ -20,9 +31,10 @@ reported as `not_connected`, and selection fails closed until authentication
 and remote command/event routing exist. The native CLI can list, save and remove
 connection metadata and select an available profile; it cannot activate an
 unauthenticated Nexus profile. Browser Settings can inspect the catalog and
-save/remove Nexus address metadata; it does not yet select a remote profile or
-authenticate to Nexus. Model-provider profiles are a separate configuration
-domain.
+save/remove Nexus address metadata and request generic-v1 authentication. It
+does not yet select a remote execution profile; compatibility with an actual
+Nexus endpoint remains unverified. Model-provider profiles are a separate
+configuration domain.
 
 Development SDK support now includes `Connections(owner_token).Capabilities()`
 with `remote_authentication:1` and

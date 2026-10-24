@@ -150,3 +150,7 @@ owner/history/settings backup.
 ## Superseded full1035d900 guidance after ledger failure — verbatim
 
 - Native d2121db4 full179 fails HTTP ENOBUFS (178pass); graph-worker passes11.88s. HTTP retention negative/focus pass; no install. See doc/evidence/native-delivery-1035d900-result-20261024.json; original failures retained.
+
+## Superseded ledger focus guidance after scoped read checkpoint — verbatim
+
+- Native fe6010fb full179 fails ledger45s (178pass); instrumented ledger passes44.96s with unchanged limit. No install. See doc/evidence/native-delivery-37becbf1-ledger-20261024.json; original fixtures NEVER replay.

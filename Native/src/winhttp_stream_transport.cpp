@@ -153,6 +153,10 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
         std::any_of(input.last_event_id.begin(),input.last_event_id.end(),[](unsigned char c){return c<0x20||c==0x7f;})))
         throw std::invalid_argument("Invalid A2A event resume cursor");
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
+    if(input.remote_binding){
+        const auto& binding=*input.remote_binding;const auto identifier=[](const std::string& value){return !value.empty()&&value.size()<=256&&std::all_of(value.begin(),value.end(),[](unsigned char c){return (c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c=='_'||c=='-'||c=='.'||c==':';});};
+        if(kind!=TransferKind::json_get||mcp||!bearer||input.credential_header!=CredentialHeader::bearer||input.protocol!=ProviderHttpProtocol::generic||!input.a2a_version.empty()||!input.last_event_id.empty()||binding.protocol_version!=1||binding.grant_revision<=0||!identifier(binding.server_id)||!identifier(binding.scope_id)||!identifier(binding.grant_id))throw std::invalid_argument("Invalid remote read transport binding");
+    }
     const auto deadline=Clock::now()+input.deadline;
     const auto parsed=endpoint(input.url);
     Handle session(WinHttpOpen(L"xMind/0.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,WINHTTP_FLAG_ASYNC));
@@ -165,6 +169,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(input.protocol==ProviderHttpProtocol::anthropic)headers.value+=L"anthropic-version: 2023-06-01\r\n";
     if(input.protocol==ProviderHttpProtocol::a2a_jsonrpc&&!input.a2a_version.empty())headers.value+=L"A2A-Version: "+wide(input.a2a_version)+L"\r\n";
     if(!input.last_event_id.empty())headers.value+=L"Last-Event-ID: "+wide(input.last_event_id)+L"\r\n";
+    if(input.remote_binding){const auto& binding=*input.remote_binding;headers.value+=L"X-XMind-Protocol-Version: 1\r\nX-XMind-Server-ID: "+wide(binding.server_id)+L"\r\nX-XMind-Scope-ID: "+wide(binding.scope_id)+L"\r\nX-XMind-Grant-ID: "+wide(binding.grant_id)+L"\r\nX-XMind-Grant-Revision: "+std::to_wstring(binding.grant_revision)+L"\r\n";}
     if(mcp) {
         auto projected=mcp_http_request_headers(input.body,mcp->era,mcp->legacy_protocol);
         if(mcp->input_schema) {
@@ -321,9 +326,13 @@ void post_event_stream(const HttpStreamRequest& input,const SecretBytes* bearer,
     transfer(input,bearer,consume,cancel,TransferKind::event_post,64*1024*1024);
 }
 std::string get_json(const HttpStreamRequest& input,const SecretBytes* bearer,std::stop_token cancel) {
+    return get_bounded_json(input,bearer,1024*1024,cancel);
+}
+std::string get_bounded_json(const HttpStreamRequest& input,const SecretBytes* bearer,std::size_t max_response_bytes,std::stop_token cancel) {
     if(!input.body.empty()) throw std::invalid_argument("JSON discovery cannot send a request body");
+    if(!max_response_bytes||max_response_bytes>8*1024*1024)throw std::invalid_argument("Invalid bounded JSON discovery limit");
     std::string result;
-    transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_get,1024*1024);
+    transfer(input,bearer,[&](std::string_view chunk){result.append(chunk);},cancel,TransferKind::json_get,max_response_bytes);
     return result;
 }
 std::string post_json(const HttpStreamRequest& input,const SecretBytes* bearer,

@@ -1,0 +1,103 @@
+{
+  "recordedAt": "2026-10-24T23:05:45.231Z",
+  "qualification": {
+    "recordedAt": "2026-10-24T23:00:28.098Z",
+    "sourceParent": "f11370fc0edbc5b29f89ea9a816e44af75523f6d",
+    "sourcePatchSha256": "2a0612e8499ee7b785c6b264a37407662c3cf762671ded737f0ace68ef0bd31b",
+    "build": {
+      "pid": 33840,
+      "launchedAt": "2026-10-24T22:57:13.624Z",
+      "completedAt": "2026-10-24T22:59:57.362Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6d351dd221d958f58ebaa837173e545035b01cb0bb4cff85a2581ccc8b65353e"
+    },
+    "test": {
+      "pid": 34752,
+      "launchedAt": "2026-10-24T23:00:00.274Z",
+      "completedAt": "2026-10-24T23:00:25.183Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4d841563065ffdc3af9198d16ec339cadc78994c15c41cee4e19c76d1db78221"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 24.86,
+    "projectFiles": 2838,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "f3b9bf699afd376ef2fd4b437fdb98c72f8d6d5fba03c1caa2f37e6bac548952",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "earlierFocusedBeforeGenerationReview": {
+    "nativeSha256": "2f5ffd1b70e319cfca239ca5427508cc3d657657acf8843f808a92b7d6993188",
+    "tests": 11,
+    "seconds": 25.92,
+    "sourcePatchSha256": "6f2b6a651c7ad36a52b098b8bf47be67096700f0534d21efe7e5a3bad6441229"
+  },
+  "implemented": {
+    "capability": {
+      "remote_scoped_session_read": 1
+    },
+    "sdk": [
+      "Connections(owner_token).OpenScope(profile_id, expected_profile_revision, scope_id).Identity()",
+      "Connections(owner_token).OpenScope(profile_id, expected_profile_revision, scope_id).Sessions().Open(session_id)"
+    ],
+    "cli": [
+      "xmind ipc --endpoint lrpc:PORT connections scope-open ID REV SCOPE",
+      "xmind ipc --endpoint lrpc:PORT connections scope-session-open ID REV SCOPE SESSION"
+    ],
+    "http": {
+      "method": "POST",
+      "path": "/v1/connections/scope-session",
+      "fields": [
+        "id",
+        "expected_profile_revision",
+        "scope_id",
+        "session_id"
+      ],
+      "authentication": "Existing owner or origin-bound view"
+    },
+    "remoteNetwork": {
+      "method": "GET",
+      "path": "/xmind/v1/scopes/{scope_id}/sessions/{session_id}",
+      "responseByteLimit": 65536,
+      "requiredCapability": {
+        "sessions": 1
+      },
+      "requiredAction": "sessions.read"
+    },
+    "mutationRouting": false
+  },
+  "evidenceScopes": {
+    "nativeTransport": "Actual controlled WinHTTP loopback: two positive metadata GETs including exact once-encoded colon IDs, sixteen refusal GETs, exact binding headers, identity/revision/schema/type/duplicate/size/error checks and no redirect/retry. Unsafe paths, expired/incompatible grants, missing permission and pre-cancellation send nothing.",
+    "nativeService": "Real xlang3/SQLite encrypted grants and captured profile/credential revisions; trusted injected read gateway checks results and rejects post-response credential rotation/profile edits before publication. No network/TLS claim for this layer.",
+    "sdkObjects": "Actual registered scoped Binding/Sessions objects created from seeded encrypted grants; invalid resource, changed profile and retained-object backend retirement refuse. No positive remote GET claim in this lifetime fixture.",
+    "separateSdkCliHttp": "Unavailable-grant scoped calls refuse following actual untrusted native TLS authentication refusal; no credential HTTP delivery, no saved grants and Local selection retained.",
+    "peerTls": "Independent Node HTTPS peer verifies its new metadata GET with explicit CA verification. No Windows trust changes or native TLS success implied."
+  },
+  "backendGeneration": "Checked before remote GET and before public result; retained owner/context objects remain fenced",
+  "privateFields": "Credential and grant ID/revision fields remain backend-only; public binding contains only connection/profile/credential revision, server/protocol/scope/backend generation and command_routing:false",
+  "remaining": [
+    "Positive trusted native SDK/CLI/HTTP metadata GET assertions added to existing isolated hosted fixture; pending execution",
+    "Complete179 native qualification and packaged browser/CLI/editor/handoff acceptance",
+    "Remote history/events/mutations, durable receipts, enrollment, worker fencing and recovery",
+    "Actual Nexus endpoint compatibility and deployment are not claimed"
+  ],
+  "localProfileSelectionUnchanged": true,
+  "applicationIpcSerializerAdded": false,
+  "applicationIpcDispatcherAdded": false,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "installed": false,
+  "goalComplete": false
+}

@@ -3,9 +3,10 @@
 Status: remote execution, enrollment and worker fencing remain proposed and
 not deployed. Native verified-HTTPS negotiation, strict response validation,
 encrypted combined credential/grant storage through embedded xlang3/SQLite,
-and cached authentication observation are implemented. The registered
-Connections subobject exposes Authenticate and Authentication using ordinary
-xlang3 SDK values and methods; CLI and native HTTP adapters use that service.
+cached authentication/scope observation and scoped session metadata reads are
+implemented in the development candidate. The registered Connections subobject
+uses ordinary xlang3 SDK values and methods; CLI and native HTTP adapters use
+the same native service. Remote mutation routing remains unavailable.
 
 Actual hosted trusted-TLS authentication is verified through separate SDK,
 CLI and native HTTP clients, including wrong-credential refusal, one grant per
@@ -30,7 +31,10 @@ xmind.Connections(owner_token)
   .Authenticate(profile_id, expected_profile_revision, request)  [implemented]
   .Authentication(profile_id, expected_profile_revision)         [implemented]
   .AuthorizedScopes(profile_id, expected_profile_revision)       [implemented]
-  .Open(profile_id, expected_profile_revision)
+  .OpenScope(profile_id, expected_profile_revision, scope_id)     [read only]
+      .Identity()
+      .Sessions().Open(session_id)                         [metadata only]
+  .Open(profile_id, expected_profile_revision)                   [Local only]
       .Identity()
       .Sessions() / .Runs() / .Graphs() / .Models() / .Commands()
       .Workspace() / .Providers() / .Contexts() / .Skills()
@@ -61,6 +65,49 @@ Network JSON is a server protocol, not an alternative IPC serializer. Remote
 server references never become caller-selected local object IDs or paths.
 Clients retain the captured binding; they cannot redirect it by changing global
 connection selection. Existing root compatibility services remain Local.
+
+## Implemented scoped session metadata observation
+
+Capability `remote_scoped_session_read:1` advertises this development API.
+`OpenScope` currently requires an authenticated, unexpired grant with exact
+`sessions:1` capability and `sessions.read` permission in the selected scope.
+Its Sessions object exposes only Open; submission, cancellation, history,
+events, enrollment and worker execution are not enabled by this binding.
+The public identity contains connection/profile/credential revisions, server,
+protocol, scope and backend generation, plus `command_routing:false`. It contains
+no credential or grant ID/revision fields. Local selection remains unchanged.
+
+The connector issues one GET to `/xmind/v1/scopes/{scope_id}/sessions/{session_id}`
+over the configured verified HTTPS origin. Opaque resource components are
+encoded individually; dot-only components, separators, percent escapes and query
+injection are refused. Backend-selected headers are Authorization Bearer,
+X-XMind-Protocol-Version, X-XMind-Server-ID, X-XMind-Scope-ID, X-XMind-Grant-ID and
+X-XMind-Grant-Revision. Clients cannot supply these headers or grant values.
+No redirects or automatic retries occur. The peer must independently authorize
+the credential, grant and scope; client-side checks do not replace that boundary.
+
+The response is at most 64 KiB and has exactly this shape:
+
+```json
+{"binding":{"server_id":"SERVER","scope_id":"SCOPE","protocol_version":1,"grant_id":"GRANT","grant_revision":1},"session":{"id":"SESSION","title":"Session title","revision":3}}
+```
+
+Every binding field and session ID must match the captured request. The title
+is bounded to 4096 UTF-8 bytes and the positive resource revision fits a safe
+JSON integer. Duplicate keys, extra fields, wrong types and excessive nesting
+refuse observation. Profile, credential/grant, scope, expiry and cancellation
+are checked before publication; backend generation is checked before the GET
+and again before returning data. A profile or credential change during the read
+rejects the result. This is a metadata snapshot, not durable command admission,
+an event cursor or proof of a deployed Nexus endpoint.
+
+The CLI methods are `connections scope-open ID REV SCOPE` and
+`connections scope-session-open ID REV SCOPE SESSION` after the normal
+`xmind ipc --endpoint lrpc:PORT` prefix. The local owner/origin-bound HTTP adapter
+is POST `/v1/connections/scope-session` with exactly `id`,
+`expected_profile_revision`, `scope_id` and `session_id`. Both return native
+projections of the same captured service state; neither activates a remote
+profile. The installed package is separate from this source checkpoint.
 
 ## Trust and authentication
 

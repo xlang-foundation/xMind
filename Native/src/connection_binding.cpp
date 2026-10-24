@@ -25,6 +25,7 @@ struct LocalConnectionContext {
 LocalConnectionBindings::LocalConnectionBindings(PersistenceService& store,RunExecutor* executor,BackendOwnerControl* owner,GraphExecution* graph,std::shared_ptr<SessionInboxService> inbox)
     :context_(std::make_shared<LocalConnectionContext>(store,executor,owner,graph,std::move(inbox))){}
 std::shared_ptr<SessionInboxService> LocalConnectionBindings::inbox_service()const{return context_->inbox;}
+std::string LocalConnectionBindings::backend_generation()const{auto life=context_->enter();return context_->generation;}
 void LocalConnectionBindings::start(){auto life=context_->enter();context_->inbox->start();}
 LocalConnectionBindings::~LocalConnectionBindings(){close();}
 void LocalConnectionBindings::close(){{std::unique_lock lock(context_->lifetime);context_->active=false;}context_->inbox->close();}
