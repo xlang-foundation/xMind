@@ -10,7 +10,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Rendered loopback Code Server candidate passes selected-editor read/edit/Node4/reload8 with separate worker; clients500/178. NEVER replay sessionc81fc6637b564336bb2419f1929e1aae/root09841bb1abe94ec8a90b87c26715a1ea. Immediate editor refresh remains open; doc/evidence/rendered-vscode-loopback-coding-20261024.json. Installed73 unchanged.
 
-- Scoped remote session reads pass11 focused; full179 still failed ledger (178pass), no install. See doc/evidence/remote-scoped-session-read-20261024.json. Native candidate uninstalled; original fixtures NEVER replay.
+- Native5e5849cd passes full179/179 in801.53s; frozen inputs exact. Package/editor/hosted checks pending; installed73 unchanged. See doc/evidence/native-delivery-5e5849cd-full-20261024.json. Goal active.
 
 - Candidate67 completed coding/handoff roots remain in doc/development-checkpoints-20261024.md verbatim; NEVER replay.
 

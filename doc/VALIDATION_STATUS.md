@@ -1,3 +1,9 @@
+## Full native qualification passes179/179 — 2026-10-24
+
+Source5e5849cd/Native f3b9bf69 completes all179 local contracts in801.53s, zero failures. Build, CTest and final integrity audit terminate successfully; all2838 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/142 binary hashes and file sets remain unchanged. Graph-worker11.87s, ledger43.10s and HTTP9.50s pass in this complete run. Earlier failed runs remain historical evidence, not erased or reclassified. Synthetic peers only; no paid provider inference or CPython execution. [Full receipt](evidence/native-delivery-5e5849cd-full-20261024.json), [complete output](evidence/native-delivery-5e5849cd-full-20261024.log).
+
+This qualifies the native candidate, including scoped session metadata reads. Packaged browser/CLI/rendered editor acceptance, immediate editor refresh and hosted trusted-TLS qualification remain separate pending requirements. Installed0.1.73 and user data remain unchanged; the complete delivery goal remains active.
+
 ## Captured remote session metadata through native SDK subobjects — 2026-10-24
 
 Development Connections.OpenScope captures an explicit profile/revision/server/grant/scope and exposes Identity plus Sessions.Open metadata observation. The CLI and owner/origin-bound native HTTP adapters call the same C++ service. Native WinHTTP sends one bounded verified-HTTPS GET with backend-selected grant headers; exact response binding and resource identity are required. Credentials/grant fields are not public values. Profile/credential changes during the read reject its result, and backend generation is checked before send and publication. Standard xlang3 SDK objects own IPC value transfer and method dispatch. No remote mutation routing or Local fallback is added.

@@ -154,3 +154,8 @@ owner/history/settings backup.
 ## Superseded ledger focus guidance after scoped read checkpoint — verbatim
 
 - Native fe6010fb full179 fails ledger45s (178pass); instrumented ledger passes44.96s with unchanged limit. No install. See doc/evidence/native-delivery-37becbf1-ledger-20261024.json; original fixtures NEVER replay.
+
+
+Superseded after complete local qualification5e5849cd (verbatim):
+
+- Scoped remote session reads pass11 focused; full179 still failed ledger (178pass), no install. See doc/evidence/remote-scoped-session-read-20261024.json. Native candidate uninstalled; original fixtures NEVER replay.
