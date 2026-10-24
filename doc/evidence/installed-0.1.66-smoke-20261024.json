@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "installedNativeSha256": "3d727450756c3c9287a87b7bdfb8dfb56e960bbcb2821b559e5c03dd88e9a5eb",
+  "managedDiscoveryAndReuse": true,
+  "sessionId": "e396142dfae23f973429a308f3c264c4",
+  "completedRoot": "430c3d73de6b88e377abcc6c9f92e51f",
+  "history": [
+    {
+      "data": {
+        "content": "Read the installed fixture marker",
+        "model_id": ""
+      },
+      "id": "msg_1",
+      "role": "user",
+      "seq": 1
+    },
+    {
+      "data": {
+        "content": "Completed graph installed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.66 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000451c0d0000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000451c0d0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "installed.read",
+        "nodes": [
+          {
+            "id": "read",
+            "output": {
+              "content": "Observed installed 0.1.66 native read.\n",
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000451c0d0000000000",
+              "path": "installed-marker.txt",
+              "source": "graph_tool",
+              "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000451c0d0000000000",
+              "workspace_revision": 1
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_4",
+      "role": "assistant",
+      "seq": 4
+    }
+  ],
+  "observedOutput": "Observed installed 0.1.66 native read.\n",
+  "modelCalls": 0,
+  "userProfileRootUsed": false,
+  "ownedBackendIdentityVerifiedAndExitObserved": true,
+  "visibleWindowOpened": false,
+  "renderedVSCode": false
+}

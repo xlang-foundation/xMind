@@ -1,3 +1,9 @@
+## Candidate66 coding and installed smoke — 2026-10-24
+
+Qualified66 passed actual rendered browser list/preview/search, approved edit and Node checks, automatic completion and reload history; CLI coding and managed65-to66 handoff passed. [Aggregate receipt](evidence/candidate-0.1.66-qualified-coding-20261024.json). The earlier browser fixture failure remains separately recorded; it is not acceptance. Completed tasks must never be replayed.
+
+The installer exited zero and the installed66 payload/runtime match the qualified package. Its isolated native smoke passed managed discovery/reuse, one file read and retained history with zero model calls; exact owned process exit was observed. [Smoke receipt](evidence/installed-0.1.66-smoke-20261024.json). Five protected user roots are still being hashed by the existing verifier; preservation acceptance is pending. Rendered VS Code coding, authenticated remote/enrollment, remaining adapters and deeper scheduling/recovery remain open.
+
 ## Current captured-service checkpoint passes complete173 — 2026-10-24
 
 Source2d98bdde builds all native targets and completes the actual173-contract inventory:173 pass in767.66s. Rust/multifolder language servers, worker RPC/ledger/nested human lifecycle, native managed view/gateway, SDK model/command/workspace/file services and provider/CLI contracts pass inside this single complete run. All2816 source inputs,16 SDK headers,1870 pure-library files,30 SDK runtime files,18598 dependency files,137 native binaries and their file sets remain unchanged. Native SHA3d727450; SDK8c7972d1. [Full receipt and inventory](evidence/native-delivery-2d98bdde-full-20261024.json).
