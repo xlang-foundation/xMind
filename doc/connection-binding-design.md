@@ -194,3 +194,11 @@ Positive separate-process Providers.Discover now has [direct SDK evidence](evide
 Health advertises `local_connection_permission_catalog:1`. HTTP GET uses `/v1/connection-bindings/{binding}/sessions/{session}/permissions` and `/permission-grants`; DELETE `/permission-grants/{grant}` accepts exactly expected_revision. The authenticated origin-bound view policy and browser gateway admit only the specific methods and paths. Existing compatibility DELETE is also fixed. The shared client checks returned binding/session, refuses downgrade and never retries through a compatibility route after negotiated refusal.
 
 Diagnostic SDK CLI methods are connections permissions ID REV SESSION, permission-grants ID REV SESSION and permission-revoke ID REV SESSION GRANT GRANT_REV after `xmind ipc --endpoint lrpc:PORT`. Permission replies and reusable-grant admission are separate migration work. [Evidence and exact limitations](evidence/captured-permission-catalog-20261024.json).
+
+## Atomic captured permission replies
+
+`binding.Permissions(session_id).Reply(operation_id, request)` accepts decision allow/deny and optional Boolean grant_resource. Actor and scope come from the backend. Denial cannot create a reusable grant. The response is `{binding, session_id, operation}`. A reusable grant, ready operation and event commit atomically in native SQLite through xlang3; expiry or operation/event failure cannot leave authority behind. The grant-only backend helper has been removed.
+
+HTTP POST `/v1/connection-bindings/{binding}/sessions/{session}/permissions/{operation}/reply` uses the same strict request parser and native method, negotiated by `local_connection_permission_reply:1`. The compatibility reply route also uses the atomic backend. Shared clients verify binding/session/request and never fall back after negotiated refusal. Reusable grants reject a stale connection profile; decisions on originally admitted work retain their captured scope.
+
+Diagnostic CLI syntax is `connections permission-reply ID REV SESSION OPERATION JSON_OBJECT` after `xmind ipc --endpoint lrpc:PORT`. [Independent SDK/HTTP and rollback evidence](evidence/captured-permission-reply-20261024.json) also retains the unexplained earlier sidebar observation failure. It does not establish rendered editor acceptance or full native qualification of this source.

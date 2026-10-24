@@ -40,7 +40,8 @@ public:
     bool allows(const std::string& session_id,const std::string& workspace_id,
         const std::string& policy_binding,const std::string& action,const std::string& resource);
     AgentPermissionGrantSnapshot list(const std::string& session_id);
-    AgentPermissionGrantSnapshot grant(const std::string& session_id,const std::string& operation_id);
+    Operation reply(const std::string& session_id,const std::string& operation_id,OperationDecision decision,bool grant_resource=false);
+
     AgentPermissionGrantSnapshot revoke(const std::string& session_id,const std::string& grant_id,
         std::int64_t expected_revision);
 private:

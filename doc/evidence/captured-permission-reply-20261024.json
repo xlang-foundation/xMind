@@ -1,0 +1,196 @@
+{
+  "recordedAt": "2026-10-24T09:46:54.507Z",
+  "nativeCore12": {
+    "recordedAt": "2026-10-24T09:36:29.928Z",
+    "sourceParent": "d8cac93049f07871b3f4ed1f24c8bb14bab8403f",
+    "sourcePatchSha256": "868f26d641d3227bb94b00866ed317c93df4584c9edba38a881935563de5fc5d",
+    "build": {
+      "pid": 16100,
+      "launchedAt": "2026-10-24T09:31:30.549Z",
+      "completedAt": "2026-10-24T09:34:27.218Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "06828b9426ca993da2179bf3861d9f4a22e5eac820d8a5133086c7b302355dec"
+    },
+    "test": {
+      "pid": 25564,
+      "launchedAt": "2026-10-24T09:34:29.797Z",
+      "completedAt": "2026-10-24T09:36:27.310Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ce894b61c152b9dd1bc750144798c40d4d8d058266892d70832b7ee1cabe6b20"
+    },
+    "total": 12,
+    "failed": 0,
+    "passed": 12,
+    "seconds": 117.47,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "11678c9a4e23c166ce946a07857b17880551b6841fc4a412cd3af3f90ffd05c0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "nativeSdkAndView4": {
+    "recordedAt": "2026-10-24T09:43:06.942Z",
+    "sourceParent": "d8cac93049f07871b3f4ed1f24c8bb14bab8403f",
+    "sourcePatchSha256": "8954381a8c5e4917b83ecba7a8e455faa853a8b0d566fca57c17cfcd0f28b19b",
+    "build": {
+      "pid": 33348,
+      "launchedAt": "2026-10-24T09:40:16.408Z",
+      "completedAt": "2026-10-24T09:41:44.152Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9176d245bc2decec707207cb9218e926f077d9f12867597e4ce6e860e8c5f0db"
+    },
+    "test": {
+      "pid": 12364,
+      "launchedAt": "2026-10-24T09:41:46.871Z",
+      "completedAt": "2026-10-24T09:43:04.274Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ba1fbf312152f41ff85adbd66199f54bd52618d8f717a400ee43c54ab682ec90"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 77.35,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "11678c9a4e23c166ce946a07857b17880551b6841fc4a412cd3af3f90ffd05c0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clients": {
+    "sourceRevision": "d8cac93049f07871b3f4ed1f24c8bb14bab8403f",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 485,
+      "browser": 168
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 485,
+      "passed": 485,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 168,
+      "passed": 168,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "fixtureOnlyChangesBetweenGates": [
+    "Native/tests/native_sidebar_subscription.mjs",
+    "Native/tests/provider_profile_runtime_peer.mjs",
+    "Native/tests/provider_profile_runtime_contract.cpp"
+  ],
+  "productionNativeUnchangedBetweenGates": true,
+  "actualSeparateProcessSdkProof": {
+    "actualSeparateProcessSdkPermissionReplyAndRevocation": true,
+    "backendPid": 27308,
+    "successfulClientPids": [
+      33380,
+      26416,
+      37484,
+      30904,
+      35516
+    ],
+    "operationState": "ready",
+    "grantRevision": 2,
+    "grants": 0,
+    "duplicateAndStaleRefused": true,
+    "toolExecutionClaimed": false
+  },
+  "initialNativeGate": {
+    "recordedAt": "2026-10-24T09:27:44.663Z",
+    "sourceParent": "d8cac93049f07871b3f4ed1f24c8bb14bab8403f",
+    "sourcePatchSha256": "34d45cb3f698835db137d9cfb2e2ceb93960e67aec5b497e3635efc8b8647593",
+    "build": {
+      "pid": 37448,
+      "launchedAt": "2026-10-24T09:18:49.701Z",
+      "completedAt": "2026-10-24T09:26:24.111Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "479b629e7812cc3579a28c2b336ef82259e1e6842075221aa522628405419f43"
+    },
+    "test": {
+      "pid": 27844,
+      "launchedAt": "2026-10-24T09:26:27.398Z",
+      "completedAt": "2026-10-24T09:27:42.025Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "eb8c1c86a49de58fd26d23afa42bf03534cf1cb280bf669938fe883eaec14fba"
+    },
+    "total": 10,
+    "failed": 1,
+    "passed": 9,
+    "seconds": 74.58,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "9066fd925a04ab40f877c685ae5191abed6f1d3fdc11d7b14205db491b9a0645",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "initialFailure": {
+    "message": "Native backend observation unavailable; reconnect this profile",
+    "fixture": "TestProj/xmind-delivery-validation/xmind-local-view-ieNw4G",
+    "logSha256": "eb8c1c86a49de58fd26d23afa42bf03534cf1cb280bf669938fe883eaec14fba",
+    "cause": "Unproven; retained as an earlier native sidebar observation failure. Later passes do not establish its cause or repair."
+  },
+  "scope": [
+    "Ready operation decision, event and reusable grant CAS commit in one native xlang3/SQLite transaction",
+    "Expired approvals create no grant; duplicate/denied replies refuse authority publication; forced SQL event failure rolls back both operation and grant",
+    "Only pre-publication grant CAS conflicts can retry; operation conflicts/expiry and effects do not retry",
+    "Captured Permissions.Reply with immutable binding/session, authenticated actor and stale-profile fencing for reusable grants",
+    "Actual independent xmind.exe clients approve, inspect and revoke actual native authority; duplicate reply and stale revocation reject",
+    "Old grant-only helper removed; runner/read-tool fixtures use atomic reply",
+    "Complete extension/browser adapter suites passed with frozen71 source inputs/18 assets"
+  ],
+  "limitations": [
+    "Separate focused12 and4 runs are not a complete native suite or a combined invented inventory",
+    "Earlier sidebar observation failure remains unexplained despite later fresh-fixture passes",
+    "Current source needs full qualification and future package/coding/handoff/preservation before installation",
+    "Rendered VS Code/setup/commands, remaining general APIs, authenticated remote/enrollment and deeper recovery remain open"
+  ],
+  "installedChanged": false,
+  "paidInference": false,
+  "cpythonExecuted": false
+}

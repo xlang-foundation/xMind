@@ -43,10 +43,12 @@ struct BoundConnectionRun {ConnectionBindingIdentity binding;Run run;};
 struct BoundConnectionOperation {ConnectionBindingIdentity binding;Operation operation;};
 struct BoundConnectionOperations {ConnectionBindingIdentity binding;std::string session_id,run_id;std::vector<Operation> operations;};
 struct BoundConnectionPermissions {ConnectionBindingIdentity binding;std::string session_id;std::vector<AgentPermissionPendingRequest> requests;};
+struct BoundConnectionPermissionReply {ConnectionBindingIdentity binding;std::string session_id;Operation operation;};
 struct BoundConnectionPermissionGrants {ConnectionBindingIdentity binding;std::string session_id;AgentPermissionGrantSnapshot snapshot;};
 class CapturedSessionPermissions {
 public:
     BoundConnectionPermissions pending()const;
+    BoundConnectionPermissionReply reply(std::string id,OperationDecision decision,bool grant_resource)const;
     BoundConnectionPermissionGrants grants()const;
     BoundConnectionPermissionGrants revoke(std::string id,std::int64_t revision)const;
 private:

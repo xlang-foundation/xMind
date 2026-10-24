@@ -249,3 +249,5 @@ test('captured provider proxy permits metadata GET and explicit selection POST o
 });
 
 test('captured permission catalog gateway restricts scope and methods',async()=>{const {allowedApiRoute}=await import('../server.mjs');const base='/v1/connection-bindings/'+'a'.repeat(32)+'/sessions/session';for(const [suffix,method]of [['/permissions','GET'],['/permission-grants','GET'],['/permission-grants/grant_fixture','DELETE']]){for(const candidate of ['GET','POST','DELETE','PUT','PATCH','HEAD'])assert.equal(allowedApiRoute(base+suffix,candidate),candidate===method);assert.equal(allowedApiRoute(base+suffix+'/extra',method),false);}assert.equal(allowedApiRoute(base+'/permission-grants/a%2Fb','DELETE'),false);});
+
+test('captured permission reply gateway permits only exact POST decisions',async()=>{const {allowedApiRoute}=await import('../server.mjs');const path='/v1/connection-bindings/'+'a'.repeat(32)+'/sessions/session/permissions/request/reply';for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),method==='POST');assert.equal(allowedApiRoute(path+'/extra','POST'),false);});

@@ -104,18 +104,12 @@ bool AgentPermissionGrantStore::allows(const std::string& session_id,const std::
 AgentPermissionGrantSnapshot AgentPermissionGrantStore::list(const std::string& session_id){
     text(session_id,128,"Invalid permission grant session");return read_catalog(persistence_,session_id).first;
 }
-AgentPermissionGrantSnapshot AgentPermissionGrantStore::grant(const std::string& session_id,const std::string& operation_id){
-    const auto context=request(operation_id);if(!context||context->session_id!=session_id)throw NotFound("Agent permission request not found in this session");
-    for(int attempt=0;attempt<8;++attempt){auto [snapshot,raw]=read_catalog(persistence_,session_id);if(snapshot.revision==max_revision)throw Conflict("Agent permission grant revision exhausted");
-        const auto existing=std::find_if(snapshot.grants.begin(),snapshot.grants.end(),[&](const auto& value){return value.id==context->grant_id;});
-        if(existing!=snapshot.grants.end())return snapshot;
-        if(snapshot.grants.size()>=256)throw Conflict("Session has too many saved agent permission grants");
-        snapshot.grants.push_back({context->grant_id,context->workspace_id,context->policy_binding,context->action,context->resource,
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()});
-        ++snapshot.revision;try{persistence_.compare_information(catalog_category,session_id,encode_catalog(snapshot),std::move(raw)).get();return snapshot;}
-        catch(const Conflict&){if(attempt==7)throw;}
-    }
-    throw Conflict("Agent permission grants changed concurrently");
+Operation AgentPermissionGrantStore::reply(const std::string& session,const std::string& id,OperationDecision decision,bool reusable){
+    if((decision!=OperationDecision::allow&&decision!=OperationDecision::deny)||(reusable&&decision!=OperationDecision::allow))throw std::invalid_argument("Invalid permission reply");const auto operation=persistence_.operation(id).get();if(persistence_.run(operation.spec.run_id).get().session_id!=session)throw NotFound("Permission request not found in this session");if(!reusable)return persistence_.decide_operation(id,decision,"local-owner").get();
+    const auto context=request(id);if(!context||context->session_id!=session)throw NotFound("Reusable read permission request not found");const auto expected=Json{{"version",1},{"operation_id",context->operation_id},{"session_id",context->session_id},{"workspace_id",context->workspace_id},{"policy_binding",context->policy_binding},{"action",context->action},{"resource",context->resource},{"grant_id",context->grant_id}}.dump();
+    for(int attempt=0;attempt<8;++attempt){auto [snapshot,raw]=read_catalog(persistence_,session);if(snapshot.revision==max_revision)throw Conflict("Agent permission grant revision exhausted");if(std::none_of(snapshot.grants.begin(),snapshot.grants.end(),[&](const auto& value){return value.id==context->grant_id;})){if(snapshot.grants.size()>=256)throw Conflict("Session has too many saved agent permission grants");snapshot.grants.push_back({context->grant_id,context->workspace_id,context->policy_binding,context->action,context->resource,std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()});++snapshot.revision;}
+        try{return persistence_.decide_permission_operation(id,"local-owner",{session,expected,encode_catalog(snapshot),std::move(raw)}).get();}catch(const PermissionGrantChanged&){if(attempt==7)throw;}
+    }throw Conflict("Permission grants changed concurrently");
 }
 AgentPermissionGrantSnapshot AgentPermissionGrantStore::revoke(const std::string& session_id,const std::string& grant_id,std::int64_t expected_revision){
     text(session_id,128,"Invalid permission grant session");text(grant_id,128,"Invalid permission grant ID");if(expected_revision<0||expected_revision>=max_revision)throw std::invalid_argument("Invalid permission grant revision");

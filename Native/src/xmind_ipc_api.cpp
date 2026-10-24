@@ -157,7 +157,8 @@ struct BoundPermissionsApi {
     X::Value Pending(){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::bound(state->pending()));});}
     X::Value Grants(){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::bound(state->grants()));});}
     X::Value Revoke(std::string id,std::int64_t revision){return api_call([&]{check();return sdk_values::to_value(Host(),connection_values::bound(state->revoke(std::move(id),revision)));});}
-    BEGIN_PACKAGE(BoundPermissionsApi) APISET().AddFunc<0>("Pending",&BoundPermissionsApi::Pending);APISET().AddFunc<0>("Grants",&BoundPermissionsApi::Grants);APISET().AddFunc<2>("Revoke",&BoundPermissionsApi::Revoke); END_PACKAGE
+    X::Value Reply(std::string id,X::Value request){return api_call([&]{check();const auto input=connection_input::permission_reply(sdk_values::from_value(request));return sdk_values::to_value(Host(),connection_values::bound(state->reply(std::move(id),input.first,input.second)));});}
+    BEGIN_PACKAGE(BoundPermissionsApi) APISET().AddFunc<2>("Reply",&BoundPermissionsApi::Reply);APISET().AddFunc<0>("Pending",&BoundPermissionsApi::Pending);APISET().AddFunc<0>("Grants",&BoundPermissionsApi::Grants);APISET().AddFunc<2>("Revoke",&BoundPermissionsApi::Revoke); END_PACKAGE
 };
 struct BoundEventsApi {
     std::shared_ptr<ConnectionEventStream> state;BoundEventsApi()=default;explicit BoundEventsApi(std::shared_ptr<ConnectionEventStream> value):state(std::move(value)){}

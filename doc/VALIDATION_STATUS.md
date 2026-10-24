@@ -1,3 +1,11 @@
+## Atomic captured permission replies pass core12, SDK/view4 and clients485/168 — 2026-10-24
+
+Reusable read grants, operation approval and its event now publish in one backend transaction through embedded xlang3/SQLite. Expired approval publishes no grant; duplicate/denied requests create no authority; a forced operation-event SQL failure rolls both records back. Only a pre-publication grant CAS conflict can retry, with no effect dispatch. The obsolete grant-only helper is removed and read-tool/runner fixtures use atomic replies.
+
+Permissions(session).Reply(operation, request) is an ordinary registered xlang3 method. SDK/HTTP and the shared client retain immutable binding/session/request identity and derive local-owner in the backend. Reusable grants require the original profile revision; original admitted operation decisions remain available after metadata edits. Actual distinct xmind.exe callers approve and revoke native authority, inspect revision2/empty grants and reject duplicate/stale decisions without tool execution or model calls.
+
+Core12/12 passes in117.47s; final SDK/view4/4 passes in77.35s with the same Native11678c9a and only three verification-source changes between gates. Complete client485/168 passes with71 source inputs/18 assets unchanged. These are separate focused inventories. The initial9/10 sidebar observation failure is retained and its cause remains unproven; later fresh-fixture passes do not relabel it repaired. [Receipt and exact scope](evidence/captured-permission-reply-20261024.json). New full qualification/package/rendered acceptance, remaining general APIs, remote/enrollment and deeper recovery remain open. Installed66 unchanged.
+
 ## Captured permission catalog passes native8 and clients484/167 — 2026-10-24
 
 Permissions(session).Pending/Grants/Revoke are registered xlang3 service-object methods. Native pending collection validates request/session ownership; SDK/HTTP and compatibility routes share projection. Captured revocation checks the original connection/profile generation and grant revision. Native lifecycle tests exercise real saved authority, stale/foreign refusal and retired objects. Separate xmind.exe callers read pending/grant collections; positive populated-grant revocation is same-process SDK and actual HTTP evidence.

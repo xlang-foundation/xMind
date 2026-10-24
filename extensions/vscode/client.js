@@ -87,6 +87,7 @@ class BackendClient {
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
   #connectionPermissionCatalogSupported=false;
+  #connectionPermissionReplySupported=false;
   #connectionHistorySupported=false;
   #connectionChildHistorySupported=false;
   #connectionCapture;
@@ -146,6 +147,8 @@ class BackendClient {
     else if(this.#connectionCommandsSupported)throw new Error("The backend command protocol changed. Reconnect before invoking commands.");
     if(health&&Object.hasOwn(health,"local_connection_model_selection")){if(health.local_connection_model_selection!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured model selection protocol.");this.#connectionModelSelectionSupported=true;}
     else if(this.#connectionModelSelectionSupported)throw new Error("The backend model selection protocol changed. Reconnect before choosing models.");
+    if(health&&Object.hasOwn(health,"local_connection_permission_reply")){if(health.local_connection_permission_reply!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured permission reply protocol.");this.#connectionPermissionReplySupported=true;}
+    else if(this.#connectionPermissionReplySupported)throw new Error("The backend permission reply protocol changed. Reconnect before replying.");
     if(health&&Object.hasOwn(health,"local_connection_permission_catalog")){if(health.local_connection_permission_catalog!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured permission catalog protocol.");this.#connectionPermissionCatalogSupported=true;}
     else if(this.#connectionPermissionCatalogSupported)throw new Error("The backend permission catalog protocol changed. Reconnect before using permissions.");
     if(health&&Object.hasOwn(health,"local_connection_provider_setup")){if(health.local_connection_provider_setup!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured provider setup protocol.");this.#connectionProviderSetupSupported=true;}
@@ -579,10 +582,14 @@ class BackendClient {
     if(!value||value.session_id!==id||!Array.isArray(value.requests)||value.requests.length>256||value.requests.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.run_id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.run_id)||typeof item.workspace_id!=='string'||!item.workspace_id||item.workspace_id.length>32768||typeof item.tool!=='string'||!item.tool||item.tool.length>128||typeof item.arguments_json!=='string'||typeof item.expires_unix_ms!=='number'||!Number.isSafeInteger(item.expires_unix_ms)||item.state!=='awaiting_approval'))throw new Error('Invalid pending session permission requests.');
     return value;
   }
+  async #permissionReplyRequest(session,id,request) {
+    if(!this.#connectionPermissionReplySupported)return this.request('/v1/sessions/'+encodeURIComponent(session)+'/permissions/'+encodeURIComponent(id)+'/reply',request);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured permission connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/sessions/'+encodeURIComponent(session)+'/permissions/'+encodeURIComponent(id)+'/reply',request);exactFields(value,['binding','session_id','operation']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key])||value.session_id!==session||value.operation?.id!==id)throw new Error('Permission reply belongs to another connection, session or request');return value.operation;
+  }
   async replySessionPermission(sessionId,requestId,decision,grantResource=false) {
     executionIdentity(sessionId);executionIdentity(requestId);if(decision!=='allow'&&decision!=='deny')throw new Error('Permission decision must be allow or deny.');
     if(typeof grantResource!=='boolean'||(grantResource&&decision!=='allow'))throw new Error('Invalid permission grant choice.');
-    const result=await this.request(`/v1/sessions/${encodeURIComponent(sessionId)}/permissions/${encodeURIComponent(requestId)}/reply`,{decision,...(grantResource?{grant_resource:true}:{})});
+    const result=await this.#permissionReplyRequest(sessionId,requestId,{decision,...(grantResource?{grant_resource:true}:{})});
     if(!result||result.id!==requestId||!['ready','denied'].includes(result.state)||result.state!==(decision==='allow'?'ready':'denied'))throw new Error('Permission reply did not settle the requested operation.');
     return result;
   }

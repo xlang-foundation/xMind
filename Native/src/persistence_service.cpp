@@ -460,6 +460,7 @@ std::future<std::vector<Operation>> PersistenceService::pending_operations_for_s
 std::future<Operation> PersistenceService::decide_operation(std::string id,OperationDecision decision,std::string actor) {
     return impl_->submit([id=std::move(id),decision,actor=std::move(actor)](Repository& repository){return repository.decide_operation(id,decision,actor);});
 }
+std::future<Operation> PersistenceService::decide_permission_operation(std::string id,std::string actor,OperationGrantPublication grant){return impl_->submit([id=std::move(id),actor=std::move(actor),grant=std::move(grant)](Repository& repository){return repository.decide_permission_operation(id,actor,grant);});}
 std::future<Operation> PersistenceService::claim_operation(std::string id,OperationSpec spec) {
     return impl_->submit([id=std::move(id),spec=std::move(spec)](Repository& repository){return repository.claim_operation(id,spec);});
 }

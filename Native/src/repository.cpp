@@ -4216,7 +4216,9 @@ std::vector<Operation> Repository::pending_operations_for_session(const std::str
     for(const auto& row:rows)result.push_back(decode_operation(row,impl_->database));
     return result;
 }
-Operation Repository::decide_operation(const std::string& id,OperationDecision decision,const std::string& actor) {
+Operation Repository::decide_operation(const std::string& id,OperationDecision decision,const std::string& actor){return decide_operation_control(id,decision,actor,nullptr);}
+Operation Repository::decide_permission_operation(const std::string& id,const std::string& actor,const OperationGrantPublication& grant){return decide_operation_control(id,OperationDecision::allow,actor,&grant);}
+Operation Repository::decide_operation_control(const std::string& id,OperationDecision decision,const std::string& actor,const OperationGrantPublication* grant) {
     identifier(actor);if(actor.size()>4096) throw std::invalid_argument("Controller identity exceeds its limit");
     try {(void)Json(actor).dump();} catch(const Json::exception&) {throw std::invalid_argument("Invalid controller identity encoding");}
     if(decision!=OperationDecision::allow && decision!=OperationDecision::deny) throw std::invalid_argument("Invalid operation decision");
@@ -4224,7 +4226,14 @@ Operation Repository::decide_operation(const std::string& id,OperationDecision d
     if(result.state!=OperationState::awaiting_approval) throw Conflict("Operation is no longer awaiting approval");
     const auto owner=run(result.spec.run_id);
     if(owner.state!=RunState::running && owner.state!=RunState::paused) throw Conflict("Operation owner is no longer active");
+    if(grant){
+        const auto expected=Json::parse(grant->request_json),current=Json::parse(information("native-agent-permission-requests",id)),catalog=Json::parse(grant->catalog_json);
+        if(expected!=current||grant->session_id!=owner.session_id||current.value("session_id",std::string{})!=owner.session_id||current.value("operation_id",std::string{})!=id||current.value("workspace_id",std::string{})!=result.spec.workspace||current.value("action",std::string{})!=result.spec.tool)throw Conflict("Permission approval scope changed");
+        if(!catalog.is_object()||catalog.value("version",0)!=1||!catalog.contains("grants")||!catalog["grants"].is_array()||catalog["grants"].size()>256)throw std::invalid_argument("Invalid native grant publication");
+        const auto found=std::find_if(catalog["grants"].begin(),catalog["grants"].end(),[&](const auto& item){return item.value("id",std::string{})==current.value("grant_id",std::string{})&&item.value("workspace_id",std::string{})==result.spec.workspace&&item.value("policy_binding",std::string{})==current.value("policy_binding",std::string{})&&item.value("action",std::string{})==result.spec.tool&&item.value("resource",std::string{})==current.value("resource",std::string{});});if(found==catalog["grants"].end())throw std::invalid_argument("Native publication omits approved scope");
+    }
     const bool expired=result.expires_unix_ms<=now_ms();
+    if(grant&&!expired){const auto published=grant->expected_catalog?db.execute("UPDATE information SET payload=? WHERE category='native-agent-permission-grants' AND id=? AND payload=?",{grant->catalog_json,grant->session_id,*grant->expected_catalog}):db.execute("INSERT INTO information(category,id,payload) VALUES('native-agent-permission-grants',?,?) ON CONFLICT(category,id) DO NOTHING",{grant->session_id,grant->catalog_json});if(published.affected_rows!=1)throw PermissionGrantChanged("Permission grants changed before approval");}
     result.state=expired?OperationState::expired:(decision==OperationDecision::allow?OperationState::ready:OperationState::denied);
     if(!expired) result.decision_actor=actor;
     changed_one(db.execute("UPDATE operations SET state=?,decision_actor=? WHERE id=? AND state='awaiting_approval'",{to_string(result.state),result.decision_actor,id}));

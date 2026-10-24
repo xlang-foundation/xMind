@@ -3,6 +3,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <optional>
 #include "agentflow/records.hpp"
 
 namespace agentflow {
@@ -24,6 +25,9 @@ struct WorkspaceEffectUncertain : Conflict {using Conflict::Conflict;};
 // Workspace is the runtime's verified workspace identity. Arguments are an
 // exact JSON object, retained byte for byte. Changing serialization requires a
 // new operation; effect adapters must execute the approved payload unchanged.
+// Native-only publication joined to an allowed operation decision. Never supplied by views.
+struct OperationGrantPublication {std::string session_id,request_json,catalog_json;std::optional<std::string> expected_catalog;};
+struct PermissionGrantChanged : Conflict {using Conflict::Conflict;};
 struct OperationSpec {
     std::string run_id,workspace,tool,arguments_json;
     // Additional trusted effect domains (for example a configured MCP server).

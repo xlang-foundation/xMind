@@ -254,6 +254,7 @@ public:
     std::vector<Operation> pending_operations_for_session(const std::string& session_id);
     // Actor is derived from the backend's authenticated controller context.
     Operation decide_operation(const std::string& id,OperationDecision decision,const std::string& actor);
+    Operation decide_permission_operation(const std::string& id,const std::string& actor,const OperationGrantPublication& grant);
     Operation claim_operation(const std::string& id,const OperationSpec& actual);
     Operation cancel_operation(const std::string& id,const OperationSpec& actual);
     Operation expire_operation(const std::string& id);
@@ -292,6 +293,7 @@ private:
     Event agent_worker_tool_event_impl(const AgentWorkerLeaseSpec&,const std::string& attempt,std::int64_t ordinal,bool returned,bool allow_files);
     AgentWorkerToolTurnRecord commit_agent_worker_tool_turn(const AgentWorkerLeaseSpec&,const std::string& attempt,bool allow_files);
     struct Impl;
+    Operation decide_operation_control(const std::string& id,OperationDecision decision,const std::string& actor,const OperationGrantPublication* grant);
     std::unique_ptr<Impl> impl_;
 };
 }
