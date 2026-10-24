@@ -1,0 +1,84 @@
+{
+  "gate": {
+    "sourceRevision": "83d320c3db89c1aa7858fe3cc2f4d698eebe2beb",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 495,
+      "browser": 176
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 495,
+      "passed": 495,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 176,
+      "passed": 176,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "priorFixtureFailure": {
+    "sourceRevision": "83d320c3db89c1aa7858fe3cc2f4d698eebe2beb",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 495,
+      "browser": 176
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 495,
+      "passed": 495,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 1,
+      "tests": 176,
+      "passed": 175,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": false
+  },
+  "fixtureCorrection": "Lightweight access fixture now optionally loads real shared chat/settings scripts and their markup dependencies.",
+  "coverage": [
+    "Shared browser/extension message handler uses native HTTP authentication/status routes",
+    "Credential cleared from form immediately on submit and close, removed from adapter message in finally",
+    "Credential-bearing failures masked with fixed text; no automatic authentication retry",
+    "Status response validates captured profile identity/revision and routing false",
+    "Retired-view replies discarded",
+    "Exact proxy route/method allowlist, no remote select route",
+    "DOM fixture observes stored state without switching Local workspace"
+  ],
+  "limitations": [
+    "DOM/synthetic adapter evidence, not rendered browser or editor acceptance",
+    "No positive HTTP trusted TLS/storage claim",
+    "No remote routing or enrollment activation",
+    "Installed0.1.72 unchanged"
+  ]
+}

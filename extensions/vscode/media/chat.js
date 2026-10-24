@@ -679,6 +679,22 @@ settings.addEventListener('close',()=>{settingsProfileSelection=undefined;});
 byId('settings').onclick=()=>{settingsProfileSelection=profileState?.active||'';byId('provider-key').value='';byId('settings-status').textContent='';settings.showModal();byId('provider-key').focus();api.postMessage({type:'mcp-refresh'});api.postMessage({type:'connections-refresh'});};
 byId('mcp-refresh').onclick=()=>api.postMessage({type:'mcp-refresh'});
 byId('mcp-resources-refresh').onclick=()=>api.postMessage({type:'mcp-resources-refresh'});
+function appendConnectionAuthentication(row,profile){
+  row.dataset.connectionId=profile.id;row.dataset.profileRevision=String(profile.revision);
+  const status=node('p','Check stored sign-in status before authenticating.','hint');status.setAttribute('role','status');status.dataset.authenticationStatus='true';
+  const check=node('button','Check sign-in');check.type='button';check.onclick=()=>api.postMessage({type:'connection-authentication-read',id:profile.id,revision:profile.revision});
+  const form=node('form'),label=node('label','Server credential'),input=node('input'),submit=node('button','Authenticate');input.type='password';input.autocomplete='off';input.spellcheck=false;input.maxLength=8192;input.required=true;input.dataset.connectionCredential='true';label.append(input);submit.type='submit';submit.disabled=true;submit.dataset.authenticationSubmit='true';form.append(label,submit);
+  form.onsubmit=event=>{event.preventDefault();const credential=input.value;input.value='';if(!row.dataset.credentialRevision)return;submit.disabled=true;api.postMessage({type:'connection-authenticate',id:profile.id,revision:profile.revision,credential_revision:Number(row.dataset.credentialRevision),credential});};row.append(status,check,form);
+}
+function showConnectionAuthentication(message){
+  const row=Array.from(byId('connections-list').children).find(value=>value.dataset.connectionId===message.id&&value.dataset.profileRevision===String(message.revision));if(!row)return;
+  const status=row.querySelector('[data-authentication-status]'),submit=row.querySelector('[data-authentication-submit]');for(const button of row.querySelectorAll('button'))button.disabled=!!message.busy;
+  if(message.busy){status.textContent='Checking server sign-in…';return;}
+  if(message.error){delete row.dataset.credentialRevision;submit.disabled=true;status.textContent=message.error;return;}
+  const state=message.state;if(!state){submit.disabled=true;return;}row.dataset.credentialRevision=String(state.credential_revision);submit.disabled=false;
+  status.textContent=state.state==='stored'?'Stored sign-in for '+state.server_id+'. Remote execution remains unavailable.':state.state==='expired'?'Stored sign-in expired. Authenticate again to replace it.':state.state==='stale_profile'?'The address changed. Authenticate again for this profile.':'No stored sign-in. Enter the credential provided by your server.';
+}
+settings.addEventListener('close',()=>{for(const input of settings.querySelectorAll('[data-connection-credential]'))input.value='';});
 byId('connections-refresh').onclick=()=>api.postMessage({type:'connections-refresh'});
 byId('connection-form').onsubmit=event=>{event.preventDefault();const name=byId('connection-name').value.trim(),origin=byId('connection-origin').value.trim();if(!name||!origin)return;const identity=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;byId('connection-add').disabled=true;byId('connections-status').textContent='Saving Nexus address…';api.postMessage({type:'connection-save',id:'nexus-'+identity,name,origin});};
 function renderMcpSettings(message){
@@ -770,6 +786,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();refreshSendControl();}
+  else if(m.type==='connection-authentication'){showConnectionAuthentication(m);}
   else if(m.type==='connections-state'){
     const list=byId('connections-list'),busy=!!m.busy;byId('connection-add').disabled=busy;byId('connections-refresh').disabled=busy;
     if(m.busy){byId('connections-status').textContent=m.text||'Updating connections…';return;}
@@ -777,7 +794,7 @@ window.addEventListener('message',event=>{
     const state=m.state;if(!state||!Array.isArray(state.profiles)){byId('connections-status').textContent='Invalid connection profile response.';return;}list.replaceChildren();
     byId('connections-status').textContent=m.completed==='connection-save'?'Nexus address saved. It remains unconnected; Local stays active.':m.completed==='connection-remove'?'Connection removed. Local stays active.':`${state.profiles.length} saved connection${state.profiles.length===1?'':'s'} · active: ${state.profiles.find(profile=>profile.id===state.active_id)?.name||'unknown'}`;
     if(m.completed==='connection-save'){byId('connection-name').value='';byId('connection-origin').value='';}
-    for(const profile of state.profiles){const row=node('div',undefined,'connection-profile'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',profile.name),node('span',profile.id===state.active_id?'Active':'Not connected','hint'));row.append(heading);if(profile.kind==='nexus')row.append(node('p',profile.origin,'hint'),node('p','Authentication and remote command/event routing are not implemented. Local remains active.','hint'));else row.append(node('p','This xMind runtime · SQLite and workspace run locally.','hint'));if(profile.kind==='nexus'){const remove=node('button','Remove connection');remove.type='button';remove.onclick=()=>{if(!window.confirm(`Remove “${profile.name}”? This retires its ID permanently.`))return;byId('connection-add').disabled=true;byId('connections-status').textContent='Removing connection…';api.postMessage({type:'connection-remove',id:profile.id});};row.append(remove);}list.append(row);}
+    for(const profile of state.profiles){const row=node('div',undefined,'connection-profile'),heading=node('div',undefined,'mcp-heading');heading.append(node('strong',profile.name),node('span',profile.id===state.active_id?'Active':'Not connected','hint'));row.append(heading);if(profile.kind==='nexus')row.append(node('p',profile.origin,'hint'),node('p','Authentication stores sign-in only. Remote execution remains unavailable; Local stays active.','hint'));else row.append(node('p','This xMind runtime · SQLite and workspace run locally.','hint'));if(profile.kind==='nexus'){appendConnectionAuthentication(row,profile);const remove=node('button','Remove connection');remove.type='button';remove.onclick=()=>{if(!window.confirm(`Remove “${profile.name}”? This retires its ID permanently.`))return;byId('connection-add').disabled=true;byId('connections-status').textContent='Removing connection…';api.postMessage({type:'connection-remove',id:profile.id});};row.append(remove);}list.append(row);}
   }
   else if(m.type==='permission-grants'){
     const snapshot=m.snapshot,selected=byId('sessions').value,list=byId('permission-grants-list');

@@ -1,3 +1,7 @@
+## Shared connection authentication settings controls — 2026-10-24
+
+Browser and extension settings now provide Check sign-in and Authenticate through a shared thin HTTP handler. The password clears immediately on submit and dialog close; the adapter drops it from its message in finally. Failed or lost confirmation requires explicit status inspection; no automatic credential resubmission. Returned state is profile/revision checked, and Local/workspace selection remains unchanged. Proxy access is limited to exact capability/status/authentication methods. Complete client suites pass495 extension/176 browser tests with source/assets unchanged. [Evidence](evidence/connection-auth-settings-ui-20261024.json), [source hashes](evidence/connection-auth-settings-ui-source-hashes-20261024.json). The first new DOM fixture failure came from omitting the real chat/settings script; it is corrected and retained. These synthetic DOM/adapter results do not prove rendered browser/editor or positive HTTP TLS. Installed72 unchanged; full goal active.
+
 ## Hosted bc2de6f2 result and lifecycle diagnostics — 2026-10-24
 
 Hosted run40109419472 is terminal failure172/176: graph runner40.57s, worker RPC70.10s, ledger45.11s and nested-human CTest45.02s timeout. Original artifact12568550235 and job hashes are in [result evidence](evidence/hosted-native-bc2de6f2-result-20261024.json). No deadline changes or effect replay; local green does not repair hosted failure.

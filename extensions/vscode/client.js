@@ -392,6 +392,19 @@ class BackendClient {
     profileIdentity(id);profileRevision(expected_revision);
     return validateProviderProfiles(await this.#providerProfilesRequest({id,expected_revision}));
   }
+  async connectionAuthentication(id,revision) {
+    connectionIdentity(id);profileRevision(revision);if(id==='local'||revision<1)throw new Error('Choose a saved remote profile.');
+    const capability=await this.request('/v1/connections/capabilities');if(capability?.remote_authentication!==1||capability?.remote_authentication_status!==1)throw new Error('Remote authentication is unavailable.');
+    return validateRemoteAuthentication(await this.request('/v1/connections/authentication',{id,expected_profile_revision:revision}),id,revision);
+  }
+  async authenticateConnection(id,revision,credentialRevision,credential) {
+    try{connectionIdentity(id);profileRevision(revision);profileRevision(credentialRevision);if(id==='local'||revision<1||typeof credential!=='string'||!credential.length||credential.length>8192||!/^[\x21-\x7e]+$/.test(credential))throw new Error('Invalid credential');
+      const response=await this.request('/v1/connections/authenticate',{id,expected_profile_revision:revision,expected_credential_revision:credentialRevision,credential},20000);
+      exactFields(response,['connection_id','server_id','profile_revision','credential_revision','protocol_version','expires_at','command_routing']);
+      if(response.connection_id!==id||response.profile_revision!==revision||response.credential_revision!==credentialRevision+1||response.protocol_version!==1||response.command_routing!==false||!Number.isSafeInteger(response.expires_at)||response.expires_at<=0||typeof response.server_id!=='string'||!response.server_id||response.server_id.length>256)throw new Error('Invalid receipt');
+      return response;
+    }catch{throw new Error('Authentication was not confirmed. Check stored status before trying again.');}
+  }
   async connectionProfiles() { return validateConnectionProfiles(await this.request('/v1/connections')); }
   async saveConnectionProfile(id,name,origin) {
     connectionIdentity(id);connectionName(name);connectionOrigin(origin);
@@ -1206,6 +1219,21 @@ function validateConnectionBindingIdentity(value){
   exactFields(value,['connection_id','profile_revision','server_id','backend_generation','protocol_version','kind']);
   if(value.connection_id!=='local'||value.kind!=='local'||!Number.isSafeInteger(value.profile_revision)||value.profile_revision<1||typeof value.server_id!=='string'||!/^local-[a-f0-9]{64}$/.test(value.server_id)||typeof value.backend_generation!=='string'||!value.backend_generation||value.backend_generation.length>256||/[\x00-\x1f\x7f]/.test(value.backend_generation)||value.protocol_version!==1)throw new Error('Invalid captured Local connection identity.');return value;
 }
+function validateRemoteAuthentication(value,id,revision){
+  exactFields(value,['connection_id','profile_revision','credential_revision','state','server_id','protocol_version','expires_at','command_routing']);
+  if(value.connection_id!==id||value.profile_revision!==revision||!Number.isSafeInteger(value.credential_revision)||value.credential_revision<0||!['absent','stored','expired','stale_profile'].includes(value.state)||value.command_routing!==false)throw new Error('Invalid authentication status.');
+  if(value.state==='absent'||value.state==='stale_profile'){if(value.server_id!==null||value.protocol_version!==null||value.expires_at!==null||(value.state==='absent'&&value.credential_revision!==0))throw new Error('Invalid authentication status.');}
+  else if(value.credential_revision<1||typeof value.server_id!=='string'||!value.server_id||value.server_id.length>256||value.protocol_version!==1||!Number.isSafeInteger(value.expires_at)||value.expires_at<=0)throw new Error('Invalid authentication status.');
+  return value;
+}
+async function handleConnectionAuthentication(client,message,post,current){
+  const id=message.id,revision=message.revision;
+  try{if(!current())return;post({type:'connection-authentication',id,revision,busy:true});
+    if(message.type==='connection-authenticate')await client.authenticateConnection(id,revision,message.credential_revision,message.credential);
+    const state=await client.connectionAuthentication(id,revision);if(current())post({type:'connection-authentication',id,revision,state});
+  }catch{if(current())post({type:'connection-authentication',id,revision,error:'Authentication was not confirmed. Check stored status before trying again.'});}
+  finally{message.credential=undefined;}
+}
 function validateConnectionProfiles(value){
   const fields=['revision','active_id','profiles'];if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field))||!Number.isSafeInteger(value.revision)||value.revision<1||!Array.isArray(value.profiles)||!value.profiles.length||value.profiles.length>32)throw new Error('Invalid connection profile catalog.');
   connectionIdentity(value.active_id);const ids=new Set();let local=false,active=false;
@@ -1429,5 +1457,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
-else globalThis.XMindBackend={BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+if(typeof module!=='undefined'&&module.exports)module.exports={handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+else globalThis.XMindBackend={handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
