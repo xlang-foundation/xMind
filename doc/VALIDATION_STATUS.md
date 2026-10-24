@@ -1,3 +1,18 @@
+## Installed62 full payload recheck during candidate qualification — 2026-10-23
+
+A fresh read-only comparison observes2442 installed extension files:2440
+expected payload files match original VSIX bytes exactly, package.json matches
+after removing only installer metadata, and the one installer .vsixmanifest
+matches the original archive manifest. No expected file is missing or changed
+and the complete expected file set is verified. Native remains e04b3cb6 and
+runtime manifest3fa2fcd7; candidate loader changes are not installed.
+
+The installed runtime was not executed; no profile backend, editor or visible
+window was started. This recheck covers extension payload only, not a fresh
+comparison of user settings/history/profile data or backup roots. Current full
+local validation remains separately live on d3fef238.
+[Receipt](evidence/installed62-payload-preservation-current-20261023.json).
+
 ## Corrected hosted startup matrix: discovery remains slow — 2026-10-23
 
 All eight official artifacts from run40044529002/source744d27a9 are downloaded

@@ -1,0 +1,28 @@
+{
+  "recordedAt": "2026-10-24T00:35:32.291Z",
+  "scope": "Read-only installed0.1.62 extension payload comparison with original verified VSIX. No user settings/profile/history or backup preservation claim in this recheck.",
+  "installedVersion": "0.1.62",
+  "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.62",
+  "filesObserved": 2442,
+  "expectedPayloadFiles": 2441,
+  "exactPayloadFiles": 2440,
+  "packageJsonMatchesExceptInstallerMetadata": true,
+  "extras": [
+    {
+      "name": ".vsixmanifest",
+      "sha256": "2663d3da776c268069bfa8c1b9cbefc96b31ca359e86a29441a60161e7f050b8"
+    }
+  ],
+  "nativeSha256": "e04b3cb67cfa9c0926923ba6c0145c7f5195abe80784b46db7adb1788b89a5a6",
+  "runtimeManifestSha256": "3fa2fcd78f3df21371ee22bb979903a6deb62ae754cf0ac0a22f38a1e1b64d0b",
+  "originalVsixSha256": "4efe4dc649255ab97527779eeb4cad7e769e7ad7077b57d5b1e086a2ec3c46e2",
+  "missing": [],
+  "mismatch": [],
+  "nativeExecuted": false,
+  "profileBackendStarted": false,
+  "visibleWindowOpened": false,
+  "installedModified": false,
+  "passed": true,
+  "installerManifestMatchesOriginalVsix": true,
+  "completeExpectedFileSetVerified": true
+}
