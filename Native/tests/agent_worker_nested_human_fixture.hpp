@@ -29,6 +29,36 @@ public:
 private:
     bool repeated_;
 };
+class PausedRootFairnessModel final:public AgentModelGateway {
+    std::mutex mutex_;NestedHumanModel paused_;unsigned roots_=0,children_=0;
+public:
+    ModelCompletion complete(const ChatProviderConfig& config,const ModelRequest& request,ChatCompletionStream::Sink sink,std::stop_token stop)override{
+        std::lock_guard lock(mutex_);const auto has=[&](const char* prefix){return std::any_of(request.messages.begin(),request.messages.end(),[&](const auto& message){return message.role==MessageRole::user&&message.content.starts_with(prefix);});};
+        const bool child=has("Fairness child B"),other=child||has("Fairness root B");if(!other)return paused_.complete(config,request,std::move(sink),stop);
+        auto& calls=child?children_:roots_;++calls;const std::string call=child?"fairness-read":"fairness-child";
+        if(calls==1)return {"","","tool_calls","{}",{{call,"plan_tasks",child?R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"read","type":"tool","tool":"read_file","arguments_json":"{\"path\":\"fairness-input.txt\"}","depends_on":[]}]})":R"({"expected_revision":0,"expected_state_sequence":0,"add":[{"id":"child","type":"agent","objective":"Fairness child B","preset":"workspace.inspect","depends_on":[]}]})"}},"[]"};
+        require(calls==2&&std::any_of(request.messages.begin(),request.messages.end(),[&](const auto& message){return message.role==MessageRole::tool&&message.tool_call_id==call&&message.content.find(child?"Actual independent root native read":"Fairness child B completed")!=std::string::npos;}),"Independent root must consume its actual native child/read report once");return {child?"Fairness child B completed":"Fairness root B completed","","stop","{}",{},"[]"};
+    }
+    std::array<unsigned,4> counts(){std::lock_guard lock(mutex_);return {paused_.roots,paused_.children,roots_,children_};}
+    ResponsesTokenCount count_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected fairness count");}
+    ResponsesCompactionResult compact_context(const ChatProviderConfig&,const ModelRequest&,std::stop_token)override{throw std::runtime_error("Unexpected fairness compaction");}
+};
+void production_paused_root_fairness(PersistenceService& store,const std::string& path,std::shared_ptr<const BoundProcessExecutable> image){
+    const auto folder=std::filesystem::path(path).parent_path();{std::ofstream file(folder/"fairness-input.txt",std::ios::binary);file<<"Actual independent root native read\n";require(static_cast<bool>(file),"Fairness source write failed");}
+    for(const bool coding:{false,true})for(const bool counted:{false,true}){
+        const auto suffix=std::string(coding?"coding-":"read-")+(counted?"counted":"plain"),a="fairness-paused-"+suffix,b="fairness-ready-"+suffix;
+        auto settings=dynamic_fixture_child(folder.string());settings.planning=DynamicPlanningPolicy{};settings.approved_edits=coding;settings.tool_allowlist.reset();if(counted){settings.context=ContextRuntimePolicy{};settings.context->compaction.automatic=false;}
+        auto gateway=std::make_shared<PausedRootFairnessModel>();auto executor=coding?make_agent_worker_coding_executor(store,settings,image,gateway):make_agent_worker_read_executor(store,settings,image,gateway);
+        AgentService service(store,settings,1,8,{},executor);store.create_session(a,"Paused root A").get();store.create_session(b,"Independent root B").get();service.submit(a,a,"Synthetic nested human root input");
+        const auto paused=std::chrono::steady_clock::now()+15s;while(std::chrono::steady_clock::now()<paused&&service.healthy()&&store.run(a).get().state!=RunState::paused)std::this_thread::sleep_for(5ms);require(service.healthy()&&store.run(a).get().state==RunState::paused,"Root A must retain its nested human pause");
+        const auto original=store.run_history(a).get();const auto children=store.owned_children(a).get();require(children.size()==1,"Paused root A must retain one child");const auto child=children.front().run.id;const auto plan=store.dynamic_plan_for_owner(child).get();require(plan.has_value(),"Paused child plan missing");const auto requests=store.dynamic_human_requests(plan->id).get();require(requests.size()==1&&requests.front().state=="waiting","Root A must await its original question");
+        service.submit(b,b,"Fairness root B");const auto completed=std::chrono::steady_clock::now()+15s;while(std::chrono::steady_clock::now()<completed&&service.healthy()&&store.run(b).get().state!=RunState::completed)std::this_thread::sleep_for(5ms);require(service.healthy()&&store.run(b).get().state==RunState::completed,"One physical root worker must complete B while A remains paused");
+        require(store.run(a).get().state==RunState::paused&&store.run(child).get().state==RunState::paused&&gateway->counts()==std::array<unsigned,4>{1,1,2,2}&&store.root_budget(a).get().model_calls_reserved==2&&store.root_budget(b).get().model_calls_reserved==4,"Independent root execution cannot replay or charge paused root A");const auto retained=store.run_history(a).get();require(retained.size()==original.size(),"Root B cannot add messages to A");for(std::size_t i=0;i<original.size();++i)require(retained[i].json==original[i].json&&retained[i].sequence==original[i].sequence,"Root A transcript must remain exact");
+        require(store.dynamic_human_requests(plan->id).get().front().state=="waiting","Root B cannot answer A's human request");const auto b_history=store.run_history(b).get();require(b_history.size()==4,"Independent B must retain two actual model turns");
+        const auto after=store.dynamic_plan_for_owner(child).get();service.plan_input(a,requests.front().id,R"({"answer":"nested-human-answer"})","fixture-controller",after->revision,after->state_sequence);const auto finish=std::chrono::steady_clock::now()+15s;while(std::chrono::steady_clock::now()<finish&&service.healthy()&&!service.idle())std::this_thread::sleep_for(5ms);
+        require(service.healthy()&&service.idle()&&store.run(a).get().state==RunState::completed&&store.run(child).get().state==RunState::completed&&gateway->counts()==std::array<unsigned,4>{2,2,2,2},"Original root A must resume once after B completes");require(store.root_budget(a).get().model_calls_reserved==4&&store.root_budget(b).get().model_calls_reserved==4&&store.dynamic_budget_segment(a).get().state=="closed"&&store.dynamic_budget_segment(b).get().state=="closed","Both roots retain independent exact charges and closed segments");service.close();
+    }
+}
 void production_nested_human(PersistenceService& store,const std::string& path){
     auto buffer=std::vector<wchar_t>(32768);const auto length=GetModuleFileNameW(nullptr,buffer.data(),static_cast<DWORD>(buffer.size()));require(length&&length<buffer.size(),"Nested human image unavailable");
     const auto image=ForegroundProcess::bind_executable((std::filesystem::path(buffer.data()).parent_path()/"xmind.exe").string());
@@ -76,5 +106,6 @@ void production_nested_human(PersistenceService& store,const std::string& path){
         for(const auto& owner:{id,child}){unsigned paused=0,completed=0;for(const auto& event:store.events(owner).get())if(event.kind=="worker.lease.admitted"){const auto lease=store.agent_worker_lease(Json::parse(event.json).at("generation")).get();require(lease.state=="retired"&&lease.spec.pid!=GetCurrentProcessId(),"Replacement SDK worker must physically retire");paused+=lease.retirement_reason=="paused";completed+=lease.retirement_reason=="completed";}require(paused==(repeated?2:1)&&completed==1,"Each owner must retain its exact paused and completed physical generations");}
         require(store.dynamic_budget_segment(id).get().state=="closed","Completed nested resume must close its replacement segment");service->close();
     }
+    production_paused_root_fairness(store,path,image);
 }
 }

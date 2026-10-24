@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-24T14:47:22.759Z",
+  "gate": {
+    "recordedAt": "2026-10-24T14:46:02.993Z",
+    "sourceParent": "36292a4ae5fb129563697877b65c01cacc06e7dd",
+    "sourcePatchSha256": "11ee5009331452dfccdb7b336892aeedf74ec76abbc782a26ebc9a3305ebffbe",
+    "build": {
+      "pid": 4132,
+      "launchedAt": "2026-10-24T14:44:56.432Z",
+      "completedAt": "2026-10-24T14:45:33.385Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "7f9905c1ecd386d44091d542e5136e6574510ab3d33dfb2450ab88d1519203a2"
+    },
+    "test": {
+      "pid": 32812,
+      "launchedAt": "2026-10-24T14:45:36.141Z",
+      "completedAt": "2026-10-24T14:46:00.226Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dcd37722b0599e88231674a2006d1c674be2e13b3d0355c53469993fa3e8c554"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 24.04,
+    "projectFiles": 2822,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "One native contract: eight existing one/two-pause read/coding plain/counted cases, plus four actual SDK-process two-root cases with one physical root worker. Controlled in-process model gateway; real native plans, file reads, SQLite, admission and workers.",
+  "newCases": {
+    "modes": [
+      "read/plain",
+      "read/counted",
+      "coding/plain",
+      "coding/counted"
+    ],
+    "rootWorkers": 1,
+    "rootsPerCase": 2,
+    "pausedRootModelCallsBeforeAndAfterOtherRoot": 2,
+    "otherRootModelCalls": 4,
+    "pausedRootFinalModelCalls": 4,
+    "pausedRootTranscriptUnchangedDuringOtherRoot": true,
+    "originalHumanRequestStillWaiting": true,
+    "otherRootActualNativeFileRead": true,
+    "originalRootResumedOnce": true,
+    "bothRootSegmentsClosed": true
+  },
+  "allFrozenProjectInputsStillMatch": true,
+  "productionBinaryMatchesInstalled71": true,
+  "fullNativeSuiteRerun": false,
+  "installed71Unchanged": true,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "notProven": [
+    "Sustained FIFO fairness under many continuously arriving roots",
+    "Deep nested cancellation and crash recovery",
+    "Authenticated remote scheduling or worker enrollment"
+  ],
+  "goalComplete": false
+}

@@ -1,3 +1,9 @@
+## Paused-root scheduling progress — 2026-10-24
+
+The native nested-human contract now passes twelve cases in24.04s: eight one/two-pause read/coding counted/plain cases and four two-root cases using one physical root worker. Root A retains its original nested human question while root B completes an actual SDK child/native file read. A's transcript and two model charges remain unchanged and its question stays unanswered. Only after B completes does one answer resume A; both roots finish with four model charges each and closed active segments. The controlled model gateway runs locally; process execution, ownership, plans and SQLite are real. [Receipt](evidence/paused-root-scheduling-20261024.json), [original log](evidence/paused-root-scheduling-20261024.log).
+
+The complete frozen closure stays unchanged during this focused gate and production Native51340e18 matches installed71. No product/runtime change or replacement installation is needed for these test-only additions. This proves progress past one paused root in the four tested modes, not sustained FIFO fairness, arbitrary root counts, deep cancellation/crash recovery or remote scheduling. The full objective remains active.
+
 ## Installed71 preserved delivery checkpoint — 2026-10-24
 
 Installed0.1.71 uses source738367ad/Native51340e18 and SDK8c7972d1, including the repeated nested-pause fix. All2442 installed files and2398 runtime files verify; package metadata, installer manifest and other extension entries match. All five protected roots retain exact file sets and hashes, and the exact70 backup is retained. Full173 in788.31s, unchanged-source clients493/175, packaged coding and managed70-to71 handoff retain their own receipts. [Installed evidence](evidence/installed-0.1.71-738367ad-20261024.json).
