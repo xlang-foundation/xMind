@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "scope": "Production native factory child-owned human pause, physical SDK retirement, AgentService reopen and original accepted-call resume in four read/coding parent and plain/counted context cases.",
+  "gates": [
+    {
+      "recordedAt": "2026-10-24T03:25:01.722Z",
+      "sourceParent": "baaf26d7c3d9c8d94805b7ff9cfcde6c18666501",
+      "sourcePatchSha256": "b2cb53453b16093a3a142f167aca263fa9aa99b1036ab8b603535ad460877aa6",
+      "build": {
+        "pid": 34128,
+        "launchedAt": "2026-10-24T03:23:05.233Z",
+        "completedAt": "2026-10-24T03:24:07.200Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "649d29a36b470ec077c4dff55da33410eeea10199e1879dfe13c761f544d3e85"
+      },
+      "test": {
+        "pid": 26616,
+        "launchedAt": "2026-10-24T03:24:09.823Z",
+        "completedAt": "2026-10-24T03:24:59.055Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "1f6cdf3c29902397ff7b43c1656f2ce431e9727759aaa5043a3fa2c1eb5b7dbe"
+      },
+      "total": 5,
+      "failed": 0,
+      "passed": 5,
+      "seconds": 49.19,
+      "projectFiles": 2816,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    {
+      "recordedAt": "2026-10-24T03:26:16.611Z",
+      "sourceParent": "baaf26d7c3d9c8d94805b7ff9cfcde6c18666501",
+      "sourcePatchSha256": "b2cb53453b16093a3a142f167aca263fa9aa99b1036ab8b603535ad460877aa6",
+      "build": {
+        "pid": 13276,
+        "launchedAt": "2026-10-24T03:25:18.140Z",
+        "completedAt": "2026-10-24T03:25:55.638Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "a16522bbfada98ad00297ca63fb54d12bf8c806bcc8e24cf25faccd7671c45b0"
+      },
+      "test": {
+        "pid": 39556,
+        "launchedAt": "2026-10-24T03:25:58.450Z",
+        "completedAt": "2026-10-24T03:26:13.858Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "4fc600877599f471cbb6509847cf1d8fed36796566f42389289fe7496cdef617"
+      },
+      "total": 5,
+      "failed": 0,
+      "passed": 5,
+      "seconds": 15.37,
+      "projectFiles": 2816,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "df12063450c83a33240273936d116b4b0f24135c1ab2dfe31a3d4cffe2f3362d",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "modelRpcDiagnosticRepetitions": 1,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    }
+  ],
+  "verified": [
+    "Root and child each dispatch one inference before the child-owned human question pauses the owner chain.",
+    "Both original SDK workers retire with paused receipts before service reopen.",
+    "Reopen spends no inference; the controller answers the original child-owned request.",
+    "Replacement SDK workers consume original accepted reports, complete both owners and physically retire.",
+    "One original child, four total model charges, four history messages per owner, one paused and one completed physical generation per owner; replacement active segment closes."
+  ],
+  "notes": [
+    "The initial gate selected the existing five-contract regression group; the lifecycle gate explicitly selected the new human lifecycle contract plus four related contracts. Both actual logs are retained.",
+    "Test inventory is now173. Focused gates are not a complete native suite.",
+    "Runtime source and installed0.1.64 are unchanged by this test-only checkpoint.",
+    "Repeated nested pause segments, deeper/multibranch recovery, full-suite qualification and remaining product scope stay open.",
+    "Controlled synthetic gateways only; no paid provider inference or CPython."
+  ]
+}

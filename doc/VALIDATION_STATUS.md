@@ -1,3 +1,23 @@
+## Production child-owned human pause and resume — 2026-10-23
+
+A separate production factory contract now proves four read/coding parent and
+plain/counted context cases. A child asks a human question; both actual SDK
+workers pause and physically retire. A reopened AgentService retains the
+original unanswered child request without inference, accepts its answer and
+launches replacement root/child workers to consume the original reports.
+Each owner retains one paused and one completed worker generation, four
+history messages, one original child and four total model charges. The
+replacement active segment closes after both workers retire.
+
+The existing regression group passes5/5 in49.19s; the explicit new lifecycle
+group passes5/5 in15.37s, including the four-case lifecycle contract in5.80s.
+Same source patch and native binary; all frozen input/binary sets and hashes
+remain unchanged. [Receipt](evidence/production-nested-human-20261023.json).
+
+Inventory is now173; no complete suite is claimed. This test-only checkpoint
+does not change installed64. Repeated/deeper nested lifecycle, multibranch
+recovery, full-suite qualification and remaining product requirements stay open.
+
 ## Automatic process children use their scoped xlang3 planning service — 2026-10-23
 
 Typed dynamic-agent workers now acquire the registered Planning subobject,

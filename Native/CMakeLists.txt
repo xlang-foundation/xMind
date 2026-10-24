@@ -995,6 +995,8 @@ if(BUILD_TESTING)
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/agent_worker_ledger_peer.mjs" "$<TARGET_FILE:agentflow_agent_worker_ledger_contract>"
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_agent_worker_ledger_contract PROPERTIES TIMEOUT 60)
+      add_test(NAME native_agent_worker_nested_human_contract COMMAND "$<TARGET_FILE:agentflow_agent_worker_ledger_contract>" "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}" --nested-human)
+      set_tests_properties(native_agent_worker_nested_human_contract PROPERTIES TIMEOUT 45)
     endif()
     target_include_directories(agentflow_agent_worker_channel_contract PRIVATE third_party)
     target_link_libraries(agentflow_agent_worker_channel_contract PRIVATE agentflow_worker_channel)
