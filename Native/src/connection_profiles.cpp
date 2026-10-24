@@ -83,6 +83,10 @@ std::string decode_server_identity(const std::string& raw){
 }
 void validate_remote_connection_origin(const std::string& value){origin(value);}
 ConnectionProfiles::ConnectionProfiles(PersistenceService& store):store_(store),admission_(connection_admission(&store)){}
+std::shared_lock<std::shared_mutex> ConnectionProfiles::admit_remote(const ConnectionProfile& profile){
+    std::shared_lock admission(*admission_);const auto catalog=load();const auto current=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[&](const auto& item){return item.id==profile.id;});
+    if(current==catalog.profiles.end()||profile.kind!=ConnectionKind::nexus||profile.revision<1||current->kind!=profile.kind||current->revision!=profile.revision||current->origin!=profile.origin)throw Conflict("Remote connection profile revision changed");return admission;
+}
 std::shared_lock<std::shared_mutex> ConnectionProfiles::admit_local(std::int64_t revision){
     std::shared_lock admission(*admission_);const auto catalog=load();const auto local=std::find_if(catalog.profiles.begin(),catalog.profiles.end(),[](const auto& profile){return profile.id=="local"&&profile.kind==ConnectionKind::local;});
     if(local==catalog.profiles.end()||revision<1||local->revision!=revision)throw Conflict("Captured connection profile revision changed");return admission;

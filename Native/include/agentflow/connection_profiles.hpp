@@ -30,6 +30,7 @@ class ConnectionProfiles {
 public:
     explicit ConnectionProfiles(PersistenceService& store);
     std::shared_lock<std::shared_mutex> admit_local(std::int64_t profile_revision);
+    std::shared_lock<std::shared_mutex> admit_remote(const ConnectionProfile& profile);
     std::string local_server_identity();
     ConnectionProfileCatalog load();
     ConnectionProfileCatalog load_or_initialize();
