@@ -1,0 +1,118 @@
+{
+  "recordedAt": "2026-10-24T15:52:47.166Z",
+  "gate": {
+    "recordedAt": "2026-10-24T15:51:38.138Z",
+    "sourceParent": "ffc6f4e8984ef746c10bdf3b4e66935b699e7673",
+    "sourcePatchSha256": "e1e194db3908279a1679c57e7e89ba88f161dca655185e3695c709b7528dd5f1",
+    "build": {
+      "pid": 13732,
+      "launchedAt": "2026-10-24T15:50:33.315Z",
+      "completedAt": "2026-10-24T15:51:23.434Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0eaf2079ec3527efdb42c21b114c59b9e7fb1e2e1d768fc7dbebcd3e9725f5a9"
+    },
+    "test": {
+      "pid": 27288,
+      "launchedAt": "2026-10-24T15:51:26.144Z",
+      "completedAt": "2026-10-24T15:51:35.527Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3f7f4d85a94ded4cba39b0208c26db6eca76cf0240269d41436c4d67568210f6"
+    },
+    "total": 9,
+    "failed": 0,
+    "passed": 9,
+    "seconds": 9.34,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "c5e772e3974af51e9867ee8281be367f3d8e920c25d7d14a02386b2c3ba22d34",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Nine local focused contracts. Separate actual SDK process calls registered authentication against native backend and untrusted HTTPS peer; independent Node explicit-CA peer success stays separate.",
+  "observed": {
+    "distinctSdkClientProcess": true,
+    "tcpConnections": 1,
+    "tlsConnections": 1,
+    "tlsFailures": 0,
+    "sdkErrorCode": "remote_unavailable",
+    "httpCredentialRequests": 0,
+    "persistedGrants": 0,
+    "databaseReopenVerified": true,
+    "localSelectionRetained": true,
+    "certificateTrustChanged": false
+  },
+  "hostedPositive": {
+    "fixtureAdded": true,
+    "usesExistingIsolatedHostedCertificateProvisioning": true,
+    "existing90SecondDeadlineUnchanged": true,
+    "expectedRequests": {
+      "refused": 1,
+      "accepted": 1
+    },
+    "nativePositiveExecutedLocally": false,
+    "nativePositivePassed": false
+  },
+  "priorObservationFailure": {
+    "gate": {
+      "recordedAt": "2026-10-24T15:49:11.058Z",
+      "sourceParent": "ffc6f4e8984ef746c10bdf3b4e66935b699e7673",
+      "sourcePatchSha256": "52e826f2d65b17a291402e4dcec8d4530993fbff2fd89f58d6d297709e76574a",
+      "build": {
+        "pid": 27392,
+        "launchedAt": "2026-10-24T15:48:10.719Z",
+        "completedAt": "2026-10-24T15:48:56.603Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "dfd93a60d5d6391f6164ffcdab7c2e539e792e843cf3867866ca21a85267c64f"
+      },
+      "test": {
+        "pid": 36664,
+        "launchedAt": "2026-10-24T15:48:59.218Z",
+        "completedAt": "2026-10-24T15:49:08.314Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "13e54e93a1bbbbca655bb9b1d451e22ffa203598f32588dfbe4f1e59280d1889"
+      },
+      "total": 9,
+      "failed": 1,
+      "passed": 8,
+      "seconds": 9.05,
+      "projectFiles": 2837,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 142,
+      "nativeSha256": "c5e772e3974af51e9867ee8281be367f3d8e920c25d7d14a02386b2c3ba22d34",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": false
+    },
+    "reason": "Assertion required tlsClientError, but subsequent observation showed completed TLS connection followed by refusal before HTTP. Failure log retained; fixture now observes actual connection stages and safe SDK transport error.",
+    "failedFixtureDatabaseRetained": false,
+    "futureFailedFixtureRetentionAdded": true
+  },
+  "ci": {
+    "expectedHostedContracts": 176,
+    "localInventory": 178,
+    "exactSetGateRetained": true
+  },
+  "productNativeUnchanged": true,
+  "nativeSha256": "c5e772e3974af51e9867ee8281be367f3d8e920c25d7d14a02386b2c3ba22d34",
+  "full178ContractSuiteRun": false,
+  "installed71Unchanged": true,
+  "goalComplete": false
+}

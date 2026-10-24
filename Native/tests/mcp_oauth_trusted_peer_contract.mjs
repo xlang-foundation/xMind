@@ -9,11 +9,15 @@ import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {createOAuthPeer,trustedRequest,access} from './mcp_oauth_trusted_peer.mjs';
 import {renewalModes} from './mcp_oauth_renewal_peer.mjs';
+import {remoteCredential} from './remote_authentication_sdk_peer.mjs';
 const [openssl]=process.argv.slice(2),execute=promisify(execFile),directory=await mkdtemp(join(tmpdir(),'xmind-oauth-peer-'));let peer;
 try{
  await execute(openssl,['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(directory,'key.pem'),'-out',join(directory,'cert.pem'),'-days','1','-subj','/CN=localhost','-addext','subjectAltName=IP:127.0.0.1'],{windowsHide:true});
  const ca=await readFile(join(directory,'cert.pem'));peer=createOAuthPeer({key:await readFile(join(directory,'key.pem')),cert:ca});const origin=await peer.listen();
  await assert.rejects(trustedRequest(origin+'/resource/success',undefined),'Default TLS must not trust the self-signed fixture');
+ const remoteBody=JSON.stringify({supported_versions:[1],required_capabilities:{events:1,receipts:1,runs:1,sessions:1},expected_server_id:null});
+ for(const positive of [false,true]){const remote=await trustedRequest(origin+'/xmind/v1/negotiate',ca,{method:'POST',body:remoteBody,headers:{'Content-Type':'application/json',Authorization:'Bearer '+(positive?remoteCredential:'wrong-synthetic-remote-credential')}});assert.equal(remote.status,positive?200:401);if(positive){const grant=JSON.parse(remote.body);assert.equal(grant.server_id,'remote-sdk-server');assert.equal(grant.protocol_version,1);assert.equal(grant.authorized_scopes[0].id,'remote-sdk-workspace');}}
+ assert.deepEqual(peer.counts.remote,{refused:1,accepted:1});
  const probe=await trustedRequest(origin+'/mcp/success',ca,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:'fixture-probe',method:'server/discover'})});assert.equal(probe.status,401);assert.match(probe.headers['www-authenticate'],/resource_metadata=/);
  const metadata=await trustedRequest(origin+'/resource/success',ca);assert.equal(metadata.status,200);assert.equal(JSON.parse(metadata.body).resource,origin+'/mcp/success');
  const issuer=await trustedRequest(origin+'/.well-known/oauth-authorization-server/issuer',ca);assert.equal(JSON.parse(issuer.body).token_endpoint,origin+'/token');

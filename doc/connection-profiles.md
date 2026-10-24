@@ -38,6 +38,13 @@ authentication via a separate SDK process and actual trusted TLS remains
 unverified. The existing independent SDK regression exercises other captured
 services; it is not positive remote authentication evidence.
 
+An [actual separate-process SDK TLS refusal fixture](evidence/remote-sdk-tls-20261024.json)
+now observes one native TLS connection followed by `remote_unavailable`, zero
+HTTP credential requests and no saved grant after database reopen. It leaves
+certificate trust unchanged. The positive native TLS/storage fixture is wired
+into the existing isolated hosted OAuth acceptance driver; its execution/pass
+remains pending. Node explicit-CA peer acceptance is separate evidence.
+
 ![Connection architecture](connection-profiles.svg)
 
 ## User experience

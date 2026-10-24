@@ -11,15 +11,17 @@ import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createServer as createTcpServer} from 'node:net';
 import {runRenewalAcceptance,renewalModes} from './mcp_oauth_renewal_peer.mjs';
+import {runRemoteAuthenticationSdk,remoteNegotiationResponse} from './remote_authentication_sdk_peer.mjs';
 export const access='synthetic-positive-access-not-live',refresh='synthetic positive refresh not live';
 export function createOAuthPeer(options,{registeredPort=43211}={}){
- const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{},renewal:{}};const codes=new Map();let origin,error;
+ const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{},renewal:{},remote:{}};const codes=new Map();let origin,error,tlsFailures=0,tlsConnections=0,tcpConnections=0;
  const kinds=new Set(['success','registered','denied','bad-state','bad-issuer','bad-code','cancelled','occupied']);
  const count=(group,kind)=>counts[group][kind]=(counts[group][kind]||0)+1;
  const peer=createServer(options,async(request,response)=>{
   try{
    const url=new URL(request.url,origin),reply=(status,value,headers={})=>{response.writeHead(status,{'Content-Type':'application/json',...headers});response.end(JSON.stringify(value));};
    assert.equal(request.headers.cookie,undefined);let body='';for await(const bytes of request){body+=bytes;if(body.length>65536)throw Error('Synthetic request bound exceeded');}
+   if(url.pathname==='/xmind/v1/negotiate'){const result=remoteNegotiationResponse(request,body);count('remote',result.kind);reply(result.status,result.value);return;}
    if(url.pathname.startsWith('/renew-mcp/')){
     const mode=url.pathname.slice(11);assert.ok(renewalModes.includes(mode));assert.equal(request.method,'POST');assert.equal(request.headers.authorization,undefined,'Renewal discovery must be anonymous');assert.equal(JSON.parse(body).method,'server/discover');
     reply(401,{error:'synthetic_authorization_required'},{'WWW-Authenticate':`Bearer resource_metadata="${origin}/renew-resource/${mode}", scope="tools.read"`});return;
@@ -82,15 +84,15 @@ export function createOAuthPeer(options,{registeredPort=43211}={}){
    }
    reply(404,{error:'synthetic_fixture_route_missing'});
   }catch(failure){error=failure;response.writeHead(500);response.end('Synthetic protocol fixture rejected the request');}
- });peer.on('tlsClientError',()=>{});
- return {server:peer,counts,codes,assertHealthy(){if(error)throw error;},async listen(){await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));origin='https://127.0.0.1:'+peer.address().port;return origin;},async close(){peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}};
+ });peer.on('tlsClientError',()=>{++tlsFailures;});peer.on('connection',()=>{++tcpConnections;});peer.on('secureConnection',()=>{++tlsConnections;});
+ return {server:peer,counts,codes,tlsStages(){return {tcpConnections,tlsConnections,tlsFailures};},assertHealthy(){if(error)throw error;},async listen(){await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));origin='https://127.0.0.1:'+peer.address().port;return origin;},async close(){peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}};
 }
 export function trustedRequest(url,ca,{method='GET',body,headers={}}={}){
  return new Promise((resolve,reject)=>{const request=httpsRequest(url,{method,ca,headers,rejectUnauthorized:true},response=>{let text='';response.setEncoding('utf8');response.on('data',data=>{text+=data;if(text.length>65536){request.destroy();reject(Error('Fixture response bound exceeded'));}});response.on('end',()=>resolve({status:response.statusCode,headers:response.headers,body:text}));});request.setTimeout(10000,()=>request.destroy(Error('Fixture HTTPS deadline exceeded')));request.on('error',reject);request.end(body);});
 }
 async function hosted(){
  if(process.platform!=='win32'||process.env.GITHUB_ACTIONS!=='true'||process.env.RUNNER_ENVIRONMENT!=='github-hosted'||process.env.RUNNER_OS!=='Windows'||!/^\d+$/.test(process.env.GITHUB_RUN_ID||''))throw Error('Trusted OAuth acceptance requires an isolated GitHub-hosted Windows runner. Never impersonate its environment locally.');
- const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
+ const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable,remoteSdkExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
  assert.equal(dirname(await realpath(directory)),tempRoot);let peer,child,exited,timer,installed=false,thumbprint,registeredReservation,occupiedReservation;
  const caFile=join(directory,'ca.cer'),provision=action=>execute('pwsh.exe',['-NoProfile','-NonInteractive','-File',certificateHelper,'-Action',action,'-CertificateFile',caFile,'-Thumbprint',thumbprint],{windowsHide:true,timeout:20000});
  try{
@@ -129,6 +131,8 @@ async function hosted(){
   assert.deepEqual(peer.counts.refresh,Object.fromEntries(['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect'].map(mode=>[mode,1])));
   await runRenewalAcceptance(renewalExecutable,modules,stdlib,origin,{peer});
   assert.deepEqual(peer.counts.renewal,Object.fromEntries(renewalModes.map(mode=>[mode,1])));assert.equal(peer.counts.refresh.forwarded,undefined);
+  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:1,accepted:1});
+  process.stdout.write('Actual separate-process xlang3 SDK authentication passed trusted native HTTPS, wrong-credential refusal, one accepted grant, stale retry without another HTTP request, encrypted credential/grant database reopen and unchanged Local selection. Remote command routing remains disabled.\n');
   process.stdout.write('Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.\n');
   process.stdout.write('Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.\n');
  }finally{
