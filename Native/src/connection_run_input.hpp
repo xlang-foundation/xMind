@@ -81,4 +81,14 @@ inline ConnectionGraphRequest graph_request(Json value,std::string default_id={}
     auto graph=string_field(value,"graph_id",64);if(!value.contains("graph_revision")||!value["graph_revision"].is_number_integer()||value["graph_revision"]<1||value["graph_revision"]>9007199254740991LL)throw std::invalid_argument("Invalid graph revision");
     const auto revision=value["graph_revision"].get<std::int64_t>();value.erase("graph_id");value.erase("graph_revision");if(value.contains("inbox_id"))throw std::invalid_argument("Captured graph queue admission is unavailable");return {run_request(value,std::move(default_id)),std::move(graph),revision};
 }
+
+inline ConnectionContextRequest context_request(const Json& value,std::string default_id={}){
+    if(!value.is_object()||value.size()>5)throw std::invalid_argument("Invalid context request");for(const auto& item:value.items())if(item.key()!="id"&&item.key()!="model_id"&&item.key()!="expected_head_revision"&&item.key()!="provider_profile_id"&&item.key()!="expected_provider_revision")throw std::invalid_argument("Unknown context request field");
+    if(!value.contains("expected_head_revision")||!value["expected_head_revision"].is_number_integer()||value["expected_head_revision"]<0||value["expected_head_revision"]>9007199254740991LL)throw std::invalid_argument("Invalid observed context head revision");
+    ConnectionContextRequest result;result.id=identifier(value.contains("id")?string_field(value,"id",128):default_id);result.model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};result.head=value["expected_head_revision"].get<std::int64_t>();result.provider=profile_admission(value);return result;
+}
+inline ConnectionSkillSelectionRequest skill_selection(const Json& value){
+    if(!value.is_object()||value.size()!=4||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8||!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Skill changes require exact ids, revision and workspace authority");
+    const auto workspace=workspace_admission(value);if(!workspace)throw std::invalid_argument("Skill changes require workspace authority");ConnectionSkillSelectionRequest result;result.workspace=*workspace;result.revision=value["expected_revision"].get<std::int64_t>();for(const auto& id:value["ids"]){if(!id.is_string())throw std::invalid_argument("Skill ids must be strings");result.ids.push_back(id.get<std::string>());}validate_skill_selections({result.workspace.workspace_id,result.ids,{}});return result;
+}
 }

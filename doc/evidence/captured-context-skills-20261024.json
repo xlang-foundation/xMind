@@ -1,0 +1,142 @@
+{
+  "recordedAt": "2026-10-24T12:13:47.344Z",
+  "native": {
+    "recordedAt": "2026-10-24T12:12:30.409Z",
+    "sourceParent": "e4fb64892c998993df0434666540950c9cdbe531",
+    "sourcePatchSha256": "f183784a6aa620a1e3e8525f98d914f8cdc48d28b44ac3c6e5adf808313bc6e8",
+    "build": {
+      "pid": 15236,
+      "launchedAt": "2026-10-24T12:11:24.812Z",
+      "completedAt": "2026-10-24T12:12:00.313Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "97e62c59e160c2664ec476f0c1c61e14bb0e345c987c95d5df67701cc303944f"
+    },
+    "test": {
+      "pid": 32088,
+      "launchedAt": "2026-10-24T12:12:02.910Z",
+      "completedAt": "2026-10-24T12:12:27.758Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c73869a6e6862ce166e25ecfe458cd065ec302704fb41aff8bb47c89d0914f1f"
+    },
+    "total": 6,
+    "failed": 0,
+    "passed": 6,
+    "seconds": 24.81,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "eeb40d78591e9296f099fb64e9af88e097b32ec9f8c69070304b1b4f26ee5ff8",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "initialIndependentFailure": {
+    "recordedAt": "2026-10-24T12:07:48.586Z",
+    "sourceParent": "e4fb64892c998993df0434666540950c9cdbe531",
+    "sourcePatchSha256": "23568a1456d17718bcedc1f78e1dedfdbc2f287c140b071a70e0774c60925064",
+    "build": {
+      "pid": 34368,
+      "launchedAt": "2026-10-24T12:06:41.894Z",
+      "completedAt": "2026-10-24T12:07:17.888Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "97e62c59e160c2664ec476f0c1c61e14bb0e345c987c95d5df67701cc303944f"
+    },
+    "test": {
+      "pid": 27076,
+      "launchedAt": "2026-10-24T12:07:20.578Z",
+      "completedAt": "2026-10-24T12:07:45.793Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "e53a44c86227f3583f486569403f38ffa2392cf2e876cbc0204fde0590abb3ab"
+    },
+    "total": 6,
+    "failed": 1,
+    "passed": 5,
+    "seconds": 25.18,
+    "projectFiles": 2816,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "eeb40d78591e9296f099fb64e9af88e097b32ec9f8c69070304b1b4f26ee5ff8",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "clients": {
+    "sourceRevision": "e4fb64892c998993df0434666540950c9cdbe531",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 491,
+      "browser": 172
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 491,
+      "passed": 491,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 172,
+      "passed": 172,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "sdk": {
+    "registeredSubobjects": [
+      "Contexts.Open(session, model)",
+      "Contexts.Request(session, request_id, model)",
+      "Contexts.Compact(session, dictionary)",
+      "Skills.List()",
+      "Skills.Open(session)",
+      "Skills.Select(session, dictionary)"
+    ],
+    "transport": "Standard xlang3 registered objects and SDK values; no custom envelope",
+    "sameProcessLifecycle": "Controlled compaction admission/actor, stale head/duplicate/profile and retirement refusal, filtered actual usage and real SQLite manual skill provenance",
+    "independentProcess": "Actual xmind.exe context observations, native skill catalogue, selection/open, stale skill revision and authority refusal; each CLI call opens a fresh binding at its supplied profile revision",
+    "http": "Actual origin-bound captured context/skill reads, revision2 skill clear, invalid query/method, wrong origin, stale mutation and original retained view observation",
+    "notProven": "Positive independent-process actual-provider compaction and rendered context/skill controls are not established by this receipt"
+  },
+  "retainedDiagnostics": [
+    ".agentflow/captured-context-skills-diagnostic.log",
+    ".agentflow/captured-context-skills-stages.log",
+    ".agentflow/captured-context-skills-restored.log"
+  ],
+  "initialFailureCause": "The fixture opened a fresh CLI binding at revision1 after changing the profile to revision2. Retained HTTP handles may read; fresh SDK opens must admit current revision. Corrected test uses revision2.",
+  "otherRetainedFailures": "Initial client fixture used queued instead of pending and counted handshake routes; initial client launcher lacked generated assets before tests. Corrected complete client gate uses a fresh directory.",
+  "controlledModels": "The independent SDK contract retains its two existing controlled model requests; new metadata/selection paths add no requests. Failed diagnostics use fresh isolated fixture namespaces, not replayed user tasks.",
+  "installedVersion": "0.1.69",
+  "installedUnchanged": true,
+  "fullNativeQualification": false,
+  "newPackage": false,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "remaining": "Shared backend inbox dispatcher and adapters, positive rendered context/skill controls and compaction, generic authenticated remote/enrollment, deeper recovery/scheduling and rendered VS Code remain open."
+}

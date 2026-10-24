@@ -219,3 +219,44 @@ Reads retain their original captured backend generation and reject retirement. S
 The authenticated Local routes are GET `/v1/connection-bindings/{binding}/agents`, GET `/agents/{id}`, and GET/POST `/sessions/{session}/agent`, advertised as `local_connection_agents:1`. SDK and HTTP share parsing/projection. After capability negotiation the shared browser/extension client validates returned binding/session identities and refuses downgrade or compatibility replay. Existing compatibility routes delegate to the same native validation and projection.
 
 Focused native4 verifies imported definitions selected/cleared by distinct SDK callers, SQLite restart persistence, stale definition/session/profile refusal, retired objects and origin-bound HTTP. Complete clients488/171 pass. Actual browser selection and clear use captured routes; one controlled model request receives the selected native guidance, and reload retains its original history/selection. The initial view-auth401 and explicit-New failure on an unavailable legacy provider catalogue remain retained. Both UI adapters now respect explicit provider-admission capability during conversation selection. [Exact scopes and retained failures](evidence/captured-agents-20261024.json). This is not full native qualification or an installation. Authenticated remote enrollment, context/skills/inbox adapters, deeper scheduling/recovery and rendered VS Code remain separate requirements.
+
+## Captured context and skills services (2026-10-24)
+
+The binding returns ordinary registered SDK subobjects. Contexts.Open(session,
+model) reads the native context snapshot; Request(session,id,model) observes one
+manual request; Compact(session,request) accepts id and expected_head_revision,
+optional model_id, and provider_profile_id/expected_provider_revision together.
+The backend owns the actor and existing provider/context admission. An empty
+model string selects the native default for SDK read calls.
+
+Skills.List() reads the backend workspace catalogue. Open(session) reads persisted
+selection and manual provenance. Select(session,request) accepts exactly ids,
+expected_revision, expected_workspace_id and expected_workspace_authority_id.
+Native workspace authority, idle ownership and optimistic revision rules apply.
+The SDK transfers ordinary values; no custom serialization or call envelope is
+introduced. Reads retain their captured generation; mutations require the
+admitted connection revision; all objects refuse retirement.
+
+HTTP uses GET /v1/connection-bindings/{binding}/skills and GET/POST
+/sessions/{session}/skills. Context uses GET /sessions/{session}/context,
+GET /context/requests/{id}, and POST /context/compact. Only context reads accept
+the existing strict model_id query. Native health advertises
+local_connection_context:1 and local_connection_skills:1. The shared client
+validates binding/session receipts, refuses downgrade and never retries a
+negotiated refusal on a compatibility route. Existing compatibility encoders and
+admission helpers are shared with these adapters.
+
+Diagnostic CLI methods after xmind ipc --endpoint lrpc:PORT connections are
+skills ID REV; skills-open ID REV SESSION; skills-select ID REV SESSION JSON;
+context-open ID REV SESSION MODEL; context-request ID REV SESSION REQUEST MODEL;
+context-compact ID REV SESSION JSON. Each CLI invocation opens a fresh binding,
+so it must supply the current profile revision. This differs from retaining a
+previously opened object for read-only observation.
+
+Focused native6/6 in24.81s and complete clients491/172 pass. Actual separate SDK
+clients and origin-bound native HTTP verify context observations and persisted
+skill selection/clear; the controlled lifecycle fixture verifies Compact
+admission without actual provider work. Positive independent-provider compaction
+and actual rendered controls remain separate, as do full native qualification
+and installation. The retained failed fixture incorrectly reused revision1 for
+a fresh CLI open after changing the profile to revision2. [Evidence and limits](evidence/captured-context-skills-20261024.json).

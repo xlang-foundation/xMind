@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed69 Native249ce7d6/SDK8c passes full173, clients488/171, named-process browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.69-872f2585-20261024.json; NEVER replay. Remaining goal active.
+- Context/skills pass native6/clients491-172; separate SDK/HTTP included. See doc/evidence/captured-context-skills-20261024.json. Installed69 preserved; full/rendered and remaining goal open. NEVER replay completed roots.
 
 - Prior68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
 

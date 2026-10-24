@@ -40,6 +40,13 @@ struct BoundConnectionMembership {ConnectionBindingIdentity binding;WorkspaceMem
 struct BoundConnectionProviderModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
 struct BoundConnectionProviders {ConnectionBindingIdentity binding;ProviderProfileRuntimeMetadata configuration;std::vector<ProviderProfileRouteMetadata> routes;};
 struct BoundConnectionModels {ConnectionBindingIdentity binding;std::vector<std::string> models;};
+struct BoundConnectionContext {ConnectionBindingIdentity binding;ContextControlSnapshot context;};
+struct BoundConnectionContextRequest {ConnectionBindingIdentity binding;std::string session_id;ContextManualStatus request;};
+struct ConnectionContextRequest {std::string id,model;std::int64_t head=0;std::optional<ProviderProfileAdmission> provider;};
+struct BoundConnectionSkills {ConnectionBindingIdentity binding;WorkspaceSkillCatalogue catalogue;};
+struct BoundConnectionSessionSkills {ConnectionBindingIdentity binding;std::string session_id;WorkspaceSessionSkills skills;};
+struct ConnectionSkillSelectionRequest {std::vector<std::string> ids;std::int64_t revision=0;WorkspaceAdmission workspace;};
+ContextManualStatus request_local_connection_context(RunExecutor&,const std::string&,ConnectionContextRequest);
 struct BoundConnectionAgents {ConnectionBindingIdentity binding;std::vector<AgentDefinitionMetadata> agents;};
 struct BoundConnectionAgentDefinition {ConnectionBindingIdentity binding;AgentDefinition agent;};
 struct BoundConnectionSessionAgent {ConnectionBindingIdentity binding;std::string session_id;SessionAgentState state;};
@@ -115,6 +122,12 @@ class CapturedLocalConnection {
 public:
     ConnectionBindingIdentity identity()const;
     BoundConnectionModels models()const;
+    BoundConnectionContext context(const std::string& session,const std::string& model)const;
+    BoundConnectionContextRequest context_request(const std::string& session,const std::string& id,const std::string& model)const;
+    BoundConnectionContextRequest compact_context(const std::string& session,ConnectionContextRequest request)const;
+    BoundConnectionSkills skills()const;
+    BoundConnectionSessionSkills session_skills(const std::string& session)const;
+    BoundConnectionSessionSkills select_session_skills(const std::string& session,ConnectionSkillSelectionRequest request)const;
     BoundConnectionAgents agents()const;
     BoundConnectionAgentDefinition agent_definition(const std::string& id)const;
     BoundConnectionSessionAgent session_agent(const std::string& session)const;

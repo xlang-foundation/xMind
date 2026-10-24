@@ -84,6 +84,8 @@ class BackendClient {
   #connectionWorkspaceSupported=false;
   #connectionWorkspaceFilesSupported=false;
   #connectionModelSelectionSupported=false;
+  #connectionContextSupported=false;
+  #connectionSkillsSupported=false;
   #connectionAgentsSupported=false;
   #connectionGraphControlSupported=false;
   #connectionOperationsSupported=false;
@@ -164,6 +166,10 @@ class BackendClient {
     else if(this.#connectionTreeStreamSupported)throw new Error("The backend tree stream protocol changed. Reconnect before observing events.");
     if(health&&Object.hasOwn(health,"local_connection_graph_control")){if(health.local_connection_graph_control!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured graph control protocol.");this.#connectionGraphControlSupported=true;}
     else if(this.#connectionGraphControlSupported)throw new Error("The backend graph control protocol changed. Reconnect before continuing graphs.");
+    if(health&&Object.hasOwn(health,"local_connection_context")){if(health.local_connection_context!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured context protocol.");this.#connectionContextSupported=true;}
+    else if(this.#connectionContextSupported)throw new Error("The backend context protocol changed. Reconnect before inspecting context.");
+    if(health&&Object.hasOwn(health,"local_connection_skills")){if(health.local_connection_skills!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured skill protocol.");this.#connectionSkillsSupported=true;}
+    else if(this.#connectionSkillsSupported)throw new Error("The backend skill protocol changed. Reconnect before selecting skills.");
     if(health&&Object.hasOwn(health,"local_connection_agents")){if(health.local_connection_agents!==1||!this.#connectionAdmissionSupported)throw new Error("Unsupported captured agent protocol.");this.#connectionAgentsSupported=true;}
     else if(this.#connectionAgentsSupported)throw new Error("The backend agent protocol changed. Reconnect before selecting agents.");
     return health;
@@ -281,17 +287,25 @@ class BackendClient {
     executionIdentity(root);planPreconditions(expected_revision,expected_state_sequence);
     return validatePlanOwner(await this.request(`/v1/runs/${root}/plan/resume`,{expected_revision,expected_state_sequence}),root);
   }
+  async #contextControl(session,suffix,model,body){
+    const path='/sessions/'+encodeURIComponent(session)+'/context'+suffix+(model?'?model_id='+encodeURIComponent(model):'');
+    if(!this.#connectionContextSupported)return this.request('/v1'+path,body);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured context connection changed.');
+    const value=await this.request('/v1/connection-bindings/'+capture.id+path,body);if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured context connection changed.');
+    exactFields(value,suffix?['binding','session_id','request']:['binding','context']);validateConnectionBindingIdentity(value.binding);
+    if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key])||(suffix?value.session_id:value.context?.session_id)!==session)throw new Error('Context response belongs to another connection or session.');return suffix?value.request:value.context;
+  }
   async context(session,model) {
     executionIdentity(session);if(model!==undefined)profileIdentity(model);
-    return validateContextObservation(await this.request(`/v1/sessions/${session}/context${model?`?model_id=${encodeURIComponent(model)}`:''}`),session,model);
+    return validateContextObservation(await this.#contextControl(session,'',model),session,model);
   }
   async contextRequest(session,id,model) {
     executionIdentity(session);executionIdentity(id);if(model!==undefined)profileIdentity(model);
-    return validateContextRequest(await this.request(`/v1/sessions/${session}/context/requests/${id}${model?`?model_id=${encodeURIComponent(model)}`:''}`),id);
+    return validateContextRequest(await this.#contextControl(session,'/requests/'+id,model),id);
   }
   async compactContext(session,id,expected_head_revision,model,binding) {
     executionIdentity(session);executionIdentity(id);planInteger(expected_head_revision);if(model!==undefined)profileIdentity(model);
-    return validateContextRequest(await this.request(`/v1/sessions/${session}/context/compact`,{id,expected_head_revision,...(model?{model_id:model}:{}),...profileBindingFields(binding)}),id);
+    return validateContextRequest(await this.#contextControl(session,'/compact',undefined,{id,expected_head_revision,...(model?{model_id:model}:{}),...profileBindingFields(binding)}),id);
   }
   async #controlGraph(root,path,body,resume=false){
     executionIdentity(root);const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error("The captured graph control connection changed.");
@@ -393,7 +407,13 @@ class BackendClient {
   sessions() { return this.request('/v1/sessions'); }
   deleteSession(id) { executionIdentity(id);return this.request(`/v1/sessions/${encodeURIComponent(id)}`,undefined,15000,'DELETE'); }
   activeSessions() { return this.request('/v1/sessions/active'); }
-  skills() { return this.request('/v1/workspace/skills'); }
+  async #skillControl(session,body){
+    if(!this.#connectionSkillsSupported)return this.request(session?'/v1/sessions/'+encodeURIComponent(session)+'/skills':'/v1/workspace/skills',body);
+    const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured skill connection changed.');
+    const value=await this.request('/v1/connection-bindings/'+capture.id+(session?'/sessions/'+encodeURIComponent(session)+'/skills':'/skills'),body);if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured skill connection changed.');
+    const key=session?'skills':'catalogue';exactFields(value,['binding',key]);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(field=>value.binding[field]!==capture.identity[field])||(session&&value.skills?.session_id!==session))throw new Error('Skill response belongs to another connection or session.');return value[key];
+  }
+  async skills() { const value=await this.#skillControl();return this.#connectionSkillsSupported?validateSkillCatalogue(value):value; }
   async commands() {
     if(!this.#connectionCommandsSupported)return this.request('/v1/workspace/commands');const capture=await this.#captureConnection();if(this.#connectionClosed||this.baseUrl!==capture.origin)throw new Error('The captured command connection changed.');const value=await this.request('/v1/connection-bindings/'+capture.id+'/commands');exactFields(value,['binding','commands','workspace_id','authority_id']);validateConnectionBindingIdentity(value.binding);if(Object.keys(capture.identity).some(key=>value.binding[key]!==capture.identity[key]))throw new Error('Commands belong to another connection');if(!Array.isArray(value.commands)||typeof value.workspace_id!=='string'||!value.workspace_id||typeof value.authority_id!=='string'||!/^[a-f0-9]{32}$/.test(value.authority_id))throw new Error('Invalid command catalog');return {commands:value.commands,workspace_id:value.workspace_id,authority_id:value.authority_id};
   }
@@ -409,11 +429,11 @@ class BackendClient {
     const workspace=await this.workspace();if(!workspace.configured)throw new Error('Workspace commands require an opened workspace.');
     const value=await this.command(sessionId,commandId,args,modelId,binding,workspace,graph);validateRunDTO(value);return value;
   }
-  async sessionSkills(id) { executionIdentity(id);return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`),id); }
+  async sessionSkills(id) { executionIdentity(id);return validateSessionSkills(await this.#skillControl(id),id); }
   async replaceSessionSkills(id,ids,observed) {
     executionIdentity(id);skillIds(ids);validateSessionSkills(observed,id);
     if(!observed.editable)throw new Error('Wait for this conversation to become idle before changing skills.');
-    return validateSessionSkills(await this.request(`/v1/sessions/${encodeURIComponent(id)}/skills`,{ids,expected_revision:observed.revision,expected_workspace_id:observed.workspace_id,expected_workspace_authority_id:observed.authority_id}),id);
+    return validateSessionSkills(await this.#skillControl(id,{ids,expected_revision:observed.revision,expected_workspace_id:observed.workspace_id,expected_workspace_authority_id:observed.authority_id}),id);
   }
   async #agentRequest(session,body){
     if(!this.#connectionAgentsSupported)return this.request(session?'/v1/sessions/'+encodeURIComponent(session)+'/agent':'/v1/agents',body);

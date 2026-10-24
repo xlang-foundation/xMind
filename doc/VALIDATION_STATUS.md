@@ -1,5 +1,9 @@
 ## Captured named-agent SDK/HTTP and rendered selection pass — 2026-10-24
 
+## Captured context/skills development checkpoint (2026-10-24)
+
+Nativeeeb40d78 passes6/6 focused contracts in24.81s with full source/SDK/library/dependency/binary closure unchanged. Complete clients491/172 pass with71 source inputs/18 assets unchanged and zero provider requests. Standard Contexts and Skills SDK subobjects, strict native captured HTTP/gateway routes and shared browser/extension routing now retain binding/session/revisions without fallback. Separate xmind.exe clients verify context observations and actual SQLite skill selection; origin-bound HTTP verifies retained reads/clearing/refusals. Positive Compact dispatch is controlled same-process SDK evidence; actual provider compaction/rendered controls remain separate. [Receipt and retained failures](evidence/captured-context-skills-20261024.json), [terminal log](evidence/captured-context-skills-fixed-20261024-ctest.log). Installed69 remains unchanged; no new full-suite/package/install claim. Shared inbox dispatch, remote/enrollment, deeper recovery/scheduling and rendered VS Code remain open.
+
 ## Installed69 preserved delivery checkpoint (2026-10-24)
 
 Installed0.1.69 uses Native249ce7d6/source872f2585 and SDK8c7972d1. All2442 installed files and2398 runtime files match the qualified package; package metadata/installer manifest and other extension registry entries verify. Five protected roots retain exact file sets/hashes. Exact68 backup is retained. [Installed receipt](evidence/installed-0.1.69-872f2585-20261024.json). No visible window was requested.

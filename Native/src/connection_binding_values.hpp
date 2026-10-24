@@ -3,6 +3,31 @@
 #include "nlohmann/json.hpp"
 namespace agentflow::connection_values {
 inline nlohmann::json identity(const ConnectionBindingIdentity& value){return {{"connection_id",value.connection_id},{"profile_revision",value.profile_revision},{"server_id",value.server_id},{"backend_generation",value.backend_generation},{"protocol_version",value.protocol_version},{"kind","local"}};}
+inline nlohmann::json public_usage(const nlohmann::json& value){
+    nlohmann::json result=nlohmann::json::object();if(!value.is_object())return result;
+    for(const auto* field:{"input_tokens","output_tokens","total_tokens","prompt_tokens","completion_tokens","cached_tokens","reasoning_tokens","cache_read_input_tokens","cache_creation_input_tokens","promptTokenCount","candidatesTokenCount","totalTokenCount","thoughtsTokenCount","cachedContentTokenCount"})if(value.contains(field)&&value[field].is_number_integer()&&value[field]>=0&&value[field]<=9007199254740991)result[field]=value[field];
+    for(const auto* field:{"input_tokens_details","output_tokens_details","prompt_tokens_details","completion_tokens_details"})if(value.contains(field)&&value[field].is_object()){
+        auto details=nlohmann::json::object();for(const auto* key:{"cached_tokens","reasoning_tokens","audio_tokens","accepted_prediction_tokens","rejected_prediction_tokens"})if(value[field].contains(key)&&value[field][key].is_number_integer()&&value[field][key]>=0&&value[field][key]<=9007199254740991)details[key]=value[field][key];if(!details.empty())result[field]=std::move(details);
+    }return result;
+}
+inline nlohmann::json context_record(const ContextControlSnapshot& value){
+    nlohmann::json result={{"session_id",value.session_id},{"model_id",value.model_id},{"enabled",value.enabled},
+        {"automatic",value.automatic},{"head_revision",value.head_revision},{"source_watermark",value.source_watermark},
+        {"manual",nullptr},{"checkpoint",nullptr}};
+    if(value.manual)result["manual"]={{"id",value.manual->id},{"state",value.manual->state}};
+    if(value.checkpoint){const auto& c=*value.checkpoint;const auto supplied=nlohmann::json::parse(c.actual_usage_json);
+        result["checkpoint"]={{"id",c.id},{"provider_elapsed_ms",c.provider_elapsed_ms},
+            {"preparation_elapsed_ms",c.preparation_elapsed_ms?nlohmann::json(*c.preparation_elapsed_ms):nlohmann::json(nullptr)},
+            {"usage",supplied.is_null()?nlohmann::json(nullptr):public_usage(supplied)}};
+    }
+    return result;
+}
+inline nlohmann::json skill_catalogue(const WorkspaceSkillCatalogue& value){auto result=nlohmann::json::parse(value.catalogue_json);result["workspace_id"]=value.workspace.workspace_id;result["authority_id"]=value.workspace.authority_id;return result;}
+inline nlohmann::json session_skills(const std::string& session,const WorkspaceSessionSkills& value){return {{"session_id",session},{"workspace_id",value.workspace.workspace_id},{"authority_id",value.workspace.authority_id},{"revision",value.state.revision},{"ids",value.state.selections.ids},{"manual_ids",value.state.selections.manual_ids},{"editable",value.state.editable}};}
+inline nlohmann::json bound(const BoundConnectionContext& value){return {{"binding",identity(value.binding)},{"context",context_record(value.context)}};}
+inline nlohmann::json bound(const BoundConnectionContextRequest& value){return {{"binding",identity(value.binding)},{"session_id",value.session_id},{"request",{{"id",value.request.id},{"state",value.request.state}}}};}
+inline nlohmann::json bound(const BoundConnectionSkills& value){return {{"binding",identity(value.binding)},{"catalogue",skill_catalogue(value.catalogue)}};}
+inline nlohmann::json bound(const BoundConnectionSessionSkills& value){return {{"binding",identity(value.binding)},{"skills",session_skills(value.session_id,value.skills)}};}
 inline nlohmann::json agent_metadata(const AgentDefinitionMetadata& value){auto permissions=nlohmann::json::array();for(const auto& rule:value.permissions)permissions.push_back({{"action",rule.action},{"resource",rule.resource},{"effect",rule.effect}});nlohmann::json result={{"id",value.id},{"revision",value.revision},{"model_id",value.model_id},{"name",value.name.empty()?value.id:value.name},{"description",value.description},{"mode",value.mode},{"hidden",value.hidden},{"default",value.is_default},{"permissions",std::move(permissions)}};if(!value.placement.empty())result["placement"]=value.placement;return result;}
 inline nlohmann::json agent_definition(const AgentDefinition& value){auto permissions=nlohmann::json::array();for(const auto& rule:value.permissions)permissions.push_back({{"action",rule.action},{"resource",rule.resource},{"effect",rule.effect}});nlohmann::json result={{"id",value.id},{"name",value.name.empty()?value.id:value.name},{"description",value.description},{"revision",value.revision},{"model_id",value.model_id.empty()?nlohmann::json(nullptr):nlohmann::json(value.model_id)},{"instructions",value.instructions},{"tools",value.tools?nlohmann::json(*value.tools):nlohmann::json(nullptr)},{"permissions",std::move(permissions)},{"mode",value.mode},{"hidden",value.hidden},{"default",value.is_default}};if(!value.placement.empty())result["placement"]=value.placement;return result;}
 inline nlohmann::json session_agent(const std::string& session,const SessionAgentState& value){const auto selected=value.selected?agent_metadata({value.selected->id,value.selected->revision,value.selected->model_id,value.selected->name,value.selected->description,value.selected->mode,value.selected->hidden,value.selected->is_default,value.selected->permissions,value.selected->placement}):nlohmann::json(nullptr);return {{"session_id",session},{"revision",value.revision},{"editable",value.editable},{"selected",selected}};}

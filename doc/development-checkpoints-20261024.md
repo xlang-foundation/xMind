@@ -66,3 +66,7 @@ frozen file sets unchanged ([receipt](../doc/evidence/native-delivery-eafe1b2e-f
 Rendered VS Code coding, remaining general captured APIs, authenticated
 remote/enrollment and deeper scheduling/recovery remain open. Private Nexus
 server/database/scheduler implementation remains excluded.
+
+## Installed69 guidance before context/skills checkpoint (verbatim)
+
+- Installed69 Native249ce7d6/SDK8c passes full173, clients488/171, named-process browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.69-872f2585-20261024.json; NEVER replay. Remaining goal active.

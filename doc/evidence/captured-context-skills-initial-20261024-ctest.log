@@ -1,0 +1,48 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  28: native_xmind_ipc_lifetime_contract
+1/6 Test  #28: native_xmind_ipc_lifetime_contract .........   Passed    0.33 sec
+    Start  29: native_xmind_ipc_api_contract
+2/6 Test  #29: native_xmind_ipc_api_contract ..............***Failed    4.50 sec
+Retained root API fixture: D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-root-api-NfZm5x; backend output: Provider credential reference: provider-071a037c74b3dcf73c2dd9ff71806fbe
+xMind API listening on lrpc:34069
+xMind Server listening on http://127.0.0.1:55162
+; 
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe ipc --endpoint lrpc:34069 connections skills-open local 1 sdk-agent-session
+xMind IPC call failed: conflict
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: 1,
+  killed: false,
+  signal: null,
+  cmd: 'D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe ipc --endpoint lrpc:34069 connections skills-open local 1 sdk-agent-session',
+  stdout: '',
+  stderr: 'xMind IPC call failed: conflict\r\n'
+}
+
+Node.js v22.19.0
+
+    Start  30: native_context_control_contract
+3/6 Test  #30: native_context_control_contract ............   Passed    4.08 sec
+    Start 105: native_skill_catalogue_contract
+4/6 Test #105: native_skill_catalogue_contract ............   Passed    5.39 sec
+    Start 130: native_agent_http_contract
+5/6 Test #130: native_agent_http_contract .................   Passed    9.33 sec
+    Start 166: native_connection_profiles_http_contract
+6/6 Test #166: native_connection_profiles_http_contract ...   Passed    1.54 sec
+
+83% tests passed, 1 tests failed out of 6
+
+Total Test time (real) =  25.18 sec
+
+The following tests FAILED:
+	 29 - native_xmind_ipc_api_contract (Failed)
+Errors while running CTest

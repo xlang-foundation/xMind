@@ -88,10 +88,7 @@ Json body(const Request& request,std::initializer_list<const char*> allowed) {
     return value;
 }
 using connection_input::string_field;
-Json session_skill_metadata(const std::string& session,const WorkspaceSessionSkills& value){
-    return {{"session_id",session},{"workspace_id",value.workspace.workspace_id},{"authority_id",value.workspace.authority_id},
-        {"revision",value.state.revision},{"ids",value.state.selections.ids},{"manual_ids",value.state.selections.manual_ids},{"editable",value.state.editable}};
-}
+Json session_skill_metadata(const std::string& session,const WorkspaceSessionSkills& value){return connection_values::session_skills(session,value);}
 Json agent_metadata(const AgentDefinitionMetadata& value){return connection_values::agent_metadata(value);}
 Json session_agent_metadata(const std::string& session,const SessionAgentState& value){return connection_values::session_agent(session,value);}
 Json session_model_metadata(const std::string& session,const SessionModelState& value){return connection_values::session_model(session,value);}
@@ -169,13 +166,7 @@ Json encode(const SessionInboxItem& value){Json result={{"id",value.id},{"sessio
 Json encode(const Run& value) {Json result={{"id",value.id},{"session_id",value.session_id},{"state",to_string(value.state)},
     {"parent_id",value.parent_id},{"node_id",value.node_id},{"graph_root",value.graph_root}};if(!value.provider_context_json.empty())result["provider_context"]=Json::parse(value.provider_context_json);return result;}
 Json encode(const OwnedChildRecord& value){Json result={{"run",encode(value.run)},{"kind",value.kind},{"batch_id",value.batch_id},{"task_id",value.task_id},{"preset_id",value.preset_id},{"preset_revision",value.preset_revision}};if(value.kind=="dynamic_agent"||value.kind=="dynamic_tool"){result["plan_id"]=value.plan_id;result["node_label"]=value.node_label;result["claim_id"]=value.claim_id;result["definition_revision"]=value.definition_revision;result["claim_revision"]=value.claim_revision;}return result;}
-Json public_usage(const Json& value){
-    Json result=Json::object();if(!value.is_object())return result;
-    for(const auto* field:{"input_tokens","output_tokens","total_tokens","prompt_tokens","completion_tokens","cached_tokens","reasoning_tokens","cache_read_input_tokens","cache_creation_input_tokens","promptTokenCount","candidatesTokenCount","totalTokenCount","thoughtsTokenCount","cachedContentTokenCount"})if(value.contains(field)&&value[field].is_number_integer()&&value[field]>=0&&value[field]<=9007199254740991)result[field]=value[field];
-    for(const auto* field:{"input_tokens_details","output_tokens_details","prompt_tokens_details","completion_tokens_details"})if(value.contains(field)&&value[field].is_object()){
-        auto details=Json::object();for(const auto* key:{"cached_tokens","reasoning_tokens","audio_tokens","accepted_prediction_tokens","rejected_prediction_tokens"})if(value[field].contains(key)&&value[field][key].is_number_integer()&&value[field][key]>=0&&value[field][key]<=9007199254740991)details[key]=value[field][key];if(!details.empty())result[field]=std::move(details);
-    }return result;
-}
+Json public_usage(const Json& value){return connection_values::public_usage(value);}
 Json public_response(const std::string& actual){
     const auto source=Json::parse(actual);Json result=Json::object();
     if(source.contains("model")&&source["model"].is_string()&&source["model"].get_ref<const std::string&>().size()<=256)result["model"]=source["model"];
@@ -183,18 +174,7 @@ Json public_response(const std::string& actual){
     for(const auto* field:{"elapsed_ms","first_token_ms"})if(source.contains(field)&&source[field].is_number_integer()&&source[field]>=0&&source[field]<=9007199254740991)result[field]=source[field];
     return result;
 }
-Json context_record(const ContextControlSnapshot& value){
-    Json result={{"session_id",value.session_id},{"model_id",value.model_id},{"enabled",value.enabled},
-        {"automatic",value.automatic},{"head_revision",value.head_revision},{"source_watermark",value.source_watermark},
-        {"manual",nullptr},{"checkpoint",nullptr}};
-    if(value.manual)result["manual"]={{"id",value.manual->id},{"state",value.manual->state}};
-    if(value.checkpoint){const auto& c=*value.checkpoint;const auto supplied=Json::parse(c.actual_usage_json);
-        result["checkpoint"]={{"id",c.id},{"provider_elapsed_ms",c.provider_elapsed_ms},
-            {"preparation_elapsed_ms",c.preparation_elapsed_ms?Json(*c.preparation_elapsed_ms):Json(nullptr)},
-            {"usage",supplied.is_null()?Json(nullptr):public_usage(supplied)}};
-    }
-    return result;
-}
+Json context_record(const ContextControlSnapshot& value){return connection_values::context_record(value);}
 Json public_plan(const DynamicPlanRecord& value){
     const auto decision=inspect_dynamic_plan(value);Json result={{"id",value.id},{"root_run_id",value.root_run_id},{"revision",value.revision},{"state_sequence",value.state_sequence},{"state",value.state},{"ready",decision.ready},{"blocked",decision.blocked},{"claimed",decision.claimed},{"waiting_human",decision.waiting_human},{"finished",decision.finished},{"report_ready",decision.report_ready},{"halted",decision.halted},{"retired_labels",value.retired_labels},{"planned_children_reserved",value.planned_children_reserved},{"planned_humans_reserved",value.planned_humans_reserved},{"humans_published",value.humans_published},{"nodes",Json::array()}};
     auto state=[](DynamicNodeState value){switch(value){case DynamicNodeState::pending:return "pending";case DynamicNodeState::blocked:return "blocked";case DynamicNodeState::claimed:return "claimed";case DynamicNodeState::waiting_human:return "waiting_human";case DynamicNodeState::settled:return "settled";case DynamicNodeState::skipped:return "skipped";case DynamicNodeState::cancelled:return "cancelled";case DynamicNodeState::uncertain:return "uncertain";}throw DatabaseError("Invalid actual plan node state");};
@@ -529,8 +509,9 @@ struct HttpServer::Impl {
             const bool view_session_delete=request.method=="DELETE"&&std::regex_match(request.path,view_session_delete_route);
             const bool view_permission_grant_delete=request.method=="DELETE"&&std::regex_match(request.path,std::regex(R"(^/v1/(connection-bindings/[0-9a-f]{32}/)?sessions/[A-Za-z0-9_-]+/permission-grants/[A-Za-z0-9_-]+$)"));
             const bool view_session_fork=request.method=="POST"&&std::regex_match(request.path,session_fork_route);
+            const bool view_context_skills=(request.method=="GET"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/(skills|sessions/[A-Za-z0-9_-]+/(skills|context(/requests/[A-Za-z0-9_-]+)?))$)")))||(request.method=="POST"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/(skills|context/compact)$)")));
             const bool view_agents=(request.method=="GET"&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/agents(/[A-Za-z0-9_.-]{1,64})?$)")))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,std::regex(R"(^/v1/connection-bindings/[0-9a-f]{32}/sessions/[A-Za-z0-9_-]+/agent$)")));
-            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||nested_graph_input||view_agents||(stream&&request.method=="GET")||view_session_delete||view_binding_delete||view_permission_grant_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
+            if(!authenticated && request.get_header_value_count("Authorization")==1 && supplied.starts_with("View ") && request.get_header_value_count("X-XMind-View-Origin")==1 && ((request.method=="GET"&&std::regex_match(request.path,workspace_find_route))||((request.method=="GET"||request.method=="POST")&&std::regex_match(request.path,run_mcp_input_route))||mcp_authorized||nested_graph_input||view_agents||view_context_skills||(stream&&request.method=="GET")||view_session_delete||view_binding_delete||view_permission_grant_delete||view_session_fork||(!stream&&(std::regex_match(request.path,view_route)||std::regex_match(request.path,session_model_route)||request.path=="/v1/vcs/status") && ((request.method=="GET"&&!std::regex_match(request.path,plan_write_route))||(request.method=="POST"&&!std::regex_match(request.path,owned_read_route)))))){
                 try{authenticated=view_sessions->accepts(std::string_view(supplied).substr(5),request.get_header_value("X-XMind-View-Origin"));}
                 catch(const std::invalid_argument&){}
                 catch(...){reply(response,{{"detail","View authentication unavailable"}},503);return httplib::Server::HandlerResponse::Handled;}
@@ -674,7 +655,7 @@ struct HttpServer::Impl {
             auto health=Json{{"status",executor && !executor->healthy()?"degraded":"ok"},{"api_version","v1"},{"core","C++"},{"storage","xlang3-sqlite"},{"session_rename",true},{"session_fork",true},{"active_session_map",true},{"session_inbox_dispatch",executor!=nullptr},{ "skill_controls",executor&&executor->supports_session_skills()},{"agent_selection",executor&&executor->supports_agent_selection()},{"session_model_selection",executor&&executor->supports_session_models()},{"file_edit_proposals",executor&&executor->supports_file_edit_proposals()},{"backend_owner_control",owner_control!=nullptr},{"agent_execution",owner_admission_open() && executor && executor->available()},{"model",models.empty()?"":models.front()},{"provider_profile_admission",executor&&executor->supports_profile_admission()},{"graph_provider_profile_admission",graphs&&graphs->supports_graph_profile_admission()},{"graph_tree_human_input",graphs&&graphs->supports_graph_tree_human_input()},{"owned_child_observation",true},{"agent_delegation",executor&&executor->supports_delegation()},{"agent_planning",executor&&executor->supports_dynamic_planning()},{"context_controls",executor&&executor->supports_context()},{"mcp_elicitation",true}};
 #if defined(_WIN32)
             health["local_connection_admission"]=1;
-            health["local_connection_operations"]=1;health["local_connection_permission_catalog"]=1;health["local_connection_permission_reply"]=1;health["local_connection_tree_stream"]=1;health["local_connection_run_stream"]=1;health["local_connection_models"]=1;health["local_connection_agents"]=1;health["local_connection_providers"]=1;health["local_connection_provider_setup"]=1;health["local_connection_model_selection"]=1;health["local_connection_commands"]=1;health["local_connection_workspace"]=1;health["local_connection_workspace_files"]=1;
+            health["local_connection_operations"]=1;health["local_connection_permission_catalog"]=1;health["local_connection_permission_reply"]=1;health["local_connection_tree_stream"]=1;health["local_connection_run_stream"]=1;health["local_connection_models"]=1;health["local_connection_agents"]=1;health["local_connection_context"]=1;health["local_connection_skills"]=1;health["local_connection_providers"]=1;health["local_connection_provider_setup"]=1;health["local_connection_model_selection"]=1;health["local_connection_commands"]=1;health["local_connection_workspace"]=1;health["local_connection_workspace_files"]=1;
             if(graphs){health["local_connection_graph_admission"]=1;health["local_connection_graph_read"]=1;health["local_connection_graph_children"]=1;health["local_connection_graph_control"]=1;}health["local_connection_history"]=1;health["local_connection_child_history"]=1;
 #endif
             reply(response,health);
@@ -762,6 +743,12 @@ struct HttpServer::Impl {
         server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/graph-runs)",guard_errors([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Graph admission does not accept query parameters");const auto result=connection_handle(request)->start_graph(connection_input::graph_request(body(request,{"id","session_id","graph_id","graph_revision","prompt","files","model_id","provider_profile_id","expected_provider_revision","expected_workspace_id","expected_workspace_authority_id","expected_workspace_revision"}),new_id()));reply(response,connection_values::bound(result),202);
         }));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/skills)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Skill catalogue does not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->skills()));}));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/skills)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session skills do not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->session_skills(identifier(request.matches[2]))));}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/skills)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid session skill request target or size");const auto value=body(request,{"ids","expected_revision","expected_workspace_id","expected_workspace_authority_id"});reply(response,connection_values::bound(connection_handle(request)->select_session_skills(identifier(request.matches[2]),connection_input::skill_selection(value))));}));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/context)",guard_errors([this](const Request& request,Response& response){const auto model=strict_context_model_query(request);reply(response,connection_values::bound(connection_handle(request)->context(identifier(request.matches[2]),model)));}));
+        server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/context/requests/([A-Za-z0-9_-]+))",guard_errors([this](const Request& request,Response& response){const auto model=strict_context_model_query(request);reply(response,connection_values::bound(connection_handle(request)->context_request(identifier(request.matches[2]),identifier(request.matches[3]),model)));}));
+        server.Post(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/context/compact)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>16384)throw std::invalid_argument("Context request exceeds limits");const auto value=body(request,{"id","model_id","expected_head_revision","provider_profile_id","expected_provider_revision"});reply(response,connection_values::bound(connection_handle(request)->compact_context(identifier(request.matches[2]),connection_input::context_request(value,new_id()))),202);}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/agents)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent catalogue does not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->agents()));}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/agents/([A-Za-z0-9_.-]{1,64}))",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Agent definition does not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->agent_definition(request.matches[2].str())));}));
         server.Get(R"(/v1/connection-bindings/([0-9a-f]{32})/sessions/([A-Za-z0-9_-]+)/agent)",guard_errors([this](const Request& request,Response& response){if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Session agent selection does not accept query parameters");reply(response,connection_values::bound(connection_handle(request)->session_agent(identifier(request.matches[2]))));}));
@@ -965,9 +952,7 @@ struct HttpServer::Impl {
         server.Get("/v1/workspace/skills",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Skill catalogue does not accept query parameters");
             if(!executor||!executor->supports_skill_catalogue())throw RunUnavailable("Workspace skill inspection is unavailable");
-            const auto actual=executor->workspace_skills();auto catalogue=Json::parse(actual.catalogue_json);
-            catalogue["workspace_id"]=actual.workspace.workspace_id;catalogue["authority_id"]=actual.workspace.authority_id;
-            reply(response,catalogue);
+            reply(response,connection_values::skill_catalogue(executor->workspace_skills()));
         }));
         server.Get("/v1/workspace/commands",guarded([this](const Request& request,Response& response){
             if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Command catalogue does not accept query parameters");
@@ -994,9 +979,7 @@ struct HttpServer::Impl {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>8192)throw std::invalid_argument("Invalid session skill request target or size");
             if(!executor||!executor->supports_session_skills())throw RunUnavailable("Session skill controls are unavailable");
             const auto value=body(request,{"ids","expected_revision","expected_workspace_id","expected_workspace_authority_id"});
-            const auto binding=workspace_admission(value);if(!binding||value.size()!=4||!value.contains("ids")||!value["ids"].is_array()||value["ids"].size()>8||!value.contains("expected_revision")||!value["expected_revision"].is_number_integer()||value["expected_revision"]<0||value["expected_revision"]>=9007199254740991LL)throw std::invalid_argument("Skill changes require exact ids, revision and workspace authority");
-            std::vector<std::string> ids;for(const auto& id:value["ids"]){if(!id.is_string())throw std::invalid_argument("Skill ids must be strings");ids.push_back(id.get<std::string>());}
-            const auto session=request.matches[1].str();reply(response,session_skill_metadata(session,executor->replace_session_skills(session,std::move(ids),value["expected_revision"].get<std::int64_t>(),*binding)));
+            auto selection=connection_input::skill_selection(value);const auto session=request.matches[1].str();reply(response,session_skill_metadata(session,executor->replace_session_skills(session,std::move(selection.ids),selection.revision,std::move(selection.workspace))));
         }));
         server.Get("/v1/agent/planning",guarded([this](const Request& request,Response& response){
             if(!request.params.empty())throw std::invalid_argument("Planning metadata does not accept query parameters");
@@ -1301,14 +1284,7 @@ struct HttpServer::Impl {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>16384)throw std::invalid_argument("Context request exceeds limits");
             if(!executor||!executor->supports_context())throw RunUnavailable("This provider has no registered context controls");
             const auto value=body(request,{"id","model_id","expected_head_revision","provider_profile_id","expected_provider_revision"});
-            if(!value.contains("expected_head_revision")||!value["expected_head_revision"].is_number_integer()||value["expected_head_revision"]<0||value["expected_head_revision"]>9007199254740991)throw std::invalid_argument("Invalid observed context head revision");
-            const auto binding=profile_admission(value);if(executor->supports_profile_admission()&&!binding)throw Conflict("Capture the active provider profile before requesting compaction");
-            if(binding&&!executor->supports_profile_admission())throw std::invalid_argument("Context provider profile admission is unavailable");
-            const auto session=identifier(request.matches[1]);const auto id=value.contains("id")?identifier(string_field(value,"id",128)):new_id();
-            const auto model=value.contains("model_id")?string_field(value,"model_id",256):std::string{};
-            const auto head=value["expected_head_revision"].get<std::int64_t>();
-            const auto admitted=binding?executor->request_context_profile(session,id,"local-owner",head,model,*binding):executor->request_context(session,id,"local-owner",head,model);
-            reply(response,{{"id",admitted.id},{"state",admitted.state}},202);
+            const auto admitted=request_local_connection_context(*executor,identifier(request.matches[1]),connection_input::context_request(value,new_id()));reply(response,{{"id",admitted.id},{"state",admitted.state}},202);
         }));
         server.Post(R"(/v1/sessions/([A-Za-z0-9_-]+)/messages)",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"role","data"});const auto role=string_field(value,"role",16);
