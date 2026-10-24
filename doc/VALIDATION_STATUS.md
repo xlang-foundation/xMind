@@ -1,5 +1,13 @@
 ## Captured named-agent SDK/HTTP and rendered selection pass — 2026-10-24
 
+## Candidate69 complete qualification and coding (2026-10-24)
+
+Source872f2585/Native249ce7d6 passes all173 native contracts in729.35s with the complete2816 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/137 binary closure unchanged. [Full receipt](evidence/native-delivery-872f2585-full-20261024.json), [terminal log](evidence/native-delivery-872f2585-full-ctest.log), [inventory](evidence/native-delivery-872f2585-full-inventory.json). The corrected direct execution catalogue retains process placement.
+
+Candidate0.1.69 has2443 archive entries and2398 runtime files; clients488/171 retain their unchanged-source scope. Fresh packaged CLI session1afad68c51456bcf4d488511d2db6289/root0a29bd1b26dddf7d9cb1592d5137909d completes is-zero read/edit/Node4 with two approvals, four controlled calls and eight history messages. Actual rendered browser sessionffc0e5b3c684426a8f1a6b8a37a80f18/root174fa964134e4a6084509ba7a68cb607 selects coding.process, sends once, completes native read/edit/Node4 with two scoped approvals and four controlled calls, then restores exact eight-message history and selected process agent after reload. The actual system request carries the named guidance; the worker retirement is observed. Temporary tab and exact owned backend exit. NEVER replay either task.
+
+Managed68-to69 handoff session09e20abeefb86443fbf5887968a356e6/roote583654dee894960f68ba68b674d6e9d passes paused-upgrade refusal, original continuation once, idle handoff and history preservation with zero model calls. NEVER replay. [Candidate receipts](evidence/candidate-0.1.69-qualified-coding-20261024.json), [actual browser after reload](evidence/candidate-0.1.69-browser-20261024.png). Installation and protected state verification have separate pending evidence. Rendered VS Code, remaining captured context/skills/inbox, authenticated remote/enrollment, deeper recovery/scheduling and rendered setup/commands remain open.
+
 ## Process-agent catalogue placement correction (2026-10-24)
 
 Source3233cc76 passes all173 native contracts in788.88s with complete source/SDK/library/dependency/binary closure unchanged. [Full receipt](evidence/native-delivery-3233cc76-full-20261024.json), [terminal log](evidence/native-delivery-3233cc76-full-ctest.log), [inventory](evidence/native-delivery-3233cc76-full-inventory.json). Candidate69 assembles2443 archive entries; its fresh CLI is-even task completes read/edit/Node4 checks, two approvals, four controlled calls and eight history messages. NEVER replay session7aac271ad6d2c34aa1892e14054b3d37/root641923abc6bf8c3d748c0a8349101322.
