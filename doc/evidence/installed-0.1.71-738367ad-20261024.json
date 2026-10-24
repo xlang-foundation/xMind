@@ -1,0 +1,98 @@
+{
+  "recordedAt": "2026-10-24T14:39:13.126Z",
+  "sourceNative": "738367adc7dd977baeb8b371ded66a8052bb87d1",
+  "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "installation": {
+    "recordedAt": "2026-10-24T14:38:53.390Z",
+    "passed": true,
+    "installedVersion": "0.1.71",
+    "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.71",
+    "vsixSha256": "d1f84ccc7a3e008818e03d2d3ca469ff5b92311331fbb38032109d83e22bb2b8",
+    "installedPayloadFilesVerified": 2440,
+    "completeInstalledFileSetVerified": 2442,
+    "installerVsixManifestMatches": true,
+    "packageJsonMatchesExceptInstallerMetadata": true,
+    "runtimeFilesVerified": 2398,
+    "runtimeManifestSha256": "7c4aeffc39e83d952a1c90e693010a39ce58a4ad097af183ea334a974af205df",
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "otherExtensionRegistryEntriesUnchanged": true,
+    "preservedRoots": [
+      "C:/Users/shaw9/.xMind",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+      "D:/CantorAI2026/xMind/.config"
+    ],
+    "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+    "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "exactOldInstallationBackup": 2442,
+    "visibleWindowRequested": false,
+    "installedNativeExecuted": false,
+    "userProfileBackendStarted": false,
+    "paidInference": false,
+    "renderedVSCode": false
+  },
+  "installer": {
+    "pid": 12036,
+    "startedAt": "2026-10-24T14:35:09.418Z",
+    "completedAt": "2026-10-24T14:35:14.012Z",
+    "exitCode": 0,
+    "signal": null,
+    "visibleWindowRequested": false
+  },
+  "smoke": {
+    "passed": true,
+    "installedNativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "managedDiscoveryAndReuse": true,
+    "sessionId": "36101962a24d24e06ec79814cb2ada72",
+    "completedRoot": "69e084762d07ff90b44d42b52e14caf6",
+    "history": [
+      {
+        "data": {
+          "content": "Read the installed fixture marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph installed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.71 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001c110e0000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001c110e0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "installed.read",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Observed installed 0.1.71 native read.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001c110e0000000000",
+                "path": "installed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000001c110e0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "observedOutput": "Observed installed 0.1.71 native read.\n",
+    "modelCalls": 0,
+    "userProfileRootUsed": false,
+    "ownedBackendIdentityVerifiedAndExitObserved": true,
+    "visibleWindowOpened": false,
+    "renderedVSCode": false
+  },
+  "previousBackup": ".agentflow/installation-backups/0.1.70-before-738367ad/extension",
+  "candidateReceipt": "candidate-0.1.71-qualified-coding-20261024.json",
+  "fullNativeReceipt": "native-delivery-738367ad-full-20261024.json",
+  "neverReplay": true,
+  "goalComplete": false,
+  "remaining": "Actual rendered VS Code, generic authenticated remote/enrollment, deeper recovery and multi-root scheduling remain open."
+}

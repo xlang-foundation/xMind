@@ -1,3 +1,9 @@
+## Installed71 preserved delivery checkpoint — 2026-10-24
+
+Installed0.1.71 uses source738367ad/Native51340e18 and SDK8c7972d1, including the repeated nested-pause fix. All2442 installed files and2398 runtime files verify; package metadata, installer manifest and other extension entries match. All five protected roots retain exact file sets and hashes, and the exact70 backup is retained. Full173 in788.31s, unchanged-source clients493/175, packaged coding and managed70-to71 handoff retain their own receipts. [Installed evidence](evidence/installed-0.1.71-738367ad-20261024.json).
+
+Fresh installed smoke session36101962a24d24e06ec79814cb2ada72/root69e084762d07ff90b44d42b52e14caf6 verifies managed discovery/reuse, actual native file read and restored history with zero model calls; its owned backend exits. NEVER replay. No visible editor/browser window was opened. The full objective remains active: rendered VS Code, authenticated generic remote/enrollment and deeper recovery/multi-root scheduling remain open.
+
 ## Candidate71 complete native and packaged qualification — 2026-10-24
 
 Source738367ad/Native51340e18 with SDK8c7972d1 passes all173 native contracts in788.31s after all targets rebuild. Complete2822 project/16 SDK/1870 pure-library/30 SDK-runtime/18598 dependency/137 binary hashes and file sets remain unchanged. The expanded eight-case nested-human contract passes in14.31s with current rebuilt backend and worker image. [Full receipt](evidence/native-delivery-738367ad-full-20261024.json), [original log](evidence/native-delivery-738367ad-full-ctest.log), [inventory](evidence/native-delivery-738367ad-full-inventory.json).

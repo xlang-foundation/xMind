@@ -1,0 +1,24 @@
+{
+  "recordedAt": "2026-10-24T14:41:46.474Z",
+  "path": "docs/xmind-implementation-status.pdf",
+  "sha256": "d8989b5e01c2c0d23e8d9a0287d46967968084ed3989a0b3694f4471af60d965",
+  "bytes": 7864,
+  "pages": 2,
+  "areas": 14,
+  "installed": "0.1.71",
+  "native": "51340e18",
+  "fullNativePassed": 173,
+  "fullNativeSeconds": 788.31,
+  "clients": {
+    "extension": 493,
+    "browser": 175
+  },
+  "source": "docs/xmind-delivery-acceptance.md",
+  "sourceSha256": "c9a1f32c1432939397eca95551f13deb68bafd6b16a627421ad5c18753bd6174",
+  "previousPdfSha256": "e244958beb4cb87683bc9a2aa2882e3cf00bf2a208b356cf084f22be9ffbf479",
+  "allAreaLabelsAndHeadersExtracted": true,
+  "allPagesRenderedAndVisuallyChecked": true,
+  "rendering": "Bundled Poppler, 100 DPI; font fallback notices did not produce visible defects.",
+  "cpythonExecuted": false,
+  "goalComplete": false
+}

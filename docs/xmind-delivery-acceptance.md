@@ -1,6 +1,13 @@
 # xMind delivery acceptance audit
 
-## Current installed70 checkpoint
+## Current installed71 checkpoint
+
+Installed0.1.71 uses source738367ad/Native51340e18 and SDK8c7972d1. Full173 passes in788.31s with the complete frozen closure unchanged, including all eight one/two-pause nested-worker cases. Clients493/175 retain unchanged-source acceptance. Fresh packaged CLI and named-process browser read/edit/Node4, two approvals, eight-message reload and managed70-to71 handoff pass. All2442 installed files/2398 runtime files, other-extension entries, five protected user-state roots, exact70 backup and zero-model installed read/history smoke verify. Preserve every completed task; never replay it.
+
+[Full native](../doc/evidence/native-delivery-738367ad-full-20261024.json), [packaged coding/handoff](../doc/evidence/candidate-0.1.71-qualified-coding-20261024.json), [installation/smoke](../doc/evidence/installed-0.1.71-738367ad-20261024.json). Rendered provider/context/direct-and-graph commands retain the controlled-peer scopes recorded below. Actual rendered VS Code, generic remote/enrollment and deeper recovery/multi-root scheduling remain open.
+
+
+## Prior installed70 checkpoint
 
 Installed0.1.70 uses source06a0c815/Native03dd5e5d and SDK8c7972d1. The complete173 native gate passes in795.61s with the full source/runtime closure unchanged. Clients493/175 pass. Packaged CLI and actual named-process browser coding pass real read/edit/Node4, two approvals and eight-message restoration; managed69-to70 handoff passes. Installed payload, registry, exact69 backup and all five protected user-state roots verify. Installed managed native read/history smoke passes with zero model calls. Preserve all completed task IDs; never replay them.
 
@@ -68,24 +75,24 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 
 ## Current requirement matrix
 
-Latest installed checkpoint:0.1.70. [Full native evidence](../doc/evidence/native-delivery-06a0c815-full-20261024.json), [packaged coding/handoff](../doc/evidence/candidate-0.1.70-qualified-coding-20261024.json), [preserved installation and smoke](../doc/evidence/installed-0.1.70-06a0c815-20261024.json). Earlier prose above retains historical scope.
+Latest installed checkpoint:0.1.71. [Full native evidence](../doc/evidence/native-delivery-738367ad-full-20261024.json), [packaged coding/handoff](../doc/evidence/candidate-0.1.71-qualified-coding-20261024.json), [preserved installation and smoke](../doc/evidence/installed-0.1.71-738367ad-20261024.json). Earlier prose above retains historical scope.
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | Source06a0c815 passes173/173 in795.61s with complete frozen closure unchanged; installed70 matches Native03dd5e5d. | Hosted results and each rendered acceptance retain separate scopes. |
+| Shared native C++ backend, embedded xlang3 and SQLite | Source738367ad passes173/173 in788.31s with complete frozen closure unchanged; installed71 matches Native51340e18. | Hosted results and each rendered acceptance retain separate scopes. |
 | Standard xlang3 root/subobjects and process workers | Actual SDK service methods, captured identity/lifetime contracts and named process-agent browser coding pass. | Authenticated generic remote binding/enrollment remains incomplete. |
-| Browser coding | Packaged70 actual New/agent selection/Send/read/edit/Node4, two approvals and exact eight-message reload pass. | Rendered provider/setup/commands and external-browser acceptance remain separate. |
-| CLI coding | Packaged70 fresh is-negative read/edit/Node4, two approvals, four controlled calls and history/watch pass. Installed managed read smoke passes. | Never replay completed tasks; broader workflow cases retain their individual scopes. |
-| VS Code extension | Installed70 exact payload, other-extension registry and user state verification;493 client tests pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven; keep visible Code closed unless requested. |
-| Conversation/footer layout | Current packaged70 screenshot shows completed history and visible composer/footer at1280x720. Earlier paging/switch/long-draft proof is retained. | Complete accessibility/viewport matrix remains outside these bounded observations. |
+| Browser coding | Packaged71 actual New/agent selection/Send/read/edit/Node4, two approvals and exact eight-message reload pass. | Provider/context/commands have separate controlled-peer receipts. Current-build external-browser acceptance remains separate. |
+| CLI coding | Packaged71 fresh is-positive read/edit/Node4, two approvals, four controlled calls and history/watch pass. Installed managed read smoke passes. | Never replay completed tasks; broader workflow cases retain their individual scopes. |
+| VS Code extension | Installed71 exact payload, other-extension registry and user state verification;493 client tests pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven; keep visible Code closed unless requested. |
+| Conversation/footer layout | Current packaged71 screenshot shows completed history and visible composer/footer at1280x720. Earlier paging/switch/long-draft proof is retained. | Complete accessibility/viewport matrix remains outside these bounded observations. |
 | Workspace selection and isolation | Earlier rendered managed switching and native local-profile/view contracts pass; captured file browsing is used by current clients. | Do not infer remote isolation from local workspace switching. |
-| Single/graph agents, planning and delegation | Installed173 includes nested human, ledger, planning and graph contracts. Development repeated-pause fix passes eight one/two-pause read/coding counted/plain cases and a rebuilt repository contract. | Complete qualification of the fix, deeper/multibranch cancellation/recovery and multi-root production scheduling need acceptance. |
+| Single/graph agents, planning and delegation | Installed173 includes nested human, ledger, planning and graph contracts. Development repeated-pause fix passes eight one/two-pause read/coding counted/plain cases and a rebuilt repository contract. | Deeper/multibranch cancellation/recovery and multi-root production scheduling need acceptance. |
 | Providers, MCP and A2A | Native173 covers controlled provider/profile wire/history, MCP SDK/network/OAuth and A2A task/stream scenarios. Rendered native provider key/discovery/model selection/inference/reload now passes with a controlled account peer. | Not universal live vendor compatibility. MCP/A2A rendered flows retain their individual scopes; no paid inference is needed for development. |
-| Coding tools | Native suite covers approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers; packaged browser/CLI70 run real Node4 checks. | Actual rendered VS Code actions/context remain separate. |
+| Coding tools | Native suite covers approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers; packaged browser/CLI71 run real Node4 checks. | Actual rendered VS Code actions/context remain separate. |
 | Connection catalog | Captured SDK/HTTP services include context/skills/inbox. Rendered provider setup, controls, SDK compaction, direct/graph commands and reload pass within their recorded scopes. | Authenticated generic remote binding remains open; live vendor compatibility is not inferred from controlled peers. |
 | Enrollment and distributed ownership | Local captured catalog and owner isolation are verified within their receipts. | Authenticated negotiation, explicit workspace/effect enrollment, expiring fenced leases, duplicate/revocation/lost-reply reconciliation remain required; private Nexus server stays excluded. |
-| Recovery and preservation | Managed69-to70 paused-upgrade refusal, continuation once, idle handoff and exact history pass with zero models. Five-root installation preservation passes. | Universal unattended/in-flight and repeated nested-process recovery remain unproven. |
-| Delivery checkpoint | Installed70:2442 files/2398 runtime files, exact69 backup, full173, clients493/175, packaged CLI/browser/handoff and installed read smoke. | The full objective remains active: general services, remote/enrollment, deeper recovery/scheduling and rendered VS Code are open. |
+| Recovery and preservation | Managed70-to71 paused-upgrade refusal, continuation once, idle handoff and exact history pass with zero models. Five-root installation preservation passes. | Unattended crash recovery, deeper nested chains and multi-root scheduling remain unproven. |
+| Delivery checkpoint | Installed71:2442 files/2398 runtime files, exact70 backup, full173, clients493/175, packaged CLI/browser/handoff and installed read smoke. | Rendered VS Code, remote/enrollment and deeper recovery/scheduling remain open. |
 
 ## Next implementation sequence
 
@@ -96,14 +103,14 @@ rendered skill/queue reload/cancel evidence. [Precise scope and failures](../doc
 Do not replay any completed fixture or confuse this focused checkpoint with a
 current complete qualification or installation.
 
-Installed70 full qualification, packaged coding/handoff and preservation are complete.
+Installed71 full qualification, packaged coding/handoff and preservation are complete.
 The [rendered slash-command check](../doc/evidence/rendered-command70-20261024.json)
 passes one captured invocation, literal arguments and exact two-message reload.
 The [rendered provider setup](../doc/evidence/rendered-provider-20261024.json)
 passes key storage, discovery, selection, inference and reload through the native
 runtime with a controlled account peer. Verify remaining VS Code editor/sidebar
 coding with editor context. The [rendered graph command](../doc/evidence/rendered-graph-command70-20261024.json) passes workflow selection, human input, actual native read and reload with zero models. Keep visible
-windows closed unless requested; retain installed70 until any replacement has
+windows closed unless requested; retain installed71 until any replacement has
 qualified coding/handoff/preservation evidence.
 
 Then complete authenticated generic remote negotiation and explicit workspace/

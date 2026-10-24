@@ -78,3 +78,7 @@ server/database/scheduler implementation remains excluded.
 ## Superseded candidate70 guidance (verbatim)
 
 - Shared inbox passes native8/clients493-175 and rendered skill/queue reload/cancel (0 models). Receipt doc/evidence/captured-inbox-20261024.json. Installed69 preserved; full qualification and remaining goal open. NEVER replay fixtures.
+
+## Superseded installed70 guidance (verbatim)
+
+- Installed70 Native03dd5e5d/SDK8c passes full173, clients493/175, named-process browser/CLI/handoff, five-root preservation and installed smoke. See doc/evidence/installed-0.1.70-06a0c815-20261024.json; NEVER replay. Remaining goal active.
