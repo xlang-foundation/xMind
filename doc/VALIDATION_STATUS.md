@@ -1,3 +1,9 @@
+## Separate native HTTP authentication TLS fixture — 2026-10-24
+
+The SDK fixture host now also exposes actual native HTTP routes. Its separate fresh HTTP namespace uses an origin-bound view credential and proves malformed-input refusal before TLS, exactly one valid untrusted TLS attempt with zero credential HTTP requests, absent/revision0 cached status, stale-profile refusal, Local retention and database reopen with no saved grant. Existing SDK/CLI hosts remain separate. Ten focused contracts pass11.78s with frozen closure unchanged and Nativecf441f05 unchanged. [Evidence](evidence/remote-auth-http-tls-bridge-20261024.json), [test log](evidence/remote-auth-http-tls-bridge-ctest.log).
+
+The isolated hosted trusted-TLS driver now includes a third fresh HTTP host: wrong-credential refusal, accepted grant/stored observation, stale-retry refusal without extra peer requests and encrypted database reopen. This branch is wired but has not passed an actual hosted run yet. No local certificate trust changed, no deadline changes or completed effects replayed. Installed72 unchanged; full objective active.
+
 ## Actual rendered connection Settings and form-ID repair — 2026-10-24
 
 The actual hidden browser exposed a duplicate connection-form ID shared by the Connect dialog and runtime metadata Settings form. The settings handler bound the wrong form, so the real Save Nexus address button did nothing. It now uses runtime-connection-form; regression clicks the actual button and verifies unique IDs. Complete clients495/176 pass with unchanged source/assets.

@@ -1,0 +1,60 @@
+{
+  "gate": {
+    "recordedAt": "2026-10-24T17:36:02.362Z",
+    "sourceParent": "705238925401039e3f37d903ca466c7283e62d4d",
+    "sourcePatchSha256": "5b05f4c16e31835911e99da57490df298c3e18a82bc108956fe73cfb5fe34029",
+    "build": {
+      "pid": 3224,
+      "launchedAt": "2026-10-24T17:34:46.398Z",
+      "completedAt": "2026-10-24T17:35:45.066Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c57f9da0bdd6b9954e080c0b8fb29fcb1688e1c41a0437f4869f9e03f184cd60"
+    },
+    "test": {
+      "pid": 37280,
+      "launchedAt": "2026-10-24T17:35:47.770Z",
+      "completedAt": "2026-10-24T17:35:59.592Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "dbcb0ea2b6ac2fe0ef84054acec0fb0394288a1fcae414f7cc8345d89c2054e5"
+    },
+    "total": 10,
+    "failed": 0,
+    "passed": 10,
+    "seconds": 11.78,
+    "projectFiles": 2837,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "cf441f05018b543749175a7b7727cd8fca5845116ed7800f01a1a4efbe41dabf",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Actual separate native HTTP host plus existing SDK/CLI untrusted-TLS regression. Hosted positive HTTP branch registered but not executed locally.",
+  "coverage": [
+    "Owner capability authorization and origin-bound view credential",
+    "Malformed empty/multiline/Ctrl-Z/oversized refusal before TLS",
+    "Exactly one well-formed HTTP TLS attempt, zero peer HTTP credential requests",
+    "Absent revision0 status, stale profile refusal, Local retained",
+    "Native host exits and xlang3/SQLite database reopens without saved grants",
+    "Existing SDK and CLI regression retain distinct fresh hosts"
+  ],
+  "hostedPending": [
+    "Wrong credential maps to remote_unauthenticated",
+    "Trusted HTTP grant publication, stored status and encrypted database reopen",
+    "Stale retry produces no extra peer HTTP request"
+  ],
+  "limits": [
+    "Positive HTTP TLS remains pending actual hosted execution",
+    "Remote routing/enrollment disabled",
+    "Focused ten contracts do not establish a full new qualification",
+    "Installed0.1.72 preserved"
+  ]
+}

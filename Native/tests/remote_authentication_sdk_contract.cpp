@@ -1,4 +1,6 @@
 #include "agentflow/xmind_ipc_api.hpp"
+#include "agentflow/http_server.hpp"
+#include <thread>
 #include "agentflow/connection_profiles.hpp"
 #include "agentflow/remote_connection_credentials.hpp"
 #include "agentflow/xmind_ipc_runtime.hpp"
@@ -33,7 +35,7 @@ void verify(PersistenceService& store,bool positive){
 int main(int argc,char** argv){try{
     if(argc==4&&std::string(argv[1])=="client")return client(argv[2],std::string(argv[3])=="positive");if(argc!=5)return 2;const auto database=(std::filesystem::path(argv[1])/"remote-sdk.sqlite").string();check(!std::filesystem::exists(database));bool positive=false;
     {PersistenceService store(database,{argv[2],argv[3]});ConnectionProfiles profiles(store);profiles.load_or_initialize();profiles.apply(nlohmann::json{{"profiles",nlohmann::json::array({{{"id","local"},{"name","Local"},{"kind","local"}},{{"id","remote-sdk"},{"name","Controlled remote SDK"},{"kind","nexus"},{"origin",argv[4]}}})}}.dump(),1);
-        {XMindIpcServer server(store,nullptr,owner_token);std::cout<<nlohmann::json{{"endpoint",server.endpoint()}}.dump()<<std::endl;std::string instruction;check(bool(std::getline(std::cin,instruction)));check(instruction=="verify-positive"||instruction=="verify-refusal");positive=instruction=="verify-positive";verify(store,positive);}
+        {HttpServer http(store,owner_token);const auto port=http.bind(0);check(port>0);std::jthread listener([&]{http.listen();});struct Shutdown{HttpServer& server;~Shutdown(){server.stop();}} shutdown{http};XMindIpcServer server(store,nullptr,owner_token);std::cout<<nlohmann::json{{"endpoint",server.endpoint()},{"http_origin","http://127.0.0.1:"+std::to_string(port)}}.dump()<<std::endl;std::string instruction;check(bool(std::getline(std::cin,instruction)));check(instruction=="verify-positive"||instruction=="verify-refusal");positive=instruction=="verify-positive";verify(store,positive);}
         store.close();}
     {PersistenceService store(database,{argv[2],argv[3]});verify(store,positive);store.close();}
     std::cout<<"remote-sdk-database-reopened"<<std::endl;return 0;
