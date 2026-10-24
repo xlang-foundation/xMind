@@ -6,15 +6,15 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Candidate68 first-send approval/read/revoke and matching-native owner reuse pass; completed fixtures in doc/evidence/candidate-0.1.68-first-send-and-reuse-20261024.json must NEVER replay. Installation/preservation is pending; keep its live handle.
+- Installed68 frontend825bd613/Native11678c9a verified: clients485/169, first-send approval, matching-owner reuse, five-root preservation and installed read/history smoke pass. Exact67 backup retained. See doc/evidence/installed-0.1.68-825bd613-20261024.json and candidate68 receipt; NEVER replay completed tasks.
 
-- Installed67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
+- Prior67 Nativeeafe1b2e/11678c9a, SDK8c7972d1: full173, packaged browser/CLI, managed handoff and five-root preservation pass. Exact66 backup retained. See doc/evidence/installed-0.1.67-eafe1b2e-20261024.json. Rendered Code remains unverified.
 
 - Candidate67 CLI41670ad0d3df8bdce0683e3c2a69b577/root91278d68f9a1ea9f8f9b4d6db83bdc9b; browser157d2e2762cb41459fd7f3e8e06f0c5f/root3d36c52b67e843fcb30f777f59a2e96b; handoff500cc07a8096747a157f468cb1b13f89/root9b490dc7a004889d2ad6fdfc46732dca completed. NEVER replay. See candidate-0.1.67-qualified-coding-20261024.json.
 
 - Installed67 smoke55a89cad4783844c55b74fccd45ea580/root8866649c22b59f0793866858907107f4 completed read/history, zero models; NEVER replay. Owner exited. Installation66 guidance archived verbatim in doc/development-checkpoints-20261024.md.
 
-- Browser first-send permission fix passes clients485/169 and actual UI without reload. Installed67 unchanged. Both completed read/grant/revoke fixtures are in doc/evidence/browser-first-send-permission-refresh-20261024.json; NEVER replay.
+- Browser first-send permission fix passes clients485/169 and actual UI without reload. Installed68 includes the fix. Both completed read/grant/revoke fixtures are in doc/evidence/browser-first-send-permission-refresh-20261024.json; NEVER replay.
 
 - Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
 

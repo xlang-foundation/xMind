@@ -27,3 +27,8 @@ Preserve these historical identities and constraints verbatim.
 
 - Qualified58 stage17441files/VSIX2448entries unchanged; now installed. Pair preserved C:/xMindNativeValidation/qualified-nested-context-binaries-20261020. See doc/VALIDATION_STATUS.md.
 - Browser58 page59185 hosts65940/58988 reuses32396. Sessionad86de667793281272e4ea9c4f9cd89c/rootdae9c437883303078971bf053b83fb51 completed3reads/2approvededits/Node4/reload12messages; NEVER replay. See doc/VALIDATION_STATUS.md.
+
+
+## Preserved candidate68 qualification guidance
+
+- Candidate68 first-send approval/read/revoke and matching-native owner reuse pass; completed fixtures in doc/evidence/candidate-0.1.68-first-send-and-reuse-20261024.json must NEVER replay. Installation/preservation is pending; keep its live handle.

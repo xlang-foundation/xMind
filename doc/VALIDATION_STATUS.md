@@ -1,3 +1,9 @@
+## Installed0.1.68 verified and implementation table updated — 2026-10-24
+
+Installed68 matches2442 installation files/2398 runtime files and the qualified frontend825bd613 package. All five protected roots retain exact file sets/hashes; other extension registry entries are unchanged and the exact67 backup is verified. Native11678c9a/sourceeafe1b2e retains the reused full173 qualification. Fresh managed installed smoke session66a3e702c36b0b1f7757b5db47f2c1d6/root4ca76ba6bfc0d581270830fe4c3c3840 completes read/history with zero model calls; its identity-checked owner exits. NEVER replay. [Installation receipt](evidence/installed-0.1.68-825bd613-20261024.json).
+
+The two-page14-area implementation table in docs/xmind-implementation-status.pdf now distinguishes installed68, reused native qualification, actual packaged first-send approval/revocation and the remaining named-agent adapters, rendered VS Code, remote/enrollment and deeper recovery/scheduling. Both pages are rendered and visually checked; text extraction confirms current versions/counts. The complete goal remains active.
+
 ## Candidate0.1.68 packages corrected first-send browser permissions — 2026-10-24
 
 The2443-entry VSIX packages frontend825bd613 and client485/169 assets. Its2398 runtime files and manifest are byte-identical to installed67: Native11678c9a/sourceeafe1b2e retains its complete173 qualification. Current Native source/file sets are rechecked; completed CLI coding tasks are not replayed and their unchanged-runtime evidence is explicitly reused.

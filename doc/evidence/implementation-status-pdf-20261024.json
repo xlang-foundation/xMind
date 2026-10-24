@@ -1,28 +1,30 @@
 {
-  "recordedAt": "2026-10-24T08:53:12.266Z",
+  "recordedAt": "2026-10-24T10:40:05.362Z",
   "output": "docs/xmind-implementation-status.pdf",
-  "sha256": "d4d25fc5bd5bf407b66008cac7ec19c0399c6376fa5840817f81e7f5095f27d2",
-  "previousPdfSha256": "eaca5153c8485342c2415a8b0706dccf61d545ebfebd597d9e01770548f66479",
+  "sha256": "e244958beb4cb87683bc9a2aa2882e3cf00bf2a208b356cf084f22be9ffbf479",
+  "previousPdfSha256": "d4d25fc5bd5bf407b66008cac7ec19c0399c6376fa5840817f81e7f5095f27d2",
   "pages": 2,
   "areas": 14,
-  "installedVersion": "0.1.66",
-  "source": "3c490dd9",
-  "fullNativeGate": "173/173 passed in768.07s; frozen closures unchanged",
-  "fullNativeReceipt": "doc/evidence/native-delivery-3c490dd9-full-20261024.json",
+  "installedVersion": "0.1.68",
+  "frontendSource": "825bd613",
+  "nativeSource": "eafe1b2e",
+  "fullNativeGate": "173/173 passed in817.90s; reused exact native files",
+  "fullNativeReceipt": "doc/evidence/native-delivery-eafe1b2e-full-20261024.json",
+  "installationReceipt": "doc/evidence/installed-0.1.68-825bd613-20261024.json",
   "evidenceIndex": "docs/xmind-delivery-acceptance.md",
   "detailedEvidence": "doc/VALIDATION_STATUS.md",
-  "renderedWith": "Bundled Poppler; both qualified pages visually reviewed at1300-pixel height",
+  "renderedWith": "Bundled Poppler; both latest pages visually reviewed at1300-pixel height",
   "pageImages": [
     {
       "page": 1,
-      "sha256": "294353a41d1609c844f128ab3311985250c0e8c89fd5e37b207ba4319aaf8864"
+      "sha256": "430958c277069437b41b0834c29ba867e92babf9d63a8af57bec6d9ababc60e7"
     },
     {
       "page": 2,
-      "sha256": "9957f60d2f667d62b693bfbfdefe2809dde58d45759d8ff7a545b47173b13d24"
+      "sha256": "f4d492b2c08d6bf297dc4c8e6ad9f895dcd003e30f8117a14474d4bb20b57f9d"
     }
   ],
-  "textExtractionChecked": "Node PDF.js: two pages, current full-pass statement and active goal",
+  "textExtractionChecked": "Node PDF.js: two pages, installed68, native173, clients485/169 and active goal",
   "authoring": "Node pdf-lib; no CPython",
   "wholeDeliveryComplete": false
 }
