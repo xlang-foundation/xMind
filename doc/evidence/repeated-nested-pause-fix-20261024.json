@@ -1,0 +1,265 @@
+{
+  "recordedAt": "2026-10-24T14:11:10.525Z",
+  "problem": "Second planning call on the same root/plan collided with UNIQUE(root_run_id,plan_id) in dynamic_owner_pause_waits.",
+  "change": "Advance the current pause-wait head only from resumed to paused, binding the new accepted call. Existing planning calls, human answers and pause events remain durable; no schema migration.",
+  "nestedWorkerEvidence": {
+    "gate": {
+      "recordedAt": "2026-10-24T14:09:07.887Z",
+      "sourceParent": "00f5dff0cc78544f7308f5a89580ed7305da3ccf",
+      "sourcePatchSha256": "992044c0b9101bc0596bd831ca077f70ed7299a9d467f086c0319119eb3360ac",
+      "build": {
+        "pid": 35944,
+        "launchedAt": "2026-10-24T14:07:49.917Z",
+        "completedAt": "2026-10-24T14:08:43.953Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "afc2cef1fc63ed0a8c058a903760cea1a0fd373aceb290f6398e8420544c38c4"
+      },
+      "test": {
+        "pid": 41308,
+        "launchedAt": "2026-10-24T14:08:46.738Z",
+        "completedAt": "2026-10-24T14:09:05.086Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "c7ee29632d3f34e31ca5317539e4e9107db227f9e74d798679822a44e79d767e"
+      },
+      "total": 2,
+      "failed": 0,
+      "passed": 2,
+      "seconds": 18.31,
+      "projectFiles": 2822,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 137,
+      "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    "acceptedScope": "Current rebuilt backend fixture passes eight read/coding plain/counted once/twice pause cases in the native nested-human contract (15.12 seconds). Its xmind child image was the prior production image; the backend repository fixture contains the fix.",
+    "repositoryEntryInThatRun": "Not accepted as current-source repository evidence: that separate executable had not been rebuilt."
+  },
+  "rebuiltRepositoryEvidence": {
+    "recordedAt": "2026-10-24T14:10:24.033Z",
+    "sourceParent": "00f5dff0cc78544f7308f5a89580ed7305da3ccf",
+    "sourcePatchSha256": "992044c0b9101bc0596bd831ca077f70ed7299a9d467f086c0319119eb3360ac",
+    "build": {
+      "pid": 37732,
+      "launchedAt": "2026-10-24T14:09:58.923Z",
+      "completedAt": "2026-10-24T14:10:15.143Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6ed905a5f84260bbd062ad72983353195151eade887399d1614dd4788143cdc8"
+    },
+    "test": {
+      "pid": 9008,
+      "launchedAt": "2026-10-24T14:10:17.906Z",
+      "completedAt": "2026-10-24T14:10:21.236Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "84e9a1ee316e60a8dda2398c69acbf5dfe33e336d2a924d86f488e126a43f300"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 3.28,
+    "projectFiles": 2822,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "newProductionNativeSha256": "51340e1801da7b55cb1a9c852fd39b2c6fa9a50e4bce38377c7bb58efbae5595",
+  "allFrozenProjectInputsStillMatch": true,
+  "fullNativeSuitePassed": false,
+  "installed70Unchanged": true,
+  "failures": [
+    {
+      "name": "repeated-nested-human",
+      "gate": {
+        "recordedAt": "2026-10-24T14:01:11.469Z",
+        "sourceParent": "00f5dff0cc78544f7308f5a89580ed7305da3ccf",
+        "sourcePatchSha256": "f5c040c7af34e0c2cc497fc99a1fd66a9b12c6b02b9c382d9f194d568e0bd601",
+        "build": {
+          "pid": 27552,
+          "launchedAt": "2026-10-24T14:00:28.879Z",
+          "completedAt": "2026-10-24T14:01:02.996Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "7f9905c1ecd386d44091d542e5136e6574510ab3d33dfb2450ab88d1519203a2"
+        },
+        "test": {
+          "pid": 41848,
+          "launchedAt": "2026-10-24T14:01:05.907Z",
+          "completedAt": "2026-10-24T14:01:08.756Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "dd14194a953431d3239d826bd45f1f4a30cfdf81ed45d2230c487eb5848be94b"
+        },
+        "total": 1,
+        "failed": 1,
+        "passed": 0,
+        "seconds": 2.81,
+        "projectFiles": 2822,
+        "sdkSourceFiles": 16,
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 30,
+        "nodeDependencyFiles": 18598,
+        "nativeBinaries": 137,
+        "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+        "cpythonExecuted": false,
+        "installed": false,
+        "scopePassed": false
+      }
+    },
+    {
+      "name": "repeated-nested-human-wait",
+      "gate": {
+        "recordedAt": "2026-10-24T14:02:39.400Z",
+        "sourceParent": "00f5dff0cc78544f7308f5a89580ed7305da3ccf",
+        "sourcePatchSha256": "ec5b608370726d4fc28190c0e65474bd98382fdd3530b2c779dbeba1d2f69eac",
+        "build": {
+          "pid": 32100,
+          "launchedAt": "2026-10-24T14:01:56.911Z",
+          "completedAt": "2026-10-24T14:02:30.995Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "7f9905c1ecd386d44091d542e5136e6574510ab3d33dfb2450ab88d1519203a2"
+        },
+        "test": {
+          "pid": 33432,
+          "launchedAt": "2026-10-24T14:02:33.635Z",
+          "completedAt": "2026-10-24T14:02:36.555Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "484f81869b9f6a90fae3fc1429e40056ffed669e2276bc84060af4ce6e3ccf47"
+        },
+        "total": 1,
+        "failed": 1,
+        "passed": 0,
+        "seconds": 2.88,
+        "projectFiles": 2822,
+        "sdkSourceFiles": 16,
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 30,
+        "nodeDependencyFiles": 18598,
+        "nativeBinaries": 137,
+        "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+        "cpythonExecuted": false,
+        "installed": false,
+        "scopePassed": false
+      }
+    },
+    {
+      "name": "repeated-nested-human-settled",
+      "gate": {
+        "recordedAt": "2026-10-24T14:04:08.322Z",
+        "sourceParent": "00f5dff0cc78544f7308f5a89580ed7305da3ccf",
+        "sourcePatchSha256": "bc416203ae8aff0b363fbe34c06b8c733e9ccec83caca0efa90da6fb6130c328",
+        "build": {
+          "pid": 39988,
+          "launchedAt": "2026-10-24T14:03:25.872Z",
+          "completedAt": "2026-10-24T14:03:59.750Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "7f9905c1ecd386d44091d542e5136e6574510ab3d33dfb2450ab88d1519203a2"
+        },
+        "test": {
+          "pid": 31760,
+          "launchedAt": "2026-10-24T14:04:02.551Z",
+          "completedAt": "2026-10-24T14:04:05.550Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "b494fb8e4ac33c91aea2fd974421af4de9dcf3d3f8fa4623ff8516f2524aa1e3"
+        },
+        "total": 1,
+        "failed": 1,
+        "passed": 0,
+        "seconds": 2.96,
+        "projectFiles": 2822,
+        "sdkSourceFiles": 16,
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 30,
+        "nodeDependencyFiles": 18598,
+        "nativeBinaries": 137,
+        "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+        "cpythonExecuted": false,
+        "installed": false,
+        "scopePassed": false
+      }
+    },
+    {
+      "name": "repeated-nested-human-diagnostic",
+      "gate": {
+        "recordedAt": "2026-10-24T14:06:28.402Z",
+        "sourceParent": "00f5dff0cc78544f7308f5a89580ed7305da3ccf",
+        "sourcePatchSha256": "d98a839fdbec59d4e950edec36954503b68d0c6b93e2a07e2585b73f64a9ee75",
+        "build": {
+          "pid": 8948,
+          "launchedAt": "2026-10-24T14:06:05.568Z",
+          "completedAt": "2026-10-24T14:06:20.100Z",
+          "exitCode": 0,
+          "signal": null,
+          "logSha256": "52215c4f72e3023fdde799e175293636921abdc7d9c7298228e56a02b31df829"
+        },
+        "test": {
+          "pid": 27584,
+          "launchedAt": "2026-10-24T14:06:22.794Z",
+          "completedAt": "2026-10-24T14:06:25.658Z",
+          "exitCode": 8,
+          "signal": null,
+          "logSha256": "ada5e071d314534afc636b57c9feb4b3bbea9bf4bb8508ce5e676df299827312"
+        },
+        "total": 1,
+        "failed": 1,
+        "passed": 0,
+        "seconds": 2.82,
+        "projectFiles": 2822,
+        "sdkSourceFiles": 16,
+        "pureLibraryFiles": 1870,
+        "sdkRuntimeFiles": 30,
+        "nodeDependencyFiles": 18598,
+        "nativeBinaries": 137,
+        "nativeSha256": "03dd5e5d83ca1d3ce63a7e281e077cbad9777141fa316155bb585fce0f69cce6",
+        "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+        "fullNativeSuiteRun": false,
+        "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+        "cpythonExecuted": false,
+        "installed": false,
+        "scopePassed": false
+      }
+    }
+  ],
+  "diagnosticSha256": "a9a83b9975715c88925e766c29def7426958bb0625c17caa071cb92a2738904d",
+  "neverReplayFailedNamespaces": [
+    "xmind-worker-ledger-3856598133-3980614638",
+    "xmind-worker-ledger-858975142-1141076838",
+    "xmind-worker-ledger-848638771-302397875",
+    "xmind-worker-ledger-3073797021-931917081"
+  ],
+  "temporaryExceptionLoggingRemoved": true,
+  "paidInference": false,
+  "goalComplete": false
+}

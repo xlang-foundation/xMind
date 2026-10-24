@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 95: native_agent_worker_nested_human_contract
+1/1 Test #95: native_agent_worker_nested_human_contract ...***Failed    2.87 sec
+Second child-owned human request must pause the original root and child; retained fixture D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-worker-ledger-858975142-1141076838
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   2.88 sec
+
+The following tests FAILED:
+	 95 - native_agent_worker_nested_human_contract (Failed)
+Errors while running CTest

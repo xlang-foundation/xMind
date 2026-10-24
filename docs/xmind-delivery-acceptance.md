@@ -79,7 +79,7 @@ Latest installed checkpoint:0.1.70. [Full native evidence](../doc/evidence/nativ
 | VS Code extension | Installed70 exact payload, other-extension registry and user state verification;493 client tests pass. | Actual rendered editor/sidebar coding and editor-context verification remain unproven; keep visible Code closed unless requested. |
 | Conversation/footer layout | Current packaged70 screenshot shows completed history and visible composer/footer at1280x720. Earlier paging/switch/long-draft proof is retained. | Complete accessibility/viewport matrix remains outside these bounded observations. |
 | Workspace selection and isolation | Earlier rendered managed switching and native local-profile/view contracts pass; captured file browsing is used by current clients. | Do not infer remote isolation from local workspace switching. |
-| Single/graph agents, planning and delegation | Native173 includes nested human, ledger, planning and graph contracts. Named process-agent selection and actual coding pass in browser70. | Repeated/deeper pause segments, multibranch cancellation/recovery and multi-root production scheduling need acceptance. |
+| Single/graph agents, planning and delegation | Installed173 includes nested human, ledger, planning and graph contracts. Development repeated-pause fix passes eight one/two-pause read/coding counted/plain cases and a rebuilt repository contract. | Complete qualification of the fix, deeper/multibranch cancellation/recovery and multi-root production scheduling need acceptance. |
 | Providers, MCP and A2A | Native173 covers controlled provider/profile wire/history, MCP SDK/network/OAuth and A2A task/stream scenarios. Rendered native provider key/discovery/model selection/inference/reload now passes with a controlled account peer. | Not universal live vendor compatibility. MCP/A2A rendered flows retain their individual scopes; no paid inference is needed for development. |
 | Coding tools | Native suite covers approved edits/patch/restore, processes/terminals, VCS, instructions, skills and language servers; packaged browser/CLI70 run real Node4 checks. | Actual rendered VS Code actions/context remain separate. |
 | Connection catalog | Captured SDK/HTTP services include context/skills/inbox. Rendered provider setup, controls, SDK compaction, direct/graph commands and reload pass within their recorded scopes. | Authenticated generic remote binding remains open; live vendor compatibility is not inferred from controlled peers. |
@@ -112,6 +112,12 @@ and deeper repeated nested-process recovery/multi-root scheduling. Unavailable,
 expired, incompatible and cross-profile refusals need actual evidence. The
 observer-induced local cancellation readback is bounded local evidence and does
 not establish the remote protocol. Private Nexus implementation stays excluded.
+
+The [repeated nested pause fix](../doc/evidence/repeated-nested-pause-fix-20261024.json)
+has focused current-backend evidence; a complete native gate and replacement
+package qualification remain necessary before installation. Two pause/reopen
+cycles do not establish arbitrary depth, multi-root fairness or unattended crash
+recovery.
 
 The root only registers service subobjects. Standard xlang3 method calls own
 cross-process transfer; all domain execution, admission and SQLite ownership stay

@@ -1,0 +1,14 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 95: native_agent_worker_nested_human_contract
+1/1 Test #95: native_agent_worker_nested_human_contract ...***Failed    2.81 sec
+TEMP nested planning failure: execute failed: UNIQUE constraint failed: dynamic_owner_pause_waits.root_run_id, dynamic_owner_pause_waits.plan_id
+Second child-owned human request must pause the original root and child; retained fixture D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-worker-ledger-3073797021-931917081
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   2.82 sec
+
+The following tests FAILED:
+	 95 - native_agent_worker_nested_human_contract (Failed)
+Errors while running CTest

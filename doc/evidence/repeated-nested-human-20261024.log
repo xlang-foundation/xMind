@@ -1,0 +1,13 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start 95: native_agent_worker_nested_human_contract
+1/1 Test #95: native_agent_worker_nested_human_contract ...***Failed    2.80 sec
+Dynamic root is not owned by this service; retained fixture D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-worker-ledger-3856598133-3980614638
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   2.81 sec
+
+The following tests FAILED:
+	 95 - native_agent_worker_nested_human_contract (Failed)
+Errors while running CTest
