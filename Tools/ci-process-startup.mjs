@@ -3,7 +3,7 @@
 import fs from 'node:fs/promises';import {tmpdir,release} from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';import {spawn,execFileSync} from 'node:child_process';import {createHash} from 'node:crypto';import {fileURLToPath,pathToFileURL} from 'node:url';
 const local=process.argv.includes('--local-guarded'),root=path.resolve(process.argv.find(a=>a.startsWith('--root='))?.slice(7)||fileURLToPath(new URL('..',import.meta.url))),out=path.resolve(process.argv.find(a=>a.startsWith('--output='))?.slice(9)||path.join(root,'build/process-startup-diagnostics'));
 const firstCase=process.argv.find(a=>a.startsWith('--first-case='))?.slice(13)||'original';
-const firstCases={original:['graph','default',false],'minimal-path':['graph','minimal-path',false],'module-qualified':['module-qualified','default',false],'cmdlet-phases':['cmdlet-phases','default',false],'private-cache':['graph','private-cache',false],'cache-off':['graph','cache-off',false],'core-only':['graph','core-only',false],'precopy-core':['graph','precopy-core',false]};
+const firstCases={original:['graph','default',false],'minimal-path':['graph','minimal-path',false],'module-qualified':['module-qualified','default',false],'cmdlet-phases':['cmdlet-phases','default',false],'private-cache':['graph','private-cache',false],'cache-off':['graph','cache-off',false],'core-only':['graph','core-only',false],'precopy-core':['graph','precopy-core',false],'system-modules':['graph','system-modules',false]};
 assert.ok(Object.hasOwn(firstCases,firstCase),'Select a declared first-case experiment');
 if(local)assert.equal(firstCase,'original','The guarded smoke must start with the unchanged original command');
 if(process.platform!=='win32')throw Error('Windows diagnostic only');

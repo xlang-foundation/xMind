@@ -1,3 +1,16 @@
+## Hosted PowerShell discovery control — 2026-10-23
+
+The startup diagnostic matrix now exposes the existing native `system-modules`
+control on a separate fresh Windows hosted job. It runs the unchanged graph
+command with only that probe process's `PSModulePath` bound to PowerShell's system
+module directory, without copying modules. Default warmed graph, agent and .NET
+comparisons remain separate. This distinguishes system-directory search from
+the earlier successful copied-core control; it does not change product profiles,
+command deadlines or qualify a failed original command. Node syntax, diff checks
+and agreement of all nine driver/workflow controls pass; hosted outcome pending.
+Current corrected native run40044528987 remains in progress; earlier c2c7a32e
+run40039032034 is terminal failure, with detailed failure review pending.
+
 ## Candidate0.1.64 packaged browser coding — 2026-10-23
 
 The exact packaged adapter/assets and copied distributable runtime pass an actual
