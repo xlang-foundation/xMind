@@ -256,6 +256,7 @@ Run execute_a2a_tool(PersistenceService& store,const std::string& child,const Dy
      catch(const ToolCancelled&){return retire(RunState::cancelled,"cancelled");}
      catch(const std::exception&){return retire(RunState::failed,"dynamic_a2a_tool_execution_failed");}
 }
+struct DynamicChildDispatch {std::shared_ptr<NativeChildSlot> slot;};
 struct ActiveBatch {
     std::unique_ptr<NativeChildExecutor::Batch> work;
     std::vector<std::string> children;
@@ -372,11 +373,14 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                     auto settings=dynamic_child_settings(frozen,policy,selected_model(plan.capabilities));const auto actual=store_.run(child_id).get();
                     if(actual.state!=RunState::running||store_.child_admission(child_id).get().claim_id!=prepared.node.claim_id)throw DynamicOutcomeUnrecorded("Paused dynamic child claim is not the exact resumed owner");
                     staged.children.push_back(child_id);
-                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance](std::stop_token stop)mutable{
+                    auto dispatch=std::make_shared<DynamicChildDispatch>();
+                    std::function<void(std::shared_ptr<NativeChildSlot>)> bind_slot;
+                    if(agent_execution_&&prepared.node.definition.kind==DynamicNodeKind::agent)bind_slot=[dispatch](auto slot){dispatch->slot=std::move(slot);};
+                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance,dispatch](std::stop_token stop)mutable{
                         bool available=false;try{available=agent_authority_identity(settings,settings.provider.model,caps.workspace_identity,agent_authority_credentials(store_,settings))==policy.backend_identity;}
                         catch(const Conflict&){}catch(const NotFound&){}
                         if(!available)return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_preset_unavailable_after_resume"})").get();
-                        if(agent_execution_)return agent_execution_(settings,child_id,budget,true,stop);
+                        if(agent_execution_)return agent_execution_(settings,child_id,budget,dispatch->slot,true,stop);
                         std::unique_ptr<AgentRunner> runner;
                         try{auto nested_planning=settings.planning?std::make_shared<DynamicPlanExecutor>(store_,children_):std::shared_ptr<DynamicPlanExecutor>{};runner=std::make_unique<AgentRunner>(store_,settings,std::shared_ptr<DelegationExecutor>{},std::move(nested_planning),true);}
                         catch(const ProcessBeforeDispatchError&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
@@ -385,7 +389,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                         catch(const std::filesystem::filesystem_error&){return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_runtime_path_unavailable"})").get();}
                         catch(const std::invalid_argument&){if(!changed_process_precondition(settings))throw;return store_.transition(child_id,RunState::running,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
                         return runner->execute(child_id,stop,{},budget,{}, {},true);
-                    },cancel});
+                    },cancel,std::move(bind_slot)});
                 }
                 try{staged.work=children_->stage(std::move(work));}
                 catch(const NativeChildCapacityUnavailable&){if(!assist())std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}
@@ -422,7 +426,10 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                     if(prepared.node.definition.kind==DynamicNodeKind::agent){policy=preset(caps,prepared.node.definition);settings=dynamic_child_settings(frozen,policy,selected_model(caps));}
                     else settings=frozen;
                     DynamicTaskClaimSpec task;task.label=prepared.node.definition.label;task.claim_id=identity();task.child_run_id=child_id;task.prompt_json=(prepared.node.definition.kind==DynamicNodeKind::tool?deterministic_prompt(prepared):prompt(prepared,caps)).dump();task.resolved_input_json=prepared.dependency_outputs_json;task.definition_revision=prepared.node.definition_revision;claim.tasks.push_back(std::move(task));staged.children.push_back(child_id);
-                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance](std::stop_token stop)mutable{
+                    auto dispatch=std::make_shared<DynamicChildDispatch>();
+                    std::function<void(std::shared_ptr<NativeChildSlot>)> bind_slot;
+                    if(agent_execution_&&prepared.node.definition.kind==DynamicNodeKind::agent)bind_slot=[dispatch](auto slot){dispatch->slot=std::move(slot);};
+                    work.push_back({budget,[this,child_id,settings=std::move(settings),policy,caps,budget,prepared,guidance,dispatch](std::stop_token stop)mutable{
                         if(prepared.node.definition.kind==DynamicNodeKind::tool){
                             static const std::set<std::string> readonly={"read_repository_instructions","read_file","list_files","search_files","find_files","glob_files"};
                             if(readonly.contains(prepared.node.definition.tool))return execute_readonly_tool(store_,child_id,prepared,settings,caps,budget,stop,guidance);
@@ -445,7 +452,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                         catch(const NotFound&){available=false;}
                         if(!available)return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_preset_unavailable"})").get();
                         if(auto retired=retire_before_launch())return *retired;
-                        if(agent_execution_)return agent_execution_(settings,child_id,budget,false,stop);
+                        if(agent_execution_)return agent_execution_(settings,child_id,budget,dispatch->slot,false,stop);
                         std::unique_ptr<AgentRunner> runner;
                         try{auto nested_planning=settings.planning?std::make_shared<DynamicPlanExecutor>(store_,children_):std::shared_ptr<DynamicPlanExecutor>{};runner=std::make_unique<AgentRunner>(store_,settings,std::shared_ptr<DelegationExecutor>{},std::move(nested_planning),true);}
                         catch(const ProcessBeforeDispatchError&){return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();}
@@ -461,7 +468,7 @@ DynamicExecutionResult DynamicPlanExecutor::execute(const DynamicPlanCallRecord&
                             return store_.transition(child_id,RunState::queued,RunState::failed,R"({"reason":"dynamic_process_precondition_unavailable"})").get();
                         }
                         return runner->execute(child_id,stop,{},budget);
-                    },cancel});
+                    },cancel,std::move(bind_slot)});
                 }
                 try{staged.work=children_->stage(std::move(work));}
                 catch(const NativeChildCapacityUnavailable&){if(!assist())std::this_thread::sleep_for(std::chrono::milliseconds(10));continue;}

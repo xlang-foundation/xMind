@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "scope": "Backend dynamic-agent dispatch carries the actual acquired NativeChildSlot with its original RootExecutionBudget to the native process factory.",
+  "gate": {
+    "recordedAt": "2026-10-24T01:32:31.741Z",
+    "sourceParent": "3a869eba34bc5393d5e8ccf465876d4e3ef4f715",
+    "sourcePatchSha256": "cad356efdb04f20d7f1d6d2cb0dcb8ab1ce2243d897ae81f486b8c29d44c9a42",
+    "build": {
+      "pid": 11148,
+      "launchedAt": "2026-10-24T01:28:34.295Z",
+      "completedAt": "2026-10-24T01:31:40.477Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c3d254adb76c6d02b636a6f7779866d5181cc9c81f00a3e4dc2dcb055320e7b9"
+    },
+    "test": {
+      "pid": 35776,
+      "launchedAt": "2026-10-24T01:31:43.074Z",
+      "completedAt": "2026-10-24T01:32:29.142Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1846cb785be90737401353b635e56d964f4ab9dd2c479eb69cdf263d9d48b05f"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 46.03,
+    "projectFiles": 2815,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 137,
+    "nativeSha256": "26eff778c9b0fd15cfce8dfbc15a0b316a655f9a90414d49796913e50d820035",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "modelRpcDiagnosticRepetitions": 1,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "dispatch": {
+    "slotBoundByPoolBeforeAction": true,
+    "perJobBinding": true,
+    "nativeOnlyNotModelOrWireData": true,
+    "missingSlotRejectedBeforeModelDispatch": true,
+    "reconstructedBudgetRejectedBeforeModelDispatch": true,
+    "changedPresetStillRejected": true,
+    "actualSeparateProcessSdkChildReadPassed": true,
+    "sharedBudgetChargesAndPhysicalDrainRetained": true
+  },
+  "automaticNestedPlannerToolEnrollment": false,
+  "nestedProcessResumeSupported": false,
+  "fullNativeSuiteRun": false,
+  "installed64Unchanged": true,
+  "fullGoalComplete": false
+}

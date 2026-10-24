@@ -1,3 +1,21 @@
+## Dynamic process factory receives its acquired slot — 2026-10-23
+
+DynamicPlanExecutor now captures the pool-acquired slot per dispatched agent
+job and passes it with the original shared budget to DynamicAgentExecution.
+The native process factory rejects missing slots or reconstructed budgets
+before child model dispatch. These are backend capabilities, not model fields
+or serialized IPC arguments. Existing frozen-preset validation remains intact.
+
+The SDK ledger fixture verifies both refusals on an actually admitted child,
+then completes the production factory's SDK child read with the original slot.
+Shared charges, canonical history and physical drain remain checked. Pool,
+ledger and context4 pass in46.03s with frozen input/binary file sets and hashes.
+[Receipt](evidence/dynamic-worker-owned-slot-20261023.json).
+
+Nested planner tool enrollment and process resume remain disabled/unfinished;
+this change supplies the ownership required to wire them safely. Full172
+qualification and installed64 remain separate.
+
 ## Exact planning slot and budget identity — 2026-10-23
 
 Planning callbacks and native scheduler binding now require the slot's original
