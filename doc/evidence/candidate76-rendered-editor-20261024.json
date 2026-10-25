@@ -1,0 +1,80 @@
+{
+  "passed": true,
+  "sessionId": "ee6a0ececf3e41b4971982585436701b",
+  "runId": "78ea9d403e604078a674ffa7fb74ef8d",
+  "historyMessages": 8,
+  "modelCalls": 4,
+  "operations": [
+    {
+      "id": "9c38f78b016f74f3b3a62b3b7988d216",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "d782984e60f22001a52755b75bc97db7",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "nodeResult": {
+    "elapsed_ms": 241,
+    "exit_code": 0,
+    "independently_verified": false,
+    "job_id": "d782984e60f22001a52755b75bc97db7",
+    "operation_id": "d782984e60f22001a52755b75bc97db7",
+    "output_artifact": {
+      "operation_id": "d782984e60f22001a52755b75bc97db7",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 24
+    },
+    "pid": 43992,
+    "process_tree_retired": true,
+    "profile_id": "node",
+    "stderr": {
+      "byte_count": 0,
+      "data": "",
+      "encoding": "utf-8",
+      "retained_bytes": 0
+    },
+    "stdout": {
+      "byte_count": 24,
+      "data": "4 abs-sum checks passed\n",
+      "encoding": "utf-8",
+      "retained_bytes": 24
+    },
+    "termination": "exited",
+    "truncated": false
+  },
+  "runtimeFilesHashChecked": 2398,
+  "verificationOnly": true,
+  "replayed": false,
+  "validatorCorrection": "History API returns {messages,has_more}; original verifier incorrectly asserted history.length.",
+  "renderedReloadObservation": "Prior browser observation confirmed same run, eight messages and selected Native Process Coder; automatic turn cleanup closed tab62 before another screenshot.",
+  "goalComplete": false,
+  "candidate": "0.1.76",
+  "installed": "0.1.75 unchanged",
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "scope": "Actual official Code Server rendered editor selected-context coding through native process worker and controlled local model peer; no paid inference.",
+  "firstCompletionScreenshot": {
+    "path": "candidate76-rendered-editor-first-20261024.png",
+    "sha256": "8bbae3e7a674efe2d938d71c0aeebd4ce116dac81a169e305b1187140ef3f9f6"
+  },
+  "originalVerifier": {
+    "exitCode": 1,
+    "error": "AssertionError: undefined !== 8 at history.length; API returned {messages,has_more}.",
+    "correctedReadOnlyCheck": true,
+    "taskReplayed": false
+  },
+  "limits": [
+    "Reload was observed in prior browser turn; second screenshot was not retained before temporary tab cleanup.",
+    "Runtime file hashes checked; this continuation does not establish a new source/dependency/file-set freeze.",
+    "Owned-server retirement handle34089 remains pending; release installation is not qualified by this receipt."
+  ],
+  "ownedRetirement": {
+    "session": 34089,
+    "state": "pending",
+    "nativePid": 14200,
+    "codeServerPid": 36628
+  }
+}
