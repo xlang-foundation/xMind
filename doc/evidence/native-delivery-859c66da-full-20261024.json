@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-25T03:25:14.482Z",
+  "sourceParent": "859c66da1bb24a742f4fa747fda56ead5a442f5e",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 1368,
+    "launchedAt": "2026-10-25T03:10:10.847Z",
+    "completedAt": "2026-10-25T03:10:37.553Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+  },
+  "test": {
+    "pid": 5116,
+    "launchedAt": "2026-10-25T03:10:40.830Z",
+    "completedAt": "2026-10-25T03:25:11.031Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "8e729d4a06b6166486daa408f6f9879934c818732d2a9ba91c18ad67e590fd46"
+  },
+  "total": 179,
+  "failed": 0,
+  "passed": 179,
+  "seconds": 870.16,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "c17c240b424d1cdb09128dc2eb1f002d61ecb02cd1511379736600514f110dd3",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "observations": {
+    "graphRunnerSeconds": 12.3,
+    "diagnosticsSeconds": 5.69,
+    "workerRpcSeconds": 60.71,
+    "graphRemoteSeconds": 13.72,
+    "ledgerSeconds": 44.27,
+    "nestedSeconds": 37.3,
+    "deepSeconds": 9.93,
+    "localProfileSeconds": 117.72,
+    "localViewSeconds": 70.1
+  },
+  "limitations": [
+    "Earlier failures retained; this pass does not establish their cause or eliminate intermittent timing risk.",
+    "Ledger remains close to unchanged 45s wrapper; no individual IPC performance claim.",
+    "Positive native OS-trusted remote TLS remains a separate hosted gate.",
+    "No fresh frontend/rendered/package/install acceptance; installed74 preserved."
+  ]
+}

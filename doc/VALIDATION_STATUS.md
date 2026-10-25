@@ -1,3 +1,9 @@
+## Complete native859c gate passes179/179 — 2026-10-24
+
+Exact source859c66da1bb24a742f4fa747fda56ead5a442f5e / Nativec17c240b / SDK8c passes the complete actual179-test inventory in870.16s. Build and CTest exit0, with2840 project/16 SDK/1870 pure library/30 runtime/18598 dependency/142 binary hashes and file sets unchanged. Graph runner12.30s, diagnostics5.69s, worker RPC60.71s, graph remote13.72s, ledger44.27s, nested37.30s, deep9.93s, local profile117.72s and local view70.10s pass. All inference is synthetic/local controlled peers; no CPython or paid development inference.
+
+This is fresh full-native evidence, not causal resolution of earlier failures or reliable timing margin: ledger remains close to its unchanged45s wrapper. Original failures and never-replay namespaces remain retained. Positive native OS-trusted remote TLS, frontend/rendered/package acceptance and unfinished generic remote execution remain separate. Candidate is uninstalled; installed74 preserved and complete goal active. [Receipt](evidence/native-delivery-859c66da-full-20261024.json), [complete log](evidence/native-delivery-859c66da-full-20261024.log).
+
 ## Transaction-local worker scope reuse — 2026-10-24
 
 Worker validation now returns its already validated root, owner and budget for reuse within the same transaction. Identical root/owner reads and the second budget read are removed; journal run/budget replies reuse those values. Every new call still checks exact active lease, current generation, workspace membership, provider and active planning segment. No cross-call cache, IPC serializer, dispatch route or deadline change is introduced.
