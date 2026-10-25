@@ -3,7 +3,7 @@
 #include "agentflow/xmind_ipc_api.hpp"
 #include "agentflow/agent_worker_native_links.hpp"
 #include <optional>
-#include "nlohmann/json.hpp"
+#include <span>
 #include "xlang3/cpp/runtime.h"
 #include <condition_variable>
 #include <cstring>
@@ -18,13 +18,11 @@
 #include <filesystem>
 #include <limits>
 #include <mutex>
-#include <set>
 #include <utility>
 #include <vector>
 
 namespace agentflow {
 namespace {
-using Json=nlohmann::json;
 using Clock=std::chrono::steady_clock;
 struct Handle {
     HANDLE value=nullptr;
@@ -42,26 +40,9 @@ void check(Clock::time_point deadline,std::stop_token stop){
 void identifier(const std::string& value){
     if(value.empty()||value.size()>256)protocol();for(unsigned char c:value)if(c<33||c>126)protocol();
 }
-Json scope_json(const AgentWorkerScope& scope){
+void validate_scope(const AgentWorkerScope& scope){
     identifier(scope.root_id);identifier(scope.run_id);identifier(scope.workspace_id);identifier(scope.generation);
     if(scope.workspace_revision<1||scope.workspace_revision>9007199254740991)protocol();
-    return {{"root_id",scope.root_id},{"run_id",scope.run_id},{"workspace_id",scope.workspace_id},{"workspace_revision",scope.workspace_revision},{"generation",scope.generation}};
-}
-Json parse(const std::string& text){
-    if(text.empty()||text.size()>AgentWorkerChannel::max_message_bytes)protocol();
-    std::vector<std::set<std::string>> objects;
-    return Json::parse(text,[&](int depth,Json::parse_event_t event,Json& value){
-        if(depth>8)protocol();
-        if(event==Json::parse_event_t::object_start)objects.emplace_back();
-        if(event==Json::parse_event_t::key){if(objects.empty()||!objects.back().insert(value.get<std::string>()).second)protocol();}
-        if(event==Json::parse_event_t::object_end){if(objects.empty())protocol();objects.pop_back();}
-        return true;
-    });
-}
-AgentWorkerScope read_scope(const Json& value){
-    if(!value.is_object()||value.size()!=5||!value.at("workspace_revision").is_number_integer())protocol();
-    AgentWorkerScope scope{value.at("root_id").get<std::string>(),value.at("run_id").get<std::string>(),value.at("workspace_id").get<std::string>(),value.at("generation").get<std::string>(),value.at("workspace_revision").get<std::int64_t>()};
-    if(scope_json(scope)!=value)protocol();return scope;
 }
 void operation(const std::string& value){
     if(value.empty()||value.size()>64)protocol();for(char c:value)if(!((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='.'||c=='_'))protocol();
@@ -83,11 +64,27 @@ std::wstring quote(const std::wstring& text){
 struct IoStatistics {std::atomic<std::uint64_t> pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;};
 struct WorkerProcessReady {std::uint32_t pid=0,parent_pid=0,port=0;std::uint64_t created=0;};
 struct Inbox {
+    AgentWorkerScope scope;
     std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;std::optional<AgentWorkerMessage> message;
     std::optional<AgentWorkerStartup> startup;
     std::optional<AgentWorkerServiceAccess> execution;
     bool startup_received=false,execution_received=false;
     std::optional<WorkerProcessReady> process_ready;bool process_ready_received=false;
+};
+struct WorkerScopeApi {
+    AgentWorkerScope scope;
+    std::string RootId(){return scope.root_id;}
+    std::string RunId(){return scope.run_id;}
+    std::string WorkspaceId(){return scope.workspace_id;}
+    std::string Generation(){return scope.generation;}
+    std::int64_t WorkspaceRevision(){return scope.workspace_revision;}
+    BEGIN_PACKAGE(WorkerScopeApi)
+        APISET().AddFunc<0>("RootId",&WorkerScopeApi::RootId);
+        APISET().AddFunc<0>("RunId",&WorkerScopeApi::RunId);
+        APISET().AddFunc<0>("WorkspaceId",&WorkerScopeApi::WorkspaceId);
+        APISET().AddFunc<0>("Generation",&WorkerScopeApi::Generation);
+        APISET().AddFunc<0>("WorkspaceRevision",&WorkerScopeApi::WorkspaceRevision);
+    END_PACKAGE
 };
 void validate_service_access(const AgentWorkerServiceAccess& access){
     if(!access.endpoint.starts_with("lrpc:")||access.endpoint.size()>32||!access.pid||access.ticket.size()!=64||access.ticket.find_first_not_of("0123456789abcdef")!=std::string::npos)protocol();
@@ -104,6 +101,7 @@ struct WorkerLinkApi {
     std::shared_ptr<Inbox> inbox;
     WorkerLinkApi()=default;
     explicit WorkerLinkApi(std::shared_ptr<Inbox> value):inbox(std::move(value)){}
+    X::Value Scope();
     std::int64_t Deliver(std::string name,std::string payload){
         operation(name);if(payload.size()>AgentWorkerChannel::max_message_bytes-name.size())protocol();if(!inbox)protocol();
         std::lock_guard lock(inbox->mutex);if(inbox->closed)return -1;if(!inbox->waiting||inbox->message)return 0;
@@ -128,6 +126,7 @@ struct WorkerLinkApi {
         inbox->process_ready=WorkerProcessReady{static_cast<std::uint32_t>(pid),static_cast<std::uint32_t>(parent_pid),static_cast<std::uint32_t>(port),static_cast<std::uint64_t>(created)};inbox->changed.notify_all();
     }
     BEGIN_PACKAGE(WorkerLinkApi)
+        APISET().AddFunc<0>("Scope",&WorkerLinkApi::Scope);
         APISET().AddFunc<2>("Deliver",&WorkerLinkApi::Deliver);
         APISET().AddFunc<0>("Close",&WorkerLinkApi::Close);
         APISET().AddFunc<4>("ConfigureModel",&WorkerLinkApi::ConfigureModel);
@@ -142,6 +141,7 @@ struct WorkerRemoteObjects {
     std::shared_ptr<Inbox> find(const std::string& token){std::lock_guard lock(mutex);auto found=inboxes.find(token);if(found==inboxes.end())protocol();auto inbox=found->second.lock();if(!inbox)protocol();return inbox;}
     BEGIN_PACKAGE(WorkerRemoteObjects)
         APISET().AddClass<0,WorkerLinkApi>("Link");
+        APISET().AddClass<0,WorkerScopeApi>("Scope");
     END_PACKAGE
 };
 struct WorkerIpcHost {
@@ -153,6 +153,20 @@ struct WorkerIpcHost {
     }
 };
 WorkerIpcHost& ipc_host(){static WorkerIpcHost host;return host;}
+X::Value WorkerLinkApi::Scope(){
+    if(!inbox)protocol();auto captured=std::make_shared<WorkerScopeApi>();
+    {std::lock_guard lock(inbox->mutex);if(inbox->closed)protocol();captured->scope=inbox->scope;}
+    validate_scope(captured->scope);
+    return ipc_host().objects.__xlang3_package_->CreateInstance("Scope",std::move(captured));
+}
+// The inherited OS record carries only identity and rendezvous capabilities.
+// Application scope is obtained from the registered SDK Scope subobject.
+struct WorkerBootstrap {
+    std::uint32_t version=2,size=0,parent_pid=0,parent_port=0;
+    std::uint64_t parent_birth=0;
+    std::array<char,64> parent_route{},worker_route{};
+};
+static_assert(sizeof(WorkerBootstrap)<=8192);
 std::string new_route(){std::array<std::uint8_t,32> bytes{};if(BCryptGenRandom(nullptr,bytes.data(),static_cast<ULONG>(bytes.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)<0)throw std::runtime_error("Cannot create worker capability");return hex(bytes);}
 struct MappingView {
     void* value=nullptr;explicit MappingView(HANDLE handle,DWORD access):value(MapViewOfFile(handle,access,0,0,8192)){if(!value)throw std::runtime_error("Cannot map private worker bootstrap");}
@@ -179,7 +193,7 @@ struct AgentWorkerChannel::Impl {
     AgentWorkerScope scope;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;IoStatistics statistics;
     std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0;Handle peer;
     X::Runtime client;X::Value remote;
-    Impl(AgentWorkerScope binding,std::string route):scope(std::move(binding)),local(std::move(route)){ipc_host().objects.add(local,inbox);}
+    Impl(AgentWorkerScope binding,std::string route):scope(std::move(binding)),local(std::move(route)){inbox->scope=scope;ipc_host().objects.add(local,inbox);}
     ~Impl(){ipc_host().objects.remove(local);}
     void attach(std::uint32_t port,std::string route,HANDLE process){
         if(port<1||port>65535||route.size()!=64)protocol();remote_port=port;remote_route=std::move(route);
@@ -244,13 +258,19 @@ AgentWorkerMessage AgentWorkerChannel::receive(Deadline deadline,std::stop_token
 std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::uintptr_t inherited,Deadline deadline,std::stop_token stop){
     check(deadline,stop);Handle mapping(reinterpret_cast<HANDLE>(inherited));if(!mapping.value||mapping.value==INVALID_HANDLE_VALUE)protocol();
     if(!SetHandleInformation(mapping.value,HANDLE_FLAG_INHERIT,0))protocol();MappingView view(mapping.value,FILE_MAP_READ);
-    std::uint32_t size=0;std::memcpy(&size,view.value,sizeof(size));if(!size||size>8188)protocol();
-    const auto* bytes=static_cast<const char*>(view.value)+4;
-    const auto config=parse(std::string(bytes,size));if(!config.is_object()||config.size()!=7||config.at("version")!=1)protocol();
-    const auto parent_pid=config.at("parent_pid").get<DWORD>();Handle parent(OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,parent_pid));
-    if(!parent.value||birth(parent.value)!=config.at("parent_birth").get<std::uint64_t>())protocol();
-    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(read_scope(config.at("scope")),config.at("worker_route").get<std::string>())));
-    channel->impl_->attach(config.at("parent_port").get<std::uint32_t>(),config.at("parent_route").get<std::string>(),parent.value);
+    WorkerBootstrap config;std::memcpy(&config,view.value,sizeof(config));
+    if(config.version!=2||config.size!=sizeof(config)||!config.parent_birth)protocol();
+    const auto route=[](const auto& bytes){std::string value(bytes.data(),bytes.size());if(value.find_first_not_of("0123456789abcdef")!=std::string::npos)protocol();return value;};
+    const auto parent_pid=config.parent_pid;Handle parent(OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,parent_pid));
+    if(!parent.value||birth(parent.value)!=config.parent_birth)protocol();
+    auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(AgentWorkerScope{},route(config.worker_route))));
+    channel->impl_->attach(config.parent_port,route(config.parent_route),parent.value);
+    X::Value captured;if(!channel->impl_->remote["Scope"].Call(std::vector<X::Value>{},captured))protocol();
+    const auto value=[&](const char* name){check(deadline,stop);X::Value result;if(!captured[name].Call(std::vector<X::Value>{},result))protocol();return result;};
+    const auto text=[&](const char* name){const auto result=value(name);if(!result.IsString())protocol();return result.ToString();};
+    AgentWorkerScope scope{text("RootId"),text("RunId"),text("WorkspaceId"),text("Generation"),0};
+    const auto revision=value("WorkspaceRevision");if(!revision.IsInt64())protocol();scope.workspace_revision=revision.ToInt64();validate_scope(scope);
+    channel->impl_->scope=scope;{std::lock_guard lock(channel->impl_->inbox->mutex);channel->impl_->inbox->scope=std::move(scope);}
     X::Value acknowledged;if(!channel->impl_->remote["AnnounceProcess"].Call(std::vector<X::Value>{X::Value(static_cast<std::int64_t>(GetCurrentProcessId())),X::Value(static_cast<std::int64_t>(birth(GetCurrentProcess()))),X::Value(static_cast<std::int64_t>(parent_pid)),X::Value(static_cast<std::int64_t>(ipc_host().port))},acknowledged))protocol();check(deadline,stop);return channel;
 }
 struct AgentWorkerProcess::Impl {
@@ -263,7 +283,7 @@ std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::launch(std::shared_ptr<c
     check(deadline,stop);auto worker=prepare(std::move(executable),std::move(scope));worker->start(deadline,stop);return worker;
 }
 std::unique_ptr<AgentWorkerProcess> AgentWorkerProcess::prepare(std::shared_ptr<const BoundProcessExecutable> executable,AgentWorkerScope scope){
-    scope_json(scope);if(!executable||executable->identity().empty())throw std::invalid_argument("Worker requires a retained executable binding");
+    validate_scope(scope);if(!executable||executable->identity().empty())throw std::invalid_argument("Worker requires a retained executable binding");
     auto state=std::make_unique<Impl>();state->executable=std::move(executable);state->scope=std::move(scope);state->worker_route=new_route();
     state->channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<AgentWorkerChannel::Impl>(state->scope,new_route())));
     return std::unique_ptr<AgentWorkerProcess>(new AgentWorkerProcess(std::move(state)));
@@ -273,11 +293,12 @@ void AgentWorkerProcess::start(AgentWorkerChannel::Deadline deadline,std::stop_t
     // Recheck the retained identity before launch; the capability pins bytes and
     // the directory chain, so no unbound replacement path may be substituted.
     if(ForegroundProcess::executable_identity(state->executable->path())!=state->executable->identity())throw ProcessBeforeDispatchError("Worker image binding changed");
-    const auto& scope=state->scope;const auto& parent_route=state->channel->impl_->local;const auto& worker_route=state->worker_route;
+    const auto& parent_route=state->channel->impl_->local;const auto& worker_route=state->worker_route;
     SECURITY_ATTRIBUTES security{sizeof(SECURITY_ATTRIBUTES),nullptr,TRUE};
     Handle child(CreateFileMappingW(INVALID_HANDLE_VALUE,&security,PAGE_READWRITE,0,8192,nullptr));if(!child.value)throw std::runtime_error("Cannot create private worker bootstrap");
-    {MappingView view(child.value,FILE_MAP_WRITE);std::string bootstrap=Json{{"version",1},{"scope",scope_json(scope)},{"parent_pid",GetCurrentProcessId()},{"parent_birth",birth(GetCurrentProcess())},{"parent_port",ipc_host().port},{"parent_route",parent_route},{"worker_route",worker_route}}.dump();
-        if(bootstrap.size()>8188)protocol();const auto size=static_cast<std::uint32_t>(bootstrap.size());std::memcpy(view.value,&size,4);std::memcpy(static_cast<char*>(view.value)+4,bootstrap.data(),bootstrap.size());SecureZeroMemory(bootstrap.data(),bootstrap.size());}
+    {MappingView view(child.value,FILE_MAP_WRITE);WorkerBootstrap bootstrap;bootstrap.size=sizeof(bootstrap);bootstrap.parent_pid=GetCurrentProcessId();bootstrap.parent_birth=birth(GetCurrentProcess());bootstrap.parent_port=ipc_host().port;
+        std::copy(parent_route.begin(),parent_route.end(),bootstrap.parent_route.begin());std::copy(worker_route.begin(),worker_route.end(),bootstrap.worker_route.begin());
+        std::memcpy(view.value,&bootstrap,sizeof(bootstrap));SecureZeroMemory(&bootstrap,sizeof(bootstrap));}
     Handle input(CreateFileW(L"NUL",GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));Handle output(CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&security,OPEN_EXISTING,0,nullptr));if(input.value==INVALID_HANDLE_VALUE||output.value==INVALID_HANDLE_VALUE)throw std::runtime_error("Cannot isolate worker standard handles");
     state->job=Handle(CreateJobObjectW(nullptr,nullptr));if(!state->job.value)throw std::runtime_error("Cannot create worker ownership job");JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;if(!SetInformationJobObject(state->job.value,JobObjectExtendedLimitInformation,&limits,sizeof(limits)))throw std::runtime_error("Cannot restrict worker ownership job");
     Attributes attributes({child.value,input.value,output.value});STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);startup.StartupInfo.dwFlags=STARTF_USESTDHANDLES;startup.StartupInfo.hStdInput=input.value;startup.StartupInfo.hStdOutput=output.value;startup.StartupInfo.hStdError=output.value;startup.lpAttributeList=attributes.list;

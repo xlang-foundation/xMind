@@ -1,0 +1,196 @@
+{
+  "run": 40206234760,
+  "source": "14c867aaae3af2b7e5346a38f9372bbffd858971",
+  "nativeTotal": 182,
+  "nativePassed": 178,
+  "nativeFailed": 4,
+  "seconds": 829.38,
+  "inventoryAndTerminalNamesVerified": true,
+  "failedContracts": [
+    {
+      "number": 96,
+      "name": "native_agent_worker_model_rpc_contract",
+      "result": "***Failed   67.55 sec"
+    },
+    {
+      "number": 102,
+      "name": "native_agent_worker_ledger_contract",
+      "result": "***Failed   45.15 sec"
+    },
+    {
+      "number": 103,
+      "name": "native_agent_worker_nested_human_contract",
+      "result": "***Timeout  45.05 sec"
+    },
+    {
+      "number": 108,
+      "name": "native_agent_runner_contract",
+      "result": "***Failed   32.71 sec"
+    }
+  ],
+  "productionFixture": {
+    "pid": 1412,
+    "elapsedMs": 60029.7733,
+    "signal": "SIGTERM",
+    "budgetMs": 60000,
+    "lastStdout": [
+      {
+        "elapsedMs": 59732.9415,
+        "text": "Production unified xmind remote AgentRunner loop verified one actual approved peer effect, exact canonical continuation, two model windows and physical child retirement.\r\n"
+      }
+    ]
+  },
+  "agentRunner": {
+    "processPid": 6808,
+    "elapsedMs": 30063,
+    "state": "uncertain",
+    "processTreeRetired": true,
+    "observedCommand": "[IO.File]::WriteAllText('agent-process-folder.txt',(Get-Location).Path)",
+    "dumpRetained": true
+  },
+  "retainedNamespacesNeverReplay": [
+    "xmind-model-rpc-1325002679-595269050",
+    "xmind-model-rpc-1961218827-3455717478",
+    "xmind-model-rpc-768399870-4122298485",
+    "xmind-worker-ledger-1093378067-4272268700",
+    "xmind-worker-ledger-2741260479-1225176793"
+  ],
+  "packagedPipExecuted": false,
+  "rootCauseResolved": false,
+  "releaseQualified": false,
+  "installed": false,
+  "contractsSha256": "1a360edff936e994f5a45642981eef605dfa80bf2076c32a1e33df0a9b096078",
+  "recordedAt": "2026-10-25T16:51:55.981Z",
+  "provenance": {
+    "processors": 4,
+    "build_parallelism": 4,
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "toolchain_version": "18.11.12315.225",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "toolchain": "Visual Studio 18 2026",
+    "xlang3": "4417a9efbca7608de9855974f46ffa2520a1a416",
+    "xmind": "14c867aaae3af2b7e5346a38f9372bbffd858971",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "windows_default_owner_matches_user": false
+  },
+  "artifacts": [
+    {
+      "id": 12606357589,
+      "name": "native-windows-diagnostic-images-14c867aaae3af2b7e5346a38f9372bbffd858971",
+      "hashReceipt": {
+        "id": 12606357589,
+        "name": "native-windows-diagnostic-images-14c867aaae3af2b7e5346a38f9372bbffd858971",
+        "bytes": 32200757,
+        "sha256": "58632554094a485665d3ae6e6ab5b9b09ebcd865e9c4836397a53fcd324c2aff"
+      }
+    },
+    {
+      "id": 12606327734,
+      "name": "native-windows-evidence-14c867aaae3af2b7e5346a38f9372bbffd858971",
+      "hashReceipt": {
+        "id": 12606327734,
+        "name": "native-windows-evidence-14c867aaae3af2b7e5346a38f9372bbffd858971",
+        "bytes": 9210650,
+        "sha256": "85695ebb893616bcd36543c99dd10ae1354c0e132db3f57bb157d479277bf676"
+      }
+    }
+  ],
+  "agentRunnerModuleLoading": {
+    "dumpSha256": "a0a54ef2bf337f6d5cdc3bcaac11278c41ad7fd2bb8bddb9e183053f28b5eaa3",
+    "managedReaderSha256": "05f02cbd94e4333d88da4df1db817f534f45cdf7f33f29a3974699571b690926",
+    "managedStackSha256": "559d647d37370016efef70676b3f9a3c14bb614b8a42efb1029bda9b620e85b2",
+    "loadingThread": {
+      "osThreadId": 4704,
+      "managedThreadId": 9,
+      "alive": true,
+      "nativePosition": {
+        "valid": true,
+        "instructionPointer": "7ffa91d8077b",
+        "module": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\clr.dll",
+        "offset": "4077b"
+      },
+      "frames": [
+        "[HelperMethodFrame_PROTECTOBJ] (System.Reflection.RuntimeAssembly._nLoad)",
+        "System.Reflection.RuntimeAssembly.InternalLoadAssemblyName(System.Reflection.AssemblyName, System.Security.Policy.Evidence, System.Reflection.RuntimeAssembly, System.Threading.StackCrawlMark ByRef, IntPtr, Boolean, Boolean, Boolean)",
+        "System.Reflection.RuntimeAssembly.InternalLoadFrom(System.String, System.Security.Policy.Evidence, Byte[], System.Configuration.Assemblies.AssemblyHashAlgorithm, Boolean, Boolean, System.Threading.StackCrawlMark ByRef)",
+        "System.Reflection.Assembly.LoadFrom(System.String)",
+        "System.Management.Automation.ClrFacade.LoadFrom(System.String)",
+        "System.Management.Automation.Runspaces.InitialSessionState.LoadAssemblyFromFile(System.String)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.AnalyzeSnapinDomainHelper()",
+        "[GCFrame]",
+        "[GCFrame]",
+        "[ContextTransitionFrame]",
+        "[GCFrame]",
+        "[GCFrame]",
+        "[GCSafeCollectionFrame]",
+        "[GCSafeCollectionFrame]",
+        "[GCSafeCollectionFrame]",
+        "[GCSafeCollectionFrame]",
+        "[GCSafeCollectionFrame]",
+        "[GCSafeCollectionFrame]",
+        "[GCSafeCollectionFrame]",
+        "[TPMethodFrame] (System.AppDomain.DoCallBack)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.GetCmdletsFromBinaryModuleImplementation(System.String, ManifestProcessingFlags, System.Version ByRef)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.LoadBinaryModule(System.Management.Automation.PSModuleInfo, Boolean, System.String, System.String, System.Reflection.Assembly, System.String, System.Management.Automation.SessionState, ImportModuleOptions, ManifestProcessingFlags, System.String, Boolean, Boolean, Boolean ByRef, System.String, Boolean)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.LoadModule(System.Management.Automation.PSModuleInfo, System.String, System.String, System.String, System.Management.Automation.SessionState, System.Object, ImportModuleOptions ByRef, ManifestProcessingFlags, Boolean ByRef, Boolean ByRef)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.LoadModuleNamedInManifest(System.Management.Automation.PSModuleInfo, Microsoft.PowerShell.Commands.ModuleSpecification, System.String, Boolean, System.String, System.Management.Automation.SessionState, ImportModuleOptions, ManifestProcessingFlags, Boolean, Boolean, System.Object, Boolean ByRef, System.String, System.Nullable`1<System.Management.Automation.PSLanguageMode>)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.LoadModuleManifest(System.String, System.Management.Automation.ExternalScriptInfo, System.Collections.Hashtable, System.Collections.Hashtable, ManifestProcessingFlags, System.Version, System.Version, System.Version, System.Nullable`1<System.Guid>, ImportModuleOptions ByRef, Boolean ByRef)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.CreateModuleInfoForGetModule(System.String, Boolean)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase+<GetModuleForRootedPaths>d__86.MoveNext()",
+        "System.Collections.Generic.List`1[[System.__Canon, mscorlib]].InsertRange(Int32, System.Collections.Generic.IEnumerable`1<System.__Canon>)",
+        "Microsoft.PowerShell.Commands.ModuleCmdletBase.GetModule(System.String[], Boolean, Boolean)",
+        "Microsoft.PowerShell.Commands.GetModuleCommand.GetAvailableLocallyModules(System.String[], System.Collections.Generic.IDictionary`2<System.String,Microsoft.PowerShell.Commands.ModuleSpecification>, Boolean)",
+        "Microsoft.PowerShell.Commands.GetModuleCommand.ProcessRecord()",
+        "System.Management.Automation.CommandProcessor.ProcessRecord()",
+        "System.Management.Automation.CommandProcessorBase.DoExecute()",
+        "System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(System.Object)",
+        "System.Management.Automation.Runspaces.LocalPipeline.InvokeHelper()",
+        "System.Management.Automation.Runspaces.LocalPipeline.InvokeThreadProc()",
+        "System.Management.Automation.Runspaces.LocalPipeline.StartPipelineExecution()",
+        "System.Management.Automation.Runspaces.PipelineBase.CoreInvoke(System.Collections.IEnumerable, Boolean)",
+        "System.Management.Automation.Runspaces.PipelineBase.Invoke(System.Collections.IEnumerable)",
+        "System.Management.Automation.PowerShell+Worker.ConstructPipelineAndDoWork(System.Management.Automation.Runspaces.Runspace, Boolean)",
+        "System.Management.Automation.PowerShell.CoreInvokeHelper[[System.__Canon, mscorlib],[System.__Canon, mscorlib]](System.Management.Automation.PSDataCollection`1<System.__Canon>, System.Management.Automation.PSDataCollection`1<System.__Canon>, System.Management.Automation.PSInvocationSettings)",
+        "System.Management.Automation.PowerShell.CoreInvoke[[System.__Canon, mscorlib],[System.__Canon, mscorlib]](System.Management.Automation.PSDataCollection`1<System.__Canon>, System.Management.Automation.PSDataCollection`1<System.__Canon>, System.Management.Automation.PSInvocationSettings)",
+        "System.Management.Automation.PowerShell.Invoke(System.Collections.IEnumerable, System.Management.Automation.PSInvocationSettings)",
+        "System.Management.Automation.AnalysisCache.CallGetModuleDashList(System.Management.Automation.ExecutionContext, System.String)",
+        "System.Management.Automation.AnalysisCache.AnalyzeTheOldWay(System.String, System.Management.Automation.ExecutionContext, System.DateTime)",
+        "System.Management.Automation.AnalysisCache.AnalyzeManifestModule(System.String, System.Management.Automation.ExecutionContext, System.DateTime, Boolean)",
+        "System.Management.Automation.AnalysisCache.GetExportedCommands(System.String, Boolean, System.Management.Automation.ExecutionContext)",
+        "System.Management.Automation.CommandDiscovery.TryModuleAutoDiscovery(System.String, System.Management.Automation.ExecutionContext, System.String, System.Management.Automation.CommandOrigin, System.Management.Automation.SearchResolutionOptions, System.Management.Automation.CommandTypes, System.Exception ByRef)",
+        "System.Management.Automation.CommandDiscovery.LookupCommandInfo(System.String, System.Management.Automation.CommandTypes, System.Management.Automation.SearchResolutionOptions, System.Management.Automation.CommandOrigin, System.Management.Automation.ExecutionContext)",
+        "System.Management.Automation.CommandDiscovery.LookupCommandProcessor(System.String, System.Management.Automation.CommandOrigin, System.Nullable`1<Boolean>)",
+        "System.Management.Automation.ExecutionContext.CreateCommand(System.String, Boolean)",
+        "System.Management.Automation.PipelineOps.AddCommand(System.Management.Automation.Internal.PipelineProcessor, System.Management.Automation.CommandParameterInternal[], System.Management.Automation.Language.CommandBaseAst, System.Management.Automation.CommandRedirection[], System.Management.Automation.ExecutionContext)",
+        "System.Management.Automation.PipelineOps.InvokePipeline(System.Object, Boolean, System.Management.Automation.CommandParameterInternal[][], System.Management.Automation.Language.CommandBaseAst[], System.Management.Automation.CommandRedirection[][], System.Management.Automation.Language.FunctionContext)",
+        "System.Management.Automation.Interpreter.ActionCallInstruction`6[[System.__Canon, mscorlib],[System.Boolean, mscorlib],[System.__Canon, mscorlib],[System.__Canon, mscorlib],[System.__Canon, mscorlib],[System.__Canon, mscorlib]].Run(System.Management.Automation.Interpreter.InterpretedFrame)",
+        "System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(System.Management.Automation.Interpreter.InterpretedFrame)",
+        "System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(System.Management.Automation.Interpreter.InterpretedFrame)",
+        "System.Management.Automation.Interpreter.EnterTryCatchFinallyInstruction.Run(System.Management.Automation.Interpreter.InterpretedFrame)",
+        "System.Management.Automation.Interpreter.Interpreter.Run(System.Management.Automation.Interpreter.InterpretedFrame)",
+        "System.Management.Automation.Interpreter.LightLambda.RunVoid1[[System.__Canon, mscorlib]](System.__Canon)",
+        "System.Management.Automation.DlrScriptCommandProcessor.RunClause(System.Action`1<System.Management.Automation.Language.FunctionContext>, System.Object, System.Object)",
+        "System.Management.Automation.DlrScriptCommandProcessor.Complete()",
+        "System.Management.Automation.CommandProcessorBase.DoComplete()",
+        "System.Management.Automation.Internal.PipelineProcessor.DoCompleteCore(System.Management.Automation.CommandProcessorBase)",
+        "System.Management.Automation.Internal.PipelineProcessor.SynchronousExecuteEnumerate(System.Object)",
+        "System.Management.Automation.Runspaces.LocalPipeline.InvokeHelper()",
+        "System.Management.Automation.Runspaces.LocalPipeline.InvokeThreadProc()",
+        "System.Management.Automation.Runspaces.PipelineThread.WorkerProc()",
+        "System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object, Boolean)",
+        "System.Threading.ExecutionContext.Run(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object, Boolean)",
+        "System.Threading.ExecutionContext.Run(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)",
+        "System.Threading.ThreadHelper.ThreadStart()",
+        "[GCFrame]",
+        "[DebuggerU2MCatchHandlerFrame]"
+      ]
+    },
+    "interpretation": "Retained dump places this process in PowerShell module/assembly loading, with console initialization waiting. This observation does not establish the cause of the separate worker RPC/ledger/nested-human deadline failures."
+  },
+  "nativeSystemTrustContract": true,
+  "sourceOrFailedTasksReplayed": false,
+  "deadlinesChanged": false,
+  "workerDeadlineRootCauseResolved": false,
+  "installedVersion": "0.1.76",
+  "fullGoalComplete": false
+}
