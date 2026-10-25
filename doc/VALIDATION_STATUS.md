@@ -1,3 +1,7 @@
+## Status table and PDF updated to installed75 — 2026-10-24
+
+The14-area acceptance matrix and two-page A4 PDF now describe installed75 qualification, distinguish newer uninstalled cancellation source and retain unresolved hosted timing/native TLS/event/enrollment/fenced-worker/recovery requirements. Both final pages render without clipping; PDF.js extraction verifies all14 labels and installed/uninstalled limits. Previous PDF is retained privately and final bytes match the generation receipt. No runtime or user data changes. [PDF verification](evidence/implementation-status-pdf-installed75-20261024.json).
+
 ## Trusted cancellation fixture prepared; independent HTTPS peer passes — 2026-10-24
 
 Controlled HTTPS cancellation peer uses the shared domain request-ID map, exact session/run/revision fields and server/scope/actor/action fingerprint. It persists admission before intentionally dropping a reply, returns the original duplicate receipt, rejects cross-operation ID reuse and exposes safe GET/not_found observation. Independent Node HTTPS test verifies admission, duplicate/conflict, dropped reply and lookup with exact counters. No actual remote worker is implied.

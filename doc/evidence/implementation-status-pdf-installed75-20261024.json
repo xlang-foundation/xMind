@@ -1,0 +1,20 @@
+{
+  "recordedAt": "2026-10-25T04:18:25.779Z",
+  "installedBaseline": "0.1.75",
+  "nativeSha256": "c17c240b424d1cdb09128dc2eb1f002d61ecb02cd1511379736600514f110dd3",
+  "sourceMatrix": "docs/xmind-delivery-acceptance.md",
+  "sourceMatrixSha256": "e9afb427180aca3995e2a0986786883d33a7b907f3af42e99911c357adfa0b13",
+  "output": "docs/xmind-implementation-status.pdf",
+  "pdfSha256": "e5dfb31095f07cdb5b66410340177bcae1abf2f3f889b22f244e0addf4f30594",
+  "previousPdfSha256": "f4e4ebedd5c3987e8b56f61ac8b27e6c7e4bc9ba20326c3c27922c3cd274d47d",
+  "previousPdfPreservedPrivately": true,
+  "pages": 2,
+  "areas": 14,
+  "allAreaLabelsVerified": true,
+  "finalTwoPagePngVisualReview": true,
+  "newCancellationExplicitlyUninstalled": true,
+  "pendingNativeTlsAndHostedTimingFailuresExplicit": true,
+  "cpythonExecuted": false,
+  "installedRuntimeChanged": false,
+  "fullGoalComplete": false
+}

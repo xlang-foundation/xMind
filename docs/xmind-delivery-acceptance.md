@@ -1,6 +1,13 @@
 # xMind delivery acceptance audit
 
-## Current installed74 checkpoint
+## Current installed75 checkpoint
+
+Installed0.1.75 uses source859c66da/Nativec17c240b/SDK8c7972d1. Complete native179/179 passes870.16s, extension500/500 and browser178/178 pass with fresh assets. Fresh packaged CLI, rendered browser and actual Code selected-context read/edit/Node4/reload pass; the clean editor updates before reload. Managed74-to75 handoff refuses a paused graph, resumes it once and preserves endpoint/profile/history. All2442 installed files/2398 runtime files, registry, exact74 backup and five protected roots verify. Isolated installed read/history smoke passes with0models and confirmed owner exit. [Installation receipt](../doc/evidence/installed-0.1.75-859c66da-20261024.json).
+
+Newer source8a751a98 adds cancellation journal/transport/SDK/CLI/HTTP and hosted client fixtures. Focused11/11 passes, but this work is uninstalled and positive native TLS cancellation awaits hosted execution. Installed75 already includes typed remote session/run submission and durable receipt observation; events, enrollment, fenced remote workers and broad recovery remain unfinished. Hosted13e6b893 records173/177 with four timing failures; local passes do not explain them. [Hosted failure evidence](../doc/evidence/hosted-native-13e6b893-result-20261024.json). Full goal remains active.
+
+
+## Prior installed74 checkpoint
 
 Installed0.1.74 uses qualified source5e5849cd/Native f3b9bf69/SDK8c7972d1. Full native179/179 passes801.53s. Fresh packaged CLI, rendered browser and actual loopback VS Code selection/read/edit/approved Node4/reload pass; clean open editor updates before reload. Managed73-to74 handoff refuses while paused and preserves exact history/profile after one resume and idle upgrade. All2442 installed files/2398 runtime files, extension registry, exact73 backup and five protected roots verify. Fresh installed managed read/history smoke passes with zero models and owned-backend exit. [Installed receipt](../doc/evidence/installed-0.1.74-5e5849cd-20261024.json).
 
@@ -105,24 +112,24 @@ these older runtime results retain their original scope. [SDK8c browser coding o
 
 ## Current requirement matrix
 
-Latest installed checkpoint: 0.1.74. Detailed receipts are in doc/VALIDATION_STATUS.md. Full goal active.
+Latest installed checkpoint: 0.1.75. Newer cancellation source is uninstalled. Detailed receipts: doc/VALIDATION_STATUS.md. Full goal active.
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
-| Shared native C++ backend, embedded xlang3 and SQLite | Installed 0.1.74 Native f3b9bf69 passes all 179 local contracts. Complete source, SDK, library, dependency and binary integrity checks pass. | Hosted workflow acceptance remains separate; historical failed runs are retained. |
-| Standard xlang3 root/subobjects and process workers | Standard registered root/subobject methods; SDK value transfer and dispatch. Fresh browser, CLI and editor tasks use separate native workers. | Authenticated remote session/run mutation routing is not implemented. |
-| Browser coding | Packaged 0.1.74 UI: new conversation, process agent, read/edit, two approvals and real Node.js test with four assertions. Clean completion and eight-message reload pass. | Controlled local model replies; broader workflows and external-browser coverage remain separate. |
-| CLI coding | Fresh candidate74 read/edit/test passes with two approvals, four controlled replies and eight messages. Installed managed read/history smoke uses zero model calls. | Broader coding workflows remain scoped. Never replay completed tasks. |
-| VS Code extension | Candidate74 actual loopback editor selection/read/edit/Node4/reload passes. Clean open editor updates automatically before reload. Installed host adapters match this candidate. | No refresh latency bound is claimed. Broader editor workflows remain unverified. |
-| Conversation/footer layout | Browser74 and actual editor show completed history, selected agent and composer/footer at 1280x720. Paging/switch/draft evidence retained. | Complete accessibility and viewport coverage remains open. |
-| Workspace selection and isolation | Rendered switching, native profile/view isolation and captured browsing pass. Five protected installation roots remain exact. | Remote scope enrollment and distributed isolation need separate implementation. |
-| Single/graph agents, planning and delegation | Full179 includes graph-worker, nested/deep human continuations and failed-startup ownership checks. Fresh managed paused-graph handoff passes. | Original startup trigger remains unproven; broader multibranch and many-root recovery need evidence. |
-| Providers, MCP and A2A | Native controlled-provider/history, MCP/OAuth and A2A task/stream contracts pass. Rendered provider setup has controlled-peer evidence. | Live vendor breadth and every rendered MCP/A2A flow remain unproven. |
-| Coding tools | Native patch/restore, processes, terminals, VCS, instructions, skills and language-server checks pass. Browser, CLI and editor run real test scripts. | Rendered navigation, formatting and terminal breadth remain scoped. |
-| Connection catalog and authentication | Captured Local APIs and shared Settings; hosted trusted SDK/CLI/HTTP authentication. Installed74 adds cached scopes and captured remote session metadata reads. | Metadata reads do not enable commands. Trusted TLS session-read hosted qualification remains pending. |
-| Enrollment and distributed ownership | Generic v1 contract defines binding, receipts, enrollment and fencing. Native authentication and captured read foundations are implemented. | Durable command receipts, enrollment, fenced leases, revocation and lost-effect reconciliation remain unimplemented. |
-| Recovery and preservation | Managed73-to74 handoff refuses while paused, resumes once, then preserves history/profile. Five roots, registry, backup and installed smoke verify. | Arbitrary in-flight crash recovery and broader multi-root scheduling remain unproven. |
-| Packaging and release qualification | Installed74: full179, clients500/178, fresh browser/CLI/editor/handoff, exact2442 installed files/2398 runtime and73 backup. | Full goal remains active. Hosted native177 passed on prior source, but its later browser fixture failed; fixture corrected, hosted acceptance pending. |
+| Shared native C++ backend, embedded xlang3 and SQLite | Installed 0.1.75 Native c17c240b passes 179/179 local contracts in 870.16 seconds. Full input and binary integrity checks pass. | Hosted full-workflow acceptance and original timing-failure diagnosis remain open. |
+| Standard xlang3 root/subobjects and process workers | Registered root/subobject methods use SDK value transfer and dispatch. Fresh CLI, browser and editor coding use separate native workers. | Generic remote events, enrollment and fenced worker execution remain unfinished. |
+| Browser coding | Packaged 0.1.75 UI: new conversation, named process agent, read/edit, two approvals and four real Node assertions. Completion and eight-message reload pass. | Controlled local model replies; broader workflows and external-browser coverage remain separate. |
+| CLI coding | Fresh candidate 75 read/edit/test passes with two approvals, four controlled replies and eight messages. Installed managed read/history smoke uses zero models. | Broader coding workflows remain scoped. Completed tasks must never be replayed. |
+| VS Code extension | Actual candidate 75 Code editor attaches selection, approves edit/test and restores history. Clean open buffer updates automatically before reload. | No refresh latency bound. Broader editor workflows remain unverified. |
+| Conversation/footer layout | Browser75 and actual editor render completion, history and composer/footer at 1280x720. Earlier paging, switching and draft evidence is retained. | Complete accessibility and viewport coverage remains open. |
+| Workspace selection and isolation | Rendered switching, native profile/view isolation and captured browsing pass. All five protected installation roots remain byte-exact. | Remote enrollment and distributed isolation need separate implementation. |
+| Single/graph agents, planning and delegation | Full179 includes graph-worker and nested/deep human continuations. Fresh managed paused-graph handoff passes. Startup ownership regression is covered. | Hosted timing failures remain unexplained; broader multibranch and many-root recovery need evidence. |
+| Providers, MCP and A2A | Native controlled-provider/history, MCP/OAuth and A2A contracts pass. Hosted trusted authentication/session commands pass on source 13e; rendered setup has controlled-peer evidence. | Live vendor breadth and every rendered MCP/A2A flow remain unproven. |
+| Coding tools | Native patch/restore, processes, terminals, VCS, instructions, skills and language-server contracts pass. All three clients run real Node checks. | Rendered navigation, formatting and terminal breadth remain scoped. |
+| Connection catalog and authentication | Installed 75 supports captured session creation, run submission/metadata and durable receipts. Newer uninstalled source adds typed cancellation and adapter checks. | Positive native TLS run-submit/cancel qualification is pending. Remote profile activation and event observation remain open. |
+| Enrollment and distributed ownership | Generic v1 defines binding, receipt, enrollment and fencing rules. Native durable command receipts retain uncertain outcomes without resend. | Enrollment, fenced remote leases, revocation and distributed effect reconciliation remain unfinished. |
+| Recovery and preservation | Managed74-to75 handoff refuses paused work, resumes once and preserves endpoint/profile/history. Five roots, registry, backup and installed smoke verify. | Arbitrary in-flight crash recovery and broader multi-root scheduling remain unproven. |
+| Packaging and release qualification | Installed 75: full 179, clients 500/178, fresh CLI/browser/editor/handoff, exact 2442 installed files/2398 runtime and retained 74 backup. | Full goal remains active. Newer cancellation source is uninstalled; hosted13e fails four timing tests. |
 
 ## Next implementation sequence
 
