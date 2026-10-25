@@ -1,5 +1,15 @@
 # Generic remote connection v1 proposal
 
+Current acceptance (source d55741e0): the complete hosted177 native gate verifies
+trusted-TLS SDK/CLI/HTTP command, run-event and durable-consumer fixtures. The
+local gate separately passes179. These are controlled-peer protocol tests, not
+acceptance against a deployed Nexus server. See the
+[hosted result](evidence/hosted-native-d55741e0-result-20261024.json).
+The chronological implementation notes below retain their original narrower
+acceptance boundaries. Authoritative snapshot/reset, root-tree recovery,
+workspace/effect enrollment, fenced workers and profile-wide Remote activation
+remain open. Candidate76 installation and hosted packaging have separate gates.
+
 The backend-private command journal also recognizes a typed `runs.cancel` intent
 with session ID, run ID and positive expected run revision. It shares the
 existing request-ID namespace and durable unknown-before-send boundary. An
@@ -15,7 +25,10 @@ encrypted combined credential/grant storage through embedded xlang3/SQLite,
 cached authentication/scope observation and scoped session metadata reads are
 implemented in the development candidate. The registered Connections subobject
 uses ordinary xlang3 SDK values and methods; CLI and native HTTP adapters use
-the same native service. Typed captured session creation, run admission, metadata and receipt observation are implemented in source; profile-wide Remote activation, events and enrollment remain unavailable.
+the same native service. Typed captured session creation, run admission,
+cancellation, metadata, receipt observation, run-only events and durable event
+consumers are implemented in source. Profile-wide Remote activation, root-tree
+events and enrollment remain unavailable.
 
 Actual hosted trusted-TLS authentication is verified through separate SDK,
 CLI and native HTTP clients, including wrong-credential refusal, one grant per
@@ -46,8 +59,14 @@ xmind.Connections(owner_token)
       .Sessions().Create(request_id, title)                [typed creation]
       .Runs().Open(session_id, run_id)                     [run metadata]
       .Runs().Submit(request_id, session_id, expected_session_revision, prompt)
+      .Runs().Cancel(request_id, session_id, run_id, expected_run_revision)
       .Requests().Open(request_id)                         [local journal]
       .Requests().Reconcile(request_id)                    [receipt GET]
+      .RunEvents(session_id, run_id).Cursor()              [initial cursor]
+      .RunEvents(session_id, run_id).Read(cursor)          [run-only page]
+      .RunEvents(session_id, run_id).Consumer(consumer_id)
+          .Open() / .Read(checkpoint_revision)
+          .Accept(checkpoint_revision, cursor)             [explicit acknowledgement]
   .Open(profile_id, expected_profile_revision)                   [Local only]
       .Identity()
       .Sessions() / .Runs() / .Graphs() / .Models() / .Commands()
