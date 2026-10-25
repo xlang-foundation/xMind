@@ -1,0 +1,61 @@
+{
+  "recordedAt": "2026-10-25T03:34:53.152Z",
+  "passed": true,
+  "sourceNative": "859c66da1bb24a742f4fa747fda56ead5a442f5e",
+  "nativeQualification": {
+    "fullPassed": 179,
+    "fullFailed": 0,
+    "spreadBinaryUnchanged": true
+  },
+  "sessionId": "38b61e75faa04471b8caa95e15254a4a",
+  "runId": "e8b4b35cff8341a5b8f569127df26bdd",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "operations": [
+    {
+      "id": "fa0e810087969361efa08e82881ca524",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "ae58aa4ca5c087e76976064b9bc4ac95",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "selectedAgent": {
+    "editable": true,
+    "revision": 1,
+    "selected": {
+      "default": false,
+      "description": "Controlled packaged coding fixture",
+      "hidden": false,
+      "id": "coding.process",
+      "mode": "primary",
+      "model_id": "client-coding-fixture",
+      "name": "Native Process Coder",
+      "permissions": [],
+      "placement": "process",
+      "revision": 1
+    },
+    "session_id": "38b61e75faa04471b8caa95e15254a4a"
+  },
+  "cleanFirstCompletion": true,
+  "reloadedSameSession": true,
+  "reloadedSameRun": true,
+  "reloadedHistoryMessages": 8,
+  "scopedDecisionCount": 2,
+  "allScopedDecisionsSucceeded": true,
+  "screenshots": {
+    "first-completion": "6843ca41b2a54e6efbcc2cb4d578420984d12f54d518c69a8456ab8176e0e3f2",
+    "reload-completion": "6843ca41b2a54e6efbcc2cb4d578420984d12f54d518c69a8456ab8176e0e3f2"
+  },
+  "ownedBackendExited": true,
+  "hiddenBrowserClosed": true,
+  "completedTaskMustNeverBeReplayed": true,
+  "paidInference": false,
+  "cpython": false,
+  "installed": false,
+  "renderedEditorAcceptance": false,
+  "releaseAccepted": false
+}

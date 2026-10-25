@@ -1,3 +1,9 @@
+## Candidate75 rendered browser coding passes — 2026-10-24
+
+Hidden IAB59 uses the byte-verified candidate75 browser assets and native runtime. Fresh conversation38b61e75faa04471b8caa95e15254a4a/root e8b4b35cff8341a5b8f569127df26bdd selects Native Process Coder, reads spread.cjs, displays and approves the exact max-minus-min edit and literal Node check command, then reaches clean first completion. Actual Node exits0/four assertions; four controlled model replies, two successful operations/eight history messages, four model charges and completed worker retirement match native receipts. Both UI decisions use exact session/run-scoped routes and return200.
+
+Reload restores the same conversation/run/named process agent/eight messages and completed answer without replay. Screenshots retain first completion and reload. Staged runtime file sets/hashes and packaged browser assets remain exact; disposable backend birth/image verify before retirement and its exit is confirmed. Hidden tab closed. NEVER replay this completed task. Installed74 remains untouched; packaged rendered editor, handoff and installation are still open, as are unfinished remote protocol requirements. [Receipt](evidence/candidate75-rendered-browser-20261024.json).
+
 ## Candidate75 assembled; fresh packaged CLI coding passes — 2026-10-24
 
 Candidate0.1.75 packages qualified native859c66da/c17c240b/SDK8c, fresh500/178 client-tested sources and18 browser assets. Archive2443 entries and64 tracked frontend files match qualified inputs; all expected runtime/client/library bytes verify. Independent browser VSIX check confirms26 required assets and no private state. Runtime staging has2398 files; installed74 remains untouched.
