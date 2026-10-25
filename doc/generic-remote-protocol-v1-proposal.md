@@ -980,3 +980,35 @@ checks or rewind a progressed checkpoint. The output uses the SDK's public
 observation/reset fields. Actual positive CLI evidence is cached snapshot state;
 network/trusted-TLS delivery remains separate. Native HTTP/UI adapters are still
 open. [CLI evidence](evidence/remote-snapshot-cli-20261025.json).
+
+### Native HTTP snapshot adapters
+
+HTTP capability remote_run_snapshots:1 now advertises four owner/origin-bound
+POST routes under `/v1/connections/`:
+
+| Route suffix | Additional fields beyond the common six |
+| --- | --- |
+| scope-run-snapshot-open | expected_checkpoint_revision |
+| scope-run-snapshot-read | expected_checkpoint_revision, snapshot_id, expected_assembly_revision, expected_backend_generation |
+| scope-run-snapshot-observe | snapshot_id, expected_backend_generation |
+| scope-run-snapshot-reset | snapshot_id, expected_assembly_revision, digest, expected_backend_generation |
+
+Common fields are id, expected_profile_revision, scope_id, session_id, run_id
+and consumer_id. Snapshot ID may be null only for an initial Read; all other
+uses require a string. Checkpoint and reset assembly revisions are positive
+JSON-safe integers; a first Read may use assembly revision0. Missing/unknown
+fields, duplicate JSON keys, booleans and query parameters refuse. Read/observe/
+reset compare generation before creating or accessing a consumer.
+
+Open explicitly derives the current baseline. Known-ID operations reopen the
+stored baseline under current authorization, so a later HTTP request can observe
+or immediately acknowledge the same complete snapshot. Current grant checks
+also protect cached data. Responses use the same public fields as SDK methods;
+snapshot records do not carry effect authority. No automatic page loop, reset,
+profile fallback or remote-effect replay is introduced.
+
+Actual HTTP owner/view fixtures verify origin refusal, strict fields, generation
+fencing, reset/idempotence, shared state with a separate SDK/CLI process and
+database reopen. This is cached native HTTP acceptance; positive remote trusted
+TLS and rendered browser/editor snapshot workflows remain open.
+[HTTP evidence](evidence/remote-snapshot-http-20261025.json).

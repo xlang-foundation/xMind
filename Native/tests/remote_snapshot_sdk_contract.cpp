@@ -1,4 +1,5 @@
 #include "agentflow/xmind_ipc_api.hpp"
+#include "agentflow/http_server.hpp"
 #include "agentflow/remote_connection_credentials.hpp"
 #include "agentflow/remote_snapshot_store.hpp"
 #include "agentflow/xmind_ipc_runtime.hpp"
@@ -7,10 +8,17 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <thread>
 using namespace agentflow;
 namespace {
 const std::string token_one(64,'a'),token_two(64,'b');
 void check(bool v){if(!v)throw std::runtime_error("Native snapshot SDK fixture failed");}
+struct ScopedHttp {
+ std::unique_ptr<HttpServer> server;std::jthread thread;std::string origin;
+ ScopedHttp(PersistenceService& store,bool enabled){if(!enabled)return;server=std::make_unique<HttpServer>(store,token_one);const auto port=server->bind(0);check(port>0);origin="http://127.0.0.1:"+std::to_string(port);thread=std::jthread([this]{server->listen();});}
+ void close(){if(server){server->stop();if(thread.joinable())thread.join();server.reset();}}
+ ~ScopedHttp(){close();}
+};
 RemoteEventConsumer consumer(){return {"sdk-consumer","https://snapshot.example.invalid",{"remote-snapshot","server-a","scope-a","session-a","run-a","",0}};}
 void verify(PersistenceService& store){const auto c=consumer();const auto checkpoint=RemoteEventCheckpoints(store).observe(c);check(checkpoint.revision==2&&checkpoint.accepted.sequence==20&&checkpoint.snapshot_reset&&checkpoint.snapshot_reset->snapshot_id=="snapshot-a");const auto assembly=RemoteRunSnapshots(store).observe({c,1,c.initial},"snapshot-a");check(assembly.complete&&assembly.revision==1&&remote_snapshot_digest(assembly)==checkpoint.snapshot_reset->digest);check(ConnectionProfiles(store).load().active_id=="local");auto stale=c;stale.id="stale-never-created";bool absent=false;try{RemoteEventCheckpoints(store).observe(stale);}catch(const NotFound&){absent=true;}check(absent);}
 int client(const char* endpoint){
@@ -23,11 +31,11 @@ int client(const char* endpoint){
 }
 }
 int main(int argc,char** argv){try{
- if(argc==3&&std::string(argv[1])=="client")return client(argv[2]);const bool cli_mode=argc==5&&std::string(argv[1])=="cli-host";if(!cli_mode&&argc!=4)return 2;const int first=cli_mode?2:1;const auto file=(std::filesystem::path(argv[first])/"state.sqlite").string();check(!std::filesystem::exists(file));
+ if(argc==3&&std::string(argv[1])=="client")return client(argv[2]);const bool cli_mode=argc==5&&std::string(argv[1])=="cli-host",http_mode=argc==5&&std::string(argv[1])=="http-host";if(!cli_mode&&!http_mode&&argc!=4)return 2;const int first=(cli_mode||http_mode)?2:1;const auto file=(std::filesystem::path(argv[first])/"state.sqlite").string();check(!std::filesystem::exists(file));
  {
   PersistenceService store(file,{argv[first+1],argv[first+2]});ConnectionProfiles profiles(store);profiles.load_or_initialize();const auto catalog=profiles.apply(nlohmann::json{{"profiles",nlohmann::json::array({{{"id","local"},{"name","Local"},{"kind","local"}},{{"id","remote-snapshot"},{"name","Snapshot fixture"},{"kind","nexus"},{"origin","https://snapshot.example.invalid"}}})}}.dump(),1);const auto now=std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();const std::string key="synthetic-snapshot-sdk-credential";SecretBytes secret({reinterpret_cast<const std::uint8_t*>(key.data()),key.size()});RemoteNegotiatedGrant grant{"server-a","grant-a",1,1,now+300,{{"scope-a",{"sessions.read","runs.read","events.read","snapshots.read"}}},{{"sessions",1},{"runs",1},{"events",1},{"snapshots",1}}};RemoteConnectionCredentials(store,profiles).save(catalog.profiles.at(1),grant,secret,0,now);
   const auto c=consumer();RemoteEventCheckpoints(store).open(c);auto cursor=c.initial;cursor.epoch="epoch-new";cursor.sequence=20;RemoteRunSnapshots(store).stage({c,1,c.initial},0,{cursor,{"snapshot-a","epoch-new",20,2,0},{{"run","run-a",R"({"state":"completed"})",1},{"message","message-a",R"({"text":"Observed snapshot text"})",1}},true});
-  auto owner=std::make_unique<XMindIpcServer>(store,nullptr,token_one);std::cout<<nlohmann::json{{"endpoint",owner->endpoint()}}.dump()<<std::endl;std::string command;check(bool(std::getline(std::cin,command)));if(!cli_mode){check(command=="retire");owner.reset();owner=std::make_unique<XMindIpcServer>(store,nullptr,token_two);std::cout<<"snapshot-owner-replaced"<<std::endl;check(bool(std::getline(std::cin,command)));}check(command=="verify");verify(store);owner.reset();store.close();
+  ScopedHttp http(store,http_mode);auto owner=std::make_unique<XMindIpcServer>(store,nullptr,token_one);nlohmann::json ready{{"endpoint",owner->endpoint()}};if(http_mode)ready["http_origin"]=http.origin;std::cout<<ready.dump()<<std::endl;std::string command;check(bool(std::getline(std::cin,command)));if(!cli_mode&&!http_mode){check(command=="retire");owner.reset();owner=std::make_unique<XMindIpcServer>(store,nullptr,token_two);std::cout<<"snapshot-owner-replaced"<<std::endl;check(bool(std::getline(std::cin,command)));}if(http_mode&&command=="deny"){RemoteConnectionCredentials credentials(store,profiles);auto saved=credentials.load(catalog.profiles.at(1));saved.grant.authorized_scopes.front().actions={"sessions.read","runs.read","events.read"};credentials.save(catalog.profiles.at(1),saved.grant,saved.credential,saved.revision,now);std::cout<<"snapshot-grant-denied"<<std::endl;check(bool(std::getline(std::cin,command)));}check(command=="verify");verify(store);owner.reset();http.close();store.close();
  }
  {PersistenceService store(file,{argv[first+1],argv[first+2]});verify(store);store.close();}std::cout<<"snapshot-sdk-reopened"<<std::endl;return 0;
 }catch(const std::exception&){std::cerr<<"Native snapshot SDK fixture failed; private material not reflected\n";return 1;}}

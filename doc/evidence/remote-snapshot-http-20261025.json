@@ -1,0 +1,76 @@
+{
+  "recordedAt": "2026-10-25T08:10:18.112Z",
+  "sourceParent": "23bbf0dd0614e65e6606d0e90cca3203c9bf0adf",
+  "sourcePatchSha256": "d691ea83bf0cfa997a918a1da6ce42a9ca7b44d5fa1e08ba97f60261d21f019c",
+  "build": {
+    "pid": 36428,
+    "launchedAt": "2026-10-25T08:08:20.292Z",
+    "completedAt": "2026-10-25T08:09:53.848Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "bd30fce939060a46992f51117570421ab29af2a1e54e4affa56ebe51853235b2"
+  },
+  "test": {
+    "pid": 38816,
+    "launchedAt": "2026-10-25T08:09:56.721Z",
+    "completedAt": "2026-10-25T08:10:15.379Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "65dc7b1910626a24b21fbd6672d3b062342f4fb21ad86c619711151258851060"
+  },
+  "total": 10,
+  "failed": 0,
+  "passed": 10,
+  "seconds": 18.62,
+  "projectFiles": 2857,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 145,
+  "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "newSourceFile": {
+    "path": "Native/tests/remote_snapshot_http_contract.mjs",
+    "sha256": "eba8ea0c6a8ee0f0477c8aba3e7f10893c8848ab3bc5ba8752fddd0c9ca02f9e"
+  },
+  "peer": {
+    "passed": true,
+    "httpRequests": 31,
+    "hostPid": 35308,
+    "ownerAndOriginBoundView": true,
+    "staleGenerationCreatesNoConsumer": true,
+    "sdkSharesCheckpoint": true,
+    "deniedGrantRefusesCachedData": true,
+    "databaseReopened": true,
+    "networkFetch": false,
+    "modelCalls": 0,
+    "goalComplete": false
+  },
+  "scope": "Actual native HTTP owner/origin-bound view snapshot routes with shared native SDK checkpoint verification and encrypted database reopen.",
+  "httpCapability": "remote_run_snapshots:1",
+  "httpCapabilities": 12,
+  "registeredLocalContracts": 184,
+  "registeredHostedContracts": 182,
+  "checks": [
+    "Open/read/observe/reset exact typed request fields",
+    "Missing owner, wrong view origin, query, duplicate/unknown fields, booleans, Local fallback and foreign resource refusal",
+    "Generation mismatch before consumer creation",
+    "Explicit complete digest reset and cross-request duplicate acknowledgement",
+    "Separate CLI/SDK process observes the same HTTP-updated checkpoint",
+    "Current grant denial refuses cached snapshot observation/reset without exposing data"
+  ],
+  "limits": [
+    "HTTP positive snapshot data is seeded cached state, not live remote trusted-TLS snapshot delivery.",
+    "No rendered snapshot UI workflow yet.",
+    "Development Native78e55344 has focused validation only; no new complete suite/package qualification.",
+    "Installed76 Natived85a1697 remains unchanged.",
+    "Older hosted graph PowerShell timeout remains unresolved."
+  ],
+  "goalComplete": false
+}
