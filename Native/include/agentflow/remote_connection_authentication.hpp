@@ -39,7 +39,7 @@ public:
     void validate_scope(const RemoteCapturedScope&);
     RemoteObservedSession read_session(const RemoteCapturedScope&,const std::string& session_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     RemoteObservedRun read_run(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,std::chrono::milliseconds timeout,std::stop_token stop={});
-    static bool session_commands_available(const RemoteCapturedScope&);
+    static bool commands_available(const RemoteCapturedScope&);
     RemoteCommandRecord observe_command(const RemoteCapturedScope&,const std::string& request_id);
     RemoteCommandRecord create_session(const RemoteCapturedScope&,const std::string& request_id,const std::string& title,std::chrono::milliseconds,std::stop_token={});
     RemoteCommandRecord submit_run(const RemoteCapturedScope&,const std::string& request_id,RemoteRunSubmitAction,std::chrono::milliseconds,std::stop_token={});

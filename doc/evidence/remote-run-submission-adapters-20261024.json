@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-10-25T02:38:13.455Z",
+  "sourceParent": "13e6b8938d87e402c9f2be329f6aa51134e7948e",
+  "sourcePatchSha256": "2fa1e965c0c4603a018de5c9d5d7ae8bcee72582e0afb5a1acf8d73d374c84d4",
+  "build": {
+    "pid": 9768,
+    "launchedAt": "2026-10-25T02:34:27.758Z",
+    "completedAt": "2026-10-25T02:37:47.063Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "3d55a6664b9e1c72a86c810f5af0573376148dd6dc9193ce640d0c57b975ac12"
+  },
+  "test": {
+    "pid": 31504,
+    "launchedAt": "2026-10-25T02:37:49.848Z",
+    "completedAt": "2026-10-25T02:38:10.599Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "cb73eee8397070cdec1aa53b054bc8a7370b50633f58bbc73a0b4a553385728b"
+  },
+  "total": 11,
+  "failed": 0,
+  "passed": 11,
+  "seconds": 20.71,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "89dd966eb6f468410c70c4c79bb29b5e7c2a2fb6c270fbd902f3ced310887bac",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Standard xlang3 Runs.Submit subobject, CLI scope-run-submit with bounded prompt stdin, and origin-bound HTTP run submission; focused local qualification",
+  "capability": "remote_scoped_run_submit:1",
+  "sdk": "Connections(owner).OpenScope(id,revision,scope).Runs().Submit(request_id,session_id,expected_session_revision,prompt)",
+  "verifiedLocally": [
+    "Known terminal run receipts through actual SDK subobject and native HTTP adapter without another send",
+    "Denied permissions invalid boolean revision conflicting prompt and retired owner refusal",
+    "Eight additive capabilities and command routing availability for either authorized typed action",
+    "Actual CLI empty/oversized redirected prompt and unauthenticated remote refusal",
+    "Independent Node HTTPS peer prompt SHA256 shared request-ID conflicts dropped reply lookup and large Unicode/CRLF body preservation"
+  ],
+  "newAdmissionNativeTrustedTlsSdkCliHttpVerified": false,
+  "newAdmissionNativeCliVerified": false,
+  "actualRemoteWorkerExecutionVerified": false,
+  "installed74Preserved": true
+}

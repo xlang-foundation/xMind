@@ -6,7 +6,7 @@ encrypted combined credential/grant storage through embedded xlang3/SQLite,
 cached authentication/scope observation and scoped session metadata reads are
 implemented in the development candidate. The registered Connections subobject
 uses ordinary xlang3 SDK values and methods; CLI and native HTTP adapters use
-the same native service. Typed captured session creation and receipt observation are implemented in source; general run routing and enrollment remain unavailable.
+the same native service. Typed captured session creation, run admission, metadata and receipt observation are implemented in source; profile-wide Remote activation, events and enrollment remain unavailable.
 
 Actual hosted trusted-TLS authentication is verified through separate SDK,
 CLI and native HTTP clients, including wrong-credential refusal, one grant per
@@ -36,6 +36,7 @@ xmind.Connections(owner_token)
       .Sessions().Open(session_id)                         [metadata only]
       .Sessions().Create(request_id, title)                [typed creation]
       .Runs().Open(session_id, run_id)                     [run metadata]
+      .Runs().Submit(request_id, session_id, expected_session_revision, prompt)
       .Requests().Open(request_id)                         [local journal]
       .Requests().Reconcile(request_id)                    [receipt GET]
   .Open(profile_id, expected_profile_revision)                   [Local only]
@@ -75,11 +76,12 @@ connection selection. Existing root compatibility services remain Local.
 Capability `remote_scoped_session_read:1` advertises this development API.
 `OpenScope` currently requires an authenticated, unexpired grant with exact
 `sessions:1` capability and `sessions.read` permission in the selected scope.
-Its Sessions object exposes Open and typed Create; run submission, cancellation,
-history, events, enrollment and worker execution are not enabled by this binding.
+Its Sessions object exposes Open and typed Create; Runs exposes metadata Open and
+typed Submit. Cancellation, history, events, enrollment and worker execution are
+not enabled by these admission/observation methods.
 The public identity contains connection/profile/credential revisions, server,
 protocol, scope and backend generation, plus `command_routing` (false for read-only grants; true only when the captured
-grant supports typed session creation and receipt reads). It contains
+grant supports at least one implemented typed mutation and receipt reads). It contains
 no credential or grant ID/revision fields. Local selection remains unchanged.
 
 The connector issues one GET to `/xmind/v1/scopes/{scope_id}/sessions/{session_id}`
@@ -208,8 +210,8 @@ CLI uses connections scope-run-open ID REV SCOPE SESSION RUN. Native HTTP uses
 POST /v1/connections/scope-run with exactly id, expected_profile_revision,
 scope_id, session_id and run_id under the existing owner/origin-bound view checks.
 All adapters call the native service and fence backend generation. They do not
-select a profile or enable run submission. Submission, cancellation, events and
-worker retirement remain separate implementation and verification requirements. A terminal run
+select a profile. Run submission has a separate typed method below; cancellation,
+events and worker retirement remain separate implementation/verification requirements. A terminal run
 metadata response does not itself establish physical worker retirement.
 
 Proposed resource paths are relative to `/xmind/v1/scopes/{scope_id}`. Encode
@@ -260,8 +262,21 @@ observation operation. Revoked read permission refuses reconciliation visibly.
 ### Native run submission and receipt connector
 
 The development native service now admits typed run intents through the durable
-journal before calling the connector. Public SDK/CLI/HTTP run-submission adapters
-are not yet enabled. The connector requires runs:1/receipts:1 and the scope's
+journal before calling the connector. Capability remote_scoped_run_submit:1
+advertises the ordinary Runs().Submit(request_id,session_id,expected_revision,prompt)
+subobject method. Its expected revision must be an actual integer, not a boolean.
+CLI uses connections scope-run-submit ID REV SCOPE REQUEST SESSION EXPECTED_REV
+PROMPT, or --prompt-stdin in place of PROMPT for exact redirected UTF-8 input
+including multiline/CRLF text up to256KiB. HTTP uses POST
+/v1/connections/scope-run-submit with exactly id, expected_profile_revision,
+scope_id, request_id, session_id, expected_session_revision and prompt. The existing
+1MiB HTTP request-body cap remains. Both adapters retain captured generation and
+authorization checks. They return only binding and the six public request fields;
+the prompt and its digest remain private to native intent/remote receipt validation.
+Command routing indicates availability of at least one authorized typed mutation,
+not run completion or support for every remote operation.
+
+The connector requires runs:1/receipts:1 and the scope's
 runs.submit plus receipts.read actions for POST. Receipt GET requires receipts.read
 and the compatible capabilities, independently of current submit permission.
 
