@@ -1,0 +1,64 @@
+{
+  "source": "61c426cd20f6e0f1e7b5afca527cc6bfae45ee81",
+  "projectFiles": 2856,
+  "dependencyFiles": 14908,
+  "testFiles": {
+    "extension": 23,
+    "browser": 10
+  },
+  "results": {
+    "build": {
+      "pid": 18800,
+      "startedAt": "2026-10-25T22:50:04.263Z",
+      "endedAt": "2026-10-25T22:50:04.340Z",
+      "exitCode": 0,
+      "logSha256": "6ee368ac2d7447f4bf4566b4438ae73de6bb2ae96bc4bdca4700c526f407b15a"
+    },
+    "extension": {
+      "pid": 10608,
+      "startedAt": "2026-10-25T22:50:04.341Z",
+      "endedAt": "2026-10-25T22:50:08.532Z",
+      "exitCode": 0,
+      "logSha256": "4caf540c84b43907d2b41863d1710672112c1297610e7687fa8a039f6df0fac3",
+      "tests": 510,
+      "pass": 510,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 4123.6412
+    },
+    "browser": {
+      "pid": 31360,
+      "startedAt": "2026-10-25T22:50:08.533Z",
+      "endedAt": "2026-10-25T22:50:28.780Z",
+      "exitCode": 0,
+      "logSha256": "ba17aacf9fd78de1e3f8cfb8e72ac5a81b591e3ecce37e480a2663f4b5a70fa4",
+      "tests": 185,
+      "pass": 185,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 20189.6159
+    }
+  },
+  "artifacts": 18,
+  "allSourceDependenciesAndSetsUnchanged": true,
+  "nativeSuiteRun": false,
+  "rendered": false,
+  "installed": false,
+  "paidInference": false,
+  "cpython": false,
+  "passed": true,
+  "sourceParent": "61c426cd20f6e0f1e7b5afca527cc6bfae45ee81",
+  "sourcePatchSha256": "84fe3534816ca661ac9b3ad169ba9618b47c1c0c36bf44383c5e1d85737a9b57",
+  "regressions": {
+    "focusedPassed": 5,
+    "originalFailureRetained": ".agentflow/workspace-preference-fix/before-fix.log",
+    "originalNegativeRunLeakedJsdomAndWasIdentityRetired": true,
+    "fixtureFailureCleanupCorrected": true
+  },
+  "nativeSourceUnchanged": true,
+  "scope": "Full client regressions for authenticated-catalogue workspace preference restoration. New packaged/rendered restart acceptance remains required."
+}
