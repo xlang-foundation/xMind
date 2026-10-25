@@ -494,6 +494,36 @@ expanding effects requires a new explicit authorization revision.
 
 ## Workers and fencing
 
+### Enrollment implementation boundary (not yet implemented)
+
+Enrollment must be a captured scope service, alongside the existing Sessions,
+Runs, Requests, Consumers and Snapshots services. The registered root only opens
+that service; it must not acquire enrollment or scheduling responsibilities.
+SDK callers use ordinary methods and SDK value serialization, with no new IPC
+dispatcher or application serializer.
+
+The first implementation must persist two separate facts: the local user's
+approved workspace authority/effect revision, and the peer's enrollment receipt.
+An authenticated connector grant, a worker-supplied Boolean or an admitted remote
+command is not evidence of local approval. The native backend must validate the
+current workspace membership before claiming the one-send boundary. Existing
+RemoteCommandJournal prepared/unknown/admitted/rejected semantics can inform the
+network intent, but cannot substitute for this local approval record.
+
+Creation must retain an unresolved send across restart and reconcile that same
+request ID. Revocation must commit the local refusal of new effects before any
+network attempt; peer acknowledgement is a separate state. Public inspection
+must distinguish these states without publishing local paths or credentials.
+Enrollment acceptance alone must not enable execution: the lease, atomic
+effect-start receipt and existing native tool permission checks below remain
+required before an actual effect.
+
+Qualification must include a changed membership between approval and send,
+concurrent claims of the same request, a lost creation reply followed by restart,
+peer effects broader than local approval, expiry, and revocation while the peer
+is unavailable. These are additional requirements, not implemented evidence or
+permission to replay an existing failed namespace.
+
 Workers use the registered `Workers()` subobject through ordinary xlang3 IPC.
 The native backend owns remote polling, authentication, lease verification,
 local admission and receipts. A worker cannot supply its own workspace root,
