@@ -1,3 +1,9 @@
+## Native remote snapshot-page decoder — 2026-10-24
+
+Added a backend-private snapshot-page model/validator for the next gap-recovery path. Initial and continuation pages pin server/scope/session/run, current grant, snapshot ID, retention epoch, sequence watermark and record count. Same-epoch sequence regression, inconsistent offsets/completion, duplicate identities within a page, unknown record kinds, malformed/duplicate JSON and ungranted/expired observations refuse. Pages are at most64KiB/256records with4096total advertised records; payload objects remain observational data, not tool/effect authority.
+
+Final actual native contract passes1/1 in0.31s including two pages and30 refusal cases, with2849project/16SDK/1870pure-library/30runtime/18598dependency/143binary hashes and file sets unchanged. New untracked source hashes are explicitly retained; git diff alone excludes those files. Inventory is now180local/178hosted; no new full-suite pass claimed. The test executable compiles the decoder; existing production executable/installed76 remain unchanged. Fetch, captured service, complete durable assembly, explicit reset, public adapters and root-tree recovery remain open. [Receipt](evidence/remote-snapshot-page-validator-20261024.json), [original log](evidence/remote-snapshot-page-validator-20261024.log). Full goal active.
+
 ## Installed76 preservation and installed native smoke accepted — 2026-10-24
 
 Installed0.1.76 contains full179-qualified Native d85a1697/source d55741e0 with SDK8c. Installer exits0; complete2442-file installed set,2440 payload files,2398 runtime files and package/VSIX manifests match. Other extension registry entries and all five protected user roots retain exact hashes/file sets (before/after SHAdf7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a). Exact2442-file installed75 backup remains preserved. Prior CLI/browser/editor/handoff proof and retained verifier/cleanup limitations remain separate receipts.

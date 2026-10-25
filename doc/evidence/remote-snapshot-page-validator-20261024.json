@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-10-25T06:58:11.098Z",
+  "sourceParent": "1b411fd4d8e86ff2f5b3c3f84c15f6b320e4bcf3",
+  "sourcePatchSha256": "cfbdd013cefcabcec62d82a293d74c455dcdc994e56e68dc87f04b2f28c4fa25",
+  "build": {
+    "pid": 31496,
+    "launchedAt": "2026-10-25T06:57:50.917Z",
+    "completedAt": "2026-10-25T06:58:05.616Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "04128908d7ec9fd63557f578d41a1582cb32ee0b6ce2bb5863123627f9d79ece"
+  },
+  "test": {
+    "pid": 39364,
+    "launchedAt": "2026-10-25T06:58:08.211Z",
+    "completedAt": "2026-10-25T06:58:08.570Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "ef3c651deaae0f9c539c60ece2a57ed0d82db413045f8cb1da4be917a9d34bcc"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 0.31,
+  "projectFiles": 2849,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 143,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "sourceFiles": {
+    "Native/include/agentflow/remote_run_snapshot.hpp": "9c8d046ee69d975be5f63285c8c8bff25094189d022d2a0108c8618f5c6dcb7d",
+    "Native/src/remote_run_snapshot.cpp": "28f830cf8450cdfbdcf8f6670a8f7f8dfc46b364ca63e240face1f07e576d7d0",
+    "Native/tests/remote_run_snapshot_contract.cpp": "b66e25c4b9f235bf76aecd693934c57d1959fbfb18698ff6df880776d272a1e6"
+  },
+  "scope": "Native network snapshot-page decoder only; initial/two-page continuation and30 refusal cases.",
+  "registeredLocalContracts": 180,
+  "registeredHostedContracts": 178,
+  "sourcePatchLimitation": "Git diff does not contain initially untracked new files; exact new-file hashes are listed here and included in the frozen project closure.",
+  "launcherLimitation": "Private generated launcher failed syntax checks before any native launch; original retained. Callback-based replacement repaired it. Two actual contract runs used distinct gate roots; final run includes added regression cases.",
+  "productionBinaryUnchanged": true,
+  "installedVersion": "0.1.76 unchanged",
+  "notImplemented": [
+    "Verified-HTTPS snapshot fetch",
+    "Captured authorization before/after network publication",
+    "Durable complete-page assembly and cross-page duplicate detection",
+    "Explicit consumer checkpoint reset and snapshot acknowledgement",
+    "SDK/CLI/HTTP/UI snapshot methods",
+    "Root-tree snapshot/recovery"
+  ],
+  "fullGoalComplete": false
+}

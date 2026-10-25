@@ -81,6 +81,7 @@ $ciExpected=@('model_stream_protocol_contract','model_request_contract','native_
 $ciExpected+='native_agent_file_tool_host_contract'
 $ciExpected+='native_root_work_executor_contract'
 $ciExpected+='native_remote_negotiation_contract'
+$ciExpected+='native_remote_run_snapshot_contract'
 $ciExpected+='native_remote_connection_client_contract'
 $ciExpected+='native_remote_connection_credentials_contract'
 $ciExpected+='native_remote_connection_authentication_contract'

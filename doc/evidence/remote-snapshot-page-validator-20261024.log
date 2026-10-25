@@ -1,0 +1,19 @@
+Start testing: Oct 24 23:58 Pacific Daylight Time
+----------------------------------------------------------
+5/180 Testing: native_remote_run_snapshot_contract
+5/180 Test: native_remote_run_snapshot_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_run_snapshot_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_run_snapshot_contract" start time: Oct 24 23:58 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native snapshot page validation: initial/continuation, replacement epoch, stable watermark, resource/grant identity and 30 refusals. No fetch, persistence, cursor reset or routing claimed.
+<end of output>
+Test time =   0.29 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_run_snapshot_contract" end time: Oct 24 23:58 Pacific Daylight Time
+"native_remote_run_snapshot_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 24 23:58 Pacific Daylight Time

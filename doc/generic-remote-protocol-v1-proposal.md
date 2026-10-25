@@ -771,3 +771,41 @@ Capability `remote_event_consumers:1` advertises these adapters, not grant
 authority. Actual SDK/HTTP cached-page recovery and acknowledgement have focused
 evidence. Native trusted-TLS consumer delivery, positive CLI acknowledgement,
 authoritative snapshot/reset and root-tree checkpoint recovery remain open.
+
+### Snapshot page decoder (native primitive; not a reset API)
+
+The native decoder now defines a bounded run-only snapshot page. This is a new
+network-domain contract, not an application IPC serializer. No snapshot method
+is advertised through the SDK or negotiation yet. Fetch and captured-service
+integration remain open.
+
+The response has exactly `binding`, `snapshot`, `records` and `complete`.
+Binding uses the existing server/scope/protocol/grant identity fields. Snapshot
+has exactly `id`, `server_id`, `scope_id`, `session_id`, `run_id`, `epoch`,
+`sequence`, `total_records` and `offset`. Initial offset is zero. Continuation
+must retain snapshot ID, resource, epoch, sequence and total count, with offset
+equal to the previous offset plus its record count. A new epoch may replace an
+expired epoch; the same epoch cannot regress behind the caller's observed
+sequence. This does not itself publish or accept the replacement cursor.
+
+Records have exactly `ordinal`, `kind`, `id`, `revision` and `payload`.
+Ordinals are contiguous. Kind is run, message, operation, decision, worker or
+budget; the first record is the exact requested run, and later records cannot
+be another run. Revisions are positive JSON-safe integers, payloads are objects,
+and duplicate kind/ID pairs within a page refuse. These are observational
+projections; a decision or worker record never grants local effect authority.
+Unknown kinds refuse until a compatible schema is negotiated.
+
+Each page is at most64KiB/256records, with a positive total at most4096. Complete
+is true exactly when the page reaches that total. Depth and duplicate JSON keys
+are checked. The decoder requires snapshots:1/runs:1/events:1 and explicit
+snapshots.read/runs.read/events.read in the captured scope. Snapshot read
+permission must cover the peer's entire authorized projection; it cannot be
+inferred from ordinary metadata read permission.
+
+Still required: verified-HTTPS retrieval, post-response authorization fences,
+durable bounded assembly across all pages, cross-page duplicate/refusal checks,
+explicit snapshot acceptance and atomic checkpoint reset. A partial snapshot
+must leave the old accepted cursor untouched. No automatic event retry, model
+or tool replay, root-tree completeness, worker retirement or Nexus deployment
+is established by page validation. [Focused evidence](evidence/remote-snapshot-page-validator-20261024.json).
