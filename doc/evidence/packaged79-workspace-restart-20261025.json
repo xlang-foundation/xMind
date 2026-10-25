@@ -1,0 +1,257 @@
+{
+  "recordedAt": "2026-10-25T23:32:34.359Z",
+  "version": "0.1.79",
+  "nativeSource": "f641f9ffc42405314547fcc4d0c4f9be933ac1ed",
+  "nativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e",
+  "qualifiedPackage": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension",
+    "archiveSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "manifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "verifiedPackagedFiles": 2379
+  },
+  "archiveBytes": 35279499,
+  "archiveEntries": 2381,
+  "clients": {
+    "extension": 510,
+    "browser": 185,
+    "repeated": false
+  },
+  "runtimeReuse": {
+    "movedFrom": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-workspace-fix/extension/native-runtime",
+    "priorArchive": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-workspace-fix/agentflow-0.1.78-workspace-restore.vsix",
+    "priorArchiveSha256": "56618c027e7a48819e6c99d95952905f759df508dc5d22e668693f3c2095960d",
+    "priorManifestSha256": "a4e03cb0ebff9605e5138587af424b2b27c325493899fc445050552bb8cebdc7",
+    "allPriorFilesVerified": true,
+    "allFilesSingleLink": true,
+    "changedFiles": [
+      "xmind.exe",
+      "provenance.json",
+      "native-runtime-manifest.json"
+    ],
+    "unchangedContentFiles": 2334,
+    "duplicateRuntimeCreated": false,
+    "sourceBundleManifestProjectionVerified": true
+  },
+  "first": {
+    "passed": true,
+    "first": {
+      "otherMarkerVisible": true,
+      "seedFileAbsent": true,
+      "sendDisabled": true,
+      "sessionId": "a90fafab69754063a59404de0fb4ab6c",
+      "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000000f1d110000000000",
+      "workspaceLabel": "v1-ui-other77⌄"
+    },
+    "reload": {
+      "otherFileVisible": true,
+      "seedFileAbsent": true,
+      "sendDisabled": true,
+      "sessionId": "a90fafab69754063a59404de0fb4ab6c",
+      "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000000f1d110000000000",
+      "workspaceLabel": "v1-ui-other77⌄"
+    },
+    "tasksSubmitted": 0,
+    "modelsCalled": 0,
+    "fullViewRestartAccepted": false,
+    "installed": false
+  },
+  "restart": {
+    "passed": true,
+    "dom": {
+      "otherMarkerVisible": true,
+      "seedFileAbsent": true,
+      "sendDisabled": true,
+      "sessionId": "a90fafab69754063a59404de0fb4ab6c",
+      "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000000f1d110000000000",
+      "workspaceLabel": "v1-ui-other77⌄"
+    },
+    "launchWorkspace": "v1-ui-seed77",
+    "restoredWorkspace": "v1-ui-other77",
+    "fullNativeViewAndAdapterRestart": true,
+    "tasksSubmitted": 0,
+    "modelsCalled": 0,
+    "installed": false
+  },
+  "routeProof": {
+    "routesSha256": "477f85439e8fe85b1af04a8893b72a5cc3d51822a3cf7f6bc0aa6692dd0d9cb2",
+    "capturedThroughReceipt": 210,
+    "successfulRestoreSelectIndex": 27,
+    "firstSuccessfulHistoryIndex": 36,
+    "oldPageRequestsBeforeReload": "Old credentials receive401; no successful old-scope history is returned.",
+    "noRootRunOrSessionCreation": true,
+    "noSuccessfulWrongSessionRead": true,
+    "postBoundMessagesMeaning": "POST connection-bindings/.../sessions/.../messages is the scope-bound history-read contract, not message creation."
+  },
+  "preservation": {
+    "sessionsBefore": [
+      [
+        [
+          "a90fafab69754063a59404de0fb4ab6c",
+          "Browser conversation"
+        ]
+      ],
+      [
+        [
+          "1529aa4c008642b5abbf8f1444867766",
+          "Browser conversation"
+        ]
+      ]
+    ],
+    "sessionsAfter": [
+      [
+        [
+          "a90fafab69754063a59404de0fb4ab6c",
+          "Browser conversation"
+        ]
+      ],
+      [
+        [
+          "1529aa4c008642b5abbf8f1444867766",
+          "Browser conversation"
+        ]
+      ]
+    ],
+    "sessionRowsIdentical": true,
+    "runsBefore": [
+      [],
+      []
+    ],
+    "runsAfter": [
+      [],
+      []
+    ],
+    "databaseReadsThroughXlang3Only": true,
+    "dbWalUnchangedDuringEachRead": true
+  },
+  "explicitOwnedBackendUpgrade": {
+    "requested": true,
+    "originalOwners": [
+      13476,
+      31548
+    ],
+    "currentOwners": [
+      {
+        "ProcessId": 31084,
+        "ExecutablePath": "\\\\?\\D:\\CantorAI2026\\xMind\\.agentflow\\u77\\p\\b61809f8a98510e50971aa0d0dbf7a8dc0785ae50d169dd8e93f916f185a8a15\\runtime-2066fc9a836c1cabb3e2cf71dddd0c6cf0f0ac4ab57634e94172cd22b0cae8c8\\xmind.exe",
+        "birthUtc": "2026-10-25T23:26:15.0191660Z",
+        "identity": {
+          "process_birth": "134374443750191667",
+          "process_id": 31084
+        },
+        "nativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e"
+      },
+      {
+        "ProcessId": 11784,
+        "ExecutablePath": "\\\\?\\D:\\CantorAI2026\\xMind\\.agentflow\\u77\\p\\2867d3b0d97c1866019b54b5a9ec9b5714c521b531423219a4d6dc8b0e50b0b4\\runtime-1e4db28be0c21b3e3d2f448f3407b63e14f2925dbaf7f4e310b87af02ca6167c\\xmind.exe",
+        "birthUtc": "2026-10-25T23:27:12.1951970Z",
+        "identity": {
+          "process_birth": "134374444321951970",
+          "process_id": 11784
+        },
+        "nativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e"
+      }
+    ],
+    "bothCurrentImagesMatchQualifiedNative": true,
+    "noUserOwnerRetired": true
+  },
+  "priorViewRetirement": {
+    "recordedAt": "2026-10-25T23:21:16.0465080Z",
+    "retired": [
+      {
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\native-sdk6df-f86eda4b\\package-workspace-fix\\extension\\native-runtime\\xmind.exe",
+        "birth": "134374424256147051",
+        "exited": true,
+        "pid": 27084,
+        "identityVerifiedOnHeldProcessHandle": true
+      },
+      {
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "birth": "134374424219625084",
+        "exited": true,
+        "pid": 15696,
+        "identityVerifiedOnHeldProcessHandle": true
+      }
+    ],
+    "identityFile": "D:\\CantorAI2026\\xMind\\.agentflow\\u77\\fixed-first-live.json",
+    "installed": false,
+    "managedOwnersPreserved": [
+      13476,
+      31548
+    ]
+  },
+  "firstRepairedViewRetirement": {
+    "recordedAt": "2026-10-25T23:29:27.0924090Z",
+    "identityFile": "D:\\CantorAI2026\\xMind\\.agentflow\\u77\\repair-first-v2-live.json",
+    "retired": [
+      {
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\native-sdk6df-view-lease\\package-qualified\\extension\\native-runtime\\xmind.exe",
+        "pid": 14912,
+        "identityVerifiedOnHeldProcessHandle": true,
+        "exited": true,
+        "birth": "134374443584256432"
+      },
+      {
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "pid": 30360,
+        "identityVerifiedOnHeldProcessHandle": true,
+        "exited": true,
+        "birth": "134374443545442126"
+      }
+    ],
+    "managedOwnersPreserved": [
+      31084,
+      11784
+    ],
+    "installed": false
+  },
+  "initialHarnessFailure": {
+    "recordedAt": "2026-10-25T23:24:44.319Z",
+    "pid": 31224,
+    "nativeExitCode": 2,
+    "stderr": "Local profile storage permits another principal to modify it",
+    "cause": "Harness pre-created r4 with inherited Authenticated Users Modify; r3 created by Native is owner/SYSTEM-only.",
+    "readyValidationBeforeProfileConnection": true,
+    "tasksSubmitted": 0,
+    "modelsCalled": 0,
+    "installationChanged": false,
+    "preservedDirectory": ".agentflow/u77/r4",
+    "correction": "Fresh r4b path is left absent for Native to create privately. Explicit upgrade-backend is requested for the owned synthetic profiles because default view startup preserves healthy owners."
+  },
+  "liveContinuation": {
+    "viewPid": 32984,
+    "viewIdentity": {
+      "process_birth": "134374445784125134",
+      "process_id": 32984
+    },
+    "adapterPid": 29836,
+    "adapterIdentity": {
+      "process_birth": "134374445745224570",
+      "process_id": 29836
+    },
+    "origin": "http://127.0.0.1:64430",
+    "browser": "http://127.0.0.1:64430/ui/",
+    "metadata": ".agentflow/u77/repair-restart-live.json",
+    "toolSession": 66802
+  },
+  "acceptance": {
+    "coldWorkspaceAttachment": true,
+    "scopedFileAndExistingSession": true,
+    "browserReload": true,
+    "fullNativeViewAndAdapterRestart": true,
+    "backendProcessRestart": false,
+    "providerSetup": false,
+    "denialAndActiveCancellationUi": false,
+    "installed": false,
+    "releaseAccepted": false
+  },
+  "tasksSubmitted": 0,
+  "modelsCalled": 0,
+  "completedEffectsReplayed": false,
+  "hostedBaseline": {
+    "run": 40235870242,
+    "source": "1f49b5c39ae260a4e6f44aa8b1004f03b3325d85",
+    "qualifiesCurrentNativeRepair": false,
+    "newRunDispatched": false
+  }
+}

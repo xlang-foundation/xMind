@@ -23,7 +23,9 @@ Advanced graph workflows, wider provider coverage, additional MCP/A2A workflows 
 
 ## Current evidence and remaining release work
 
-Checkpoint1f49b5c3 passes local184/184 and hosted182/182 against SDK6df6520f, including hosted packaged offline pip25.2; SDK pip25/26 and fixed performance evidence remain separate. Candidate0.1.77 VSIX ead875de passes fresh packaged CLI, hidden browser and Code coding; Code reload requires reauthentication. Candidate managed startup/cancellation/restart is reconciled without task replay. Workspace creation/switching/reload works, but full browser-view restart loses the selected workspace: this blocks v1. Provider/remaining usability checks, the selection repair and safe installation remain open. Installed0.1.76 is preserved; no installed/release acceptance is claimed. See [validation status](VALIDATION_STATUS.md) and [workspace restart evidence](evidence/packaged-sdk6df-workspace-restart-20261025.json).
+Candidate0.1.79 VSIX1cddb6a0 contains Native78bf31b0 at f641f9ff/SDK6df6520f. Complete local184/184 and clients510/185 pass. Actual packaged cold workspace attachment, scoped files/session, reload and full native-view/adapter restart now preserve the selected workspace; both original session rows remain identical with0runs/models. The browser preference and stale-lease defects are repaired. [Current restart/preservation evidence](evidence/packaged79-workspace-restart-20261025.json), [native qualification](evidence/native-view-lease-sdk6df-20261025.json).
+
+Earlier candidate77 fresh packaged CLI/browser/Code coding and managed restart receipts remain preserved without task replay; Code reload requires reauthentication. Provider setup, denial/active cancellation UI, remaining current-package client acceptance and safe installation remain open. Installed0.1.76 is preserved; no installed/release acceptance is claimed. Hosted182/182 and packaged offline pip25.2 qualify earlier source1f49b5c3, not the native lease repair; no new hosted job is dispatched. SDK pip25/26 and fixed performance evidence remain separate. See [validation status](VALIDATION_STATUS.md).
 
 ## Test artifact retention
 
