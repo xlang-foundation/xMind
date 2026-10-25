@@ -248,15 +248,21 @@ if(@($ciActual).Count -ne $ciExpected.Count -or $ciInventoryDifference){
 $ciFixtureRoot=Join-Path $ciEvidence 'native-fixtures'
 if(Test-Path -LiteralPath $ciFixtureRoot){throw 'Fresh native fixture directory required.'}
 New-Item -ItemType Directory -Path $ciFixtureRoot | Out-Null
+$ciWorkerTimingRoot=Join-Path $ciEvidence 'worker-rpc-timing'
+if(Test-Path -LiteralPath $ciWorkerTimingRoot){throw 'Fresh worker timing directory required.'}
+New-Item -ItemType Directory -Path $ciWorkerTimingRoot | Out-Null
 $ciPriorTemp=$env:TEMP
 $ciPriorTmp=$env:TMP
+$ciPriorWorkerTiming=$env:XMIND_WORKER_FIXTURE_TIMING_DIR
 try {
     $env:TEMP=$ciFixtureRoot
     $env:TMP=$ciFixtureRoot
+    $env:XMIND_WORKER_FIXTURE_TIMING_DIR=$ciWorkerTimingRoot
     Invoke-CiCommand 'native-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error')
 } finally {
     $env:TEMP=$ciPriorTemp
     $env:TMP=$ciPriorTmp
+    $env:XMIND_WORKER_FIXTURE_TIMING_DIR=$ciPriorWorkerTiming
 }
 # Publish the complete successful gate only after CTest returns zero. Packaging
 # binds this receipt to the exact registered set, test log and source revision.

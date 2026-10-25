@@ -57,6 +57,8 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path build/ci-evidence | Out-Null
           node --test Tools/tests/owned-process-diagnostics.test.mjs > build/ci-evidence/owned-process-diagnostics-contract.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test Tools/tests/native-fixture-timing.test.mjs > build/ci-evidence/native-fixture-timing-contract.log
           exit $LASTEXITCODE
       - name: Run extension contracts without package lifecycle scripts
         working-directory: xmind/extensions/vscode

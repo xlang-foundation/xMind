@@ -1,0 +1,117 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T06:08:57.724Z",
+    "sourceParent": "9cc566b2336cc8363e61dc87fb2c4b7aaf2d89be",
+    "sourcePatchSha256": "621034c5319eae005f869115e0c3211f58369aee2f892e6cf12ed0b90b139471",
+    "build": {
+      "pid": 2552,
+      "launchedAt": "2026-10-25T06:07:37.719Z",
+      "completedAt": "2026-10-25T06:08:00.954Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+    },
+    "test": {
+      "pid": 32020,
+      "launchedAt": "2026-10-25T06:08:03.551Z",
+      "completedAt": "2026-10-25T06:08:55.161Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "50ba15f15a04eb2c332ea28de04996881802efbe6cd564e629f1a4c6db30a103"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 51.57,
+    "projectFiles": 2845,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "helperTests": {
+    "passed": 4,
+    "cases": [
+      "split UTF-8 stdout/stderr with exact reconstruction",
+      "nonzero exit preserves original rejection/output",
+      "disabled capture creates no files",
+      "timeout preserves null exit code and killed signal"
+    ]
+  },
+  "nativeRetention": {
+    "passed": true,
+    "records": [
+      {
+        "file": "production-5236.json",
+        "phase": "production",
+        "pid": 3452,
+        "elapsedMs": 45616.479100000004,
+        "chunks": 119,
+        "stdoutBytes": 20479,
+        "stderrBytes": 0,
+        "lastCompletedLine": "Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open."
+      },
+      {
+        "file": "transport-5236.json",
+        "phase": "transport",
+        "pid": 39912,
+        "elapsedMs": 5848.058300000001,
+        "chunks": 66,
+        "stdoutBytes": 6992,
+        "stderrBytes": 0,
+        "lastCompletedLine": "Actual child model RPC, nested stream callbacks, scope/duplicate rejection, cancellation, crash and lost delivery passed; product AgentRunner/journal/tool placement remains open."
+      }
+    ]
+  },
+  "records": [
+    {
+      "name": "production-5236.json",
+      "sha256": "9b4bafae124cd92c8b2fe7e8ae35cb72a034988877916aea725e26dbc3fc9dc4",
+      "bytes": 52500
+    },
+    {
+      "name": "transport-5236.json",
+      "sha256": "def66b311c88e1512709ffaf0854004aabc9c280dcd31cb3e7ba88fb796877ab",
+      "bytes": 20381
+    }
+  ],
+  "ciConfiguration": "Scoped worker-rpc-timing directory under build/ci-evidence; previous environment restored in finally; helper tests run in diagnostics step",
+  "bounds": {
+    "maxTimingChunks": 4096,
+    "subprocessMaxBufferBytes": 2097152,
+    "originalPhaseTimeoutMs": 60000
+  },
+  "diagnosticsCollects": [
+    "phase",
+    "child pid",
+    "relative chunk times",
+    "stdout",
+    "stderr",
+    "exit code",
+    "signal",
+    "killed flag"
+  ],
+  "diagnosticsDoesNotCollect": [
+    "command-line metadata",
+    "environment metadata",
+    "process memory"
+  ],
+  "productionNativeUnchanged": true,
+  "noDeadlineOrCoverageChange": true,
+  "originalHostedFailuresNotReplayed": true,
+  "powerShellStackCaptureStillOpen": true,
+  "exactTimingFailureCausesRemainUnproven": true,
+  "installed75Unchanged": true,
+  "validationLauncherSyntaxCorrection": {
+    "caughtBeforeAnyNativeProcess": true,
+    "finalLauncherSyntaxPassed": true
+  }
+}
