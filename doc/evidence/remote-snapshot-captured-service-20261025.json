@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-25T07:06:23.729Z",
+  "sourceParent": "9a0f82da406281ad2e6a6401c310ec4e15a74b83",
+  "sourcePatchSha256": "25e3f40ad290e7ab88f89d5b86e6602e323f0d661f9d98da8024d47f300a0266",
+  "build": {
+    "pid": 27332,
+    "launchedAt": "2026-10-25T07:05:07.903Z",
+    "completedAt": "2026-10-25T07:06:14.542Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "3f93997e8f197ee5bc0d1f3ed17912b6f69a0d1fa2f47b1ec6a08be1d77631a7"
+  },
+  "test": {
+    "pid": 13952,
+    "launchedAt": "2026-10-25T07:06:17.228Z",
+    "completedAt": "2026-10-25T07:06:21.054Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "11dcc93bf24fddd269ce54a0f46e978d79b4f100c512c144733f511765e963e7"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 3.79,
+  "projectFiles": 2850,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 144,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Captured native snapshot service with real embedded xlang3/SQLite and controlled backend exchange; decoder/loopback transport/existing client regressions.",
+  "checks": [
+    "Two captured snapshot pages",
+    "Independent typed reply validation including duplicate payload keys",
+    "Pre-send foreign-resource and cancellation refusal",
+    "Post-response cancellation, credential revision and profile revision fences",
+    "Fresh explicit scope after credential rotation",
+    "Encrypted reopen and snapshots.read denial",
+    "Local profile selection unchanged; input cursor unchanged"
+  ],
+  "limits": [
+    "No snapshot reset, durable snapshot assembly or public adapter yet.",
+    "No backend-generation fence claimed until retained SDK adapter integration.",
+    "No positive native trusted-TLS snapshot result; transport positive is controlled loopback.",
+    "Existing production executable and installed76 remain unchanged; no new full native pass."
+  ],
+  "goalComplete": false
+}

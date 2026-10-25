@@ -1,3 +1,9 @@
+## Captured native remote snapshot service — 2026-10-25
+
+RemoteConnectionAuthentication now provides typed read_run_snapshot. It derives the exact captured run binding, validates snapshot permission/continuation before exchange and reloads profile/credential/grant state before publishing. Default exchange uses the existing verified-HTTPS snapshot connector. A separate native domain-result validator rejects malformed injected replies, duplicate payload keys and resource/watermark changes; no application IPC serializer or dispatcher is introduced.
+
+Decoder, transport, client and authentication contracts pass4/4 in3.79s. Actual embedded xlang3/SQLite tests verify two pages, foreign-resource/pre-cancellation refusal, malformed replies, post-response cancellation/profile/credential changes, explicit scope reopen after rotation, encrypted reopen and snapshots.read denial. Local selection/input cursor remain unchanged. Full2850/16/1870/30/18598/144 hashes/file sets verify. Existing production executable and installed76 remain unchanged; no new full-suite or trusted-TLS snapshot acceptance claimed. Durable assembly/reset, retained-object generation fencing/public adapters and root-tree recovery remain open. [Receipt](evidence/remote-snapshot-captured-service-20261025.json), [original log](evidence/remote-snapshot-captured-service-20261025.log). Full goal active.
+
 ## Native remote snapshot transport — 2026-10-25
 
 Native read_remote_run_snapshot_page now uses the existing bounded verified-HTTPS client by default, with no redirect/retry and at most64KiB per response. It validates grant/resource/continuation before dispatch and validates the returned page with current grant expiry after transport. Each call fetches one observation page; no cursor is published or reset. Continuation query pins snapshot_id and offset; opaque path/query IDs encode colons once.

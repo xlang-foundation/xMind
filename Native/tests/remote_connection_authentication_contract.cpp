@@ -267,7 +267,29 @@ void captured_run_read_contract(const std::string& modules,const std::string& st
     for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
     std::cout<<"Captured run reads verified exact metadata, six states, no-send refusals and post-response cancellation/profile/credential fencing through real xlang3/SQLite. Controlled backend exchange only."<<std::endl;
 }
+void captured_snapshot_contract(const std::string& modules,const std::string& stdlib){
+ const auto file=std::filesystem::temp_directory_path()/("xmind-captured-snapshot-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));unsigned calls=0;int mode=0;std::stop_source cancelled;
+ const auto negotiate=[](const auto&,const auto&,auto requirements,auto,auto){RemoteNegotiatedGrant grant;grant.server_id="server-a";grant.grant_id="snapshot-grant";grant.protocol_version=1;grant.grant_revision=1;grant.expires_at=requirements.now_unix_seconds+120;grant.capabilities=requirements.required_capabilities;grant.capabilities["snapshots"]=1;grant.authorized_scopes={{"workspace-a",{"sessions.read","runs.read","events.read","snapshots.read"}}};return grant;};
+ {
+  PersistenceService store(file.string(),{modules,stdlib});ConnectionProfiles profiles(store);const auto catalog=profiles.apply(source("https://snapshot.example.invalid"),profiles.load().revision);const auto profile=catalog.profiles.at(1);RemoteConnectionCredentials credentials(store,profiles);
+  const RemoteRunSnapshotExchange exchange=[&](const auto& origin,const auto& credential,const auto& grant,const auto& after,const auto& continuation,auto timeout,auto)->RemoteRunSnapshotPage{
+   ++calls;require(origin==profile.origin&&!credential.view().empty()&&timeout==2s);RemoteRunSnapshotPage result;result.cursor=after;result.cursor.epoch="epoch-a";result.cursor.sequence=20;result.position={"snapshot-a","epoch-a",20,2,continuation?1:0};result.complete=continuation.has_value();result.records={{continuation?"message":"run",continuation?"message-a":"run-a","{}",1}};
+   if(mode==1)result.cursor.connection_id="foreign";if(mode==2)result.cursor.session_id="foreign";if(mode==3)++result.position.sequence;if(mode==4)result.records[0].payload_json="[]";if(mode==5)result.records[0].payload_json=R"({"key":1,"key":2})";if(mode==6)cancelled.request_stop();if(mode==7)credentials.save(profile,grant,credential,1,grant.expires_at-120);if(mode==8){const auto current=profiles.load();profiles.apply(source(origin,"Changed during snapshot"),current.revision);}return result;
+  };
+  RemoteConnectionAuthentication auth(store,profiles,negotiate,{},{},{},{},{},{},{},{},{},exchange);auth.authenticate(profile.id,profile.revision,0,secret(),2s);auto scope=auth.open_scope(profile.id,profile.revision,"workspace-a");const auto initial=auth.run_event_cursor(scope,"session-a","run-a");
+  const auto first=auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s);require(!first.complete&&first.cursor.sequence==20);auto next=first.position;next.offset=1;require(auth.read_run_snapshot(scope,"session-a","run-a",initial,next,2s).complete);
+  const auto before=calls;auto wrong=initial;wrong.run_id="other";rejects<std::invalid_argument>([&]{auth.read_run_snapshot(scope,"session-a","run-a",wrong,std::nullopt,2s);});std::stop_source pre;pre.request_stop();rejects<TransportCancelled>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s,pre.get_token());});require(calls==before);
+  for(mode=1;mode<=5;++mode)rejects<TransportError>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s);});mode=6;rejects<TransportCancelled>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s,cancelled.get_token());});mode=7;rejects<Conflict>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s);});const auto rotated=calls;rejects<Conflict>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s);});require(calls==rotated);
+  scope=auth.open_scope(profile.id,profile.revision,"workspace-a");mode=0;require(auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s).cursor.sequence==20);mode=8;rejects<Conflict>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s);});require(initial.sequence==0&&initial.epoch.empty()&&profiles.load().active_id=="local");store.close();
+ }
+ {
+  PersistenceService store(file.string(),{modules,stdlib});ConnectionProfiles profiles(store);RemoteConnectionAuthentication auth(store,profiles,negotiate);const auto profile=profiles.load().profiles.at(1);auth.authenticate(profile.id,profile.revision,2,secret(),2s);RemoteConnectionCredentials credentials(store,profiles);auto saved=credentials.load(profile);saved.grant.authorized_scopes.front().actions={"sessions.read","runs.read","events.read"};credentials.save(profile,saved.grant,saved.credential,3,saved.grant.expires_at-120);const auto scope=auth.open_scope(profile.id,profile.revision,"workspace-a");const auto initial=auth.run_event_cursor(scope,"session-a","run-a");rejects<TransportError>([&]{auth.read_run_snapshot(scope,"session-a","run-a",initial,std::nullopt,2s);});require(profiles.load().active_id=="local");store.close();
+ }
+ for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
+ std::cout<<"Captured snapshot service: two pages, malformed typed replies, no-send refusal, cancellation/profile/credential fencing and encrypted reopen; no reset or actual TLS claimed.\n";
+}
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
+    captured_snapshot_contract(argv[1],argv[2]);
     captured_run_read_contract(argv[1],argv[2]);
     captured_event_consumer_contract(argv[1],argv[2]);
     captured_run_event_contract(argv[1],argv[2]);

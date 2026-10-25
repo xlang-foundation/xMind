@@ -30,4 +30,7 @@ RemoteRunSnapshotPage validate_remote_run_snapshot_page(std::string_view respons
     const RemoteNegotiatedGrant&,const RemoteRunEventCursor& resource,
     std::int64_t now_unix_seconds,
     const std::optional<RemoteSnapshotPosition>& continuation=std::nullopt);
+void validate_remote_run_snapshot_result(const RemoteRunSnapshotPage&,
+    const RemoteNegotiatedGrant&,const RemoteRunEventCursor&,std::int64_t,
+    const std::optional<RemoteSnapshotPosition>&);
 }

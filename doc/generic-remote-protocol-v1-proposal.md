@@ -777,7 +777,8 @@ authoritative snapshot/reset and root-tree checkpoint recovery remain open.
 The native decoder now defines a bounded run-only snapshot page. This is a new
 network-domain contract, not an application IPC serializer. No snapshot method
 is advertised through the SDK or negotiation yet. Native one-page retrieval is
-implemented; captured-service integration remains open.
+implemented, as is captured native service integration. Durable assembly/reset
+and public adapters remain open.
 
 The response has exactly `binding`, `snapshot`, `records` and `complete`.
 Binding uses the existing server/scope/protocol/grant identity fields. Snapshot
@@ -811,8 +812,17 @@ redirects, automatic page loops or retries. Resource/continuation/grant checks
 precede dispatch; response validation checks current grant expiry. Actual
 positive snapshot delivery currently has controlled-loopback evidence only.
 
-Still required: positive native trusted-TLS snapshot verification, captured
-post-response profile/credential/generation authorization fences,
+The captured native service derives the resource from its captured profile and
+scope, validates permission before the exchange, and reloads profile/credential/
+grant state before publishing. It independently validates typed backend replies,
+including payload size, depth and duplicate-key checks. Profile edits, credential
+rotation or cancellation during an exchange prevent publication. These local
+authorization fences do not probe live peer-side revocation. A fresh explicitly
+authorized scope can observe again after credential rotation; it never resets a
+consumer checkpoint. [Captured-service evidence](evidence/remote-snapshot-captured-service-20261025.json).
+
+Still required: positive native trusted-TLS snapshot verification,
+retained-object backend-generation fencing in public adapters,
 durable bounded assembly across all pages, cross-page duplicate/refusal checks,
 explicit snapshot acceptance and atomic checkpoint reset. A partial snapshot
 must leave the old accepted cursor untouched. No automatic event retry, model

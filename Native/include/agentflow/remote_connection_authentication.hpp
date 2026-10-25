@@ -2,6 +2,7 @@
 #include "agentflow/remote_event_checkpoint.hpp"
 #include "agentflow/remote_connection_client.hpp"
 #include "agentflow/remote_connection_credentials.hpp"
+#include "agentflow/remote_run_snapshot.hpp"
 #include <functional>
 
 namespace agentflow {
@@ -11,6 +12,7 @@ using RemoteNegotiationExchange=std::function<RemoteNegotiatedGrant(const std::s
 using RemoteSessionReadExchange=std::function<RemoteObservedSession(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
 using RemoteRunReadExchange=std::function<RemoteObservedRun(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
 using RemoteRunEventExchange=std::function<RemoteObservedRunEvents(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const RemoteRunEventCursor&,std::chrono::milliseconds,std::stop_token)>;
+using RemoteRunSnapshotExchange=std::function<RemoteRunSnapshotPage(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const RemoteRunEventCursor&,const std::optional<RemoteSnapshotPosition>&,std::chrono::milliseconds,std::stop_token)>;
 // Backend-only captured state; SDK objects expose a separate public identity.
 using RemoteSessionCommandExchange=std::function<RemoteCommandObservation(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
 using RemoteRunCommandExchange=std::function<RemoteCommandObservation(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const RemoteRunSubmitAction&,std::chrono::milliseconds,std::stop_token)>;
@@ -32,7 +34,7 @@ struct RemoteAuthenticationStatus {
 class RemoteConnectionAuthentication {
 public:
     RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&);
-    RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange,RemoteSessionReadExchange = {},RemoteSessionCommandExchange create = {},RemoteSessionCommandExchange receipt = {},RemoteRunReadExchange run_read = {},RemoteRunCommandExchange run_submit = {},RemoteRunCommandExchange run_receipt = {},RemoteRunCancelExchange run_cancel = {},RemoteRunCancelExchange cancel_receipt = {},RemoteRunEventExchange event_read = {});
+    RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange,RemoteSessionReadExchange = {},RemoteSessionCommandExchange create = {},RemoteSessionCommandExchange receipt = {},RemoteRunReadExchange run_read = {},RemoteRunCommandExchange run_submit = {},RemoteRunCommandExchange run_receipt = {},RemoteRunCancelExchange run_cancel = {},RemoteRunCancelExchange cancel_receipt = {},RemoteRunEventExchange event_read = {},RemoteRunSnapshotExchange snapshot_read = {});
     RemoteAuthenticationReceipt authenticate(const std::string& profile_id,std::int64_t expected_profile_revision,
         std::int64_t expected_credential_revision,const SecretBytes& credential,std::chrono::milliseconds timeout,std::stop_token stop={});
     // Local encrypted-record observation only; no live revocation check,
@@ -43,6 +45,7 @@ public:
     RemoteObservedSession read_session(const RemoteCapturedScope&,const std::string& session_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     RemoteObservedRun read_run(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     RemoteRunEventCursor run_event_cursor(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id);
+    RemoteRunSnapshotPage read_run_snapshot(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,const RemoteRunEventCursor&,const std::optional<RemoteSnapshotPosition>&,std::chrono::milliseconds,std::stop_token={});
     RemoteObservedRunEvents read_run_events(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,const RemoteRunEventCursor&,std::chrono::milliseconds,std::stop_token={});
     RemoteEventCheckpoint open_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id);
     RemoteEventCheckpoint read_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,std::int64_t expected_revision,std::chrono::milliseconds,std::stop_token={});
@@ -56,6 +59,6 @@ public:
 private:
     RemoteCommandRecord send_command(const RemoteCapturedScope&,const RemoteCommandIntent&,std::chrono::milliseconds,std::stop_token);
     RemoteStoredCredential load_scope(const RemoteCapturedScope&);
-    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;RemoteRunCancelExchange run_cancel_,cancel_receipt_;RemoteRunEventExchange event_read_;RemoteEventCheckpoints event_checkpoints_;
+    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;RemoteRunCancelExchange run_cancel_,cancel_receipt_;RemoteRunEventExchange event_read_;RemoteRunSnapshotExchange snapshot_read_;RemoteEventCheckpoints event_checkpoints_;
 };
 }

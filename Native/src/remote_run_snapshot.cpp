@@ -48,4 +48,15 @@ RemoteRunSnapshotPage validate_remote_run_snapshot_page(std::string_view raw,con
         return result;
     }catch(const Json::exception&){invalid();}
 }
+void validate_remote_run_snapshot_result(const RemoteRunSnapshotPage& page,const RemoteNegotiatedGrant& grant,const RemoteRunEventCursor& resource,std::int64_t at,const std::optional<RemoteSnapshotPosition>& continuation){
+    if(page.cursor.connection_id!=resource.connection_id||page.cursor.epoch!=page.position.epoch||page.cursor.sequence!=page.position.sequence||page.records.size()>256)invalid();
+    try{
+        Json records=Json::array();std::int64_t ordinal=page.position.offset;std::size_t bytes=0;
+        for(const auto& record:page.records){bytes+=record.payload_json.size()+record.kind.size()+record.id.size();if(bytes>65536)invalid();std::vector<std::set<std::string>> objects;
+            auto payload=Json::parse(record.payload_json,[&](int depth,Json::parse_event_t event,Json& v){if(depth>24)invalid();if(event==Json::parse_event_t::object_start)objects.emplace_back();else if(event==Json::parse_event_t::key){if(objects.empty()||!objects.back().insert(v.get<std::string>()).second)invalid();}else if(event==Json::parse_event_t::object_end)objects.pop_back();return true;});
+            records.push_back({{"ordinal",ordinal++},{"kind",record.kind},{"id",record.id},{"revision",record.revision},{"payload",std::move(payload)}});}
+        const Json wire={{"binding",{{"server_id",grant.server_id},{"scope_id",resource.scope_id},{"protocol_version",grant.protocol_version},{"grant_id",grant.grant_id},{"grant_revision",grant.grant_revision}}},{"snapshot",{{"id",page.position.snapshot_id},{"server_id",page.cursor.server_id},{"scope_id",page.cursor.scope_id},{"session_id",page.cursor.session_id},{"run_id",page.cursor.run_id},{"epoch",page.position.epoch},{"sequence",page.position.sequence},{"total_records",page.position.total_records},{"offset",page.position.offset}}},{"records",std::move(records)},{"complete",page.complete}};
+        (void)validate_remote_run_snapshot_page(wire.dump(),grant,resource,at,continuation);
+    }catch(const Json::exception&){invalid();}
+}
 }
