@@ -1,3 +1,7 @@
+## Hosted client exact-count gate corrected — 2026-10-25
+
+Hosted ef981a63 run40176938712/job121119535040 failed its gate despite504/504 extension and178/178 browser cases passing with unchanged source/assets. Tools/ci-views.mjs still expected500 extension cases after four new snapshot contracts. The reviewed count is now504, preserving strict exact inventory checks. Original failed gate and artifact12592446928 SHA256 are retained. Read-only comparison confirms corrected counts match the original terminal results; no new suite execution or corrected hosted success is claimed. Installed76 unchanged. [Correction receipt](evidence/hosted-client-inventory-correction-20261025.json), [original gate](evidence/hosted-client-ef981a63-original-gate-20261025.json). Full goal active.
+
 ## Native SDK snapshot TLS acceptance wired; hosted result pending — 2026-10-25
 
 The existing isolated hosted trusted-TLS driver now grants snapshots.read/snapshots:1 and checks a separate SDK process fetching exactly two snapshot pages through native WinHTTP. It checks partial-reset refusal, complete assembly, cached observation, explicit reset/idempotence and encrypted SQLite reopen. CLI/HTTP command/event fixtures remain separate and must not add snapshot GETs. No application IPC dispatcher or serializer is introduced.

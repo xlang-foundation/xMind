@@ -1,0 +1,55 @@
+{
+  "observedAt": "2026-10-25T08:37:20.171Z",
+  "run": 40176938712,
+  "job": 121119535040,
+  "originalHostedConclusion": "failure",
+  "reason": "Exact-count gate expected500 extension cases after four snapshot contracts increased complete inventory to504",
+  "originalGate": {
+    "sourceRevision": "ef981a63e93fe704c6fae42a25a545056b16b288",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 500,
+      "browser": 178
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 504,
+      "passed": 504,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": false
+  },
+  "reviewedExpectedTests": {
+    "extension": 504,
+    "browser": 178
+  },
+  "reviewedGateMatchesOriginalResults": true,
+  "correctedHostedRunExecuted": false,
+  "newSuiteExecution": false,
+  "artifact": {
+    "id": 12592446928,
+    "name": "view-contracts-evidence-ef981a63e93fe704c6fae42a25a545056b16b288",
+    "bytes": 326442,
+    "sha256": "9c8b9e922f6d803157a7a78e9342e7eb9505cf09f0ab3682f2cba9bbfe233755"
+  },
+  "correctedGateSha256": "c85141e2762f2b7955bb28c30154d8d3eaaf597befbdd6ac9fdaf6a2ba0ea157",
+  "installed": false
+}
