@@ -1,4 +1,5 @@
 #pragma once
+#include "agentflow/remote_event_checkpoint.hpp"
 #include "agentflow/remote_connection_client.hpp"
 #include "agentflow/remote_connection_credentials.hpp"
 #include <functional>
@@ -43,6 +44,9 @@ public:
     RemoteObservedRun read_run(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     RemoteRunEventCursor run_event_cursor(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id);
     RemoteObservedRunEvents read_run_events(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,const RemoteRunEventCursor&,std::chrono::milliseconds,std::stop_token={});
+    RemoteEventCheckpoint open_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id);
+    RemoteEventCheckpoint read_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,std::int64_t expected_revision,std::chrono::milliseconds,std::stop_token={});
+    RemoteEventCheckpoint accept_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,std::int64_t expected_revision,const RemoteRunEventCursor&,std::stop_token={});
     static bool commands_available(const RemoteCapturedScope&);
     RemoteCommandRecord observe_command(const RemoteCapturedScope&,const std::string& request_id);
     RemoteCommandRecord create_session(const RemoteCapturedScope&,const std::string& request_id,const std::string& title,std::chrono::milliseconds,std::stop_token={});
@@ -52,6 +56,6 @@ public:
 private:
     RemoteCommandRecord send_command(const RemoteCapturedScope&,const RemoteCommandIntent&,std::chrono::milliseconds,std::stop_token);
     RemoteStoredCredential load_scope(const RemoteCapturedScope&);
-    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;RemoteRunCancelExchange run_cancel_,cancel_receipt_;RemoteRunEventExchange event_read_;
+    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;RemoteRunCancelExchange run_cancel_,cancel_receipt_;RemoteRunEventExchange event_read_;RemoteEventCheckpoints event_checkpoints_;
 };
 }

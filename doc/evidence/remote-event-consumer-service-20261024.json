@@ -1,0 +1,73 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T05:21:17.260Z",
+    "sourceParent": "e4ebf907f3d00cfc507f6d62296ef09d977fd186",
+    "sourcePatchSha256": "6fe8177be41b88fcba6a71d360371392e11d90744cdea9ddca78fb85ff65d93c",
+    "build": {
+      "pid": 29788,
+      "launchedAt": "2026-10-25T05:17:50.139Z",
+      "completedAt": "2026-10-25T05:20:48.880Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "69da5d03ee40f22ed06c603cab738181404cac11fa90c6f60ec3c06b70c61b0e"
+    },
+    "test": {
+      "pid": 43724,
+      "launchedAt": "2026-10-25T05:20:52.688Z",
+      "completedAt": "2026-10-25T05:21:14.246Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2ca543d6622250f292216974b7b35aca2093ae2e1c4abaca2dc405247195f815"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 21.47,
+    "projectFiles": 2843,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "10bfdb8efbe73a9b6c2c0b4a91070dc9b6bd4b31108a9dbc32b9ff60edd5546f",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "methods": [
+    "open_run_event_consumer",
+    "read_run_event_consumer",
+    "accept_run_event_consumer"
+  ],
+  "semantics": [
+    "Consumer binding derives from captured profile/origin and authorized event namespace",
+    "Fresh local profile/credential/grant/events.read checks before and after publication or acknowledgement",
+    "Pending pages return without another remote GET",
+    "Fresh scopes can explicitly recover the same observation checkpoint after credential rotation",
+    "No cursor acceptance without exact staged revision/cursor",
+    "Cancellation and post-response authorization changes refuse staging/publication"
+  ],
+  "verified": [
+    "Three real encrypted xlang3/SQLite database lifetimes",
+    "Retained pending page and unchanged accepted cursor after reopen",
+    "Permission revocation refuses cached page/open/acknowledgement",
+    "Fresh reauthorization recovers original pending page without network resend",
+    "Wrong/stale/cancelled acknowledgement refusal and idempotent correct acknowledgement",
+    "Empty resume leaves revision unchanged",
+    "Retention gap and post-response cancellation/credential mutation leave checkpoint unstaged",
+    "Final accepted checkpoint survives profile edit plus explicit reauthorization and reopen",
+    "Local profile remains selected"
+  ],
+  "authorizationLimit": "Current local captured grant checks, not a live remote revocation probe when returning cached pages",
+  "remaining": [
+    "Public SDK/CLI/HTTP consumer subobjects/adapters",
+    "Authoritative snapshot/reset and root-tree consumer recovery",
+    "Positive hosted native event delivery",
+    "Full native qualification and product installation"
+  ],
+  "installed75Unchanged": true,
+  "completedTasksMustNeverBeReplayed": true
+}

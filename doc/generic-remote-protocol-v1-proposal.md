@@ -681,3 +681,26 @@ This primitive is not authorization: future captured-service integration must
 freshly validate current profile, credential/grant and events.read before
 publishing a retained page or accepting its acknowledgement. SDK/CLI/HTTP
 consumer methods and the authoritative snapshot/reset workflow remain open.
+
+### Captured event consumer service
+
+The native authentication service now owns open_run_event_consumer,
+read_run_event_consumer and accept_run_event_consumer. Consumer identity is
+derived from the captured profile/origin plus authorized session/run. Every
+operation checks current local profile, credential/grant and events.read before
+and after publication. Returning a saved page does not bypass these checks, but
+it does not perform a live remote revocation probe. An expired or locally
+revoked grant refuses cached data and acknowledgements.
+
+Read requires the current checkpoint revision. A pending page is returned from
+SQLite without another GET. Otherwise the existing native event reader validates
+the network page and post-response authorization before staging it. Cancellation
+or authorization change after the response prevents staging; any failure after
+a stage cannot implicitly accept it. Empty resume does not advance revision.
+A fresh explicitly authorized scope may recover the same matching consumer after
+credential rotation. Accept requires the exact staged revision/cursor and never
+executes or repeats a remote command. Its repeated acknowledgement is idempotent.
+
+Three database lifetimes have local focused evidence. Public SDK/CLI/HTTP
+consumer adapters, authoritative snapshot/reset, root-tree checkpoint recovery
+and native trusted-TLS consumer acceptance remain separate work.
