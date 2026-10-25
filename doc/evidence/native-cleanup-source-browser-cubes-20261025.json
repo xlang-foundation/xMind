@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-25T18:28:11.714Z",
+  "scope": "Source-rendered browser coding, reload and offline read-only SQLite reconciliation; controlled model only",
+  "nativeSource": "feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+  "nativeSha256": "ce3d809288a91be2f2b12df4f69a4992191e0ca813338fb6109dd24a0ebc0337",
+  "sdkRevision": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "sessionId": "56007f79a5164c8e896ef5f39e131893",
+  "runId": "2c0fee43e5454c15a00240bb665f97f3",
+  "renderedCodingPassed": true,
+  "reloadRestored": true,
+  "filePreviewVerified": true,
+  "selectedAgent": "coding.process.cleanup",
+  "placement": "process",
+  "messages": 8,
+  "modelCalls": 4,
+  "approvals": 2,
+  "operations": [
+    {
+      "id": "c6e17ed8a1816bef70c63e1590dcce2e",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "7116253b7604c10d38608d5267f8bc0f",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "node": {
+    "checks": 4,
+    "exitCode": 0,
+    "elapsedMs": 119,
+    "processTreeRetired": true
+  },
+  "worker": {
+    "pid": 28440,
+    "retirementReason": "completed",
+    "uncertainModelDispatches": 0
+  },
+  "isolatedBackendPid": 4416,
+  "backendWorkerAndCommandPidsAbsent": true,
+  "tabClosed": true,
+  "supplementalPersistedProofPassed": true,
+  "postRunSetsAndHashesVerified": {
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "browserAssets": 18,
+    "frontend": 64,
+    "nodeDependencies": 18598,
+    "nativeExecutableAndRuntimeDll": 2
+  },
+  "originalCollector": {
+    "passed": false,
+    "exitCode": 1,
+    "reason": "Missing cleanFirstCompletion field in rendered-proof.json; stopped before CLI/route collection. No task replay. Backend exited.",
+    "scopedDecisionRouteCaptureRetained": false
+  },
+  "screenshotSha256": "bd2393f905419411e456f40a11ab630e021da994e48c84f5f27e8053c55ff4fb",
+  "paidProviderCalls": 0,
+  "cpythonExecuted": false,
+  "packagedAcceptance": false,
+  "installed": false,
+  "fullDeliveryPassed": false
+}
