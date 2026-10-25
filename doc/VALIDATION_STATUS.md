@@ -1,3 +1,11 @@
+## SDK6df6520f: complete local native qualification — 2026-10-25
+
+The complete184-contract suite passes together in767.44s against SDK6df6520f and the exact pinned Python3.14.0 pure source. Actual inventory and184 terminal pass names match;2860 project,16 SDK-header,1831 pure-library,30 runtime,18598 Node-dependency and145 native-binary sets/hashes remain unchanged. Native SHAf86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171. The pinned license is verified separately. No CPython or paid provider inference is used.
+
+Three earlier full-run failures remain recorded: two library/license layout errors, then a Gemini fixture ordering race between durable completion and runtime retirement. The fixture now observes idle before repair without retrying mutations, changing production code or weakening deadlines. Its old peer removed the failed database; original logs/test images/source are retained and future failures retain their fixture. Focused3/3 and1/1 are separate evidence from the new complete184/184 pass. [Receipt and actual inventory](evidence/native-sdk6df-full-20261025.json), [terminal log](evidence/native-sdk6df-full-20261025.log).
+
+The three CI SDK pins now move together to6df6520f; the library pin remains ebf955df. The local gate used this SDK explicitly before that metadata change. Hosted qualification, release packaging, fresh rendered/CLI acceptance and installation preservation remain open; installed76 is unchanged. The full delivery goal remains active.
+
 ## Module-class SDK compatibility qualified; xMind integration gate next — 2026-10-25
 
 Isolated SDK6df6520f passes six SDK contracts, imported-module reassignment/descriptor/call regressions, four ctypes regressions, offline pip25.2 against the exact hosted3.14.0 source and pip26.2.1, plus the fixed default11 performance gate (21 repeats,5 warmups,10% threshold). No CPython or vendor patch is used. The source is published on the SDK compatibility branch and a separate47-file snapshot retains original4417 headers/modules with the qualified replacement runtime. xMind has not yet been qualified against this SDK and installed76 is unchanged. [SDK qualification](evidence/sdk-module-class-qualified-20261025.json).

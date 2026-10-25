@@ -17,7 +17,7 @@ const finalAnswer='Synthetic Gemini peer checked the enrolled native file read.'
 const cursor='opaque/cursor+?=&雪',encodedCursor=encodeURIComponent(cursor);
 const callParts=[{functionCall:{id:'provider-profile-read',name:'read_file',args:{path:'README.md'}},thoughtSignature:'cHJvZmlsZS1jYWxsLXNpZ25hdHVyZQ=='}];
 const finalParts=[{text:finalAnswer},{thoughtSignature:'cHJvZmlsZS1maW5hbC1zaWduYXR1cmU='}];
-let child,failure,stalledDiscovery,discoveryReleased=false,heldRequestClosed=false;const catalogues=[],modelRequests=[];
+let child,failure,stalledDiscovery,discoveryReleased=false,heldRequestClosed=false,passed=false;const catalogues=[],modelRequests=[];
 function catalogue(response,next){
  response.writeHead(200,{'Content-Type':'application/json'});
  response.end(JSON.stringify(next?{models:[{name:'models/fixture-gemini',supportedGenerationMethods:['generateContent'],displayName:'Untrusted display label',baseModelId:'different-base-id'}]}:{models:[{name:'models/fixture-gemini-second',supportedGenerationMethods:['countTokens','generateContent']},{name:'models/fixture-unknown-tools',supportedGenerationMethods:['generateContent']},{name:'models/fixture-embedding',supportedGenerationMethods:['embedContent']}],nextPageToken:cursor}));
@@ -96,8 +96,9 @@ try{
   if(entry.name.startsWith('invalid-saved-resource.sqlite'))continue;
   const stored=await readFile(join(root,entry.name));for(const secret of [key,secondKey,raceKey])assert.equal(stored.includes(Buffer.from(secret)),false,'Provider keys must not persist as plaintext SQLite bytes');
  }
- process.stdout.write(result.stdout);
+ process.stdout.write(result.stdout);passed=true;
 }finally{
  peer.closeAllConnections();if(peer.listening)await new Promise(resolve=>peer.close(resolve));
- const target=resolve(root);assert.equal(dirname(target),resolve(tmpdir()));assert.ok(basename(target).startsWith('xmind-gemini-profile-'));await rm(target,{recursive:true,force:true});
+ const target=resolve(root);assert.equal(dirname(target),resolve(tmpdir()));assert.ok(basename(target).startsWith('xmind-gemini-profile-'));
+ if(passed)await rm(target,{recursive:true,force:true});else process.stderr.write(JSON.stringify({retainedFixture:target})+'\n');
 }

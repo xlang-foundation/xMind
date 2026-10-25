@@ -46,6 +46,14 @@ ProviderProfileRuntimeMetadata select_idle(ProviderProfileRuntime& runtime,const
     const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
     for(;;){try{return runtime.select_profile(id,revision);}catch(const Conflict&){require(std::chrono::steady_clock::now()<deadline,"Native Gemini workers did not retire");std::this_thread::sleep_for(std::chrono::milliseconds(5));}}
 }
+void wait_idle(ProviderProfileRuntime& runtime){
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(5);
+    while(!runtime.idle()){
+        require(runtime.healthy(),"Native Gemini execution must remain healthy during retirement");
+        require(std::chrono::steady_clock::now()<deadline,"Native Gemini workers did not retire before profile repair");
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
 void public_only(const std::string& source){
     for(const auto* forbidden:{fixture_key,second_key,race_key,owner_token,"credential_id","credential_scope","credential_purpose","endpoint","api_key"})
         require(source.find(forbidden)==std::string::npos,"Public Gemini profile metadata must exclude keys, credential references and destinations");
@@ -153,6 +161,9 @@ int main(int argc,char** argv){if(argc!=6)return 2;try{
             require(runtime.discover_models("gemini","gemini.generate-content",key(""),9)==std::vector<std::string>{"models/fixture-gemini","models/fixture-gemini-second"},"Key-only migration must discover using the exact saved encrypted reference");
             store.create_session("key-only-gemini","Select Gemini model per session").get();runtime.submit_model("key-only-gemini-run","key-only-gemini","Selected model in key-only Gemini profile","models/fixture-gemini");wait(store,"key-only-gemini-run",RunState::completed);
             const auto key_only_history=store.history("key-only-gemini").get();require(key_only_history.size()==2&&Json::parse(key_only_history.back().json).at("content")=="Synthetic key-only Gemini selected-model reply.","Key-only Gemini profile must execute the explicit session model through its saved key");
+            // Durable completion precedes release of execution ownership.
+            // Observe retirement before repair; do not retry profile mutations.
+            wait_idle(runtime);
             rejects<std::invalid_argument>([&]{runtime.save_profile("gemini","gemini.generate-content","models/fixture-unknown-tools",key(""),9,true);});require(store.credentials("fixture").get().size()==1&&runtime.configuration().revision==9,"Unknown-tool migration repair cannot persist a candidate or publish execution");
             require(runtime.save_profile("gemini","gemini.generate-content","fixture-gemini",key(""),9,true).revision==10&&runtime.available(),"A validated bare Gemini model must resolve the canonical native tools policy during repair");}
         ProviderProfileRuntime reopened(store,base,policy(origin),1,8);require(reopened.models()==std::vector<std::string>{"fixture-gemini"},"Reopen must revalidate the repaired bare model through the same native binder and tools resolver");

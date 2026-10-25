@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: CantorAI/xlang3
-          ref: 4417a9efbca7608de9855974f46ffa2520a1a416
+          ref: 6df6520f3728678341de3db18c95ff6499103f1a
           path: xlang3
           persist-credentials: false
       - name: Check out allowed standard-library source only
