@@ -1,0 +1,36 @@
+{
+  "recordedAt": "2026-10-25T22:33:55.590Z",
+  "passed": false,
+  "stage": "First installed0.1.76 profile-info call; before any session or task admission",
+  "expectedWrapperMs": 30000,
+  "result": {
+    "args": [
+      "--config",
+      "D:/CantorAI2026/xMind/.agentflow/packaged-v1-managed-handoff-sdk6df/providers.yaml",
+      "--graphs-config",
+      "D:/CantorAI2026/xMind/.agentflow/packaged-v1-managed-handoff-sdk6df/graphs.json",
+      "--agent-execution",
+      "process-code",
+      "profile-info"
+    ],
+    "code": null,
+    "stdout": "",
+    "stderr": ""
+  },
+  "diagnosticsSha256": "abef03b3da9545047b67fa34165d7e748371691f8115a43f28ad7c1b239a5a1b",
+  "retainedNamespace": ".agentflow/packaged-v1-managed-handoff-sdk6df",
+  "retainedFiles": [
+    "profiles/30287dfbea2ef59b6a7869570cf71148962fa14c7fe3834f9f8483174225fe6e/startup.lock",
+    "commands.json",
+    "1-unexpected.json"
+  ],
+  "observedOwnerProcessesAbsent": true,
+  "profileStateCreated": false,
+  "tasksSubmitted": 0,
+  "modelCalls": 0,
+  "cause": "Unproven. Only startup.lock exists; source generation verification precedes profile.state publication in the installed source. No stack was captured before the wrapper ended.",
+  "replayed": false,
+  "budgetChanged": false,
+  "installed76Changed": false,
+  "releaseAccepted": false
+}

@@ -1,0 +1,125 @@
+{
+  "recordedAt": "2026-10-25T22:32:03.163Z",
+  "passed": true,
+  "sessionId": "cad770cfb1b44980bec72423e2d8c272",
+  "runId": "13999d0493df4f06a6bdd2aa97ac13f1",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "operations": [
+    {
+      "id": "dbc1c3c41d530576f6b779f31e588437",
+      "tool": "replace_file",
+      "state": "succeeded",
+      "result": {
+        "after_sha256": "ad86bf6a0578b3d74ff09b91ed823021d34269eab5dc2003674d1bd6c8e0f95b",
+        "before_sha256": "2123cc332207d13314529a0f39fda6345190aa40effebc98a2e6465014266b29",
+        "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000c81b110000000000",
+        "path": "cubes.cjs",
+        "size": 67,
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c81b110000000000"
+      }
+    },
+    {
+      "id": "d73ca53b2f17952bc08d55f549d162e2",
+      "tool": "run_process",
+      "state": "succeeded",
+      "result": {
+        "elapsed_ms": 124,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "d73ca53b2f17952bc08d55f549d162e2",
+        "operation_id": "d73ca53b2f17952bc08d55f549d162e2",
+        "output_artifact": {
+          "operation_id": "d73ca53b2f17952bc08d55f549d162e2",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 22
+        },
+        "pid": 29916,
+        "process_tree_retired": true,
+        "profile_id": "node",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 22,
+          "data": "4 cubes checks passed\n",
+          "encoding": "utf-8",
+          "retained_bytes": 22
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    }
+  ],
+  "rendered": {
+    "passed": true,
+    "cleanFirstCompletion": true,
+    "sessionId": "cad770cfb1b44980bec72423e2d8c272",
+    "runId": "13999d0493df4f06a6bdd2aa97ac13f1",
+    "reloadRestored": true,
+    "filePreviewVerified": true,
+    "approvals": 2,
+    "hiddenBrowser": true,
+    "tabClosed": true,
+    "observedCommandExit": 0,
+    "observedStdout": "4 cubes checks passed",
+    "screenshot": "doc/evidence/packaged-sdk6df-browser-20261025.png"
+  },
+  "backendProof": {
+    "recordedAt": "2026-10-25T22:31:29.327Z",
+    "sessionId": "cad770cfb1b44980bec72423e2d8c272",
+    "runId": "13999d0493df4f06a6bdd2aa97ac13f1",
+    "state": "completed",
+    "messages": 8,
+    "operations": 2,
+    "modelCalls": 4,
+    "completedWorkerRetirements": 1,
+    "historySha256": "72d8cdfc5fcda2e9729682b82bf5d2a2598e01cc5938d75f4680cc9fccf630e2",
+    "eventsSha256": "b8960eb4820f64a1b2b08ac500465490d173c9655c037b6dd1e7e3ad745f3201",
+    "operationsSha256": "eaf53eb886bc13a4b8d836039ab67bba789aa867c83887e79c4909694ee94555",
+    "readOnly": true,
+    "tasksReplayed": false,
+    "renderedAcceptance": false,
+    "packagedAcceptance": false
+  },
+  "selectedAgent": {
+    "editable": true,
+    "revision": 1,
+    "selected": {
+      "default": false,
+      "description": "Controlled source-rendered cleanup fixture",
+      "hidden": false,
+      "id": "coding.process.cleanup",
+      "mode": "primary",
+      "model_id": "client-coding-fixture",
+      "name": "Native Process Coder",
+      "permissions": [],
+      "placement": "process",
+      "revision": 1
+    },
+    "session_id": "cad770cfb1b44980bec72423e2d8c272"
+  },
+  "ownedPidsAbsent": [
+    24836,
+    30068,
+    29916
+  ],
+  "packageBefore": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension",
+    "archiveSha256": "ead875de402f8e2a53b9fb627b2f7903b19cfd6244136bf5d12e743b2be850c0",
+    "manifestSha256": "a4e03cb0ebff9605e5138587af424b2b27c325493899fc445050552bb8cebdc7",
+    "verifiedPackagedFiles": 2379
+  },
+  "fixtureGateSha256": "f86521b5cd444987d226b3b25a95da59c0600c88dea9d55aa0bfe8c11f27f109",
+  "screenshotSha256": "2ef6aadb7bd024dcd5d7a8432162c842afa896cc680eda6d125659fbb1804236",
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false,
+  "releaseAccepted": false,
+  "scope": "Actual hidden browser served from VSIX-verified0.1.77 server/assets; native read, reviewed edit and Node command, automatic preview refresh, first clean completion and reload of the same history/run/model/agent. No task replay."
+}

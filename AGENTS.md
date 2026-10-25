@@ -10,6 +10,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - SDK6df6520f passes local184 (f86eda4b), hosted182/pip25, SDKpip25/26 and fixed perf11. Candidate77 VSIX ead875de passes fresh packaged CLI read/edit/Node4; NEVER replay sessione79c1b465d3a838371a5ca9ed24c3530/run41adee13318f1b47b08716af8eab53c4. Rendered/installed v1 acceptance remains open; installed76 unchanged. Local IPC only; cross-node workers belong to Cantor Cluster. See doc/VALIDATION_STATUS.md.
 
+- Candidate77 hidden packaged browser passes read/edit/Node4, automatic preview and same-run reload; NEVER replay sessioncad770cfb1b44980bec72423e2d8c272/run13999d0493df4f06a6bdd2aa97ac13f1. Owners retired. Initial76 handoff profile-info exceeds30s before any task; retain .agentflow/packaged-v1-managed-handoff-sdk6df. Cause unproven; no replay/budget change. See status/evidence.
+
 - Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.
 
 - Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.
