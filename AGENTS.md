@@ -6,11 +6,11 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Installed74 Nativef3b9bf69/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and73-to74 handoff. Five roots/2442 files/2398 runtime/73 backup/smoke verify. See doc/evidence/installed-0.1.74-5e5849cd-20261024.json; goal active.
+- Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.
 
 - Candidate74 editor updates clean buffer before reload; selected-context coding and history restore pass. NEVER replay session99b136d7bb544013a4d98bbc72705860/rootc3266a85e6704444b2c640e05babc442. See doc/evidence/candidate74-rendered-editor-coding-20261024.json.
 
-- Installed74 smoke session2af986f326bb78de7034ea049268460f/rootd8e11b246eb0859f5adbb4a6e15c727e completes managed read/history with0models; owner exited. NEVER replay. Original failed validation fixtures remain retained.
+- Installed75 smoke sessiondd7f9cdd53c3546a9fe1aaf50e9abd3c/rootcbc04d940ea8cc5278f403b9cc75aafe completes read/history with0models; owner exited. NEVER replay. Installed74 checkpoint archived verbatim.
 
 - Candidate67 completed coding/handoff roots remain in doc/development-checkpoints-20261024.md verbatim; NEVER replay.
 

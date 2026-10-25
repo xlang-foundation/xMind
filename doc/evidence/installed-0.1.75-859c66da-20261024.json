@@ -1,0 +1,61 @@
+{
+  "installation": {
+    "recordedAt": "2026-10-25T03:48:05.152Z",
+    "passed": true,
+    "installedVersion": "0.1.75",
+    "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.75",
+    "vsixSha256": "e6f0d30b7ed64bbb339d728703b76c0b4d9af4b27e5a27a32244e69e10f87f2e",
+    "installedPayloadFilesVerified": 2440,
+    "completeInstalledFileSetVerified": 2442,
+    "installerVsixManifestMatches": true,
+    "packageJsonMatchesExceptInstallerMetadata": true,
+    "runtimeFilesVerified": 2398,
+    "runtimeManifestSha256": "055c88a3e11374b585e20403ab820c59674ea0d78e1ed8f0f62d9bc68bf41ba7",
+    "nativeSha256": "c17c240b424d1cdb09128dc2eb1f002d61ecb02cd1511379736600514f110dd3",
+    "otherExtensionRegistryEntriesUnchanged": true,
+    "preservedRoots": [
+      "C:/Users/shaw9/.xMind",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+      "D:/CantorAI2026/xMind/.config"
+    ],
+    "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+    "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "exactOldInstallationBackup": 2442,
+    "visibleWindowRequested": false,
+    "installedNativeExecuted": false,
+    "userProfileBackendStarted": false,
+    "paidInference": false,
+    "renderedVSCode": false
+  },
+  "smoke": {
+    "passed": true,
+    "sessionId": "dd7f9cdd53c3546a9fe1aaf50e9abd3c",
+    "completedRoot": "cbc04d940ea8cc5278f403b9cc75aafe",
+    "modelCalls": 0,
+    "historyMessages": 2,
+    "managedDiscoveryAndReuse": true,
+    "ownedBackendIdentityVerifiedAndExitObserved": true,
+    "userProfileRootUsed": false
+  },
+  "handoff": {
+    "passed": true,
+    "session": "ec98eb281c335c30b54144ef9e40bcef",
+    "completedRoot": "c7657c237e8f4502684a365203456d5a",
+    "migration": "Actual immutable 0.1.74 Nativef3b9bf69/SDK8c package to candidate 0.1.75 Nativec17c240b qualified from859c66da/SDK8c",
+    "activeGraphUpgradeRefused": true,
+    "originalGraphResumedOnce": true,
+    "historyAndProfileExactAfterUpgrade": true,
+    "ownedOwnerRetirementObserved": true,
+    "modelCalls": 0
+  },
+  "initialPostInstallVerifier": {
+    "result": "Missing private staging path; no payload checks ran",
+    "corrected": "native-859c66da-transaction-scope",
+    "reinstallationPerformed": false
+  },
+  "completedFixturesMustNeverBeReplayed": true,
+  "fullGoalComplete": false
+}

@@ -1,3 +1,11 @@
+## Installed75 verified with preserved state and managed handoff — 2026-10-24
+
+Qualified0.1.75 Nativec17c240b/SDK8c is installed after complete179/179 native,500/178 clients, fresh packaged CLI, rendered browser and actual Code selected-context coding. Managed74-to75 takeover refuses a paused graph, resumes it once, then preserves endpoint/profile/session/history exactly with0models. Sessionec98eb281c335c30b54144ef9e40bcef/rootc7657c237e8f4502684a365203456d5a and all other p75 roots must NEVER be replayed. Disposable owner exit is confirmed.
+
+Exact2442-file installed74 backup is retained under .agentflow/installation-backups/0.1.74-before-859c66da/extension. Installer exits0; installed75 complete2442-file set,2440 payload checks and2398 runtime files verify, registry unrelated entries match. Five protected roots have identical hashes and file sets before/after, including settings/history/profile state/credentials/repository .config. The initial verifier stops on a private script staging-path typo before payload checks; correcting only that path passes, with no reinstall.
+
+Fresh installed-executable smoke uses an isolated profile, reads the managed marker with0models/two history messages and confirms identity-bound owner exit. Sessiondd7f9cdd53c3546a9fe1aaf50e9abd3c/rootcbc04d940ea8cc5278f403b9cc75aafe must NEVER be replayed. No visible window, CPython or paid development inference. This completes this release checkpoint; generic remote protocol work and broader documented acceptance requirements keep the full goal active. [Installation/handoff/smoke receipt](evidence/installed-0.1.75-859c66da-20261024.json).
+
 ## Candidate75 actual rendered editor coding passes — 2026-10-24
 
 Official isolated Code serve-web/hidden IAB60 loads candidate75, with telemetry off and trust limited to the disposable fixture. Actual Ask About Selection attaches the saved clamp.cjs buffer; named Native Process Coder executes one fresh task. Reviewed edit and literal Node check command each require approval; actual four Node assertions pass, four controlled model replies produce eight persisted history messages, both operations succeed and worker retirement is recorded. The clean editor buffer displays the corrected bounds before reload.
