@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-25T16:21:16.980Z",
+  "project": 2858,
+  "browserAssets": 18,
+  "source": "7755bae6c1fc16e438c04f11d66736c4523316f0",
+  "sdkRevision": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "sdkHeaders": 16,
+  "runtime": 30,
+  "pureLibraries": 1870,
+  "nodeDependencies": {
+    "Native/tests/sdk/node_modules": 3690,
+    "extensions/vscode/node_modules": 14918
+  },
+  "nativeBinaries": 145,
+  "recordedAt": "2026-10-25T16:23:20.181Z",
+  "scope": "Read-only exact source/SDK/pure-library/dependency/native-binary/browser-asset audit for SDK4417 release assembly.",
+  "passed": true,
+  "stagingGuardRefusalVerified": true,
+  "hostedReceiptAbsent": true,
+  "stagingOutputAbsent": true,
+  "stagingExecuted": false,
+  "packaged": false,
+  "installed": false,
+  "installedVersion": "0.1.76",
+  "fullGoalComplete": false,
+  "scripts": {
+    "audit-package77-sdk4417-inputs.mjs": "084880ea631323be9cc5d933120430a56acb91f23d6b11390c8ee4719ff04c79",
+    "require-hosted-sdk4417-qualification.mjs": "28c7191cd96368eda0cbba7c69a64960ea392c983db1cb78e354bd21a86373ad",
+    "stage-native-sdk4417-package77.mjs": "db451924dc784c5e612a9b266ebe17fc284af5a931064cdb3adda18ccf44f1a3"
+  }
+}

@@ -4,6 +4,8 @@ At clean source7755bae6, the actual184-contract native inventory passes in793.35
 
 The same checkout then passes all510 extension and180 browser contracts, with no skips, and builds18 browser assets. Its2854 client-input files and14918 extension-dependency files retain their exact sets/hashes. This verifies the newly installed dependency tree rather than assuming the older client result covers it. [Client receipt](evidence/clients-sdk4417-owned-rust-full-20261025.json).
 
+A subsequent read-only release-input audit verifies the same2858 source files,18 browser assets,16 SDK headers,30 runtime files,1870 pure-library files,3690 SDK-peer dependencies,14918 extension dependencies and145 native binaries. The new staging entry point targets source7755/SDK4417 and refuses absent hosted acceptance before creating output. No package is staged or installed. [Audit receipt](evidence/release-sdk4417-input-audit-20261025.json).
+
 These are synthetic gateway/local-peer contract gates, not new rendered or packaged coding acceptance. Native positive Windows OS-trust integration remains hosted-only. Hosted40206234760 is still running, with40209454418 pending at the last observation. The previous SDK4417 Rust-location failure remains retained and is not combined with focused results to invent this pass. Installed76 remains unchanged. Package/install qualification, remaining IPC bootstrap/generic-channel cleanup, generic remote binding/enrollment/fencing, and the full delivery goal remain open.
 
 ## SDK4417 and typed-startup candidate under full qualification — 2026-10-25
