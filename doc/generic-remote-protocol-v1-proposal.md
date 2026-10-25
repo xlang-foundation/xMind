@@ -1,5 +1,14 @@
 # Generic remote connection v1 proposal
 
+The backend-private command journal also recognizes a typed `runs.cancel` intent
+with session ID, run ID and positive expected run revision. It shares the
+existing request-ID namespace and durable unknown-before-send boundary. An
+admitted cancellation receipt must name that same run at a revision no older
+than the captured revision; it proves request admission only, never worker
+retirement. Cancellation network exchange, public SDK/CLI/HTTP methods and
+reconciliation remain unavailable until their typed connector is implemented.
+
+
 Status: remote execution, enrollment and worker fencing remain proposed and
 not deployed. Native verified-HTTPS negotiation, strict response validation,
 encrypted combined credential/grant storage through embedded xlang3/SQLite,

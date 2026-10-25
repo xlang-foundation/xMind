@@ -49,7 +49,7 @@ void remote_session_command_contract(const std::string& modules,const std::strin
  {
   PersistenceService store(path.string(),{modules,stdlib});ConnectionProfiles profiles(store);profiles.load_or_initialize();const auto catalog=profiles.apply(source("https://remote.example.invalid"),1);const auto profile=catalog.profiles.at(1);RemoteConnectionAuthentication service(store,profiles,negotiation,{},create,receipt);service.authenticate(profile.id,profile.revision,0,secret(),2s);const auto scope=service.open_scope(profile.id,profile.revision,"workspace-a");
   require(service.create_session(scope,"lost-reply","Original remote title",2s).state==RemoteCommandState::unknown&&sends==1);require(service.create_session(scope,"lost-reply","Original remote title",2s).state==RemoteCommandState::unknown&&sends==1);rejects<Conflict>([&]{service.create_session(scope,"lost-reply","Changed remote title",2s);});require(sends==1);
-  require(service.create_session(scope,"accepted-reply","Accepted title",2s).state==RemoteCommandState::admitted&&sends==2);std::stop_source stop;stop.request_stop();rejects<TransportCancelled>([&]{service.create_session(scope,"cancelled","No send",2s,stop.get_token());});require(sends==2);store.close();
+  require(service.create_session(scope,"accepted-reply","Accepted title",2s).state==RemoteCommandState::admitted&&sends==2);std::stop_source stop;stop.request_stop();rejects<TransportCancelled>([&]{service.create_session(scope,"cancelled","No send",2s,stop.get_token());});require(sends==2);RemoteCommandJournal journal(store);const RemoteCommandIntent pending_cancel{"private-cancel",profile.id,profile.origin,scope.grant.server_id,scope.scope_id,profile.revision,scope.credential_revision,RemoteRunCancelAction{"session-a","run-a",1}};journal.prepare(pending_cancel);require(journal.claim_send(pending_cancel));rejects<Conflict>([&]{service.observe_command(scope,pending_cancel.request_id);});rejects<Conflict>([&]{service.reconcile_command(scope,pending_cancel.request_id,2s);});require(sends==2&&lookups==0);store.close();
  }
  {
   PersistenceService store(path.string(),{modules,stdlib});ConnectionProfiles profiles(store);const auto profile=profiles.load().profiles.at(1);RemoteConnectionAuthentication service(store,profiles,negotiation,{},create,receipt);auto scope=service.open_scope(profile.id,profile.revision,"workspace-a");require(service.reconcile_command(scope,"lost-reply",2s).state==RemoteCommandState::unknown&&lookups==1);require(service.create_session(scope,"lost-reply","Original remote title",2s).state==RemoteCommandState::unknown&&sends==2);
@@ -58,6 +58,30 @@ void remote_session_command_contract(const std::string& modules,const std::strin
   service.authenticate(profile.id,profile.revision,1,secret(),2s);const auto fresh=service.open_scope(profile.id,profile.revision,"workspace-a");rejects<Conflict>([&]{service.reconcile_command(scope,"lost-reply",2s);});const auto resolved=service.reconcile_command(fresh,"lost-reply",2s);require(resolved.state==RemoteCommandState::admitted&&resolved.intent.credential_revision==1&&lookups==2&&sends==2);require(service.reconcile_command(fresh,"lost-reply",2s).state==RemoteCommandState::admitted&&lookups==2);RemoteCommandJournal journal(store);require(!journal.claim_send(resolved.intent));require(profiles.load().active_id=="local");store.close();
  }
  for(const auto* suffix:{"","-wal","-shm"}){auto candidate=path;candidate+=suffix;std::error_code ignored;std::filesystem::remove(candidate,ignored);}std::cout<<"Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.\n";
+}
+void cancel_command_journal_contract(const std::string& modules,const std::string& stdlib){
+    const auto path=std::filesystem::temp_directory_path()/("xmind-cancel-command-journal-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(path));
+    const RemoteCommandIntent intent{"cancel-request","remote-a","https://remote.example.invalid","server-a","scope-a",2,3,RemoteRunCancelAction{"session-a","run-a",7}};
+    const RemoteCommandResolution proof{intent.request_id,intent.server_id,intent.scope_id,"runs.cancel","run-a",RemoteCommandState::admitted,8};
+    try{
+        {
+            PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store),other(store);require(journal.prepare(intent).revision==1&&std::string(remote_command_operation(journal.observe(intent.request_id).intent))=="runs.cancel");
+            for(int mode=0;mode<7;++mode){auto changed=intent;auto& action=std::get<RemoteRunCancelAction>(changed.action);if(mode==0)action.session_id="session-b";if(mode==1)action.run_id="run-b";if(mode==2)++action.expected_run_revision;if(mode==3)changed.scope_id="scope-b";if(mode==4)++changed.credential_revision;if(mode==5)changed.action=RemoteSessionCreateAction{"Other command"};if(mode==6)changed.action=RemoteRunSubmitAction{"session-a","Other command",7};rejects<Conflict>([&]{journal.prepare(changed);});}
+            for(int mode=0;mode<5;++mode){auto invalid=intent;invalid.request_id="invalid-cancel-"+std::to_string(mode);auto& action=std::get<RemoteRunCancelAction>(invalid.action);if(mode==0)action.session_id="../outside";if(mode==1)action.run_id.clear();if(mode==2)action.run_id="../outside";if(mode==3)action.expected_run_revision=0;if(mode==4)action.expected_run_revision=9007199254740992LL;rejects<std::invalid_argument>([&]{journal.prepare(invalid);});rejects<NotFound>([&]{journal.observe(invalid.request_id);});}
+            rejects<Conflict>([&]{journal.resolve(intent,proof);});auto one=std::async(std::launch::async,[&]{return journal.claim_send(intent);});auto two=std::async(std::launch::async,[&]{return other.claim_send(intent);});require(static_cast<int>(one.get())+static_cast<int>(two.get())==1);require(journal.observe(intent.request_id).state==RemoteCommandState::unknown);store.close();
+        }
+        {
+            PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store);const auto record=journal.observe(intent.request_id);const auto& action=std::get<RemoteRunCancelAction>(record.intent.action);require(record.state==RemoteCommandState::unknown&&action.session_id=="session-a"&&action.run_id=="run-a"&&action.expected_run_revision==7&&!journal.claim_send(intent));
+            auto wrong=proof;wrong.resource_id="run-b";rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});wrong=proof;wrong.resource_revision=6;rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});wrong=proof;wrong.operation="runs.submit";rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});require(journal.resolve(intent,proof).revision==3&&journal.resolve(intent,proof).revision==3);
+            auto rejected=intent;rejected.request_id="rejected-cancel";journal.prepare(rejected);require(journal.claim_send(rejected));journal.resolve(rejected,{rejected.request_id,rejected.server_id,rejected.scope_id,"runs.cancel","",RemoteCommandState::rejected,0});store.close();
+        }
+        {
+            PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store);require(journal.observe(intent.request_id).state==RemoteCommandState::admitted&&journal.observe("rejected-cancel").state==RemoteCommandState::rejected&&!journal.claim_send(intent));auto changed=proof;changed.resource_revision=9;rejects<Conflict>([&]{journal.resolve(intent,changed);});
+            auto raw=Json::parse(store.information("remote-command-v1",intent.request_id).get());raw["resource_id"]="foreign-run";store.put_information("remote-command-v1",intent.request_id,raw.dump()).get();rejects<DatabaseError>([&]{journal.observe(intent.request_id);});store.close();
+        }
+    }catch(...){std::cerr<<"Retained cancellation journal fixture "<<path.string()<<'\n';throw;}
+    for(const auto* suffix:{"","-wal","-shm"}){auto file=path;file+=suffix;std::error_code ignored;std::filesystem::remove(file,ignored);}
+    std::cout<<"Typed cancellation journal passed exact session/run/revision binding, competing send claims, unknown across reopen, immutable admission/rejection and wrong-run receipt refusal. Admission is not worker retirement; no cancellation network dispatch.\n";
 }
 void run_command_journal_contract(const std::string& modules,const std::string& stdlib){
     const auto path=std::filesystem::temp_directory_path()/("xmind-run-command-journal-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(path));
@@ -144,6 +168,7 @@ void captured_run_read_contract(const std::string& modules,const std::string& st
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
     captured_run_read_contract(argv[1],argv[2]);
     run_command_journal_contract(argv[1],argv[2]);
+    cancel_command_journal_contract(argv[1],argv[2]);
     run_command_service_contract(argv[1],argv[2]);
     command_journal_contract(argv[1],argv[2]);
     remote_session_command_contract(argv[1],argv[2]);
