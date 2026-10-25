@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T15:44:50.714Z",
+  "runId": 40198358836,
+  "jobId": 121195208507,
+  "source": "d6b01ac697872c96cfa56955f2195ddfe67f7221",
+  "sdk": "35fa98d1513c8595f1c0e856be7c645a43d187f1",
+  "conclusion": "failure",
+  "native": {
+    "passed": 179,
+    "total": 182,
+    "failed": 3,
+    "seconds": 820.66,
+    "failures": [
+      {
+        "name": "native_agent_worker_model_rpc_contract",
+        "seconds": 67.15
+      },
+      {
+        "name": "native_agent_worker_ledger_contract",
+        "seconds": 45.15
+      },
+      {
+        "name": "native_agent_worker_nested_human_contract",
+        "seconds": 45.03
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 12604640836,
+      "name": "native-windows-evidence-d6b01ac697872c96cfa56955f2195ddfe67f7221",
+      "bytes": 9117584,
+      "sha256": "083658071a8c3970d5e63c563d18a7de2edd38ba84e8966a14f3343e09a4a950"
+    },
+    {
+      "id": 12604571033,
+      "name": "native-windows-diagnostic-images-d6b01ac697872c96cfa56955f2195ddfe67f7221",
+      "bytes": 32185085,
+      "sha256": "ff140516aa378019f9adc49269db6d6b7bb8fd146790e04620e3303b9482e771"
+    }
+  ],
+  "productionTiming": {
+    "elapsedMs": 60025.524999999994,
+    "signal": "SIGTERM",
+    "killed": true,
+    "lastSuccessfulOutputElapsedMs": 59419.8393,
+    "budgetMs": 60000
+  },
+  "dump": {
+    "dumpSha256": "0b093047cfa274fa2aaf1135a8341e0d80432484b7608b3c0ba2da31c11ceb0f",
+    "matched": [
+      {
+        "name": "agentflow_agent_worker_model_rpc_contract.exe",
+        "timestamp": 1792941469,
+        "imageSize": 12419072,
+        "sha256": "7eb162e59b7ee5e3a6c66beaa7c182db705600f49f717823778544c915c0e8c7"
+      },
+      {
+        "name": "xlang3_runtime.dll",
+        "timestamp": 1792938640,
+        "imageSize": 20156416,
+        "sha256": "a1ef346c62d27062aa07749924d9b9e7feced6f90c8a95483c398a886a73f281"
+      }
+    ]
+  },
+  "offlineStackObservation": {
+    "mainThread": "ntdll!ZwDelayExecution -> ntdll!RtlDelayExecution -> KERNELBASE!SleepEx -> four native fixture offsets",
+    "scope": "Matching executable/runtime images verified by dump image size and timestamp; matching Microsoft system images enable native unwind. No task executed.",
+    "limitation": "No private PDBs. SDK export-relative names with large offsets are not reliable source-function attribution. A polling snapshot and late successful phases do not establish an IPC deadlock or prove its absence."
+  },
+  "preservedNamespacesNeverReplay": [
+    "xmind-model-rpc-2057621968-3878048026",
+    "xmind-model-rpc-3702057714-2741749435",
+    "xmind-model-rpc-4149574135-2120096212",
+    "xmind-worker-ledger-2347602077-1813244883",
+    "xmind-worker-ledger-2554733311-3243287233"
+  ],
+  "rootCauseResolved": false,
+  "releaseQualified": false,
+  "installedVersionUnchanged": "0.1.76"
+}
