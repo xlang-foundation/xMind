@@ -1,0 +1,126 @@
+{
+  "recordedAt": "2026-10-25T09:12:10.376Z",
+  "scope": "Actual hidden browser Settings authorized-scope inspection through native C++ service, embedded xlang3/SQLite and origin-bound cookie proxy",
+  "fixture": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-snapshot-http-Afgt0t",
+  "hostPid": 13264,
+  "proof": {
+    "passed": true,
+    "scope": "Actual hidden browser Settings inspecting native saved grant through cookie-authenticated loopback proxy",
+    "server": "server-a",
+    "scopeId": "scope-a",
+    "actions": [
+      "sessions.read",
+      "runs.read",
+      "events.read",
+      "snapshots.read"
+    ],
+    "observedAccessibilityText": [
+      "2 saved connections · active: Local",
+      "Authorized scopes for server-a",
+      "scope-a: sessions.read, runs.read, events.read, snapshots.read"
+    ],
+    "observation": "Verified from returned browser accessibility state and screenshot; saved later AX file is a no-change diff, not a full tree",
+    "localActive": true,
+    "executionDisabled": true,
+    "modelCalls": 0,
+    "screenshotSha256": "9fe23938cc6b73924751c94c850a6d60d98cac9cd896451e802ccccc73926ee9",
+    "browserClosed": true
+  },
+  "native": {
+    "passed": true,
+    "httpRequests": 31,
+    "sharedClientRequests": 10,
+    "sharedBrowserEditorClient": true,
+    "hostPid": 13264,
+    "ownerAndOriginBoundView": true,
+    "staleGenerationCreatesNoConsumer": true,
+    "sdkSharesCheckpoint": true,
+    "deniedGrantRefusesCachedData": true,
+    "databaseReopened": true,
+    "networkFetch": false,
+    "modelCalls": 0,
+    "goalComplete": false
+  },
+  "preparation": {
+    "recordedAt": "2026-10-25T09:09:35.349Z",
+    "sourceParent": "f8f59f9c595230fad2c5f1de27a1ae376760e376",
+    "sourcePatchSha256": "c49ffd5a3f07a6cfd014acb73e4b478a84da20dc60694a21663f1066d8b427a8",
+    "build": {
+      "pid": 13020,
+      "launchedAt": "2026-10-25T09:05:34.044Z",
+      "completedAt": "2026-10-25T09:09:15.888Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b9c7a1995ea14fe6373282bbd56fb2e621e7f5c220ea3fad4afca617348410c0"
+    },
+    "test": {
+      "pid": 21508,
+      "launchedAt": "2026-10-25T09:09:24.571Z",
+      "completedAt": "2026-10-25T09:09:26.555Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "afb724caa08f6b8aa7f96502404493343ad0030052c794ade0f7f92717304491"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 1.94,
+    "projectFiles": 2857,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "renderedGate": {
+    "testRunner": "Actual hidden browser Settings interaction followed by native HTTP snapshot contract; not CTest",
+    "recordedAt": "2026-10-25T09:11:38.449Z",
+    "sourceParent": "f8f59f9c595230fad2c5f1de27a1ae376760e376",
+    "sourcePatchSha256": "c49ffd5a3f07a6cfd014acb73e4b478a84da20dc60694a21663f1066d8b427a8",
+    "build": {
+      "exitCode": 0,
+      "skipped": true,
+      "reason": "No C++ changes; exact previously tested development executable verified"
+    },
+    "test": {
+      "pid": 16968,
+      "launchedAt": "2026-10-25T09:09:50.919Z",
+      "completedAt": "2026-10-25T09:11:29.960Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "870f0ec33b6d129e16c63c8f158b744481e602d7637750d8fbf8debff303268a"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 99.041,
+    "projectFiles": 2857,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "gateClarification": "No production C++ changes or executable rebuild in rendered gate; test-host C++ was changed and compiled in the separate preparation gate",
+  "verifierCorrections": [
+    "Saved AX observation was a no-change diff; evidence uses the original returned accessibility state and screenshot",
+    "Browser screenshot bytes are JPEG despite initial private .png filename; retained public image uses .jpg"
+  ],
+  "renderedSnapshotRecoveryUI": false,
+  "installed": false,
+  "goalComplete": false
+}

@@ -1,3 +1,11 @@
+## Rendered native-backed authorized scope inspection accepted — 2026-10-25
+
+A fresh hidden browser loads the actual shared Settings UI through the loopback adapter and native C++ HTTP service, with saved encrypted grant metadata in embedded xlang3/SQLite. Clicking Inspect authorized scopes visibly displays server-a, scope-a and sessions.read/runs.read/events.read/snapshots.read. Local remains active; no credential entry, model call or execution occurs. Screenshot retained.
+
+The native test host now supplies a real opened WorkspaceTools directory identity and read-only workspace metadata; execution is explicitly unavailable. Its SDK/CLI/HTTP contracts pass3/3 in1.94s. The separate rendered fixture then completes existing snapshot checks, reset, permission refusal and database reopen. Both gates verify2857/16/1870/30/18598/145 source/SDK/library/runtime/dependency/binary hashes and sets. Production executable78e55344 and installed76 unchanged. Rendered gate99.041s includes browser observation and proof collection, not one IPC call. Completed namespace xmind-snapshot-http-Afgt0t must NEVER be replayed.
+
+This accepts browser Settings scope inspection, not rendered snapshot recovery or rendered VS Code scope inspection. Private proof-checker AX-diff/JPEG corrections are recorded; no browser task was resubmitted. [Receipt](evidence/rendered-native-authorized-scopes-20261025.json), [screenshot](evidence/rendered-native-authorized-scopes-20261025.jpg). Full goal active.
+
 ## Actual browser proxy now forwards authorized scopes and snapshots — 2026-10-25
 
 Real-path inspection found the loopback browser proxy omitted authorized-scopes and all four snapshot endpoints despite the shared client and native backend supporting them. Added only those five exact POST routes; wrong methods/suffixes and Remote selection remain refused. Existing proxy tests now verify native view credential/origin forwarding and exact JSON bodies for all five.
