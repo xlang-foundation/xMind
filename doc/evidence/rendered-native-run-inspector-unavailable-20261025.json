@@ -1,0 +1,81 @@
+{
+  "recordedAt": "2026-10-25T10:07:14.815Z",
+  "scope": "Actual hidden browser run-inspector unavailable-peer handling, backed by native C++ HTTP, embedded xlang3 and SQLite",
+  "fixture": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-snapshot-http-PecpQu",
+  "proof": {
+    "passed": true,
+    "scope": "Actual native-backed browser run inspection unavailable-peer handling only",
+    "renderedRunInspectionSuccess": false,
+    "localRemainsActive": true,
+    "inputValuesRetained": true,
+    "credentialEntered": false,
+    "modelCalls": 0,
+    "acceptedBrowserAssetHashesMatchedAfterObservation": 18,
+    "axSha256": "79181c9c7cc495de3b540a2f38c12ecfdb90a4ab725b53feee1fde77d6dd80ad",
+    "imageSha256": "862e862b78663c7c9619b9cff399eba29539d766c2d4edfe86c8a26922f15b64",
+    "browserTabClosed": true
+  },
+  "nativeSnapshotContinuation": {
+    "passed": true,
+    "httpRequests": 31,
+    "sharedClientRequests": 10,
+    "sharedBrowserEditorClient": true,
+    "hostPid": 26644,
+    "ownerAndOriginBoundView": true,
+    "staleGenerationCreatesNoConsumer": true,
+    "sdkSharesCheckpoint": true,
+    "deniedGrantRefusesCachedData": true,
+    "databaseReopened": true,
+    "networkFetch": false,
+    "modelCalls": 0,
+    "goalComplete": false
+  },
+  "gate": {
+    "testRunner": "Actual hidden browser Settings interaction followed by native HTTP snapshot contract; not CTest",
+    "recordedAt": "2026-10-25T10:06:35.880Z",
+    "sourceParent": "e1e71ff32cc6e673699b1246cc821427eab539bb",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "exitCode": 0,
+      "skipped": true,
+      "reason": "No C++ changes; exact previously tested development executable verified"
+    },
+    "test": {
+      "pid": 27088,
+      "launchedAt": "2026-10-25T10:05:06.459Z",
+      "completedAt": "2026-10-25T10:06:33.028Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "2dd614cca2f36a1c897cc455a641c285ba4fe246a6d69aaa732dfc8eba22ac57"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 86.569,
+    "projectFiles": 2858,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "clarifications": [
+    "Saved HTTPS origin snapshot.example.invalid has no live peer. Successful remote metadata inspection is not claimed.",
+    "The continuation console/receipt no-network statement applies only to its original cached snapshot checks; the preceding browser inspection attempts the configured remote read.",
+    "86.569 seconds includes interactive UI observation and proof capture; it is not one IPC-call latency.",
+    "This is the development executable from a failed full184 gate. Focused browser evidence does not qualify packaging."
+  ],
+  "renderedPositiveRemoteRunInspection": false,
+  "renderedVsCodeScopeOrRunInspection": false,
+  "renderedSnapshotRecovery": false,
+  "installed": false,
+  "goalComplete": false,
+  "completedNamespaceMustNeverBeReplayed": true
+}

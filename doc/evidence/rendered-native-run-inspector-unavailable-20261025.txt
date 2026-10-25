@@ -1,0 +1,65 @@
+Browser tab: 3, Title: "xMind · Browser", URL: "http://127.0.0.1:62427/ui/".
+0 AXWebArea xMind · Browser, URL: 127.0.0.1:62427/ui/
+	1 container Settings, ID: provider-settings
+		2 container provider-form
+			3 heading Settings, Value: 2, ID: settings-title
+				4 text Settings
+			5 button Description: Close settings, ID: settings-close
+			6 text Provider API
+			7 pop up button (disabled, collapsed, settable) Provider API, Value: OpenAI, ID: provider-name, Secondary Actions: Expand
+				8 menu
+					9 (disabled) OpenAI
+			10 text API key
+			11 text field (settable) API key
+			12 text Leave blank to use the saved key. A new profile needs a key.
+			13 text Provider keys stay in the local xMind profile, encrypted by the native runtime. They are never included in conversations or sent to the browser.
+			14 button Fetch models, ID: settings-save
+			15 text Choose a model in the sidebar below after fetching.
+		16 container Runtime connections, ID: connection-settings
+			17 heading Runtime connections, Value: 3, ID: connections-title
+				18 text Runtime connections
+			19 button Refresh, ID: connections-refresh
+			20 text Local is this xMind runtime. Nexus profiles save a server address and sign-in. Remote execution is not available yet. Local remains active.
+			21 text 2 saved connections · active: Local
+			22 container connections-list
+				23 text Local
+				24 text Active
+				25 text This xMind runtime · SQLite and workspace run locally.
+				26 text Snapshot fixture
+				27 text Not connected
+				28 text https://snapshot.example.invalid
+				29 text Authentication stores sign-in only. Remote execution remains unavailable; Local stays active.
+				53 text Stored sign-in for server-a. Remote execution remains unavailable.
+				31 button Check sign-in
+				32 button Inspect authorized scopes
+				54 text Authorized scopes for server-a
+				55 text scope-a: sessions.read, runs.read, events.read, snapshots.read
+				56 container
+					57 text Session ID
+					58 text field (settable) Session ID, Value: session-a
+					59 text Run ID
+					60 text field (settable) Run ID, Value: run-a
+					61 button Inspect run
+					62 text Remote run inspection was not confirmed. Check the scope, session and run IDs, then inspect again.
+				33 container
+					34 text Server credential
+					35 text field (settable) Server credential
+					36 button Authenticate
+				37 button Remove connection
+			38 container runtime-connection-form
+				39 text Connection name
+				40 text field (settable) Connection name, ID: connection-name
+				41 text Nexus HTTPS address
+				42 text field (settable) Nexus HTTPS address, ID: connection-origin
+				43 button Save Nexus address, ID: connection-add
+		44 container MCP servers, ID: mcp-settings
+			45 heading MCP servers, Value: 3, ID: mcp-title
+				46 text MCP servers
+			47 container
+				48 button List resources, ID: mcp-resources-refresh
+				49 button Refresh, ID: mcp-refresh
+			50 text Sign in to configured MCP servers. Closing this view leaves a pending login running on the backend.
+			51 text MCP login setup is unavailable on this backend.
+			52 text Resource discovery connects to configured MCP servers only when requested.
+
+The focused UI element is 0 AXWebArea xMind · Browser, URL: 127.0.0.1:62427/ui/
