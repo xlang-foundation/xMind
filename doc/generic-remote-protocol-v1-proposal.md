@@ -585,8 +585,7 @@ The backend-only `read_remote_run_events` connector uses the scoped session/run
 `/events` GET, requiring `events:1` and `events.read`. Initial cursor has empty
 epoch and sequence zero and sends no query. Subsequent reads send exactly
 `?epoch=EPOCH&after=SEQUENCE`; opaque colons are encoded once. Connection ID is
-local cursor metadata retained by the connector, not remote authority. A future
-captured service must validate it against the exact profile/binding before send.
+local cursor metadata retained by the connector, not remote authority. The captured service validates it against the exact profile/binding before send.
 
 Responses have exactly `binding`, `status`, `cursor`, `events`. Binding is the
 existing five-field server/scope/protocol/grant identity. The wire cursor has
@@ -602,6 +601,24 @@ Status `gap` or `epoch_expired` requires an empty event list and raises a typed
 reset-required result. An unexpected epoch change under `ok` also refuses.
 Neither case publishes a new cursor or retries/resets automatically. Unknown
 statuses, duplicate keys, extra fields, malformed bindings or out-of-order/foreign
-records fail closed. No captured service, SDK/CLI/HTTP event capability, durable
+records fail closed. This primitive does not itself expose SDK/CLI/HTTP event capability, durable
 cursor publication, authoritative snapshot/reset workflow or positive native TLS
-event acceptance is implemented by this primitive.
+event acceptance.
+
+### Captured run-event service
+
+Backend `run_event_cursor(scope, session, run)` creates a zero/empty-epoch cursor
+only after validating the captured profile/credential/grant and events.read.
+`read_run_events` compares connection/server/scope/session/run against that exact
+captured scope before dispatch. Invalid ownership, cursor shape or pre-send
+cancellation sends nothing. After exchange it rechecks cancellation, profile,
+credential/grant and permission before returning any page. Typed backend results
+are independently checked for namespace, epoch, count/bytes, payload objects,
+strict order and last-record sequence.
+
+Inputs are immutable; a gap or failure cannot publish an advanced cursor. Fresh
+explicitly authenticated scopes can resume the same matching cursor after
+credential rotation; retired scopes refuse. The service neither persists cursors
+nor resets retention gaps. SDK/CLI/HTTP event subobjects, backend-generation
+fencing in those adapters, authoritative snapshot/reset and positive native TLS
+event verification remain separate work.
