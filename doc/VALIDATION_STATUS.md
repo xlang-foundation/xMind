@@ -1,3 +1,9 @@
+## Complete local Native184 at1d6a4a74/SDK35fa passes — 2026-10-25
+
+The complete actual184-test inventory passes in787.54s at1d6a4a74, with zero source patch. All2858 project,16 SDK header,1870 pure-library,30 SDK runtime,18598 Node-dependency and145 native-binary file sets/hashes remain unchanged. The current instruction, graph, trusted TLS, worker RPC/ledger/human and remaining contracts all pass. Native image SHA84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3 matches the actual Code snapshot observation fixture. Synthetic gateways/peers only; no paid inference or CPython. [Full receipt and actual inventory](evidence/native-sdk35fa-graph-full-20261025.json), [complete terminal log](evidence/native-sdk35fa-graph-full-20261025.log).
+
+This qualifies the current complete local inventory. Original failed cold commands and instruction/worker namespaces remain preserved and forbidden for replay; a later passing inventory does not supply their missing causal evidence. Hosted40187593147/d500 remains active and40190311424/1d6a4a74 is pending. No package or installation is accepted from this local result alone. Installed76 and the full delivery goal remain unchanged/active.
+
 ## Hosted075 failure preserved; graph fixture avoids cmdlet discovery — 2026-10-25
 
 Hosted075/SDK35fa completes180/182 in693.01s. Graph PowerShell reaches script_entered, then exceeds30000ms at30032ms; the operation remains uncertain and its process tree is retired. Original namespace xmind-graph-runner-mGQLCJ and operation5d7de9fe68509f648034d280746256f3 must NEVER be replayed. The retained CLR4.8.9363 dump again shows assembly loading/AnalyzeSnapinDomainHelper on a busy PowerShell thread, consistent with discovery for the next Start-Sleep statement. The trusted-TLS test also fails; this source predates the SDK None correction. Artifact12597542851/6030255 bytes/SHA9399e21c verifies.
