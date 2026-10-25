@@ -1,3 +1,9 @@
+## Ledger bounded coexistence: focused pass, timing margin remains — 2026-10-24
+
+All twelve independent planning/delegation cases now run in bounded pairs against the same native/xlang3 backend. The original case body is byte-exact, including assertions, case identities, physical worker retirement and each12s limit. Every batch drains both futures before propagating failure. The added check proves12 completed cases, peak2 active roots and no active case afterward; this is not a maximum-two-workers claim.
+
+Focused ledger passes1/1 in44.74s with the unchanged45s wrapper. Coexistence phase is16644ms versus the prior sequential20382ms observation; these single observations are not a benchmark. All2840 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/142 binary hashes and sets stay unchanged across the gate. Product Native2f564d45 is unchanged. Timing margin remains small; full179 qualification is still required and the previous178/179 failure is retained. No package/install; installed74 preserved. [Receipt](evidence/ledger-bounded-concurrency-20261024.json), [complete focused log](evidence/ledger-bounded-concurrency-20261024.log).
+
 ## Full820 terminal178/179; ledger aggregate cutoff located — 2026-10-24
 
 Current command-adapter source820c10a8/Native2f564d45 finishes178/179 in953.74s. Only ledger exceeds its unchanged45s wrapper (45.20s). RPC64.13s, graph remote14.51s, nested38.31s, deep9.48s and HTTP9.11s pass. Full2840/16/1870/30/18598/142 source/SDK/library/runtime/dependency/binary closures and sets remain exact. This is failed qualification; no package/install.
