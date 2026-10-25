@@ -191,7 +191,7 @@ X::Value NativeWorkerLinksApi::Open(std::string ticket){auto& host=ipc_host();au
 
 struct AgentWorkerChannel::Impl {
     AgentWorkerScope scope;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;IoStatistics statistics;
-    std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0;Handle peer;
+    std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0,peer_pid=0;std::uint64_t peer_created=0;Handle peer;
     X::Runtime client;X::Value remote;
     Impl(AgentWorkerScope binding,std::string route):scope(std::move(binding)),local(std::move(route)){inbox->scope=scope;ipc_host().objects.add(local,inbox);}
     ~Impl(){ipc_host().objects.remove(local);}
@@ -200,6 +200,7 @@ struct AgentWorkerChannel::Impl {
         HANDLE duplicate=nullptr;if(!DuplicateHandle(GetCurrentProcess(),process,GetCurrentProcess(),&duplicate,SYNCHRONIZE,FALSE,0))throw std::runtime_error("Cannot retain IPC peer identity");peer=Handle(duplicate);
         const auto endpoint="lrpc:"+std::to_string(port);X3LrpcEndpointInfo info{};info.size=sizeof(info);
         if(x3_runtime_probe_remote(client.get(),endpoint.c_str(),1000,&info)!=X3_STATUS_OK||info.pid!=GetProcessId(process))protocol();
+        peer_pid=info.pid;peer_created=birth(process);
         auto root=client.ImportRemote("xmind",endpoint.c_str());X::Value links;
         if(!root["WorkerLinks"].Call(std::vector<X::Value>{},links)||!links["Open"].Call(std::vector<X::Value>{X::Value(client,remote_route)},remote))protocol();
     }
@@ -208,6 +209,8 @@ struct AgentWorkerChannel::Impl {
 AgentWorkerChannel::AgentWorkerChannel(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
 AgentWorkerChannel::~AgentWorkerChannel(){close();}
 const AgentWorkerScope& AgentWorkerChannel::scope()const noexcept{return impl_->scope;}
+AgentWorkerPeer AgentWorkerChannel::peer()const{return {"lrpc:"+std::to_string(impl_->remote_port),impl_->peer_pid,impl_->peer_created};}
+bool AgentWorkerChannel::peer_closed()const noexcept{return impl_->closed||impl_->poisoned||(impl_->peer.value&&WaitForSingleObject(impl_->peer.value,0)!=WAIT_TIMEOUT);}
 AgentWorkerChannelStatistics AgentWorkerChannel::statistics()const noexcept{const auto& s=impl_->statistics;return {s.pending_reads.load(),s.pending_writes.load(),s.cancelled_reads.load(),s.cancelled_writes.load()};}
 void AgentWorkerChannel::close()noexcept{
     if(impl_->closed.exchange(true))return;impl_->poisoned=true;

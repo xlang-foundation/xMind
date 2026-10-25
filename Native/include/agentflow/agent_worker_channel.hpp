@@ -19,6 +19,7 @@ struct AgentWorkerScope {
 struct AgentWorkerMessage {std::string operation,payload;};
 struct AgentWorkerServiceAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 struct AgentWorkerStartup {bool coding=false;AgentWorkerServiceAccess model;};
+struct AgentWorkerPeer {std::string endpoint;std::uint32_t pid=0;std::uint64_t creation_time=0;};
 struct AgentWorkerChannelStatistics {
     std::uint64_t pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;
 };
@@ -37,6 +38,8 @@ public:
     // and calls the parent's SDK remote object with its actual ready identity.
     static std::unique_ptr<AgentWorkerChannel> accept_inherited(std::uintptr_t,Deadline,std::stop_token={});
     const AgentWorkerScope& scope()const noexcept;
+    AgentWorkerPeer peer()const;
+    bool peer_closed()const noexcept;
     AgentWorkerChannelStatistics statistics()const noexcept;
     // Owner shutdown only, after readers have joined and writers are excluded.
     // Closing the remote object notifies the peer; it does not kill a PID.
