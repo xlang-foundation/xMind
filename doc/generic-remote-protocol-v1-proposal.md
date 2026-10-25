@@ -496,6 +496,16 @@ expanding effects requires a new explicit authorization revision.
 
 ### Enrollment implementation boundary (not yet implemented)
 
+A backend-private local approval journal is now implemented on the enrollment
+branch. It captures actual executor workspace/authority and membership, stores
+only opaque IDs/effect limits, uses SQLite compare-and-swap through xlang3, and
+commits local revocation independently of networking. The focused persistence
+contract covers concurrent creation, stale membership/authority, broader effects,
+expiry, scope isolation, malformed records and revocation/reopen. This does not
+implement the authenticated SDK/UI approval entry point, peer receipt, one-send
+enrollment intent or fenced execution described below.
+[Focused evidence](evidence/enrollment-local-approval-focused-20261025.json).
+
 Enrollment must be a captured scope service, alongside the existing Sessions,
 Runs, Requests, Consumers and Snapshots services. The registered root only opens
 that service; it must not acquire enrollment or scheduling responsibilities.

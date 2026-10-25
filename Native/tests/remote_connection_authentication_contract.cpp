@@ -1,3 +1,4 @@
+#include "remote_enrollment_approval_fixture.hpp"
 #include "agentflow/remote_command_journal.hpp"
 #include "agentflow/remote_event_checkpoint.hpp"
 #include "agentflow/remote_snapshot_store.hpp"
@@ -346,6 +347,7 @@ void snapshot_recovery_service_contract(const std::string& modules,const std::st
  std::cout<<"Captured snapshot recovery: durable two-page fetch, cached recovery, explicit digest reset, post-fetch cancellation/profile/credential/baseline fences, no-stage failures, reopen and cached-data permission refusal.\n";
 }
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
+    enrollment_approval_fixture::run(argv[1],argv[2]);
     snapshot_recovery_service_contract(argv[1],argv[2]);
     snapshot_reset_contract(argv[1],argv[2]);
     snapshot_store_contract(argv[1],argv[2]);
