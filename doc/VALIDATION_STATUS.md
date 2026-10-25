@@ -1,3 +1,9 @@
+## Hosted d55741e0 native177 pass; staging pin correction — 2026-10-24
+
+Run40166026077/job121089528929 is terminal: all177 registered native contracts pass together in646.65s, with inventory/native-gate/CTest hashes verified against the retained official artifact. Graph runner29.49s, graph remote10.68s, ledger35.26s, nested28.27s and trusted OAuth6.16s pass. This supplies hosted trusted native TLS coverage for this source's public command/event/consumer fixtures. Earlier intermittent timeout causes remain unproven. Extension step and browser178/native integration steps succeed.
+
+The job then fails runtime staging: Tools/ci-stage-runtime.mjs still pins SDKf809da86 while workflow checkout/provenance use8c7972d1. Corrected the pin and added a workflow/staging consistency test before staging; local1/1 and syntax pass. Actual corrected hosted staging, packaged pip and VSIX remain unverified. Installed75 remains unchanged; no replay or installation. [Receipt](evidence/hosted-native-d55741e0-result-20261024.json), [original CTest log](evidence/hosted-native-d55741e0-ctest-20261024.log). Full goal active.
+
 ## Candidate76 rendered Code selected-context coding — 2026-10-24
 
 Actual official Code Server/xMind pane sessionee6a0ececf3e41b4971982585436701b/root78ea9d403e604078a674ffa7fb74ef8d completes selected abs-sum.cjs context, read, one approved edit and one approved Node command. Four controlled replies, eight history messages, two succeeded operations, physical worker retirement and actual four Node assertions verify. The clean editor showed corrected bytes before reload; prior UI observation restored the same run, agent and eight messages. First-completion screenshot is retained; a second screenshot is missing after automatic temporary-tab cleanup. NEVER replay this completed namespace.

@@ -1,0 +1,47 @@
+{
+  "runId": 40166026077,
+  "jobId": 121089528929,
+  "source": "d55741e00a7c63cbe16ef1de2e4084a7a1afbaba",
+  "jobConclusion": "failure",
+  "native": {
+    "passed": 177,
+    "failed": 0,
+    "seconds": 646.65,
+    "inventoryAndGateHashesVerified": true,
+    "graphRunnerSeconds": 29.49,
+    "graphRemoteWorkerSeconds": 10.68,
+    "workerLedgerSeconds": 35.26,
+    "nestedHumanSeconds": 28.27,
+    "trustedOAuthSeconds": 6.16
+  },
+  "provenance": {
+    "xlang3": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "windows_default_owner_matches_user": false,
+    "toolchain": "Visual Studio 18 2026",
+    "xmind": "d55741e00a7c63cbe16ef1de2e4084a7a1afbaba",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "toolchain_version": "18.11.12315.225",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "build_parallelism": 4,
+    "processors": 4
+  },
+  "artifact": {
+    "id": 12589873032,
+    "name": "native-windows-evidence-d55741e00a7c63cbe16ef1de2e4084a7a1afbaba",
+    "bytes": 4766529,
+    "sha256": "11f41474b1bf1dd455c14d1e306ec0cb8cb139f3e38e5fcbbff06e0577afd8fa"
+  },
+  "failedStep": [
+    "Stage the contract-tested native runtime and pinned pure library source"
+  ],
+  "failure": "Runtime/library source pins differ: CI staged f809da86 while checkout/provenance use8c7972d1.",
+  "fix": "Align staging SDK revision with workflow; check workflow/staging pins before staging.",
+  "localValidation": "Pin consistency test1/1 and staging syntax pass. Actual corrected hosted staging remains unverified.",
+  "limits": [
+    "Earlier intermittent timeout cause remains unproven.",
+    "No completed model/tool task replayed.",
+    "Hosted packaging/pip/VSIX steps did not complete.",
+    "Candidate76 remains uninstalled; full goal incomplete."
+  ]
+}

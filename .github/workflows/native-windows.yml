@@ -79,7 +79,11 @@ jobs:
           exit $LASTEXITCODE
       - name: Stage the contract-tested native runtime and pinned pure library source
         working-directory: xmind
-        run: node Tools/ci-stage-runtime.mjs
+        run: |
+          node --test Tools/tests/ci-runtime-pins.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node Tools/ci-stage-runtime.mjs
+          exit $LASTEXITCODE
       # Bootstrap executes from the staged package, with an offline installation
       # from the pinned source wheel rather than a runner's Python installation.
       - name: Verify packaged xlang3 pip bootstrap and offline installation
