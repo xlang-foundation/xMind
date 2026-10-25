@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-25T11:37:32.421Z",
+  "sourceCommit": "d500780a47d7a41c7f711bfd6529c004a84ea8ee",
+  "scope": "Actual hidden Microsoft Code Server 1.143.1 web workbench with unpackaged source extension, native C++ HTTP backend and embedded xlang3 SQLite; cached snapshot observation and explicit acknowledgment only",
+  "passed": true,
+  "proof": {
+    "passed": true,
+    "observedAt": "2026-10-25T11:30:41.455Z",
+    "acceptedSequence": 20,
+    "records": 2,
+    "acknowledgedExactlyOnce": true,
+    "duplicateButtonDisabled": true,
+    "localRemainsActive": true,
+    "modelCalls": 0,
+    "codeHostIdentityCorrection": "code-owner-correction.json",
+    "developmentPathFlagUsed": false,
+    "sourceRegisteredInIsolatedExtensionDirectory": true
+  },
+  "nativeDatabaseReopened": true,
+  "sourceHashesUnchanged": 71,
+  "nativeBinaryHashesAndFileSetUnchanged": 145,
+  "codeVendorEntryHashesUnchanged": 2,
+  "dependencyClosureMatchesEarlierFrozenBaseline": {
+    "sdkSource": 16,
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "nodeDependencies": {
+      "Native/tests/sdk/node_modules": 3690,
+      "extensions/vscode/node_modules": 14908
+    }
+  },
+  "dependencyBaseline": ".agentflow/workspace-switch-validation/native/sdk-null-snapshot-argument-focused/inputs-before-build.json",
+  "dependencyBaselineNote": "Reused pre-existing frozen dependency inventory, reverified after the rendered check; not a new baseline captured immediately before Code startup.",
+  "codeOwner": {
+    "identity": {
+      "ProcessId": 12144,
+      "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+      "birthUtc": "2026-10-25T11:27:26.3059320Z"
+    },
+    "previousCodeHostExitedWithOriginalLauncher": true,
+    "codePort": 61434,
+    "sourceRegistrationReused": true,
+    "userInstallationChanged": false
+  },
+  "nativeOwner": {
+    "pid": 1580,
+    "birthUtc": "2026-10-25T11:28:48.0681050Z",
+    "exitCode": 0
+  },
+  "retirement": {
+    "ownedCodeTreeAbsent": true,
+    "nativePid": 1580,
+    "retiredUtc": "2026-10-25T11:33:49.2091278Z",
+    "nativeOwnerAbsent": true
+  },
+  "installed76NativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "firstAttempt": {
+    "passed": false,
+    "namespace": "xmind-code-snapshot-pCZXmT",
+    "reason": "Five-minute synthetic scope grant expired during initial workbench setup; UI refused scopes, no acknowledgment and no model task occurred. Original fixture retained.",
+    "grantLifetimeUnchangedSeconds": 300,
+    "sourceDevelopmentFlagDidNotActivateExtension": true,
+    "registration": "Unpackaged source junction in isolated extension directory; no user extension installation."
+  },
+  "acceptedNamespace": "xmind-code-snapshot-prepared-OZEVzQ",
+  "preparationCorrection": "Prepared and trusted only the fresh empty fixture folder before creating its native backend/grant. Original Code process exited with its launcher; separately supervised Code PID12144 replaced it before the native grant was seeded. Earlier prepared/live JSON mentions stale PID17604; code-owner-correction.json and this receipt supersede that identity.",
+  "ownedCleanupGuard": "Initial cleanup refused because PowerShell JSON parsed ISO time as DateTime; exact UTC ticks plus image verified before any process retirement.",
+  "temporaryTabs": "Accepted tab6 closed. Closing old error tab5 was refused by browser URL policy for its generated data URL; no bypass attempted.",
+  "noModelCalls": true,
+  "noCpython": true,
+  "noVisibleEditorOrBrowserOpened": true,
+  "packageBuilt": false,
+  "releaseQualified": false,
+  "remaining": "Full native qualification and generic remote binding/execution remain open; this does not prove remote snapshot fetching, live peer routing or new packaged installation.",
+  "artifacts": {
+    "code-snapshot-recovery-20261025.jpg": {
+      "bytes": 70682,
+      "sha256": "45ef4a049f76308cbc07959d5b6c2f08109109ae94a4a9a24e1d2365bd5c7b87"
+    },
+    "code-snapshot-recovery-20261025.txt": {
+      "bytes": 14266,
+      "sha256": "2da47968be5c545e1a2e31ad1cee953293c46550fad90c9fb6a8687e8666922c"
+    },
+    "code-snapshot-expired-grant-20261025.jpg": {
+      "bytes": 70401,
+      "sha256": "511d2c1e4d2741adddebb0794811378e0b0c0fadd6f57bb9ec62dd7fa64bc5c7"
+    },
+    "code-snapshot-expired-grant-20261025.txt": {
+      "bytes": 13027,
+      "sha256": "8adcb52b12a57c989a8b9aeb7042c69d63e65f1f1542d83f0123a3b6f017ce62"
+    }
+  },
+  "recorderNote": "Dependency and artifact checks completed; initial recorder final console output referenced an undefined display variable after both receipt files were saved. No test rerun."
+}
