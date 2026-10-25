@@ -1,3 +1,9 @@
+## Owned PowerShell stack capture for future hosted stalls — 2026-10-25
+
+Hosted process diagnostics now request MiniDumpNormal for verified owned PowerShell descendants still alive after15s, at most two processes and one attempt per PID/birth. Existing ancestry, image and birth checks precede capture. No full-memory flag, termination, retry, module warming or deadline change is introduced. Local capture remains disabled unless explicitly enabled by the controlled diagnostic fixture. Raw dumps remain diagnostic artifacts, not repository files; stack memory can contain synthetic fixture data. API reference: [Microsoft MiniDumpWriteDump](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump).
+
+Four actual-process tests pass in13.20s with diagnostic inputs unchanged. They verify a real MDMP thread-list stream from the owned descendant, unrelated-process exclusion, normal completion/effect exactly once, identity mismatch refusal and preservation of fast nonzero errors. This proves capture mechanics, not the cause of an original graph timeout. A fresh hosted stall and stack analysis are still needed. Product native binaries and installed76 unchanged. [Receipt](evidence/owned-process-stack-capture-20261025.json), [log](evidence/owned-process-stack-capture-20261025.log). Full goal active.
+
 ## Authorized scope inspection in shared Settings UI — 2026-10-25
 
 Browser and VS Code Settings now offer explicit Inspect authorized scopes on saved remote profiles. The shared client uses the native authorized-scopes endpoint, validates exact profile/status/scope/action fields, and refuses duplicate/malformed scopes, expired scope claims, origin changes and closed connections. Scope IDs and permitted actions render as text. It does not activate Remote or change the selected workspace.

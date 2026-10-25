@@ -43,12 +43,14 @@ test('read-only diagnostic captures its actual PowerShell descendant and exclude
   const launchedAfter=new Date().toISOString(),fixture=run(process.execPath,['-e',script,shell,command,secret]);
   let diagnostic;
   try{
-    diagnostic=await observeOwnedProcess(fixture.child,process.execPath,{enabled:true,evidenceRoot:directory,shellPath:await monitorShell(),label:'actual-owner',launchedAfter,intervalMs:200,durationSeconds:20});
+    diagnostic=await observeOwnedProcess(fixture.child,process.execPath,{enabled:true,evidenceRoot:directory,shellPath:await monitorShell(),label:'actual-owner',launchedAfter,intervalMs:200,durationSeconds:20,captureStacks:true,stackCaptureAgeMs:1000});
     const result=await fixture.done;assert.equal(result.code,0,result.stderr);const ownedPid=JSON.parse(result.stdout.trim()).pid;
     const stopped=await diagnostic.stop();assert.equal(stopped.exitCode,0,JSON.stringify(stopped));
     const rows=await records(diagnostic.output),samples=rows.filter(row=>row.kind==='process');
     console.log('Actual owner diagnostics retained at '+diagnostic.output);
     assert.ok(samples.length>0,'Capture at least one actual live owned PowerShell process');
+    const dumps=rows.filter(row=>row.kind==='stack_dump');assert.equal(dumps.length,1);assert.equal(dumps[0].pid,ownedPid);assert.equal(dumps[0].success,true,JSON.stringify(dumps[0]));assert.equal(dumps[0].fullMemory,false);
+    const dump=await readFile(join(diagnostic.directory,dumps[0].file));assert.equal(dump.subarray(0,4).toString(),'MDMP');const streams=dump.readUInt32LE(8),directoryOffset=dump.readUInt32LE(12);assert.ok(streams>0&&streams<128);let threads=0;for(let index=0;index<streams;index++){const entry=directoryOffset+12*index;if(dump.readUInt32LE(entry)===3)threads=dump.readUInt32LE(dump.readUInt32LE(entry+8));}assert.ok(threads>0,'Actual dump must contain its thread list');
     assert.ok(samples.every(row=>row.pid===ownedPid&&row.pid!==unrelated.child.pid));
     assert.ok(samples.every(row=>Array.isArray(row.threads)&&row.threads.length>0&&row.threads.length<=128&&row.modules.length<=64));
     assert.ok(samples.every(row=>Number.isSafeInteger(row.moduleCount)&&row.moduleCount>=row.modules.length&&row.modulesTruncated===(row.moduleCount>64)));

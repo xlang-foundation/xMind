@@ -5,7 +5,9 @@ param(
     [Parameter(Mandatory)][string]$OutputFile,
     [Parameter(Mandatory)][string]$StopFile,
     [ValidateRange(200,5000)][int]$IntervalMs=2000,
-    [ValidateRange(1,70)][int]$DurationSeconds=65
+    [ValidateRange(1,70)][int]$DurationSeconds=65,
+    [switch]$CaptureStacks,
+    [ValidateRange(1000,25000)][int]$StackCaptureAgeMs=15000
 )
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'process-module-observation.ps1')
@@ -14,6 +16,19 @@ $timer=[Diagnostics.Stopwatch]::StartNew()
 $samples=0
 $ownerBirth=$null
 $seen=@{}
+$dumped=@{}
+if($CaptureStacks){
+    # Separate-process MiniDumpNormal: thread contexts/stacks, no full-memory flag.
+    Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class XMindOwnedStackDump {
+ [DllImport("dbghelp.dll", SetLastError=true)]
+ [return: MarshalAs(UnmanagedType.Bool)]
+ public static extern bool MiniDumpWriteDump(IntPtr process, uint pid, IntPtr file, uint type, IntPtr exception, IntPtr streams, IntPtr callback);
+}
+'@
+}
 function Record($value){
     if((Get-Item -LiteralPath $OutputFile).Length -gt 2097152){throw 'Diagnostic output limit reached'}
     [IO.File]::AppendAllText($OutputFile,($value|ConvertTo-Json -Depth 8 -Compress)+[Environment]::NewLine,$encoding)
@@ -49,12 +64,21 @@ try {
             $id=[int]$candidate.ProcessId
             if($id -eq $OwnerProcessId -or -not $family.ContainsKey($id) -or $candidate.Name -notin @('powershell.exe','pwsh.exe')){continue}
             $key=[string]$id+':'+$candidate.CreationDate.ToUniversalTime().Ticks
-            if($seen.ContainsKey($key) -and ($seen[$key].count -ge 3 -or $timer.ElapsedMilliseconds -lt $seen[$key].nextAt)){continue}
+            $needsDump=$CaptureStacks -and $dumped.Count -lt 2 -and -not $dumped.ContainsKey($key) -and ([DateTime]::UtcNow-$candidate.CreationDate.ToUniversalTime()).TotalMilliseconds -ge $StackCaptureAgeMs
+            if(-not $needsDump -and $seen.ContainsKey($key) -and ($seen[$key].count -ge 3 -or $timer.ElapsedMilliseconds -lt $seen[$key].nextAt)){continue}
             if(-not $seen.ContainsKey($key) -and $seen.Count -ge 16){continue}
             $process=$null
             try {
                 $process=[Diagnostics.Process]::GetProcessById($id)
                 if([Math]::Abs(($process.StartTime.ToUniversalTime()-$candidate.CreationDate.ToUniversalTime()).TotalMilliseconds) -gt 1 -or -not [String]::Equals($process.MainModule.FileName,$candidate.ExecutablePath,[StringComparison]::OrdinalIgnoreCase)){continue}
+                if($needsDump){
+                    $dumped[$key]=$true
+                    $dumpName='owned-'+$id+'-'+$candidate.CreationDate.ToUniversalTime().Ticks+'.dmp'
+                    $dumpFile=[IO.File]::Open((Join-Path ([IO.Path]::GetDirectoryName($OutputFile)) $dumpName),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+                    try{$ok=[XMindOwnedStackDump]::MiniDumpWriteDump($process.Handle,[uint32]$id,$dumpFile.SafeFileHandle.DangerousGetHandle(),0,[IntPtr]::Zero,[IntPtr]::Zero,[IntPtr]::Zero);$dumpError=[Runtime.InteropServices.Marshal]::GetLastWin32Error()}
+                    finally{$dumpFile.Dispose()}
+                    Record @{kind='stack_dump';pid=$id;createdUtc=$candidate.CreationDate.ToUniversalTime().ToString('o');file=$dumpName;success=$ok;windowsError=$(if($ok){0}else{$dumpError});dumpType='MiniDumpNormal';fullMemory=$false}
+                }
                 $threads=@($process.Threads|Select-Object -First 128|ForEach-Object {
                     $thread=$_
                     try {$state=[string]$thread.ThreadState;$reason=if($state -eq 'Wait'){[string]$thread.WaitReason}else{$null};@{id=$thread.Id;state=$state;waitReason=$reason;cpuMs=$thread.TotalProcessorTime.TotalMilliseconds}}catch{@{id=$thread.Id;unavailable=$true}}

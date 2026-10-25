@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-10-25T08:54:06.912Z",
+  "inputs": {
+    "Tools/owned-process-diagnostics.mjs": "87ba8863d6a269f83d21e1e51b397224d7f49fd95db52880b6240087581efe94",
+    "Tools/owned-process-diagnostics.ps1": "00319c028820a5bf597bea1145a50e0f70bed75fd63a63c8f6b758a914fc764b",
+    "Tools/process-module-observation.ps1": "06fd6b681442a72734377cbae7e4159001927eb09247790618e3aae1f2b4d191",
+    "Tools/tests/owned-process-diagnostics.test.mjs": "b04b1b4062308d053f8a296f288bc91e654c9fff3577d7b42316e10d5fa70d3c"
+  },
+  "exitCode": 0,
+  "logSha256": "3d202f1117424c4bc1d5ce761573756ccf46c8206ed1bef39404216438295bbf",
+  "nativeProductChanged": false,
+  "installed": false,
+  "cpython": false,
+  "passed": true
+}

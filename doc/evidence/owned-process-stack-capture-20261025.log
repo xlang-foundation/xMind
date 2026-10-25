@@ -1,0 +1,36 @@
+TAP version 13
+# Actual owner diagnostics retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-igt5UD\\actual-owner-32906881-1d2c-49d5-91ec-becca41a1408\\observations.jsonl
+# Subtest: read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+ok 1 - read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+  ---
+  duration_ms: 8479.3264
+  type: 'test'
+  ...
+# Subtest: module presence includes an assembly beyond the bounded name list
+ok 2 - module presence includes an assembly beyond the bounded name list
+  ---
+  duration_ms: 281.186
+  type: 'test'
+  ...
+# Identity-rejection diagnostics retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-uSGyv5\\mismatched-owner-d46dca29-b7b6-4791-9da9-fbad267b63c9\\observations.jsonl
+# Subtest: identity mismatch stops observation without terminating the actual root
+ok 3 - identity mismatch stops observation without terminating the actual root
+  ---
+  duration_ms: 4076.1287
+  type: 'test'
+  ...
+# Subtest: optional diagnostics preserve the actual fast nonzero execution error
+ok 4 - optional diagnostics preserve the actual fast nonzero execution error
+  ---
+  duration_ms: 269.4995
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13201.6754
