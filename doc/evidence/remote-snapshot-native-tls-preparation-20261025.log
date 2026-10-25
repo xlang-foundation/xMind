@@ -1,0 +1,17 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  5: native_remote_run_snapshot_contract
+1/6 Test  #5: native_remote_run_snapshot_contract ...................   Passed    0.04 sec
+    Start  7: native_remote_snapshot_transport_contract
+2/6 Test  #7: native_remote_snapshot_transport_contract .............   Passed    0.13 sec
+    Start  9: native_remote_connection_authentication_contract
+3/6 Test  #9: native_remote_connection_authentication_contract ......   Passed    1.75 sec
+    Start 78: native_remote_snapshot_sdk_contract
+4/6 Test #78: native_remote_snapshot_sdk_contract ...................   Passed    0.28 sec
+    Start 81: native_remote_authentication_sdk_untrusted_contract
+5/6 Test #81: native_remote_authentication_sdk_untrusted_contract ...   Passed    1.79 sec
+    Start 82: native_mcp_oauth_trusted_peer_contract
+6/6 Test #82: native_mcp_oauth_trusted_peer_contract ................   Passed    0.46 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =   4.45 sec
