@@ -1,3 +1,9 @@
+## Candidate75 actual rendered editor coding passes — 2026-10-24
+
+Official isolated Code serve-web/hidden IAB60 loads candidate75, with telemetry off and trust limited to the disposable fixture. Actual Ask About Selection attaches the saved clamp.cjs buffer; named Native Process Coder executes one fresh task. Reviewed edit and literal Node check command each require approval; actual four Node assertions pass, four controlled model replies produce eight persisted history messages, both operations succeed and worker retirement is recorded. The clean editor buffer displays the corrected bounds before reload.
+
+Reload restores the same completed run, conversation and named agent; the corrected file stays open and model calls remain exactly four. Sessionb125c72f6d484c7f9360cac12ea6da4f/roota4356a9eeddb49b7bd537d34c1e1a675 must NEVER be replayed. Loaded extension files exactly match the staged candidate after execution. Hidden tab closed, owned native exits and exact Code server birth/image verify before retiring its isolated process tree; absence confirmed. Installed74 unchanged. Handoff/install and remaining remote protocol requirements remain open. [Receipt](evidence/candidate75-rendered-editor-20261024.json).
+
 ## Candidate75 rendered browser coding passes — 2026-10-24
 
 Hidden IAB59 uses the byte-verified candidate75 browser assets and native runtime. Fresh conversation38b61e75faa04471b8caa95e15254a4a/root e8b4b35cff8341a5b8f569127df26bdd selects Native Process Coder, reads spread.cjs, displays and approves the exact max-minus-min edit and literal Node check command, then reaches clean first completion. Actual Node exits0/four assertions; four controlled model replies, two successful operations/eight history messages, four model charges and completed worker retirement match native receipts. Both UI decisions use exact session/run-scoped routes and return200.
