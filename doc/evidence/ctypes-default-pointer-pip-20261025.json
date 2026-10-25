@@ -1,0 +1,166 @@
+{
+  "recordedAt": "2026-10-25T09:29:21.255Z",
+  "sdkCommit": "35fa98d1513c8595f1c0e856be7c645a43d187f1",
+  "sdkUrl": "https://github.com/CantorAI/xlang3/commit/35fa98d1513c8595f1c0e856be7c645a43d187f1",
+  "baselineReproduction": "Traceback (most recent call last):\r\n  File \"<string>\", line 1, in <module>\r\n    import ctypes; f=ctypes.windll.kernel32.GetModuleHandleW; f.restype=ctypes.c_void_p; print(bool(f(None)))\r\n                                                                                                    ~^^^^^^\r\nTypeError: expected integer for ctypes argument\r\n",
+  "candidate": {
+    "sdkCandidate": true,
+    "sourcePatchSha256": "5d8ca243ec27c32e89a2e4c11c971d0d75bee3f6d797a6cf1acb90f1279a57a4",
+    "sourceRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+    "sourceFiles": 14057,
+    "qualifiedSdkFiles": 47,
+    "nativeBinaries": 145,
+    "configured": {
+      "pid": 27464,
+      "startedAt": "2026-10-25T09:21:35.313Z",
+      "endedAt": "2026-10-25T09:21:36.461Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "9320b320b6310ae625bc0bd30c7ea1bf22d27f707026ec8ffce079467ac0b3fb"
+    },
+    "compiled": {
+      "pid": 11916,
+      "startedAt": "2026-10-25T09:21:39.708Z",
+      "endedAt": "2026-10-25T09:22:47.606Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "82d581d46d681f615a26252c5fa730537667a1d81f27bbffc7930d2be737e1b5"
+    },
+    "tested": {
+      "pid": 24908,
+      "startedAt": "2026-10-25T09:23:01.827Z",
+      "endedAt": "2026-10-25T09:23:04.991Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c96af4541fe610a184545758f476f1990c976eba0bb7953fc32e629c010f63ea"
+    },
+    "outputs": {
+      "xlang3_runtime.dll": "ca1449cf0f17997453ea97f1c8f695fec3fcf0cfe3c6e5f889b41e6033a3fe75",
+      "xlang3_runtime.lib": "5c3b83a87597df78f6b90cdb095409f97d57f8ed88dcd5323f32779f902944ab",
+      "xlang3.exe": "449fbd0f331c31d1393482d130bc6841202f31b46aee00788a3ab1ebbe90f32d"
+    },
+    "allOriginalInputFileSetsAndBytesUnchanged": true,
+    "cpythonExecuted": false,
+    "runtimeExecuted": true,
+    "releaseAcceptance": false,
+    "passed": true
+  },
+  "performance": {
+    "cases": {
+      "ctypes_pointer_return": {
+        "pid": 27912,
+        "startedAt": "2026-10-25T09:23:39.624Z",
+        "completedAt": "2026-10-25T09:23:40.248Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "dbcc8141ea7856c98b94bbd9484e9a1d1b2b7629df22dc5e0c284ce16365d10f",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_cast_errcheck_array": {
+        "pid": 17240,
+        "startedAt": "2026-10-25T09:23:40.249Z",
+        "completedAt": "2026-10-25T09:23:40.369Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "873daadd27a58895f1bfdee25ba375d9b4235be5b88485090f700690cc11465b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_structure_layout": {
+        "pid": 26344,
+        "startedAt": "2026-10-25T09:23:40.369Z",
+        "completedAt": "2026-10-25T09:23:40.478Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "2a44feb38a53149727a882243266422984f8746b329301fd1348cda35ace9f7b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "performance": {
+      "pid": 28636,
+      "startedAt": "2026-10-25T09:23:40.478Z",
+      "completedAt": "2026-10-25T09:25:12.816Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "ec94eaeceb1465acbd85d512f492409c5ecf158aef6d0e5b5e225f3036d2bf02",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "status": "pass",
+    "caseCount": 11,
+    "repeats": 21,
+    "warmup": 5,
+    "threshold": 0.1,
+    "allInputsFileSetsAndRuntimeBytesUnchanged": true,
+    "cpython": false,
+    "installed": false,
+    "passed": true
+  },
+  "pip": {
+    "recordedAt": "2026-10-25T09:26:33.190Z",
+    "commands": [
+      {
+        "pid": 6492,
+        "startedAt": "2026-10-25T09:26:20.327Z",
+        "completedAt": "2026-10-25T09:26:20.411Z",
+        "args": [
+          "-c",
+          "import sys; assert sys.implementation.name == 'xlang3'; print(sys.implementation.name)"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stdout": "xlang3\r\n",
+        "stderr": ""
+      },
+      {
+        "pid": 4140,
+        "startedAt": "2026-10-25T09:26:20.411Z",
+        "completedAt": "2026-10-25T09:26:21.861Z",
+        "args": [
+          "-m",
+          "pip",
+          "--version"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stdout": "pip 26.2.1 from D:\\CantorAI2026\\xMind\\.agentflow\\p76\\new-runtime\\stdlib\\pip (python 3.14)\r\r\n",
+        "stderr": ""
+      },
+      {
+        "pid": 3680,
+        "startedAt": "2026-10-25T09:26:21.861Z",
+        "completedAt": "2026-10-25T09:26:30.764Z",
+        "args": [
+          "-m",
+          "pip",
+          "install",
+          "--no-index",
+          "--only-binary=:all:",
+          "--target",
+          "D:/CantorAI2026/xMind/.agentflow/ctypes-default-pointer-pip/site",
+          "C:/Python/Python314/Lib/ensurepip/_bundled/pip-26.2.1-py3-none-any.whl"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stdout": "Processing C:\\Python\\Python314\\Lib\\ensurepip\\_bundled\\pip-26.2.1-py3-none-any.whl\r\nInstalling collected packages: pip\r\nSuccessfully installed pip-26.2.1\r\n",
+        "stderr": ""
+      }
+    ],
+    "sourceFiles": 14057,
+    "pureLibraryFiles": 2345,
+    "candidateFiles": 31,
+    "allInputHashesAndSetsUnchanged": true,
+    "offlineInstall": true,
+    "packagedRuntimeQualified": false,
+    "installed": false,
+    "cpython": false,
+    "passed": true
+  },
+  "generatedPipScripts": 3,
+  "generatedScriptsSelectXlang3": true,
+  "preservedAcceptedSdk": ".agentflow/xlang3-lifetime-guard-sdk",
+  "candidateSdkSnapshot": ".agentflow/xlang3-default-pointer-sdk",
+  "ciCheckoutAndStagePinsMatch": true,
+  "fullNativeWithNewSdkQualified": false,
+  "packagedRuntimeQualified": false,
+  "installed": false,
+  "goalComplete": false
+}

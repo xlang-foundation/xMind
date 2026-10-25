@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-25T09:24:17.011Z",
+  "source": "02f3ed7c6cb530fa28de6f376f0f0dc28e078b4b",
+  "run": 40175860466,
+  "job": 121118165769,
+  "conclusion": "failure",
+  "native": {
+    "total": 182,
+    "passed": 182,
+    "failed": 0,
+    "seconds": 677.45,
+    "inventoryAndLogVerified": true,
+    "graphRunnerSeconds": 32.17,
+    "graphRemoteSeconds": 11.31,
+    "trustedOAuthSeconds": 6.36
+  },
+  "runtimeStaging": {
+    "sourceRevision": "02f3ed7c6cb530fa28de6f376f0f0dc28e078b4b",
+    "sdkRevision": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+    "stdlibRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "contracts": 182,
+    "sourceFiles": 53,
+    "sourceManifestSha256": "974cb043231c85c6820f0eca1612219225cd13f436a498098f4889a95e3e31d0",
+    "output": "D:\\a\\xMind\\xMind\\xmind\\extensions\\vscode\\native-runtime",
+    "manifestSha256": "67d0a44e90ce39ca13106cc94a54c102f57dcf9c18101317edebcc75b244ff35",
+    "nativeFiles": 5,
+    "pureSourceFiles": 1830,
+    "files": 2338,
+    "nativeExecuted": false,
+    "configAccessed": false,
+    "installed": false,
+    "scope": "File staging from the complete successful native gate; VSIX verification follows separately"
+  },
+  "packagedPip": {
+    "identityPassed": true,
+    "versionExitCode": 1,
+    "error": "TypeError: expected integer for ctypes argument",
+    "call": "pip vendored platformdirs windows.get_win_folder_via_ctypes -> SHGetFolderPathW(None, csidl_const, None, 0, unicode_buffer)",
+    "offlineInstallationReached": false
+  },
+  "artifact": {
+    "id": 12594256429,
+    "name": "native-windows-evidence-02f3ed7c6cb530fa28de6f376f0f0dc28e078b4b",
+    "bytes": 4961944,
+    "sha256": "073ba65c02735831a59cbdd0600c68faa6f5441d5fba06556dd44cc21bdaf518"
+  },
+  "graphIntermittentTimeoutCauseResolved": false,
+  "positiveNativeSnapshotTlsCovered": false,
+  "fullGoalComplete": false,
+  "installed": false
+}
