@@ -8,10 +8,11 @@ namespace agentflow {
 // remote peer independently derives and authorizes its actor from credentials.
 struct RemoteSessionCreateAction {std::string title;};
 struct RemoteRunSubmitAction {std::string session_id,prompt;std::int64_t expected_session_revision=0;};
+using RemoteCommandAction=std::variant<RemoteSessionCreateAction,RemoteRunSubmitAction>;
 struct RemoteCommandIntent {
     std::string request_id,connection_id,origin,server_id,scope_id;
     std::int64_t profile_revision=0,credential_revision=0;
-    std::variant<RemoteSessionCreateAction,RemoteRunSubmitAction> action;
+    RemoteCommandAction action;
 };
 const char* remote_command_operation(const RemoteCommandIntent&) noexcept;
 enum class RemoteCommandState {prepared,unknown,admitted,rejected};

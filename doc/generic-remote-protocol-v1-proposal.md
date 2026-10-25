@@ -257,6 +257,40 @@ observation operation. Revoked read permission refuses reconciliation visibly.
 
 ## Implemented local command journal foundation
 
+### Native run submission and receipt connector
+
+The development native service now admits typed run intents through the durable
+journal before calling the connector. Public SDK/CLI/HTTP run-submission adapters
+are not yet enabled. The connector requires runs:1/receipts:1 and the scope's
+runs.submit plus receipts.read actions for POST. Receipt GET requires receipts.read
+and the compatible capabilities, independently of current submit permission.
+
+POST `/xmind/v1/scopes/{scope}/sessions/{session}/runs` has exactly request_id,
+operation (`runs.submit`), session_id, expected_revision and prompt. Session ID in
+the body must agree with its encoded path component. The peer must independently
+authorize the actor and atomically validate the expected session revision while
+deduplicating the full intent. It must compute prompt_sha256 itself from the exact
+UTF-8 prompt bytes, rather than trusting a client-provided fingerprint.
+
+Both POST and GET `/xmind/v1/scopes/{scope}/requests/{request_id}` return exactly
+binding and receipt. Binding has the existing five captured fields. A known run
+receipt has exactly request_id, operation, session_id, expected_revision,
+prompt_sha256 (lowercase SHA-256), state, resource_id and resource_revision. Every
+intent field must match the retained request; responses remain bounded to64KiB
+without reflecting the prompt. Admitted resources have an opaque run ID and a
+positive JSON-safe revision; pending/rejected receipts have empty ID/revision0.
+GET not_found remains exactly request_id/state and leaves the journal unknown.
+POST not_found is invalid. No state permits automatic resubmission.
+
+The service stores unknown before dispatch, checks captured authorization before
+and after the exchange, and retains unknown on lost replies or cancellation after
+possible send. A changed credential/profile refuses the observed result without
+resetting the intent. A fresh authorized receipt-only grant can reconcile the
+original intent after database reopen. Terminal reconciliation is local observation
+with no GET or POST. Admission receipts do not establish execution completion or
+physical worker retirement. Controlled connector/service fixtures are separate
+from native OS-trusted HTTPS and actual remote worker execution evidence.
+
 `RemoteCommandJournal` is backend-private C++ infrastructure for typed
 `sessions.create` and `runs.submit` intents. A C++ variant distinguishes session
 title from run session/prompt/expected-session-revision; callers cannot supply an

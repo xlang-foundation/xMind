@@ -15,6 +15,14 @@ RemoteNegotiatedGrant negotiate_remote_connection(const std::string& origin,cons
 struct RemoteCommandObservation {std::string state;std::optional<RemoteCommandResolution> resolution;};
 void validate_remote_receipt_scope(const RemoteNegotiatedGrant&,const std::string&,std::int64_t);
 void validate_remote_session_create_scope(const RemoteNegotiatedGrant&,const std::string&,std::int64_t);
+void validate_remote_run_submit_scope(const RemoteNegotiatedGrant&,const std::string&,std::int64_t);
+void validate_remote_run_receipt_scope(const RemoteNegotiatedGrant&,const std::string&,std::int64_t);
+RemoteCommandObservation submit_remote_run(const std::string& origin,const SecretBytes&,const RemoteNegotiatedGrant&,
+    const std::string& scope,const std::string& request_id,const RemoteRunSubmitAction&,std::chrono::milliseconds,
+    RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});
+RemoteCommandObservation observe_remote_run_request(const std::string& origin,const SecretBytes&,const RemoteNegotiatedGrant&,
+    const std::string& scope,const std::string& request_id,const RemoteRunSubmitAction&,std::chrono::milliseconds,
+    RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});
 RemoteCommandObservation create_remote_session(const std::string& origin,const SecretBytes&,const RemoteNegotiatedGrant&,
     const std::string& scope,const std::string& request_id,const std::string& title,std::chrono::milliseconds,
     RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});

@@ -11,6 +11,7 @@ using RemoteSessionReadExchange=std::function<RemoteObservedSession(const std::s
 using RemoteRunReadExchange=std::function<RemoteObservedRun(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
 // Backend-only captured state; SDK objects expose a separate public identity.
 using RemoteSessionCommandExchange=std::function<RemoteCommandObservation(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
+using RemoteRunCommandExchange=std::function<RemoteCommandObservation(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const RemoteRunSubmitAction&,std::chrono::milliseconds,std::stop_token)>;
 struct RemoteCapturedScope {ConnectionProfile profile;RemoteNegotiatedGrant grant;std::string scope_id;std::int64_t credential_revision=0;};
 struct RemoteAuthenticationReceipt {
     std::string connection_id,server_id;
@@ -28,7 +29,7 @@ struct RemoteAuthenticationStatus {
 class RemoteConnectionAuthentication {
 public:
     RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&);
-    RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange,RemoteSessionReadExchange = {},RemoteSessionCommandExchange create = {},RemoteSessionCommandExchange receipt = {},RemoteRunReadExchange run_read = {});
+    RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange,RemoteSessionReadExchange = {},RemoteSessionCommandExchange create = {},RemoteSessionCommandExchange receipt = {},RemoteRunReadExchange run_read = {},RemoteRunCommandExchange run_submit = {},RemoteRunCommandExchange run_receipt = {});
     RemoteAuthenticationReceipt authenticate(const std::string& profile_id,std::int64_t expected_profile_revision,
         std::int64_t expected_credential_revision,const SecretBytes& credential,std::chrono::milliseconds timeout,std::stop_token stop={});
     // Local encrypted-record observation only; no live revocation check,
@@ -39,11 +40,13 @@ public:
     RemoteObservedSession read_session(const RemoteCapturedScope&,const std::string& session_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     RemoteObservedRun read_run(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     static bool session_commands_available(const RemoteCapturedScope&);
-    RemoteCommandRecord observe_session_command(const RemoteCapturedScope&,const std::string& request_id);
+    RemoteCommandRecord observe_command(const RemoteCapturedScope&,const std::string& request_id);
     RemoteCommandRecord create_session(const RemoteCapturedScope&,const std::string& request_id,const std::string& title,std::chrono::milliseconds,std::stop_token={});
-    RemoteCommandRecord reconcile_session(const RemoteCapturedScope&,const std::string& request_id,std::chrono::milliseconds,std::stop_token={});
+    RemoteCommandRecord submit_run(const RemoteCapturedScope&,const std::string& request_id,RemoteRunSubmitAction,std::chrono::milliseconds,std::stop_token={});
+    RemoteCommandRecord reconcile_command(const RemoteCapturedScope&,const std::string& request_id,std::chrono::milliseconds,std::stop_token={});
 private:
+    RemoteCommandRecord send_command(const RemoteCapturedScope&,const RemoteCommandIntent&,std::chrono::milliseconds,std::stop_token);
     RemoteStoredCredential load_scope(const RemoteCapturedScope&);
-    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;
+    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;
 };
 }

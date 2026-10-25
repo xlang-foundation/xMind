@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-25T02:21:19.572Z",
+  "sourceParent": "0e4eaff59e5d0a85b60a2cd3aa89bdb7464e8897",
+  "sourcePatchSha256": "5e09e0989615816756cd4c0aa9127830f2ef538bf2103bbdceb4dd262f088053",
+  "build": {
+    "pid": 42432,
+    "launchedAt": "2026-10-25T02:17:26.765Z",
+    "completedAt": "2026-10-25T02:20:53.81Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "28abcbdbc73bc07af8d40bc18126a2fd1790121741f7d55f06b9e9d472ed5378"
+  },
+  "test": {
+    "pid": 9836,
+    "launchedAt": "2026-10-25T02:20:56.692Z",
+    "completedAt": "2026-10-25T02:21:16.701Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "cd6faaeab8662aa6fbfa121313acb55f4505e5901d8cd943d059f4a1f0986312"
+  },
+  "total": 11,
+  "failed": 0,
+  "passed": 11,
+  "seconds": 19.97,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "055170c6294cb77994425d2bc005683491d2c8ef29a37eaf61c9a2240e515f9d",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Native typed run POST/receipt GET connector and journal-backed captured service; controlled loopback transport and injected exchanges with actual xlang3/SQLite",
+  "verified": [
+    "Exact encoded session/request path and five-field typed POST body",
+    "Known independent SHA256 prompt digest and expected session revision bound in 64KiB receipt",
+    "17 malformed/error response modes refuse on POST and GET without redirect or retry",
+    "Pending rejected admitted and GET not_found remain distinct; POST not_found refuses",
+    "Missing permissions/capabilities expired grants invalid input and pre-cancellation send nothing",
+    "One durable send under repeated same intent; different intent and operation conflict",
+    "Lost reply persists unknown across database reopen; not_found cannot authorize POST",
+    "Fresh receipt-only grant reconciles original credential revision; terminal read makes no network call",
+    "Post-send credential change or cancellation retains unknown"
+  ],
+  "publicRunSubmissionAdaptersEnabled": false,
+  "positiveNativeTrustedTlsSubmissionVerified": false,
+  "remoteWorkerExecutionVerified": false
+}
