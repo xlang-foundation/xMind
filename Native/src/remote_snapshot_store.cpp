@@ -1,0 +1,45 @@
+#include "agentflow/remote_snapshot_store.hpp"
+#include "agentflow/connection_profiles.hpp"
+#include "agentflow/context_records.hpp"
+#include "nlohmann/json.hpp"
+#include <set>
+
+namespace agentflow {
+namespace {
+using Json=nlohmann::json;
+constexpr auto category="remote-run-snapshot-v1";
+constexpr std::int64_t maximum=9007199254740991LL;
+constexpr std::size_t byte_limit=4*1024*1024;
+bool id(const std::string& s){return !s.empty()&&s.size()<=256&&s!="."&&s!=".."&&s.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-:")==std::string::npos;}
+bool owner(const RemoteRunEventCursor& a,const RemoteRunEventCursor& b){return a.connection_id==b.connection_id&&a.server_id==b.server_id&&a.scope_id==b.scope_id&&a.session_id==b.session_id&&a.run_id==b.run_id;}
+void valid(const RemoteRunEventCursor& c){if(!id(c.connection_id)||!id(c.server_id)||!id(c.scope_id)||!id(c.session_id)||!id(c.run_id)||c.sequence<0||c.sequence>maximum||(c.epoch.empty()?c.sequence!=0:!id(c.epoch)))throw std::invalid_argument("Invalid snapshot cursor");}
+void valid(const RemoteSnapshotBase& b){valid(b.consumer.initial);valid(b.accepted);validate_remote_connection_origin(b.consumer.origin);if(!id(b.consumer.id)||!b.consumer.initial.epoch.empty()||b.consumer.initial.sequence!=0||!owner(b.consumer.initial,b.accepted)||b.checkpoint_revision<1||b.checkpoint_revision>maximum)throw std::invalid_argument("Invalid snapshot base");}
+Json cursor(const RemoteRunEventCursor& c){return {{"connection_id",c.connection_id},{"server_id",c.server_id},{"scope_id",c.scope_id},{"session_id",c.session_id},{"run_id",c.run_id},{"epoch",c.epoch},{"sequence",c.sequence}};}
+RemoteRunEventCursor cursor(const Json& j){if(!j.is_object()||j.size()!=7||!j.at("sequence").is_number_integer())throw DatabaseError("Invalid stored snapshot cursor");RemoteRunEventCursor c{j.at("connection_id"),j.at("server_id"),j.at("scope_id"),j.at("session_id"),j.at("run_id"),j.at("epoch"),j.at("sequence")};valid(c);return c;}
+Json base(const RemoteSnapshotBase& b){return {{"consumer_id",b.consumer.id},{"origin",b.consumer.origin},{"initial",cursor(b.consumer.initial)},{"checkpoint_revision",b.checkpoint_revision},{"accepted",cursor(b.accepted)}};}
+std::string key(const RemoteSnapshotBase& b,const std::string& snapshot){return context_digest(Json::array({b.consumer.id,snapshot}).dump());}
+Json records(const std::vector<RemoteSnapshotRecord>& values){auto result=Json::array();for(const auto& r:values)result.push_back({{"kind",r.kind},{"id",r.id},{"revision",r.revision},{"payload_json",r.payload_json}});return result;}
+void records_valid(const std::vector<RemoteSnapshotRecord>& records,const std::string& run,std::int64_t offset,std::size_t limit){
+    if(records.empty()||records.size()>4096||offset<0)throw std::invalid_argument("Invalid snapshot records");std::set<std::pair<std::string,std::string>> unique;std::size_t bytes=0;
+    const std::set<std::string> kinds{"run","message","operation","decision","worker","budget"};
+    try{for(const auto& r:records){bytes+=r.payload_json.size()+r.kind.size()+r.id.size();if(bytes>limit||!id(r.id)||!kinds.contains(r.kind)||r.revision<1||r.revision>maximum||!unique.emplace(r.kind,r.id).second||(r.kind=="run")!=(offset==0)||(r.kind=="run"&&r.id!=run))throw std::invalid_argument("Invalid snapshot record");
+        std::vector<std::set<std::string>> objects;const auto payload=Json::parse(r.payload_json,[&](int depth,Json::parse_event_t event,Json& value){if(depth>24)throw std::invalid_argument("Invalid snapshot payload");if(event==Json::parse_event_t::object_start)objects.emplace_back();else if(event==Json::parse_event_t::key){if(objects.empty()||!objects.back().insert(value.get<std::string>()).second)throw std::invalid_argument("Duplicate snapshot payload key");}else if(event==Json::parse_event_t::object_end)objects.pop_back();return true;});if(!payload.is_object())throw std::invalid_argument("Invalid snapshot payload");++offset;}}
+    catch(const Json::exception&){throw std::invalid_argument("Invalid snapshot payload");}
+}
+std::string encode(const RemoteSnapshotAssembly& v){const auto raw=Json{{"version",1},{"base",base(v.base)},{"id",v.snapshot_id},{"revision",v.revision},{"total_records",v.total_records},{"cursor",cursor(v.cursor)},{"records",records(v.records)},{"complete",v.complete},{"last_page_digest",v.last_page_digest}}.dump();if(raw.size()>byte_limit)throw std::invalid_argument("Snapshot assembly exceeds its byte limit");return raw;}
+void valid(const RemoteSnapshotAssembly& v){valid(v.base);valid(v.cursor);if(!id(v.snapshot_id)||v.cursor.epoch.empty()||!owner(v.base.accepted,v.cursor)||v.revision<1||v.revision>maximum||v.total_records<1||v.total_records>4096||v.records.size()>static_cast<std::size_t>(v.total_records)||v.complete!=(v.records.size()==static_cast<std::size_t>(v.total_records))||v.last_page_digest.size()!=64||v.last_page_digest.find_first_not_of("0123456789abcdef")!=std::string::npos||(v.cursor.epoch==v.base.accepted.epoch&&v.cursor.sequence<v.base.accepted.sequence))throw std::invalid_argument("Invalid snapshot assembly");records_valid(v.records,v.cursor.run_id,0,byte_limit);}
+RemoteSnapshotAssembly decode(const std::string& raw){
+    try{if(raw.size()>byte_limit)throw DatabaseError("Invalid stored snapshot");const auto j=Json::parse(raw);if(j.size()!=9||!j.at("version").is_number_integer()||j.at("version")!=1||!j.at("revision").is_number_integer()||!j.at("total_records").is_number_integer()||!j.at("complete").is_boolean())throw DatabaseError("Invalid stored snapshot");const auto& b=j.at("base");if(b.size()!=5||!b.at("checkpoint_revision").is_number_integer())throw DatabaseError("Invalid stored snapshot");RemoteSnapshotAssembly v;v.base={{b.at("consumer_id"),b.at("origin"),cursor(b.at("initial"))},b.at("checkpoint_revision"),cursor(b.at("accepted"))};v.snapshot_id=j.at("id");v.revision=j.at("revision");v.total_records=j.at("total_records");v.cursor=cursor(j.at("cursor"));v.complete=j.at("complete");v.last_page_digest=j.at("last_page_digest");if(!j.at("records").is_array()||j.at("records").size()>4096)throw DatabaseError("Invalid stored snapshot");for(const auto& r:j.at("records")){if(r.size()!=4||!r.at("revision").is_number_integer())throw DatabaseError("Invalid stored snapshot");v.records.push_back({r.at("kind"),r.at("id"),r.at("payload_json"),r.at("revision")});}valid(v);if(encode(v)!=raw)throw DatabaseError("Invalid stored snapshot");return v;
+    }catch(const Json::exception&){throw DatabaseError("Invalid stored snapshot");}catch(const std::invalid_argument&){throw DatabaseError("Invalid stored snapshot");}
+}
+}
+RemoteSnapshotAssembly RemoteRunSnapshots::observe(const RemoteSnapshotBase& b,const std::string& snapshot){valid(b);if(!id(snapshot))throw std::invalid_argument("Invalid snapshot identity");auto v=decode(store_.information(category,key(b,snapshot)).get());if(v.snapshot_id!=snapshot||base(v.base)!=base(b))throw Conflict("Snapshot base binding changed");return v;}
+RemoteSnapshotAssembly RemoteRunSnapshots::stage(const RemoteSnapshotBase& b,std::int64_t expected,const RemoteRunSnapshotPage& page){
+    valid(b);valid(page.cursor);const auto& p=page.position;if(expected<0||expected>=maximum||!id(p.snapshot_id)||p.epoch!=page.cursor.epoch||p.sequence!=page.cursor.sequence||page.cursor.epoch.empty()||!owner(b.accepted,page.cursor)||p.total_records<1||p.total_records>4096||p.offset<0||p.offset>=p.total_records||page.records.size()>256||p.offset+page.records.size()>static_cast<std::size_t>(p.total_records)||page.complete!=(p.offset+page.records.size()==static_cast<std::size_t>(p.total_records)))throw std::invalid_argument("Invalid snapshot assembly page");records_valid(page.records,page.cursor.run_id,p.offset,65536);
+    const auto digest=context_digest(Json{{"cursor",cursor(page.cursor)},{"id",p.snapshot_id},{"offset",p.offset},{"total",p.total_records},{"records",records(page.records)},{"complete",page.complete}}.dump());RemoteSnapshotAssembly v;std::optional<std::string> before;
+    try{v=observe(b,p.snapshot_id);before=encode(v);}catch(const NotFound&){if(expected!=0)throw Conflict("Snapshot assembly is absent");v.base=b;v.snapshot_id=p.snapshot_id;v.cursor=page.cursor;v.total_records=p.total_records;}
+    if(v.revision==expected+1&&v.last_page_digest==digest)return v;
+    if(v.revision!=expected||v.complete||v.cursor!=page.cursor||v.total_records!=p.total_records||p.offset!=static_cast<std::int64_t>(v.records.size()))throw Conflict("Snapshot assembly changed");
+    v.records.insert(v.records.end(),page.records.begin(),page.records.end());v.complete=page.complete;v.last_page_digest=digest;++v.revision;valid(v);store_.compare_information(category,key(b,p.snapshot_id),encode(v),before).get();return v;
+}
+}

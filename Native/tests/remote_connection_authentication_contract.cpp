@@ -1,5 +1,7 @@
 #include "agentflow/remote_command_journal.hpp"
 #include "agentflow/remote_event_checkpoint.hpp"
+#include "agentflow/remote_snapshot_store.hpp"
+#include "agentflow/context_records.hpp"
 #include "../src/remote_event_values.hpp"
 #include <future>
 #include "agentflow/remote_connection_authentication.hpp"
@@ -288,7 +290,24 @@ void captured_snapshot_contract(const std::string& modules,const std::string& st
  for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
  std::cout<<"Captured snapshot service: two pages, malformed typed replies, no-send refusal, cancellation/profile/credential fencing and encrypted reopen; no reset or actual TLS claimed.\n";
 }
+void snapshot_store_contract(const std::string& modules,const std::string& stdlib){
+ const auto file=std::filesystem::temp_directory_path()/("xmind-snapshot-store-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));const RemoteEventConsumer consumer{"snapshot-consumer","https://remote.example.invalid",{"remote-a","server-a","scope-a","session-a","run-a","",0}};const RemoteSnapshotBase base{consumer,1,consumer.initial};auto cursor=consumer.initial;cursor.epoch="epoch-new";cursor.sequence=20;const RemoteRunSnapshotPage first{cursor,{"snapshot-a","epoch-new",20,3,0},{{"run","run-a","{}",1},{"message","message-a",R"({"text":"retained"})",2}},false};
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteEventCheckpoints checkpoints(store);checkpoints.open(consumer);RemoteRunSnapshots snapshots(store);const auto staged=snapshots.stage(base,0,first);require(staged.revision==1&&!staged.complete&&staged.records.size()==2&&checkpoints.observe(consumer).accepted==consumer.initial);require(snapshots.stage(base,0,first).revision==1);auto changed=first;changed.records[1].payload_json=R"({"text":"different"})";rejects<Conflict>([&]{snapshots.stage(base,0,changed);});auto foreign=base;foreign.consumer.origin="https://other.example.invalid";rejects<Conflict>([&]{snapshots.observe(foreign,"snapshot-a");});store.close();
+ }
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteRunSnapshots snapshots(store),other(store);const auto restored=snapshots.observe(base,"snapshot-a");require(restored.revision==1&&restored.records[1].payload_json==first.records[1].payload_json&&!restored.complete);RemoteRunSnapshotPage last{cursor,{"snapshot-a","epoch-new",20,3,2},{{"worker","worker-a","{}",1}},true};auto duplicate=last;duplicate.records[0]={"message","message-a","{}",1};rejects<std::invalid_argument>([&]{snapshots.stage(base,1,duplicate);});require(snapshots.observe(base,"snapshot-a").revision==1);auto moved=last;moved.cursor.sequence=21;moved.position.sequence=21;rejects<Conflict>([&]{snapshots.stage(base,1,moved);});auto stale=base;stale.checkpoint_revision=2;rejects<Conflict>([&]{snapshots.stage(stale,1,last);});
+  auto alternative=last;alternative.records[0].id="worker-b";const auto attempt=[&](const auto& page){try{other.stage(base,1,page);return 1;}catch(const Conflict&){return 0;}};auto one=std::async(std::launch::async,[&]{return attempt(last);}),two=std::async(std::launch::async,[&]{return attempt(alternative);});require(one.get()+two.get()==1);const auto complete=snapshots.observe(base,"snapshot-a");require(complete.complete&&complete.revision==2&&complete.records.size()==3);auto accepted=last;accepted.records[0]=complete.records.back();require(snapshots.stage(base,1,accepted).revision==2);rejects<Conflict>([&]{snapshots.stage(base,2,accepted);});RemoteEventCheckpoints checkpoints(store);require(checkpoints.observe(consumer).revision==1&&checkpoints.observe(consumer).accepted==consumer.initial);store.close();
+ }
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteRunSnapshots snapshots(store);require(snapshots.observe(base,"snapshot-a").complete);auto bad=first;bad.position.snapshot_id="snapshot-b";bad.records[0].payload_json=R"({"duplicate":1,"duplicate":2})";rejects<std::invalid_argument>([&]{snapshots.stage(base,0,bad);});rejects<NotFound>([&]{snapshots.observe(base,"snapshot-b");});bad=first;bad.position.snapshot_id="snapshot-b";bad.position.total_records=4097;rejects<std::invalid_argument>([&]{snapshots.stage(base,0,bad);});bad=first;bad.position.snapshot_id="snapshot-b";bad.records[0].payload_json=Json{{"oversized",std::string(65536,'x')}}.dump();rejects<std::invalid_argument>([&]{snapshots.stage(base,0,bad);});
+  const auto key=context_digest(Json::array({consumer.id,"snapshot-a"}).dump()),raw=store.information("remote-run-snapshot-v1",key).get();for(int mode=0;mode<4;++mode){auto invalid=Json::parse(raw);if(mode==0)invalid["revision"]=true;if(mode==1){invalid["records"][2]["kind"]="message";invalid["records"][2]["id"]="message-a";}if(mode==2)invalid["complete"]=false;if(mode==3)invalid["unexpected"]=true;const auto corrupted=invalid.dump();store.compare_information("remote-run-snapshot-v1",key,corrupted,raw).get();rejects<DatabaseError>([&]{snapshots.observe(base,"snapshot-a");});store.compare_information("remote-run-snapshot-v1",key,raw,corrupted).get();}require(snapshots.observe(base,"snapshot-a").complete);store.close();
+ }
+ for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
+ std::cout<<"Snapshot assembly: three database lifetimes, partial reopen, duplicate-page idempotence, cross-page duplicate refusal and competing CAS writer; accepted event checkpoint unchanged.\n";
+}
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
+    snapshot_store_contract(argv[1],argv[2]);
     captured_snapshot_contract(argv[1],argv[2]);
     captured_run_read_contract(argv[1],argv[2]);
     captured_event_consumer_contract(argv[1],argv[2]);

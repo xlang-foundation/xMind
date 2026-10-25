@@ -1,0 +1,29 @@
+Start testing: Oct 25 00:13 Pacific Daylight Time
+----------------------------------------------------------
+9/181 Testing: native_remote_connection_authentication_contract
+9/181 Test: native_remote_connection_authentication_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_authentication_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_authentication_contract" start time: Oct 25 00:13 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Snapshot assembly: three database lifetimes, partial reopen, duplicate-page idempotence, cross-page duplicate refusal and competing CAS writer; accepted event checkpoint unchanged.
+Captured snapshot service: two pages, malformed typed replies, no-send refusal, cancellation/profile/credential fencing and encrypted reopen; no reset or actual TLS claimed.
+Captured run reads verified exact metadata, six states, no-send refusals and post-response cancellation/profile/credential fencing through real xlang3/SQLite. Controlled backend exchange only.
+Captured remote events passed pre-send namespace refusal, typed-page validation, immutable input cursor, retention gaps, post-response cancellation/profile/credential fencing and encrypted reopen. No public cursor/reset or actual network claim.
+Typed run command journal verified immutable prompt/session revision, cross-operation conflicts, competing single-send claim and prepared/unknown/terminal state across three xlang3/SQLite lifetimes. No networking or run execution.
+Typed cancellation journal passed exact session/run/revision binding, competing send claims, unknown across reopen, immutable admission/rejection and wrong-run receipt refusal. Admission is not worker retirement; no cancellation network dispatch.
+Native cancellation service passed one uncertain send, no resend across reopen/not-found, fresh receipt-only credential reconciliation, original intent retention and terminal no-network observation. Admission is not worker retirement.
+Native run submission service verified one send, lost reply/not-found retention, receipt-only fresh-grant reconciliation across database reopen, terminal no-network observation and post-send credential/cancellation uncertainty. Controlled exchanges only; no remote worker execution.
+Remote command SQLite journal verifies exact intent conflicts, competing send claims, persisted unknown before send, restart before/after send, terminal admission/rejection and no completed resend. No network or model execution.
+Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.
+Native authentication service integrates nine controlled injected negotiation outcomes with real xlang3/SQLite encrypted publication. Read-only observation covers absent/stored/stale-profile/expired states, redacted stale identity, retained revision after database reopen and no exchange. Captured session reads verify scope permission, exact resource result, profile/credential revision fencing, pre-send cancellation and post-response credential rotation refusal. No actual TLS/network exchange in this service fixture; standalone HTTP peer coverage is separate. Remote selection remains disabled.
+<end of output>
+Test time =   1.72 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_authentication_contract" end time: Oct 25 00:13 Pacific Daylight Time
+"native_remote_connection_authentication_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 25 00:13 Pacific Daylight Time

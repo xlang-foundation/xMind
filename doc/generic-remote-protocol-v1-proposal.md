@@ -828,3 +828,28 @@ explicit snapshot acceptance and atomic checkpoint reset. A partial snapshot
 must leave the old accepted cursor untouched. No automatic event retry, model
 or tool replay, root-tree completeness, worker retirement or Nexus deployment
 is established by page validation. [Focused evidence](evidence/remote-snapshot-page-validator-20261024.json).
+
+### Durable snapshot assembly (backend-private primitive)
+
+RemoteRunSnapshots stages observation pages in SQLite through PersistenceService
+and embedded xlang3. An assembly captures consumer/origin/run identity, the
+original accepted cursor and checkpoint revision. Its storage key binds consumer
+and snapshot ID; observing the same ID under a changed origin, resource or
+baseline refuses. This captured baseline is data for a future reset CAS, not
+proof that the event checkpoint is still current.
+
+Stage starts at expected assembly revision0. Pages must retain the same
+snapshot ID, epoch, sequence and total; offset must equal the accumulated record
+count. The last identical page can be retried with its original expected
+revision without appending it again. Different competing pages use SQLite CAS;
+only one wins. Cross-page kind/ID duplicates refuse. Complete is true only when
+all advertised records are stored. There is no implicit replacement of an old
+snapshot ID or loss of its partial state.
+
+Incoming pages retain the256-record/64KiB bounds. Complete assembly is bounded
+to4096records and4MiB serialized state, with depth/duplicate-payload checks and
+canonical persisted-record validation. Partial and complete assemblies survive
+database reopen. This store neither fetches pages nor authorizes publication,
+accepts a snapshot, resets an event checkpoint, or retries model/tool work.
+Captured-service integration and explicit authorized atomic checkpoint reset
+remain required. [Store evidence](evidence/remote-snapshot-store-20261025.json).

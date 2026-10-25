@@ -1,0 +1,97 @@
+{
+  "recordedAt": "2026-10-25T07:13:29.270Z",
+  "sourceParent": "971508a2212b9def456966c3c37ac55092ce86d2",
+  "sourcePatchSha256": "634a2fa9a7082008930d50629997a46f62229fa6b04f44a307653a00eaac9cab",
+  "build": {
+    "pid": 35172,
+    "launchedAt": "2026-10-25T07:13:08.260Z",
+    "completedAt": "2026-10-25T07:13:21.750Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "711692bb8fc28abaaff601e4a75daa3a2af89749f9d5eb27cc4ca18065a2f231"
+  },
+  "test": {
+    "pid": 27544,
+    "launchedAt": "2026-10-25T07:13:24.564Z",
+    "completedAt": "2026-10-25T07:13:26.335Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "34dc626d94640bbac2909ffae4a3ed6de6614c9a7a14a8edddca9ac1a73de4bf"
+  },
+  "total": 1,
+  "failed": 0,
+  "passed": 1,
+  "seconds": 1.73,
+  "projectFiles": 2852,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 144,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "sourceFiles": {
+    "Native/include/agentflow/remote_snapshot_store.hpp": "3db202d21a8577c6e549b86a4b03c7b5e691663b940a35b0e02bc1de6e04bd39",
+    "Native/src/remote_snapshot_store.cpp": "4a67703d41a142576871835a8e1634322038a067a37956167912184bb94c73dd"
+  },
+  "earlierFourContractGate": {
+    "recordedAt": "2026-10-25T07:12:26.229Z",
+    "sourceParent": "971508a2212b9def456966c3c37ac55092ce86d2",
+    "sourcePatchSha256": "8702d1fd03a3efcbca7bbae65bfde7e0003455acaf24dd4eb04e0c2560d0c99c",
+    "build": {
+      "pid": 40248,
+      "launchedAt": "2026-10-25T07:11:39.737Z",
+      "completedAt": "2026-10-25T07:12:16.731Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "f4f47f732b4c01f3c9a595c3f0abd7bbc94e0835deff58f6f511a194386397e7"
+    },
+    "test": {
+      "pid": 41304,
+      "launchedAt": "2026-10-25T07:12:19.665Z",
+      "completedAt": "2026-10-25T07:12:23.540Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "02ef55bc986f3937f59bc35bb1217293055a44d32933cc5d1102110b34a90063"
+    },
+    "total": 4,
+    "failed": 0,
+    "passed": 4,
+    "seconds": 3.83,
+    "projectFiles": 2852,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 144,
+    "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Backend-private durable snapshot assembly through embedded xlang3/SQLite; accepted event checkpoint unchanged.",
+  "checks": [
+    "Three database lifetimes with partial and complete reopen",
+    "Identical last-page retry idempotence",
+    "Cross-page kind/identity duplicate refusal",
+    "Stable snapshot cursor/total/offset and immutable checkpoint baseline",
+    "One CAS winner for competing final pages",
+    "Malformed stored record, duplicate JSON payload and oversized page refusal",
+    "No event cursor acknowledgement or reset"
+  ],
+  "limits": [
+    "Authorization belongs to captured-service integration, not this store.",
+    "Captured fetch/stage integration and explicit atomic event-checkpoint reset remain open.",
+    "No public SDK/CLI/HTTP/UI assembly API or positive trusted-TLS snapshot claim.",
+    "No new full-suite acceptance or installed/runtime update."
+  ],
+  "goalComplete": false
+}
