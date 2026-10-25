@@ -1012,3 +1012,7 @@ fencing, reset/idempotence, shared state with a separate SDK/CLI process and
 database reopen. This is cached native HTTP acceptance; positive remote trusted
 TLS and rendered browser/editor snapshot workflows remain open.
 [HTTP evidence](evidence/remote-snapshot-http-20261025.json).
+
+### Shared browser/editor snapshot client
+
+BackendClient exposes openRemoteSnapshot, readRemoteSnapshot, observeRemoteSnapshot and resetRemoteSnapshot. Each call is explicit and binds the resource, consumer, server and backend generation. Reset requires a validated complete assembly; partial reads must progress. Capability/origin/close fences and strict public response validation apply before publication. No automatic page loop or acknowledgement is added. Client suites and actual native HTTP integration pass; rendered snapshot workflows remain open. [Evidence](evidence/remote-snapshot-shared-client-20261025.json).

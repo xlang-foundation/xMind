@@ -1,3 +1,9 @@
+## Shared browser/editor snapshot client — 2026-10-25
+
+BackendClient now exposes explicit open/read/observe/reset methods against native HTTP. It validates exact public bindings, consumer/cursor identity, generation, bounded records, complete digest acknowledgement and progressing partial revisions. Capability/origin/close checks discard late responses; no automatic fetch loop, reset or retry is introduced.
+
+Final extension504/504 and browser178/178 pass with fresh18 assets and2853 project/14908 dependency hashes and file sets unchanged. Actual shared client to native HTTP passes1/1 in0.48s, with2857 project/16 SDK/1870 pure-library/30 runtime/18598 dependency/145 native-binary closure unchanged. Exact prior development executable reused; no C++ rebuild. Installed76 remains unchanged. Rendered snapshot UI, positive native trusted TLS, full qualification and graph timeout diagnosis remain open. [Receipt](evidence/remote-snapshot-shared-client-20261025.json). Full goal active.
+
 ## Owner/origin-bound native HTTP snapshot routes — 2026-10-25
 
 Added four /v1/connections/scope-run-snapshot-open/read/observe/reset POST routes through the captured native service and shared public value projections. They use exact field allowlists, duplicate/boolean/query rejection, owner or origin-bound view authentication and generation checks before consumer creation. Explicit reset resumes the stored original baseline and requires its complete revision/digest; no remote work is replayed. HTTP now advertises remote_run_snapshots:1, matching SDK/CLI availability; rendered UI remains separate.

@@ -1,0 +1,96 @@
+{
+  "recordedAt": "2026-10-25T08:31:04.761Z",
+  "scope": "Shared browser/editor BackendClient explicit snapshot methods and actual native HTTP integration",
+  "clients": {
+    "source": "02f3ed7c6cb530fa28de6f376f0f0dc28e078b4b",
+    "projectFiles": 2853,
+    "dependencyFiles": 14908,
+    "testFiles": {
+      "extension": 23,
+      "browser": 10
+    },
+    "results": {
+      "build": {
+        "pid": 40096,
+        "startedAt": "2026-10-25T08:27:11.122Z",
+        "endedAt": "2026-10-25T08:27:11.215Z",
+        "exitCode": 0,
+        "logSha256": "f4596075e686a1ad9f6603412df4ff8b9522ac830413aa1971711523e32d3a02"
+      },
+      "extension": {
+        "pid": 43064,
+        "startedAt": "2026-10-25T08:27:11.215Z",
+        "endedAt": "2026-10-25T08:27:15.501Z",
+        "exitCode": 0,
+        "logSha256": "bf928b44c734368de74dae1f096aa806bf1e2bfca69684719cc4414e9653594c",
+        "tests": 504,
+        "pass": 504,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 4224.2709
+      },
+      "browser": {
+        "pid": 23532,
+        "startedAt": "2026-10-25T08:27:15.502Z",
+        "endedAt": "2026-10-25T08:27:35.783Z",
+        "exitCode": 0,
+        "logSha256": "5bf944d254c82b471b1e8bc47b71fb1504e82af1ace8dcb3c1b8d2994672a8a3",
+        "tests": 178,
+        "pass": 178,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 20208.6241
+      }
+    },
+    "artifacts": 18,
+    "allSourceDependenciesAndSetsUnchanged": true,
+    "nativeSuiteRun": false,
+    "rendered": false,
+    "installed": false,
+    "paidInference": false,
+    "cpython": false,
+    "passed": true
+  },
+  "native": {
+    "recordedAt": "2026-10-25T08:30:39.050Z",
+    "sourceParent": "02f3ed7c6cb530fa28de6f376f0f0dc28e078b4b",
+    "sourcePatchSha256": "5e2bda91625f0f9bcd4e1e9858803b4f7e6341c5eead1e63bb3dd797af498340",
+    "build": {
+      "exitCode": 0,
+      "skipped": true,
+      "reason": "No C++ changes; exact previously tested development executable verified"
+    },
+    "test": {
+      "pid": 42160,
+      "launchedAt": "2026-10-25T08:30:35.668Z",
+      "completedAt": "2026-10-25T08:30:36.189Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "ecfd9d7fc56f2cc828e6e40bd3371352c3fe150cc2a598b40eeae62a7d769fc7"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.48,
+    "projectFiles": 2857,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "renderedSnapshotUI": false,
+  "installed": false,
+  "graphTimeoutResolved": false
+}

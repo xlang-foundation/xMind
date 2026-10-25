@@ -114,6 +114,7 @@ class BackendClient {
   #connectionChildHistorySupported=false;
   #connectionCapture;
   #connectionClosed=false;
+  #remoteSnapshotUsed=false;
   #connectionClosing;
   constructor(baseUrl, tokenProvider, fetchImpl = (...args) => fetch(...args)) {
     this.baseUrl = backendOrigin(baseUrl);
@@ -223,7 +224,7 @@ class BackendClient {
     }catch(error){error.admissionId=id;error.connectionBinding=capture.identity;throw error;}
   }
   async closeConnection(){
-    if(!this.#connectionAdmissionSupported&&!this.#connectionCapture)return;
+    if(!this.#connectionAdmissionSupported&&!this.#connectionCapture&&!this.#remoteSnapshotUsed)return;
     if(this.#connectionClosing)return this.#connectionClosing;this.#connectionClosed=true;
     this.#connectionClosing=(async()=>{if(!this.#connectionCapture)return;let capture;try{capture=await this.#connectionCapture;}catch{return;}if(this.baseUrl!==capture.origin)return;await this.request('/v1/connection-bindings/'+capture.id,undefined,15000,'DELETE');})();return this.#connectionClosing;
   }
@@ -414,6 +415,29 @@ class BackendClient {
     connectionIdentity(id);profileRevision(revision);if(id==='local'||revision<1)throw new Error('Choose a saved remote profile.');
     const capability=await this.request('/v1/connections/capabilities');if(capability?.remote_authentication!==1||capability?.remote_authentication_status!==1)throw new Error('Remote authentication is unavailable.');
     return validateRemoteAuthentication(await this.request('/v1/connections/authentication',{id,expected_profile_revision:revision}),id,revision);
+  }
+  async #snapshotRequest(operation,resource,fields){
+    this.#remoteSnapshotUsed=true;const origin=this.baseUrl,check=()=>{if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The captured snapshot connection changed or closed.');};check();
+    const capability=await this.request('/v1/connections/capabilities');check();if(capability?.remote_run_snapshots!==1)throw new Error('Remote snapshot recovery is unavailable.');
+    const value=await this.request('/v1/connections/scope-run-snapshot-'+operation,{...resource,...fields});check();return value;
+  }
+  async openRemoteSnapshot(resource,checkpointRevision){
+    const scope=snapshotResource(resource);snapshotRevision(checkpointRevision);const value=await this.#snapshotRequest('open',scope,{expected_checkpoint_revision:checkpointRevision});
+    exactFields(value,['binding','consumer_id','checkpoint_revision','accepted']);snapshotBinding(value.binding,scope);snapshotCursor(value.accepted,scope,value.binding);
+    if(value.consumer_id!==scope.consumer_id||value.checkpoint_revision!==checkpointRevision)throw new Error('Snapshot baseline belongs to another consumer.');return value;
+  }
+  async readRemoteSnapshot(resource,baseline,snapshotId,assemblyRevision){
+    const scope=snapshotResource(resource),binding={...baseline?.binding},accepted={...baseline?.accepted},checkpointRevision=baseline?.checkpoint_revision;snapshotBinding(binding,scope);snapshotCursor(accepted,scope,binding);snapshotRevision(checkpointRevision);snapshotRevision(assemblyRevision,true);if(baseline?.consumer_id!==scope.consumer_id)throw new Error('Snapshot baseline belongs to another consumer.');if(snapshotId!==null)snapshotIdentity(snapshotId);else if(assemblyRevision!==0)throw new Error('An initial snapshot read requires revision zero.');
+    const value=await this.#snapshotRequest('read',scope,{expected_checkpoint_revision:checkpointRevision,snapshot_id:snapshotId,expected_assembly_revision:assemblyRevision,expected_backend_generation:binding.backend_generation});snapshotState(value,scope,binding);
+    if(value.checkpoint_revision!==checkpointRevision||Object.keys(accepted).some(key=>value.accepted[key]!==accepted[key])||(snapshotId!==null&&value.snapshot_id!==snapshotId)||value.revision<assemblyRevision||value.revision>assemblyRevision+1||(!value.complete&&value.revision===assemblyRevision))throw new Error('Snapshot page differs from its captured baseline.');return value;
+  }
+  async observeRemoteSnapshot(resource,identity,snapshotId){
+    const scope=snapshotResource(resource),binding={...identity};snapshotBinding(binding,scope);snapshotIdentity(snapshotId);const value=await this.#snapshotRequest('observe',scope,{snapshot_id:snapshotId,expected_backend_generation:binding.backend_generation});snapshotState(value,scope,binding);if(value.snapshot_id!==snapshotId)throw new Error('Snapshot observation belongs to another snapshot.');return value;
+  }
+  async resetRemoteSnapshot(resource,snapshot){
+    const scope=snapshotResource(resource);snapshotState(snapshot,scope,snapshot?.binding);if(!snapshot.complete)throw new Error('A complete snapshot must be applied before acknowledgement.');const binding={...snapshot.binding},cursor={...snapshot.cursor},id=snapshot.snapshot_id,revision=snapshot.revision,digest=snapshot.digest,checkpointRevision=snapshot.checkpoint_revision;
+    const value=await this.#snapshotRequest('reset',scope,{snapshot_id:id,expected_assembly_revision:revision,digest,expected_backend_generation:binding.backend_generation});exactFields(value,['binding','checkpoint','snapshot_reset']);snapshotBinding(value.binding,scope,binding);const checkpoint=value.checkpoint,receipt=value.snapshot_reset;exactFields(checkpoint,['consumer_id','revision','accepted','pending']);exactFields(receipt,['snapshot_id','digest','snapshot_revision','checkpoint_revision']);snapshotCursor(checkpoint.accepted,scope,binding);
+    if(checkpoint.consumer_id!==scope.consumer_id||checkpoint.revision!==checkpointRevision+1||checkpoint.pending!==null||Object.keys(cursor).some(key=>checkpoint.accepted[key]!==cursor[key])||receipt.snapshot_id!==id||receipt.digest!==digest||receipt.snapshot_revision!==revision||receipt.checkpoint_revision!==checkpointRevision)throw new Error('Snapshot reset was not confirmed. Observe the stored state before trying again.');return value;
   }
   async authenticateConnection(id,revision,credentialRevision,credential) {
     try{connectionIdentity(id);profileRevision(revision);profileRevision(credentialRevision);if(id==='local'||revision<1||typeof credential!=='string'||!credential.length||credential.length>8192||!/^[\x21-\x7e]+$/.test(credential))throw new Error('Invalid credential');
@@ -1229,6 +1253,23 @@ function validateSessionArchive(value){
   exactFields(value.session,value.version===1?['title']:['title','agent']);if(typeof value.session.title!=='string'||!value.session.title||value.session.title.length>512)throw new Error('Invalid xMind session title');
   if(value.version===2&&value.session.agent!==null){const agent=value.session.agent,fields=['id','revision','model_id','instructions','tools','permissions','name','description','mode','hidden','default'];if(!agent||typeof agent!=='object'||Array.isArray(agent)||Object.keys(agent).some(key=>!fields.includes(key))||(agent.name===undefined)!==(agent.description===undefined)||(agent.mode!==undefined&&!['all','primary','subagent'].includes(agent.mode))||(agent.hidden!==undefined&&typeof agent.hidden!=='boolean')||(agent.default!==undefined&&typeof agent.default!=='boolean')||typeof agent.id!=='string'||!agent.id||!Number.isSafeInteger(agent.revision)||agent.revision<1||typeof agent.model_id!=='string'||agent.model_id.length>256||typeof agent.instructions!=='string'||!agent.instructions||agent.instructions.length>32768||(agent.name!==undefined&&(typeof agent.name!=='string'||!agent.name.trim()||new TextEncoder().encode(agent.name).length>128))||(agent.description!==undefined&&(typeof agent.description!=='string'||new TextEncoder().encode(agent.description).length>2048))||(agent.tools!==undefined&&(!Array.isArray(agent.tools)||agent.tools.length>64||agent.tools.some(tool=>typeof tool!=='string'||!tool||tool.length>128)))||(agent.permissions!==undefined&&(!Array.isArray(agent.permissions)||agent.permissions.length>128||agent.permissions.some(rule=>!rule||typeof rule!=='object'||Array.isArray(rule)||Object.keys(rule).length!==3||!['action','resource','effect'].every(field=>Object.hasOwn(rule,field))||typeof rule.action!=='string'||!rule.action||rule.action.length>128||rule.action!=='*'&&!/^[A-Za-z0-9_.*-]+$/.test(rule.action)||typeof rule.resource!=='string'||!rule.resource||new TextEncoder().encode(rule.resource).length>1024||rule.resource.includes('\\')||rule.resource.includes(':')||rule.resource.startsWith('/')||rule.resource.split('/').includes('..')||!['deny','allow'].includes(rule.effect)))))throw new Error('Invalid archived agent selection');}
   let total=0;const encoder=new TextEncoder();for(const message of value.messages){exactFields(message,['role','data']);if(!['user','assistant','tool'].includes(message.role)||!message.data||typeof message.data!=='object'||Array.isArray(message.data))throw new Error('Invalid archived conversation message');const size=encoder.encode(JSON.stringify(message.data)).length;if(size>262144||total>4194304-size)throw new Error('Session archive exceeds limits');total+=size;}return value;
+}
+function snapshotIdentity(value){if(typeof value!=='string'||!value.length||value.length>256||value==='.'||value==='..'||!/^[A-Za-z0-9_.:-]+$/.test(value))throw new Error('Invalid snapshot identity.');}
+function snapshotRevision(value,zero=false){if(!Number.isSafeInteger(value)||value<(zero?0:1)||value>=Number.MAX_SAFE_INTEGER)throw new Error('Invalid snapshot revision.');}
+function snapshotResource(value){exactFields(value,['id','expected_profile_revision','scope_id','session_id','run_id','consumer_id']);connectionIdentity(value.id);snapshotRevision(value.expected_profile_revision);if(value.id==='local')throw new Error('Choose a saved remote snapshot profile.');for(const key of ['scope_id','session_id','run_id','consumer_id'])snapshotIdentity(value[key]);return {...value};}
+function snapshotBinding(value,resource,expected){
+ exactFields(value,['connection_id','profile_revision','credential_revision','server_id','protocol_version','scope_id','backend_generation','command_routing']);snapshotIdentity(value.server_id);snapshotIdentity(value.backend_generation);snapshotRevision(value.credential_revision);
+ if(value.connection_id!==resource.id||value.profile_revision!==resource.expected_profile_revision||value.scope_id!==resource.scope_id||value.protocol_version!==1||typeof value.command_routing!=='boolean'||(expected&&Object.keys(expected).some(key=>value[key]!==expected[key])))throw new Error('Snapshot response belongs to another connection.');
+}
+function snapshotCursor(value,resource,binding){
+ exactFields(value,['connection_id','server_id','scope_id','session_id','run_id','epoch','sequence','backend_generation']);if(!Number.isSafeInteger(value.sequence)||value.sequence<0||value.sequence>Number.MAX_SAFE_INTEGER||typeof value.epoch!=='string'||(!value.epoch&&value.sequence!==0))throw new Error('Invalid snapshot cursor.');if(value.epoch)snapshotIdentity(value.epoch);
+ if(value.connection_id!==resource.id||value.server_id!==binding.server_id||value.scope_id!==resource.scope_id||value.session_id!==resource.session_id||value.run_id!==resource.run_id||value.backend_generation!==binding.backend_generation)throw new Error('Snapshot cursor belongs to another resource.');
+}
+function snapshotState(value,resource,binding){
+ exactFields(value,['binding','consumer_id','checkpoint_revision','accepted','snapshot_id','revision','cursor','total_records','records','complete','digest']);snapshotBinding(value.binding,resource,binding);snapshotCursor(value.accepted,resource,value.binding);snapshotCursor(value.cursor,resource,value.binding);snapshotRevision(value.checkpoint_revision);snapshotRevision(value.revision);snapshotIdentity(value.snapshot_id);
+ if(value.consumer_id!==resource.consumer_id||!value.cursor.epoch||!Number.isSafeInteger(value.total_records)||value.total_records<1||value.total_records>4096||!Array.isArray(value.records)||!value.records.length||value.records.length>value.total_records||typeof value.complete!=='boolean'||value.complete!==(value.records.length===value.total_records)||typeof value.digest!=='string'||!/^[a-f0-9]{64}$/.test(value.digest)||(value.accepted.epoch===value.cursor.epoch&&value.cursor.sequence<value.accepted.sequence))throw new Error('Invalid snapshot assembly.');
+ const ids=new Set(),kinds=new Set(['run','message','operation','decision','worker','budget']);for(let i=0;i<value.records.length;i++){const record=value.records[i];exactFields(record,['kind','id','revision','payload']);snapshotIdentity(record.id);snapshotRevision(record.revision);const key=record.kind+'\0'+record.id;if(!kinds.has(record.kind)||ids.has(key)||(record.kind==='run')!==(i===0)||(i===0&&record.id!==resource.run_id)||!record.payload||typeof record.payload!=='object'||Array.isArray(record.payload))throw new Error('Invalid snapshot record.');ids.add(key);}
+ try{if(new TextEncoder().encode(JSON.stringify(value.records)).byteLength>4*1024*1024)throw new Error();}catch{throw new Error('Invalid snapshot record size.');}
 }
 function connectionIdentity(value){if(typeof value!=='string'||!/^[A-Za-z0-9_.-]{1,64}$/.test(value))throw new Error('Invalid connection profile identity.');return value;}
 function connectionName(value){if(typeof value!=='string'||!value.trim()||value.length>128||/[\r\n\0]/.test(value))throw new Error('Enter a connection name (up to 128 characters).');return value;}
