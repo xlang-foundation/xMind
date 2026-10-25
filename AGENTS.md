@@ -12,6 +12,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Candidate77 hidden packaged browser passes read/edit/Node4, automatic preview and same-run reload; NEVER replay sessioncad770cfb1b44980bec72423e2d8c272/run13999d0493df4f06a6bdd2aa97ac13f1. Owners retired. Initial76 handoff profile-info exceeds30s before any task; retain .agentflow/packaged-v1-managed-handoff-sdk6df. Cause unproven; no replay/budget change. See status/evidence.
 
+- Candidate77 packaged Code passes selected saved-editor context/read/edit/Node4, live buffer update and same-run reload after reauthentication; NEVER replay session4362efdf093a41249a5fe377dfbe1721/rune3bbf9fdeb1a498899fa280143c26a9e. Isolated backend/command and11 identity-verified Code processes retired. Authentication persistence/visible desktop are not proved; installed76 unchanged.
+
 - Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.
 
 - Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.

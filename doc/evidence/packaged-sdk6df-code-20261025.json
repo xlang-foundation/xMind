@@ -1,0 +1,133 @@
+{
+  "recordedAt": "2026-10-25T22:37:43.296Z",
+  "passed": true,
+  "modelCalls": 4,
+  "rendered": {
+    "passed": true,
+    "cleanFirstCompletion": true,
+    "sessionId": "4362efdf093a41249a5fe377dfbe1721",
+    "runId": "e3bbf9fdeb1a498899fa280143c26a9e",
+    "selectionCommandVerified": true,
+    "liveEditorUpdatedBeforeReload": true,
+    "reloadRestored": true,
+    "authenticationRequiredOnReload": true,
+    "approvals": 2,
+    "tabClosed": true,
+    "observedCommandExit": 0,
+    "observedStdout": "4 min-abs checks passed",
+    "isolatedCodeServer": true,
+    "desktopVisible": false
+  },
+  "backendProof": {
+    "recordedAt": "2026-10-25T22:36:48.120Z",
+    "sessionId": "4362efdf093a41249a5fe377dfbe1721",
+    "runId": "e3bbf9fdeb1a498899fa280143c26a9e",
+    "state": "completed",
+    "messages": 8,
+    "operations": 2,
+    "modelCalls": 4,
+    "completedWorkerRetirements": 1,
+    "historySha256": "45bf162c2591fd272aeac5e55f9d0a4c0dd252ba8f5169ce7450ff7d8097acd6",
+    "eventsSha256": "63f6f6b6524979c6a0c22c6426722c5d9f7569bf1b22ae5a6841290af63b9149",
+    "operationsSha256": "f498d5fa1c292dcbed57310f20d956e8d0e646bb3f344922fbe17c3889afb420",
+    "readOnly": true,
+    "tasksReplayed": false,
+    "renderedAcceptance": false,
+    "packagedAcceptance": false
+  },
+  "package": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension",
+    "archiveSha256": "ead875de402f8e2a53b9fb627b2f7903b19cfd6244136bf5d12e743b2be850c0",
+    "manifestSha256": "a4e03cb0ebff9605e5138587af424b2b27c325493899fc445050552bb8cebdc7",
+    "verifiedPackagedFiles": 2379
+  },
+  "nativeSha256": "f86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171",
+  "isolatedCodeTreeRetirement": {
+    "observedAt": "2026-10-25T22:37:22.6207638Z",
+    "ownedCodeTreeAbsent": true,
+    "identityVerifiedProcesses": [
+      {
+        "ProcessId": 13716,
+        "ParentProcessId": 30516,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:34:26.6268110Z"
+      },
+      {
+        "ProcessId": 29560,
+        "ParentProcessId": 13716,
+        "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe",
+        "birthUtc": "2026-10-25T22:34:26.6488760Z"
+      },
+      {
+        "ProcessId": 29968,
+        "ParentProcessId": 13716,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:34:41.0970790Z"
+      },
+      {
+        "ProcessId": 20864,
+        "ParentProcessId": 13716,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:34:41.2532780Z"
+      },
+      {
+        "ProcessId": 30492,
+        "ParentProcessId": 13716,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:34:54.9290620Z"
+      },
+      {
+        "ProcessId": 30540,
+        "ParentProcessId": 13716,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:36:19.2783110Z"
+      },
+      {
+        "ProcessId": 27936,
+        "ParentProcessId": 13716,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:36:19.3501480Z"
+      },
+      {
+        "ProcessId": 584,
+        "ParentProcessId": 29968,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:34:43.7529070Z"
+      },
+      {
+        "ProcessId": 17424,
+        "ParentProcessId": 30540,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:36:19.9602870Z"
+      },
+      {
+        "ProcessId": 29204,
+        "ParentProcessId": 30540,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:36:19.9678420Z"
+      },
+      {
+        "ProcessId": 22500,
+        "ParentProcessId": 29204,
+        "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+        "birthUtc": "2026-10-25T22:36:20.2391430Z"
+      }
+    ],
+    "userInstallationChanged": false
+  },
+  "backendAndCommandPidsAbsent": [
+    27604,
+    8040
+  ],
+  "fixtureGateSha256": "8f173b3e5333bb5ba32b679c4689d38ac83eaad3d19862a48f07052879e6ec7a",
+  "screenshots": {
+    "packaged-sdk6df-code-before-reload-20261025.png": "d7a350ad1ba6d888c28c4ce3c6551b53da1b4e6d21641b287b3e2eba0eb75900",
+    "packaged-sdk6df-code-reload-20261025.png": "d7c0e0d2e9fc4f275ee7cef35ed31651e8d11eb8e857d6d0547665b1e53893d1"
+  },
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "userInstallationChanged": false,
+  "releaseAccepted": false,
+  "scope": "Actual VSIX-verified candidate extension in hidden Microsoft Code Server; selected saved-editor context, reviewed native edit and Node command, live clean-buffer update, completed run/history/model/agent restored after reauthentication. Authentication persistence and visible desktop Code are not established."
+}
