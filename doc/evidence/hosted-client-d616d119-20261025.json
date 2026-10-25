@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-25T08:55:29.575Z",
+  "run": 40177517702,
+  "job": 121121322752,
+  "conclusion": "success",
+  "artifact": {
+    "id": 12593202051,
+    "name": "view-contracts-evidence-d616d1195fad30dde079f9a0e6c31d83d856227a",
+    "bytes": 327098,
+    "sha256": "da2496bb52c04e1d16107b805b57b1120832ecd9883c3c79a444341c2c338334"
+  },
+  "gate": {
+    "sourceRevision": "d616d1195fad30dde079f9a0e6c31d83d856227a",
+    "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+    "sourceFiles": 71,
+    "trackedSourceFiles": 66,
+    "vendorFiles": 5,
+    "browserAssets": 18,
+    "sourceAndAssetBytesUnchanged": true,
+    "expectedTests": {
+      "extension": 506,
+      "browser": 179
+    },
+    "extension": {
+      "exitCode": 0,
+      "tests": 506,
+      "passed": 506,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "browser": {
+      "exitCode": 0,
+      "tests": 179,
+      "passed": 179,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0
+    },
+    "providerRequests": 0,
+    "nativeExecuted": false,
+    "cpythonExecuted": false,
+    "passed": true
+  },
+  "originalLogsVerified": true,
+  "sourceAssetManifestsVerified": true,
+  "rendered": false,
+  "installed": false,
+  "nativeSuiteRun": false
+}

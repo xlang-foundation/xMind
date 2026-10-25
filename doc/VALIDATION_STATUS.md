@@ -1,3 +1,7 @@
+## Hosted browser/editor scope-inspection suites accepted — 2026-10-25
+
+Hosted d616d119 run40177517702/job121121322752 succeeds506/506 extension and179/179 browser contracts. Original artifact12593202051 SHA256 verifies;71 source and18 asset before/after manifests agree and original terminal logs confirm both counts with zero failures. This accepts the adapter/controller scope and corrected exact-count gate. Rendered native-backed scope inspection, snapshot UI and full native release qualification remain separate. Installed76 unchanged. [Hosted receipt](evidence/hosted-client-d616d119-20261025.json). Full goal active.
+
 ## Owned PowerShell stack capture for future hosted stalls — 2026-10-25
 
 Hosted process diagnostics now request MiniDumpNormal for verified owned PowerShell descendants still alive after15s, at most two processes and one attempt per PID/birth. Existing ancestry, image and birth checks precede capture. No full-memory flag, termination, retry, module warming or deadline change is introduced. Local capture remains disabled unless explicitly enabled by the controlled diagnostic fixture. Raw dumps remain diagnostic artifacts, not repository files; stack memory can contain synthetic fixture data. API reference: [Microsoft MiniDumpWriteDump](https://learn.microsoft.com/en-us/windows/win32/api/minidumpapiset/nf-minidumpapiset-minidumpwritedump).
