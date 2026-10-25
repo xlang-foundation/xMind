@@ -1,3 +1,7 @@
+## Diagnostics observation and failed-fixture retention — 2026-10-24
+
+The diagnostics fixture now flushes begin/end and elapsed milliseconds for each mode, including client shutdown/destruction, and retains its directory on ordinary assertion failure. Original18 require occurrences, cases,1s request timeout and20s CTest limit remain unchanged. Fresh focused1/1 passes5.83s; missing-readiness and silent cases each take about1.09s, other modes170–552ms. This does not explain or clear the prior full-run53.60s timeout. Product Native2f564d45 unchanged; all2840/16/1870/30/18598/142 closure hashes/sets exact. No package/install; installed74 preserved. [Receipt](evidence/language-diagnostics-observation-20261024.json), [phase log](evidence/language-diagnostics-observation-20261024.log).
+
 ## Full179 fcdd4b51: two timeouts retained — 2026-10-24
 
 Complete native gate finishes177/179 in988.54s. Graph remote15.39s, RPC66.83s, nested44.18s, deep10.32s and HTTP9.61s pass. Diagnostics hits its configured20s deadline with CTest reporting53.60s before termination; no phase output proves its cause. Original xmind-language-diagnostics-1542773962 remains retained. Ledger45.15s exceeds its unchanged45s wrapper: planning13683ms, paused820ms, main planning8197ms, then final coexistence pair cutoff after eleven case completions. The earlier focused44.74s pass did not resolve full-run timing. Original xmind-worker-ledger-3926656428-3716486766 and raw ledger-failure-7oY6ex remain retained; NEVER replay either fixture.

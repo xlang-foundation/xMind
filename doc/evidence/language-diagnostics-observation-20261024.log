@@ -1,0 +1,41 @@
+Start testing: Oct 24 18:25 Pacific Daylight Time
+----------------------------------------------------------
+84/179 Testing: native_language_server_diagnostics_contract
+84/179 Test: native_language_server_diagnostics_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_language_server_diagnostics_contract.exe" "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/language_server_diagnostics_peer.mjs"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_language_server_diagnostics_contract" start time: Oct 24 18:25 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Diagnostics fixture "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-language-diagnostics-600712229"
+Diagnostics phase begin rust-ready
+Diagnostics phase end rust-ready elapsed_ms=259
+Diagnostics phase begin rust-never-ready
+Diagnostics phase end rust-never-ready elapsed_ms=1091
+Diagnostics phase begin rust-malformed
+Diagnostics phase end rust-malformed elapsed_ms=170
+Diagnostics phase begin push
+Diagnostics phase end push elapsed_ms=547
+Diagnostics phase begin unversioned
+Diagnostics phase end unversioned elapsed_ms=537
+Diagnostics phase begin suppress-clean
+Diagnostics phase end suppress-clean elapsed_ms=552
+Diagnostics phase begin pull
+Diagnostics phase end pull elapsed_ms=175
+Diagnostics phase begin silent-tool-cancellation
+Diagnostics phase end silent-tool-cancellation elapsed_ms=1089
+Diagnostics phase begin pull-error
+Diagnostics phase end pull-error elapsed_ms=181
+Diagnostics phase begin silent
+Diagnostics phase end silent elapsed_ms=1089
+Native LSP diagnostics passed actual framed push/pull dispatch, version filtering, changed-buffer invalidation, observed clean results and bounded missing/error outcomes. Synthetic server only.
+Diagnostics failed fixture retained at "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-language-diagnostics-600712229"
+<end of output>
+Test time =   5.81 sec
+----------------------------------------------------------
+Test Passed.
+"native_language_server_diagnostics_contract" end time: Oct 24 18:25 Pacific Daylight Time
+"native_language_server_diagnostics_contract" time elapsed: 00:00:05
+----------------------------------------------------------
+
+End testing: Oct 24 18:25 Pacific Daylight Time
