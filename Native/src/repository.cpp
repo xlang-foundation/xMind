@@ -31,7 +31,8 @@ bool worker_uncounted_graph_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_effect_owner(Repository&,const AgentWorkerLeaseSpec&,const std::string& tool={});
 bool worker_planning_root_owner(Repository&,const AgentWorkerLeaseSpec&);
 bool worker_agent_owner(Repository&,const AgentWorkerLeaseSpec&);
-void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false);
+struct WorkerScopeSnapshot { Run root,owner; RootBudgetRecord budget; };
+void worker_current_scope(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,bool allow_queued_root=false,WorkerScopeSnapshot* snapshot=nullptr);
 std::optional<std::string> worker_attempt_generation(XlangSqlite&,const std::string& root,const std::string& owner,const std::string& attempt);
 std::string worker_assistant_receipt(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&,const std::string& attempt,bool final,bool planning_root=false);
 void worker_require_tool_turns(Repository&,XlangSqlite&,const AgentWorkerLeaseSpec&);
@@ -3589,8 +3590,9 @@ bool worker_effect_owner(Repository& repository,const AgentWorkerLeaseSpec& leas
 bool worker_agent_owner(Repository& repository,const AgentWorkerLeaseSpec& lease){
     return lease.owner_run_id==lease.root_run_id?ordinary_worker_policy(repository.root_budget(lease.root_run_id).spec.policy_id):(worker_delegated_owner(repository,lease)||worker_graph_owner(repository,lease)||worker_dynamic_owner(repository,lease));
 }
-void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec,bool allow_queued_root=false){
-    const auto root=repository.run(spec.root_run_id),owner=repository.run(spec.owner_run_id);if(!root.parent_id.empty())throw Conflict("Worker requires an owning root, not another child");const auto budget=repository.root_budget(spec.root_run_id);
+WorkerScopeSnapshot worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& spec,bool allow_queued_root=false){
+    WorkerScopeSnapshot captured;captured.root=repository.run(spec.root_run_id);captured.owner=spec.owner_run_id==spec.root_run_id?captured.root:repository.run(spec.owner_run_id);
+    const auto& root=captured.root;const auto& owner=captured.owner;if(!root.parent_id.empty())throw Conflict("Worker requires an owning root, not another child");captured.budget=repository.root_budget(spec.root_run_id);const auto& budget=captured.budget;
     const bool delegated=worker_delegated_owner(repository,spec),graph=worker_graph_owner(repository,spec),dynamic=worker_dynamic_owner(repository,spec);
     const bool queued=allow_queued_root&&owner.state==RunState::queued&&((spec.root_run_id==spec.owner_run_id&&!root.graph_root&&root.state==RunState::queued&&ordinary_worker_policy(budget.spec.policy_id))||((delegated||graph||dynamic)&&root.state==RunState::running));
     const auto provider=(delegated||graph||dynamic)?worker_provider_identity(repository,spec.root_run_id,spec.owner_run_id):Json::parse(budget.spec.provider_identity_json);
@@ -3600,12 +3602,14 @@ void worker_running_scope(Repository& repository,XlangSqlite& db,const AgentWork
     if(delegated||graph||dynamic){const auto parent_membership=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='agent.workspace_membership' ORDER BY seq LIMIT 1",{spec.root_run_id}).rows;if(parent_membership.empty()!=membership.empty()||(!membership.empty()&&Json::parse(text(parent_membership[0][0]))!=Json::parse(text(membership[0][0]))))throw Conflict("Child worker membership differs from its captured root");}
     if(spec.workspace_id=="workspace:none"){if(spec.workspace_revision!=1||!membership.empty())throw Conflict("Worker workspace-free admission differs");}
     else{if(membership.empty())throw Conflict("Worker requires backend-captured workspace membership");const auto saved=Json::parse(text(membership[0][0]));if(saved.at("workspace_id")!=spec.workspace_id||saved.at("revision")!=spec.workspace_revision)throw Conflict("Worker workspace admission changed");}
+    return captured;
 }
-void worker_current_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& expected,bool allow_queued_root){
-    const auto lease=read_worker_lease(db,expected.generation);if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker has no exact active captured lease");worker_running_scope(repository,db,expected,allow_queued_root);
+void worker_current_scope(Repository& repository,XlangSqlite& db,const AgentWorkerLeaseSpec& expected,bool allow_queued_root,WorkerScopeSnapshot* snapshot){
+    const auto lease=read_worker_lease(db,expected.generation);if(lease.state!="active"||lease.spec!=expected)throw Conflict("Worker has no exact active captured lease");auto captured=worker_running_scope(repository,db,expected,allow_queued_root);
     const auto current=db.execute("SELECT payload FROM information WHERE category=? AND id=?",{std::string(worker_current_category),expected.owner_run_id}).rows;
     if(current.empty()||Json::parse(text(current[0][0])).at("generation")!=expected.generation)throw Conflict("Worker generation is stale");
-    if(repository.root_budget(expected.root_run_id).spec.policy_id=="native.dynamic-plan"){const auto segment=repository.dynamic_budget_segment(expected.root_run_id);const auto admitted=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{expected.owner_run_id,expected.generation}).rows;if(segment.state!="open"||admitted.size()!=1||integer(admitted[0][0])<segment.opened_event_seq)throw Conflict("Worker lease predates its active planning segment");}
+    if(captured.budget.spec.policy_id=="native.dynamic-plan"){const auto segment=repository.dynamic_budget_segment(expected.root_run_id);const auto admitted=db.execute("SELECT seq FROM events WHERE run_id=? AND kind='worker.lease.admitted' AND json_extract(payload,'$.generation')=?",{expected.owner_run_id,expected.generation}).rows;if(segment.state!="open"||admitted.size()!=1||integer(admitted[0][0])<segment.opened_event_seq)throw Conflict("Worker lease predates its active planning segment");}
+    if(snapshot)*snapshot=std::move(captured);
 }
 std::optional<std::string> worker_attempt_generation(XlangSqlite& db,const std::string& root,const std::string& owner,const std::string& attempt){
     const auto rows=db.execute("SELECT payload FROM events WHERE run_id=? AND kind='budget.model_call.reserved' AND json_extract(payload,'$.root_run_id')=? AND json_extract(payload,'$.attempt_id')=?",{owner,root,attempt}).rows;
@@ -3642,12 +3646,13 @@ void Repository::validate_agent_worker_model_window(const AgentWorkerLeaseSpec& 
 }
 AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerLeaseSpec& expected,const AgentWorkerJournalRead& query){
     if(query.target.empty()||query.target.size()>256||query.after<0||(query.kind!=AgentWorkerJournalReadKind::events&&query.after!=0))throw std::invalid_argument("Invalid worker journal read");
-    auto& db=impl_->database;Transaction tx(db);worker_current_scope(*this,db,expected,true);
-    const auto owner=run(expected.owner_run_id);
+    // Reuse only values validated in this transaction; every new call rechecks its lease and authority.
+    auto& db=impl_->database;Transaction tx(db);WorkerScopeSnapshot captured;worker_current_scope(*this,db,expected,true,&captured);
+    const auto& owner=captured.owner;
     AgentWorkerJournalValue result;
     switch(query.kind){
     case AgentWorkerJournalReadKind::run:
-        if(query.target!=expected.owner_run_id&&query.target!=expected.root_run_id)throw Conflict("Worker cannot read a foreign run");result=run(query.target);break;
+        if(query.target!=expected.owner_run_id&&query.target!=expected.root_run_id)throw Conflict("Worker cannot read a foreign run");result=query.target==owner.id?owner:captured.root;break;
     case AgentWorkerJournalReadKind::session:
         if(query.target!=owner.session_id)throw Conflict("Worker cannot read a foreign session");result=session(query.target);break;
     case AgentWorkerJournalReadKind::history:
@@ -3657,7 +3662,7 @@ AgentWorkerJournalValue Repository::read_agent_worker_journal(const AgentWorkerL
     case AgentWorkerJournalReadKind::child_admission:
         if(query.target!=expected.owner_run_id||(!worker_delegated_owner(*this,expected)&&!worker_graph_owner(*this,expected)&&!worker_dynamic_owner(*this,expected)))throw Conflict("Worker may inspect only its exact child admission");{auto admission=child_admission(query.target);if(admission.kind==ChildAdmissionKind::dynamic_agent)admission.backend_identity.clear();result=std::move(admission);}break;
     case AgentWorkerJournalReadKind::root_budget:
-        if(query.target!=expected.root_run_id)throw Conflict("Worker cannot read another root budget");result=root_budget(query.target);break;
+        if(query.target!=expected.root_run_id)throw Conflict("Worker cannot read another root budget");result=captured.budget;break;
     default:throw std::invalid_argument("Unsupported worker journal read");
     }
     tx.commit();return result;

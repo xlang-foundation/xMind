@@ -1,3 +1,9 @@
+## Transaction-local worker scope reuse — 2026-10-24
+
+Worker validation now returns its already validated root, owner and budget for reuse within the same transaction. Identical root/owner reads and the second budget read are removed; journal run/budget replies reuse those values. Every new call still checks exact active lease, current generation, workspace membership, provider and active planning segment. No cross-call cache, IPC serializer, dispatch route or deadline change is introduced.
+
+Focused five-contract gate passes5/5 in123.39s: worker RPC61.04s, graph remote13.37s, ledger44.52s, channel2.95s, shared memory1.49s. All2840/16/1870/30/18598/142 input/binary hashes and file sets remain exact during the gate. Nativec17c240b is uninstalled. This does not demonstrate a performance improvement: ledger is slower than the prior39.43s observation and remains close to its45s wrapper. Original diagnostics/ledger/PowerShell failures remain open; full qualification and complete delivery goal remain active. [Receipt](evidence/worker-transaction-snapshot-20261024.json), [focused log](evidence/worker-transaction-snapshot-focused-20261024.log).
+
 ## Hosted0fe terminal175/177; trusted failure retention repaired — 2026-10-24
 
 Official run40150618641/job121044360758 finishes175/177 in706.14s. Artifact12583294599 is5043881 bytes/SHAe369f9259e7c85eee719e676391b6371baf3aa6a1292897cdfd2c0e35bd7c10d; provenance matches exact0fe170b0785b8825c39a203a8628572da5ac5f6c and SDK8c. Diagnostics5.64s, RPC55.51s, graph remote12.63s, ledger42.41s, nested34.81s and deep8.57s pass in this run. These observations do not clear the earlier failed local complete gate.

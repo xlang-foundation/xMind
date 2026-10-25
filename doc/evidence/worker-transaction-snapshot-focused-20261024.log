@@ -1,0 +1,15 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+    Start  93: native_agent_worker_model_rpc_contract
+1/5 Test  #93: native_agent_worker_model_rpc_contract ........   Passed   61.04 sec
+    Start  96: native_agent_worker_graph_remote_contract
+2/5 Test  #96: native_agent_worker_graph_remote_contract .....   Passed   13.37 sec
+    Start  99: native_agent_worker_ledger_contract
+3/5 Test  #99: native_agent_worker_ledger_contract ...........   Passed   44.52 sec
+    Start 102: native_agent_worker_channel_contract
+4/5 Test #102: native_agent_worker_channel_contract ..........   Passed    2.95 sec
+    Start 103: native_xlang3_shared_memory_worker_contract
+5/5 Test #103: native_xlang3_shared_memory_worker_contract ...   Passed    1.49 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) = 123.39 sec

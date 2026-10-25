@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-25T03:09:08.357Z",
+  "sourceParent": "32a70b036ff2e60b39a37434ed2a7bba983f2d76",
+  "sourcePatchSha256": "4fc57dbc7f2acaba55d565cab28e2da1ab7b6957468895a08fa98328d429045d",
+  "build": {
+    "pid": 26300,
+    "launchedAt": "2026-10-25T03:04:10.232Z",
+    "completedAt": "2026-10-25T03:06:58.348Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "59ea329eccc605c79f4f9bdfe9e1d1c8304940d1fc575f09729c817f420c54aa"
+  },
+  "test": {
+    "pid": 25972,
+    "launchedAt": "2026-10-25T03:07:01.581Z",
+    "completedAt": "2026-10-25T03:09:05.027Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "9bab8d795227e13f8814f24e61e6002b8416009d46a13637b853fbd44038d0d1"
+  },
+  "total": 5,
+  "failed": 0,
+  "passed": 5,
+  "seconds": 123.39,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "c17c240b424d1cdb09128dc2eb1f002d61ecb02cd1511379736600514f110dd3",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "change": "Reuse validated root/owner/budget only inside one worker repository transaction; every new call revalidates active lease, generation, membership, provider and planning segment.",
+  "observations": {
+    "rpcSeconds": 61.04,
+    "graphRemoteSeconds": 13.37,
+    "ledgerSeconds": 44.52,
+    "channelSeconds": 2.95,
+    "sharedMemorySeconds": 1.49
+  },
+  "limitations": [
+    "No measured performance improvement: ledger 44.52s is slower than the prior 39.43s observation and close to its unchanged 45s wrapper.",
+    "Original diagnostics, ledger and PowerShell timeouts remain unresolved.",
+    "Focused evidence only; no full-suite, new installation or individual IPC latency acceptance."
+  ]
+}
