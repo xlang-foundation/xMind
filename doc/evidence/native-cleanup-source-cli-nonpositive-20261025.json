@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-25T18:37:59.783Z",
+  "scope": "Actual CLI using the locally qualified cleanup executable and runtime DLL, SDK4417 modules and pinned pure source. Controlled model; real native read/edit/Node command and SDK process worker. Source fixture only; packaged acceptance and managed profile discovery not covered.",
+  "passed": true,
+  "sourceNative": "feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+  "nativeSha256": "ce3d809288a91be2f2b12df4f69a4992191e0ca813338fb6109dd24a0ebc0337",
+  "sdkRevision": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "sessionId": "e38971d8a8716dca213bc61c4f3d0633",
+  "runId": "e86e47f117cb864208a49c44f071a921",
+  "state": "completed",
+  "modelCalls": 4,
+  "history": 8,
+  "approvals": 2,
+  "operations": [
+    {
+      "id": "fd71680f51ab283a0629d33d4dccf4f8",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "87cd6cc99796cc23517e5aa58f2ad693",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "node": {
+    "checks": 4,
+    "exitCode": 0,
+    "elapsedMs": 109,
+    "stdout": "4 is-nonpositive checks passed\n",
+    "processTreeRetired": true
+  },
+  "workerRetirement": {
+    "generation": "188d3f58da41123bda01f29190cdb4c1",
+    "reason": "completed",
+    "uncertain_model_dispatches": 0
+  },
+  "backendWorkerAndCommandPidsAbsent": true,
+  "watchAndHistoryReobserveWithoutAdditionalModels": true,
+  "beforeAfterInputSetsAndHashesVerified": {
+    "executedNativeImages": 2,
+    "sdkRuntime": 30,
+    "pureLibraries": 1870,
+    "nodeExecutable": 1
+  },
+  "retainedFailedFixture": {
+    "sessionId": "93a928ae97583cedc190c3886630bbc0",
+    "runId": "09a63f59f6fa94759397f11107960709",
+    "state": "failed",
+    "operationsCreated": 0,
+    "reason": "Fixture edit selector did not match original; native file_content_conflict refused edit, then controlled peer asserted a missing operation_id.",
+    "taskReplayed": false
+  },
+  "paidProviderCalls": 0,
+  "cpythonExecuted": false,
+  "packagedAcceptance": false,
+  "managedProfileAutoDiscoveryCovered": false,
+  "installed": false,
+  "fullDeliveryPassed": false
+}

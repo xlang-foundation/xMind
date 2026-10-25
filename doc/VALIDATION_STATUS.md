@@ -1,3 +1,9 @@
+## Cleanup executable passes fresh CLI coding — 2026-10-25
+
+A fresh explicit-port CLI task against Nativece3d8092/SDK4417 completes actual read/edit/Node execution through a separate process worker: two approvals, four controlled model calls, eight messages and four Node checks. Watch and history observation add no model calls. Owner/worker/command PIDs are absent after verified retirement, and the two executed images,30 SDK runtime files,1870 pure libraries and Node executable match before/after qualification inputs. This is a source fixture, not packaged release or managed-profile discovery acceptance.
+
+The prior negative fixture has a stale edit selector: native file_content_conflict refuses the edit, no operation is created, and its controlled peer subsequently fails an assertion. That failed session is retained, not retried or claimed as acceptance. NEVER replay either failed session93a928ae97583cedc190c3886630bbc0/run09a63f59f6fa94759397f11107960709 or completed sessione38971d8a8716dca213bc61c4f3d0633/rune86e47f117cb864208a49c44f071a921. [CLI receipt](evidence/native-cleanup-source-cli-nonpositive-20261025.json).
+
 ## Cleanup browser coding and reload verified; collector limitation retained — 2026-10-25
 
 The qualified ce3d8092/SDK4417 executable completes a fresh hidden browser task using the named process agent: one read, one approved edit, one approved Node command, four checks and four controlled model calls. Reload restores all eight messages, the same completed run, selected agent and corrected file preview. Offline read-only SQLite inspection confirms two successful operations and clean worker retirement with no uncertain model dispatches. Backend, worker and command PIDs are absent. Post-run file sets and hashes verify30 runtime files,1870 pure libraries,18 assets,64 frontend files,18598 Node dependencies and the two executed native images. No paid provider or CPython is used; installed76 is unchanged.
