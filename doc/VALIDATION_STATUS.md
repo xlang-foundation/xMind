@@ -1,3 +1,9 @@
+## Full179 fcdd4b51: two timeouts retained — 2026-10-24
+
+Complete native gate finishes177/179 in988.54s. Graph remote15.39s, RPC66.83s, nested44.18s, deep10.32s and HTTP9.61s pass. Diagnostics hits its configured20s deadline with CTest reporting53.60s before termination; no phase output proves its cause. Original xmind-language-diagnostics-1542773962 remains retained. Ledger45.15s exceeds its unchanged45s wrapper: planning13683ms, paused820ms, main planning8197ms, then final coexistence pair cutoff after eleven case completions. The earlier focused44.74s pass did not resolve full-run timing. Original xmind-worker-ledger-3926656428-3716486766 and raw ledger-failure-7oY6ex remain retained; NEVER replay either fixture.
+
+All2840/16/1870/30/18598/142 project/SDK/library/runtime/dependency/binary hashes and sets remain exact through terminal audit. No package/install; installed74 preserved. Investigate diagnostics stall and ledger execution costs without deadline changes, removed cases or effect retries. [Full receipt](evidence/native-delivery-fcdd4b51-full-20261024.json), [full terminal log](evidence/native-delivery-fcdd4b51-full-20261024.log).
+
 ## Ledger bounded coexistence: focused pass, timing margin remains — 2026-10-24
 
 All twelve independent planning/delegation cases now run in bounded pairs against the same native/xlang3 backend. The original case body is byte-exact, including assertions, case identities, physical worker retirement and each12s limit. Every batch drains both futures before propagating failure. The added check proves12 completed cases, peak2 active roots and no active case afterward; this is not a maximum-two-workers claim.

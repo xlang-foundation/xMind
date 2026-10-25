@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-25T01:23:55.459Z",
+  "sourceParent": "fcdd4b517b95b4f2a9ee388dd914b21d5ed1b61f",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 43168,
+    "launchedAt": "2026-10-25T01:06:52.163Z",
+    "completedAt": "2026-10-25T01:07:20.003Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+  },
+  "test": {
+    "pid": 6360,
+    "launchedAt": "2026-10-25T01:07:23.631Z",
+    "completedAt": "2026-10-25T01:23:52.203Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "6dc4f875b01e9dc3afd3b78456f74131743d5dcb5ee5211e8a82ea2307407316"
+  },
+  "total": 179,
+  "failed": 2,
+  "passed": 177,
+  "seconds": 988.54,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "2f564d4587175ce9f467b2177b876c4b085a5d750981cd958bd41e265fcd26bd",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false,
+  "failures": [
+    {
+      "configuredTimeoutSeconds": 20,
+      "retainedNamespace": "xmind-language-diagnostics-1542773962",
+      "cause": "Unproven; no phase output retained",
+      "observedSeconds": 53.6,
+      "test": "native_language_server_diagnostics_contract"
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "cause": "Aggregate deadline reached during final coexistence pair; exact performance cause unproven",
+      "retainedNamespace": "xmind-worker-ledger-3926656428-3716486766",
+      "rawFailure": "ledger-failure-7oY6ex",
+      "observedSeconds": 45.15,
+      "configuredTimeoutSeconds": 45
+    }
+  ],
+  "completedTasksMustNeverBeReplayed": true,
+  "graphRemoteSeconds": 15.39,
+  "installed74Preserved": true
+}
