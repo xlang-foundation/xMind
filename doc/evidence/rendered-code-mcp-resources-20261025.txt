@@ -1,0 +1,242 @@
+Browser tab: 9, Title: "Welcome - xmind-mcp-resource-ui-Aq6ttE - Visual Studio Code", URL: "http://127.0.0.1:62457/?folder=vscode-remote%3A%2F%2F127.0.0.1%3A62457%2FD%3A%2FCantorAI2026%2FTestProj%2Fxmind-delivery-validation%2Fxmind-mcp-resource-ui-Aq6ttE".
+1 AXWebArea Welcome - xmind-mcp-resource-ui-Aq6ttE - Visual Studio Code, URL: 127.0.0.1:62457/?folder=vscode-remote%3A%2F%2F127.0.0.1%3A62457%2FD%3A%2FCantorAI2026%2FTestProj%2Fxmind-delivery-validation%2Fxmind-mcp-resource-ui-Aq6ttE
+	2 container
+		3 container
+			11 container
+				343 toolbar
+					344 button (disabled) Go Back (Alt+LeftArrow)
+						345 text 
+					346 button (disabled) Go Forward (Alt+RightArrow)
+						347 text 
+					348 toolbar Agent Status
+						349 button Open Quick Access
+						350 container
+							351 button Toggle Chat
+								352 button Toggle Chat
+									353 text 
+							354 pop up button (collapsed) Description: More Actions, Secondary Actions: Expand
+				24 toolbar Title actions
+					297 button Customize Layout...
+						298 text 
+					299 checkbox Description: Toggle Primary Side Bar (Ctrl+B), Value: 1
+						300 text 
+					301 checkbox Description: Toggle Panel (Ctrl+J), Value: 0
+						302 text 
+					303 checkbox Description: Toggle Secondary Side Bar (Ctrl+Alt+B), Value: 1
+						304 text 
+			33 container
+				34 container
+					35 menu bar
+						36 Application Menu
+					37 tab group Active View Switcher
+						38 tab (selected, expanded, settable, boolean) Explorer (Ctrl+Shift+E), Secondary Actions: Collapse, Value: 1
+
+						39 tab (selectable, collapsed, settable, boolean) Search (Ctrl+Shift+F), Secondary Actions: Expand, Value: 0
+
+						40 tab (selectable, collapsed, settable, boolean) Source Control (Ctrl+Shift+G), Secondary Actions: Expand, Value: 0
+
+						41 tab (selectable, collapsed, settable, boolean) Run and Debug (Ctrl+Shift+D), Secondary Actions: Expand, Value: 0
+
+						42 tab (selectable, collapsed, settable, boolean) Extensions (Ctrl+Shift+X), Secondary Actions: Expand, Value: 0
+
+					43 toolbar Manage
+						44 pop up button Accounts
+							45 container Accounts
+								46 text 
+						47 pop up button Manage
+							48 container Manage
+								49 text 
+				50 container
+					51 heading Explorer, Value: 2
+						305 text Explorer
+					53 toolbar Explorer actions
+						306 pop up button (collapsed) Description: Views and More Actions..., Secondary Actions: Expand
+					55 container
+						56 container
+							57 button (expanded) Description: Explorer Section: xmind-mcp-resource-ui-Aq6ttE, Secondary Actions: Collapse
+								58 text 
+								59 heading Description: Explorer Section: xmind-mcp-resource-ui-Aq6ttE, Value: 3
+									60 text xmind-mcp-resource-ui-Aq6ttE
+							61 outline Files Explorer
+								62 container
+									63 row (selectable) Description: mcp.json, ID: list_id_3_0
+										64 container
+											65 container D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-mcp-resource-ui-Aq6ttE\mcp.json
+												66 text 
+												67 text mcp.json
+									68 row (selectable) Description: state.sqlite, ID: list_id_3_1
+										69 container
+											70 container D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-mcp-resource-ui-Aq6ttE\state.sqlite
+												71 text 
+												72 text state.sqlite
+									73 row (selectable) Description: state.sqlite-shm, ID: list_id_3_2
+										74 container
+											75 container D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-mcp-resource-ui-Aq6ttE\state.sqlite-shm
+												76 text 
+												77 text state.sqlite-shm
+									78 row (selectable) Description: state.sqlite-wal, ID: list_id_3_3
+										79 container
+											80 container D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-mcp-resource-ui-Aq6ttE\state.sqlite-wal
+												81 text 
+												82 text state.sqlite-wal
+									83 row (selectable) Description: state.sqlite.backend-lock, ID: list_id_3_4
+										84 container
+											85 container D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-mcp-resource-ui-Aq6ttE\state.sqlite.backend-lock
+												86 text 
+												87 text state.sqlite.backend-lock
+						88 button (collapsed) Description: Outline Section, Secondary Actions: Expand
+							89 text 
+							90 heading Outline, Value: 3
+								91 text Outline
+						92 button (collapsed) Description: Timeline Section, Secondary Actions: Expand
+							93 text 
+							94 heading Timeline, Value: 3
+								95 text Timeline
+						307 button (collapsed) Description: xMind Git Changes Section, Secondary Actions: Expand
+							308 text 
+							309 heading XMind Git Changes, Value: 3
+								310 text XMind Git Changes
+				96 container
+					97 container
+						98 container
+							99 container
+								100 tab group
+									101 tab (selected, settable, boolean) Description: Welcome, preview
+Welcome
+Tab actions
+Close (Ctrl+F4), Value: 1
+Welcome
+
+								102 toolbar Editor actions
+									335 button Split Editor Right (Ctrl+\) [Alt] Split Editor Down
+										336 text 
+									337 pop up button (collapsed) Description: More Actions..., Secondary Actions: Expand
+										338 text 
+							107 container Overview of how to get up to speed with your editor.
+								108 container
+									315 heading Visual Studio Code, Value: 1
+										316 text Visual Studio Code
+									317 text Editing evolved
+									109 heading Start, Value: 2
+										110 text Start
+									111 content list
+										318 button  New File..., Help: Open a new untitled text file, notebook, or custom editor. (Ctrl+Alt+Windows+N)
+											319 text 
+											320 text New File...
+										321 button  Open File..., Help: Open a file to start working (Ctrl+O)
+											322 text 
+											323 text Open File...
+										324 button  Clone Git Repository..., Help: Clone a remote repository to a local folder
+											325 text 
+											326 text Clone Git Repository...
+									118 heading Recent, Value: 2
+										119 text Recent
+									120 content list
+										121 container
+											122 text You have no recent folders,
+											123 button open a folder
+											124 text to start.
+									125 heading Walkthroughs, Value: 2
+										126 text Walkthroughs
+									127 content list
+										128 button  Get Started with VS Code for the Web Customize your editor, learn the basics, and start coding, Help: Customize your editor, learn the basics, and start coding
+											327 text 
+											130 heading Get Started with VS Code for the Web, Value: 3
+												131 text Get Started with VS Code for the Web
+											132 text Customize your editor, learn the basics, and start coding
+										133 button  Learn the Fundamentals, Help: Get an overview of the most essential features
+											328 text 
+											135 heading Learn the Fundamentals, Value: 3
+												136 text Learn the Fundamentals
+									137 checkbox Description: When checked, this page will be shown on startup., Value: 1, ID: showOnStartup
+									138 text Show welcome page on startup
+				139 container
+					140 tab group Active View Switcher
+						141 tab (selectable, collapsed, settable, boolean) Chat (Ctrl+Alt+I), Secondary Actions: Expand, Value: 0
+Chat
+						329 tab (selected, expanded, settable, boolean) xMind, Secondary Actions: Collapse, Value: 1
+xMind
+					142 content list xMind actions
+					147 toolbar
+						330 checkbox Description: Maximize Secondary Side Bar, Value: 0
+							331 text 
+						332 button Hide Secondary Side Bar (Ctrl+Alt+B)
+							333 text 
+					334 container
+			183 container workbench.parts.statusbar
+				184 container Description: remote, ID: status.host
+					185 button remote
+				190 container Description: No Problems, ID: status.problems
+					191 button No Problems
+						192 text 
+						193 text  0 
+						194 text 
+						195 text  0
+				196 container Description: Notifications, ID: status.notifications
+					197 button Notifications
+				198 container Description: Layout: US, ID: status.workbench.keyboardLayout
+					199 button Layout: US
+				200 container Description: Copilot status, ID: chat.statusBarEntry
+					201 button Copilot status
+		339 AXWebArea 15hgpq6n5744qsb0djta28q8ob4fgi8pegpa98rck7dlphelu5n3.vscode-cdn.net/stable/e646868227c3e3a9e3f24277c8c7220be42c0be7/out/vs/workbench/contrib/webview/browser/pre/index.html?id=70fd958d-eca0-4b61-bcac-3d0a15380dae&parentId=1&origin=e6b619f9-2b7d-4ea5-839a-0416483ef24f&swVersion=6&extensionId=agentflow-local.agentflow&platform=browser&vscode-resource-base-authority=vscode-resource.vscode-cdn.net&parentOrigin=http%3A%2F%2F127.0.0.1%3A62457&mountId=ade35811-5f59-4c87-9186-97c5785067ea&remoteAuthority=127.0.0.1%3A62457&purpose=webviewView
+			355 container Description: xMind, ID: active-frame
+				356 AXWebArea 15hgpq6n5744qsb0djta28q8ob4fgi8pegpa98rck7dlphelu5n3.vscode-cdn.net/stable/e646868227c3e3a9e3f24277c8c7220be42c0be7/out/vs/workbench/contrib/webview/browser/pre/index.html?id=70fd958d-eca0-4b61-bcac-3d0a15380dae&parentId=1&origin=e6b619f9-2b7d-4ea5-839a-0416483ef24f&swVersion=6&extensionId=agentflow-local.agentflow&platform=browser&vscode-resource-base-authority=vscode-resource.vscode-cdn.net&parentOrigin=http%3A%2F%2F127.0.0.1%3A62457&mountId=ade35811-5f59-4c87-9186-97c5785067ea&remoteAuthority=127.0.0.1%3A62457&purpose=webviewView
+					357 container Settings, ID: provider-settings
+						358 container provider-form
+							359 heading Settings, Value: 2, ID: settings-title
+								360 text Settings
+							361 button Description: Close settings, ID: settings-close
+							362 container profile-controls
+								363 text Profile
+								364 pop up button (collapsed, settable) Profile, Value: Add profile, ID: provider-profile, Secondary Actions: Expand
+									365 menu
+										366 (selected) Add profile
+								367 button (disabled) Use saved profile, ID: profile-use
+							368 text Provider API
+							369 pop up button (collapsed, settable) Provider API, Value: OpenAI · Responses, ID: provider-name, Secondary Actions: Expand
+								370 menu
+									371 OpenAI · Chat Completions
+									372 (selected) OpenAI · Responses
+									373 Claude · Messages
+									374 Gemini · GenerateContent
+									375 DeepSeek · Chat Completions
+									376 xai · Responses
+									377 mistral · Chat Completions
+									378 OpenRouter · Chat Completions
+							379 text API key
+							380 text field (settable) API key
+							381 text Enter the key for this new profile, then choose a model below after fetching.
+							382 text Provider keys stay in the local xMind profile, encrypted by the native runtime. They are never included in conversations or sent to the browser.
+							383 button Fetch models, ID: settings-save
+							384 text Choose a model in the sidebar below after fetching.
+						385 container Runtime connections, ID: connection-settings
+							386 heading Runtime connections, Value: 3, ID: connections-title
+								387 text Runtime connections
+							388 button Refresh, ID: connections-refresh
+							389 text Local is this xMind runtime. Nexus profiles save a server address and sign-in. Remote execution is not available yet. Local remains active.
+							390 text 1 saved connection · active: Local
+							391 container connections-list
+								392 text Local
+								393 text Active
+								394 text This xMind runtime · SQLite and workspace run locally.
+							395 container runtime-connection-form
+								396 text Connection name
+								397 text field (settable) Connection name, ID: connection-name
+								398 text Nexus HTTPS address
+								399 text field (settable) Nexus HTTPS address, ID: connection-origin
+								400 button Save Nexus address, ID: connection-add
+						401 container MCP servers, ID: mcp-settings
+							402 heading MCP servers, Value: 3, ID: mcp-title
+								403 text MCP servers
+							404 container
+								405 button List resources, ID: mcp-resources-refresh
+								406 button Refresh, ID: mcp-refresh
+							407 text Sign in to configured MCP servers. Closing this view leaves a pending login running on the backend.
+							408 container mcp-servers
+								409 text resource-peer
+								410 text OAuth not configured
+							411 text 1 resource and 1 template found.
+							412 container
+								413 text resource-peer Connected Controlled readme fixture://readme text/plain Read-only fixture resource Controlled records fixture://records/{id} application/json
+
+The focused UI element is 356 AXWebArea 15hgpq6n5744qsb0djta28q8ob4fgi8pegpa98rck7dlphelu5n3.vscode-cdn.net/stable/e646868227c3e3a9e3f24277c8c7220be42c0be7/out/vs/workbench/contrib/webview/browser/pre/index.html?id=70fd958d-eca0-4b61-bcac-3d0a15380dae&parentId=1&origin=e6b619f9-2b7d-4ea5-839a-0416483ef24f&swVersion=6&extensionId=agentflow-local.agentflow&platform=browser&vscode-resource-base-authority=vscode-resource.vscode-cdn.net&parentOrigin=http%3A%2F%2F127.0.0.1%3A62457&mountId=ade35811-5f59-4c87-9186-97c5785067ea&remoteAuthority=127.0.0.1%3A62457&purpose=webviewView

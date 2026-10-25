@@ -1,0 +1,93 @@
+{
+  "recordedAt": "2026-10-25T13:08:38.455Z",
+  "passed": true,
+  "scope": "Actual hidden Microsoft Code Server1.143.1 source extension pane, native C++ MCP catalog and controlled loopback modern peer; resource/template metadata discovery only",
+  "nativeSource": "1d6a4a74689d2ec19bce8e175d22c76406d13e01",
+  "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+  "namespace": "xmind-mcp-resource-ui-Aq6ttE",
+  "nativeOwner": {
+    "ProcessId": 28056,
+    "ExecutablePath": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xmind.exe",
+    "birthUtc": "2026-10-25T13:04:43.4244460Z"
+  },
+  "codeOwner": {
+    "ProcessId": 1260,
+    "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe",
+    "birthUtc": "2026-10-25T13:05:16.8911950Z"
+  },
+  "countsBeforeUi": {
+    "discovery": 0,
+    "tools": 0,
+    "resources": 0,
+    "templates": 0,
+    "unexpected": 0
+  },
+  "countsAfterUi": {
+    "discovery": 1,
+    "tools": 0,
+    "resources": 1,
+    "templates": 1,
+    "unexpected": 0
+  },
+  "resources": 1,
+  "templates": 1,
+  "explicitDiscoveryClick": true,
+  "metadataOnly": true,
+  "resourceContentsRead": false,
+  "subscriptionsTested": false,
+  "mcpOAuthTested": false,
+  "modelCalls": 0,
+  "toolExecutions": 0,
+  "source71Unchanged": true,
+  "nativeBinaries145AndBrowserAssets18Unchanged": true,
+  "dependencyClosureReverified": {
+    "sdkSource": 16,
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "nodeDependencies": {
+      "Native/tests/sdk/node_modules": 3690,
+      "extensions/vscode/node_modules": 14908
+    }
+  },
+  "dependencyBaseline": "Earlier frozen sdk-null-snapshot-argument-focused dependency inventory; reused and reverified, not recaptured immediately before Code startup.",
+  "codeVendorTwoEntriesMatchEarlierFrozenBaseline": true,
+  "sourceRegisteredOnlyInIsolatedExtensionDirectory": true,
+  "userInstallationChanged": false,
+  "initialWorkbenchAccess": "Unauthenticated workbench refused; normal token authentication then succeeded and removed the token query from the page URL.",
+  "nativeRetirement": {
+    "retirement": "Identity-bound termination after metadata-only proof; no graceful shutdown or reopen claim",
+    "nativeOwnerAbsent": true,
+    "retiredUtc": "2026-10-25T13:07:49.2993930Z"
+  },
+  "codeTerminal": {
+    "terminal": {
+      "exitCode": 4294967295,
+      "signal": null
+    },
+    "source71Unchanged": true,
+    "userInstallationChanged": false
+  },
+  "codeRetirement": {
+    "nativePid": 28056,
+    "retiredUtc": "2026-10-25T13:07:37.5962271Z",
+    "ownedCodeTreeAbsent": true,
+    "nativeOwnerAbsent": false
+  },
+  "retirementNote": "Both temporary server trees retired by verified PID/birth/image. Code retirement receipt was written before native retirement and therefore records nativeOwnerAbsent:false at that earlier instant; nativeRetirement proves subsequent absence. No graceful shutdown/reopen claim.",
+  "visibleWindowsOpened": false,
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "installed": false,
+  "releaseQualified": false,
+  "goalComplete": false,
+  "artifacts": {
+    "rendered-code-mcp-resources-20261025.jpg": {
+      "bytes": 69506,
+      "sha256": "ea069ffe3623d18cd52b1056147d4c1a8c365cac8ef0bd6f833a20b0fad77801"
+    },
+    "rendered-code-mcp-resources-20261025.txt": {
+      "bytes": 13087,
+      "sha256": "236f37da18fdcc334551cde517fe4c3294fe7ae2edadb66328c2d97c0cf05df6"
+    }
+  }
+}
