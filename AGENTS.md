@@ -22,16 +22,11 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Browser first-send permission fix passes clients485/169 and actual UI without reload. Installed68 includes the fix. Both completed read/grant/revoke fixtures are in doc/evidence/browser-first-send-permission-refresh-20261024.json; NEVER replay.
 
-- Historical54 session2591d25a7123d6fa9d4cbd41b077b38d/root659d79470e216b25f431aa0c7e6bad1b completed1read/4messages; NEVER replay. Its owners were superseded; evidence remains in doc/VALIDATION_STATUS.md.
-
 - Qualification58 and completed browser58 guidance is preserved verbatim in doc/development-checkpoints-20261024.md; NEVER replay its tasks.
 
 - Native55 CLI sessionf5eebd145890d132cfc59b0589491803/rootcc3d14ff5b4c570cebf41a92c85c6d52 completed2reads/1approvededit/1process, Node4/4,9messages. NEVER replay. Previous6sessions/150messages/11runs/configuration exact, owner56032 retained. See coding55-cli-live-coding evidence.
 
-- Historical53 actual IAB sessioncb160a995f28f81865b47f95f294999d/root5fdd5b9dfea15f7eeb110fa00d3e0af7 completed the reviewed cart edit/Node4/4/reload11messages; NEVER replay it. TestProj/xmind-browser-acceptance-20261019 is an acceptance fixture. Exact prior process identities, absent48owners/18pages and installed52 backup receipts remain in doc/VALIDATION_STATUS.md and coding53-iab-coding-api. Older live-owner claims below are historical.
-
-
-- Installed51 history and never-replay constraints: doc/development-checkpoints-20261024.md. Preserve prior owners; no browser retry without relevant state change.
+- Historical51/53/54 owner, history and NEVER-replay rules remain verbatim in doc/development-checkpoints-20261024.md. Preserve those completed tasks.
 
 - Historical hosted view-count failures and corrected gates remain in doc/evidence/hosted-view-inventory-failure-20261019.json; those receipts are not new runtime acceptance.
 
