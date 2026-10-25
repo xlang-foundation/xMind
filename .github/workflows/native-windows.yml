@@ -103,6 +103,7 @@ jobs:
           path: |
             xmind/build/ci-evidence/
             xmind/build/native/Testing/
+            xmind/build/skill-state-native/instruction-failures/
           # Controlled fixtures may retain their policy/database in .config or
           # .agentflow. These isolated tests use synthetic credentials only.
           include-hidden-files: true

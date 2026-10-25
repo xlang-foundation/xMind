@@ -1,11 +1,16 @@
 // Retain failed native fixtures; successful synthetic storage may be removed.
-import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
+import {mkdirSync,mkdtempSync,rmSync,writeFileSync} from 'node:fs';
 import {join,resolve,dirname,basename} from 'node:path';
 import {tmpdir} from 'node:os';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
+import {fileURLToPath} from 'node:url';
 import {withOwnedProcessDiagnostics} from '../../Tools/owned-process-diagnostics.mjs';
-const [binary,modules,stdlib]=process.argv.slice(2),root=mkdtempSync(join(tmpdir(),'xmind-instructions-'));
+const hosted=process.env.GITHUB_ACTIONS==='true'&&process.env.RUNNER_ENVIRONMENT==='github-hosted';
+// Keep original failed databases inside the uploaded CI evidence, not runner TEMP.
+const fixtureParent=hosted?fileURLToPath(new URL('../../build/skill-state-native/instruction-failures/',import.meta.url)):tmpdir();
+if(hosted)mkdirSync(fixtureParent,{recursive:true});
+const [binary,modules,stdlib]=process.argv.slice(2),root=mkdtempSync(join(fixtureParent,'xmind-instructions-'));
 const launchedAt=new Date().toISOString();
 let succeeded=false;
 try{
@@ -18,6 +23,6 @@ try{
   writeFileSync(join(root,'failure.json'),JSON.stringify({launchedAt,failedAt:new Date().toISOString(),binary:resolve(binary),deadlineMs:30000,code:error.code,signal:error.signal,killed:error.killed,stdout:error.stdout||'',stderr:error.stderr||''},null,2)+'\n',{flag:'wx'});
   process.stderr.write('Failed instruction fixture retained at '+root+'\n');throw error;
 }finally{
-  const safe=resolve(root);if(dirname(safe)!==resolve(tmpdir())||!basename(safe).startsWith('xmind-instructions-'))throw new Error('Unsafe instruction fixture cleanup target');
+  const safe=resolve(root);if(dirname(safe)!==resolve(fixtureParent)||!basename(safe).startsWith('xmind-instructions-'))throw new Error('Unsafe instruction fixture cleanup target');
   if(succeeded)rmSync(safe,{recursive:true,force:true});
 }

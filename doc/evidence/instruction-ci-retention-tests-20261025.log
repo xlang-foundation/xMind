@@ -1,0 +1,57 @@
+TAP version 13
+# Original synthetic failure retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-instruction-retention-UA5uTj\\tmp\\xmind-instructions-bTcNrU
+# Subtest: instruction peer retains the original failed namespace and command output
+ok 1 - instruction peer retains the original failed namespace and command output
+  ---
+  duration_ms: 132.9331
+  type: 'test'
+  ...
+# Original synthetic hosted failure retained for artifact upload at D:\\CantorAI2026\\xMind\\build\\skill-state-native\\instruction-failures\\xmind-instructions-zEmH9l
+# Subtest: hosted instruction failures are inside the uploaded artifact instead of runner TEMP
+ok 2 - hosted instruction failures are inside the uploaded artifact instead of runner TEMP
+  ---
+  duration_ms: 431.4757
+  type: 'test'
+  ...
+# Actual owner diagnostics retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-OBdJ3a\\actual-owner-9227926e-aa30-4264-a7e8-2508dd246f63\\observations.jsonl
+# Subtest: read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+ok 3 - read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+  ---
+  duration_ms: 8342.3444
+  type: 'test'
+  ...
+# Subtest: module presence includes an assembly beyond the bounded name list
+ok 4 - module presence includes an assembly beyond the bounded name list
+  ---
+  duration_ms: 251.2933
+  type: 'test'
+  ...
+# Identity-rejection diagnostics retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-H9uI70\\mismatched-owner-5604f37d-9917-4761-93de-140482ac9f6d\\observations.jsonl
+# Subtest: identity mismatch stops observation without terminating the actual root
+ok 5 - identity mismatch stops observation without terminating the actual root
+  ---
+  duration_ms: 4062.7754
+  type: 'test'
+  ...
+# Subtest: optional diagnostics preserve the actual fast nonzero execution error
+ok 6 - optional diagnostics preserve the actual fast nonzero execution error
+  ---
+  duration_ms: 301.728
+  type: 'test'
+  ...
+# Actual native owner dump retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-9QzRI2\\explicit-native-owner-0c5e0f36-ae57-417e-9b66-bed94f587500\\observations.jsonl
+# Subtest: explicit owner capture records the verified native owner and its thread stack
+ok 7 - explicit owner capture records the verified native owner and its thread stack
+  ---
+  duration_ms: 8141.5347
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 21166.0739

@@ -1,0 +1,157 @@
+{
+  "recordedAt": "2026-10-25T10:36:25.217Z",
+  "hosted3fb": {
+    "source": "3fb2d1917361bb4dd7d6093bb23534204f803377",
+    "run": 40179676972,
+    "job": 121128627734,
+    "artifact": {
+      "id": 12595776050,
+      "name": "native-windows-evidence-3fb2d1917361bb4dd7d6093bb23534204f803377",
+      "bytes": 9610480,
+      "sha256": "379ebfb1af538829339bf10fbcc0276d77e70f61d05496bf8b2e12091711c073"
+    },
+    "provenance": {
+      "toolchain": "Visual Studio 18 2026",
+      "processors": 4,
+      "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+      "xmind": "3fb2d1917361bb4dd7d6093bb23534204f803377",
+      "windows_default_owner_matches_user": false,
+      "xlang3": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+      "toolchain_version": "18.11.12315.225",
+      "build_parallelism": 4,
+      "runtime": "Native xlang3; no CPython execution or bridge",
+      "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb"
+    },
+    "tests": 182,
+    "passed": 177,
+    "failed": 5,
+    "seconds": 843.86,
+    "failedContracts": [
+      {
+        "name": "native_graph_runner_contract",
+        "result": "***Failed"
+      },
+      {
+        "name": "native_mcp_oauth_trusted_contract",
+        "result": "***Failed"
+      },
+      {
+        "name": "native_agent_worker_model_rpc_contract",
+        "result": "***Failed"
+      },
+      {
+        "name": "native_agent_worker_ledger_contract",
+        "result": "***Failed"
+      },
+      {
+        "name": "native_agent_worker_nested_human_contract",
+        "result": "***Timeout"
+      }
+    ],
+    "nativeLogSha256": "7e0a541129925ad60e07db4c52228661fc490ec40daf783fd8e53bba68e0e22f",
+    "fullNativeSuitePassed": false
+  },
+  "hosted7107Native": {
+    "run": 40184505124,
+    "job": 121143073924,
+    "failedBeforeNativeBuild": true,
+    "cause": "ci-native.ps1 still required SDK8c while checkout and staging pinned35fa",
+    "diagnosticUnitAlsoFailed": true,
+    "diagnosticFailure": "Controlled PowerShell child exited nonzero; its12000ms budget and8-second sleep are unchanged. Separate from SDK pin failure.",
+    "artifact": {
+      "id": 12595317540,
+      "name": "native-windows-evidence-7107bee43243e44429ac3d7ee1cbd012fb76d8c7",
+      "bytes": 180580,
+      "sha256": "9a5d576b916004f54638468a525e3b41ee2c639353d9ea19ddc39da1999c40f9"
+    }
+  },
+  "hosted7107Client": {
+    "run": 40184505211,
+    "job": 121142319294,
+    "artifact": {
+      "id": 12595860548,
+      "name": "view-contracts-evidence-7107bee43243e44429ac3d7ee1cbd012fb76d8c7",
+      "bytes": 330433,
+      "sha256": "15ee6a3dd9e9285e3f50bdc2ee7415b4f873d79dfa112f9500eb5b1b47b2d02f"
+    },
+    "gate": {
+      "sourceRevision": "7107bee43243e44429ac3d7ee1cbd012fb76d8c7",
+      "scope": "Complete isolated Node adapter/controller suites; fixtures are synthetic, not native inference, live browser or rendered IDE acceptance",
+      "sourceFiles": 71,
+      "trackedSourceFiles": 66,
+      "vendorFiles": 5,
+      "browserAssets": 18,
+      "sourceAndAssetBytesUnchanged": true,
+      "expectedTests": {
+        "extension": 510,
+        "browser": 180
+      },
+      "extension": {
+        "exitCode": 0,
+        "tests": 510,
+        "passed": 510,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "browser": {
+        "exitCode": 0,
+        "tests": 180,
+        "passed": 180,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "providerRequests": 0,
+      "nativeExecuted": false,
+      "cpythonExecuted": false,
+      "passed": true
+    },
+    "rawCountsAndSourceAssetPairsVerified": true
+  },
+  "fix": {
+    "nativeBuildPin": "35fa98d1513c8595f1c0e856be7c645a43d187f1",
+    "expandedPinTestBefore": "1 failed: native build/checkout mismatch",
+    "expandedPinTestAfter": "1 passed",
+    "pinLocationsCovered": [
+      "workflow checkout",
+      "native build guard",
+      "runtime staging SDK and standard library guards"
+    ],
+    "failureRetention": "Original instruction failure namespaces now reside in explicitly uploaded build/skill-state-native/instruction-failures; only success is cleaned.",
+    "diagnosticTests": {
+      "startedAt": "2026-10-25T10:27:00.295Z",
+      "finishedAt": "2026-10-25T10:27:22.489Z",
+      "exitCode": 0,
+      "signal": null,
+      "pid": 1320,
+      "logSha256": "9e44d02f133b187dbc41e9471eacc6259a58665ae524b11cdfb97aa1af4888a9",
+      "trackedInputFiles": 2858,
+      "nativeBinaries": 145,
+      "inputsAndBinariesUnchanged": true,
+      "passed": 7,
+      "failed": 0,
+      "installed": false,
+      "modelCalls": 0
+    }
+  },
+  "originalGraphDump": {
+    "file": "owned-8056-639285199932688120.dmp",
+    "sha256": "22f3499dc50379f096fd18cdde58cebf196878db4275037eac2c6a1c3ddff1af",
+    "clrVersion": "4.8.9363.0",
+    "hotThread": 7992,
+    "observedManagedFrames": [
+      "System.Reflection.RuntimeAssembly._nLoad",
+      "Microsoft.PowerShell.Commands.ModuleCmdletBase.AnalyzeSnapinDomainHelper",
+      "System.Management.Automation.AnalysisCache.AnalyzeTheOldWay"
+    ],
+    "readerPackage": "Microsoft.Diagnostics.Runtime4.2.751201",
+    "offline": true,
+    "originalTaskReplayed": false,
+    "rootCauseResolved": false,
+    "readerReference": "https://github.com/microsoft/clrmd/blob/main/doc/GettingStarted.md"
+  },
+  "verifierCorrection": "First receipt parser required whitespace before ***Failed and omitted five failed rows; corrected to accept the actual CTest formatting. No tests were rerun for this correction.",
+  "installed": false,
+  "goalComplete": false
+}
