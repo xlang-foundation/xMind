@@ -36,7 +36,13 @@ bool live(const Json& record){
     if(pid!=birth)return false;
     if(!pid)return record.size()==3;
     if(record.size()!=5||!record.at("process_id").is_number_unsigned()||record.at("process_id").get<std::uint64_t>()>MAXDWORD||record.at("process_id")==0||!record.at("process_birth").is_string())return false;
-    return !observe_owner_exit(record.at("process_id").get<std::uint32_t>(),record.at("process_birth").get<std::string>(),0).exited;
+    // A saved lease needs affirmative process-identity proof. An inaccessible
+    // or malformed old identity cannot authenticate or block owner enrollment.
+    // Persistence failures remain outside this observation-only boundary.
+    try{
+        const auto observed=observe_owner_exit(record.at("process_id").get<std::uint32_t>(),record.at("process_birth").get<std::string>(),0);
+        return !observed.exited&&observed.identity_matches;
+    }catch(const std::runtime_error&){return false;}catch(const std::invalid_argument&){return false;}
 }
 bool accepted(PersistenceService& store,const std::string& purpose,std::string_view credential,const std::string& origin){
     if(!parse(credential))return false;

@@ -8,6 +8,8 @@
 #include <thread>
 #if defined(_WIN32)
 #include "agentflow/view_sessions.hpp"
+#include "agentflow/owner_process.hpp"
+#include <process.h>
 #endif
 
 using namespace agentflow;
@@ -74,6 +76,24 @@ int main(int argc,char** argv) {
             std::vector<std::string> retained;for(int i=0;i<32;++i)retained.push_back(views.issue(origin).credential);
             rejects<Conflict>([&]{views.issue(origin);});require(store.credentials("local-view-sessions").get().size()==32,"Session limit must reject before persisting another credential");
             views.revoke(retained.back(),origin);const auto replacement=views.issue(origin);require(views.accepts(replacement.credential,origin),"Revocation must release session capacity");
+        }
+        {
+            PersistenceService store((directory.path/"view-owner-inspection.sqlite").string(),roots);ViewSessions views(store,authority);
+            const auto stale=views.issue(origin);const auto id=stale.credential.substr(0,64);
+            auto record=store.information("local-view-sessions",id).get();
+            // Windows denies user-mode observation of the System process. A saved
+            // lease whose PID is no longer observable must never authenticate or
+            // prevent the owner from issuing a new, independently verified lease.
+            rejects<std::runtime_error>([]{observe_owner_exit(4,"1",0);});
+            require(record.ends_with('}'),"Expected view metadata object");record.pop_back();
+            record+=",\"process_id\":4,\"process_birth\":\"1\"}";
+            store.put_information("local-view-sessions",id,record).get();
+            require(!views.accepts(stale.credential,origin),"Unobservable view process must fail authentication closed");
+            const auto pid=static_cast<std::uint32_t>(_getpid());const auto birth=inspect_owner_process_birth(pid);
+            const auto fresh=views.issue(origin,pid,birth);
+            require(views.accepts(fresh.credential,origin)&&!views.accepts(stale.credential,origin)&&store.credentials("local-view-sessions").get().size()==1,"Unobservable old lease must not block independently verified browser enrollment");
+            rejects<std::invalid_argument>([&]{views.issue(origin,pid,"1");});
+            require(views.accepts(fresh.credential,origin),"Rejected new process identity must preserve the current verified lease");
         }
 #endif
         {

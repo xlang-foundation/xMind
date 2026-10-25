@@ -1,0 +1,155 @@
+{
+  "recordedAt": "2026-10-25T23:08:47.483Z",
+  "diagnosis": "A saved browser lease names an exited view PID which Windows refuses to observe. The exception escapes stale-lease validation and prevents fresh browser enrollment in the selected workspace.",
+  "viewObservation": "identity_verified_attached pid=27084 read_only=true\r\ncpp_first_chance thread=22304 message=Native workspace rejected browser access\r\nobservation_complete exceptions=1 detached=1 target_terminated=false\r\n",
+  "backendObservation": "identity_verified_attached pid=31548 read_only=true\r\ncpp_first_chance thread=21688 message=Information not found\r\ncpp_first_chance thread=29172 message=Information not found\r\ncpp_first_chance thread=30368 message=Cannot observe native owner process\r\nobservation_complete exceptions=3 detached=1 target_terminated=false\r\n",
+  "savedLease": {
+    "read_only": true,
+    "implementation": "xlang3",
+    "leases": [
+      {
+        "pid": 29720,
+        "birth": "134374417349269191",
+        "origin": "http://127.0.0.1:64430",
+        "expires": 1792997016492
+      }
+    ],
+    "dbWalUnchanged": true,
+    "hashes": [
+      "3530b16d9a7ca21f069650815da3c3e9017ff90d850d082c6b44d04ab87f979f",
+      "b6f8dabfe27524e5827fff1bb5fdcf63aca9edb3b701a1a5d1718278ad07e5c9"
+    ]
+  },
+  "debuggerObservation": {
+    "identityBound": true,
+    "noDump": true,
+    "detached": true,
+    "targetTerminated": false,
+    "source": ".agentflow/view-refusal-observer.cpp"
+  },
+  "repair": {
+    "file": "Native/src/view_sessions.cpp",
+    "behavior": "Require affirmative live identity proof; reject unverifiable/malformed saved browser leases and let owner-authenticated enrollment prune them. New process identity and persistence failures retain their existing checks."
+  },
+  "regression": {
+    "before": {
+      "stdlibLicense": {
+        "sourceCommit": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+        "blobSha1": "20cf39097c68baa17cc566b64e76d34ebf034044",
+        "sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+        "bytes": 13804
+      },
+      "priorFailedFullGate": "sdk6df6520f-module-class-full/gate.json",
+      "recordedAt": "2026-10-25T23:04:46.626Z",
+      "sourceParent": "caa736508a9cf87412495ae99343932f96a2243c",
+      "sourcePatchSha256": "9ed04fbf12a9e2f5d8c697c56b21cbfdb45812723c8ad30cb54d7df65e73a617",
+      "build": {
+        "pid": 30396,
+        "launchedAt": "2026-10-25T23:04:28.593Z",
+        "completedAt": "2026-10-25T23:04:39.510Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "459742de6aae341219eb21dd72e1c4e3f19058872c0ca1eb0a5b682e33d28a7a"
+      },
+      "test": {
+        "pid": 32948,
+        "launchedAt": "2026-10-25T23:04:42.132Z",
+        "completedAt": "2026-10-25T23:04:44.028Z",
+        "exitCode": 8,
+        "signal": null,
+        "logSha256": "b4177d31d9a57913f344cf17b6c5121b289f04b6b678eb7abedac59196f9e898"
+      },
+      "total": 1,
+      "failed": 1,
+      "passed": 0,
+      "seconds": 1.85,
+      "projectFiles": 2860,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1831,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 145,
+      "nativeSha256": "f86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": false
+    },
+    "after": {
+      "stdlibLicense": {
+        "sourceCommit": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+        "blobSha1": "20cf39097c68baa17cc566b64e76d34ebf034044",
+        "sha256": "b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231",
+        "bytes": 13804
+      },
+      "priorFailedFocusedGate": "sdk6df6520f-view-lease-before-fix-v2/gate.json",
+      "recordedAt": "2026-10-25T23:05:18.962Z",
+      "sourceParent": "caa736508a9cf87412495ae99343932f96a2243c",
+      "sourcePatchSha256": "ce5c7919854f076e75d2bf209f61c5d2d20140a698fa72580578e6843ec192b3",
+      "build": {
+        "pid": 23520,
+        "launchedAt": "2026-10-25T23:05:01.068Z",
+        "completedAt": "2026-10-25T23:05:11.750Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "bdcfc446e6c5e5d61c6fe6ffb05ce1d20b07e536aec4fcf87703fba0738fb77e"
+      },
+      "test": {
+        "pid": 24920,
+        "launchedAt": "2026-10-25T23:05:14.371Z",
+        "completedAt": "2026-10-25T23:05:16.330Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "2d929be5638dc00ed4369f9c79ede884272758640790abef0d5fa91dc95f49f2"
+      },
+      "total": 1,
+      "failed": 0,
+      "passed": 1,
+      "seconds": 1.92,
+      "projectFiles": 2860,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1831,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 145,
+      "nativeSha256": "f86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": true
+    },
+    "onlyRedGreenSourceDifference": [
+      "Native/src/view_sessions.cpp"
+    ],
+    "fixture": "A deliberately unobservable Windows System PID in saved metadata; the replacement is bound to the actual test process PID/birth. New wrong-birth enrollment remains rejected."
+  },
+  "initialTestSetupFailure": {
+    "path": ".agentflow/workspace-switch-validation/native/sdk6df6520f-view-lease-before-fix/build.log",
+    "reason": "The test target does not expose private nlohmann headers; the fixture now appends fixed fields to its own serialized metadata without a new dependency."
+  },
+  "diagnosticCompatibilityGap": {
+    "component": "xlang3 _sqlite3.connect",
+    "unsupported": "uri keyword",
+    "workaround": "Diagnostic uses the existing path, isolation_level=None and PRAGMA query_only=ON; source DB/WAL hashes remain unchanged. No CPython or alternate SQLite engine used."
+  },
+  "completeNativeValidation": {
+    "session": 81666,
+    "status": "running",
+    "directory": ".agentflow/workspace-switch-validation/native/sdk6df6520f-view-lease-full"
+  },
+  "hostedBaseline": {
+    "run": 40235870242,
+    "source": "1f49b5c39ae260a4e6f44aa8b1004f03b3325d85",
+    "qualifiesCurrentNativeRepair": false,
+    "newHostedRunDispatched": false
+  },
+  "fixtureTasksSubmitted": 0,
+  "fixtureModelCalls": 0,
+  "installed": false,
+  "packagedRepairAccepted": false,
+  "releaseAccepted": false
+}
