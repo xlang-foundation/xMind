@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only release preparation; not package, installation or full runtime qualification",
+  "qualifiedLocalSource": "1d6a4a74689d2ec19bce8e175d22c76406d13e01",
+  "checks": {
+    "checkedAt": "2026-10-25T13:42:29.755Z",
+    "sdkHeaders": 16,
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "nodeDependencies": {
+      "Native/tests/sdk/node_modules": 3690,
+      "extensions/vscode/node_modules": 14908
+    },
+    "nativeBinaries": 145
+  },
+  "exactFileSetsAndHashes": true,
+  "privateOperationalScriptsSha256": {
+    "audit-package77-qualified-inputs.mjs": "3d629cc3d96880eb57690f26fefc2a17c3c2eaf40e01f2fb716bedb78ba64fc0",
+    "stage-native-1d6a4a74-package77.mjs": "ad5f77c5db32d94a026be69f95a1e05bcfdc4afe348d5a255d307580203518de",
+    "require-hosted-1d6-qualification.mjs": "a7fcbb7f6f73eb7ee0852a1b5ffff4d82a6b53b98cb50cd50aca7dbac064c899"
+  },
+  "stagingAuditBeforeAndAfterConfigured": true,
+  "stagingExecuted": false,
+  "missingHostedQualificationRefusedBeforeMutation": true,
+  "candidateDirectoryAbsent": true,
+  "installedVersionUnchanged": "0.1.76",
+  "limitation": "Actual staging and its after-assembly audit await the required successful hosted receipt."
+}
