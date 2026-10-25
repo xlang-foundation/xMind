@@ -178,3 +178,8 @@ Superseded after installed74 qualification (verbatim):
 ## Verbatim historical e09259c4 qualification guidance
 
 - Complete e09259c4/native5dc5bc6c local gate passes154/154 in1028.90s with checked2625 project/16 SDK/1870 pure libraries/76 runtime/18598 dependencies/129 native binaries and file sets unchanged. Gate65478 closed0; no local build/test live. Actual installed44 pane/model/inference/reload check passes in one TestProj window; source candidate remains uninstalled. Full receipt doc/evidence/process-module-profile-full-native-20261019.json.
+
+
+Archived after hosted d55741e0 terminal result (2026-10-24):
+
+- Development d55741e0/Native d85a1697 passes full179 in788.06s; installed75 unchanged. Older hosted6cc54bee fails5/177; current hosted40166026077 is live. See doc/VALIDATION_STATUS.md; no replay.
