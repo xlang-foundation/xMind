@@ -1,3 +1,11 @@
+## Trusted cancellation fixture prepared; independent HTTPS peer passes — 2026-10-24
+
+Controlled HTTPS cancellation peer uses the shared domain request-ID map, exact session/run/revision fields and server/scope/actor/action fingerprint. It persists admission before intentionally dropping a reply, returns the original duplicate receipt, rejects cross-operation ID reuse and exposes safe GET/not_found observation. Independent Node HTTPS test verifies admission, duplicate/conflict, dropped reply and lookup with exact counters. No actual remote worker is implied.
+
+Hosted native scenarios now exercise standard SDK Runs.Cancel, CLI scope-run-cancel and owner/origin-bound HTTP cancellation: repeated completed requests, changed target/boolean refusal, lost reply remaining unknown with no resend, one receipt GET, terminal no-network reobservation and encrypted journal reopen. The hosted wrapper requires per-channel totals2/1/1 for created/lost/observed (cumulative2,4,6), so unexpected duplicate POSTs fail. Grant action count is updated to actual6 including runs.cancel. Positive native execution still requires the existing strict isolated hosted-Windows guard; no local CA changes or environment impersonation.
+
+Focused11/11 passes22.52s with2840/16/1870/30/18598/142 hashes and sets exact. Product Native2b2811e3 is unchanged from adapters; installed75 preserved. Native trusted-TLS cancellation remains unverified until the hosted job executes these scenarios. [Receipt](evidence/remote-cancel-trusted-fixture-20261024.json), [focused log](evidence/remote-cancel-trusted-fixture-focused-20261024.log).
+
 ## Captured remote cancellation SDK/CLI/HTTP adapters — 2026-10-24
 
 Standard registered Runs subobject adds Cancel(request,session,run,expected revision), advertised by remote_scoped_run_cancel:1. CLI scope-run-cancel and exact seven-field owner/origin-bound HTTP scope-run-cancel route call the same captured native service. The view allowlist includes the exact route. Expected revision refuses booleans and values outside positive JSON-safe bounds; captured lifetime/profile/credential/grant/scope/backend generation remain fenced. Public replies retain only binding plus six receipt fields. command_routing recognizes a cancel-plus-receipt grant without activating Remote or implying worker retirement.
