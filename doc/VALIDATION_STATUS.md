@@ -1,3 +1,9 @@
+## Candidate75 assembled; fresh packaged CLI coding passes — 2026-10-24
+
+Candidate0.1.75 packages qualified native859c66da/c17c240b/SDK8c, fresh500/178 client-tested sources and18 browser assets. Archive2443 entries and64 tracked frontend files match qualified inputs; all expected runtime/client/library bytes verify. Independent browser VSIX check confirms26 required assets and no private state. Runtime staging has2398 files; installed74 remains untouched.
+
+Fresh isolated packaged CLI session04ce9a6e1207d2d034537ac86b2067f4/roota4eab22bbb8afd8e226c942aba80a997 completes actual read/reviewed edit/Node4 checks through a native worker: four controlled replies, two approvals, eight history messages, successful operations, closed budget and retired worker. Watch/history observation does not repeat the four calls. Exact staged runtime hashes remain unchanged; disposable backend birth/image verify before retirement and exit is confirmed. NEVER replay this completed task. No paid inference or CPython. Rendered packaged browser/editor, handoff and installation remain separate open gates; candidate release is not accepted. [Package and CLI receipt](evidence/candidate75-package-cli-20261024.json).
+
 ## Fresh client assets and native browser integration — 2026-10-24
 
 Source4104e082 (native code identical to qualified859c66da) passes extension500/500 and browser178/178 with18 freshly built assets. The first private gate incorrectly used the old .agentflow/browser-assets before building: page SHA c5ae0320 differs from current3c7124b8 and connection sign-in fails with a missing DOM element. Its identity-verified synthetic child was intentionally retired to drain the parent and retain the original log; no product/model task was replayed. The corrected gate builds first and binds XMIND_BROWSER_TEST_ASSETS explicitly. Both original failure and fresh complete result are retained. Project2836/dependencies14908 hashes and sets remain exact.

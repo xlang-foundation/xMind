@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-25T03:33:11.996Z",
+  "version": "0.1.75",
+  "nativeQualifiedSource": "859c66da1bb24a742f4fa747fda56ead5a442f5e",
+  "nativeSha256": "c17c240b424d1cdb09128dc2eb1f002d61ecb02cd1511379736600514f110dd3",
+  "archiveSha256": "e6f0d30b7ed64bbb339d728703b76c0b4d9af4b27e5a27a32244e69e10f87f2e",
+  "archiveBytes": 35504738,
+  "archiveEntries": 2443,
+  "frontendFilesMatched": 64,
+  "acceptedExtensionTests": 500,
+  "acceptedBrowserTests": 178,
+  "allExpectedRuntimeClientAssetsAndLibrariesVerified": true,
+  "stagedRuntimeManifestSha256": "055c88a3e11374b585e20403ab820c59674ea0d78e1ed8f0f62d9bc68bf41ba7",
+  "browserVsixVerification": {
+    "requiredAssets": 26,
+    "privateStateAbsent": true
+  },
+  "cli": {
+    "sessionId": "04ce9a6e1207d2d034537ac86b2067f4",
+    "runId": "a4eab22bbb8afd8e226c942aba80a997",
+    "state": "completed",
+    "modelCalls": 4,
+    "history": 8,
+    "approvals": 2,
+    "operationCount": 2,
+    "allOperationsSucceeded": true,
+    "runtimeFilesAndHashesUnchanged": true,
+    "ownedBackendExit": {
+      "observed": true,
+      "code": null,
+      "pid": 41752,
+      "birthAndImageVerified": true
+    }
+  },
+  "completedTaskMustNeverBeReplayed": true,
+  "installed": false,
+  "releaseAccepted": false,
+  "renderedBrowserAccepted": false,
+  "renderedEditorAccepted": false,
+  "paidInference": false,
+  "cpython": false
+}
