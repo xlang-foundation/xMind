@@ -10,6 +10,7 @@
 #include <thread>
 #include <algorithm>
 #include <fstream>
+#include <exception>
 #include "nlohmann/json.hpp"
 using namespace agentflow;
 namespace {
@@ -19,8 +20,9 @@ std::string env(const char* name){const auto* value=std::getenv(name);return val
 std::string utf8(const std::filesystem::path& path){const auto value=path.u8string();return {reinterpret_cast<const char*>(value.data()),value.size()};}
 struct TempDirectory {
     std::filesystem::path path=std::filesystem::temp_directory_path()/"xmind-language-server-http-contract";
+    int uncaught_at_creation=std::uncaught_exceptions();
     TempDirectory(){path+=std::to_string(std::random_device{}());require(std::filesystem::create_directory(path),"HTTP fixture directory must be unique");}
-    ~TempDirectory(){std::error_code ignored;std::filesystem::remove_all(path,ignored);}
+    ~TempDirectory(){if(std::uncaught_exceptions()>uncaught_at_creation){std::cerr<<"Retained failed language-server fixture: "<<utf8(path)<<'\n';return;}std::error_code ignored;std::filesystem::remove_all(path,ignored);}
 };
 struct Serving {
     HttpServer& server;std::thread worker;
@@ -125,7 +127,20 @@ void provider_profile_contract(const std::string& executable,const std::string& 
 int main(int argc,char** argv){
     if(argc!=6)return 2;
     try{
-        WorkspaceTools workspace(argv[2]);LanguageServerProfile profile;
+        // Source checkouts may live inside protected backend configuration.
+        // Exercise the same project in an owned model workspace; never relax
+        // workspace admission merely to make the fixture source admissible.
+        TempDirectory project;
+        const auto fixture=std::filesystem::u8path(argv[2]);
+        for(const auto* name:{"Cargo.toml","Cargo.lock"}){
+            require(std::filesystem::is_regular_file(std::filesystem::symlink_status(fixture/name)),"Rust fixture manifest must be a regular source file");
+            std::filesystem::copy_file(fixture/name,project.path/name);
+        }
+        require(std::filesystem::is_directory(std::filesystem::symlink_status(fixture/"src")),"Rust fixture source must be a real directory");
+        for(const auto& entry:std::filesystem::recursive_directory_iterator(fixture/"src"))require(!entry.is_symlink()&&(entry.is_regular_file()||entry.is_directory()),"Rust fixture source must contain only regular files and directories");
+        std::filesystem::copy(fixture/"src",project.path/"src",std::filesystem::copy_options::recursive);
+        const auto workspace_path=utf8(project.path);
+        WorkspaceTools workspace(workspace_path);LanguageServerProfile profile;
         profile=rust_profile(argv[1]);const std::string path=argv[3];
         LanguageServerToolRegistry registry(workspace,{profile});
         require(registry.definitions().size()==1&&registry.definitions()[0].name=="language_server","Agent catalogue must expose one configured read-only language-server tool");
@@ -156,7 +171,7 @@ int main(int argc,char** argv){
         const auto diagnostics=request("diagnostics");
         require(diagnostics["result"].is_object()&&diagnostics["result"]["items"].is_array()&&diagnostics["result"]["items"].empty(),"Real rust-analyzer must report the valid fixture without diagnostics");
         const auto editor=registry.query(LanguageServerRequest{path,"documentSymbol",0,0});if(Json::parse(editor)["result"]!=symbols["result"])throw std::runtime_error("Editor and AgentRunner symbol comparison changed; observed "+Json::parse(editor)["result"].dump()+"; expected "+symbols["result"].dump());
-        http_contract(argv[1],argv[2],path,argv[4],argv[5]);provider_profile_contract(argv[1],argv[2],path,argv[4],argv[5]);agent_owner_contract(argv[1],argv[2],path,argv[4],argv[5]);
+        http_contract(argv[1],workspace_path,path,argv[4],argv[5]);provider_profile_contract(argv[1],workspace_path,path,argv[4],argv[5]);agent_owner_contract(argv[1],workspace_path,path,argv[4],argv[5]);
         std::cout<<"Actual rust-analyzer verified persistent native stdio, symbols, definition, references, hover, clean diagnostics and authenticated formatting. Real AgentRunner used an explicit model fixture to verify owned language queries and path-specific denial through xlang3 SQLite; no live model or synthetic LSP peer used\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

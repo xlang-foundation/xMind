@@ -1,0 +1,9 @@
+Test project D:/CantorAI2026/xMind/.agentflow/worker-sdk-startup-build
+    Start 90: native_language_server_rust_fixture_check
+1/2 Test #90: native_language_server_rust_fixture_check .......   Passed    0.08 sec
+    Start 91: native_language_server_rust_analyzer_contract
+2/2 Test #91: native_language_server_rust_analyzer_contract ...   Passed   17.17 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =  17.27 sec
