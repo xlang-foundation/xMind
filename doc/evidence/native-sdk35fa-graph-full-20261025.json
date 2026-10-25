@@ -2473,5 +2473,7 @@
   "instructionNote": "The current full inventory passes the instrumented instruction fixture; the original iGG7QW timeout still lacks preserved phase/DB evidence and is not retrospectively resolved.",
   "graphNote": "This full inventory contains the documented intrinsic-sleep/workdir fixture change, retaining six seconds, real PowerShell and thirty-second deadline. Original cold cmdlet commands remain failed evidence.",
   "renderedCodeEvidence": "code-snapshot-recovery-20261025.json",
-  "fullGoalComplete": false
+  "fullGoalComplete": false,
+  "nativeSystemTrustIntegrationExecuted": false,
+  "tlsScope": "Local inventory covers untrusted native SDK refusal and an independent Node HTTPS peer with explicit CA validation. It excludes native_mcp_oauth_trusted_contract, which requires the hosted Windows OS-trust option. Native positive trusted TLS remains pending hosted qualification."
 }
