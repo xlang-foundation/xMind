@@ -5,8 +5,8 @@ with session ID, run ID and positive expected run revision. It shares the
 existing request-ID namespace and durable unknown-before-send boundary. An
 admitted cancellation receipt must name that same run at a revision no older
 than the captured revision; it proves request admission only, never worker
-retirement. Cancellation network exchange, public SDK/CLI/HTTP methods and
-reconciliation remain unavailable until their typed connector is implemented.
+retirement. Native typed cancellation exchange and journal-backed reconciliation are implemented
+in source; public SDK/CLI/HTTP cancellation methods remain unavailable.
 
 
 Status: remote execution, enrollment and worker fencing remain proposed and
@@ -536,3 +536,27 @@ namespace and exact typed schemas before production remote activation. This
 document supplies a reviewable design. Only the authentication APIs identified
 as implemented above are current capabilities; proposed routing/enrollment
 APIs are not advertised as available.
+
+### Native cancellation connector and journal-backed service
+
+`cancel_remote_run` POSTs to `/xmind/v1/scopes/{scope}/sessions/{session}/runs/{run}/cancel`
+with exactly `request_id`, `operation: "runs.cancel"`, `session_id`, `run_id` and
+`expected_revision` (the captured run revision). It requires `runs:1`,
+`receipts:1`, `runs.cancel` and `receipts.read`; submit permission cannot authorize
+cancellation. The eight-field receipt binds these same five fields plus `state`,
+`resource_id` and `resource_revision`, inside the standard five-field grant binding.
+Admitted resource ID must equal the target run and its revision cannot regress.
+Pending/rejected receipts have empty resource ID and revision zero; only GET may
+return the exact two-field request-ID/not_found observation.
+
+`observe_remote_cancel_request` uses the original `/requests/{request_id}` GET
+with no request body, requiring receipt permission rather than cancel permission.
+Both connectors retain verified HTTPS by default, bounded64KiB replies, strict
+keys/types/duplicate rejection, individual opaque path encoding and no redirect
+or automatic retry. The backend-private `cancel_run` service shares the existing
+durable unknown-before-send journal and fences captured profile/credential/grant
+before and after exchange. A fresh receipt-only grant can reconcile the original
+intent after credential rotation without changing that intent or resending POST.
+Admitted cancellation does not establish terminal run state or worker retirement.
+Public adapters, positive native TLS cancellation and actual remote workers remain
+separate implementation/verification requirements.
