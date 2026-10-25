@@ -1,3 +1,9 @@
+## Full820 terminal178/179; ledger aggregate cutoff located — 2026-10-24
+
+Current command-adapter source820c10a8/Native2f564d45 finishes178/179 in953.74s. Only ledger exceeds its unchanged45s wrapper (45.20s). RPC64.13s, graph remote14.51s, nested38.31s, deep9.48s and HTTP9.11s pass. Full2840/16/1870/30/18598/142 source/SDK/library/runtime/dependency/binary closures and sets remain exact. This is failed qualification; no package/install.
+
+Ledger completes planning-admission11950ms, paused drain820ms, main process7072ms, delegation20382ms and planned permissions3179ms before the cutoff in restricted-catalogues. Original raw output/DB/WAL remain retained. Read-only xlang3 queries on copies show restricted-read-language completed with retired lease at the cutoff. Seventeen copied hosted databases independently locate nested failure after child settlement and parent continuation reservation, ledger at queued counted delegation child, and RPC after the last printed remote-coding task durably completed/retired. All original hashes remain unchanged; no tasks replayed, no CPython. These locate progress, not underlying causal proof. [Full result and copied-state findings](evidence/native-delivery-820c10a8-ledger-20261024.json), [complete output](evidence/native-delivery-820c10a8-full-20261024.log). Installed74 remains unchanged; goal active.
+
 ## Hosted5e terminal173/177; failed databases now retained — 2026-10-24
 
 Official run40141348537/job121017624351 completes173/177 in827.66s. Graph runner fails an actual PowerShell process at30060ms after script_entered only, with physical tree retired and effect uncertain. Worker RPC production phase exceeds its60s child wrapper; ledger45s wrapper stops during main-planning-delegation; nested-human45s CTest expires in a later counted coding-resume case. Graph remote-worker passes18.18s. Prior f113 native177 pass remains a separate source/run, not acceptance of these failures.

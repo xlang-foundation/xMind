@@ -1,0 +1,187 @@
+{
+  "recordedAt": "2026-10-25T00:59:32.462Z",
+  "sourceParent": "820c10a8d39bcb7de0a0559e437e642437098e3d",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 35276,
+    "launchedAt": "2026-10-25T00:43:03.242Z",
+    "completedAt": "2026-10-25T00:43:31.944Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+  },
+  "test": {
+    "pid": 26476,
+    "launchedAt": "2026-10-25T00:43:35.215Z",
+    "completedAt": "2026-10-25T00:59:28.986Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "e27c1a073c42ab86b2424028192d62d823e01305a2d767b3270604625e99e250"
+  },
+  "total": 179,
+  "failed": 1,
+  "passed": 178,
+  "seconds": 953.74,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "2f564d4587175ce9f467b2177b876c4b085a5d750981cd958bd41e265fcd26bd",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false,
+  "scope": "Complete local qualification failed only ledger45s wrapper; no package/install",
+  "failure": {
+    "contract": "native_agent_worker_ledger_contract",
+    "seconds": 45.2,
+    "timeoutMs": 45000,
+    "lastPhase": "restricted-catalogues",
+    "precedingPhaseMilliseconds": {
+      "planningAdmission": 11950,
+      "pausedChildDrain": 820,
+      "mainProcessPlanning": 7072,
+      "mainPlanningDelegation": 20382,
+      "plannedReadPermissions": 3179
+    },
+    "rawOutputRetained": true,
+    "originalNamespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-worker-ledger-2830413835-4171313208",
+    "lastDurableRuns": [
+      [
+        "restricted-read-language",
+        "completed"
+      ],
+      [
+        "b77ec7796ee3321385261fd9b9f870b5",
+        "completed"
+      ],
+      [
+        "restricted-read-plan",
+        "completed"
+      ],
+      [
+        "restricted-read-read",
+        "completed"
+      ],
+      [
+        "restricted-read-none",
+        "completed"
+      ],
+      [
+        "main-plan-permission-invalid-path",
+        "completed"
+      ],
+      [
+        "6c2dbf43f0376756521edf81eff83c18",
+        "failed"
+      ],
+      [
+        "main-plan-permission-process-deny",
+        "completed"
+      ],
+      [
+        "449899daeeb5f42ba61e77ccf2aee11c",
+        "failed"
+      ],
+      [
+        "main-plan-permission-ask-guidance-change",
+        "completed"
+      ],
+      [
+        "b8b87ee27b5cf93a1d44c178281518e4",
+        "failed"
+      ],
+      [
+        "main-plan-permission-parent-deny",
+        "completed"
+      ]
+    ],
+    "lastDurableEvents": [
+      [
+        3202,
+        "restricted-read-language",
+        "worker.lease.retired",
+        "{\"generation\":\"27cfa494eff764ac2391e4853dea6cd6\",\"reason\":\"completed\",\"uncertain_model_dispatches\":0}"
+      ],
+      [
+        3201,
+        "restricted-read-language",
+        "run.completed",
+        "{}"
+      ]
+    ]
+  },
+  "localReadOnlyInspection": {
+    "recordedAt": "2026-10-25T00:56:41.932Z",
+    "original": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-worker-ledger-2830413835-4171313208",
+    "files": 16,
+    "originalBytesUnchanged": true,
+    "queryOnlyOnCopies": true,
+    "runtime": "xlang3",
+    "taskReplay": false,
+    "cpython": false
+  },
+  "hostedReadOnlyInspection": {
+    "recordedAt": "2026-10-25T00:44:21.296Z",
+    "runtime": "xlang3",
+    "originalFiles": 23,
+    "databases": 17,
+    "originalHashesUnchanged": true,
+    "queriesOnlyOnCopies": true,
+    "queryOnly": true,
+    "taskNamespacesReplayed": false,
+    "cpythonExecuted": false
+  },
+  "hostedFindings": {
+    "recordedAt": "2026-10-25T00:46:41.705Z",
+    "rpc": {
+      "lastDurableRun": [
+        "rpc-production-coding-remote",
+        "completed"
+      ],
+      "lastEvent": [
+        3216,
+        "rpc-production-coding-remote",
+        "worker.lease.retired",
+        "{\"generation\":\"production-coding-remote-generation\",\"reason\":\"completed\",\"uncertain_model_dispatches\":0}"
+      ],
+      "lastUntruncatedOutput": "Production unified xmind remote AgentRunner loop verified one actual approved peer effect, exact canonical continuation, two model windows and physical child retirement.",
+      "nextSourceCase": "worker_coding_remote_fixture::parent(..., refresh=true)",
+      "interpretation": "Last printed effect and worker retirement are durable; location between that call completion and next case admission remains unproven. Never replay to discover whether it ran."
+    },
+    "nested": {
+      "lastEvent": [
+        1522,
+        "fairness-paused-coding-counted-resume",
+        "budget.model_call.reserved",
+        "{\"attempt_id\":\"12c3041edd6087584e490c7a9bf5874a\",\"plan_call_id\":\"ab019bc56aab754a3f7f64ec132395df\",\"role\":\"parent\",\"root_run_id\":\"fairness-paused-coding-counted-resume\",\"worker_generation\":\"9fe4f8432fc0089f4e3104727ecb8ef8\"}"
+      ],
+      "root": "fairness-paused-coding-counted-resume",
+      "childState": "completed with worker lease retired and plan settled",
+      "interpretation": "Outer deadline catches parent continuation after child settlement; not evidence of a stuck child effect."
+    },
+    "ledger": {
+      "root": "coexisting-coding-counted-normal",
+      "lastChild": [
+        "90d69306b0954cf32abcbd1f333d2e85",
+        "queued"
+      ],
+      "lastEvent": [
+        2508,
+        "90d69306b0954cf32abcbd1f333d2e85",
+        "worker.lease.admitted",
+        "{\"generation\":\"442286419782088bb52267df41f172c0\",\"pid\":8136,\"root_run_id\":\"coexisting-coding-counted-normal\"}"
+      ],
+      "interpretation": "Aggregate outer45s wrapper interrupts after admission of a queued counted delegation child; exact readiness/dispatch cause remains unproven."
+    },
+    "originalBytesUnchanged": true,
+    "readOnlyCopies": true,
+    "taskReplay": false
+  },
+  "installedVersion": "0.1.74",
+  "installationChanged": false
+}
