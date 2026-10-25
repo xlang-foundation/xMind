@@ -6,7 +6,7 @@ existing request-ID namespace and durable unknown-before-send boundary. An
 admitted cancellation receipt must name that same run at a revision no older
 than the captured revision; it proves request admission only, never worker
 retirement. Native typed cancellation exchange and journal-backed reconciliation are implemented
-in source; public SDK/CLI/HTTP cancellation methods remain unavailable.
+in source, with standard Runs.Cancel and thin SDK/CLI/HTTP adapters.
 
 
 Status: remote execution, enrollment and worker fencing remain proposed and
@@ -558,5 +558,23 @@ durable unknown-before-send journal and fences captured profile/credential/grant
 before and after exchange. A fresh receipt-only grant can reconcile the original
 intent after credential rotation without changing that intent or resending POST.
 Admitted cancellation does not establish terminal run state or worker retirement.
-Public adapters, positive native TLS cancellation and actual remote workers remain
-separate implementation/verification requirements.
+The public adapters are described below; positive native TLS cancellation and
+actual remote workers remain separate verification requirements.
+
+### Captured cancellation adapters
+
+Capability `remote_scoped_run_cancel:1` advertises the typed method
+`OpenScope(...).Runs().Cancel(request_id, session_id, run_id, expected_run_revision)`.
+It uses the ordinary registered xlang3 Runs subobject and existing six-field
+request receipt projection. Expected revision must be a positive JSON-safe
+integer; booleans refuse. Captured lifetime, profile, credential/grant, scope
+and backend generation remain fenced around the native operation.
+
+CLI: `xmind ipc --endpoint lrpc:PORT connections scope-run-cancel ID REV SCOPE REQUEST SESSION RUN EXPECTED_RUN_REV`.
+HTTP: owner/origin-bound `POST /v1/connections/scope-run-cancel` accepts exactly
+`id`, `expected_profile_revision`, `scope_id`, `request_id`, `session_id`,
+`run_id`, `expected_run_revision`, with no query parameters. Replies contain
+only captured binding and public receipt metadata. The command-routing flag
+recognizes an authorized cancellation-plus-receipt grant, but never activates
+a Remote profile or implies worker retirement. Positive trusted-TLS cancellation
+and actual remote worker behavior remain separate acceptance requirements.
