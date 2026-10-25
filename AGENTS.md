@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- Immediate user milestone: deliver a working v1 with solid UI and reliable browser/VS Code/CLI coding, prioritizing usability and release blockers over feature breadth. Keep the original broader goal for later work. Acceptance: [working v1 goal](doc/WORKING_V1_GOAL.md).
+
 - SDK6df6520f passes local184 (f86eda4b), pip25/26 and fixed perf11; CI pins updated. Hosted/new release qualification remains open. Local IPC only; cross-node workers belong to later Cantor Cluster. Installed76 unchanged. See doc/VALIDATION_STATUS.md.
 
 - Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.

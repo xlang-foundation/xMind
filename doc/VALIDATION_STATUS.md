@@ -1,3 +1,7 @@
+## Current delivery priority: working v1 — 2026-10-25
+
+The user set a working first version with solid UI and a reliable coding framework as the immediate milestone; the original broader goal remains retained for later delivery. Follow [v1 acceptance](WORKING_V1_GOAL.md). Prioritize packaged browser/VS Code/CLI usability and release blockers. Advanced feature breadth is deferred; a full local contract pass does not prove a usable installed release.
+
 ## SDK6df6520f: complete local native qualification — 2026-10-25
 
 The complete184-contract suite passes together in767.44s against SDK6df6520f and the exact pinned Python3.14.0 pure source. Actual inventory and184 terminal pass names match;2860 project,16 SDK-header,1831 pure-library,30 runtime,18598 Node-dependency and145 native-binary sets/hashes remain unchanged. Native SHAf86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171. The pinned license is verified separately. No CPython or paid provider inference is used.
