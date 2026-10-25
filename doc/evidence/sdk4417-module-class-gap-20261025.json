@@ -1,0 +1,13 @@
+{
+  "exitCode": 1,
+  "signal": null,
+  "executableSha256": "449fbd0f331c31d1393482d130bc6841202f31b46aee00788a3ab1ebbe90f32d",
+  "runtimeSha256": "27199382abd7b0bf8c23ade5dd32749b373e9621704cb953d5211be7f9897446",
+  "source": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "cpythonExecuted": false,
+  "scope": "Minimal imported pure module __class__ assignment using immutable SDK4417; ordinary module attribute assignment succeeds first",
+  "stderr": "Traceback (most recent call last):\r\n  File \"<string>\", line 13, in <module>\r\n    probe_target.__class__ = Derived\r\n                             ^^^^^^^\r\nAttributeError: object does not support attribute assignment\r\n",
+  "stdout": "ordinary_module_assignment 42\r\n",
+  "fixed": false,
+  "packagedPipPassed": false
+}

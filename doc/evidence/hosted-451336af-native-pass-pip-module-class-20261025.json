@@ -1,0 +1,42 @@
+{
+  "source": "451336afa00c74621e0a5eee93fa8e0939159c90",
+  "runId": 40215612380,
+  "jobId": 121244287009,
+  "workflowConclusion": "failure",
+  "native": {
+    "passed": 182,
+    "total": 182,
+    "failed": 0,
+    "seconds": 692.02,
+    "completeInventoryAndTerminalVerified": true,
+    "ctestSha256": "ce021c69caf063178a2b177b8dac5cf2b405c8668dbdc7763d01bf45bfd7f75f",
+    "contractsSha256": "1a360edff936e994f5a45642981eef605dfa80bf2076c32a1e33df0a9b096078"
+  },
+  "packagedPip": {
+    "passed": false,
+    "commandsRecorded": 3,
+    "failure": "pip._vendor.urllib3.request assigns sys.modules[__name__].__class__ = RequestModule; xlang3 rejects attribute assignment during pip install import.",
+    "version": "25.2",
+    "stdlibRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "priorLocalPipVersion": "26.2.1",
+    "priorLocalCheckDoesNotQualifyThisVendoredImportPath": true
+  },
+  "artifacts": [
+    {
+      "id": 12609822278,
+      "name": "native-windows-evidence-451336afa00c74621e0a5eee93fa8e0939159c90",
+      "bytes": 5173863,
+      "sha256": "41f48e2456ccf3b376da5a6335c38ccab3f996ba0242e411a3bd30dad92c1653"
+    },
+    {
+      "id": 12610056976,
+      "name": "native-windows-diagnostic-images-451336afa00c74621e0a5eee93fa8e0939159c90",
+      "bytes": 32207264,
+      "sha256": "9159d004da1aca3ff3873d08a07e8b0d9a98c2abc6ea4b4abe30ed746eed840d"
+    }
+  ],
+  "preservedWorkerNamespaces": [],
+  "releaseQualified": false,
+  "installed": false,
+  "goalComplete": false
+}

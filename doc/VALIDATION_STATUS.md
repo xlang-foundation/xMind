@@ -1,3 +1,9 @@
+## Hosted451 native182 passes; packaged pip exposes module-class gap — 2026-10-25
+
+Hosted40215612380/source451336af completes all182 native contracts in692.02s. The complete CTest inventory, gate hashes and182 terminal pass records match. Workflow failure occurs later during packaged offline pip installation: vendored urllib3 assigns a module subclass through __class__, and xlang3 rejects the assignment. No hosted release qualification or new installation is claimed. Cleanup sourcefeb42dc2 now has its own running hosted40218841893 gate. [Terminal receipt](evidence/hosted-451336af-native-pass-pip-module-class-20261025.json).
+
+A fresh minimal imported-module probe reproduces the same unsupported assignment directly on immutable SDK4417: ordinary module attribute assignment succeeds first. The isolated SDK source is still unchanged; the compatibility fix, correctness checks and fixed default performance gate remain required before any new SDK publication. Prior snapshots and accepted baseline remain intact. [Reproduction](evidence/sdk4417-module-class-gap-20261025.json).
+
 ## Cleanup executable completes real Code selection/edit/Node/reload — 2026-10-25
 
 The source extension uses Ask About Selection to capture the actual saved editor buffer, file and range. A fresh named process-agent task against qualified Nativece3d8092/SDK4417 completes read, approved edit and approved Node execution: four checks, four controlled model calls and eight messages. The live clean editor buffer updates before reload; the same completed run and named agent restore after re-authentication in the isolated Code Server. Authentication persistence is not proved. All isolated owners and the tab are retired; installed76 is unchanged. Source71 remains unchanged, and post-run sets/hashes verify frontend64, Node18598, runtime30, pure libraries1870 and the two executed native images.
