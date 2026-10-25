@@ -174,4 +174,3 @@ Superseded after installed74 qualification (verbatim):
 - Installed74 Nativef3b9bf69/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and73-to74 handoff. Five roots/2442 files/2398 runtime/73 backup/smoke verify. See doc/evidence/installed-0.1.74-5e5849cd-20261024.json; goal active.
 
 - Installed74 smoke session2af986f326bb78de7034ea049268460f/rootd8e11b246eb0859f5adbb4a6e15c727e completes managed read/history with0models; owner exited. NEVER replay. Original failed validation fixtures remain retained.
-
