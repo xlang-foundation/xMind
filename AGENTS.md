@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- SDK4417: production generic worker transport removed; local184 passes (ce3d8092). Clients510/180 prior7755 accepted. Hosted14c fails178/182;40209454418 active. Installed76 unchanged. Details: doc/VALIDATION_STATUS.md.
+- SDK4417: production generic worker transport removed; local184 passes (ce3d8092). Clients510/180 prior7755 accepted. Hostedfa56 fails180/182;451336af active. Installed76 unchanged. Details: doc/VALIDATION_STATUS.md.
 
 - Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.
 

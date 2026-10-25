@@ -1,3 +1,9 @@
+## Hostedfa56:180/182; two worker deadline failures remain — 2026-10-25
+
+Hosted40209454418 atfa56cd23/SDK4417 completes the actual182-test inventory in794.21s:180 pass, ledger fails in45.15s and nested-human times out in45.03s. Worker RPC and agent-runner pass in this run. The inventory/terminal names and artifact hashes verify, and all original fixture namespaces remain preserved and forbidden for replay. Neither this run nor later local passes resolve those original worker deadline causes. Packaged pip and release assembly were skipped. [Terminal evidence](evidence/hosted-fa56-worker-deadlines-20261025.json).
+
+Mainfeb42dc2 now includes the separately qualified production IPC cleanup (complete local184, Nativece3d8092). Hosted40215612380/451336af is running; the cleanup source receives its own subsequent hosted gate. Installed76 and the complete delivery goal remain unchanged.
+
 ## Production generic worker transport removed; complete local184 passes — 2026-10-25
 
 Production AgentWorkerChannel removes its generic send/receive API, message envelope, test I/O counters and Deliver SDK method. Packet-fault transport now lives under Native/tests and exports its own SDK root. All fixture users migrate to that test transport. Production retains Scope, Close, ConfigureModel, PublishExecution and AnnounceProcess, with peer endpoint/identity and lifecycle access. The unchanged journal value-size bound is independent of the removed test channel constant. Logical peer-close detection now observes the SDK Close notification before OS process exit; the channel contract verifies the peer remains alive until explicit owner retirement.

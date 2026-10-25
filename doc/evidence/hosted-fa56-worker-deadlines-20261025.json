@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-25T17:56:54.518Z",
+  "run": 40209454418,
+  "source": "fa56cd231e18658ce695e66cc7b1eca99e893d72",
+  "provenance": {
+    "toolchain_version": "18.11.12315.225",
+    "toolchain": "Visual Studio 18 2026",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "build_parallelism": 4,
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "xlang3": "4417a9efbca7608de9855974f46ffa2520a1a416",
+    "windows_default_owner_matches_user": false,
+    "processors": 4,
+    "xmind": "fa56cd231e18658ce695e66cc7b1eca99e893d72",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb"
+  },
+  "total": 182,
+  "passed": 180,
+  "failed": 2,
+  "seconds": 794.21,
+  "actualInventoryAndTerminalNamesVerified": true,
+  "failedContracts": [
+    {
+      "number": 102,
+      "name": "native_agent_worker_ledger_contract",
+      "result": "***Failed   45.15 sec"
+    },
+    {
+      "number": 103,
+      "name": "native_agent_worker_nested_human_contract",
+      "result": "***Timeout  45.03 sec"
+    }
+  ],
+  "workerRpcPassed": {
+    "number": 96,
+    "name": "native_agent_worker_model_rpc_contract",
+    "result": "Passed   65.39 sec"
+  },
+  "agentRunnerPassed": {
+    "number": 108,
+    "name": "native_agent_runner_contract",
+    "result": "Passed   38.62 sec"
+  },
+  "retainedNamespacesNeverReplay": [
+    "xmind-model-rpc-1938845655-4214891100",
+    "xmind-model-rpc-539824652-220559245",
+    "xmind-worker-ledger-1326061466-3725053706",
+    "xmind-worker-ledger-2954728212-1080935474"
+  ],
+  "artifacts": [
+    {
+      "id": 12608460175,
+      "name": "native-windows-diagnostic-images-fa56cd231e18658ce695e66cc7b1eca99e893d72",
+      "bytes": 32200746,
+      "sha256": "7a04dffd6d7757cb29feedc14a0ea6fe431fa3d1236c6ea3512103db3bef52ca"
+    },
+    {
+      "id": 12607619325,
+      "name": "native-windows-evidence-fa56cd231e18658ce695e66cc7b1eca99e893d72",
+      "bytes": 7608260,
+      "sha256": "b9d809d9ccba12af964a991b66f9494bcbc77da552de6971a2aa78929b0b4213"
+    }
+  ],
+  "contractsSha256": "1a360edff936e994f5a45642981eef605dfa80bf2076c32a1e33df0a9b096078",
+  "deadlinesChanged": false,
+  "rootCauseResolved": false,
+  "packagedPipExecuted": false,
+  "releaseQualified": false,
+  "installedVersion": "0.1.76",
+  "fullGoalComplete": false
+}
