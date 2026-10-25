@@ -36,6 +36,29 @@ RemoteObservedSession read_remote_session(const std::string& origin,const Secret
         const auto& value=response.at("session");keys(value,{"id","title","revision"});if(!value.at("id").is_string()||value.at("id")!=session||!value.at("title").is_string()||value.at("title").get_ref<const std::string&>().size()>4096||!value.at("revision").is_number_integer()||value.at("revision")<1||value.at("revision")>9007199254740991LL)invalid_session();return {value.at("id"),value.at("title"),value.at("revision")};
     }catch(const nlohmann::json::exception&){invalid_session();}
 }
+void validate_remote_run_scope(const RemoteNegotiatedGrant& grant,const std::string& scope,std::int64_t at){
+    if(!identifier(scope)||at<=0)throw std::invalid_argument("Invalid remote scope identity");
+    RemoteNegotiationRequirements requirements;requirements.now_unix_seconds=at;requirements.expected_server_id=grant.server_id;requirements.required_capabilities={{"runs",1}};
+    const auto checked=validate_remote_negotiation(encode_remote_negotiated_grant(grant),requirements);
+    const auto found=std::find_if(checked.authorized_scopes.begin(),checked.authorized_scopes.end(),[&](const auto& item){return item.id==scope;});
+    if(found==checked.authorized_scopes.end()||std::find(found->actions.begin(),found->actions.end(),"runs.read")==found->actions.end())throw TransportError("Remote scope does not authorize run observation");
+}
+RemoteObservedRun read_remote_run(const std::string& origin,const SecretBytes& credential,const RemoteNegotiatedGrant& grant,const std::string& scope,const std::string& session,const std::string& run,std::chrono::milliseconds timeout,RemoteTransportPolicy policy,std::stop_token stop){
+    endpoint_origin(origin,policy);validate_remote_run_scope(grant,scope,now());const auto session_resource=component(session),run_resource=component(run);
+    if(timeout.count()<=0||timeout>std::chrono::minutes(2)||credential.view().empty()||credential.view().size()>8192)throw std::invalid_argument("Invalid remote run request");
+    for(const auto c:credential.view())if(c<33||c>126)throw std::invalid_argument("Invalid remote credential");
+    HttpStreamRequest request;request.url=origin+"/xmind/v1/scopes/"+component(scope)+"/sessions/"+session_resource+"/runs/"+run_resource;request.deadline=timeout;request.idle_timeout=timeout;
+    request.remote_binding=RemoteHttpBinding{grant.server_id,scope,grant.grant_id,1,grant.grant_revision};
+    const auto raw=get_bounded_json(request,&credential,65536,stop);validate_remote_run_scope(grant,scope,now());if(stop.stop_requested())throw TransportCancelled("Remote run observation cancelled");
+    try{using Json=nlohmann::json;std::vector<std::set<std::string>> objects;const auto response=Json::parse(raw,[&](int depth,Json::parse_event_t event,Json& value){if(depth>4)throw TransportError("Invalid remote run observation");if(event==Json::parse_event_t::object_start)objects.emplace_back();else if(event==Json::parse_event_t::key){if(objects.empty()||!objects.back().insert(value.get<std::string>()).second)throw TransportError("Invalid remote run observation");}else if(event==Json::parse_event_t::object_end)objects.pop_back();return true;});
+        keys(response,{"binding","run"});const auto& binding=response.at("binding");keys(binding,{"server_id","scope_id","protocol_version","grant_id","grant_revision"});
+        if(binding.at("server_id")!=grant.server_id||binding.at("scope_id")!=scope||binding.at("grant_id")!=grant.grant_id||!binding.at("protocol_version").is_number_integer()||binding.at("protocol_version")!=1||!binding.at("grant_revision").is_number_integer()||binding.at("grant_revision")!=grant.grant_revision)throw TransportError("Invalid remote run binding");
+        const auto& value=response.at("run");keys(value,{"id","session_id","root_id","state","revision"});
+        if(value.at("id")!=run||value.at("session_id")!=session||!value.at("root_id").is_string()||!identifier(value.at("root_id").get_ref<const std::string&>())||!value.at("state").is_string()||!value.at("revision").is_number_integer()||value.at("revision")<1||value.at("revision")>9007199254740991LL)throw TransportError("Invalid remote run observation");
+        const auto state=value.at("state").get<std::string>();if(state!="queued"&&state!="running"&&state!="paused"&&state!="completed"&&state!="failed"&&state!="cancelled")throw TransportError("Invalid remote run state");
+        return {value.at("id"),value.at("session_id"),value.at("root_id"),state,value.at("revision")};
+    }catch(const nlohmann::json::exception&){throw TransportError("Invalid remote run observation");}
+}
 namespace {
 void command_scope(const RemoteNegotiatedGrant& grant,const std::string& scope,std::int64_t at,bool create){
  if(!identifier(scope)||at<=0)throw std::invalid_argument("Invalid remote scope identity");RemoteNegotiationRequirements needs;needs.now_unix_seconds=at;needs.expected_server_id=grant.server_id;needs.required_capabilities={{"sessions",1},{"receipts",1}};const auto checked=validate_remote_negotiation(encode_remote_negotiated_grant(grant),needs);const auto found=std::find_if(checked.authorized_scopes.begin(),checked.authorized_scopes.end(),[&](const auto& s){return s.id==scope;});const auto action=create?"sessions.create":"receipts.read";if(found==checked.authorized_scopes.end()||std::find(found->actions.begin(),found->actions.end(),action)==found->actions.end())throw TransportError("Remote scope does not authorize command request");

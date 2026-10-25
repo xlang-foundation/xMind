@@ -22,6 +22,11 @@ RemoteCommandObservation observe_remote_session_request(const std::string& origi
     const std::string& scope,const std::string& request_id,const std::string& title,std::chrono::milliseconds,
     RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});
 struct RemoteObservedSession {std::string id,title;std::int64_t revision=0;};
+struct RemoteObservedRun {std::string id,session_id,root_id,state;std::int64_t revision=0;};
+void validate_remote_run_scope(const RemoteNegotiatedGrant&,const std::string& scope_id,std::int64_t now_unix_seconds);
+RemoteObservedRun read_remote_run(const std::string& origin,const SecretBytes& credential,
+    const RemoteNegotiatedGrant&,const std::string& scope_id,const std::string& session_id,const std::string& run_id,
+    std::chrono::milliseconds timeout,RemoteTransportPolicy policy=RemoteTransportPolicy::verified_https,std::stop_token stop={});
 void validate_remote_session_scope(const RemoteNegotiatedGrant&,const std::string& scope_id,std::int64_t now_unix_seconds);
 RemoteObservedSession read_remote_session(const std::string& origin,const SecretBytes& credential,
     const RemoteNegotiatedGrant&,const std::string& scope_id,const std::string& session_id,std::chrono::milliseconds timeout,

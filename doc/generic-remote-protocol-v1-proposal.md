@@ -179,6 +179,29 @@ authorization permits. Expiry/revocation never falls back to Local execution.
 
 ## Typed operations and durable receipts
 
+### Native run metadata observation connector
+
+The development connector defines a typed GET at
+`/xmind/v1/scopes/{scope}/sessions/{session}/runs/{run}`. It requires
+`runs:1` and the exact scope's `runs.read` action independently of session
+read or run submission permission. The existing verified HTTPS, bearer and
+captured grant headers apply; there are no redirects or automatic retries.
+The response is bounded to64KiB and has exactly this shape:
+
+```json
+{"binding":{"server_id":"SERVER","scope_id":"SCOPE","protocol_version":1,"grant_id":"GRANT","grant_revision":1},"run":{"id":"RUN","session_id":"SESSION","root_id":"ROOT","state":"running","revision":7}}
+```
+
+Binding and requested session/run IDs must match exactly. Root identity is an
+opaque resource ID; a child may have a different root. Revision is a positive
+JSON-safe integer. State is one of queued, running, paused, completed, failed
+or cancelled; unknown states, duplicate keys, extra fields and mismatches refuse.
+Grant expiry is checked before and after observation. This connector alone
+does not expose an SDK capability or enable run routing. Captured service and
+SDK/CLI/HTTP adapters, submission, cancellation, events and worker retirement
+remain separate implementation and verification requirements. A terminal run
+metadata response does not itself establish physical worker retirement.
+
 Proposed resource paths are relative to `/xmind/v1/scopes/{scope_id}`. Encode
 opaque IDs as individual path components; reject ambiguous encodings.
 

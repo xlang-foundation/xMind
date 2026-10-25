@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-10-25T01:40:25.407Z",
+  "sourceParent": "d235c1f777c4101e74934e4cbced4396c6bb2391",
+  "sourcePatchSha256": "bae227f670ecb2a01fe56d5524bad275a80e6ec9f643612ba229d3c1d1f5ee1a",
+  "build": {
+    "pid": 37688,
+    "launchedAt": "2026-10-25T01:36:47.321Z",
+    "completedAt": "2026-10-25T01:40:15.552Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c14b32b41e944790991458a0030e4718c34ad2e7395d1a79392d36a51bc462cf"
+  },
+  "test": {
+    "pid": 25296,
+    "launchedAt": "2026-10-25T01:40:19.738Z",
+    "completedAt": "2026-10-25T01:40:21.647Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "04497089318f1503afd5bdaf6fe7700165a59ea1703f1fe941a23166a13e7ebf"
+  },
+  "total": 3,
+  "failed": 0,
+  "passed": 3,
+  "seconds": 1.83,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "586908735839f99a9549cbd3f4d753c41b947cae945482d106dcebe01ce19f43",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Native typed remote run metadata connector only; isolated loopback transport tests plus negotiation/authentication regression",
+  "publicAdaptersImplemented": false,
+  "productionTlsRunObservationVerified": false,
+  "outstanding": [
+    "Captured backend scope service and standard SDK subobject",
+    "CLI and native HTTP adapters",
+    "Hosted native verified TLS run observation",
+    "Run submission/cancellation/events/enrollment/fencing",
+    "Full native and delivery qualification; existing diagnostics and ledger failures retained"
+  ]
+}

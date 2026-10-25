@@ -1,3 +1,9 @@
+## Native typed remote run metadata connector — 2026-10-24
+
+Native read_remote_run implements the scoped/session/run GET with verified HTTPS default, exact bearer/grant binding,64KiB bound, no redirects/retries and before/after grant validation. It independently requires runs:1/runs.read; submit or session permission does not imply run observation. Exact session/run IDs, opaque root ID, six supported states and positive JSON-safe revision are validated; duplicate/extra/malformed fields refuse without peer-private text. Network JSON remains a typed server protocol, not an application IPC serializer.
+
+Three focused native negotiation/client/authentication contracts pass1.83s with all2840/16/1870/30/18598/142 hashes/sets exact. New Native58690873 replaces rejected experimental build outputs but is uninstalled and not fully qualified. Controlled loopback tests cover success/states,18 invalid response modes, auth/capability/expiry refusal, path injection, pre-cancellation and default HTTP refusal. Captured service, ordinary SDK subobject, CLI/HTTP adapters and hosted actual TLS run observation remain next; no run execution or retirement claim. Full diagnostics/ledger failures stay open; installed74 unchanged. [Receipt](evidence/remote-run-observation-native-20261024.json), [focused log](evidence/remote-run-observation-native-20261024.log).
+
 ## Ledger execution cost isolated; private-wait experiment rejected — 2026-10-24
 
 Stage observations preserve all existing checks/deadlines. Fresh focused ledger completes child44902ms/CTest45.19s: execution takes927–3649ms per coexistence case; assertion reads2–23ms and explicit service closure1–2ms. This is a near-deadline observation, not reliable full qualification or proof of the original timeout cause. Complete closure stays2840/16/1870/30/18598/142.
