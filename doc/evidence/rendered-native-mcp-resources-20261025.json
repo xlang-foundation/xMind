@@ -1,0 +1,88 @@
+{
+  "recordedAt": "2026-10-25T12:38:48.859Z",
+  "scope": "Actual hidden browser resource/template discovery through the local184-qualified production xmind.exe and native MCP HTTP client, with a controlled loopback modern MCP peer",
+  "passed": true,
+  "nativeSource": "1d6a4a74689d2ec19bce8e175d22c76406d13e01",
+  "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+  "clientSource": "7107bee43243e44429ac3d7ee1cbd012fb76d8c7 executable frontend, unchanged through d75d2822",
+  "namespace": "xmind-mcp-resource-ui-5c7aAf",
+  "nativeOwner": {
+    "ProcessId": 23704,
+    "ExecutablePath": "D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xmind.exe",
+    "birthUtc": "2026-10-25T12:34:49.5197850Z"
+  },
+  "countsBeforeUi": {
+    "discovery": 0,
+    "tools": 0,
+    "resources": 0,
+    "templates": 0,
+    "unexpected": 0
+  },
+  "countsAfterUi": {
+    "discovery": 1,
+    "tools": 0,
+    "resources": 1,
+    "templates": 1,
+    "unexpected": 0
+  },
+  "modernProtocol": "2026-07-28",
+  "resources": 1,
+  "templates": 1,
+  "explicitDiscoveryClick": true,
+  "noAutomaticDiscovery": true,
+  "metadataOnly": true,
+  "resourceContentsRead": false,
+  "subscriptionsTested": false,
+  "resourceAttachmentToModelTested": false,
+  "mcpOAuthTested": false,
+  "modelCalls": 0,
+  "toolExecutions": 0,
+  "nativeBinariesUnchanged": 145,
+  "acceptedBrowserAssetsUnchanged": 18,
+  "dependenciesReverifiedAgainstEarlierFrozenBaseline": {
+    "sdkSource": 16,
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "nodeDependencies": {
+      "Native/tests/sdk/node_modules": 3690,
+      "extensions/vscode/node_modules": 14908
+    }
+  },
+  "dependencyBaselineNote": "SDK/pure-library/dependency inventory reuses the earlier frozen sdk-null-snapshot-argument-focused baseline; this is not a new immediately-before-UI dependency snapshot.",
+  "retirement": {
+    "zeroModelOrToolExecution": true,
+    "retiredUtc": "2026-10-25T12:36:55.5960024Z",
+    "retirement": "Identity-bound termination of isolated metadata-only server after accepted UI proof; not a graceful shutdown/reopen claim",
+    "nativeOwnerAbsent": true
+  },
+  "firstAttempt": {
+    "namespace": "xmind-mcp-resource-ui-hbjEky",
+    "passed": false,
+    "reason": "Private controlled peer omitted server/discover and returned HTTP500. Native client/UI correctly refused the unsupported peer; no initialize/resource/template request was made.",
+    "counts": {
+      "initialize": 0,
+      "tools": 0,
+      "resources": 0,
+      "templates": 0,
+      "unexpected": 1
+    },
+    "originalRetained": true
+  },
+  "correction": "A new isolated namespace and peer implement server/discover with supportedVersions, serverInfo metadata and modern complete results. No production source or timeout changes.",
+  "cpythonExecuted": false,
+  "paidInference": false,
+  "visibleWindowOpened": false,
+  "installed": false,
+  "releaseQualified": false,
+  "fullGoalComplete": false,
+  "artifacts": {
+    "rendered-native-mcp-resources-20261025.jpg": {
+      "bytes": 67354,
+      "sha256": "c59e9330b862573cf75c4fcbccb35b7777b1f267f0d5d146e72347131979495d"
+    },
+    "rendered-native-mcp-resources-20261025.txt": {
+      "bytes": 3027,
+      "sha256": "081dc6292b2f98faf1df657bfd3aa2acd33b66069db44e9f30f4288a9cd69177"
+    }
+  }
+}

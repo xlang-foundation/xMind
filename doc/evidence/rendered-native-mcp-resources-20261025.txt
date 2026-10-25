@@ -1,0 +1,61 @@
+Browser tab: 8, Title: "xMind · Browser", URL: "http://127.0.0.1:50149/ui/".
+0 AXWebArea xMind · Browser, URL: 127.0.0.1:50149/ui/
+	1 container Settings, ID: provider-settings
+		2 container provider-form
+			3 heading Settings, Value: 2, ID: settings-title
+				4 text Settings
+			5 button Description: Close settings, ID: settings-close
+			6 container profile-controls
+				7 text Profile
+				8 pop up button (collapsed, settable) Profile, Value: Add profile, ID: provider-profile, Secondary Actions: Expand
+					9 menu
+						10 (selected) Add profile
+				11 button (disabled) Use saved profile, ID: profile-use
+			12 text Provider API
+			13 pop up button (collapsed, settable) Provider API, Value: OpenAI · Responses, ID: provider-name, Secondary Actions: Expand
+				14 menu
+					15 OpenAI · Chat Completions
+					16 (selected) OpenAI · Responses
+					17 Claude · Messages
+					18 Gemini · GenerateContent
+					19 DeepSeek · Chat Completions
+					20 xai · Responses
+					21 mistral · Chat Completions
+					22 OpenRouter · Chat Completions
+			23 text API key
+			24 text field (settable) API key
+			25 text Enter the key for this new profile, then choose a model below after fetching.
+			26 text Provider keys stay in the local xMind profile, encrypted by the native runtime. They are never included in conversations or sent to the browser.
+			27 button Fetch models, ID: settings-save
+			28 text Choose a model in the sidebar below after fetching.
+		29 container Runtime connections, ID: connection-settings
+			30 heading Runtime connections, Value: 3, ID: connections-title
+				31 text Runtime connections
+			32 button Refresh, ID: connections-refresh
+			33 text Local is this xMind runtime. Nexus profiles save a server address and sign-in. Remote execution is not available yet. Local remains active.
+			34 text 1 saved connection · active: Local
+			35 container connections-list
+				36 text Local
+				37 text Active
+				38 text This xMind runtime · SQLite and workspace run locally.
+			39 container runtime-connection-form
+				40 text Connection name
+				41 text field (settable) Connection name, ID: connection-name
+				42 text Nexus HTTPS address
+				43 text field (settable) Nexus HTTPS address, ID: connection-origin
+				44 button Save Nexus address, ID: connection-add
+		45 container MCP servers, ID: mcp-settings
+			46 heading MCP servers, Value: 3, ID: mcp-title
+				47 text MCP servers
+			48 container
+				49 button List resources, ID: mcp-resources-refresh
+				50 button Refresh, ID: mcp-refresh
+			51 text Sign in to configured MCP servers. Closing this view leaves a pending login running on the backend.
+			52 container mcp-servers
+				53 text resource-peer
+				54 text OAuth not configured
+			55 text 1 resource and 1 template found.
+			56 container
+				57 text resource-peer Connected Controlled readme fixture://readme text/plain Read-only fixture resource Controlled records fixture://records/{id} application/json
+
+The focused UI element is 0 AXWebArea xMind · Browser, URL: 127.0.0.1:50149/ui/

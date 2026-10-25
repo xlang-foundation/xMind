@@ -1,6 +1,14 @@
 # xMind delivery acceptance audit
 
-## Current installed75 checkpoint
+## Current installed76 and development qualification
+
+Installed0.1.76 remains Native d85a1697/SDK8c7972d1, with its separate local179/hosted177, packaged CLI/browser/editor coding, managed handoff, preserved five roots, exact75 backup and zero-model installed smoke receipts. Its2442 installed files/2398 runtime files were verified at installation. [Installed76 evidence](../doc/evidence/installed-0.1.76-d55741e0-20261024.json). Historical checkpoints below retain their original scopes and never-replay constraints.
+
+Uninstalled Native84afd022/SDK35fa passes its complete actual local184 inventory at1d6a4a74, and the unchanged executable frontend passes510 extension/180 browser tests. Actual Code cached-snapshot acknowledgment/reopen and browser MCP resource/template discovery have separate rendered evidence. Hosted d500 finishes181/182: native SDK trusted-TLS snapshot/reset/reopen succeeds, then a stale CLI permission expectation fails. That assertion is corrected atd75d2822; complete updated hosted CLI/HTTP/workflow acceptance is pending. No new package or installation is qualified from these partial hosted results. [Current authoritative status](../doc/VALIDATION_STATUS.md).
+
+Generic profile-wide Remote routing, workspace/effect enrollment, fenced distributed execution and deeper recovery remain open. Typed scoped commands, run-only events, durable consumers and snapshots are implemented primitives; their existence does not satisfy those remaining boundaries. The complete objective remains active.
+
+## Prior installed75 checkpoint
 
 Installed0.1.75 uses source859c66da/Nativec17c240b/SDK8c7972d1. Complete native179/179 passes870.16s, extension500/500 and browser178/178 pass with fresh assets. Fresh packaged CLI, rendered browser and actual Code selected-context read/edit/Node4/reload pass; the clean editor updates before reload. Managed74-to75 handoff refuses a paused graph, resumes it once and preserves endpoint/profile/history. All2442 installed files/2398 runtime files, registry, exact74 backup and five protected roots verify. Isolated installed read/history smoke passes with0models and confirmed owner exit. [Installation receipt](../doc/evidence/installed-0.1.75-859c66da-20261024.json).
 
@@ -110,9 +118,9 @@ and [CLI coding](../doc/evidence/client-cli-coding-57c05580-20261023.json) have
 separate actual edit/Node/history receipts. Preserve their completed tasks;
 these older runtime results retain their original scope. [SDK8c browser coding on b133a0ee](../doc/evidence/client-browser-captured-b133a0ee-20261023.json) also passes actual edit/Node4/reload against the complete local172-qualified runtime.
 
-## Current requirement matrix
+## Requirement matrix baseline (installed75 evidence)
 
-Latest installed checkpoint: 0.1.75. Newer cancellation source is uninstalled. Detailed receipts: doc/VALIDATION_STATUS.md. Full goal active.
+The following historical baseline retains the original requirement list and its evidence. Installed76 and newer uninstalled verification are summarized above; use doc/VALIDATION_STATUS.md for superseding results and exact limits. In particular, run-only events/consumers and cached snapshot UI checks now have evidence, while profile-wide Remote activation/enrollment/fencing remain open. Full goal active.
 
 | Requirement | Current evidence | What remains |
 | --- | --- | --- |
