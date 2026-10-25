@@ -1,0 +1,89 @@
+{
+  "recordedAt": "2026-10-25T12:24:14.679Z",
+  "source": "d500780a47d7a41c7f711bfd6529c004a84ea8ee",
+  "run": 40187593147,
+  "job": 121156397287,
+  "total": 182,
+  "passed": 181,
+  "failed": 1,
+  "seconds": 613.04,
+  "failedTest": "native_mcp_oauth_trusted_contract",
+  "artifact": {
+    "id": 12598204062,
+    "bytes": 5497191,
+    "sha256": "c89b04ed746b3b1be2f035d39bd57c79b6bf0240624cb5ae11f2284c6a6f24d8"
+  },
+  "originalNamespace": "xmind-oauth-trust-bgW5qD",
+  "neverReplay": true,
+  "failure": {
+    "stage": "CLI authorized-scopes exact comparison",
+    "sourceLocation": "Native/tests/remote_authentication_sdk_peer.mjs:107:118",
+    "expectedMissingPermission": "snapshots.read",
+    "actualPermissionPresent": true,
+    "productionAuthorizationFailure": false
+  },
+  "precedingSdkScope": {
+    "completed": true,
+    "evidence": "Driver reached the subsequent CLI scope comparison; its preceding SDK client, native verify-positive, SQLite reopen and plaintext-absence assertions must have returned successfully. Separate-process SDK timing is also present in the original terminal output.",
+    "snapshotReadAndExplicitResetIncluded": true,
+    "nativePositiveTlsSdkOnly": true,
+    "entireCliAndHttpPositiveFlowPassed": false
+  },
+  "sdkRetainedMethod": {
+    "method": "Host.ApiVersion",
+    "calls": 256,
+    "import_us": 7230,
+    "subobject_us": 716,
+    "first_call_us": 139,
+    "median_us": 89,
+    "p95_us": 102,
+    "max_us": 196,
+    "total_us": 23491,
+    "over_10ms": 0,
+    "excludes": "Process startup, model/tool execution, persistence and other SDK methods"
+  },
+  "fix": "Add snapshots.read to the sole stale CLI scope expectation, retaining exact deep equality and order. Peer grant and native HTTP expectation already include it.",
+  "localFocused": {
+    "recordedAt": "2026-10-25T12:22:33.748Z",
+    "sourceParent": "ee57076b4695f46c73e332393b2e4e2f0c3ae9c6",
+    "sourcePatchSha256": "6947a1b124662cef9494c8e8635e9d670cf641083992edbfa81306660a439536",
+    "build": {
+      "pid": 25324,
+      "launchedAt": "2026-10-25T12:22:18.885Z",
+      "completedAt": "2026-10-25T12:22:25.981Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "447fef6a724a59eebe8608b3cf873d7a39c13d32078b989439b19fd44fe30256"
+    },
+    "test": {
+      "pid": 7532,
+      "launchedAt": "2026-10-25T12:22:28.673Z",
+      "completedAt": "2026-10-25T12:22:31.019Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "b2f1154cc9d375dc30d6369fb75f42a8925af0cb432eef2fa00640657b76d030"
+    },
+    "total": 2,
+    "failed": 0,
+    "passed": 2,
+    "seconds": 2.31,
+    "projectFiles": 2858,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "localFocusedScope": "Native SDK untrusted refusal and independent Node HTTPS peer only; does not execute positive native OS-trust integration.",
+  "fullLocalNativeReference": "native-sdk35fa-graph-full-20261025.json",
+  "nativeProductionSourcesChanged": false,
+  "installed": false,
+  "fullGoalComplete": false
+}
