@@ -1,0 +1,85 @@
+{
+  "version": "0.1.76",
+  "nativeSource": "d55741e00a7c63cbe16ef1de2e4084a7a1afbaba",
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "sdk": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "fullNativeContractsPassed": 179,
+  "acceptedExtensionTests": 500,
+  "acceptedBrowserTests": 178,
+  "packageSource": "9cfc1d70d5ea3f52b03567e28417724c92348e05",
+  "validationOnlyNativeSourceDifferences": [
+    "Native/tests/agent_worker_model_rpc_peer.mjs",
+    "Native/tests/fixture_process_timing.mjs",
+    "Native/tests/remote_authentication_sdk_contract.cpp",
+    "Native/tests/remote_authentication_sdk_peer.mjs"
+  ],
+  "archive": {
+    "path": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-d55741e0-consumers/package-qualified/agentflow-0.1.76-sdk-8c7972d1.vsix",
+    "sha256": "424e68c1541bcc3e69ea8fa392b2f3a18d7254c070de64c48c98354ea226c056",
+    "bytes": 35550389,
+    "entries": 2443
+  },
+  "runtime": {
+    "files": 2398,
+    "manifestSha256": "5a9bffc7b97a8c066bc436a066ea75a8213fcbd8b5d5fb3edb2796e305c3c56e",
+    "unchangedThroughCli": true
+  },
+  "vsixRequiredAccessRendererLicenseAssetsVerified": 26,
+  "noPrivateStateVerified": true,
+  "cli": {
+    "sessionId": "31cdb1f2235ec0bd838bb931b64b3b7f",
+    "runId": "aa2fb24c7a45e215eafbd605975f12be",
+    "state": "completed",
+    "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/packaged-cli-even76-d55741e0",
+    "modelReplies": 4,
+    "historyMessages": 8,
+    "approvals": 2,
+    "operations": [
+      {
+        "arguments_json": "{\"after_content\":\"module.exports = n => n % 2 === 0;\\n\",\"after_sha256\":\"3eaed2902bd59df8ca772fe5e572a287d6e37112ee87a5a393aeea5370cf03c3\",\"before_content\":\"module.exports = n => n < 0;\\n\",\"before_sha256\":\"2d7ecfedea2933236cab951fb1ad410715ea9611bc6d13090450e59eef003c16\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000c8dc0f0000000000\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"path\":\"is-even.cjs\",\"replaced_occurrences\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"workspace_revision\":1}",
+        "decision_actor": "local-owner",
+        "expires_unix_ms": 1792909545776,
+        "id": "76dda8ca14a5003d1786a60398c4bb61",
+        "resources": [],
+        "result_json": "{\"after_sha256\":\"3eaed2902bd59df8ca772fe5e572a287d6e37112ee87a5a393aeea5370cf03c3\",\"before_sha256\":\"2d7ecfedea2933236cab951fb1ad410715ea9611bc6d13090450e59eef003c16\",\"file_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000c8dc0f0000000000\",\"path\":\"is-even.cjs\",\"size\":35,\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\"}",
+        "run_id": "aa2fb24c7a45e215eafbd605975f12be",
+        "state": "succeeded",
+        "tool": "replace_file",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000"
+      },
+      {
+        "arguments_json": "{\"arguments\":[\"check-is-even.cjs\"],\"background\":false,\"directory_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"environment\":[],\"executable\":\"C:/Program Files/nodejs/node.exe\",\"executable_id\":\"windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:42050100000042000000000000000000:995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362\",\"folder_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"output_limit\":65536,\"persistent\":false,\"profile_id\":\"node\",\"profile_revision\":1,\"repository_guidance\":{\"directory\":\".\",\"sources\":[],\"version\":1},\"target_workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"timeout_ms\":10000,\"workdir\":\".\",\"workspace_id\":\"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000\",\"workspace_revision\":1}",
+        "decision_actor": "local-owner",
+        "expires_unix_ms": 1792909546062,
+        "id": "b9fa1f2ac1033cb36aed29a07ebf93ba",
+        "resources": [
+          "process-profile:node"
+        ],
+        "result_json": "{\"elapsed_ms\":164,\"exit_code\":0,\"independently_verified\":false,\"job_id\":\"b9fa1f2ac1033cb36aed29a07ebf93ba\",\"operation_id\":\"b9fa1f2ac1033cb36aed29a07ebf93ba\",\"output_artifact\":{\"operation_id\":\"b9fa1f2ac1033cb36aed29a07ebf93ba\",\"state\":\"complete\",\"stderr_bytes\":0,\"stdout_bytes\":24},\"pid\":13444,\"process_tree_retired\":true,\"profile_id\":\"node\",\"stderr\":{\"byte_count\":0,\"data\":\"\",\"encoding\":\"utf-8\",\"retained_bytes\":0},\"stdout\":{\"byte_count\":24,\"data\":\"4 is-even checks passed\\n\",\"encoding\":\"utf-8\",\"retained_bytes\":24},\"termination\":\"exited\",\"truncated\":false}",
+        "run_id": "aa2fb24c7a45e215eafbd605975f12be",
+        "state": "succeeded",
+        "tool": "run_process",
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c8dc0f0000000000"
+      }
+    ],
+    "sourceNative": "d55741e00a7c63cbe16ef1de2e4084a7a1afbaba",
+    "scope": "Actual byte-verified distributable candidate CLI attached by explicit loopback port; synthetic provider, real native read/edit/Node command and SDK process owner. Managed profile auto-discovery not covered.",
+    "ownerExit": {
+      "observed": true,
+      "code": null,
+      "pid": 35480,
+      "birthAndImageVerified": true
+    }
+  },
+  "freshTask": "Fix is-even.cjs from n<0 to n%2===0; actual read/reviewed edit/Node4",
+  "completedTasksMustNeverBeReplayed": true,
+  "installed": false,
+  "releaseAccepted": false,
+  "installed75Unchanged": true,
+  "remaining": [
+    "Fresh packaged rendered browser coding/reload",
+    "Fresh actual Code selected-context coding/reload",
+    "Managed75-to76 paused/idle handoff and preservation qualification",
+    "Positive hosted remote native TLS and remaining full product scope"
+  ]
+}
