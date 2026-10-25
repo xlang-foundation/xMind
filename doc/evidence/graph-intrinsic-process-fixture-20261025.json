@@ -1,0 +1,155 @@
+{
+  "recordedAt": "2026-10-25T11:46:56.533Z",
+  "scope": "Graph process fixture cmdlet discovery dependency removed; unchanged six-second delay and thirty-second process deadline",
+  "originalHosted": {
+    "run": 40185477039,
+    "job": 121145240970,
+    "source": "075c02097e1a199c5cf15542eedf7cce0cdc065e",
+    "sdk": "35fa98d1513c8595f1c0e856be7c645a43d187f1",
+    "total": 182,
+    "passed": 180,
+    "failed": 2,
+    "seconds": 693.01,
+    "failedTests": [
+      "native_graph_runner_contract",
+      "native_mcp_oauth_trusted_contract"
+    ],
+    "artifact": {
+      "id": 12597542851,
+      "bytes": 6030255,
+      "sha256": "9399e21c8815c48a9789d62633ceeddf4737c28e8447e88388ef1d0a85f22b0b"
+    },
+    "graph": {
+      "namespace": "xmind-graph-runner-mGQLCJ",
+      "operation": "5d7de9fe68509f648034d280746256f3",
+      "child": "0e14ad1be3e35e86012b8ebd296b312c",
+      "timeoutMs": 30000,
+      "elapsedMs": 30032,
+      "state": "uncertain",
+      "processTreeRetired": true,
+      "phases": [
+        "script_entered"
+      ],
+      "neverReplay": true
+    },
+    "trustedTlsNote": "This source predates the SDK None constructor correction; that correction still requires its own hosted evidence."
+  },
+  "dump": {
+    "bytes": 679000,
+    "sha256": "ee267e218733a0bceb6bc6428b16c783473493bd220004ee3f2b939747002eb4",
+    "clr": [
+      "4.8.9363.0"
+    ],
+    "hotThread": 4564,
+    "observedFrames": [
+      "[HelperMethodFrame_PROTECTOBJ] (System.Reflection.RuntimeAssembly._nLoad)",
+      "System.Reflection.RuntimeAssembly.InternalLoadFrom(System.String, System.Security.Policy.Evidence, Byte[], System.Configuration.Assemblies.AssemblyHashAlgorithm, Boolean, Boolean, System.Threading.StackCrawlMark ByRef)",
+      "System.Reflection.Assembly.LoadFrom(System.String)",
+      "System.Management.Automation.ClrFacade.LoadFrom(System.String)",
+      "Microsoft.PowerShell.Commands.ModuleCmdletBase.AnalyzeSnapinDomainHelper()",
+      "System.Management.Automation.AnalysisCache.CallGetModuleDashList(System.Management.Automation.ExecutionContext, System.String)",
+      "System.Management.Automation.AnalysisCache.AnalyzeTheOldWay(System.String, System.Management.Automation.ExecutionContext, System.DateTime)",
+      "System.Management.Automation.AnalysisCache.AnalyzeManifestModule(System.String, System.Management.Automation.ExecutionContext, System.DateTime, Boolean)",
+      "System.Management.Automation.AnalysisCache.GetExportedCommands(System.String, Boolean, System.Management.Automation.ExecutionContext)"
+    ],
+    "samples": [
+      {
+        "pid": 7280,
+        "birthUtc": "2026-10-25T11:20:19.5842760Z",
+        "sampledUtc": "2026-10-25T11:20:22.4113420Z",
+        "processAgeMs": 2827,
+        "cpuMs": 375,
+        "modulePresence": {
+          "automation": true,
+          "amsi": true,
+          "management": false,
+          "stateRepository": true,
+          "utility": false
+        }
+      },
+      {
+        "pid": 7280,
+        "birthUtc": "2026-10-25T11:20:19.5842760Z",
+        "sampledUtc": "2026-10-25T11:20:33.2271140Z",
+        "processAgeMs": 13643,
+        "cpuMs": 9750,
+        "modulePresence": {
+          "automation": true,
+          "amsi": true,
+          "management": false,
+          "stateRepository": true,
+          "utility": false
+        }
+      },
+      {
+        "pid": 7280,
+        "birthUtc": "2026-10-25T11:20:19.5842760Z",
+        "sampledUtc": "2026-10-25T11:20:36.9209390Z",
+        "processAgeMs": 17337,
+        "cpuMs": 11937.5,
+        "modulePresence": {
+          "automation": true,
+          "amsi": true,
+          "management": false,
+          "stateRepository": true,
+          "utility": false
+        }
+      }
+    ]
+  },
+  "inference": "Both retained hosted graph dumps show PowerShell module analysis after the script-entered marker. The next statement is Start-Sleep. This supports removing unrelated cmdlet discovery from this graph/workdir fixture; it does not diagnose every assembly-loader delay or resolve arbitrary PowerShell cold-start performance.",
+  "change": {
+    "delayBefore": "Start-Sleep -Seconds 6",
+    "delayAfter": "[Threading.Thread]::Sleep(6000)",
+    "directoryBefore": "(Get-Location).Path",
+    "directoryAfter": "[Environment]::CurrentDirectory",
+    "realPowerShellChildRetained": true,
+    "markersAndGraphAssertionsRetained": true,
+    "delayMs": 6000,
+    "processTimeoutMs": 30000,
+    "productionTimeoutChanged": false
+  },
+  "localFocused": {
+    "recordedAt": "2026-10-25T11:44:08.935Z",
+    "sourceParent": "ab468199c101399a44a178475a05377d5688bf60",
+    "sourcePatchSha256": "f85a3fe204b637b0b062e317500535f164da39acccdd864cd688951a70288ea7",
+    "build": {
+      "pid": 25872,
+      "launchedAt": "2026-10-25T11:43:24.407Z",
+      "completedAt": "2026-10-25T11:43:51.277Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "00173311cdb8133e9590ac29f958b24c6fd01a804a7125b10a11a24c4ffa394a"
+    },
+    "test": {
+      "pid": 18356,
+      "launchedAt": "2026-10-25T11:43:54.040Z",
+      "completedAt": "2026-10-25T11:44:06.095Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "c7ad2bbc6a3b5a5e8c77f92319bc27aa2fe13faae10e2a9df9ece2c8daa745a7"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 12.02,
+    "projectFiles": 2858,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "fullNativeQualification": false,
+  "originalFailuresReplayed": false,
+  "originalFailuresRemainRecorded": true,
+  "installed76Unchanged": true,
+  "goalComplete": false
+}

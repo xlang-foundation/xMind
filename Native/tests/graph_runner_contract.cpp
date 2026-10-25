@@ -198,7 +198,11 @@ int main(int argc,char** argv){if(argc!=5)return 2;try{
  {PersistenceService persistence(multi_database,imports);Json nodes=Json::array();nodes.push_back({{"id","read"},{"type","tool"},{"tool","read_file"},{"arguments",Json{{"path","secondary.txt"},{"folder_id",attached.identity()}}}});Json child_nodes=Json::array();child_nodes.push_back({{"id","read"},{"type","tool"},{"tool","read_file"},{"arguments",Json{{"path","secondary.txt"},{"folder_id",attached.identity()}}}});child_nodes.push_back({{"id","agent"},{"type","agent"},{"depends_on",Json::array({"read"})},{"prompt","secondary agent child"}});
    // An ordinary command may legitimately exceed the observer's old five-
    // second wait while staying inside its trusted thirty-second budget.
-   const std::string process_path="graph-process-folder.txt";const std::string command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); Start-Sleep -Seconds 6; [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('"+process_path+"',(Get-Location).Path); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";
+   // Exercise the real process delay and OS working directory without adding
+   // PowerShell cmdlet discovery to this graph/permission contract. The hosted
+   // originals stalled in module analysis after script_entered. Keep the same
+   // six-second delay and trusted profile's thirty-second process deadline.
+   const std::string process_path="graph-process-folder.txt";const std::string command="[Console]::Out.WriteLine('xmind-graph-phase:script_entered'); [Threading.Thread]::Sleep(6000); [Console]::Out.WriteLine('xmind-graph-phase:delay_completed'); [IO.File]::WriteAllText('"+process_path+"',[Environment]::CurrentDirectory); [Console]::Out.WriteLine('xmind-graph-phase:effect_completed')";
    const Json process_spec={{"nodes",Json::array({{{"id","process"},{"type","tool"},{"tool","run_process"},{"arguments",Json{{"profile","powershell"},{"arguments",Json::array({command})},{"workdir","."},{"folder_id",attached.identity()}}}}})}};
    const Json failed_process_spec={{"nodes",Json::array({
      {{"id","process"},{"type","tool"},{"tool","run_process"},{"arguments",Json{{"profile","powershell"},{"arguments",Json::array({"[IO.File]::AppendAllText('graph-nonzero-effect.txt','once'); [Console]::Out.Write('expected failure output'); [Console]::Error.Write('expected failure error'); exit 7"})},{"workdir","."},{"folder_id",attached.identity()}}}},
