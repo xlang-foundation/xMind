@@ -1,3 +1,9 @@
+## Shared Settings remote run metadata inspector — 2026-10-25
+
+Authorized scopes with sessions.read and runs.read now offer Session ID/Run ID fields and Inspect run in browser and VS Code Settings. One explicit native scope-run request returns server, run state, revision and root. The shared client validates exact profile/scope binding and run identity/state/revision; origin/close fences reject late replies. The UI correlates each request, refuses stale selections and renders metadata as text. No activation, cancellation, submission, effect replay or credential entry is added. Browser proxy forwards only the exact POST scope-run route.
+
+Final complete client suites pass508/508 extension and179/179 browser with fresh18 assets,2853 project/14908 dependency hashes and file sets unchanged. Tests cover malformed/foreign metadata, closed/stale hosts, generic error projection and full scope-form/run-result interaction without connection selection. Original first browser failure remains recorded: its manually supplied exports omitted the new handler; the fixture was corrected before final validation. Native-backed rendered run inspection is still open; prior rendered authorized-scopes evidence is separate. Installed76 unchanged. [Receipt](evidence/remote-run-inspection-ui-20261025.json), [browser log](evidence/remote-run-inspection-ui-browser-20261025.log), [extension log](evidence/remote-run-inspection-ui-extension-20261025.log). Full goal active.
+
 ## Rendered native-backed authorized scope inspection accepted — 2026-10-25
 
 A fresh hidden browser loads the actual shared Settings UI through the loopback adapter and native C++ HTTP service, with saved encrypted grant metadata in embedded xlang3/SQLite. Clicking Inspect authorized scopes visibly displays server-a, scope-a and sessions.read/runs.read/events.read/snapshots.read. Local remains active; no credential entry, model call or execution occurs. Screenshot retained.

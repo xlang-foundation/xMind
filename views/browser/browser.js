@@ -266,6 +266,7 @@ class BrowserController {
       try{const catalog=await this.client.mcpResources();if(this.current(version))this.post({type:'mcp-resources',busy:false,catalog});}
       catch(error){if(this.current(version))this.post({type:'mcp-resources',busy:false,error:error.message});}return;
     }
+    if(message.type==='connection-run-inspect'){const target=this.client;await globalThis.XMindBackend.handleRemoteRunInspection(target,message,value=>this.post(value),()=>this.current(version)&&this.client===target);return;}
     if(message.type==='connection-authenticate'||message.type==='connection-authentication-read'||message.type==='connection-scopes-read'){
       const target=this.client;await globalThis.XMindBackend.handleConnectionAuthentication(target,message,value=>this.post(value),()=>this.current(version)&&this.client===target);return;
     }

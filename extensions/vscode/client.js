@@ -430,10 +430,18 @@ class BackendClient {
     const ids=new Set();for(const scope of scopes){exactFields(scope,['id','actions']);snapshotIdentity(scope.id);if(ids.has(scope.id)||!Array.isArray(scope.actions)||scope.actions.length>256)throw new Error('Invalid authorized scopes.');ids.add(scope.id);const actions=new Set();for(const action of scope.actions){if(typeof action!=='string'||!action.length||action.length>128||!/^[A-Za-z0-9_.:-]+$/.test(action)||actions.has(action))throw new Error('Invalid authorized scope actions.');actions.add(action);}}
     return value;
   }
+  async inspectRemoteRun(resource){
+    exactFields(resource,['id','expected_profile_revision','scope_id','session_id','run_id']);connectionIdentity(resource.id);snapshotRevision(resource.expected_profile_revision);if(resource.id==='local')throw new Error('Choose a saved remote profile.');for(const key of ['scope_id','session_id','run_id'])snapshotIdentity(resource[key]);const captured={...resource};
+    const value=await this.#remoteObservationRequest('remote_scoped_run_read','scope-run',captured);exactFields(value,['binding','run']);snapshotBinding(value.binding,captured);exactFields(value.run,['id','session_id','root_id','state','revision']);snapshotIdentity(value.run.root_id);snapshotRevision(value.run.revision);
+    if(value.run.id!==captured.run_id||value.run.session_id!==captured.session_id||!['queued','running','paused','completed','failed','cancelled'].includes(value.run.state))throw new Error('Remote run response differs from the requested resource.');return value;
+  }
+  async #remoteObservationRequest(capabilityName,route,body){
+    this.#remoteInspectionUsed=true;const origin=this.baseUrl,check=()=>{if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The captured remote connection changed or closed.');};check();
+    const capability=await this.request('/v1/connections/capabilities');check();if(capability?.[capabilityName]!==1)throw new Error('Remote observation is unavailable.');
+    const value=await this.request('/v1/connections/'+route,body);check();return value;
+  }
   async #snapshotRequest(operation,resource,fields){
-    this.#remoteInspectionUsed=true;const origin=this.baseUrl,check=()=>{if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The captured snapshot connection changed or closed.');};check();
-    const capability=await this.request('/v1/connections/capabilities');check();if(capability?.remote_run_snapshots!==1)throw new Error('Remote snapshot recovery is unavailable.');
-    const value=await this.request('/v1/connections/scope-run-snapshot-'+operation,{...resource,...fields});check();return value;
+    return this.#remoteObservationRequest('remote_run_snapshots','scope-run-snapshot-'+operation,{...resource,...fields});
   }
   async openRemoteSnapshot(resource,checkpointRevision){
     const scope=snapshotResource(resource);snapshotRevision(checkpointRevision);const value=await this.#snapshotRequest('open',scope,{expected_checkpoint_revision:checkpointRevision});
@@ -1299,6 +1307,11 @@ function validateRemoteAuthentication(value,id,revision){
   else if(value.credential_revision<1||typeof value.server_id!=='string'||!value.server_id||value.server_id.length>256||value.protocol_version!==1||!Number.isSafeInteger(value.expires_at)||value.expires_at<=0)throw new Error('Invalid authentication status.');
   return value;
 }
+async function handleRemoteRunInspection(client,message,post,current){
+ const identity={id:message.id,revision:message.revision,scope_id:message.scope_id,request_id:message.request_id};
+ try{if(!current())return;post({type:'connection-run-inspection',...identity,busy:true});const result=await client.inspectRemoteRun({id:message.id,expected_profile_revision:message.revision,scope_id:message.scope_id,session_id:message.session_id,run_id:message.run_id});if(current())post({type:'connection-run-inspection',...identity,result});}
+ catch{if(current())post({type:'connection-run-inspection',...identity,error:'Remote run inspection was not confirmed. Check the scope, session and run IDs, then inspect again.'});}
+}
 async function handleConnectionAuthentication(client,message,post,current){
   const id=message.id,revision=message.revision;
   try{if(!current())return;post({type:'connection-authentication',id,revision,busy:true});
@@ -1530,5 +1543,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
-else globalThis.XMindBackend={handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+if(typeof module!=='undefined'&&module.exports)module.exports={handleRemoteRunInspection,handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+else globalThis.XMindBackend={handleRemoteRunInspection,handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};

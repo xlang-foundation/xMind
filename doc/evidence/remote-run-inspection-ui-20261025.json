@@ -1,0 +1,112 @@
+{
+  "source": "3fb2d1917361bb4dd7d6093bb23534204f803377",
+  "projectFiles": 2853,
+  "dependencyFiles": 14908,
+  "testFiles": {
+    "extension": 23,
+    "browser": 10
+  },
+  "results": {
+    "build": {
+      "pid": 26132,
+      "startedAt": "2026-10-25T09:16:42.136Z",
+      "endedAt": "2026-10-25T09:16:42.234Z",
+      "exitCode": 0,
+      "logSha256": "e259e6f45a6f3d61161ae754960841088950fa1c91f3ae2255d882a4578d0747"
+    },
+    "extension": {
+      "pid": 8548,
+      "startedAt": "2026-10-25T09:16:42.234Z",
+      "endedAt": "2026-10-25T09:16:46.763Z",
+      "exitCode": 0,
+      "logSha256": "e267682adb81d26e937decdc4ec45a7c8d57491274af2ba1a80167a361278400",
+      "tests": 508,
+      "pass": 508,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 4467.0313
+    },
+    "browser": {
+      "pid": 28616,
+      "startedAt": "2026-10-25T09:16:46.764Z",
+      "endedAt": "2026-10-25T09:17:07.063Z",
+      "exitCode": 0,
+      "logSha256": "c3ae36c64f6420e3c1fef01946184c9d58411cef2023ba7cac9dab3ed751e420",
+      "tests": 179,
+      "pass": 179,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 20231.1063
+    }
+  },
+  "artifacts": 18,
+  "allSourceDependenciesAndSetsUnchanged": true,
+  "nativeSuiteRun": false,
+  "rendered": false,
+  "installed": false,
+  "paidInference": false,
+  "cpython": false,
+  "passed": true,
+  "scope": "Shared browser/editor explicit remote run metadata inspector and exact browser proxy route",
+  "initialFailure": {
+    "source": "3fb2d1917361bb4dd7d6093bb23534204f803377",
+    "projectFiles": 2853,
+    "dependencyFiles": 14908,
+    "testFiles": {
+      "extension": 23,
+      "browser": 10
+    },
+    "results": {
+      "build": {
+        "pid": 16188,
+        "startedAt": "2026-10-25T09:15:01.036Z",
+        "endedAt": "2026-10-25T09:15:01.120Z",
+        "exitCode": 0,
+        "logSha256": "94c1a9c4f96274ca6343e8eaf808b97be33d1e4f3f64afa298b5704ee8e80bf0"
+      },
+      "extension": {
+        "pid": 7556,
+        "startedAt": "2026-10-25T09:15:01.120Z",
+        "endedAt": "2026-10-25T09:15:11.116Z",
+        "exitCode": 0,
+        "logSha256": "0e68642742b9637946ad215309a9d5e4af03d518cc4ca424393fc0e2e5773b4e",
+        "tests": 508,
+        "pass": 508,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 9923.6035
+      },
+      "browser": {
+        "pid": 11164,
+        "startedAt": "2026-10-25T09:15:11.117Z",
+        "endedAt": "2026-10-25T09:15:31.564Z",
+        "exitCode": 1,
+        "logSha256": "6466169c20a8b44d8d9e43bb348cc167da2254ac3fdea4c16b38c7e6366e885a",
+        "tests": 179,
+        "pass": 178,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 20300.1813
+      }
+    },
+    "artifacts": 18,
+    "allSourceDependenciesAndSetsUnchanged": true,
+    "nativeSuiteRun": false,
+    "rendered": false,
+    "installed": false,
+    "paidInference": false,
+    "cpython": false,
+    "passed": false
+  },
+  "initialFailureReason": "Browser test manually supplied exports omitted new host handler; fixture export corrected before final complete-suite execution",
+  "nativeRemoteFetchExecuted": false,
+  "renderedNativeRunInspector": false
+}
