@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-25T19:00:42.042Z",
+  "scope": "Source Code editor selection, live buffer update, coding, reload after reauthentication and offline read-only SQLite reconciliation; controlled model only",
+  "nativeSource": "feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+  "nativeSha256": "ce3d809288a91be2f2b12df4f69a4992191e0ca813338fb6109dd24a0ebc0337",
+  "sdkRevision": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "sessionId": "c0a4ca0107fc4c169dbe2315ff8714cf",
+  "runId": "6e937ebcd4a94f98b8cba3792f396e75",
+  "renderedCodingPassed": true,
+  "reloadRestored": true,
+  "liveEditorUpdatedBeforeReload": true,
+  "selectionCommandVerified": true,
+  "authenticationRequiredOnReload": true,
+  "selectedAgent": "coding.process.cleanup.code",
+  "placement": "process",
+  "messages": 8,
+  "modelCalls": 4,
+  "approvals": 2,
+  "operations": [
+    {
+      "id": "b85ab77e1c3427b745023fada72106be",
+      "tool": "replace_file",
+      "state": "succeeded"
+    },
+    {
+      "id": "62ff39b9e817dd039770b272ffccae7c",
+      "tool": "run_process",
+      "state": "succeeded"
+    }
+  ],
+  "node": {
+    "checks": 4,
+    "exitCode": 0,
+    "elapsedMs": 127,
+    "processTreeRetired": true
+  },
+  "worker": {
+    "pid": 28228,
+    "retirementReason": "completed",
+    "uncertainModelDispatches": 0
+  },
+  "isolatedBackendPid": 10168,
+  "backendWorkerAndCommandPidsAbsent": true,
+  "tabClosed": true,
+  "supplementalPersistedProofPassed": true,
+  "postRunSetsAndHashesVerified": {
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "browserAssets": 18,
+    "frontend": 64,
+    "nodeDependencies": 18598,
+    "nativeExecutableAndRuntimeDll": 2
+  },
+  "originalCollector": {
+    "passed": false,
+    "exitCode": 1,
+    "reason": "Collector expected history.length; HTTP returns a paged object with messages. Stopped before persisting live receipts; no task replay. Backend exited.",
+    "scopedDecisionRouteCaptureRetained": false
+  },
+  "screenshotSha256": "e3820a9299741216be58ea89cb4eca1d515af9916ae143a5d0ee55840d28a8aa",
+  "paidProviderCalls": 0,
+  "cpythonExecuted": false,
+  "packagedAcceptance": false,
+  "installed": false,
+  "fullDeliveryPassed": false,
+  "codeSourceFilesUnchanged": true,
+  "retainedFailedFixture": {
+    "sessionId": "09be5315c76f4de49ae4c8abf91b89f4",
+    "runId": "058dda3dd96b4765a4d277130c2a034b",
+    "state": "failed",
+    "operationsCreated": 0,
+    "reason": "Ordinary Send did not add editor context; controlled peer required that context and rejected the initial model request. Fresh accepted fixture invokes Ask About Selection.",
+    "taskReplayed": false
+  },
+  "authenticationPersistenceCovered": false,
+  "installed76Unchanged": true
+}
