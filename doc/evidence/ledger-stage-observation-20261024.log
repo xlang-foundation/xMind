@@ -1,0 +1,197 @@
+Start testing: Oct 24 18:29 Pacific Daylight Time
+----------------------------------------------------------
+99/179 Testing: native_agent_worker_ledger_contract
+99/179 Test: native_agent_worker_ledger_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/agent_worker_ledger_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_agent_worker_ledger_contract" start time: Oct 24 18:29 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Ledger suite phase begin ledger elapsed_ms=0
+Ledger phase begin planning-admission
+Ledger planning seed case=terminal-failure elapsed_ms=0 remaining_ms=19999
+Ledger planning worker-ready case=terminal-failure elapsed_ms=90 remaining_ms=19909
+Ledger planning model-reserve case=terminal-failure elapsed_ms=90 remaining_ms=19909
+Ledger planning model-start case=terminal-failure elapsed_ms=92 remaining_ms=19907
+Ledger planning seed case=terminal-cancel elapsed_ms=147 remaining_ms=19852
+Ledger planning worker-ready case=terminal-cancel elapsed_ms=231 remaining_ms=19768
+Ledger planning model-reserve case=terminal-cancel elapsed_ms=231 remaining_ms=19768
+Ledger planning model-start case=terminal-cancel elapsed_ms=233 remaining_ms=19766
+Ledger planning seed case=root-plain-funding elapsed_ms=288 remaining_ms=19711
+Ledger planning seed case=root-read-epoch elapsed_ms=307 remaining_ms=19692
+Ledger planning seed case=root-read-catalogue elapsed_ms=315 remaining_ms=19684
+Ledger planning seed case=root-delegation-unsealed elapsed_ms=331 remaining_ms=19668
+Ledger planning seed case=once elapsed_ms=343 remaining_ms=19656
+Ledger planning seed case=unfinished elapsed_ms=356 remaining_ms=19643
+Ledger planning seed case=no-assistant elapsed_ms=365 remaining_ms=19634
+Ledger planning seed case=multiple elapsed_ms=375 remaining_ms=19624
+Ledger planning seed case=ordinary-tool elapsed_ms=384 remaining_ms=19615
+Ledger planning seed case=wrong-call elapsed_ms=395 remaining_ms=19604
+Ledger planning seed case=cancelled elapsed_ms=404 remaining_ms=19595
+Ledger planning seed case=expired elapsed_ms=413 remaining_ms=19586
+Ledger planning seed case=stale-attempt elapsed_ms=421 remaining_ms=19578
+Ledger planning seed case=root-file-unsealed elapsed_ms=432 remaining_ms=19567
+Ledger planning seed case=root-file-sealed elapsed_ms=442 remaining_ms=19557
+Ledger planning seed case=provisional elapsed_ms=465 remaining_ms=19534
+Ledger planning seed case=inspect_plan elapsed_ms=478 remaining_ms=19521
+Ledger planning seed case=revise_plan elapsed_ms=518 remaining_ms=19481
+Ledger planning seed case=owner-inspection elapsed_ms=536 remaining_ms=19463
+Ledger planning seed case=owner-rejection elapsed_ms=708 remaining_ms=19291
+Ledger planning seed case=owner-runner elapsed_ms=725 remaining_ms=19274
+Ledger planning seed case=slot-owner elapsed_ms=913 remaining_ms=19086
+Ledger planning seed case=slot-owner-accepted elapsed_ms=1078 remaining_ms=18921
+Ledger planning seed case=owner-runner-accepted elapsed_ms=1287 remaining_ms=18712
+Ledger planning owner-code-worker-ready case=owner-runner-accepted elapsed_ms=1384 remaining_ms=18615
+Ledger planning owner-code-execution-returned case=owner-runner-accepted elapsed_ms=2205 remaining_ms=17794
+Ledger planning owner-code-drain-begin case=owner-runner-accepted elapsed_ms=2205 remaining_ms=17794
+Ledger planning owner-code-drain-exit case=owner-runner-accepted elapsed_ms=2214 remaining_ms=17785
+Ledger planning seed case=owner-runner-counted elapsed_ms=2242 remaining_ms=17757
+Ledger planning owner-code-worker-ready case=owner-runner-counted elapsed_ms=2335 remaining_ms=17664
+Ledger planning owner-code-execution-returned case=owner-runner-counted elapsed_ms=3333 remaining_ms=16666
+Ledger planning owner-code-drain-begin case=owner-runner-counted elapsed_ms=3333 remaining_ms=16666
+Ledger planning owner-code-drain-exit case=owner-runner-counted elapsed_ms=3349 remaining_ms=16650
+Ledger planning seed case=owner-code-approved-plain elapsed_ms=3377 remaining_ms=16622
+Ledger planning owner-code-worker-ready case=owner-code-approved-plain elapsed_ms=3481 remaining_ms=16518
+Ledger planning owner-code-execution-returned case=owner-code-approved-plain elapsed_ms=4833 remaining_ms=15166
+Ledger planning owner-code-drain-begin case=owner-code-approved-plain elapsed_ms=4833 remaining_ms=15166
+Ledger planning owner-code-drain-exit case=owner-code-approved-plain elapsed_ms=4842 remaining_ms=15157
+Ledger planning seed case=owner-code-approved-counted elapsed_ms=4869 remaining_ms=15130
+Ledger planning owner-code-worker-ready case=owner-code-approved-counted elapsed_ms=4961 remaining_ms=15038
+Ledger planning owner-code-execution-returned case=owner-code-approved-counted elapsed_ms=6314 remaining_ms=13685
+Ledger planning owner-code-drain-begin case=owner-code-approved-counted elapsed_ms=6314 remaining_ms=13685
+Ledger planning owner-code-drain-exit case=owner-code-approved-counted elapsed_ms=6322 remaining_ms=13677
+Ledger planning seed case=owner-code-denied-plain elapsed_ms=6348 remaining_ms=13651
+Ledger planning owner-code-worker-ready case=owner-code-denied-plain elapsed_ms=6451 remaining_ms=13548
+Ledger planning owner-code-execution-returned case=owner-code-denied-plain elapsed_ms=7563 remaining_ms=12436
+Ledger planning owner-code-drain-begin case=owner-code-denied-plain elapsed_ms=7563 remaining_ms=12436
+Ledger planning owner-code-drain-exit case=owner-code-denied-plain elapsed_ms=7571 remaining_ms=12428
+Ledger planning seed case=owner-code-denied-counted elapsed_ms=7596 remaining_ms=12403
+Ledger planning owner-code-worker-ready case=owner-code-denied-counted elapsed_ms=7725 remaining_ms=12274
+Ledger planning owner-code-execution-returned case=owner-code-denied-counted elapsed_ms=8907 remaining_ms=11092
+Ledger planning owner-code-drain-begin case=owner-code-denied-counted elapsed_ms=8907 remaining_ms=11092
+Ledger planning owner-code-drain-exit case=owner-code-denied-counted elapsed_ms=8916 remaining_ms=11083
+Ledger planning seed case=owner-code-human-plain elapsed_ms=8941 remaining_ms=11058
+Ledger planning owner-code-worker-ready case=owner-code-human-plain elapsed_ms=9038 remaining_ms=10961
+Ledger planning owner-code-execution-returned case=owner-code-human-plain elapsed_ms=9205 remaining_ms=10794
+Ledger planning owner-code-resume-drain-begin case=owner-code-human-plain elapsed_ms=9469 remaining_ms=10530
+Ledger planning owner-code-resume-drain-exit case=owner-code-human-plain elapsed_ms=9477 remaining_ms=10522
+Ledger planning seed case=owner-code-human-counted elapsed_ms=9485 remaining_ms=10514
+Ledger planning owner-code-worker-ready case=owner-code-human-counted elapsed_ms=9581 remaining_ms=10418
+Ledger planning owner-code-execution-returned case=owner-code-human-counted elapsed_ms=9768 remaining_ms=10231
+Ledger planning owner-code-resume-drain-begin case=owner-code-human-counted elapsed_ms=10041 remaining_ms=9958
+Ledger planning owner-code-resume-drain-exit case=owner-code-human-counted elapsed_ms=10049 remaining_ms=9950
+Ledger planning seed case=accepted-atomic elapsed_ms=10056 remaining_ms=9943
+Ledger planning seed case=rejected-atomic elapsed_ms=10102 remaining_ms=9897
+Ledger planning seed case=continuation elapsed_ms=10149 remaining_ms=9850
+Ledger planning child-context-prepare case=planning-continuation elapsed_ms=10597 remaining_ms=9402
+Ledger planning child-context-prepared case=planning-continuation elapsed_ms=10622 remaining_ms=9377
+Ledger planning child-sdk-complete case=planning-continuation elapsed_ms=10743 remaining_ms=9256
+Ledger planning child-sdk-completed case=planning-continuation elapsed_ms=10776 remaining_ms=9223
+Ledger planning seed case=owner-accepted-context elapsed_ms=10954 remaining_ms=9045
+Ledger planning child-context-prepare case=planning-owner-accepted-context elapsed_ms=11172 remaining_ms=8827
+Ledger planning child-context-prepared case=planning-owner-accepted-context elapsed_ms=11223 remaining_ms=8776
+Ledger planning child-sdk-complete case=planning-owner-accepted-context elapsed_ms=11409 remaining_ms=8590
+Ledger planning child-sdk-completed case=planning-owner-accepted-context elapsed_ms=11450 remaining_ms=8549
+Ledger planning seed case=stale-settlement elapsed_ms=11721 remaining_ms=8278
+Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.
+Ledger phase end planning-admission elapsed_ms=11757
+Ledger phase begin paused-child-drain
+Ledger planning seed case=slot-owner-paused elapsed_ms=0 remaining_ms=19999
+Ledger planning seed case=slot-owner-resumed elapsed_ms=245 remaining_ms=19754
+Ledger phase end paused-child-drain elapsed_ms=764
+Ledger phase begin main-process-planning
+Ledger phase end main-process-planning elapsed_ms=6860
+Ledger phase begin main-planning-delegation
+Ledger coexistence case begin coexisting-read-plain-normal
+Ledger coexistence case begin coexisting-read-plain-deny
+Ledger coexistence stage read-plain-normal execution-settled elapsed_ms=3633
+Ledger coexistence stage read-plain-normal assertions-verified elapsed_ms=3637
+Ledger coexistence stage read-plain-normal service-closed elapsed_ms=3639
+Ledger coexistence case end coexisting-read-plain-normal elapsed_ms=3639
+Ledger coexistence stage read-plain-deny execution-settled elapsed_ms=3649
+Ledger coexistence stage read-plain-deny assertions-verified elapsed_ms=3656
+Ledger coexistence stage read-plain-deny service-closed elapsed_ms=3657
+Ledger coexistence case end coexisting-read-plain-deny elapsed_ms=3658
+Ledger coexistence case begin coexisting-read-plain-cancel
+Ledger coexistence case begin coexisting-read-counted-normal
+Ledger coexistence stage read-plain-cancel execution-settled elapsed_ms=940
+Ledger coexistence stage read-plain-cancel assertions-verified elapsed_ms=955
+Ledger coexistence stage read-plain-cancel service-closed elapsed_ms=956
+Ledger coexistence case end coexisting-read-plain-cancel elapsed_ms=956
+Ledger coexistence stage read-counted-normal execution-settled elapsed_ms=2495
+Ledger coexistence stage read-counted-normal assertions-verified elapsed_ms=2499
+Ledger coexistence stage read-counted-normal service-closed elapsed_ms=2500
+Ledger coexistence case end coexisting-read-counted-normal elapsed_ms=2500
+Ledger coexistence case begin coexisting-read-counted-deny
+Ledger coexistence case begin coexisting-read-counted-cancel
+Ledger coexistence stage read-counted-cancel execution-settled elapsed_ms=927
+Ledger coexistence stage read-counted-cancel assertions-verified elapsed_ms=950
+Ledger coexistence stage read-counted-cancel service-closed elapsed_ms=951
+Ledger coexistence case end coexisting-read-counted-cancel elapsed_ms=951
+Ledger coexistence stage read-counted-deny execution-settled elapsed_ms=2400
+Ledger coexistence stage read-counted-deny assertions-verified elapsed_ms=2403
+Ledger coexistence stage read-counted-deny service-closed elapsed_ms=2405
+Ledger coexistence case end coexisting-read-counted-deny elapsed_ms=2405
+Ledger coexistence case begin coexisting-coding-plain-normal
+Ledger coexistence case begin coexisting-coding-plain-deny
+Ledger coexistence stage coding-plain-normal execution-settled elapsed_ms=3124
+Ledger coexistence stage coding-plain-normal assertions-verified elapsed_ms=3129
+Ledger coexistence stage coding-plain-normal service-closed elapsed_ms=3131
+Ledger coexistence case end coexisting-coding-plain-normal elapsed_ms=3131
+Ledger coexistence stage coding-plain-deny execution-settled elapsed_ms=3140
+Ledger coexistence stage coding-plain-deny assertions-verified elapsed_ms=3144
+Ledger coexistence stage coding-plain-deny service-closed elapsed_ms=3145
+Ledger coexistence case end coexisting-coding-plain-deny elapsed_ms=3145
+Ledger coexistence case begin coexisting-coding-plain-cancel
+Ledger coexistence case begin coexisting-coding-counted-normal
+Ledger coexistence stage coding-plain-cancel execution-settled elapsed_ms=1029
+Ledger coexistence stage coding-plain-cancel assertions-verified elapsed_ms=1038
+Ledger coexistence stage coding-plain-cancel service-closed elapsed_ms=1039
+Ledger coexistence case end coexisting-coding-plain-cancel elapsed_ms=1039
+Ledger coexistence stage coding-counted-normal execution-settled elapsed_ms=2535
+Ledger coexistence stage coding-counted-normal assertions-verified elapsed_ms=2539
+Ledger coexistence stage coding-counted-normal service-closed elapsed_ms=2540
+Ledger coexistence case end coexisting-coding-counted-normal elapsed_ms=2540
+Ledger coexistence case begin coexisting-coding-counted-deny
+Ledger coexistence case begin coexisting-coding-counted-cancel
+Ledger coexistence stage coding-counted-cancel execution-settled elapsed_ms=956
+Ledger coexistence stage coding-counted-cancel assertions-verified elapsed_ms=958
+Ledger coexistence stage coding-counted-cancel service-closed elapsed_ms=959
+Ledger coexistence case end coexisting-coding-counted-cancel elapsed_ms=959
+Ledger coexistence stage coding-counted-deny execution-settled elapsed_ms=2519
+Ledger coexistence stage coding-counted-deny assertions-verified elapsed_ms=2524
+Ledger coexistence stage coding-counted-deny service-closed elapsed_ms=2526
+Ledger coexistence case end coexisting-coding-counted-deny elapsed_ms=2526
+Ledger coexistence cases=12 max_concurrent=2
+Ledger phase end main-planning-delegation elapsed_ms=16787
+Ledger phase begin planned-read-permissions
+Ledger phase end planned-read-permissions elapsed_ms=3111
+Ledger phase begin restricted-catalogues
+Ledger phase end restricted-catalogues elapsed_ms=3881
+Delegated worker ledger verified queued admission, named provider binding, shared funding, four-turn cap, read-only authority, canonical child history, sibling-independent completion and cancellation without refund; synthetic process identities, no child runner dispatch.
+Graph worker admission boundary verified exact registered node/model, active graph segment, captured membership, sibling isolation, tool-node rejection and no untyped funding; synthetic identities, no graph worker dispatch.
+Durable file claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain partial, retired and late outcomes. Synthetic process/proposal identities; no filesystem mutation or file RPC.
+Durable process claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no command dispatch or process RPC.
+Durable remote claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no remote peer dispatch or worker RPC.
+Durable callable claims bind actual model calls and approved native operation IDs, reject replay, roll back atomically and retain retired and late outcomes. Synthetic model and native-operation identities; no callable peer dispatch or worker RPC.
+Durable process control ledger binds wait and stop to one captured service with distinct call receipts, no duplicate control, exact canonical observations and read-only rejection. Synthetic job facts; no native process control or RPC.
+Mixed workspace turns preserve exact ordered read/file/process/remote/callable results atomically, reject read-only acknowledgement even after commit, and release continuation only after commit. Synthetic ledger facts only.
+Ledger suite phase end ledger elapsed_ms=44469 phase_ms=44469
+Ledger suite phase begin terminal-boundary elapsed_ms=44469
+Atomic online worker terminal boundary: rollback, exact identity, queued cancellation, interrupted reservations and retained charges verified.
+Ledger suite phase end terminal-boundary elapsed_ms=44595 phase_ms=125
+Ledger suite phase begin recovery-rollback elapsed_ms=44595
+Ledger suite phase end recovery-rollback elapsed_ms=44771 phase_ms=175
+Ledger suite phase begin model-host elapsed_ms=44771
+Ledger suite phase end model-host elapsed_ms=44902 phase_ms=131
+Durable worker admission, duplicate dispatch, replacement, uncertainty, exact receipts and backend-owned model transport passed; planning uses actual SDK child processes and controlled synthetic inference.
+Independent peer observed exactly one native model request; rejected duplicates caused no extra HTTP.
+<end of output>
+Test time =  45.16 sec
+----------------------------------------------------------
+Test Passed.
+"native_agent_worker_ledger_contract" end time: Oct 24 18:30 Pacific Daylight Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:45
+----------------------------------------------------------
+
+End testing: Oct 24 18:30 Pacific Daylight Time

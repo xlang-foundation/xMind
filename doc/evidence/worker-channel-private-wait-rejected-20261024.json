@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-25T01:34:31.059Z",
+  "sourceParent": "499491d268395f1146e38bfb892dc86f4caf4b7a",
+  "sourcePatchSha256": "d65b725ac99a59f4cce347833774f263284de620a511a889dc8a7ea88098f3f3",
+  "build": {
+    "pid": 2556,
+    "launchedAt": "2026-10-25T01:31:05.518Z",
+    "completedAt": "2026-10-25T01:33:20.373Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c7c1d8eb182dbf040e5030e1bb8bd75bf2e721de4ccba7276dcf6fccda09089a"
+  },
+  "test": {
+    "pid": 512,
+    "launchedAt": "2026-10-25T01:33:23.542Z",
+    "completedAt": "2026-10-25T01:34:27.379Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "4221c1675c7cf74af278829d26214c3cee3bf56bc46d163a7879bad4ba1cb6a5"
+  },
+  "total": 4,
+  "failed": 1,
+  "passed": 3,
+  "seconds": 63.8,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "1516d74b4ad8fa36711b7c1508c2e9ec3650bf5b158424a555f087c7ce179e80",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false,
+  "productionChangeReverted": true,
+  "conclusion": "Private send retry wait did not demonstrate ledger benefit; removed after terminal audit. Retained stage-observation source separately passed focused ledger; build must be regenerated before use because on-disk candidate binaries contain the rejected experiment."
+}
