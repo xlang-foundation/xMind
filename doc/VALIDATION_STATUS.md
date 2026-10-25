@@ -1,3 +1,11 @@
+## Trusted-TLS fixture SDK None argument corrected from original database evidence — 2026-10-25
+
+The retained hosted3fb trusted-TLS database was copied for query-only analysis through xlang3, with original4 files,47 SDK files and2345 pure-library files unchanged. Six SDK command journals are admitted at revision3; sdk-consumer is revision3 and sdk-snapshot-consumer revision1, with no snapshot assembly stored. No task was replayed and the original WAL/SHM/database remain untouched.
+
+The first snapshot Read passed X::Value(), an invalid SDK value. It now passes the standard SDK None constructor X::Value(nullptr). The source_location diagnostic helper now forwards the real caller location instead of always reporting its own line. No production backend, serializer, TLS policy or process budget changes. The updated target compiles; three local snapshot SDK, untrusted SDK and independent trusted-peer contracts pass in2.79s with2858/16/1870/30/18598/145 source/SDK/library/runtime/dependency/binary file sets and hashes unchanged. These local contracts do not execute the hosted positive TLS branch; its success remains unverified until a new qualifying hosted result.
+
+Original graph dump context also places thread7992 at clr.dll+0x101f64 during module assembly loading; this is a point-in-time observation, not a complete cause of the timeout. [Receipt](evidence/sdk-snapshot-none-argument-20261025.json), [focused log](evidence/sdk-snapshot-none-argument-focused-20261025.log). Installed76 unchanged; complete goal remains active and packaging unqualified.
+
 ## Hosted failures retained; full SDK pin guard fixed; original graph stacks read — 2026-10-25
 
 Hosted3fb2d191 run40179676972/job121128627734 ends177/182 in843.86s with graph runner, trusted OAuth/SDK, worker model RPC, worker ledger and nested-human failures. Inventory names and original Passed/Failed/Timeout rows agree. SDK8c source is recorded; no packaging acceptance. Original graph namespace xmind-graph-runner-Y1Y3wb/operation7167ae8214d993805ce9aa85f201ac78 must NEVER be replayed. Its PowerShell8056 dump is retained and now read offline with Microsoft ClrMD: CLR4.8.9363.0, thread7992 in assembly loading/snap-in and AnalysisCache module analysis. This is original stack evidence, not a resolved cause or authorization to weaken budgets.

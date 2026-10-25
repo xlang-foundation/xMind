@@ -1,0 +1,243 @@
+{
+  "recordedAt": "2026-10-25T10:46:51.672Z",
+  "scope": "Correct SDK None argument in hosted trusted-TLS snapshot fixture; offline examination of original evidence",
+  "originalHostedRun": 40179676972,
+  "originalNamespace": "xmind-oauth-trust-5Nh3mk/remote-sdk-positive",
+  "originalState": {
+    "queryOnlyCopy": true,
+    "inspection": {
+      "implementation": "xlang3",
+      "query_only": true,
+      "rows": [
+        {
+          "category": "native-backend-owner",
+          "id": "owner",
+          "fields": [
+            "generation",
+            "quiesced",
+            "receipt_id",
+            "revision",
+            "version"
+          ],
+          "revision": 1
+        },
+        {
+          "category": "native-connections",
+          "id": "profiles",
+          "fields": [
+            "active_id",
+            "profiles",
+            "retired_ids",
+            "revision",
+            "version"
+          ],
+          "revision": 2
+        },
+        {
+          "category": "remote-command-v1",
+          "id": "sdk-cancel-create",
+          "fields": [
+            "request_id",
+            "resource_id",
+            "resource_revision",
+            "revision",
+            "semantic",
+            "state",
+            "version"
+          ],
+          "state": "admitted",
+          "revision": 3
+        },
+        {
+          "category": "remote-command-v1",
+          "id": "sdk-cancel-lost",
+          "fields": [
+            "request_id",
+            "resource_id",
+            "resource_revision",
+            "revision",
+            "semantic",
+            "state",
+            "version"
+          ],
+          "state": "admitted",
+          "revision": 3
+        },
+        {
+          "category": "remote-command-v1",
+          "id": "sdk-create",
+          "fields": [
+            "request_id",
+            "resource_id",
+            "resource_revision",
+            "revision",
+            "semantic",
+            "state",
+            "version"
+          ],
+          "state": "admitted",
+          "revision": 3
+        },
+        {
+          "category": "remote-command-v1",
+          "id": "sdk-lost",
+          "fields": [
+            "request_id",
+            "resource_id",
+            "resource_revision",
+            "revision",
+            "semantic",
+            "state",
+            "version"
+          ],
+          "state": "admitted",
+          "revision": 3
+        },
+        {
+          "category": "remote-command-v1",
+          "id": "sdk-run-create",
+          "fields": [
+            "request_id",
+            "resource_id",
+            "resource_revision",
+            "revision",
+            "semantic",
+            "state",
+            "version"
+          ],
+          "state": "admitted",
+          "revision": 3
+        },
+        {
+          "category": "remote-command-v1",
+          "id": "sdk-run-lost",
+          "fields": [
+            "request_id",
+            "resource_id",
+            "resource_revision",
+            "revision",
+            "semantic",
+            "state",
+            "version"
+          ],
+          "state": "admitted",
+          "revision": 3
+        },
+        {
+          "category": "remote-event-checkpoint-v1",
+          "id": "sdk-consumer",
+          "fields": [
+            "accepted",
+            "id",
+            "initial",
+            "origin",
+            "pending",
+            "revision",
+            "version"
+          ],
+          "revision": 3
+        },
+        {
+          "category": "remote-event-checkpoint-v1",
+          "id": "sdk-snapshot-consumer",
+          "fields": [
+            "accepted",
+            "id",
+            "initial",
+            "origin",
+            "pending",
+            "revision",
+            "version"
+          ],
+          "revision": 1
+        }
+      ]
+    },
+    "integrity": {
+      "originalFiles": 4,
+      "sdkFiles": 47,
+      "pureLibraryFiles": 2345,
+      "allFileSetsAndHashesUnchanged": true,
+      "modelCalls": 0,
+      "originalTaskReplayed": false,
+      "cpython": false
+    },
+    "originalTaskReplayed": false
+  },
+  "finding": "The original SDK fixture passed default-constructed X::Value(), which is invalid, as the initial snapshot ID. The supported SDK constructor X::Value(nullptr) creates None, which the native Read API requires for an initial fetch.",
+  "changes": [
+    "Use X::Value(nullptr) for initial Read",
+    "Forward source_location through the call helper so subsequent failures identify the actual SDK call site"
+  ],
+  "sdkHeader": {
+    "path": "sdk/xlang3/cpp/value.h",
+    "sha256": "0013d0c15a6d29f3074b3cde3ce3e862142a644830359181a2d10d2307bee97b",
+    "noneConstructor": "explicit Value(std::nullptr_t) : value_(x3_value_none()) {}"
+  },
+  "focused": {
+    "recordedAt": "2026-10-25T10:44:40.657Z",
+    "sourceParent": "075c02097e1a199c5cf15542eedf7cce0cdc065e",
+    "sourcePatchSha256": "0ff44e8e206b9c7b292980c00c2bc017b9f8cae613ecafcb7909f794ca67facb",
+    "build": {
+      "pid": 28196,
+      "launchedAt": "2026-10-25T10:44:11.475Z",
+      "completedAt": "2026-10-25T10:44:32.395Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "52e8b20aa38a20f95fef083b3c34437770544e5b72b15fbed5e6165c46d10ad8"
+    },
+    "test": {
+      "pid": 9560,
+      "launchedAt": "2026-10-25T10:44:35.169Z",
+      "completedAt": "2026-10-25T10:44:38.005Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6389ff62288c6c85e508cd9cf3d0339d9028b1c2b22f5ce48699de8fa4594f09"
+    },
+    "total": 3,
+    "failed": 0,
+    "passed": 3,
+    "seconds": 2.79,
+    "projectFiles": 2858,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "hostedPositiveTlsRetested": false,
+  "hostedPositiveTlsSuccessClaimed": false,
+  "productionCppChanged": false,
+  "applicationIpcSerializationAdded": false,
+  "originalGraphAdditionalObservation": {
+    "thread": 7992,
+    "clrVersion": "4.8.9363.0",
+    "nativePosition": {
+      "valid": true,
+      "instructionPointer": "7ffd16fc1f64",
+      "module": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\clr.dll",
+      "offset": "101f64"
+    },
+    "managedFrames": [
+      "[HelperMethodFrame_PROTECTOBJ] (System.Reflection.RuntimeAssembly._nLoad)",
+      "System.Reflection.RuntimeAssembly.InternalLoadAssemblyName(System.Reflection.AssemblyName, System.Security.Policy.Evidence, System.Reflection.RuntimeAssembly, System.Threading.StackCrawlMark ByRef, IntPtr, Boolean, Boolean, Boolean)",
+      "System.Reflection.RuntimeAssembly.InternalLoadFrom(System.String, System.Security.Policy.Evidence, Byte[], System.Configuration.Assemblies.AssemblyHashAlgorithm, Boolean, Boolean, System.Threading.StackCrawlMark ByRef)",
+      "System.Reflection.Assembly.LoadFrom(System.String)",
+      "System.Management.Automation.ClrFacade.LoadFrom(System.String)",
+      "System.Management.Automation.Runspaces.InitialSessionState.LoadAssemblyFromFile(System.String)",
+      "Microsoft.PowerShell.Commands.ModuleCmdletBase.AnalyzeSnapinDomainHelper()",
+      "[GCFrame]"
+    ],
+    "rootCauseResolved": false
+  },
+  "reader": "Microsoft.Diagnostics.Runtime4.2.751201; original retained dump, no live attach or task execution",
+  "installed": false,
+  "goalComplete": false
+}

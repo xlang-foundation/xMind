@@ -24,7 +24,7 @@ struct FixtureCheckFailure:std::runtime_error {std::uint_least32_t line,column;e
 void check(bool value,std::source_location location=std::source_location::current()){if(!value)throw FixtureCheckFailure(location);}
 int client(const char* endpoint,bool positive){
     const auto import_started=std::chrono::steady_clock::now();X::Runtime runtime;const auto root=runtime.ImportRemote("xmind",endpoint);const auto import_us=std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-import_started).count();const auto text=[&](const std::string& value){return X::Value(runtime,value);};
-    const auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;check(method.Call(args,result));return result;};
+    const auto call=[&](const X::Value& method,std::vector<X::Value> args,std::source_location location=std::source_location::current()){X::Value result;check(method.Call(args,result),location);return result;};
     const auto refused=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;check(!method.Call(args,result));};
     {
         const auto clock=[]{return std::chrono::steady_clock::now();};const auto micros=[](auto elapsed){return std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();};const auto object_started=clock();const auto host=call(root["Host"],{});const auto method=host["ApiVersion"];const auto subobject_us=micros(clock()-object_started);const auto first_started=clock();check(call(method,{}).ToInt64()==1);const auto first_us=micros(clock()-first_started);std::vector<std::int64_t> samples;samples.reserve(256);const auto repeated_started=clock();
@@ -49,7 +49,7 @@ int client(const char* endpoint,bool positive){
         const auto scope=call(connections["OpenScope"],{text("remote-sdk"),X::Value(1),text("remote-sdk-workspace")});
         const auto events=call(scope["RunEvents"],{text("remote-session"),text("remote-run")}),consumer=call(events["Consumer"],{text("sdk-snapshot-consumer")});
         const auto snapshot=call(consumer["Snapshot"],{X::Value(1)});check(call(snapshot["Open"],{})["accepted"]["sequence"].ToInt64()==0);
-        const auto first=call(snapshot["Read"],{X::Value(),X::Value(0)});check(!first["complete"].ToInt64()&&first["revision"].ToInt64()==1&&first["records"].Size()==1&&first["snapshot_id"].ToString()=="snapshot:tls");
+        const auto first=call(snapshot["Read"],{X::Value(nullptr),X::Value(0)});check(!first["complete"].ToInt64()&&first["revision"].ToInt64()==1&&first["records"].Size()==1&&first["snapshot_id"].ToString()=="snapshot:tls");
         refused(snapshot["Reset"],{text("snapshot:tls"),X::Value(1),text(first["digest"].ToString())});
         const auto complete=call(snapshot["Read"],{text("snapshot:tls"),X::Value(1)});check(complete["complete"].ToInt64()&&complete["revision"].ToInt64()==2&&complete["records"].Size()==2&&complete["cursor"]["sequence"].ToInt64()==11&&complete["cursor"]["epoch"].ToString()=="epoch:snapshot");
         check(complete["records"][1]["payload"]["text"].ToString()=="Snapshot over verified TLS 🐈");
