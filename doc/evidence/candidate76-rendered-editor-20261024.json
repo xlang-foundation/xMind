@@ -69,12 +69,12 @@
   "limits": [
     "Reload was observed in prior browser turn; second screenshot was not retained before temporary tab cleanup.",
     "Runtime file hashes checked; this continuation does not establish a new source/dependency/file-set freeze.",
-    "Owned-server retirement handle34089 remains pending; release installation is not qualified by this receipt."
+    "Original cleanup loop failed; cause, correction and terminal handles retained separately. Installation requires its own preservation checks."
   ],
   "ownedRetirement": {
-    "session": 34089,
-    "state": "pending",
-    "nativePid": 14200,
-    "codeServerPid": 36628
+    "state": "completed",
+    "receipt": "candidate76-editor-retirement-20261024.json",
+    "ownedBackendAbsent": true,
+    "ownedCodeTreeAbsent": true
   }
 }

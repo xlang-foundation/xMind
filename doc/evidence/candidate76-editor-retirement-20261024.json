@@ -1,0 +1,75 @@
+{
+  "retiredUtc": "2026-10-25T06:39:43.3031027Z",
+  "ownedBackendAbsent": true,
+  "ownedCodeTreeAbsent": true,
+  "identities": [
+    {
+      "ProcessId": 36628,
+      "ParentProcessId": 27180,
+      "CreationDate": "2026-10-24T23:25:09.747731-07:00",
+      "ExecutablePath": "C:\\Users\\shaw9\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code-tunnel.exe"
+    },
+    {
+      "ProcessId": 25416,
+      "ParentProcessId": 36628,
+      "CreationDate": "2026-10-24T23:25:09.765268-07:00",
+      "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe"
+    },
+    {
+      "ProcessId": 41380,
+      "ParentProcessId": 36628,
+      "CreationDate": "2026-10-24T23:25:24.424849-07:00",
+      "ExecutablePath": "C:\\WINDOWS\\system32\\cmd.exe"
+    },
+    {
+      "ProcessId": 37788,
+      "ParentProcessId": 41380,
+      "CreationDate": "2026-10-24T23:25:24.440297-07:00",
+      "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe"
+    },
+    {
+      "ProcessId": 2308,
+      "ParentProcessId": 41380,
+      "CreationDate": "2026-10-24T23:25:26.546396-07:00",
+      "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe"
+    },
+    {
+      "ProcessId": 43724,
+      "ParentProcessId": 2308,
+      "CreationDate": "2026-10-24T23:25:32.589149-07:00",
+      "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe"
+    },
+    {
+      "ProcessId": 6796,
+      "ParentProcessId": 2308,
+      "CreationDate": "2026-10-24T23:28:48.650666-07:00",
+      "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node.exe"
+    },
+    {
+      "ProcessId": 40428,
+      "ParentProcessId": 43724,
+      "CreationDate": "2026-10-24T23:25:33.916896-07:00",
+      "ExecutablePath": "d:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\cli-data\\serve-web\\e646868227c3e3a9e3f24277c8c7220be42c0be7\\node_modules\\@github\\copilot-sdk-win32-x64\\prebuilds\\win32-x64\\copilot-runtime.exe"
+    },
+    {
+      "ProcessId": 18164,
+      "ParentProcessId": 40428,
+      "CreationDate": "2026-10-24T23:25:33.923023-07:00",
+      "ExecutablePath": "C:\\WINDOWS\\system32\\conhost.exe"
+    }
+  ],
+  "originalCleanup": {
+    "pid": 36856,
+    "birth": "2026-10-25T06:34:51.8918030Z",
+    "cause": "PowerShell @($empty.ProcessId) returned [null], so pending.Count remained1 at leaf. Bounded reproduction confirmed repeated null levels.",
+    "action": "Stopped exact birth/image/command-bound cleanup process only after reproducing loop; retained original script, corrected projection and completed owner-scoped retirement.",
+    "session": 34089,
+    "exitCode": -1
+  },
+  "serverWrapper": {
+    "session": 57679,
+    "exitCode": 0
+  },
+  "nativeObservation": "Native14200 was already absent when retirement continuation inspected it; no intentional native retirement claimed.",
+  "replayed": false
+}

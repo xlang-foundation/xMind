@@ -1,0 +1,134 @@
+{
+  "prior": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:54065",
+    "process_id": 28864,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p76\\profiles\\9e0b1ea1698ac2aa6860d45ee3ae609128c79dce10a83e804e8d3aa6db94da26",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff76",
+    "workspace_edits": "approved"
+  },
+  "owner": {
+    "agent_execution": "process-code",
+    "origin": "http://127.0.0.1:54065",
+    "process_id": 31504,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\p76\\profiles\\9e0b1ea1698ac2aa6860d45ee3ae609128c79dce10a83e804e8d3aa6db94da26",
+    "started": true,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\managed-handoff76",
+    "workspace_edits": "approved"
+  },
+  "session": "e09631a2e4bcab263ba3d8c9a0c4c8b6",
+  "completedRoot": "8453c850bc1f675258f0dd572762feb0",
+  "history": [
+    {
+      "data": {
+        "content": "Read the original managed marker",
+        "model_id": ""
+      },
+      "id": "msg_1",
+      "role": "user",
+      "seq": 1
+    },
+    {
+      "data": {
+        "content": "Completed graph managed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Native managed package handoff: exact original history.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e2df0f0000000000\",\n      \"path\": \"managed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e2df0f0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "managed.read",
+        "nodes": [
+          {
+            "id": "read",
+            "output": {
+              "content": "Native managed package handoff: exact original history.\n",
+              "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e2df0f0000000000",
+              "path": "managed-marker.txt",
+              "source": "graph_tool",
+              "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000e2df0f0000000000",
+              "workspace_revision": 1
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_4",
+      "role": "assistant",
+      "seq": 4
+    },
+    {
+      "data": {
+        "content": "Hold this exact graph during attempted package upgrade",
+        "model_id": ""
+      },
+      "id": "msg_5",
+      "role": "user",
+      "seq": 5
+    },
+    {
+      "data": {
+        "content": "Completed graph managed.pause.\n\n```json\n[\n  {\n    \"id\": \"approval\",\n    \"output\": {\n      \"approved\": true\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+        "graph_id": "managed.pause",
+        "nodes": [
+          {
+            "id": "approval",
+            "output": {
+              "approved": true
+            },
+            "state": "completed"
+          }
+        ],
+        "source": "graph_join"
+      },
+      "id": "msg_6",
+      "role": "assistant",
+      "seq": 6
+    }
+  ],
+  "migration": "Actual immutable 0.1.75 Nativec17c240b/SDK8c package to candidate 0.1.76 Natived85a1697 qualified fromd55741e0/SDK8c",
+  "managedDiscovery": true,
+  "activeGraphUpgradeRefused": true,
+  "originalGraphResumedOnce": true,
+  "historyAndProfileExactAfterUpgrade": true,
+  "modelCalls": 0,
+  "paidInference": false,
+  "installed": false,
+  "passed": true,
+  "packageIntegrity": {
+    "oldExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newExecution": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "oldClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    },
+    "newClean": {
+      "coveredFiles": 2398,
+      "coveredBytesUnchanged": true,
+      "addedFiles": []
+    }
+  },
+  "ownedOwnerRetirementObserved": true,
+  "completedRoots": [
+    "013f047f4df136a0da98727f2e99b6f9",
+    "8453c850bc1f675258f0dd572762feb0"
+  ],
+  "sourceFreeze": {
+    "passed": true,
+    "sourceFiles": 10284,
+    "hashesAndFileSetsUnchanged": true,
+    "terminal": {
+      "code": 0,
+      "signal": null
+    },
+    "scope": "Fresh disposable managed75-to76 package handoff; runtime manifests checked by fixture",
+    "goalComplete": false
+  },
+  "launchLimitation": "Initial preflight matched the parent shell containing its own guard source and refused before starting any native process. Original directory retained; a separate simple launch passed preflight and ran the scenario once.",
+  "goalComplete": false
+}
