@@ -1,3 +1,7 @@
+## User scope correction: cross-node execution belongs to Cantor Cluster — 2026-10-25
+
+Scope correction, 2026-10-25: xMind workers are local processes using standard xlang3 IPC. Cross-node worker enrollment, assignment, leases and fencing belong to later Cantor Cluster work and are not xMind delivery requirements. Generic authenticated connection clients remain separate from network worker execution. Removed the unused approval header, implementation and fixture; the Native source tree now matches the already qualified main Native tree exactly. Historical experiment evidence is retained. Browser, Code, CLI and pip packaging work continue; no installed runtime or user data changed.
+
 ## Hosted451 native182 passes; packaged pip exposes module-class gap — 2026-10-25
 
 Hosted40215612380/source451336af completes all182 native contracts in692.02s. The complete CTest inventory, gate hashes and182 terminal pass records match. Workflow failure occurs later during packaged offline pip installation: vendored urllib3 assigns a module subclass through __class__, and xlang3 rejects the assignment. No hosted release qualification or new installation is claimed. Cleanup sourcefeb42dc2 now has its own running hosted40218841893 gate. [Terminal receipt](evidence/hosted-451336af-native-pass-pip-module-class-20261025.json).
@@ -22,9 +26,9 @@ The qualified ce3d8092/SDK4417 executable completes a fresh hidden browser task 
 
 The original collection helper exits because the supplied UI proof omitted its cleanFirstCompletion field. Its route capture and live CLI follow-up were not retained; subsequent read-only reconciliation does not claim those checks passed. This is source browser component evidence, not packaged acceptance or full delivery completion. NEVER replay session56007f79a5164c8e896ef5f39e131893/run2c0fee43e5454c15a00240bb665f97f3. [Receipt](evidence/native-cleanup-source-browser-cubes-20261025.json), [rendered result after reload](evidence/native-cleanup-source-browser-cubes-20261025.png).
 
-## Enrollment approval foundation remains branch-only — 2026-10-25
+## Historical enrollment approval experiment — removed after user scope correction
 
-Branch codex/remote-enrollment-approval adds durable owner approval storage with binding, membership revision, effect subset, expiry, compare-and-set identity and offline revocation checks. Its focused authentication contract passes1/1 in1.81s. This is not an authenticated user approval endpoint, an SDK-exported enrollment flow, a peer receipt or fenced remote execution. The production executable remains the qualified cleanup binary; the focused test executable changed, so the previous145-binary release audit must not be treated as current. [Focused receipt](evidence/enrollment-local-approval-focused-20261025.json).
+Historical checkpoint f25d6f3e added durable owner approval storage; that unused implementation has now been removed after the user scope correction. Its experiment covered storage with binding, membership revision, effect subset, expiry, compare-and-set identity and offline revocation checks. Its focused authentication contract passes1/1 in1.81s. This is not an authenticated user approval endpoint, an SDK-exported enrollment flow, a peer receipt or fenced remote execution. The production executable remains the qualified cleanup binary; the focused test executable changed, so the previous145-binary release audit must not be treated as current. [Focused receipt](evidence/enrollment-local-approval-focused-20261025.json).
 
 ## Cleanup release inputs verified; hosted gate still required — 2026-10-25
 

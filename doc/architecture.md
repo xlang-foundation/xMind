@@ -140,7 +140,7 @@ remain required. Browser UI and VS Code remain OSS deliverables.
 ### Local and Nexus connection profiles
 
 The [connection-profile contract](connection-profiles.md) specifies the selector,
-authentication/enrollment distinction, shared binding and acceptance sequence.
+authentication and execution distinction, shared binding and acceptance sequence.
 Its [diagram](connection-profiles.svg) shows the public/private boundary.
 
 xMind supports both single-user local execution and an optional connection to a
@@ -152,7 +152,7 @@ does not move the workspace or require remote SQL access.
 
 | Boundary | Local profile | Nexus profile |
 | --- | --- | --- |
-| Runtime/workspace | Local xMind core | Local xMind core enrolls as an authorized agent/workspace endpoint; server may assign other authorized workers |
+| Runtime/workspace | Local xMind core | Local xMind core with an authenticated connection client; no network-assigned workers |
 | Sessions and coordination | Local backend and SQLite | Nexus owns shared sessions, team policies, scheduling and durable shared events in PostgreSQL |
 | Local persistence | Sessions, configuration, encrypted credentials and execution journal | Connection/authentication metadata and local effect receipts; shared records stay server-owned |
 | Model-provider keys | Local backend resolves its own encrypted keys | Server-owned provider routes keep team keys on Nexus; worker access requires an authorized model-service contract |
@@ -167,13 +167,7 @@ Nexus connections require authenticated encrypted transport and validated protoc
 versions. Disconnect or server failure must not silently re-submit a Nexus task
 as local work. Local execution continues independently when Local is selected.
 
-Nexus remains the private team-server implementation. The generic connection and
-agent-enrollment protocol is an OSS capability, preserving the public C++ engine
-and private native-package extension boundary. Distributed jobs require actual
-workspace authorization, durable leases, idempotent receipts and cancellation/
-recovery checks before being advertised. Current native APIs do not yet implement
-Nexus profile enrollment or team-worker scheduling; this is the revised target
-architecture, not a new integration acceptance claim.
+Nexus remains the private team-server implementation. Scope correction, 2026-10-25: xMind workers are local processes using standard xlang3 IPC. Cross-node worker enrollment, assignment, leases and fencing belong to later Cantor Cluster work and are not xMind delivery requirements. Generic authenticated connection clients remain separate from network worker execution.
 
 The backend owns connection profiles; views receive public labels and connection
 status only. A profile has a stable local ID, kind (`local` or `nexus`), display
@@ -186,15 +180,7 @@ already admitted runs retain their original connection identity. It does not
 cancel, transfer or replay those runs. Event cursors are scoped to the connection
 and session, so changing servers cannot reuse another server's event history.
 
-Local worker enrollment is separate from viewing shared sessions. Nexus issues
-an expiring lease bound to an authorized workspace and task; the local agent
-checks workspace access and effect permissions before running tools. Durable
-fencing and idempotent effect receipts prevent duplicate owners after reconnect
-or reassignment. Expired or revoked leases stop new effects; recovery must
-reconcile existing receipts before retrying. Cantor Cluster will implement the
-same scheduler/worker boundary in Nexus, without changing the UI or duplicating
-the xMind agent engine. These are required acceptance contracts, not implemented
-distributed behavior.
+Local process workers retain native ownership, cancellation and tool approval checks. xMind does not enroll local workspaces for network-assigned execution.
 
 OpenCode informs selected coding, CLI and editor design choices. Its API and feature
 inventory is reference material only: xMind does not target API compatibility,

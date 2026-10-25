@@ -1,3 +1,5 @@
+Scope correction, 2026-10-25: xMind workers are local processes using standard xlang3 IPC. Cross-node worker enrollment, assignment, leases and fencing belong to later Cantor Cluster work and are not xMind delivery requirements. Generic authenticated connection clients remain separate from network worker execution.
+
 # Local and Nexus connection profiles
 
 Cached authorized scope discovery is implemented through the registered SDK
@@ -19,7 +21,7 @@ commands are `connections scope-open ID REV SCOPE` and
 is POST `/v1/connections/scope-session` with `id`, `expected_profile_revision`,
 `scope_id` and `session_id`. An exact current grant, sessions capability and
 scope permission are required. Returned public fields contain no credential
-or grant reference. Mutation routing, remote activation and enrollment remain
+or grant reference. Mutation routing and Remote client activation remain
 unavailable. This source feature is not yet an installed release.
 
 This is the target connection contract. The native SQLite catalog is exposed
@@ -100,13 +102,11 @@ secrets.
 
 Adding a Nexus URL creates an unconnected configuration. Authentication verifies
 the server identity and negotiates the protocol. The server returns the user's
-authorized team/project/workspace choices and capabilities. Selecting a project
-then permits explicit enrollment of a local workspace as an execution endpoint.
+authorized team/project/workspace choices and capabilities. Selecting a project scopes the authenticated connection client.
 Viewing shared sessions does not automatically authorize remote tool execution.
-The local user must approve the workspace and effect policy for enrollment.
+Cross-node workspace enrollment is excluded from this delivery.
 
-A Nexus profile can therefore provide shared session viewing without worker
-enrollment, or participate in team execution after enrollment. Team controls
+A Nexus profile can provide authenticated shared-session and command-client capabilities; it does not turn xMind into a network worker. Team controls
 appear only for capabilities returned by the authenticated server and supported
 by the local agent. An unavailable server is shown as unavailable; switching to
 Local requires explicit selection and does not replay shared tasks.
@@ -139,10 +139,7 @@ profile does not transfer, cancel or reinterpret already admitted work.
 | Add/edit connection | Backend validates destination and revision; credentials remain encrypted |
 | Authenticate/negotiate | Verify identity and transport; reject unsupported protocol; return authorized scope |
 | Select connection | Change view/new admission context; retain existing run ownership |
-| Enroll workspace | Separate explicit workspace/effect authorization and worker identity |
-| Accept assigned work | Validate task, workspace, lease expiry and fencing token before effects |
 | Reconnect | Resume scoped events and reconcile effect receipts; do not blindly replay commands |
-| Revoke enrollment | Reject new effects; reconcile in-flight effects and cancellation explicitly |
 
 ## Implementation and acceptance order
 
@@ -156,9 +153,7 @@ profile does not transfer, cancel or reinterpret already admitted work.
    that switching profiles cannot cross session, cursor or credential boundaries.
 3. Private Nexus authentication and negotiation, then public authenticated client
    binding; exercise unavailable, expired and incompatible connections.
-4. Authorized workspace enrollment, fenced leases and durable effect receipts;
-   validate two workers, revocation, reassignment and lost replies.
-5. CLI catalog management is implemented. Browser Settings reads the native
+4. CLI catalog management is implemented. Browser Settings reads the native
    catalog and saves/removes public Nexus metadata through the browser adapter's
    allowlisted `GET`/`POST /v1/connections` route. The right VS Code Settings
    panel shares the same client contract. Neither view can select an

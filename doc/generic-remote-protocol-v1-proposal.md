@@ -1,5 +1,7 @@
 # Generic remote connection v1 proposal
 
+Scope correction, 2026-10-25: xMind workers are local processes using standard xlang3 IPC. Cross-node worker enrollment, assignment, leases and fencing belong to later Cantor Cluster work and are not xMind delivery requirements. Generic authenticated connection clients remain separate from network worker execution.
+
 Current acceptance (source d55741e0): the complete hosted177 native gate verifies
 trusted-TLS SDK/CLI/HTTP command, run-event and durable-consumer fixtures. The
 local gate separately passes179. These are controlled-peer protocol tests, not
@@ -7,7 +9,7 @@ acceptance against a deployed Nexus server. See the
 [hosted result](evidence/hosted-native-d55741e0-result-20261024.json).
 The chronological implementation notes below retain their original narrower
 acceptance boundaries. Authoritative snapshot/reset, root-tree recovery,
-workspace/effect enrollment, fenced workers and profile-wide Remote activation
+profile-wide Remote client activation
 remain open. Candidate76 installation and hosted packaging have separate gates.
 
 The backend-private command journal also recognizes a typed `runs.cancel` intent
@@ -19,8 +21,7 @@ retirement. Native typed cancellation exchange and journal-backed reconciliation
 in source, with standard Runs.Cancel and thin SDK/CLI/HTTP adapters.
 
 
-Status: remote execution, enrollment and worker fencing remain proposed and
-not deployed. Native verified-HTTPS negotiation, strict response validation,
+Status: cross-node worker execution is outside this delivery and belongs to Cantor Cluster. Native verified-HTTPS negotiation, strict response validation,
 encrypted combined credential/grant storage through embedded xlang3/SQLite,
 cached authentication/scope observation and scoped session metadata reads are
 implemented in the development candidate. The registered Connections subobject
@@ -257,7 +258,6 @@ opaque IDs as individual path components; reject ambiguous encodings.
 | Run cancellation | `/sessions/{id}/runs/{run}/cancel` | `runs:1` |
 | Durable command observation | `/requests/{request_id}` | `receipts:1` |
 | Root/run event observation | `/sessions/{id}/runs/{run}/events` | `events:1` |
-| Enrollments | `/enrollments`, `/enrollments/{id}` | `enrollments:1` |
 | Worker leases | `/workers/{id}/leases` | `worker_leases:1` |
 
 Additional services are unavailable until their typed request/response schema
@@ -473,101 +473,9 @@ paths; actual trusted-TLS creation/lost-reply reconciliation through each public
 adapter remains pending hosted acceptance. No new package is installed.
 [Adapter scope and retained regression](evidence/remote-session-command-adapters-20261024.json).
 
-## Explicit workspace and effect enrollment
+## Cross-node execution boundary
 
-`Enrollments.Create(request)` proposes request ID, authorized scope ID,
-expected scope revision, local workspace/authority IDs and exact effect classes
-offered by the user (for example read, approved edit or approved process).
-Local canonical paths, credentials and file contents are excluded from public
-enrollment metadata. Membership changes invalidate the prior authority proof.
-
-The local backend checks workspace identity and user approval before sending;
-the peer independently authorizes enrollment. Both checks are required. The
-receipt binds enrollment ID/revision, server/scope, workspace authority, worker
-identity, allowed effects and expiry. Viewing shared sessions creates no
-enrollment. Server capabilities cannot expand the locally approved effects.
-
-`Enrollments.Open(id)` observes state. `Revoke(id, expected_revision, request_id)`
-durably closes new local effects before network notification. An unavailable
-peer leaves notification pending, not enrollment active locally. Reopening or
-expanding effects requires a new explicit authorization revision.
-
-## Workers and fencing
-
-### Enrollment implementation boundary (not yet implemented)
-
-A backend-private local approval journal is now implemented on the enrollment
-branch. It captures actual executor workspace/authority and membership, stores
-only opaque IDs/effect limits, uses SQLite compare-and-swap through xlang3, and
-commits local revocation independently of networking. The focused persistence
-contract covers concurrent creation, stale membership/authority, broader effects,
-expiry, scope isolation, malformed records and revocation/reopen. This does not
-implement the authenticated SDK/UI approval entry point, peer receipt, one-send
-enrollment intent or fenced execution described below.
-[Focused evidence](evidence/enrollment-local-approval-focused-20261025.json).
-
-Enrollment must be a captured scope service, alongside the existing Sessions,
-Runs, Requests, Consumers and Snapshots services. The registered root only opens
-that service; it must not acquire enrollment or scheduling responsibilities.
-SDK callers use ordinary methods and SDK value serialization, with no new IPC
-dispatcher or application serializer.
-
-The first implementation must persist two separate facts: the local user's
-approved workspace authority/effect revision, and the peer's enrollment receipt.
-An authenticated connector grant, a worker-supplied Boolean or an admitted remote
-command is not evidence of local approval. The native backend must validate the
-current workspace membership before claiming the one-send boundary. Existing
-RemoteCommandJournal prepared/unknown/admitted/rejected semantics can inform the
-network intent, but cannot substitute for this local approval record.
-
-Creation must retain an unresolved send across restart and reconcile that same
-request ID. Revocation must commit the local refusal of new effects before any
-network attempt; peer acknowledgement is a separate state. Public inspection
-must distinguish these states without publishing local paths or credentials.
-Enrollment acceptance alone must not enable execution: the lease, atomic
-effect-start receipt and existing native tool permission checks below remain
-required before an actual effect.
-
-Qualification must include a changed membership between approval and send,
-concurrent claims of the same request, a lost creation reply followed by restart,
-peer effects broader than local approval, expiry, and revocation while the peer
-is unavailable. These are additional requirements, not implemented evidence or
-permission to replay an existing failed namespace.
-
-Workers use the registered `Workers()` subobject through ordinary xlang3 IPC.
-The native backend owns remote polling, authentication, lease verification,
-local admission and receipts. A worker cannot supply its own workspace root,
-grant, fencing epoch or allowed effect set.
-
-A lease contains server/scope, enrollment ID/revision, worker ID, assignment ID,
-run/operation IDs, monotonically increasing fencing epoch, expiry and immutable
-operation fingerprint. The server owns assignment and epoch allocation. Before
-each effect the local backend checks the complete binding, current enrollment,
-lease validity, workspace authority and existing native permission policy.
-Clock conversion uses a conservatively measured validity interval; wall-clock
-rollback cannot extend a lease. An unverifiable interval refuses new effects.
-
-The local durable effect key is `(server_id, scope_id, assignment_id,
-operation_id)`. Duplicate delivery observes the existing receipt. A higher epoch
-does not authorize repeating an already completed effect. A stale epoch cannot
-start an effect or commit a replacement result. A renewal must retain identity
-and fingerprint and is persisted before extending local validity.
-
-Before a new physical effect, the peer must atomically admit an effect-start
-receipt against the current epoch, enrollment and deduplication key. The local
-backend persists that receipt before execution. No new remote-assigned effect
-starts offline. A lost start reply is reconciled before execution. Server
-revocation blocks subsequent starts; it cannot instantly stop a previously
-authorized effect on a disconnected machine. The server contract must reject
-replacement starts while a prior start is unresolved, including on another
-worker. A local journal or fencing integer alone cannot provide that guarantee.
-
-Expiry/revocation stops new effects and requests cancellation of active work.
-An already-started external effect may be uncertain; it cannot be declared
-undone or safely reassigned merely because the lease expired. The server must
-reconcile the prior effect receipt before authorizing replacement. Restart
-loads receipts and reconciles the exact prior assignment; it does not invoke
-the tool again to learn whether it ran. Private scheduling policy is excluded.
+Scope correction, 2026-10-25: xMind workers are local processes using standard xlang3 IPC. Cross-node worker enrollment, assignment, leases and fencing belong to later Cantor Cluster work and are not xMind delivery requirements. Generic authenticated connection clients remain separate from network worker execution. The unused branch-only enrollment approval journal and fixture have been removed. Existing local IPC ownership, cancellation and approval checks remain required.
 
 ## Error and implementation acceptance
 
@@ -588,10 +496,7 @@ Implementation must preserve current Local behavior and add these proofs:
 3. Real SQLite receipts: lost admission reply, duplicate same/different body,
    restart before/after send and reconciliation without duplicate model/tool
    effects. Unknown outcomes remain visible when the peer is unavailable.
-4. Two actual worker processes: explicit enrollment, duplicate assignment,
-   renew/expire/revoke, stale epoch and reassignment; completed effects remain
-   single, unresolved external effects stay uncertain until reconciled.
-5. Browser/CLI/extension binding presentation and captured commands, then the
+4. Browser/CLI/extension binding presentation and captured commands, then the
    complete native/client gates and qualified packaging/preservation. Controlled
    peers establish protocol behavior, not deployed Nexus compatibility.
 
@@ -599,7 +504,7 @@ Architecture review should settle the proposed bearer bootstrap, endpoint
 namespace and exact typed schemas before production remote activation. This
 document supplies a reviewable design. Only the authentication APIs identified
 as implemented above are current capabilities; proposed routing/enrollment
-APIs are not advertised as available.
+APIs are not advertised as available. Cross-node enrollment is excluded from xMind acceptance.
 
 ### Native cancellation connector and journal-backed service
 
