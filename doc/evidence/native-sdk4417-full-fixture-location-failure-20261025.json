@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-25T15:53:43.297Z",
+  "sourceParent": "14c867aaae3af2b7e5346a38f9372bbffd858971",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 17156,
+    "launchedAt": "2026-10-25T15:20:00.127Z",
+    "completedAt": "2026-10-25T15:39:18.755Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "05a88acc12289936274c2bf0165733ff04072e1e0bd7ebe910d3018588b45052"
+  },
+  "test": {
+    "pid": 15116,
+    "launchedAt": "2026-10-25T15:39:21.351Z",
+    "completedAt": "2026-10-25T15:53:40.630Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "71289f342bc6f1bd2659f3c40461c93a9c8cc5a3499e3b001e0475c1dbd4b9d8"
+  },
+  "total": 184,
+  "failed": 1,
+  "passed": 183,
+  "seconds": 859.23,
+  "projectFiles": 2858,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18608,
+  "nativeBinaries": 145,
+  "nativeSha256": "32489d726e51c2b30024d8e63ae1547530f24ddbdef90af71e8f0e292444f607",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false,
+  "failedCase": "native_language_server_rust_analyzer_contract",
+  "failure": "Backend configuration cannot be a model workspace",
+  "interpretation": "The checkout is under .agentflow; this fixture incorrectly uses its source directory as a model workspace. Product workspace protection is retained. No full pass or release acceptance.",
+  "releaseQualified": false
+}
