@@ -1,0 +1,35 @@
+{
+  "recordedAt": "2026-10-25T14:44:18.537Z",
+  "sourceParent": "3c9e1a5887cd6091f8a2d5ddf58ff4b654897f05",
+  "sourcePatchSha256": "0bf50600894251949948864c1c92d92ddc15f864cdb1b2d5bb0d007098582f0a",
+  "scope": "Isolated startup SDK method integration; focused validation only",
+  "passed": 4,
+  "failed": 0,
+  "seconds": 121.2,
+  "sourceFiles": 2858,
+  "nodeDependencyFiles": 18608,
+  "binaries": {
+    "agentflow_agent_worker_channel_contract.exe": "d415939a3f213106781772d1ec308d168dea7f1fa42a3209c16cfd6ee4214ae8",
+    "agentflow_agent_worker_ledger_contract.exe": "a796c7322c1e0c5456d55c65a98ff575666310502cc88e010a4e7bdc08eca435",
+    "agentflow_agent_worker_model_rpc_contract.exe": "5519b1a356803977dcb3f70e1312c5525f26cebe8cee1347aadcb47207eb82f9",
+    "xlang3_runtime.dll": "ca1449cf0f17997453ea97f1c8f695fec3fcf0cfe3c6e5f889b41e6033a3fe75",
+    "xmind.exe": "2f6c21ade10fd8fd2e4ca3a41004c18a8e04370cbe06639285e7e130c75da4e4",
+    "xmind_schema_worker.exe": "0427e0eb7bebc385873d3338f7b6c9cd12ffe0a0da8f1b7aa0eb0140f0017956"
+  },
+  "external": {
+    "checkedAt": "2026-10-25T14:44:16.235Z",
+    "sdkHeaders": 16,
+    "runtime": 30,
+    "pureLibraries": 1870,
+    "nodeDependencies": {
+      "Native/tests/sdk/node_modules": 3690,
+      "extensions/vscode/node_modules": 14908
+    },
+    "nativeBinaries": 145
+  },
+  "allSetsAndHashesUnchanged": true,
+  "ctestSha256": "9b87598faeced02d1ec93622cfe2b821352382427734227b6e4197bbbdc5d386",
+  "oldGenericChannelAndPrivateMappingStillPresent": true,
+  "fullNativeAcceptance": false,
+  "installed": false
+}

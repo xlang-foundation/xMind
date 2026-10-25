@@ -69,7 +69,6 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         throw AgentWorkerRpcRemoteError("unsupported");
     },deadline);
     const auto access=backend_owner.native_model_access();
-    std::string startup=Json{{"mode",mode},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
     if(product_entry){
         if(no_tools){
         rejects<Conflict>([&]{NativeWorkerModelClient wrong(access,id,"foreign-owner",lease.workspace_id,generation,1);});
@@ -87,9 +86,9 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         rejects<Conflict>([&]{scoped.journal_commit_workspace_turn("missing-attempt");});
         check(store.root_budget(id).get().model_calls_reserved==0,"Native journal refusals must not fund a model");
         }
-        startup=Json{{"version",1},{"workspace","read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();
+
     }
-    worker->channel().send({product_entry?"worker.boot":"fixture.boot",startup},deadline);if(product_entry)peer.bind_native_execution(connect_agent_worker_execution(*worker,deadline));peer.start();
+    if(product_entry){worker->channel().configure_model({false,{access.endpoint,access.ticket,access.pid}},deadline);peer.bind_native_execution(connect_agent_worker_execution(*worker,deadline));}else worker->channel().send({"fixture.boot",Json{{"mode",mode},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump()},deadline);peer.start();
     const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(peer.native_execution()->execute(deadline))}}.dump():peer.call("fixture.run","{}");};
     if(product_entry){rejects<Conflict>([&]{drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);});check(worker->alive()&&peer.alive(),"Queued root is not proof of completed drain");rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute",R"({"instructions":"forged"})");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.unknown","{}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.cancel",R"({"run_id":"foreign"})");});check(store.root_budget(id).get().model_calls_reserved==0,"Rejected product controls must not reserve a model");}
     if(mode.starts_with("product_admission_")||mode.starts_with("product_journal_")){
