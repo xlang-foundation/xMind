@@ -1,0 +1,135 @@
+{
+  "recordedAt": "2026-10-25T15:17:25.894Z",
+  "sdk": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "runtimeSha256": "27199382abd7b0bf8c23ade5dd32749b373e9621704cb953d5211be7f9897446",
+  "sdkContracts": 5,
+  "ctypesCases": 4,
+  "performance": {
+    "cases": {
+      "ctypes_pointer_return": {
+        "pid": 26452,
+        "startedAt": "2026-10-25T15:06:39.481Z",
+        "completedAt": "2026-10-25T15:06:39.601Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "dbcc8141ea7856c98b94bbd9484e9a1d1b2b7629df22dc5e0c284ce16365d10f",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_cast_errcheck_array": {
+        "pid": 26084,
+        "startedAt": "2026-10-25T15:06:39.602Z",
+        "completedAt": "2026-10-25T15:06:39.710Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "873daadd27a58895f1bfdee25ba375d9b4235be5b88485090f700690cc11465b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_structure_layout": {
+        "pid": 21252,
+        "startedAt": "2026-10-25T15:06:39.714Z",
+        "completedAt": "2026-10-25T15:06:39.821Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "2a44feb38a53149727a882243266422984f8746b329301fd1348cda35ace9f7b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ctypes_unicode_buffer_contract": {
+        "pid": 1332,
+        "startedAt": "2026-10-25T15:06:39.822Z",
+        "completedAt": "2026-10-25T15:06:39.931Z",
+        "exitCode": 0,
+        "signal": null,
+        "stdoutSha256": "4a016a2d3749b0f9ddb759305ee960736424214fb3144bb1fb899f48b5ad908b",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "performance": {
+      "pid": 28068,
+      "startedAt": "2026-10-25T15:06:39.931Z",
+      "completedAt": "2026-10-25T15:08:08.175Z",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutSha256": "028dacbc2473d5648c6ada5fb801cb078d39055a6bf58ea6fcb1482512d5f345",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "status": "pass",
+    "caseCount": 11,
+    "repeats": 21,
+    "warmup": 5,
+    "threshold": 0.1,
+    "allInputsFileSetsAndRuntimeBytesUnchanged": true,
+    "cpython": false,
+    "installed": false,
+    "passed": true
+  },
+  "pipCompatibility": {
+    "recordedAt": "2026-10-25T15:09:53.981Z",
+    "commands": [
+      {
+        "pid": 27776,
+        "startedAt": "2026-10-25T15:09:42.253Z",
+        "completedAt": "2026-10-25T15:09:42.337Z",
+        "args": [
+          "-c",
+          "import sys; assert sys.implementation.name == 'xlang3'; print(sys.implementation.name)"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stdout": "xlang3\r\n",
+        "stderr": ""
+      },
+      {
+        "pid": 23260,
+        "startedAt": "2026-10-25T15:09:42.337Z",
+        "completedAt": "2026-10-25T15:09:43.779Z",
+        "args": [
+          "-m",
+          "pip",
+          "--version"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stdout": "pip 26.2.1 from D:\\CantorAI2026\\xMind\\.agentflow\\p76\\new-runtime\\stdlib\\pip (python 3.14)\r\r\n",
+        "stderr": ""
+      },
+      {
+        "pid": 28392,
+        "startedAt": "2026-10-25T15:09:43.780Z",
+        "completedAt": "2026-10-25T15:09:52.280Z",
+        "args": [
+          "-m",
+          "pip",
+          "install",
+          "--no-cache-dir",
+          "--no-index",
+          "--only-binary=:all:",
+          "--target",
+          "D:/CantorAI2026/xMind/.agentflow/ctypes-unicode-v3-pip/site",
+          "C:/Python/Python314/Lib/ensurepip/_bundled/pip-26.2.1-py3-none-any.whl"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "stdout": "Processing C:\\Python\\Python314\\Lib\\ensurepip\\_bundled\\pip-26.2.1-py3-none-any.whl\r\nInstalling collected packages: pip\r\nSuccessfully installed pip-26.2.1\r\n",
+        "stderr": ""
+      }
+    ],
+    "sourceFiles": 14062,
+    "pureLibraryFiles": 2345,
+    "candidateFiles": 31,
+    "allInputHashesAndSetsUnchanged": true,
+    "offlineInstall": true,
+    "packagedRuntimeQualified": false,
+    "installed": false,
+    "cpython": false,
+    "passed": true
+  },
+  "immutableSnapshot": {
+    "headers": 16,
+    "runtimeFiles": 30,
+    "headersByteEqualTo": "35fa98d1513c8595f1c0e856be7c645a43d187f1"
+  },
+  "workerStartupSourceCheckpoint": "a3d3fccd",
+  "workerStartupFocusedContracts": 4,
+  "fullXmindQualification": false,
+  "installedVersionUnchanged": "0.1.76"
+}

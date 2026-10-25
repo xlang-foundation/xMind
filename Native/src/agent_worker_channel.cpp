@@ -81,9 +81,25 @@ std::wstring quote(const std::wstring& text){
 // A rendezvous accepts one message only while its owning reader is waiting.
 // Tool execution never runs in an IPC callback, so callbacks stay bounded.
 struct IoStatistics {std::atomic<std::uint64_t> pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;};
+struct WorkerProcessReady {std::uint32_t pid=0,parent_pid=0,port=0;std::uint64_t created=0;};
 struct Inbox {
     std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;std::optional<AgentWorkerMessage> message;
+    std::optional<AgentWorkerStartup> startup;
+    std::optional<AgentWorkerServiceAccess> execution;
+    bool startup_received=false,execution_received=false;
+    std::optional<WorkerProcessReady> process_ready;bool process_ready_received=false;
 };
+void validate_service_access(const AgentWorkerServiceAccess& access){
+    if(!access.endpoint.starts_with("lrpc:")||access.endpoint.size()>32||!access.pid||access.ticket.size()!=64||access.ticket.find_first_not_of("0123456789abcdef")!=std::string::npos)protocol();
+}
+template<class T,class Live>
+T await_startup_value(Inbox& inbox,std::optional<T> Inbox::*slot,bool Inbox::*consumed,Clock::time_point deadline,std::stop_token stop,Live live){
+    std::unique_lock lock(inbox.mutex);if(inbox.*consumed)protocol();
+    for(;;){check(deadline,stop);if(inbox.closed)protocol();
+        if(inbox.*slot){auto value=std::move(*(inbox.*slot));(inbox.*slot).reset();inbox.*consumed=true;return value;}
+        live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));
+    }
+}
 struct WorkerLinkApi {
     std::shared_ptr<Inbox> inbox;
     WorkerLinkApi()=default;
@@ -94,9 +110,29 @@ struct WorkerLinkApi {
         inbox->message=AgentWorkerMessage{std::move(name),std::move(payload)};inbox->changed.notify_one();return 1;
     }
     void Close(){if(!inbox)protocol();std::lock_guard lock(inbox->mutex);inbox->closed=true;inbox->changed.notify_all();}
+    void ConfigureModel(bool coding,std::string endpoint,std::string ticket,std::int64_t pid){
+        if(!inbox||pid<1||pid>UINT32_MAX)protocol();
+        AgentWorkerStartup startup{coding,{std::move(endpoint),std::move(ticket),static_cast<std::uint32_t>(pid)}};validate_service_access(startup.model);
+        std::lock_guard lock(inbox->mutex);if(inbox->closed||inbox->startup||inbox->startup_received)protocol();
+        inbox->startup=std::move(startup);inbox->changed.notify_all();
+    }
+    void PublishExecution(std::string endpoint,std::string ticket,std::int64_t pid){
+        if(!inbox||pid<1||pid>UINT32_MAX)protocol();
+        AgentWorkerServiceAccess access{std::move(endpoint),std::move(ticket),static_cast<std::uint32_t>(pid)};validate_service_access(access);
+        std::lock_guard lock(inbox->mutex);if(inbox->closed||inbox->execution||inbox->execution_received)protocol();
+        inbox->execution=std::move(access);inbox->changed.notify_all();
+    }
+    void AnnounceProcess(std::int64_t pid,std::int64_t created,std::int64_t parent_pid,std::int64_t port){
+        if(!inbox||pid<1||pid>UINT32_MAX||created<1||parent_pid<1||parent_pid>UINT32_MAX||port<1||port>65535)protocol();
+        std::lock_guard lock(inbox->mutex);if(inbox->closed||inbox->process_ready||inbox->process_ready_received)protocol();
+        inbox->process_ready=WorkerProcessReady{static_cast<std::uint32_t>(pid),static_cast<std::uint32_t>(parent_pid),static_cast<std::uint32_t>(port),static_cast<std::uint64_t>(created)};inbox->changed.notify_all();
+    }
     BEGIN_PACKAGE(WorkerLinkApi)
         APISET().AddFunc<2>("Deliver",&WorkerLinkApi::Deliver);
         APISET().AddFunc<0>("Close",&WorkerLinkApi::Close);
+        APISET().AddFunc<4>("ConfigureModel",&WorkerLinkApi::ConfigureModel);
+        APISET().AddFunc<3>("PublishExecution",&WorkerLinkApi::PublishExecution);
+        APISET().AddFunc<4>("AnnounceProcess",&WorkerLinkApi::AnnounceProcess);
     END_PACKAGE
 };
 struct WorkerRemoteObjects {
@@ -172,6 +208,30 @@ void AgentWorkerChannel::send(const AgentWorkerMessage& message,Deadline deadlin
     catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
     catch(...){impl_->poisoned=true;throw AgentWorkerProtocolError("Worker shared-memory IPC send failed");}
 }
+void AgentWorkerChannel::configure_model(const AgentWorkerStartup& startup,Deadline deadline,std::stop_token stop){
+    validate_service_access(startup.model);std::lock_guard writer(impl_->writer);if(impl_->poisoned)protocol();check(deadline,stop);impl_->live();
+    try{X::Value result;if(!impl_->remote["ConfigureModel"].Call(std::vector<X::Value>{X::Value(startup.coding),X::Value(impl_->client,startup.model.endpoint),X::Value(impl_->client,startup.model.ticket),X::Value(static_cast<std::int64_t>(startup.model.pid))},result))protocol();check(deadline,stop);}
+    catch(...){impl_->poisoned=true;throw;}
+}
+AgentWorkerStartup AgentWorkerChannel::receive_model(Deadline deadline,std::stop_token stop){
+    std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();
+    try{return await_startup_value(*impl_->inbox,&Inbox::startup,&Inbox::startup_received,deadline,stop,[&]{impl_->live();});}
+    catch(...){impl_->poisoned=true;throw;}
+}
+void AgentWorkerChannel::publish_execution(const AgentWorkerServiceAccess& access,Deadline deadline,std::stop_token stop){
+    validate_service_access(access);std::lock_guard writer(impl_->writer);if(impl_->poisoned)protocol();check(deadline,stop);impl_->live();
+    try{X::Value result;if(!impl_->remote["PublishExecution"].Call(std::vector<X::Value>{X::Value(impl_->client,access.endpoint),X::Value(impl_->client,access.ticket),X::Value(static_cast<std::int64_t>(access.pid))},result))protocol();check(deadline,stop);}
+    catch(...){impl_->poisoned=true;throw;}
+}
+AgentWorkerServiceAccess AgentWorkerChannel::receive_execution(Deadline deadline,std::stop_token stop){
+    std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();
+    try{return await_startup_value(*impl_->inbox,&Inbox::execution,&Inbox::execution_received,deadline,stop,[&]{impl_->live();});}
+    catch(...){impl_->poisoned=true;throw;}
+}
+void AgentWorkerChannel::wait_peer_closed(Deadline deadline,std::stop_token stop){
+    std::lock_guard reader(impl_->reader);auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);
+    for(;;){check(deadline,stop);if(inbox.closed)return;impl_->live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));}
+}
 AgentWorkerMessage AgentWorkerChannel::receive(Deadline deadline,std::stop_token stop){
     std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();++impl_->statistics.pending_reads;
     auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);inbox.waiting=true;
@@ -191,7 +251,7 @@ std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::ui
     if(!parent.value||birth(parent.value)!=config.at("parent_birth").get<std::uint64_t>())protocol();
     auto channel=std::unique_ptr<AgentWorkerChannel>(new AgentWorkerChannel(std::make_unique<Impl>(read_scope(config.at("scope")),config.at("worker_route").get<std::string>())));
     channel->impl_->attach(config.at("parent_port").get<std::uint32_t>(),config.at("parent_route").get<std::string>(),parent.value);
-    channel->send({"worker.ready",Json{{"pid",GetCurrentProcessId()},{"creation_time",birth(GetCurrentProcess())},{"parent_pid",parent_pid},{"port",ipc_host().port}}.dump()},deadline,stop);return channel;
+    X::Value acknowledged;if(!channel->impl_->remote["AnnounceProcess"].Call(std::vector<X::Value>{X::Value(static_cast<std::int64_t>(GetCurrentProcessId())),X::Value(static_cast<std::int64_t>(birth(GetCurrentProcess()))),X::Value(static_cast<std::int64_t>(parent_pid)),X::Value(static_cast<std::int64_t>(ipc_host().port))},acknowledged))protocol();check(deadline,stop);return channel;
 }
 struct AgentWorkerProcess::Impl {
     Handle process,job;std::shared_ptr<const BoundProcessExecutable> executable;std::unique_ptr<AgentWorkerChannel> channel;AgentWorkerScope scope;std::string worker_route;std::uint32_t pid=0;std::uint64_t created=0;bool assigned=false,start_attempted=false;
@@ -231,8 +291,9 @@ void AgentWorkerProcess::start(AgentWorkerChannel::Deadline deadline,std::stop_t
     state->assigned=true;
     if(ResumeThread(thread.value)==static_cast<DWORD>(-1))throw ProcessBeforeDispatchError("Cannot start owned worker");
     child=Handle();input=Handle();output=Handle();
-    const auto ready=state->channel->receive(deadline,stop);const auto identity=parse(ready.payload);if(ready.operation!="worker.ready"||!identity.is_object()||identity.size()!=4||identity.at("pid")!=state->pid||identity.at("creation_time")!=state->created||identity.at("parent_pid")!=GetCurrentProcessId())protocol();
-    state->channel->impl_->attach(identity.at("port").get<std::uint32_t>(),worker_route,state->process.value);
+    const auto identity=await_startup_value(*state->channel->impl_->inbox,&Inbox::process_ready,&Inbox::process_ready_received,deadline,stop,[&]{if(WaitForSingleObject(state->process.value,0)!=WAIT_TIMEOUT)protocol();});
+    if(identity.pid!=state->pid||identity.created!=state->created||identity.parent_pid!=GetCurrentProcessId())protocol();
+    state->channel->impl_->attach(identity.port,worker_route,state->process.value);
 }
 AgentWorkerChannel& AgentWorkerProcess::channel()noexcept{return *impl_->channel;}
 std::uint32_t AgentWorkerProcess::pid()const noexcept{return impl_->pid;}

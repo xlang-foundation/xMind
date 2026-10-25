@@ -12,7 +12,7 @@ function Invoke-CiCommand([string]$Name,[string]$Executable,[string[]]$Arguments
     if($LASTEXITCODE -ne 0){throw ($Name+' failed with exit code '+$LASTEXITCODE)}
 }
 $ciRevision=(& git -C $ciRuntime rev-parse HEAD).Trim()
-if($LASTEXITCODE -ne 0 -or $ciRevision -ne '35fa98d1513c8595f1c0e856be7c645a43d187f1'){throw 'xlang3 source does not match the pinned runtime.'}
+if($LASTEXITCODE -ne 0 -or $ciRevision -ne '4417a9efbca7608de9855974f46ffa2520a1a416'){throw 'xlang3 source does not match the pinned runtime.'}
 if((& git -C $ciRuntime status --porcelain)){throw 'Pinned runtime checkout must be clean.'}
 $ciStdlibRevision=(& git -C (Split-Path $ciStdlib -Parent) rev-parse HEAD).Trim()
 if($LASTEXITCODE -ne 0 -or $ciStdlibRevision -ne 'ebf955df7a89ed0c7968f79faec1de49f61ed7cb'){throw 'Standard-library source differs from the pinned CPython 3.14.0 source.'}

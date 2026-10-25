@@ -10,9 +10,6 @@
 #include <set>
 
 namespace agentflow {
-namespace {
-std::string worker_boot(const NativeWorkerModelAccess& access,bool coding){return nlohmann::json{{"version",1},{"workspace",coding?"coding":"read"},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump();}
-}
 struct AgentWorkerSupervisor::Impl {
     PersistenceService& store;
     AgentWorkerChannel::Deadline deadline;
@@ -69,7 +66,7 @@ void AgentWorkerSupervisor::start(AgentReadToolOwnerContext context,AgentWorkerR
     impl_->started=true; // Startup failure is not permission to retry this child.
     impl_->owner=std::make_unique<AgentWorkerReadOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel);
-    impl_->worker->channel().send({"worker.boot",worker_boot(impl_->owner->native_model_access(),false)},impl_->deadline,cancel);
+    {const auto startup_access=impl_->owner->native_model_access();impl_->worker->channel().configure_model({false,{startup_access.endpoint,startup_access.ticket,startup_access.pid}},impl_->deadline,cancel);}
     impl_->control=connect_agent_worker_execution(*impl_->worker,impl_->deadline,cancel);
     impl_->ready=true;
 }
@@ -80,7 +77,7 @@ void AgentWorkerSupervisor::start_coding(AgentReadToolOwnerContext context,Agent
     impl_->started=true; // Startup failure is not permission to retry this child.
     impl_->coding_owner=std::make_unique<AgentWorkerCodingOwner>(impl_->store,impl_->lease,impl_->worker->channel().scope(),
         std::move(context),std::move(policy),std::move(config),std::move(identity),std::move(gateway),impl_->deadline,cancel,std::move(process_owner),std::move(remote_owner),std::move(callable_owner));
-    impl_->worker->channel().send({"worker.boot",worker_boot(impl_->coding_owner->native_model_access(),true)},impl_->deadline,cancel);
+    {const auto startup_access=impl_->coding_owner->native_model_access();impl_->worker->channel().configure_model({true,{startup_access.endpoint,startup_access.ticket,startup_access.pid}},impl_->deadline,cancel);}
     impl_->control=connect_agent_worker_execution(*impl_->worker,impl_->deadline,cancel);
     impl_->ready=true;
 }

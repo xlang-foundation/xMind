@@ -5,8 +5,6 @@
 #include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/agent_worker_native_execution.hpp"
 #include <thread>
-#include "agentflow/mcp_wire.hpp"
-#include "nlohmann/json.hpp"
 #include <atomic>
 #include <charconv>
 #include <string_view>
@@ -22,13 +20,9 @@ int run_agent_channel_worker(int argc,char** argv){
         throw std::invalid_argument("Invalid worker inherited handle");
     const auto bootstrap_deadline=Clock::now()+std::chrono::seconds(10);
     auto channel=AgentWorkerChannel::accept_inherited(handle,bootstrap_deadline);
-    const auto boot=channel->receive(bootstrap_deadline);
-    if(boot.operation!="worker.boot"||boot.payload.size()>1024)throw AgentWorkerProtocolError("Invalid worker execution bootstrap");
-    const auto config=nlohmann::json::parse(mcp_compact_object(boot.payload));
-    if(config.size()!=3||!config.at("version").is_number_integer()||config.at("version")!=1||!config.at("workspace").is_string()||(config.at("workspace")!="read"&&config.at("workspace")!="coding"))throw AgentWorkerProtocolError("Invalid worker execution bootstrap");
-    const bool coding=config.at("workspace")=="coding";const auto& model=config.at("model");
-    if(!model.is_object()||model.size()!=3||!model.at("endpoint").is_string()||!model.at("ticket").is_string()||!model.at("pid").is_number_unsigned()||model.at("pid").get<std::uint64_t>()>UINT32_MAX)throw AgentWorkerProtocolError("Invalid worker native model bootstrap");
-    NativeWorkerModelAccess access{model.at("endpoint").get<std::string>(),model.at("ticket").get<std::string>(),model.at("pid").get<std::uint32_t>()};
+    const auto startup=channel->receive_model(bootstrap_deadline);
+    const bool coding=startup.coding;
+    NativeWorkerModelAccess access{startup.model.endpoint,startup.model.ticket,startup.model.pid};
     // This is only a transport ceiling. Every backend operation still checks
     // the captured original deadline, current lease and owner cancellation.
     const auto transport_deadline=Clock::now()+std::chrono::hours(1);
@@ -41,8 +35,8 @@ int run_agent_channel_worker(int argc,char** argv){
         catch(const AgentWorkerRpcCancelled&){return RunState::cancelled;}
         catch(...){return RunState::failed;}
     });
-    const auto control=execution.access();channel->send({"worker.execution.ready",nlohmann::json{{"version",1},{"endpoint",control.endpoint},{"ticket",control.ticket},{"pid",control.pid}}.dump()},bootstrap_deadline);
-    std::jthread parent_lifetime([&](std::stop_token stop){try{(void)channel->receive(transport_deadline,stop);}catch(...){}execution.close();});
+    const auto control=execution.access();channel->publish_execution({control.endpoint,control.ticket,control.pid},bootstrap_deadline);
+    std::jthread parent_lifetime([&](std::stop_token stop){try{channel->wait_peer_closed(transport_deadline,stop);}catch(...){}execution.close();});
     execution.wait_closed(transport_deadline);parent_lifetime.request_stop();return 0;
 }
 }

@@ -17,6 +17,8 @@ struct AgentWorkerScope {
     bool operator==(const AgentWorkerScope&)const=default;
 };
 struct AgentWorkerMessage {std::string operation,payload;};
+struct AgentWorkerServiceAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
+struct AgentWorkerStartup {bool coding=false;AgentWorkerServiceAccess model;};
 struct AgentWorkerChannelStatistics {
     std::uint64_t pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;
 };
@@ -41,6 +43,11 @@ public:
     void close()noexcept;
     void send(const AgentWorkerMessage&,Deadline,std::stop_token={});
     AgentWorkerMessage receive(Deadline,std::stop_token={});
+    void configure_model(const AgentWorkerStartup&,Deadline,std::stop_token={});
+    AgentWorkerStartup receive_model(Deadline,std::stop_token={});
+    void publish_execution(const AgentWorkerServiceAccess&,Deadline,std::stop_token={});
+    AgentWorkerServiceAccess receive_execution(Deadline,std::stop_token={});
+    void wait_peer_closed(Deadline,std::stop_token={});
 private:
     struct Impl;std::unique_ptr<Impl> impl_;
     explicit AgentWorkerChannel(std::unique_ptr<Impl>);
