@@ -2,9 +2,11 @@
 
 Status: captured Local SDK objects, the shared native HTTP adapter and browser/
 extension prompt admission are implemented. The development candidate also
-implements authenticated negotiation, cached scope discovery and an explicit
-read-only remote session metadata binding. Remote command/event routing,
-durable mutation receipts, enrollment and worker fencing remain proposed.
+implements authenticated negotiation, cached scope discovery and explicit
+scoped remote session/run methods, durable command receipts, run-only event
+consumers and snapshot recovery objects. These are separate native service
+objects, not profile-wide Remote activation. Unified view command routing,
+workspace/effect enrollment, root-tree recovery and worker fencing remain open.
 The implemented catalog API is documented in connection-profiles.md. This design
 extends that public contract; it does not include private Nexus implementation.
 Installation and source qualification remain separate checkpoints. Current
@@ -28,12 +30,28 @@ Use ordinary SDK method calls and SDK list/dictionary values for local IPC.
 Do not add peer.call routes, custom remote-value envelopes or a second serializer.
 
 `Connections.OpenScope(profile_id, expected_profile_revision, scope_id)` creates
-a distinct captured remote object with Identity and Sessions subobjects.
-`Sessions().Open(session_id)` observes only remote metadata (id, title, revision).
+a distinct captured remote object with Identity, Sessions and Runs services,
+plus `RunEvents(session_id, run_id)`. Sessions expose metadata and typed creation;
+Runs expose metadata, typed submission/cancellation and receipt reconciliation.
+These explicit methods still require their individual negotiated permissions.
+They do not enroll a workspace or authorize a local worker/tool effect.
+
+`RunEvents(...).Consumer(consumer_id)` exposes durable Open/Read/Accept methods.
+Its `Snapshot(expected_checkpoint_revision)` and `ResumeSnapshot(snapshot_id)`
+return recovery objects with Open/Read/Observe/Reset methods. Reset acknowledges
+an explicitly observed complete snapshot with matching revision and digest;
+observation alone does not advance the consumer checkpoint or replay work.
 The native connector validates the encrypted grant and typed HTTPS protocol;
 the SDK owns IPC value transfer and method dispatch. This does not change the
-Local Open API or activate remote mutation routing. See the exact wire schema
+Local Open API or route the active Local view implicitly to a Remote profile.
+See the exact wire schema
 and limitations in the [generic remote contract](generic-remote-protocol-v1-proposal.md).
+
+Implementation and acceptance are distinct: installed76 has its recorded
+controlled-peer acceptance; the newer SDK35fa source passes its actual local184
+inventory and rendered cached-snapshot checks. Native Windows positive trusted
+TLS for that newer source remains pending hosted qualification. See
+[current validation evidence](VALIDATION_STATUS.md).
 
 Identity contains the stable connection/profile ID, profile revision, verified
 server identity, negotiated protocol version and captured backend generation.
