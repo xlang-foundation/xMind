@@ -114,7 +114,7 @@ class BackendClient {
   #connectionChildHistorySupported=false;
   #connectionCapture;
   #connectionClosed=false;
-  #remoteSnapshotUsed=false;
+  #remoteInspectionUsed=false;
   #connectionClosing;
   constructor(baseUrl, tokenProvider, fetchImpl = (...args) => fetch(...args)) {
     this.baseUrl = backendOrigin(baseUrl);
@@ -224,7 +224,7 @@ class BackendClient {
     }catch(error){error.admissionId=id;error.connectionBinding=capture.identity;throw error;}
   }
   async closeConnection(){
-    if(!this.#connectionAdmissionSupported&&!this.#connectionCapture&&!this.#remoteSnapshotUsed)return;
+    if(!this.#connectionAdmissionSupported&&!this.#connectionCapture&&!this.#remoteInspectionUsed)return;
     if(this.#connectionClosing)return this.#connectionClosing;this.#connectionClosed=true;
     this.#connectionClosing=(async()=>{if(!this.#connectionCapture)return;let capture;try{capture=await this.#connectionCapture;}catch{return;}if(this.baseUrl!==capture.origin)return;await this.request('/v1/connection-bindings/'+capture.id,undefined,15000,'DELETE');})();return this.#connectionClosing;
   }
@@ -416,8 +416,22 @@ class BackendClient {
     const capability=await this.request('/v1/connections/capabilities');if(capability?.remote_authentication!==1||capability?.remote_authentication_status!==1)throw new Error('Remote authentication is unavailable.');
     return validateRemoteAuthentication(await this.request('/v1/connections/authentication',{id,expected_profile_revision:revision}),id,revision);
   }
+  async connectionAuthorizedScopes(id,revision){
+    this.#remoteInspectionUsed=true;if(this.#connectionClosed)throw new Error("Connection changed or closed.");
+    connectionIdentity(id);profileRevision(revision);if(id==='local'||revision<1)throw new Error('Choose a saved remote profile.');
+    const origin=this.baseUrl;const capability=await this.request('/v1/connections/capabilities');
+    if(this.baseUrl!==origin||this.#connectionClosed)throw new Error('Connection changed or closed.');
+    if(capability?.remote_authorized_scopes!==1)throw new Error('Authorized scope inspection is unavailable.');
+    const value=await this.request('/v1/connections/authorized-scopes',{id,expected_profile_revision:revision});
+    if(this.baseUrl!==origin||this.#connectionClosed)throw new Error('Connection changed or closed.');
+    exactFields(value,['connection_id','profile_revision','credential_revision','state','server_id','protocol_version','expires_at','command_routing','scopes']);
+    const {scopes,...status}=value;validateRemoteAuthentication(status,id,revision);
+    if(!Array.isArray(scopes)||scopes.length>1024||(status.state!=='stored'&&scopes.length))throw new Error('Invalid authorized scopes.');
+    const ids=new Set();for(const scope of scopes){exactFields(scope,['id','actions']);snapshotIdentity(scope.id);if(ids.has(scope.id)||!Array.isArray(scope.actions)||scope.actions.length>256)throw new Error('Invalid authorized scopes.');ids.add(scope.id);const actions=new Set();for(const action of scope.actions){if(typeof action!=='string'||!action.length||action.length>128||!/^[A-Za-z0-9_.:-]+$/.test(action)||actions.has(action))throw new Error('Invalid authorized scope actions.');actions.add(action);}}
+    return value;
+  }
   async #snapshotRequest(operation,resource,fields){
-    this.#remoteSnapshotUsed=true;const origin=this.baseUrl,check=()=>{if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The captured snapshot connection changed or closed.');};check();
+    this.#remoteInspectionUsed=true;const origin=this.baseUrl,check=()=>{if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The captured snapshot connection changed or closed.');};check();
     const capability=await this.request('/v1/connections/capabilities');check();if(capability?.remote_run_snapshots!==1)throw new Error('Remote snapshot recovery is unavailable.');
     const value=await this.request('/v1/connections/scope-run-snapshot-'+operation,{...resource,...fields});check();return value;
   }
@@ -1289,7 +1303,7 @@ async function handleConnectionAuthentication(client,message,post,current){
   const id=message.id,revision=message.revision;
   try{if(!current())return;post({type:'connection-authentication',id,revision,busy:true});
     if(message.type==='connection-authenticate')await client.authenticateConnection(id,revision,message.credential_revision,message.credential);
-    const state=await client.connectionAuthentication(id,revision);if(current())post({type:'connection-authentication',id,revision,state});
+    const state=message.type==='connection-scopes-read'?await client.connectionAuthorizedScopes(id,revision):await client.connectionAuthentication(id,revision);if(current())post({type:'connection-authentication',id,revision,state});
   }catch{if(current())post({type:'connection-authentication',id,revision,error:'Authentication was not confirmed. Check stored status before trying again.'});}
   finally{message.credential=undefined;}
 }

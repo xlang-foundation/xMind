@@ -684,14 +684,16 @@ function appendConnectionAuthentication(row,profile){
   const status=node('p','Check stored sign-in status before authenticating.','hint');status.setAttribute('role','status');status.dataset.authenticationStatus='true';
   const check=node('button','Check sign-in');check.type='button';check.onclick=()=>api.postMessage({type:'connection-authentication-read',id:profile.id,revision:profile.revision});
   const form=node('form'),label=node('label','Server credential'),input=node('input'),submit=node('button','Authenticate');input.type='password';input.autocomplete='off';input.spellcheck=false;input.maxLength=8192;input.required=true;input.dataset.connectionCredential='true';label.append(input);submit.type='submit';submit.disabled=true;submit.dataset.authenticationSubmit='true';form.append(label,submit);
-  form.onsubmit=event=>{event.preventDefault();const credential=input.value;input.value='';if(!row.dataset.credentialRevision)return;submit.disabled=true;api.postMessage({type:'connection-authenticate',id:profile.id,revision:profile.revision,credential_revision:Number(row.dataset.credentialRevision),credential});};row.append(status,check,form);
+  form.onsubmit=event=>{event.preventDefault();const credential=input.value;input.value='';if(!row.dataset.credentialRevision)return;submit.disabled=true;api.postMessage({type:'connection-authenticate',id:profile.id,revision:profile.revision,credential_revision:Number(row.dataset.credentialRevision),credential});};const scopes=node('button','Inspect authorized scopes');scopes.type='button';scopes.onclick=()=>api.postMessage({type:'connection-scopes-read',id:profile.id,revision:profile.revision});const scopeList=node('div');scopeList.dataset.authorizedScopes='true';row.append(status,check,scopes,scopeList,form);
 }
 function showConnectionAuthentication(message){
   const row=Array.from(byId('connections-list').children).find(value=>value.dataset.connectionId===message.id&&value.dataset.profileRevision===String(message.revision));if(!row)return;
   const status=row.querySelector('[data-authentication-status]'),submit=row.querySelector('[data-authentication-submit]');for(const button of row.querySelectorAll('button'))button.disabled=!!message.busy;
-  if(message.busy){status.textContent='Checking server sign-in…';return;}
+  if(message.busy){row.querySelector('[data-authorized-scopes]').replaceChildren();status.textContent='Checking server sign-in…';return;}
   if(message.error){delete row.dataset.credentialRevision;submit.disabled=true;status.textContent=message.error;return;}
+  const scopeList=row.querySelector('[data-authorized-scopes]');scopeList.replaceChildren();
   const state=message.state;if(!state){submit.disabled=true;return;}row.dataset.credentialRevision=String(state.credential_revision);submit.disabled=false;
+  if(Array.isArray(state.scopes)){scopeList.append(node('p',state.scopes.length?'Authorized scopes for '+state.server_id:'No currently authorized scopes.','hint'));for(const scope of state.scopes)scopeList.append(node('p',scope.id+': '+(scope.actions.join(', ')||'No actions'),'hint'));}
   status.textContent=state.state==='stored'?'Stored sign-in for '+state.server_id+'. Remote execution remains unavailable.':state.state==='expired'?'Stored sign-in expired. Authenticate again to replace it.':state.state==='stale_profile'?'The address changed. Authenticate again for this profile.':'No stored sign-in. Enter the credential provided by your server.';
 }
 settings.addEventListener('close',()=>{for(const input of settings.querySelectorAll('[data-connection-credential]'))input.value='';});

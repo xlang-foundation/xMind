@@ -1,3 +1,9 @@
+## Authorized scope inspection in shared Settings UI — 2026-10-25
+
+Browser and VS Code Settings now offer explicit Inspect authorized scopes on saved remote profiles. The shared client uses the native authorized-scopes endpoint, validates exact profile/status/scope/action fields, and refuses duplicate/malformed scopes, expired scope claims, origin changes and closed connections. Scope IDs and permitted actions render as text. It does not activate Remote or change the selected workspace.
+
+Complete extension506/506 and browser179/179 suites pass, including actual DOM/controller interaction and no-select assertions. Fresh18 browser assets and2853 project/14908 dependency hashes and file sets remain unchanged. Hosted exact counts updated alongside the three new tests. This is synthetic UI/controller acceptance; rendered native-backed scope inspection and snapshot recovery UI remain open. Installed76 unchanged. [Receipt](evidence/authorized-scopes-ui-20261025.json), [extension log](evidence/authorized-scopes-ui-extension-20261025.log), [browser log](evidence/authorized-scopes-ui-browser-20261025.log). Full goal active.
+
 ## Hosted client exact-count gate corrected — 2026-10-25
 
 Hosted ef981a63 run40176938712/job121119535040 failed its gate despite504/504 extension and178/178 browser cases passing with unchanged source/assets. Tools/ci-views.mjs still expected500 extension cases after four new snapshot contracts. The reviewed count is now504, preserving strict exact inventory checks. Original failed gate and artifact12592446928 SHA256 are retained. Read-only comparison confirms corrected counts match the original terminal results; no new suite execution or corrected hosted success is claimed. Installed76 unchanged. [Correction receipt](evidence/hosted-client-inventory-correction-20261025.json), [original gate](evidence/hosted-client-ef981a63-original-gate-20261025.json). Full goal active.

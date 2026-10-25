@@ -1,0 +1,54 @@
+{
+  "source": "135de5cf7f867944f82871b80cf5b99465040521",
+  "projectFiles": 2853,
+  "dependencyFiles": 14908,
+  "testFiles": {
+    "extension": 23,
+    "browser": 10
+  },
+  "results": {
+    "build": {
+      "pid": 2680,
+      "startedAt": "2026-10-25T08:38:46.598Z",
+      "endedAt": "2026-10-25T08:38:46.675Z",
+      "exitCode": 0,
+      "logSha256": "544e5e15d5e42138851562864d42a989d5e6bc25330555920027cf83febcdfd8"
+    },
+    "extension": {
+      "pid": 41972,
+      "startedAt": "2026-10-25T08:38:46.676Z",
+      "endedAt": "2026-10-25T08:38:50.943Z",
+      "exitCode": 0,
+      "logSha256": "c2ad27e932668586b287933687aa26ae8ce7c4eb85ec977dede55fd24b4e28ca",
+      "tests": 506,
+      "pass": 506,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 4211.9454
+    },
+    "browser": {
+      "pid": 41616,
+      "startedAt": "2026-10-25T08:38:50.943Z",
+      "endedAt": "2026-10-25T08:39:11.225Z",
+      "exitCode": 0,
+      "logSha256": "9f2c7cbef24da725a44e0fd3ef1d5407354dcf08ea0b4529ed5cfc248ae5c2ef",
+      "tests": 179,
+      "pass": 179,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 20216.9124
+    }
+  },
+  "artifacts": 18,
+  "allSourceDependenciesAndSetsUnchanged": true,
+  "nativeSuiteRun": false,
+  "rendered": false,
+  "installed": false,
+  "paidInference": false,
+  "cpython": false,
+  "passed": true
+}

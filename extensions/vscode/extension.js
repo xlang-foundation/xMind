@@ -633,7 +633,7 @@ async function activate(context) {
           post({type:'mcp-resources',busy:true});
           try{const catalog=await resourceClient.mcpResources();if(current())post({type:'mcp-resources',busy:false,catalog});}
           catch(error){if(current())post({type:'mcp-resources',busy:false,error:error.message});}
-        } else if(message.type==='connection-authenticate'||message.type==='connection-authentication-read'){
+        } else if(message.type==='connection-authenticate'||message.type==='connection-authentication-read'||message.type==='connection-scopes-read'){
           const target=client,epoch=generation,workspaceEpoch=workspaceBackend.epoch;
           await require('./client').handleConnectionAuthentication(target,message,post,()=>panel===view&&client===target&&generation===epoch&&workspaceBackend.epoch===workspaceEpoch&&configuredOrigin()===target.baseUrl);
         } else if(['connections-refresh','connection-save','connection-remove'].includes(message.type)){
