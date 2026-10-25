@@ -1,3 +1,9 @@
+## SDK4417 and typed-startup candidate under full qualification — 2026-10-25
+
+Main14c867aa integrates ordinary SDK ConfigureModel, PublishExecution and AnnounceProcess startup methods and pins xlang3 revision4417a9ef consistently in checkout, native build and staging. The SDK compatibility candidate passes5 SDK contracts, four ctypes regressions, the unchanged complete11-case fixed-baseline performance gate and pip26.2.1 version lookup without a cache override plus offline wheel installation. The immutable snapshot contains16 byte-identical SDK headers and30 runtime files; its shared-runtime SHA is27199382abd7b0bf8c23ade5dd32749b373e9621704cb953d5211be7f9897446. [Integration receipt](evidence/sdk4417-compatibility-startup-integration-20261025.json).
+
+The isolated startup checkpoint passed4 focused contracts before integration. Complete local184-contract validation of the combined candidate is now building in a separate checkout; hosted40206234760 is queued behind40198358836. Neither gate is accepted yet. The private launch mapping and generic channel/testing API still remain; this is not a claim that every worker boundary has completed the IPC cleanup. Installed76 and the previously qualified main binaries remain unchanged.
+
 ## Hosted d75: complete native pass; packaged pip remains blocked — 2026-10-25
 
 Hosted40192957480/job121181991153 completes the actual182-contract native inventory with zero failures in707.16s. The inventory, expected names, terminal exit and raw contract/test-log hashes verify against the retained native gate. This includes the previously failing worker and hosted trusted-TLS integration contracts. [Receipt](evidence/hosted-d75-native-pass-packaged-pip-failure-20261025.json).
@@ -6,7 +12,7 @@ The workflow subsequently fails its packaged xlang3 pip --version command in pip
 
 ## Worker bootstrap IPC audit: remaining application envelope — 2026-10-25
 
-Current native source still uses worker.boot and worker.execution.ready channel envelopes: agent_worker_supervisor.cpp builds a JSON boot payload, and agent_worker_control.cpp parses JSON endpoint/ticket/PID rendezvous metadata. These are startup/control messages; agent_worker_process_rpc.cpp delegates process invocation to the typed service. The legacy peer.call("worker.execute", ...) execution route was not found in the inspected native source. This does not justify claiming every worker boundary uses only SDK value serialization: removing the startup/control application envelopes remains required. Replacement must use ordinary registered SDK service methods/value objects while preserving identity checks, cancellation, deadline and owned-process retirement behavior. No runtime change or new acceptance is claimed by this read-only audit.
+Historical source through3c9e1a58 still used worker.boot and worker.execution.ready channel envelopes: agent_worker_supervisor.cpp builds a JSON boot payload, and agent_worker_control.cpp parses JSON endpoint/ticket/PID rendezvous metadata. These are startup/control messages; agent_worker_process_rpc.cpp delegates process invocation to the typed service. The legacy peer.call("worker.execute", ...) execution route was not found in the inspected native source. This does not justify claiming every worker boundary uses only SDK value serialization: removing the startup/control application envelopes remains required. Replacement must use ordinary registered SDK service methods/value objects while preserving identity checks, cancellation, deadline and owned-process retirement behavior. No runtime change or new acceptance is claimed by this read-only audit.
 
 ## Hosted 1d6: graph passes; worker aggregate deadlines still fail — 2026-10-25
 
