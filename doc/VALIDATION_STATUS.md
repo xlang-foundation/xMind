@@ -1,3 +1,9 @@
+## Captured remote run-event public adapters — 2026-10-24
+
+Standard SDK OpenScope(...).RunEvents(session,run) now exposes Cursor()/Read(cursor). The shared eight-field cursor includes backend_generation; foreign namespace/generation, malformed integer/bool values and extra keys refuse before dispatch. CLI scope-run-events calls the ordinary SDK methods; owner/origin-bound HTTP scope-run-events calls the same backend service and generation checks. Typed gaps return remote_cursor_reset_required, with no retry or implicit reset. SDK value serialization remains entirely xlang3-owned.
+
+Focused11/11 passes22.46s with2841/16/1870/30/18598/142 frozen source/SDK/library/runtime/dependency/binary hashes and file sets exact. Real SDK cursor creation, forged cursor refusal, retained object retirement and HTTP rejection paths are covered alongside backend positive page tests. Positive public SDK/CLI/HTTP event delivery over native trusted TLS is pending, as are durable cursor storage, authoritative snapshot/reset and root-tree events. Native d361fe72 is uninstalled; full native gate remains unqualified and installed75 unchanged. [Receipt](evidence/remote-run-events-adapters-20261024.json), [focused log](evidence/remote-run-events-adapters-focused-20261024.log).
+
 ## Full native and hosted terminal results — 2026-10-24
 
 Development6cc54bee/Native8e88904f completes178/179 in933.17s with the full frozen closure unchanged. Graph remote passes15.21s; ledger hits its unchanged45s wrapper during restricted-catalogues after all12 coexistence cases complete. Cause remains unproven; no deadline extension or task replay. Installed75 is unchanged and this development build is unqualified. [Full result](evidence/native-delivery-6cc54bee-full-20261024.json), [original full log](evidence/native-delivery-6cc54bee-full-20261024.log), [raw ledger log](evidence/native-delivery-6cc54bee-ledger-20261024.log).

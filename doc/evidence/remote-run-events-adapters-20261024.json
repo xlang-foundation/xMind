@@ -1,0 +1,75 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T05:05:46.813Z",
+    "sourceParent": "97c77038cec1c4bd1a0ded5f3ce77bc59dd046cf",
+    "sourcePatchSha256": "c1004155206e0f9eefeb8a15124fafd92c8dd78a26c2675f9a8117c31fc8829a",
+    "build": {
+      "pid": 6636,
+      "launchedAt": "2026-10-25T05:01:29.411Z",
+      "completedAt": "2026-10-25T05:05:17.522Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "cc61384a6ebf114f84d502570257a959e53836d913593c4ec4a5e877b6e3a94f"
+    },
+    "test": {
+      "pid": 4160,
+      "launchedAt": "2026-10-25T05:05:20.933Z",
+      "completedAt": "2026-10-25T05:05:43.443Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "20ad6923a66c77e5c00e1c19d362dca44e97903f81fd91d4423c59013293f929"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 22.46,
+    "projectFiles": 2841,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d361fe72441253d5e5616a59cdd2932c178bdcbac963076d15a945c92d5e3da4",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "api": "Connections(token).OpenScope(id,revision,scope).RunEvents(session,run).Cursor()/Read(cursor)",
+  "cli": "xmind ipc --endpoint lrpc:PORT connections scope-run-events ID REV SCOPE SESSION RUN JSON_CURSOR|null",
+  "http": "POST /v1/connections/scope-run-events",
+  "cursorFields": [
+    "connection_id",
+    "server_id",
+    "scope_id",
+    "session_id",
+    "run_id",
+    "epoch",
+    "sequence",
+    "backend_generation"
+  ],
+  "cursorResetError": "remote_cursor_reset_required",
+  "implemented": [
+    "standard SDK subobject registration and value transfer",
+    "generation-bound public cursor and shared domain projection",
+    "CLI adapter through ordinary SDK method calls",
+    "owner/origin-bound HTTP route with exact request fields",
+    "typed gap maps to fixed SDK error or HTTP409; no implicit retry/reset"
+  ],
+  "verified": [
+    "real SDK Cursor dispatch and exact eight-field projection",
+    "SDK refuses six foreign namespace/generation fields, four malformed sequence values and extra fields",
+    "retained SDK objects refuse after owner retirement",
+    "HTTP refuses six foreign namespace/generation fields and boolean sequence",
+    "backend service event pages, encrypted reopen, credential/profile mutation and gap refusal",
+    "shared public cursor projection round-trip, invalid fields and JSON-safe bounds"
+  ],
+  "limits": [
+    "positive public SDK/CLI/HTTP event network delivery over native trusted TLS remains pending",
+    "no durable cursor store, authoritative snapshot/reset workflow, root-tree event observation or remote profile activation",
+    "not a full-suite qualification; installed75 unchanged"
+  ],
+  "completedTasksMustNeverBeReplayed": true
+}

@@ -622,3 +622,38 @@ credential rotation; retired scopes refuse. The service neither persists cursors
 nor resets retention gaps. SDK/CLI/HTTP event subobjects, backend-generation
 fencing in those adapters, authoritative snapshot/reset and positive native TLS
 event verification remain separate work.
+
+### Captured public run-event adapters
+
+After explicit authentication and OpenScope, use ordinary SDK subobjects:
+
+```text
+stream = xmind.Connections(owner).OpenScope(id, revision, scope).RunEvents(session, run)
+cursor = stream.Cursor()
+page = stream.Read(cursor)
+// Accept/process the returned records before retaining page.cursor for a later read.
+```
+
+Cursor has exactly connection_id, server_id, scope_id, session_id, run_id, epoch,
+sequence and backend_generation. Initial epoch is empty and sequence zero. Read
+requires an explicit cursor; unlike an initial adapter null, a supplied cursor
+never implicitly rebinds or resets. Backend generation is checked before dispatch
+and before publishing a page; retained SDK objects refuse after owner retirement.
+The cursor is a domain dictionary transferred by xlang3 SDK serialization.
+
+CLI: `connections scope-run-events ID REV SCOPE SESSION RUN JSON_CURSOR|null`
+through the usual `xmind ipc --endpoint lrpc:PORT` entry point. HTTP:
+`POST /v1/connections/scope-run-events` requires exactly id,
+expected_profile_revision, scope_id, session_id, run_id and cursor. A null cursor
+requests the initial cursor; otherwise the eight-field cursor is required. HTTP
+retains local owner/origin authorization and rejects query parameters. Responses
+have binding, cursor and events; each event has sequence, run_id, kind and an
+object payload. The adapters return `remote_cursor_reset_required` for retention
+gaps or expired/changed epochs (HTTP409), without an advanced cursor or retry.
+
+Capability `remote_scoped_run_events:1` describes adapter support, not permission
+or automatic Remote activation. Current grant must independently authorize
+events:1/events.read and the captured session/run namespace. SDK cursor/refusal
+and HTTP refusal integration plus backend positive pages have focused evidence.
+Positive public event delivery over native trusted TLS remains pending. Durable
+cursor acceptance, authoritative snapshot/reset and root-tree streams remain open.

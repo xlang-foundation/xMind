@@ -1,4 +1,5 @@
 #include "agentflow/remote_command_journal.hpp"
+#include "../src/remote_event_values.hpp"
 #include <future>
 #include "agentflow/remote_connection_authentication.hpp"
 #include "agentflow/http_stream_transport.hpp"
@@ -15,7 +16,16 @@ template<class E,class F>void rejects(F action){try{action();}catch(const E&){re
 SecretBytes secret(){const std::string value="synthetic-auth-service-credential";return SecretBytes({reinterpret_cast<const std::uint8_t*>(value.data()),value.size()});}
 std::string source(std::string origin,std::string name="Remote"){return Json{{"profiles",Json::array({{{"id","local"},{"name","Local"},{"kind","local"}},{{"id","remote-a"},{"name",name},{"kind","nexus"},{"origin",origin}}})}}.dump();}
 }
+void remote_event_value_contract(){
+ const RemoteRunEventCursor original{"remote-a","server-a","scope-a","session-a","run-a","epoch:a",7};const auto encoded=remote_event_values::cursor(original,"generation-a");require(remote_event_values::cursor(encoded,"generation-a")==original);
+ rejects<Conflict>([&]{remote_event_values::cursor(encoded,"generation-b");});
+ for(const auto& value:std::vector<Json>{true,-1,1.5,9007199254740992ULL}){auto malformed=encoded;malformed["sequence"]=value;rejects<std::invalid_argument>([&]{remote_event_values::cursor(malformed,"generation-a");});}
+ for(const auto* field:{"connection_id","server_id","scope_id","session_id","run_id","epoch","backend_generation"}){auto missing=encoded;missing.erase(field);rejects<std::invalid_argument>([&]{remote_event_values::cursor(missing,"generation-a");});auto invalid=encoded;invalid[field]=true;rejects<std::invalid_argument>([&]{remote_event_values::cursor(invalid,"generation-a");});}
+ auto extra=encoded;extra["private_grant"]="must refuse";rejects<std::invalid_argument>([&]{remote_event_values::cursor(extra,"generation-a");});
+ const auto page=remote_event_values::page({original,{{3,"run-a","run.running","{}"},{7,"run-a","tool.completed",R"({"observed":true})"}}},"generation-a");require(page.size()==2&&page.at("cursor")==encoded&&page.at("events").size()==2&&page.at("events")[1].at("payload").at("observed")==true&&page.at("events")[0].at("sequence")==3);
+}
 void command_journal_contract(const std::string& modules,const std::string& stdlib){
+ remote_event_value_contract();
  const auto path=std::filesystem::temp_directory_path()/("xmind-remote-command-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(path));
  const RemoteCommandIntent intent{"request-1","remote-a","https://remote.example.invalid","server-a","scope-a",2,3,RemoteSessionCreateAction{"Original title"}};
  {
