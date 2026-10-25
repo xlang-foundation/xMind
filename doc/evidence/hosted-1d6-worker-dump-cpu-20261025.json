@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T13:48:09.744Z",
+  "runId": 40190311424,
+  "source": "1d6a4a74689d2ec19bce8e175d22c76406d13e01",
+  "dump": {
+    "name": "fixture-1488-3677453-slow.dmp",
+    "bytes": 304322,
+    "sha256": "8135f28bad468d6478e8673fd52955c3190d93977bb9ac1faaca1d99520d43d1"
+  },
+  "method": "Read-only MINIDUMP_THREAD_INFO_LIST and MINIDUMP_MISC_INFO decoding using installed Windows SDK minidumpapiset.h definitions. AMD64 instruction-module attribution uses the retained module list; no stack unwind.",
+  "retainedThreadCount": 26,
+  "retainedThreadUserMilliseconds": 25109.375,
+  "retainedThreadKernelMilliseconds": 10812.5,
+  "retainedThreadCpuMilliseconds": 35921.875,
+  "processCpuWholeSeconds": {
+    "userSeconds": 29,
+    "kernelSeconds": 15
+  },
+  "processAndThreadCpuScope": "Process totals include CPU of threads absent from the retained thread list. They are not required to equal the sum of retained threads.",
+  "highestCpuThreads": [
+    {
+      "id": 3228,
+      "flags": 0,
+      "kernelMs": 6109.375,
+      "userMs": 20734.375,
+      "instructionModule": "ntdll.dll",
+      "instructionOffset": "0x165f14"
+    },
+    {
+      "id": 8880,
+      "flags": 0,
+      "kernelMs": 703.125,
+      "userMs": 1343.75,
+      "instructionModule": "ntdll.dll",
+      "instructionOffset": "0x162944"
+    },
+    {
+      "id": 252,
+      "flags": 0,
+      "kernelMs": 859.375,
+      "userMs": 515.625,
+      "instructionModule": "ntdll.dll",
+      "instructionOffset": "0x165f74"
+    },
+    {
+      "id": 8144,
+      "flags": 0,
+      "kernelMs": 765.625,
+      "userMs": 515.625,
+      "instructionModule": "ntdll.dll",
+      "instructionOffset": "0x165f74"
+    },
+    {
+      "id": 700,
+      "flags": 0,
+      "kernelMs": 531.25,
+      "userMs": 578.125,
+      "instructionModule": "ntdll.dll",
+      "instructionOffset": "0x162344"
+    }
+  ],
+  "interpretation": "Substantial accumulated CPU work precedes the slow snapshot. These counters do not identify expensive code, prove an IPC deadlock, rule out a later stall or establish per-call latency. Current instruction modules alone cannot attribute past CPU work.",
+  "replayed": false,
+  "releaseQualified": false
+}
