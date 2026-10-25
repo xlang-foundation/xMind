@@ -38,6 +38,24 @@ RemoteCommandObservation observe_remote_session_request(const std::string& origi
     RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});
 struct RemoteObservedSession {std::string id,title;std::int64_t revision=0;};
 struct RemoteObservedRun {std::string id,session_id,root_id,state;std::int64_t revision=0;};
+struct RemoteRunEventCursor {
+    std::string connection_id,server_id,scope_id,session_id,run_id,epoch;
+    std::int64_t sequence=0;
+    bool operator==(const RemoteRunEventCursor&)const=default;
+};
+enum class RemoteEventGapReason {retention_gap,epoch_expired};
+class RemoteEventCursorGap:public std::runtime_error {
+public:
+    explicit RemoteEventCursorGap(RemoteEventGapReason reason):std::runtime_error("Remote event cursor requires an authoritative snapshot and explicit reset"),reason_(reason){}
+    RemoteEventGapReason reason()const noexcept{return reason_;}
+private:RemoteEventGapReason reason_;
+};
+struct RemoteObservedRunEvents {RemoteRunEventCursor cursor;std::vector<Event> events;};
+void validate_remote_event_scope(const RemoteNegotiatedGrant&,const std::string&,std::int64_t);
+// Backend connector only. Does not publish a cursor, reset gaps or replay work.
+RemoteObservedRunEvents read_remote_run_events(const std::string& origin,const SecretBytes&,
+    const RemoteNegotiatedGrant&,const RemoteRunEventCursor&,std::chrono::milliseconds,
+    RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});
 void validate_remote_run_scope(const RemoteNegotiatedGrant&,const std::string& scope_id,std::int64_t now_unix_seconds);
 RemoteObservedRun read_remote_run(const std::string& origin,const SecretBytes& credential,
     const RemoteNegotiatedGrant&,const std::string& scope_id,const std::string& session_id,const std::string& run_id,

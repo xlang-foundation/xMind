@@ -578,3 +578,30 @@ only captured binding and public receipt metadata. The command-routing flag
 recognizes an authorized cancellation-plus-receipt grant, but never activates
 a Remote profile or implies worker retirement. Positive trusted-TLS cancellation
 and actual remote worker behavior remain separate acceptance requirements.
+
+### Native run-event read primitive
+
+The backend-only `read_remote_run_events` connector uses the scoped session/run
+`/events` GET, requiring `events:1` and `events.read`. Initial cursor has empty
+epoch and sequence zero and sends no query. Subsequent reads send exactly
+`?epoch=EPOCH&after=SEQUENCE`; opaque colons are encoded once. Connection ID is
+local cursor metadata retained by the connector, not remote authority. A future
+captured service must validate it against the exact profile/binding before send.
+
+Responses have exactly `binding`, `status`, `cursor`, `events`. Binding is the
+existing five-field server/scope/protocol/grant identity. The wire cursor has
+exactly server_id, scope_id, session_id, run_id, epoch and sequence. All namespace
+fields must match; epoch is opaque and sequence is a nonnegative JSON-safe integer.
+At most256 events fit a64KiB response. Each event has exactly sequence, run_id,
+kind and object-valued payload; sequence strictly increases beyond the submitted
+cursor, run_id must equal the requested run and kind is bounded to128 bytes.
+The page cursor must equal its last returned sequence, or the original sequence
+for an empty page. Global sequence holes are valid for a filtered run stream.
+
+Status `gap` or `epoch_expired` requires an empty event list and raises a typed
+reset-required result. An unexpected epoch change under `ok` also refuses.
+Neither case publishes a new cursor or retries/resets automatically. Unknown
+statuses, duplicate keys, extra fields, malformed bindings or out-of-order/foreign
+records fail closed. No captured service, SDK/CLI/HTTP event capability, durable
+cursor publication, authoritative snapshot/reset workflow or positive native TLS
+event acceptance is implemented by this primitive.
