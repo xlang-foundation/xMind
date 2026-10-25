@@ -1,0 +1,18 @@
+{
+  "lastSequence": 2750,
+  "queryOnlyOnCopies": true,
+  "finding": "Final denied root had admitted its third child through the actual worker lease when aggregate wrapper terminated. This proves neither a deadlock nor successful completion. Exact performance cause remains unproven.",
+  "originalFilesUnchanged": true,
+  "lastEvent": "agent.delegation.preset",
+  "lastChild": "3632d2a892590f6462b648fc5e0ce783",
+  "runtime": "xlang3",
+  "lastRootState": "running",
+  "source": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-worker-ledger-3926656428-3716486766",
+  "recordedAt": "2026-10-25T01:26:44.1205479Z",
+  "lastChildState": "running",
+  "lastRoot": "coexisting-coding-counted-deny",
+  "lastWorkerPid": 34920,
+  "taskReplay": false,
+  "completedTasksMustNeverBeReplayed": true,
+  "cpythonExecuted": false
+}
