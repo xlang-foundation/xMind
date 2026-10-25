@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- SDK4417: SDK5/ctypes4/perf11/pip pass; local184/hosted40206234760 pending. Installed76 unchanged. Details: doc/VALIDATION_STATUS.md.
+
 - Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.
 
 - Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.
