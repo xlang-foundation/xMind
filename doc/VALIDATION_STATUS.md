@@ -1,3 +1,9 @@
+## Full native and hosted terminal results — 2026-10-24
+
+Development6cc54bee/Native8e88904f completes178/179 in933.17s with the full frozen closure unchanged. Graph remote passes15.21s; ledger hits its unchanged45s wrapper during restricted-catalogues after all12 coexistence cases complete. Cause remains unproven; no deadline extension or task replay. Installed75 is unchanged and this development build is unqualified. [Full result](evidence/native-delivery-6cc54bee-full-20261024.json), [original full log](evidence/native-delivery-6cc54bee-full-20261024.log), [raw ledger log](evidence/native-delivery-6cc54bee-ledger-20261024.log).
+
+Hosted859c66da run40157167806 finishes176/177 in686.86s. Graph remote12.25s, ledger40.05s and nested33.29s pass. Trusted OAuth refuses certificate setup because retained fixtures now live under repository evidence TEMP while the helper permitted only RUNNER_TEMP. The helper now admits the exact repository evidence directory as well; hosted/admin/owned-name/certificate identity guards remain. PowerShell syntax passes; actual hosted trust provisioning remains pending. These passes do not establish the causes of older timing failures. [Hosted evidence](evidence/hosted-native-859c66da-result-20261024.json).
+
 ## Captured remote event service and cursor ownership — 2026-10-24
 
 run_event_cursor validates the exact captured profile/credential/grant and events.read before creating its empty-epoch/zero cursor. read_run_events refuses cursor connection/server/scope/session/run mismatch before exchange, then rechecks cancellation, profile/credential/grant and permission before returning. Typed exchange results independently validate namespace/epoch/count/content size, object payloads, strict order and last-record cursor. Caller inputs remain unchanged; gaps and failures publish no advanced cursor. Fresh explicit authorization can resume the same matching observation cursor after rotation; stale scopes refuse.

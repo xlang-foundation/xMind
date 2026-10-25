@@ -1,0 +1,240 @@
+Ledger suite phase begin ledger elapsed_ms=0
+Ledger phase begin planning-admission
+Ledger planning seed case=terminal-failure elapsed_ms=0 remaining_ms=19999
+Ledger planning worker-ready case=terminal-failure elapsed_ms=125 remaining_ms=19874
+Ledger planning model-reserve case=terminal-failure elapsed_ms=125 remaining_ms=19874
+Ledger planning model-start case=terminal-failure elapsed_ms=127 remaining_ms=19872
+Ledger planning seed case=terminal-cancel elapsed_ms=182 remaining_ms=19817
+Ledger planning worker-ready case=terminal-cancel elapsed_ms=273 remaining_ms=19726
+Ledger planning model-reserve case=terminal-cancel elapsed_ms=273 remaining_ms=19726
+Ledger planning model-start case=terminal-cancel elapsed_ms=275 remaining_ms=19724
+Ledger planning seed case=root-plain-funding elapsed_ms=324 remaining_ms=19675
+Ledger planning seed case=root-read-epoch elapsed_ms=348 remaining_ms=19651
+Ledger planning seed case=root-read-catalogue elapsed_ms=357 remaining_ms=19642
+Ledger planning seed case=root-delegation-unsealed elapsed_ms=369 remaining_ms=19630
+Ledger planning seed case=once elapsed_ms=380 remaining_ms=19619
+Ledger planning seed case=unfinished elapsed_ms=397 remaining_ms=19602
+Ledger planning seed case=no-assistant elapsed_ms=410 remaining_ms=19589
+Ledger planning seed case=multiple elapsed_ms=422 remaining_ms=19577
+Ledger planning seed case=ordinary-tool elapsed_ms=436 remaining_ms=19563
+Ledger planning seed case=wrong-call elapsed_ms=449 remaining_ms=19550
+Ledger planning seed case=cancelled elapsed_ms=460 remaining_ms=19539
+Ledger planning seed case=expired elapsed_ms=469 remaining_ms=19530
+Ledger planning seed case=stale-attempt elapsed_ms=477 remaining_ms=19522
+Ledger planning seed case=root-file-unsealed elapsed_ms=487 remaining_ms=19512
+Ledger planning seed case=root-file-sealed elapsed_ms=497 remaining_ms=19502
+Ledger planning seed case=provisional elapsed_ms=519 remaining_ms=19480
+Ledger planning seed case=inspect_plan elapsed_ms=532 remaining_ms=19467
+Ledger planning seed case=revise_plan elapsed_ms=566 remaining_ms=19433
+Ledger planning seed case=owner-inspection elapsed_ms=579 remaining_ms=19420
+Ledger planning seed case=owner-rejection elapsed_ms=775 remaining_ms=19224
+Ledger planning seed case=owner-runner elapsed_ms=791 remaining_ms=19208
+Ledger planning seed case=slot-owner elapsed_ms=991 remaining_ms=19008
+Ledger planning seed case=slot-owner-accepted elapsed_ms=1239 remaining_ms=18760
+Ledger planning seed case=owner-runner-accepted elapsed_ms=1513 remaining_ms=18486
+Ledger planning owner-code-worker-ready case=owner-runner-accepted elapsed_ms=1629 remaining_ms=18370
+Ledger planning owner-code-execution-returned case=owner-runner-accepted elapsed_ms=2556 remaining_ms=17443
+Ledger planning owner-code-drain-begin case=owner-runner-accepted elapsed_ms=2556 remaining_ms=17443
+Ledger planning owner-code-drain-exit case=owner-runner-accepted elapsed_ms=2565 remaining_ms=17434
+Ledger planning seed case=owner-runner-counted elapsed_ms=2597 remaining_ms=17402
+Ledger planning owner-code-worker-ready case=owner-runner-counted elapsed_ms=2719 remaining_ms=17280
+Ledger planning owner-code-execution-returned case=owner-runner-counted elapsed_ms=3981 remaining_ms=16018
+Ledger planning owner-code-drain-begin case=owner-runner-counted elapsed_ms=3981 remaining_ms=16018
+Ledger planning owner-code-drain-exit case=owner-runner-counted elapsed_ms=3989 remaining_ms=16010
+Ledger planning seed case=owner-code-approved-plain elapsed_ms=4029 remaining_ms=15970
+Ledger planning owner-code-worker-ready case=owner-code-approved-plain elapsed_ms=4146 remaining_ms=15853
+Ledger planning owner-code-execution-returned case=owner-code-approved-plain elapsed_ms=5650 remaining_ms=14349
+Ledger planning owner-code-drain-begin case=owner-code-approved-plain elapsed_ms=5650 remaining_ms=14349
+Ledger planning owner-code-drain-exit case=owner-code-approved-plain elapsed_ms=5666 remaining_ms=14333
+Ledger planning seed case=owner-code-approved-counted elapsed_ms=5697 remaining_ms=14302
+Ledger planning owner-code-worker-ready case=owner-code-approved-counted elapsed_ms=5807 remaining_ms=14192
+Ledger planning owner-code-execution-returned case=owner-code-approved-counted elapsed_ms=7589 remaining_ms=12410
+Ledger planning owner-code-drain-begin case=owner-code-approved-counted elapsed_ms=7589 remaining_ms=12410
+Ledger planning owner-code-drain-exit case=owner-code-approved-counted elapsed_ms=7599 remaining_ms=12400
+Ledger planning seed case=owner-code-denied-plain elapsed_ms=7636 remaining_ms=12363
+Ledger planning owner-code-worker-ready case=owner-code-denied-plain elapsed_ms=7763 remaining_ms=12236
+Ledger planning owner-code-execution-returned case=owner-code-denied-plain elapsed_ms=8995 remaining_ms=11004
+Ledger planning owner-code-drain-begin case=owner-code-denied-plain elapsed_ms=8995 remaining_ms=11004
+Ledger planning owner-code-drain-exit case=owner-code-denied-plain elapsed_ms=9011 remaining_ms=10988
+Ledger planning seed case=owner-code-denied-counted elapsed_ms=9040 remaining_ms=10959
+Ledger planning owner-code-worker-ready case=owner-code-denied-counted elapsed_ms=9160 remaining_ms=10839
+Ledger planning owner-code-execution-returned case=owner-code-denied-counted elapsed_ms=10590 remaining_ms=9409
+Ledger planning owner-code-drain-begin case=owner-code-denied-counted elapsed_ms=10590 remaining_ms=9409
+Ledger planning owner-code-drain-exit case=owner-code-denied-counted elapsed_ms=10600 remaining_ms=9399
+Ledger planning seed case=owner-code-human-plain elapsed_ms=10638 remaining_ms=9361
+Ledger planning owner-code-worker-ready case=owner-code-human-plain elapsed_ms=10776 remaining_ms=9223
+Ledger planning owner-code-execution-returned case=owner-code-human-plain elapsed_ms=10977 remaining_ms=9022
+Ledger planning owner-code-resume-drain-begin case=owner-code-human-plain elapsed_ms=11303 remaining_ms=8696
+Ledger planning owner-code-resume-drain-exit case=owner-code-human-plain elapsed_ms=11332 remaining_ms=8667
+Ledger planning seed case=owner-code-human-counted elapsed_ms=11343 remaining_ms=8656
+Ledger planning owner-code-worker-ready case=owner-code-human-counted elapsed_ms=11443 remaining_ms=8556
+Ledger planning owner-code-execution-returned case=owner-code-human-counted elapsed_ms=11641 remaining_ms=8358
+Ledger planning owner-code-resume-drain-begin case=owner-code-human-counted elapsed_ms=11987 remaining_ms=8012
+Ledger planning owner-code-resume-drain-exit case=owner-code-human-counted elapsed_ms=11997 remaining_ms=8002
+Ledger planning seed case=accepted-atomic elapsed_ms=12006 remaining_ms=7993
+Ledger planning seed case=rejected-atomic elapsed_ms=12055 remaining_ms=7944
+Ledger planning seed case=continuation elapsed_ms=12104 remaining_ms=7895
+Ledger planning child-context-prepare case=planning-continuation elapsed_ms=12521 remaining_ms=7478
+Ledger planning child-context-prepared case=planning-continuation elapsed_ms=12544 remaining_ms=7455
+Ledger planning child-sdk-complete case=planning-continuation elapsed_ms=12715 remaining_ms=7284
+Ledger planning child-sdk-completed case=planning-continuation elapsed_ms=12762 remaining_ms=7237
+Ledger planning seed case=owner-accepted-context elapsed_ms=12967 remaining_ms=7032
+Ledger planning child-context-prepare case=planning-owner-accepted-context elapsed_ms=13188 remaining_ms=6811
+Ledger planning child-context-prepared case=planning-owner-accepted-context elapsed_ms=13244 remaining_ms=6755
+Ledger planning child-sdk-complete case=planning-owner-accepted-context elapsed_ms=13433 remaining_ms=6566
+Ledger planning child-sdk-completed case=planning-owner-accepted-context elapsed_ms=13490 remaining_ms=6509
+Ledger planning seed case=stale-settlement elapsed_ms=13747 remaining_ms=6252
+Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.
+Ledger phase end planning-admission elapsed_ms=13771
+Ledger phase begin paused-child-drain
+Ledger planning seed case=slot-owner-paused elapsed_ms=0 remaining_ms=19999
+Ledger planning seed case=slot-owner-resumed elapsed_ms=306 remaining_ms=19693
+Ledger phase end paused-child-drain elapsed_ms=919
+Ledger phase begin main-process-planning
+Ledger phase end main-process-planning elapsed_ms=7201
+Ledger phase begin main-planning-delegation
+Ledger coexistence case begin coexisting-read-plain-normal
+Ledger coexistence case begin coexisting-read-plain-deny
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=1 owner=root elapsed_ms=233
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=1 owner=root elapsed_ms=238
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=2 owner=delegated elapsed_ms=939
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=2 owner=delegated elapsed_ms=944
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=3 owner=delegated elapsed_ms=1420
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=3 owner=delegated elapsed_ms=1430
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=4 owner=root elapsed_ms=1538
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=4 owner=root elapsed_ms=1560
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=5 owner=planned elapsed_ms=2427
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=5 owner=planned elapsed_ms=2440
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=6 owner=root elapsed_ms=2579
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=6 owner=root elapsed_ms=2585
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=7 owner=delegated elapsed_ms=3332
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=7 owner=delegated elapsed_ms=3341
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=8 owner=delegated elapsed_ms=3691
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=8 owner=delegated elapsed_ms=3704
+Ledger model dispatch case=coexisting-read-plain-normal ordinal=9 owner=root elapsed_ms=3827
+Ledger model dispatch case=coexisting-read-plain-deny ordinal=9 owner=root elapsed_ms=3845
+Ledger coexistence stage read-plain-deny execution-settled elapsed_ms=3873
+Ledger coexistence stage read-plain-deny assertions-verified elapsed_ms=3880
+Ledger coexistence stage read-plain-deny service-closed elapsed_ms=3881
+Ledger coexistence case end coexisting-read-plain-deny elapsed_ms=3881
+Ledger coexistence stage read-plain-normal execution-settled elapsed_ms=3889
+Ledger coexistence stage read-plain-normal assertions-verified elapsed_ms=3893
+Ledger coexistence stage read-plain-normal service-closed elapsed_ms=3895
+Ledger coexistence case end coexisting-read-plain-normal elapsed_ms=3895
+Ledger coexistence case begin coexisting-read-plain-cancel
+Ledger coexistence case begin coexisting-read-counted-normal
+Ledger model dispatch case=coexisting-read-plain-cancel ordinal=1 owner=root elapsed_ms=207
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=1 owner=root elapsed_ms=209
+Ledger model dispatch case=coexisting-read-plain-cancel ordinal=2 owner=delegated elapsed_ms=766
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=2 owner=delegated elapsed_ms=791
+Ledger coexistence stage read-plain-cancel execution-settled elapsed_ms=896
+Ledger coexistence stage read-plain-cancel assertions-verified elapsed_ms=908
+Ledger coexistence stage read-plain-cancel service-closed elapsed_ms=909
+Ledger coexistence case end coexisting-read-plain-cancel elapsed_ms=909
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=3 owner=delegated elapsed_ms=1004
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=4 owner=root elapsed_ms=1095
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=5 owner=planned elapsed_ms=1720
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=6 owner=root elapsed_ms=1848
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=7 owner=delegated elapsed_ms=2188
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=8 owner=delegated elapsed_ms=2385
+Ledger model dispatch case=coexisting-read-counted-normal ordinal=9 owner=root elapsed_ms=2488
+Ledger coexistence stage read-counted-normal execution-settled elapsed_ms=2518
+Ledger coexistence stage read-counted-normal assertions-verified elapsed_ms=2522
+Ledger coexistence stage read-counted-normal service-closed elapsed_ms=2523
+Ledger coexistence case end coexisting-read-counted-normal elapsed_ms=2524
+Ledger coexistence case begin coexisting-read-counted-deny
+Ledger coexistence case begin coexisting-read-counted-cancel
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=1 owner=root elapsed_ms=237
+Ledger model dispatch case=coexisting-read-counted-cancel ordinal=1 owner=root elapsed_ms=239
+Ledger model dispatch case=coexisting-read-counted-cancel ordinal=2 owner=delegated elapsed_ms=941
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=2 owner=delegated elapsed_ms=946
+Ledger coexistence stage read-counted-cancel execution-settled elapsed_ms=1067
+Ledger coexistence stage read-counted-cancel assertions-verified elapsed_ms=1086
+Ledger coexistence stage read-counted-cancel service-closed elapsed_ms=1087
+Ledger coexistence case end coexisting-read-counted-cancel elapsed_ms=1087
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=3 owner=delegated elapsed_ms=1188
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=4 owner=root elapsed_ms=1280
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=5 owner=planned elapsed_ms=1804
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=6 owner=root elapsed_ms=1911
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=7 owner=delegated elapsed_ms=2255
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=8 owner=delegated elapsed_ms=2427
+Ledger model dispatch case=coexisting-read-counted-deny ordinal=9 owner=root elapsed_ms=2521
+Ledger coexistence stage read-counted-deny execution-settled elapsed_ms=2573
+Ledger coexistence stage read-counted-deny assertions-verified elapsed_ms=2578
+Ledger coexistence stage read-counted-deny service-closed elapsed_ms=2579
+Ledger coexistence case end coexisting-read-counted-deny elapsed_ms=2579
+Ledger coexistence case begin coexisting-coding-plain-normal
+Ledger coexistence case begin coexisting-coding-plain-deny
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=1 owner=root elapsed_ms=331
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=1 owner=root elapsed_ms=354
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=2 owner=delegated elapsed_ms=923
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=2 owner=delegated elapsed_ms=963
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=3 owner=delegated elapsed_ms=1298
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=3 owner=delegated elapsed_ms=1321
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=4 owner=root elapsed_ms=1441
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=4 owner=root elapsed_ms=1447
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=5 owner=planned elapsed_ms=2563
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=5 owner=planned elapsed_ms=2585
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=6 owner=root elapsed_ms=2745
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=6 owner=root elapsed_ms=2767
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=7 owner=delegated elapsed_ms=3403
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=7 owner=delegated elapsed_ms=3409
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=8 owner=delegated elapsed_ms=3737
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=8 owner=delegated elapsed_ms=3759
+Ledger model dispatch case=coexisting-coding-plain-deny ordinal=9 owner=root elapsed_ms=3876
+Ledger model dispatch case=coexisting-coding-plain-normal ordinal=9 owner=root elapsed_ms=3881
+Ledger coexistence stage coding-plain-deny execution-settled elapsed_ms=3911
+Ledger coexistence stage coding-plain-deny assertions-verified elapsed_ms=3916
+Ledger coexistence stage coding-plain-deny service-closed elapsed_ms=3917
+Ledger coexistence case end coexisting-coding-plain-deny elapsed_ms=3917
+Ledger coexistence stage coding-plain-normal execution-settled elapsed_ms=3942
+Ledger coexistence stage coding-plain-normal assertions-verified elapsed_ms=3948
+Ledger coexistence stage coding-plain-normal service-closed elapsed_ms=3950
+Ledger coexistence case end coexisting-coding-plain-normal elapsed_ms=3950
+Ledger coexistence case begin coexisting-coding-plain-cancel
+Ledger coexistence case begin coexisting-coding-counted-normal
+Ledger model dispatch case=coexisting-coding-plain-cancel ordinal=1 owner=root elapsed_ms=344
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=1 owner=root elapsed_ms=355
+Ledger model dispatch case=coexisting-coding-plain-cancel ordinal=2 owner=delegated elapsed_ms=968
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=2 owner=delegated elapsed_ms=1084
+Ledger coexistence stage coding-plain-cancel execution-settled elapsed_ms=1095
+Ledger coexistence stage coding-plain-cancel assertions-verified elapsed_ms=1098
+Ledger coexistence stage coding-plain-cancel service-closed elapsed_ms=1100
+Ledger coexistence case end coexisting-coding-plain-cancel elapsed_ms=1100
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=3 owner=delegated elapsed_ms=1347
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=4 owner=root elapsed_ms=1451
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=5 owner=planned elapsed_ms=2022
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=6 owner=root elapsed_ms=2167
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=7 owner=delegated elapsed_ms=2575
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=8 owner=delegated elapsed_ms=2804
+Ledger model dispatch case=coexisting-coding-counted-normal ordinal=9 owner=root elapsed_ms=2903
+Ledger coexistence stage coding-counted-normal execution-settled elapsed_ms=2939
+Ledger coexistence stage coding-counted-normal assertions-verified elapsed_ms=2944
+Ledger coexistence stage coding-counted-normal service-closed elapsed_ms=2946
+Ledger coexistence case end coexisting-coding-counted-normal elapsed_ms=2946
+Ledger coexistence case begin coexisting-coding-counted-deny
+Ledger coexistence case begin coexisting-coding-counted-cancel
+Ledger model dispatch case=coexisting-coding-counted-cancel ordinal=1 owner=root elapsed_ms=265
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=1 owner=root elapsed_ms=271
+Ledger model dispatch case=coexisting-coding-counted-cancel ordinal=2 owner=delegated elapsed_ms=905
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=2 owner=delegated elapsed_ms=916
+Ledger coexistence stage coding-counted-cancel execution-settled elapsed_ms=1032
+Ledger coexistence stage coding-counted-cancel assertions-verified elapsed_ms=1047
+Ledger coexistence stage coding-counted-cancel service-closed elapsed_ms=1048
+Ledger coexistence case end coexisting-coding-counted-cancel elapsed_ms=1048
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=3 owner=delegated elapsed_ms=1207
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=4 owner=root elapsed_ms=1369
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=5 owner=planned elapsed_ms=1988
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=6 owner=root elapsed_ms=2126
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=7 owner=delegated elapsed_ms=2497
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=8 owner=delegated elapsed_ms=2694
+Ledger model dispatch case=coexisting-coding-counted-deny ordinal=9 owner=root elapsed_ms=2814
+Ledger coexistence stage coding-counted-deny execution-settled elapsed_ms=2847
+Ledger coexistence stage coding-counted-deny assertions-verified elapsed_ms=2853
+Ledger coexistence stage coding-counted-deny service-closed elapsed_ms=2855
+Ledger coexistence case end coexisting-coding-counted-deny elapsed_ms=2855
+Ledger coexistence cases=12 max_concurrent=2
+Ledger phase end main-planning-delegation elapsed_ms=18761
+Ledger phase begin planned-read-permissions
+Ledger phase end planned-read-permissions elapsed_ms=3128
+Ledger phase begin restricted-catalogues

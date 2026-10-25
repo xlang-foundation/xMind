@@ -18,7 +18,15 @@ try {
         throw 'OAuth test certificate provisioning requires the elevated isolated runner.'
     }
 } finally {$oauthIdentity.Dispose()}
-$oauthTemp=(Resolve-Path -LiteralPath $env:RUNNER_TEMP).Path
+$oauthRunnerTemp=(Resolve-Path -LiteralPath $env:RUNNER_TEMP).Path
+$oauthTemp=(Resolve-Path -LiteralPath $env:TEMP).Path
+# ci-native retains failed fixtures in this repository-owned artifact directory.
+# Accept only that exact location or the original runner temporary directory;
+# a caller-selected TEMP directory must not expand certificate provisioning.
+$oauthEvidenceTemp=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../build/ci-evidence/native-fixtures'))
+if($oauthTemp -ne $oauthRunnerTemp -and $oauthTemp -ne $oauthEvidenceTemp){
+    throw 'OAuth fixtures require the runner temporary or repository evidence directory.'
+}
 $oauthFile=(Resolve-Path -LiteralPath $CertificateFile).Path
 $oauthRelative=[IO.Path]::GetRelativePath($oauthTemp,$oauthFile)
 if([IO.Path]::IsPathRooted($oauthRelative) -or $oauthRelative -eq '..' -or $oauthRelative.StartsWith('..'+[IO.Path]::DirectorySeparatorChar) -or $oauthRelative -notmatch '^xmind-oauth-trust-[^\\/]+[\\/]ca\.cer$'){

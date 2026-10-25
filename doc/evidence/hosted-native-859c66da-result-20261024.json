@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-10-25T04:58:22.752Z",
+  "source": "859c66da1bb24a742f4fa747fda56ead5a442f5e",
+  "runId": 40157167806,
+  "jobId": 121067690323,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40157167806",
+  "terminal": "failure",
+  "inventory": 177,
+  "passed": 176,
+  "failed": 1,
+  "seconds": 686.86,
+  "failure": {
+    "test": "native_mcp_oauth_trusted_contract",
+    "seconds": 0.84,
+    "stage": "Certificate provisioning before network execution",
+    "reason": "Fixture retention changed TEMP to repository build/ci-evidence/native-fixtures, but helper validated only RUNNER_TEMP",
+    "fixture": "xmind-oauth-trust-8VNgYj"
+  },
+  "separatePasses": {
+    "graphRemoteSeconds": 12.25,
+    "ledgerSeconds": 40.05,
+    "nestedHumanSeconds": 33.29,
+    "graphRunnerSeconds": 34.95
+  },
+  "artifact": {
+    "id": 12587096097,
+    "name": "native-windows-evidence-859c66da1bb24a742f4fa747fda56ead5a442f5e",
+    "bytes": 4702034,
+    "sha256": "2251c88ec868c8ecac3412a2eb2dccb81da2d586e1dffea52d8f9c27d47399fb"
+  },
+  "logSha256": "1770ce7f00e5474315c293cd3cbd5dd2226787b2e63b23301bdcb727446d89d1",
+  "fix": {
+    "file": "Tools/ci-oauth-certificate.ps1",
+    "scope": "Allow only exact runner TEMP or exact repository evidence TEMP, retaining all hosted/admin/path/certificate checks",
+    "powerShellSyntaxPassed": true,
+    "positiveHostedExecutionPending": true,
+    "pathOnlyGuardCasesPassed": 5
+  },
+  "completedTasksMustNeverBeReplayed": true,
+  "installed75Unchanged": true,
+  "earlierTimeoutCausesRemainUnproven": true
+}

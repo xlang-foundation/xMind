@@ -1,0 +1,66 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T04:50:54.274Z",
+    "sourceParent": "6cc54bee66ffdffadc9a928d5a531cec81af310e",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "pid": 14068,
+      "launchedAt": "2026-10-25T04:34:44.872Z",
+      "completedAt": "2026-10-25T04:35:14.075Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "503e59370e1502f74db398394ff83ca77b9d5db6b7c8ea13bf0fcf5d496fde87"
+    },
+    "test": {
+      "pid": 40788,
+      "launchedAt": "2026-10-25T04:35:17.613Z",
+      "completedAt": "2026-10-25T04:50:50.809Z",
+      "exitCode": 8,
+      "signal": null,
+      "logSha256": "52cfe93c90c3b517872da29a2fb491a49cfc1f32d474aca21bfa24c2134e5dae"
+    },
+    "total": 179,
+    "failed": 1,
+    "passed": 178,
+    "seconds": 933.17,
+    "projectFiles": 2840,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "8e88904fac065dbeb83239eddc506d2991b884cf452e26cf0aa91e8db4d44d98",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": true,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": false
+  },
+  "failure": {
+    "recordedAt": "2026-10-25T04:42:41.650Z",
+    "code": null,
+    "killed": true,
+    "signal": "SIGTERM",
+    "requests": 0,
+    "timeoutMs": 45000,
+    "maxBuffer": 1048576,
+    "completedTasksMustNeverBeReplayed": true
+  },
+  "lastPhase": "restricted-catalogues",
+  "completedCoexistenceCases": 12,
+  "maxConcurrentCases": 2,
+  "phaseMs": {
+    "planningAdmission": 13771,
+    "pausedChildDrain": 919,
+    "mainProcessPlanning": 7201,
+    "mainPlanningDelegation": 18761,
+    "plannedReadPermissions": 3128
+  },
+  "graphRemoteSeconds": 15.21,
+  "cause": "Unproven; cumulative ledger fixture exceeded unchanged 45-second wrapper deadline",
+  "ledgerLogSha256": "9f101bc08fd50167b9cf4d279e2e0a8d49a25038e1339258af472b9f89b7b64f",
+  "originalLogsRetained": true,
+  "completedTasksMustNeverBeReplayed": true,
+  "installed75Unchanged": true
+}
