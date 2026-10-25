@@ -1,3 +1,7 @@
+## Hosted graph process timeout reproduced; cause unproven — 2026-10-25
+
+Hosted9dd2c599 run40172774309/job121107448974 finishes178/179 in720.37s. The sole graph-runner failure is the original PowerShell30045/30000ms timeout: script_entered only, uncertain operation, physical tree retired. Original artifact12592054302 is retained and SHA256 verified. Namespace xmind-graph-runner-V9ilZT/rootmulti-process-root/child99040c67afc9dcba5cf56ceb889754ac must NEVER be replayed. Process observations do not contain an original thread stack, so no root cause or IPC-latency diagnosis is claimed. Existing30s budget remains unchanged. Newer hosted validation continues separately. [Receipt](evidence/hosted-native-9dd2c599-result-20261025.json), [original CTest log](evidence/hosted-native-9dd2c599-ctest-20261025.log). Full goal active.
+
 ## Shared browser/editor snapshot client — 2026-10-25
 
 BackendClient now exposes explicit open/read/observe/reset methods against native HTTP. It validates exact public bindings, consumer/cursor identity, generation, bounded records, complete digest acknowledgement and progressing partial revisions. Capability/origin/close checks discard late responses; no automatic fetch loop, reset or retry is introduced.

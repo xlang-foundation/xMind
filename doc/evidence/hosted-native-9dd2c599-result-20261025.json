@@ -1,0 +1,47 @@
+{
+  "observedAt": "2026-10-25T08:32:32.860Z",
+  "source": "9dd2c59994e698003116bc4e4bd4eeda05af9e7a",
+  "run": 40172774309,
+  "job": 121107448974,
+  "conclusion": "failure",
+  "total": 179,
+  "passed": 178,
+  "failed": 1,
+  "seconds": 720.37,
+  "failedContract": "native_graph_runner_contract",
+  "fixture": "xmind-graph-runner-V9ilZT",
+  "root": "multi-process-root",
+  "child": "99040c67afc9dcba5cf56ceb889754ac",
+  "operation": {
+    "elapsed_ms": 30045,
+    "exit_code": 1,
+    "id": "935aad828cbc51082b24cf31900338a0",
+    "output_artifact": {
+      "operation_id": "935aad828cbc51082b24cf31900338a0",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "artifact": {
+    "id": 12592054302,
+    "name": "native-windows-evidence-9dd2c59994e698003116bc4e4bd4eeda05af9e7a",
+    "bytes": 5119029,
+    "sha256": "f076587f9cafbe208d9e6b4a7552fafd685909ed36025d2dc6d7b286cd84ed14"
+  },
+  "ctestSha256": "b7680d0b51504e0cdecad2ae6cea544a7414ebcfa55598834f4fa1c55ef0636a",
+  "processObservationSamples": 3,
+  "originalThreadStackCaptured": false,
+  "causeProven": false,
+  "replayed": false,
+  "fullGoalComplete": false
+}
