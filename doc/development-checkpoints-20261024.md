@@ -183,3 +183,8 @@ Superseded after installed74 qualification (verbatim):
 Archived after hosted d55741e0 terminal result (2026-10-24):
 
 - Development d55741e0/Native d85a1697 passes full179 in788.06s; installed75 unchanged. Older hosted6cc54bee fails5/177; current hosted40166026077 is live. See doc/VALIDATION_STATUS.md; no replay.
+
+
+Archived when76 installer completed; preservation pending:
+
+- Development d55741e0/Native d85a1697 passes local179/hosted177; CI staging pin fixed47e9a2e4, hosted packaging pending. Installed75 unchanged; candidate76 CLI/browser/editor tasks complete, NEVER replay. See doc/VALIDATION_STATUS.md.

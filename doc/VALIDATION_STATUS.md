@@ -1,3 +1,7 @@
+## Installed76; preservation comparison pending — 2026-10-24
+
+The installer exits0 for qualified candidate76 after exact2442-file installed75 backup and five protected-root snapshots. Actual installed payload2440 files, complete file set/package manifest,2398 runtime hashes and other extension registry entries verify. Final protected-root comparison is still running as session54333/PID9724; acceptance and installed smoke remain pending. No visible window or user-profile backend was started. Retain the exact live handle; do not rerun installation or replay any completed task. [Pending receipt](evidence/installed76-pending-preservation-20261024.json). Full goal active.
+
 ## Candidate76 managed handoff and isolated editor retirement — 2026-10-24
 
 Fresh disposable sessione09631a2e4bcab263ba3d8c9a0c4c8b6, completed roots013f047f4df136a0da98727f2e99b6f9/8453c850bc1f675258f0dd572762feb0 verifies actual75-to76 native package handoff: paused-graph upgrade refusal, exact original graph resumed once, idle takeover preserving endpoint/profile/session/history, zero model calls and identity-bound owner retirement. All10284 tracked source hashes/file sets and both immutable package manifests verify. Initial preflight refused a parent shell containing its guard text before any native launch; separate launch passed and ran the scenario once. NEVER replay these completed roots. [Handoff receipt](evidence/candidate76-managed-handoff-20261024.json).

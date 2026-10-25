@@ -1,0 +1,44 @@
+{
+  "state": "installed-awaiting-preservation-and-smoke",
+  "version": "0.1.76",
+  "terminal": {
+    "pid": 24568,
+    "startedAt": "2026-10-25T06:47:28.286Z",
+    "completedAt": "2026-10-25T06:47:33.109Z",
+    "exitCode": 0,
+    "signal": null,
+    "visibleWindowRequested": false
+  },
+  "preflight": {
+    "versionBefore": "0.1.75",
+    "backupVerifiedFiles": 2442,
+    "preservedRoots": [
+      "C:/Users/shaw9/.xMind",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+      "D:/CantorAI2026/xMind/.config"
+    ],
+    "vsixSha256": "424e68c1541bcc3e69ea8fa392b2f3a18d7254c070de64c48c98354ea226c056",
+    "visibleWindowRequested": false
+  },
+  "checksCompleted": {
+    "payloadFiles": 2440,
+    "runtimeFiles": 2398,
+    "completeInstalledFileSetAndManifest": true,
+    "otherExtensionRegistryEntriesUnchanged": true
+  },
+  "pending": {
+    "preservationVerifierSession": 54333,
+    "pid": 9724,
+    "birth": "2026-10-25T06:47:42.6037520Z",
+    "smokeNotStarted": true
+  },
+  "limitations": [
+    "Final user-state comparison is still running; no preservation pass claimed.",
+    "No visible editor/browser opened; no user-profile backend started.",
+    "Initial additional payload-copy check refused missing VSIX-added LICENSE.txt before any backup/install; only that packaging-added license was excluded from the rendered-copy comparison. Installed license is included in actual payload verification.",
+    "Hosted corrected staging remains pending; earlier full177 hosted native pass is separate evidence."
+  ],
+  "goalComplete": false
+}

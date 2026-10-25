@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Development d55741e0/Native d85a1697 passes local179/hosted177; CI staging pin fixed47e9a2e4, hosted packaging pending. Installed75 unchanged; candidate76 CLI/browser/editor tasks complete, NEVER replay. See doc/VALIDATION_STATUS.md.
+- Native d85a1697 passes local179/hosted177. Installed76 installer/payload pass; preservation54333 and smoke pending. Exact75 backup verified. NEVER replay candidate76 CLI/browser/editor/handoff tasks. See doc/VALIDATION_STATUS.md.
 
 - Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.
 
