@@ -1,6 +1,6 @@
 ## Current delivery priority: working v1 — 2026-10-25
 
-The user set a working first version with solid UI and a reliable coding framework as the immediate milestone; the original broader goal remains retained for later delivery. Follow [v1 acceptance](WORKING_V1_GOAL.md). Prioritize packaged browser/VS Code/CLI usability and release blockers. Advanced feature breadth is deferred; a full local contract pass does not prove a usable installed release.
+Working v1 with solid UI and a reliable coding framework is the only delivery goal. The user removed the old broader goal; do not resume or pursue its feature backlog. Follow [v1 acceptance](WORKING_V1_GOAL.md). Prioritize packaged browser/VS Code/CLI usability and release blockers. Advanced feature breadth is outside this goal unless it blocks v1; a full local contract pass does not prove a usable installed release. Historical checkpoints below retain their original scope and are not current backlog instructions.
 
 ## SDK6df6520f: complete local native qualification — 2026-10-25
 
@@ -8,7 +8,7 @@ The complete184-contract suite passes together in767.44s against SDK6df6520f and
 
 Three earlier full-run failures remain recorded: two library/license layout errors, then a Gemini fixture ordering race between durable completion and runtime retirement. The fixture now observes idle before repair without retrying mutations, changing production code or weakening deadlines. Its old peer removed the failed database; original logs/test images/source are retained and future failures retain their fixture. Focused3/3 and1/1 are separate evidence from the new complete184/184 pass. [Receipt and actual inventory](evidence/native-sdk6df-full-20261025.json), [terminal log](evidence/native-sdk6df-full-20261025.log).
 
-The three CI SDK pins now move together to6df6520f; the library pin remains ebf955df. The local gate used this SDK explicitly before that metadata change. Hosted qualification, release packaging, fresh rendered/CLI acceptance and installation preservation remain open; installed76 is unchanged. The full delivery goal remains active.
+The three CI SDK pins now move together to6df6520f; the library pin remains ebf955df. The local gate used this SDK explicitly before that metadata change. Hosted qualification, release packaging, fresh rendered/CLI acceptance and installation preservation remain open; installed76 is unchanged. The working v1 goal remains active.
 
 ## Module-class SDK compatibility qualified; xMind integration gate next — 2026-10-25
 

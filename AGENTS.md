@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Immediate user milestone: deliver a working v1 with solid UI and reliable browser/VS Code/CLI coding, prioritizing usability and release blockers over feature breadth. Keep the original broader goal for later work. Acceptance: [working v1 goal](doc/WORKING_V1_GOAL.md).
+- Only delivery goal: deliver a working v1 with solid UI and reliable browser/VS Code/CLI coding, prioritizing usability and release blockers over feature breadth. The user removed the old broader goal; do not resume or pursue that backlog. Advanced breadth is outside this goal unless it blocks v1. Acceptance: [working v1 goal](doc/WORKING_V1_GOAL.md).
 
 - SDK6df6520f passes local184 (f86eda4b), pip25/26 and fixed perf11; CI pins updated. Hosted/new release qualification remains open. Local IPC only; cross-node workers belong to later Cantor Cluster. Installed76 unchanged. See doc/VALIDATION_STATUS.md.
 
