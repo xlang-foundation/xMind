@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-25T07:52:12.224Z",
+  "sourceParent": "35fdcbaa7d9d77d4db8758047d00111d03f2c34d",
+  "sourcePatchSha256": "8b66b2fd8c23608c4bd86ea076c01e82fa4d1bc37bb5fa81480099a0bd6c0a3c",
+  "build": {
+    "pid": 39652,
+    "launchedAt": "2026-10-25T07:50:55.299Z",
+    "completedAt": "2026-10-25T07:51:51.565Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "fa61b5e152893992307a0e9661e9469ae1c034194038948932a9c990e896e13d"
+  },
+  "test": {
+    "pid": 41540,
+    "launchedAt": "2026-10-25T07:51:54.305Z",
+    "completedAt": "2026-10-25T07:52:09.097Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "5972c6d3d58ae2607e23b3fee15089a0500e869bba47f5831faf2f717eff9766"
+  },
+  "total": 8,
+  "failed": 0,
+  "passed": 8,
+  "seconds": 14.73,
+  "projectFiles": 2856,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 145,
+  "nativeSha256": "b98b7476a4a89b385016109dde521cf169587a0e3fb502853b0e18b47b589666",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "newSourceFile": {
+    "path": "Native/tests/remote_snapshot_cli_contract.mjs",
+    "sha256": "7f2048dc61bca2054c01432497157c32a40a2770a0f91f6251bcc1f54bbac1d8"
+  },
+  "peer": {
+    "passed": true,
+    "commands": 18,
+    "hostPid": 39740,
+    "separateCliProcesses": true,
+    "standardSdkMethods": true,
+    "generationCheckedBeforeConsumerCreation": true,
+    "explicitResumeAndReset": true,
+    "databaseReopened": true,
+    "networkFetch": false,
+    "modelCalls": 0,
+    "goalComplete": false
+  },
+  "scope": "Actual separate CLI processes call standard retained xlang3 snapshot methods against a disposable native host; existing CLI/IPC, lifetime, decoder/transport/authentication/SDK regressions also run.",
+  "commands": [
+    "scope-run-snapshot-open",
+    "scope-run-snapshot-read",
+    "scope-run-snapshot-observe",
+    "scope-run-snapshot-reset"
+  ],
+  "registeredLocalContracts": 183,
+  "registeredHostedContracts": 181,
+  "limits": [
+    "CLI positive snapshot data is preseeded cached state; no positive trusted-TLS snapshot fetch claim.",
+    "Development executable Nativeb98b7476 has focused validation only, not a new complete suite/package qualification.",
+    "Installed76 remains Natived85a1697 unchanged.",
+    "Native HTTP/UI adapters, root-tree recovery and remaining enrollment/fenced-worker work remain open."
+  ],
+  "goalComplete": false
+}

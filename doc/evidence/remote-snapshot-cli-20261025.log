@@ -1,0 +1,149 @@
+Start testing: Oct 25 00:51 Pacific Daylight Time
+----------------------------------------------------------
+5/183 Testing: native_remote_run_snapshot_contract
+5/183 Test: native_remote_run_snapshot_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_run_snapshot_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_run_snapshot_contract" start time: Oct 25 00:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native snapshot page validation: initial/continuation, replacement epoch, stable watermark, resource/grant identity and 30 refusals. No fetch, persistence, cursor reset or routing claimed.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_run_snapshot_contract" end time: Oct 25 00:51 Pacific Daylight Time
+"native_remote_run_snapshot_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/183 Testing: native_remote_connection_client_contract
+6/183 Test: native_remote_connection_client_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_client_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_client_contract" start time: Oct 25 00:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Remote run event connector passed namespace/order/last-record cursor binding,20 invalid page modes, explicit retention/epoch gaps, empty reconnect and no-send refusal. No public cursor publication or trusted TLS claim.
+Typed cancellation POST and receipt GET pass exact target/revision binding, admission distinctions, malformed/error refusal and permission isolation; no worker retirement or trusted TLS claim.
+Typed run POST/receipt GET verified exact session/request/revision and known prompt SHA256, outcome distinctions,17 invalid response modes and no-send authorization/input/cancellation refusal. Controlled loopback only; no persisted run execution.
+Actual native typed session POST and receipt GET pass exact request/title/revision binding, admission/pending/rejection/not-found distinctions, malformed/error/redirect/size refusal and no retry. Loopback test only; no production activation.
+Remote scoped session observation passed two actual controlled GETs and16 exact refusal GETs, fixed binding headers, strict identity/schema/size checks, preflight scope/action/expiry/path/cancellation checks and no redirect/retry. No TLS trust or remote mutation claim.
+Native remote client made 10 controlled bearer-authenticated loopback negotiation requests: positive grant, expired/mismatched/incompatible/malformed responses, HTTP401/403/307 and bounded-response refusal; no retry, downgrade or redirect. Unsafe/default HTTP origins and pre-cancelled calls sent nothing. No TLS trust, profile activation or persistence claim.
+<end of output>
+Test time =   1.82 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_client_contract" end time: Oct 25 00:51 Pacific Daylight Time
+"native_remote_connection_client_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+7/183 Testing: native_remote_snapshot_transport_contract
+7/183 Test: native_remote_snapshot_transport_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_snapshot_transport_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_snapshot_transport_contract" start time: Oct 25 00:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native snapshot transport: two exact encoded GET pages, 12 refusals, no redirects/retries or cursor mutation. Controlled loopback only; native trusted TLS remains separate.
+<end of output>
+Test time =   0.14 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_snapshot_transport_contract" end time: Oct 25 00:51 Pacific Daylight Time
+"native_remote_snapshot_transport_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/183 Testing: native_remote_connection_authentication_contract
+9/183 Test: native_remote_connection_authentication_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_authentication_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_authentication_contract" start time: Oct 25 00:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Captured snapshot recovery: durable two-page fetch, cached recovery, explicit digest reset, post-fetch cancellation/profile/credential/baseline fences, no-stage failures, reopen and cached-data permission refusal.
+Explicit snapshot reset: complete revision/digest required, partial/pending/stale refusals, one competing CAS winner, duplicate acknowledgement, event continuation and durable reset receipt. No authorization or remote effects claimed.
+Snapshot assembly: three database lifetimes, partial reopen, duplicate-page idempotence, cross-page duplicate refusal and competing CAS writer; accepted event checkpoint unchanged.
+Captured snapshot service: two pages, malformed typed replies, no-send refusal, cancellation/profile/credential fencing and encrypted reopen; no reset or actual TLS claimed.
+Captured run reads verified exact metadata, six states, no-send refusals and post-response cancellation/profile/credential fencing through real xlang3/SQLite. Controlled backend exchange only.
+Captured remote events passed pre-send namespace refusal, typed-page validation, immutable input cursor, retention gaps, post-response cancellation/profile/credential fencing and encrypted reopen. No public cursor/reset or actual network claim.
+Typed run command journal verified immutable prompt/session revision, cross-operation conflicts, competing single-send claim and prepared/unknown/terminal state across three xlang3/SQLite lifetimes. No networking or run execution.
+Typed cancellation journal passed exact session/run/revision binding, competing send claims, unknown across reopen, immutable admission/rejection and wrong-run receipt refusal. Admission is not worker retirement; no cancellation network dispatch.
+Native cancellation service passed one uncertain send, no resend across reopen/not-found, fresh receipt-only credential reconciliation, original intent retention and terminal no-network observation. Admission is not worker retirement.
+Native run submission service verified one send, lost reply/not-found retention, receipt-only fresh-grant reconciliation across database reopen, terminal no-network observation and post-send credential/cancellation uncertainty. Controlled exchanges only; no remote worker execution.
+Remote command SQLite journal verifies exact intent conflicts, competing send claims, persisted unknown before send, restart before/after send, terminal admission/rejection and no completed resend. No network or model execution.
+Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.
+Native authentication service integrates nine controlled injected negotiation outcomes with real xlang3/SQLite encrypted publication. Read-only observation covers absent/stored/stale-profile/expired states, redacted stale identity, retained revision after database reopen and no exchange. Captured session reads verify scope permission, exact resource result, profile/credential revision fencing, pre-send cancellation and post-response credential rotation refusal. No actual TLS/network exchange in this service fixture; standalone HTTP peer coverage is separate. Remote selection remains disabled.
+<end of output>
+Test time =   1.80 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_authentication_contract" end time: Oct 25 00:51 Pacific Daylight Time
+"native_remote_connection_authentication_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+34/183 Testing: native_xmind_ipc_lifetime_contract
+34/183 Test: native_xmind_ipc_lifetime_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_xmind_ipc_lifetime_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_lifetime_contract" start time: Oct 25 00:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native process root registration passed concurrent initialization, unbound service refusal, one listener, exclusive public ownership, stale object/token refusal, rebinding without re-registration, persisted data and refusal after backend destruction. Same-process SDK lifecycle fixture; separate xmind.exe calls are covered independently.
+<end of output>
+Test time =   1.83 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_lifetime_contract" end time: Oct 25 00:51 Pacific Daylight Time
+"native_xmind_ipc_lifetime_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+35/183 Testing: native_xmind_ipc_api_contract
+35/183 Test: native_xmind_ipc_api_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/xmind_ipc_api_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_xmind_ipc_api_contract" start time: Oct 25 00:51 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+{"actualOrdinarySdkCommand":true,"commandRunId":"sdk-direct-command","sessionId":"sdk-direct-command-session","controlledModelRequests":1,"persistedMessages":2,"duplicateDispatchRefused":true,"literalArgumentsRetained":true}
+{"backendPid":18572,"clientPids":[19032,31808,35216,29644,41156,25912,22436,32104,38156,36140,34764,1988,27308,19596,41464,43612,32908,14168,27448,38228,43580,42492,28272,33332,20360,37316,39380,22936,43032,40836,36588,17420,39680,44632,38452,31972,34712,29624,9912,14824,27920,9104,40392,44260,25040,6176,41016,42160,38608,38836,43748,36532,42760,36004,39352,36992,16152,43048,3968,41640,43184,25096,42096,36392,43280,43444,11412,15448,13824,35588,40428,34200,42728,31704,12364,21476,24688,41240,32632,32988,42916,42328,26064,9712,8796,9168,7068,41332,38368,43392,42944,27352,30608,1936,39344,26756,37508,41408,39828,15556,17960,18428,31600,40776,43400,41108,42080,13560,18436,26672,30644,29328,28612,33264,27260,12760,11812,29764,31212,42700,33604,43404,34884,10476,40024,33048,32384,11248,11132,38892,42948,29880,32520,8612,44224,4564,13036,4136,11808,40712,25428,36060,9820,44392,8964,32996],"apiVersion":1,"transport":"xlang3-lrpc","actualUnifiedExecutable":true,"verified":["Distinct SDK agent list/definition/select/clear with real imported definitions and zero added inference","Origin-bound captured HTTP agent selection, stale refusal and shared parsing","Root registered at backend startup","Native Host/Connections/Sessions/Runs subobjects","Distinct xmind.exe clients call SDK methods directly","Exact UTF-8 persisted session survives independent clients","Duplicate create and wrong authentication rejected","No unauthorized session created","Unknown run rejected","Captured run start/open/events and live cancellation use actual SDK service subobjects","Wrong-token and stale captured run admissions dispatch no model","SDK value catalog agrees with HTTP and persists UTF-8 metadata","Independent clients race one catalog revision; exactly one succeeds","Unauthenticated selection, wrong token, stale revision and credential fields rejected"],"limitations":["No worker migration, model/tool/planning IPC or old dispatcher removal established by this gate","No live provider or rendering acceptance"],"passed":true}
+<end of output>
+Test time =   6.36 sec
+----------------------------------------------------------
+Test Passed.
+"native_xmind_ipc_api_contract" end time: Oct 25 00:52 Pacific Daylight Time
+"native_xmind_ipc_api_contract" time elapsed: 00:00:06
+----------------------------------------------------------
+
+78/183 Testing: native_remote_snapshot_sdk_contract
+78/183 Test: native_remote_snapshot_sdk_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/remote_snapshot_sdk_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_snapshot_sdk_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_snapshot_sdk_contract" start time: Oct 25 00:52 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Separate-process standard SDK snapshot subobject, cached payload/digest, explicit reset, owner retirement/rebind and database reopen passed; no network or model work.
+<end of output>
+Test time =   0.64 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_snapshot_sdk_contract" end time: Oct 25 00:52 Pacific Daylight Time
+"native_remote_snapshot_sdk_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+79/183 Testing: native_remote_snapshot_cli_contract
+79/183 Test: native_remote_snapshot_cli_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/remote_snapshot_cli_contract.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_snapshot_sdk_contract.exe" "D:/CantorAI2026/xMind/build/skill-state-native/Release/xmind.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_snapshot_cli_contract" start time: Oct 25 00:52 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Separate native CLI snapshot open/read/observe/reset, generation refusals before consumer creation, digest acknowledgement, explicit resume and reopen passed; no network/model work.
+<end of output>
+Test time =   2.10 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_snapshot_cli_contract" end time: Oct 25 00:52 Pacific Daylight Time
+"native_remote_snapshot_cli_contract" time elapsed: 00:00:02
+----------------------------------------------------------
+
+End testing: Oct 25 00:52 Pacific Daylight Time

@@ -954,3 +954,29 @@ snapshot content is seeded for this SDK fixture; it is not positive network or
 trusted-TLS evidence. SDK lifetime and permission checks apply to every method.
 CLI/native HTTP/UI routes remain open, so the HTTP capability endpoint does not
 yet advertise remote_run_snapshots. [SDK evidence](evidence/remote-snapshot-sdk-20261025.json).
+
+### Native CLI snapshot adapters
+
+After `xmind ipc --endpoint lrpc:PORT connections`:
+
+```text
+scope-run-snapshot-open ID REV SCOPE SESSION RUN CONSUMER CHECKPOINT_REV
+scope-run-snapshot-read ID REV SCOPE SESSION RUN CONSUMER CHECKPOINT_REV JSON_SNAPSHOT_ID|null ASSEMBLY_REV BACKEND_GENERATION
+scope-run-snapshot-observe ID REV SCOPE SESSION RUN CONSUMER SNAPSHOT_ID BACKEND_GENERATION
+scope-run-snapshot-reset ID REV SCOPE SESSION RUN CONSUMER SNAPSHOT_ID ASSEMBLY_REV DIGEST BACKEND_GENERATION
+```
+
+These commands call the registered SDK subobjects; they do not access SQLite.
+Read/observe/reset compare the expected backend generation before creating the
+consumer. Open explicitly acquires a fresh baseline. For Read, the snapshot ID
+argument is a JSON string or null, distinguishing the ordinary ID `"null"` from
+the null first-page sentinel. The checkpoint revision must match the captured
+stored baseline. Numeric revisions refuse malformed/boolean text.
+
+Observe/Reset explicitly resume the original stored baseline under the current
+authorized scope. This supports a separate CLI process acknowledging an existing
+complete snapshot; it does not revive a retired SDK object, bypass generation
+checks or rewind a progressed checkpoint. The output uses the SDK's public
+observation/reset fields. Actual positive CLI evidence is cached snapshot state;
+network/trusted-TLS delivery remains separate. Native HTTP/UI adapters are still
+open. [CLI evidence](evidence/remote-snapshot-cli-20261025.json).
