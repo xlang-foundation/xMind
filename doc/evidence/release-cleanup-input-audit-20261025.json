@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-25T18:01:33.690Z",
+  "project": 2860,
+  "sourceCommit": "feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+  "sourceProof": "Canonical Git source projection matches the exact Native patch hash captured before full validation; checkout line endings and subsequent guidance-only changes are not claimed byte-identical.",
+  "guidanceRawSha256": "42abb4a3ae4f26b14003772a11fc032e2ed48a5fe093f7a28b9ecef50d1df48b",
+  "frontend": 64,
+  "browserAssets": 18,
+  "sdkRevision": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "sdkHeaders": 16,
+  "runtime": 30,
+  "pureLibraries": 1870,
+  "nodeDependencies": {
+    "Native/tests/sdk/node_modules": 3690,
+    "extensions/vscode/node_modules": 14908
+  },
+  "nativeBinaries": 145,
+  "recordedAt": "2026-10-25T18:02:54.302Z",
+  "nativeSha256": "ce3d809288a91be2f2b12df4f69a4992191e0ca813338fb6109dd24a0ebc0337",
+  "fullNativeReceipt": "native-sdk4417-test-only-channel-full-20261025.json",
+  "clientContractCounts": {
+    "extension": 510,
+    "browser": 180
+  },
+  "hostedRunRequired": 40218841893,
+  "hostedSourceRequired": "feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+  "stagingRefusalVerified": true,
+  "outputCreated": false,
+  "packaged": false,
+  "installed": false,
+  "fullGoalComplete": false,
+  "scripts": {
+    "audit-package77-cleanup-inputs.mjs": "2960b215913c5c5a6902e208c4ca6cc139b4cf624219308b623848d362099c2b",
+    "require-hosted-cleanup-qualification.mjs": "34e197b4ea18b791311704bb65e2198cf1bc73c378a104161337c4738988da15",
+    "stage-native-cleanup-package77.mjs": "20590138898d43882fc3a61e74da71ce0eee69a1662570cc9b30213a7d459143"
+  }
+}

@@ -1,3 +1,7 @@
+## Cleanup release inputs verified; hosted gate still required — 2026-10-25
+
+Release preparation now targets the qualified feb42dc2/Nativece3d8092 cleanup rather than the older32489 startup build. Its canonical Native patch matches the exact pre-validation patch hash; current non-guidance source matches that committed source tree. Checkout line endings and later guidance-only changes are explicitly separate from byte identity. The audit verifies the2860-file source set,64 unchanged frontend files against the existing510/180 client gate,18 browser assets,16 SDK headers,30 runtime files,1870 pure libraries,18598 Node dependencies and145 native binaries. The complete staging entry point refuses absent hosted40218841893/feb42 acceptance before creating output. No new package/install is claimed. [Audit receipt](evidence/release-cleanup-input-audit-20261025.json).
+
 ## Hostedfa56:180/182; two worker deadline failures remain — 2026-10-25
 
 Hosted40209454418 atfa56cd23/SDK4417 completes the actual182-test inventory in794.21s:180 pass, ledger fails in45.15s and nested-human times out in45.03s. Worker RPC and agent-runner pass in this run. The inventory/terminal names and artifact hashes verify, and all original fixture namespaces remain preserved and forbidden for replay. Neither this run nor later local passes resolve those original worker deadline causes. Packaged pip and release assembly were skipped. [Terminal evidence](evidence/hosted-fa56-worker-deadlines-20261025.json).
