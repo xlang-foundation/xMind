@@ -1,0 +1,174 @@
+{
+  "recordedAt": "2026-10-25T09:03:56.844Z",
+  "scope": "Five exact browser proxy POST routes: authorized scopes and explicit snapshot open/read/observe/reset",
+  "clients": {
+    "source": "b314c3828bc41c3184b49f6c049aaf428ce1ed56",
+    "projectFiles": 2853,
+    "dependencyFiles": 14908,
+    "testFiles": {
+      "extension": 23,
+      "browser": 10
+    },
+    "results": {
+      "build": {
+        "pid": 25956,
+        "startedAt": "2026-10-25T09:01:16.429Z",
+        "endedAt": "2026-10-25T09:01:16.509Z",
+        "exitCode": 0,
+        "logSha256": "9c20a39a33249bfaa74018991ca110e90c152da8785b593c8eda89c0a557d450"
+      },
+      "extension": {
+        "pid": 2380,
+        "startedAt": "2026-10-25T09:01:16.509Z",
+        "endedAt": "2026-10-25T09:01:27.638Z",
+        "exitCode": 0,
+        "logSha256": "d12f3326888b15fac8c3c8150967680d9135a599125bba343811cde1f69f270f",
+        "tests": 506,
+        "pass": 506,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 11064.9561
+      },
+      "browser": {
+        "pid": 15696,
+        "startedAt": "2026-10-25T09:01:27.639Z",
+        "endedAt": "2026-10-25T09:01:48.064Z",
+        "exitCode": 0,
+        "logSha256": "1f2fb037c9a52d155e89ed52a0444829ba8ad4dfff2c49310c8dd14dd3893335",
+        "tests": 179,
+        "pass": 179,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 20322.8267
+      }
+    },
+    "artifacts": 18,
+    "allSourceDependenciesAndSetsUnchanged": true,
+    "nativeSuiteRun": false,
+    "rendered": false,
+    "installed": false,
+    "paidInference": false,
+    "cpython": false,
+    "passed": true
+  },
+  "nativeOwnerProxy": {
+    "testRunner": "Direct Node native HTTP fixture through actual browser proxy; not CTest",
+    "recordedAt": "2026-10-25T09:01:23.265Z",
+    "sourceParent": "b314c3828bc41c3184b49f6c049aaf428ce1ed56",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "exitCode": 0,
+      "skipped": true,
+      "reason": "No C++ changes; exact previously tested development executable verified"
+    },
+    "test": {
+      "pid": 15436,
+      "launchedAt": "2026-10-25T09:01:13.881Z",
+      "completedAt": "2026-10-25T09:01:14.500Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4d007964401ad83cfb895ca71e77fd33c2af5826757819dce94f2e9b70dbd6dc"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.619,
+    "projectFiles": 2857,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "nativeCookieViewProxy": {
+    "testRunner": "Direct Node native HTTP fixture through actual browser proxy; not CTest",
+    "recordedAt": "2026-10-25T09:03:11.899Z",
+    "sourceParent": "b314c3828bc41c3184b49f6c049aaf428ce1ed56",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "exitCode": 0,
+      "skipped": true,
+      "reason": "No C++ changes; exact previously tested development executable verified"
+    },
+    "test": {
+      "pid": 5052,
+      "launchedAt": "2026-10-25T09:03:02.101Z",
+      "completedAt": "2026-10-25T09:03:02.807Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "4d007964401ad83cfb895ca71e77fd33c2af5826757819dce94f2e9b70dbd6dc"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.706,
+    "projectFiles": 2857,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "rendered": false,
+  "installed": false,
+  "retainedFailures": {
+    "renderedFixture": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-snapshot-http-CIvlqf",
+    "reason": "Native test host has no workspace catalogue; no complete rendered acceptance",
+    "launcherGate": {
+      "testRunner": "Direct Node native HTTP fixture through actual browser proxy; not CTest",
+      "recordedAt": "2026-10-25T09:00:49.605Z",
+      "sourceParent": "b314c3828bc41c3184b49f6c049aaf428ce1ed56",
+      "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build": {
+        "exitCode": 0,
+        "skipped": true,
+        "reason": "No C++ changes; exact previously tested development executable verified"
+      },
+      "test": {
+        "pid": 24948,
+        "launchedAt": "2026-10-25T09:00:38.480Z",
+        "completedAt": "2026-10-25T09:00:38.814Z",
+        "exitCode": 1,
+        "signal": null,
+        "logSha256": "c0fee0957b6e22468e6a2e9344f8b57c77a26deb2212c2aa5210a1bc39ba504b"
+      },
+      "total": 1,
+      "failed": 1,
+      "passed": 0,
+      "seconds": 0.334,
+      "projectFiles": 2857,
+      "sdkSourceFiles": 16,
+      "pureLibraryFiles": 1870,
+      "sdkRuntimeFiles": 30,
+      "nodeDependencyFiles": 18598,
+      "nativeBinaries": 145,
+      "nativeSha256": "78e55344f43023c27cea52821f54bc015046be3b1664d11bbb76b8e144085e9e",
+      "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+      "fullNativeSuiteRun": false,
+      "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+      "cpythonExecuted": false,
+      "installed": false,
+      "scopePassed": false
+    },
+    "launcherReason": "Incorrect private test enrollment URL; corrected to /ui/session in fresh fixture"
+  },
+  "goalComplete": false
+}

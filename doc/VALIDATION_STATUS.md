@@ -1,3 +1,11 @@
+## Actual browser proxy now forwards authorized scopes and snapshots — 2026-10-25
+
+Real-path inspection found the loopback browser proxy omitted authorized-scopes and all four snapshot endpoints despite the shared client and native backend supporting them. Added only those five exact POST routes; wrong methods/suffixes and Remote selection remain refused. Existing proxy tests now verify native view credential/origin forwarding and exact JSON bodies for all five.
+
+Complete client suites pass506/506 and179/179 with2853 project/14908 dependency closure stable. Fresh native integration passes through both owner-authenticated proxy and cookie-authenticated origin-bound view proxy, exercising actual scope inspection, snapshot open/read/observe/reset, cached permission denial, shared SDK checkpoint and SQLite reopen. View fixture completes0.706s;2857/16/1870/30/18598/145 source/SDK/library/runtime/dependency/binary hashes and sets stable. No C++ rebuild or paid inference.
+
+An earlier hidden-browser attempt is unaccepted because the test host has no workspace catalogue; its xmind-snapshot-http-CIvlqf namespace/logs remain and must not be replayed. A separate private-launcher URL mistake also remains in the receipt; final proxy tests used fresh fixtures. Rendered full UI acceptance remains open. Installed76 unchanged. [Receipt](evidence/browser-remote-observation-proxy-20261025.json), [native log](evidence/browser-remote-observation-proxy-native-20261025.log), [browser suite](evidence/browser-remote-observation-proxy-browser-20261025.log). Full goal active.
+
 ## Hosted browser/editor scope-inspection suites accepted — 2026-10-25
 
 Hosted d616d119 run40177517702/job121121322752 succeeds506/506 extension and179/179 browser contracts. Original artifact12593202051 SHA256 verifies;71 source and18 asset before/after manifests agree and original terminal logs confirm both counts with zero failures. This accepts the adapter/controller scope and corrected exact-count gate. Rendered native-backed scope inspection, snapshot UI and full native release qualification remain separate. Installed76 unchanged. [Hosted receipt](evidence/hosted-client-d616d119-20261025.json). Full goal active.
