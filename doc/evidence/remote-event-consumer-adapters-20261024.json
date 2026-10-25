@@ -1,0 +1,96 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T05:29:57.148Z",
+    "sourceParent": "5a750456c76e6c2576a0d04d283f47f9084c29c4",
+    "sourcePatchSha256": "2154b86078b9a0f00c7cd3a214ebaf605723a79ab17bf9a7240fa511329bc490",
+    "build": {
+      "pid": 1140,
+      "launchedAt": "2026-10-25T05:25:56.461Z",
+      "completedAt": "2026-10-25T05:29:29.535Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "d8cb394941c19318913d56267b1dbe1ddb141c1b62f5ee3248107c01b263df57"
+    },
+    "test": {
+      "pid": 36080,
+      "launchedAt": "2026-10-25T05:29:33.120Z",
+      "completedAt": "2026-10-25T05:29:54.597Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "27769e8e5ce95d559ea7191d1a844c3cdbf097d2cd8c8e47a867125d1a608730"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 21.42,
+    "projectFiles": 2843,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "api": "OpenScope(...).RunEvents(session,run).Consumer(id).Open()/Read(revision)/Accept(revision,cursor)",
+  "capability": "remote_event_consumers:1",
+  "httpRoutes": [
+    "scope-run-event-consumer-open",
+    "scope-run-event-consumer-read",
+    "scope-run-event-consumer-accept"
+  ],
+  "cliCommands": [
+    "scope-run-event-consumer-open",
+    "scope-run-event-consumer-read",
+    "scope-run-event-consumer-accept"
+  ],
+  "publicFields": [
+    "binding",
+    "consumer_id",
+    "revision",
+    "accepted",
+    "pending"
+  ],
+  "fencing": [
+    "Retained SDK consumer objects refuse owner retirement",
+    "CLI and HTTP reads require caller-observed backend generation",
+    "Acknowledgements require generation-bound cursor",
+    "All authorization/persistence remains in native captured service"
+  ],
+  "verified": [
+    "Actual SDK initial checkpoint, retained two-event page, original accepted cursor, acknowledgement and duplicate acknowledgement",
+    "Actual HTTP initial checkpoint, cached page and acknowledgement through same native service",
+    "SDK observes HTTP acknowledgement in shared SQLite state",
+    "Stale generation, boolean revision and retired object refusal",
+    "All three CLI branches reach normal SDK routing and reject unavailable scope without usage fallthrough"
+  ],
+  "pending": [
+    "Positive network consumer delivery and CLI acknowledgement through hosted native TLS",
+    "Authoritative snapshot/reset and root-tree consumer recovery",
+    "Full native qualification and release installation"
+  ],
+  "initialBuildFailure": {
+    "pid": 10172,
+    "launchedAt": "2026-10-25T05:24:46.609Z",
+    "completedAt": "2026-10-25T05:25:10.435Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "98f160be65c6aef31900b1e1adc41993ddf7338fd487d13288c0c931f5c6bca7",
+    "reason": "MSVC C1128 object section limit in SDK API registration",
+    "testsStarted": false,
+    "inputAudit": {
+      "recordedAt": "2026-10-25T05:25:49.007Z",
+      "allProjectSdkLibrariesRuntimeDependenciesAndFileSetsUnchanged": true,
+      "testsStarted": false
+    },
+    "fix": "MSVC /bigobj on agentflow_ipc_api target; same option already present on core target",
+    "originalLog": "remote-event-consumer-adapters-initial-build-20261024.log"
+  },
+  "installed75Unchanged": true,
+  "completedTasksMustNeverBeReplayed": true
+}

@@ -704,3 +704,51 @@ executes or repeats a remote command. Its repeated acknowledgement is idempotent
 Three database lifetimes have local focused evidence. Public SDK/CLI/HTTP
 consumer adapters, authoritative snapshot/reset, root-tree checkpoint recovery
 and native trusted-TLS consumer acceptance remain separate work.
+
+### Public durable event consumers
+
+The standard SDK event object now exposes a durable consumer subobject:
+
+```text
+consumer = scope.RunEvents(session, run).Consumer(consumer_id)
+state = consumer.Open()
+state = consumer.Read(state.revision)
+// If state.pending is present, process those records, then explicitly acknowledge:
+state = consumer.Accept(state.revision, state.pending.cursor)
+```
+
+Open returns binding, consumer_id, revision, accepted and pending. Consumer(id)
+explicitly opens/creates the consumer; another binding cannot reuse its ID.
+Accepted and pending cursors use the eight public generation-bound fields.
+Pending is null or a cursor/events page. Read returns an existing pending page
+without another GET; otherwise it stages a validated native observation. Reading
+does not accept the page. Empty resume leaves pending null and revision unchanged.
+Accept requires the exact pending revision/cursor; repeated acknowledgement is
+idempotent. Recovery can redeliver unacknowledged observations, so consumers must
+handle their event sequences idempotently. This never retries tool/model effects.
+
+CLI commands after `xmind ipc --endpoint lrpc:PORT connections`:
+
+```text
+scope-run-event-consumer-open ID REV SCOPE SESSION RUN CONSUMER
+scope-run-event-consumer-read ID REV SCOPE SESSION RUN CONSUMER CHECKPOINT_REV BACKEND_GENERATION
+scope-run-event-consumer-accept ID REV SCOPE SESSION RUN CONSUMER CHECKPOINT_REV JSON_CURSOR
+```
+
+Owner/origin-bound HTTP POST routes end with
+`scope-run-event-consumer-open`, `scope-run-event-consumer-read` and
+`scope-run-event-consumer-accept` under /v1/connections/. All require exactly
+id, expected_profile_revision, scope_id, session_id, run_id and consumer_id.
+Read additionally requires expected_checkpoint_revision and
+expected_backend_generation. Accept instead adds expected_checkpoint_revision
+and cursor. Query parameters and extra fields refuse. Revision values are
+positive JSON-safe integers; booleans refuse. The SDK retained object cannot
+survive owner retirement; CLI/HTTP reads compare the caller's observed backend
+generation before accessing the consumer. Accept independently verifies the
+cursor generation. Fresh explicit Open obtains a new observation envelope after
+reconnect, never automatic reset or profile fallback.
+
+Capability `remote_event_consumers:1` advertises these adapters, not grant
+authority. Actual SDK/HTTP cached-page recovery and acknowledgement have focused
+evidence. Native trusted-TLS consumer delivery, positive CLI acknowledgement,
+authoritative snapshot/reset and root-tree checkpoint recovery remain open.

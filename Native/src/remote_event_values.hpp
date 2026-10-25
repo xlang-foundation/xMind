@@ -1,5 +1,5 @@
 #pragma once
-#include "agentflow/remote_connection_client.hpp"
+#include "agentflow/remote_event_checkpoint.hpp"
 #include "nlohmann/json.hpp"
 
 namespace agentflow::remote_event_values {
@@ -23,5 +23,8 @@ inline nlohmann::json page(const RemoteObservedRunEvents& value,const std::strin
     auto events=nlohmann::json::array();
     for(const auto& event:value.events)events.push_back({{"sequence",event.sequence},{"run_id",event.run_id},{"kind",event.kind},{"payload",nlohmann::json::parse(event.json)}});
     return {{"cursor",cursor(value.cursor,generation)},{"events",std::move(events)}};
+}
+inline nlohmann::json checkpoint(const RemoteEventCheckpoint& value,const std::string& generation){
+    return {{"consumer_id",value.consumer.id},{"revision",value.revision},{"accepted",cursor(value.accepted,generation)},{"pending",value.pending?page(*value.pending,generation):nlohmann::json(nullptr)}};
 }
 }
