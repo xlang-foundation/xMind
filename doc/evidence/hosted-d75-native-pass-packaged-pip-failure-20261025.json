@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T14:29:08.078Z",
+  "runId": 40192957480,
+  "jobId": 121181991153,
+  "conclusion": "failure",
+  "source": "d75d2822270ac288f44afe1932bd042776ee4425",
+  "sdk": "35fa98d1513c8595f1c0e856be7c645a43d187f1",
+  "native": {
+    "passed": 182,
+    "failed": 0,
+    "total": 182,
+    "seconds": 707.16,
+    "actualInventoryAndTerminalVerified": true,
+    "contractsSha256": "1a360edff936e994f5a45642981eef605dfa80bf2076c32a1e33df0a9b096078",
+    "ctestSha256": "a362730f09db6623a02f55a22ae8ad6ce82ce99b54008d3a10fff4ee95454506"
+  },
+  "artifact": {
+    "id": 12602615718,
+    "name": "native-windows-evidence-d75d2822270ac288f44afe1932bd042776ee4425",
+    "bytes": 5344404,
+    "sha256": "670000299e4a52ab659d107b123ddf909ff64dbde8f470af0e05f59e37762c8c"
+  },
+  "failedStep": "Verify packaged xlang3 pip bootstrap and offline installation",
+  "failure": {
+    "command": [
+      "-B",
+      "-m",
+      "pip",
+      "--version"
+    ],
+    "exitCode": 1,
+    "module": "pip._vendor.platformdirs.windows",
+    "error": "TypeError: ord() expected a character"
+  },
+  "interpretation": "Complete native acceptance passes, including hosted trusted-TLS integration and worker fixtures. The later packaged pip --version check fails; pip bootstrap/offline installation and overall release qualification are not accepted. No original task is replayed.",
+  "releaseQualified": false,
+  "installedVersionUnchanged": "0.1.76"
+}
