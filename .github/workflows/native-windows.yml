@@ -95,6 +95,26 @@ jobs:
           npm run package -- --out ../../build/ci-evidence/xmind.vsix > ../../build/ci-evidence/browser-package.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ../../Tools/verify-browser-vsix.ps1 -Path ../../build/ci-evidence/xmind.vsix > ../../build/ci-evidence/browser-package-verification.log
+      # A minidump without its exact PE images cannot reliably unwind native
+      # worker frames. Keep these build outputs separately on failure; optional
+      # PDBs are included when produced. No credentials/configuration are here.
+      - name: Preserve matching native images for failed-worker dump analysis
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: native-windows-diagnostic-images-${{ github.sha }}
+          path: |
+            xmind/build/native/Release/xmind.exe
+            xmind/build/native/Release/xmind.pdb
+            xmind/build/native/Release/agentflow_agent_worker_model_rpc_contract.exe
+            xmind/build/native/Release/agentflow_agent_worker_model_rpc_contract.pdb
+            xmind/build/native/Release/agentflow_agent_worker_ledger_contract.exe
+            xmind/build/native/Release/agentflow_agent_worker_ledger_contract.pdb
+            xlang3/build/Release/xlang3_runtime.dll
+            xlang3/build/Release/xlang3_runtime.pdb
+            xlang3/build/Release/modules/**/*.dll
+          if-no-files-found: warn
+          retention-days: 14
       - name: Preserve build and test diagnostics
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T13:36:07.329Z",
+  "runId": 40190311424,
+  "jobId": 121166488409,
+  "source": "1d6a4a74689d2ec19bce8e175d22c76406d13e01",
+  "sdk": "35fa98d1513c8595f1c0e856be7c645a43d187f1",
+  "conclusion": "failure",
+  "native": {
+    "total": 182,
+    "passed": 178,
+    "failed": 4,
+    "seconds": 809.76,
+    "graph": {
+      "passed": true,
+      "seconds": 12.47
+    },
+    "failures": [
+      {
+        "name": "native_mcp_oauth_trusted_contract",
+        "seconds": 5.06,
+        "knownIssue": "CLI snapshot permission expected array is stale; corrected in d75d2822, awaiting hosted qualification."
+      },
+      {
+        "name": "native_agent_worker_model_rpc_contract",
+        "seconds": 67.28,
+        "productionProcessMilliseconds": 60031.9411,
+        "budgetMilliseconds": 60000,
+        "lastSuccessfulPhasesMilliseconds": [
+          59177.646,
+          59841.004
+        ]
+      },
+      {
+        "name": "native_agent_worker_ledger_contract",
+        "seconds": 45.15
+      },
+      {
+        "name": "native_agent_worker_nested_human_contract",
+        "seconds": 45.02
+      }
+    ]
+  },
+  "artifact": {
+    "id": 12600468354,
+    "bytes": 9067426,
+    "sha256": "3dcebe4306d3e5133024e6fe129015b6645ff6dfeac8d2ba341a4689ad029d3a"
+  },
+  "preservedNamespacesNeverReplay": [
+    "xmind-model-rpc-1677472478-4178664556",
+    "xmind-model-rpc-2190953451-3823389969",
+    "xmind-model-rpc-2598426583-2825000987",
+    "xmind-worker-ledger-1361296256-776325499",
+    "xmind-worker-ledger-2181430167-2706154663"
+  ],
+  "interpretation": "Worker fixtures reached their aggregate deadlines after successful intermediate phases. These observations do not establish an individual IPC deadlock or its cause. No deadlines were weakened and no original namespace was replayed.",
+  "dumpLimit": "The retained native minidump lacks matching executable images and symbols, preventing reliable native stack attribution. Future failed CI runs now collect exact native images and available PDBs separately.",
+  "releaseQualified": false
+}
