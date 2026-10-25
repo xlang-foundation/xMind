@@ -1,0 +1,260 @@
+{
+  "recordedAt": "2026-10-25T10:22:17.076Z",
+  "scope": "Shared browser/editor snapshot recovery controls through existing native domain APIs",
+  "features": [
+    "Open reader using its current native checkpoint; no caller-entered revision",
+    "Inspect cached snapshot or fetch one page per explicit action",
+    "Render up to 100 records as text; retain complete validated assembly for acknowledgement",
+    "Acknowledge only complete snapshots; no automatic fetch, page loop, reset or remote activation",
+    "After unconfirmed acknowledgement, require another inspection before offering acknowledgement",
+    "Invalidate observations and pending replies when session/run/reader selection changes"
+  ],
+  "clientSuites": {
+    "source": "92143154c024311131af9b863ef9ea52ff9626b5",
+    "projectFiles": 2854,
+    "dependencyFiles": 14908,
+    "testFiles": {
+      "extension": 23,
+      "browser": 10
+    },
+    "results": {
+      "build": {
+        "pid": 19332,
+        "startedAt": "2026-10-25T10:20:12.755Z",
+        "endedAt": "2026-10-25T10:20:12.850Z",
+        "exitCode": 0,
+        "logSha256": "1eb63a2aa2fbb735789cc5c06cb49ebd46adf38d3c130caf6dc87489d4dd6f60"
+      },
+      "extension": {
+        "pid": 3548,
+        "startedAt": "2026-10-25T10:20:12.851Z",
+        "endedAt": "2026-10-25T10:20:17.074Z",
+        "exitCode": 0,
+        "logSha256": "4926d3d0add30fec76528479b65ab8c1c29cccbdfaec0e89cb8587a3494bccb1",
+        "tests": 510,
+        "pass": 510,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 4166.0383
+      },
+      "browser": {
+        "pid": 24956,
+        "startedAt": "2026-10-25T10:20:17.075Z",
+        "endedAt": "2026-10-25T10:20:37.389Z",
+        "exitCode": 0,
+        "logSha256": "99d4ed0b912e083f26109a68d31b00d1367a258aa0d94e4eefdd703d52a1ed5b",
+        "tests": 180,
+        "pass": 180,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 20250.9839
+      }
+    },
+    "artifacts": 18,
+    "allSourceDependenciesAndSetsUnchanged": true,
+    "nativeSuiteRun": false,
+    "rendered": false,
+    "installed": false,
+    "paidInference": false,
+    "cpython": false,
+    "passed": true
+  },
+  "initialFailure": {
+    "gate": {
+      "source": "92143154c024311131af9b863ef9ea52ff9626b5",
+      "projectFiles": 2854,
+      "dependencyFiles": 14908,
+      "testFiles": {
+        "extension": 23,
+        "browser": 10
+      },
+      "results": {
+        "build": {
+          "pid": 18088,
+          "startedAt": "2026-10-25T10:14:46.180Z",
+          "endedAt": "2026-10-25T10:14:46.248Z",
+          "exitCode": 0,
+          "logSha256": "d87498eff11ad2f0b5ad057dcc0eee7c68b9f9bb0cfd452799efbb3c09c29d12"
+        },
+        "extension": {
+          "pid": 1260,
+          "startedAt": "2026-10-25T10:14:46.249Z",
+          "endedAt": "2026-10-25T10:14:50.735Z",
+          "exitCode": 0,
+          "logSha256": "208b60604aefb12d832b13bc217b857f412172fb6025ac5660b057182f5eaeca",
+          "tests": 510,
+          "pass": 510,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 4430.0491
+        },
+        "browser": {
+          "pid": 27024,
+          "startedAt": "2026-10-25T10:14:50.736Z",
+          "endedAt": "2026-10-25T10:15:11.004Z",
+          "exitCode": 1,
+          "logSha256": "6de20ce7834a456489cd5a5c5e4a0c8586f20845ad4137c4e3528629bef5fe33",
+          "tests": 180,
+          "pass": 179,
+          "fail": 1,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "duration_ms": 20208.9818
+        }
+      },
+      "artifacts": 18,
+      "allSourceDependenciesAndSetsUnchanged": true,
+      "nativeSuiteRun": false,
+      "rendered": false,
+      "installed": false,
+      "paidInference": false,
+      "cpython": false,
+      "passed": false
+    },
+    "cause": "The new browser fixture used unsupported profile status saved; actual native contract requires not_connected. Production validation was correct.",
+    "log": "snapshot-recovery-ui-first-browser-20261025.log"
+  },
+  "initialFullPass": {
+    "source": "92143154c024311131af9b863ef9ea52ff9626b5",
+    "projectFiles": 2854,
+    "dependencyFiles": 14908,
+    "testFiles": {
+      "extension": 23,
+      "browser": 10
+    },
+    "results": {
+      "build": {
+        "pid": 1172,
+        "startedAt": "2026-10-25T10:15:51.651Z",
+        "endedAt": "2026-10-25T10:15:51.724Z",
+        "exitCode": 0,
+        "logSha256": "973bc7c4b68c0e8157d3d3615ac195e7e7006dd37b11877ef7fcf27e83b0e2c8"
+      },
+      "extension": {
+        "pid": 13320,
+        "startedAt": "2026-10-25T10:15:51.725Z",
+        "endedAt": "2026-10-25T10:15:56.084Z",
+        "exitCode": 0,
+        "logSha256": "e879becbabc81c351e9c2387c81ec28b92ec10a44604ce8872be8cf9aab6cc7e",
+        "tests": 510,
+        "pass": 510,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 4300.6388
+      },
+      "browser": {
+        "pid": 7244,
+        "startedAt": "2026-10-25T10:15:56.085Z",
+        "endedAt": "2026-10-25T10:16:16.359Z",
+        "exitCode": 0,
+        "logSha256": "ce6b3d95fdd94628ffb0af67f14ce849e364b65d1a8f14e3d4aa719e4b7ddadc",
+        "tests": 180,
+        "pass": 180,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 20216.7197
+      }
+    },
+    "artifacts": 18,
+    "allSourceDependenciesAndSetsUnchanged": true,
+    "nativeSuiteRun": false,
+    "rendered": false,
+    "installed": false,
+    "paidInference": false,
+    "cpython": false,
+    "passed": true
+  },
+  "renderedGate": {
+    "testRunner": "Actual hidden browser Settings interaction followed by native HTTP snapshot contract; not CTest",
+    "recordedAt": "2026-10-25T10:18:23.807Z",
+    "sourceParent": "92143154c024311131af9b863ef9ea52ff9626b5",
+    "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build": {
+      "exitCode": 0,
+      "skipped": true,
+      "reason": "No C++ changes; exact previously tested development executable verified"
+    },
+    "test": {
+      "pid": 1212,
+      "launchedAt": "2026-10-25T10:17:28.498Z",
+      "completedAt": "2026-10-25T10:18:21.035Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "0cd71211e251fef900869a4ed9d5df36404cec88af69b3a81b5d965b9f933fea"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 52.537,
+    "projectFiles": 2858,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "native": {
+    "passed": true,
+    "proof": {
+      "passed": true,
+      "acknowledgedSequence": 20,
+      "completeRecordsRendered": 2,
+      "acknowledgementWasExplicit": true,
+      "afterAcknowledgementButtonDisabled": true,
+      "localRemainsActive": true,
+      "credentialEntered": false,
+      "modelCalls": 0,
+      "browserTabClosed": true,
+      "beforeAxSha256": "b2d6f5ccd5b7928ee14dbac8b97a2ee07516df9a4767cb61131ee77bb983e110",
+      "afterAxSha256": "c35801644ab46ed045b051a15a836d1a51233cd53fc399b83ee52725cb9adb5a",
+      "imageSha256": "1ca99169b1440f802b29b56ee751b26abcf18c0089cbe23447b5934a7df567e3"
+    },
+    "host": {
+      "code": 0,
+      "signal": null
+    },
+    "hostPid": 16544,
+    "databaseReopened": true,
+    "assetsUnchanged": 18,
+    "modelCalls": 0,
+    "remoteNetworkSnapshotFetched": false,
+    "cachedNativeSnapshotObserved": true,
+    "consumerCheckpointAcknowledged": true,
+    "installed": false
+  },
+  "postRenderedChanges": {
+    "scope": "Pending-event validation branch and its fixtures only",
+    "details": "Permit a valid empty epoch-transition pending page; enforce native kind length128; bound HTTP projection separately from native64KiB event data. The rendered fixture used pending:null, so this branch was not exercised there. Final client suites verify the updated source; saved rendered assets are the preceding accepted build.",
+    "renderedFinalAssetBytesClaimed": false
+  },
+  "nativeCppChanged": false,
+  "applicationIpcSerializerAdded": false,
+  "installed": false,
+  "goalComplete": false,
+  "fullNativeSuitePassed": false,
+  "limitations": [
+    "Rendered browser proof covers a cached native snapshot and explicit checkpoint acknowledgement, not remote fetching.",
+    "Rendered VS Code snapshot recovery remains open.",
+    "Generic remote routing and effect/worker enrollment remain open.",
+    "Native SDK35fa full gate still fails one instruction fixture; packaging remains blocked."
+  ],
+  "completedNamespaceMustNeverBeReplayed": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-snapshot-recovery-ui-nhF4WP"
+}

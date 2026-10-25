@@ -437,7 +437,7 @@ class BackendClient {
   }
   async #remoteObservationRequest(capabilityName,route,body){
     this.#remoteInspectionUsed=true;const origin=this.baseUrl,check=()=>{if(this.#connectionClosed||this.baseUrl!==origin)throw new Error('The captured remote connection changed or closed.');};check();
-    const capability=await this.request('/v1/connections/capabilities');check();if(capability?.[capabilityName]!==1)throw new Error('Remote observation is unavailable.');
+    const capability=await this.request('/v1/connections/capabilities');check();if((Array.isArray(capabilityName)?capabilityName:[capabilityName]).some(name=>capability?.[name]!==1))throw new Error('Remote observation is unavailable.');
     const value=await this.request('/v1/connections/'+route,body);check();return value;
   }
   async #snapshotRequest(operation,resource,fields){
@@ -447,6 +447,23 @@ class BackendClient {
     const scope=snapshotResource(resource);snapshotRevision(checkpointRevision);const value=await this.#snapshotRequest('open',scope,{expected_checkpoint_revision:checkpointRevision});
     exactFields(value,['binding','consumer_id','checkpoint_revision','accepted']);snapshotBinding(value.binding,scope);snapshotCursor(value.accepted,scope,value.binding);
     if(value.consumer_id!==scope.consumer_id||value.checkpoint_revision!==checkpointRevision)throw new Error('Snapshot baseline belongs to another consumer.');return value;
+  }
+  async openRemoteSnapshotReader(resource){
+    const scope=snapshotResource(resource),origin=this.baseUrl;
+    const checkpoint=await this.#remoteObservationRequest(['remote_event_consumers','remote_run_snapshots'],'scope-run-event-consumer-open',scope);
+    exactFields(checkpoint,['binding','consumer_id','revision','accepted','pending']);snapshotBinding(checkpoint.binding,scope);snapshotCursor(checkpoint.accepted,scope,checkpoint.binding);snapshotRevision(checkpoint.revision);
+    if(checkpoint.consumer_id!==scope.consumer_id)throw new Error('Remote reader differs from the requested consumer.');
+    if(checkpoint.pending!==null){
+      // HTTP projection includes field/cursor and numeric-format overhead; native event data remains capped at 64 KiB.
+      const page=checkpoint.pending;exactFields(page,['cursor','events']);snapshotCursor(page.cursor,scope,checkpoint.binding);
+      if(!Array.isArray(page.events)||page.events.length>256||!page.cursor.epoch||(checkpoint.accepted.epoch&&checkpoint.accepted.epoch!==page.cursor.epoch)||new TextEncoder().encode(JSON.stringify(page)).byteLength>262144)throw new Error('Invalid pending remote events.');
+      let sequence=checkpoint.accepted.sequence;
+      for(const event of page.events){exactFields(event,['sequence','run_id','kind','payload']);snapshotIdentity(event.kind);if(event.kind.length>128||event.run_id!==scope.run_id||!Number.isSafeInteger(event.sequence)||event.sequence<=sequence||!event.payload||typeof event.payload!=='object'||Array.isArray(event.payload))throw new Error('Invalid pending remote event.');sequence=event.sequence;}
+      if(sequence!==page.cursor.sequence)throw new Error('Pending remote cursor differs from its events.');
+    }
+    if(this.baseUrl!==origin||this.#connectionClosed)throw new Error('The captured remote connection changed or closed.');
+    const baseline=await this.openRemoteSnapshot(scope,checkpoint.revision);snapshotBinding(baseline.binding,scope,checkpoint.binding);
+    if(Object.keys(checkpoint.accepted).some(key=>baseline.accepted[key]!==checkpoint.accepted[key])||this.baseUrl!==origin||this.#connectionClosed)throw new Error('Remote snapshot reader changed during capture.');return baseline;
   }
   async readRemoteSnapshot(resource,baseline,snapshotId,assemblyRevision){
     const scope=snapshotResource(resource),binding={...baseline?.binding},accepted={...baseline?.accepted},checkpointRevision=baseline?.checkpoint_revision;snapshotBinding(binding,scope);snapshotCursor(accepted,scope,binding);snapshotRevision(checkpointRevision);snapshotRevision(assemblyRevision,true);if(baseline?.consumer_id!==scope.consumer_id)throw new Error('Snapshot baseline belongs to another consumer.');if(snapshotId!==null)snapshotIdentity(snapshotId);else if(assemblyRevision!==0)throw new Error('An initial snapshot read requires revision zero.');
@@ -1307,6 +1324,19 @@ function validateRemoteAuthentication(value,id,revision){
   else if(value.credential_revision<1||typeof value.server_id!=='string'||!value.server_id||value.server_id.length>256||value.protocol_version!==1||!Number.isSafeInteger(value.expires_at)||value.expires_at<=0)throw new Error('Invalid authentication status.');
   return value;
 }
+async function handleRemoteSnapshotInspection(client,message,post,current){
+ const identity={id:message.id,revision:message.revision,scope_id:message.scope_id,request_id:message.request_id};
+ try{
+  if(!current())return;const resource=snapshotResource({id:message.id,expected_profile_revision:message.revision,scope_id:message.scope_id,session_id:message.session_id,run_id:message.run_id,consumer_id:message.consumer_id});
+  post({type:'connection-snapshot-inspection',...identity,busy:true,action:message.action});let result;
+  if(message.action==='open')result=await client.openRemoteSnapshotReader(resource);
+  else if(message.action==='observe')result=await client.observeRemoteSnapshot(resource,message.baseline?.binding,message.snapshot_id);
+  else if(message.action==='read')result=await client.readRemoteSnapshot(resource,message.baseline,message.snapshot_id,message.assembly_revision);
+  else if(message.action==='reset')result=await client.resetRemoteSnapshot(resource,message.snapshot);
+  else throw new Error('Unsupported snapshot inspection action.');
+  if(current())post({type:'connection-snapshot-inspection',...identity,action:message.action,result});
+ }catch{if(current())post({type:'connection-snapshot-inspection',...identity,action:message.action,error:'Snapshot operation was not confirmed. Inspect the reader and saved snapshot before taking another action.'});}
+}
 async function handleRemoteRunInspection(client,message,post,current){
  const identity={id:message.id,revision:message.revision,scope_id:message.scope_id,request_id:message.request_id};
  try{if(!current())return;post({type:'connection-run-inspection',...identity,busy:true});const result=await client.inspectRemoteRun({id:message.id,expected_profile_revision:message.revision,scope_id:message.scope_id,session_id:message.session_id,run_id:message.run_id});if(current())post({type:'connection-run-inspection',...identity,result});}
@@ -1543,5 +1573,5 @@ class ProviderProfileController {
     return true;
   }
 }
-if(typeof module!=='undefined'&&module.exports)module.exports={handleRemoteRunInspection,handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
-else globalThis.XMindBackend={handleRemoteRunInspection,handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+if(typeof module!=='undefined'&&module.exports)module.exports={handleRemoteSnapshotInspection,handleRemoteRunInspection,handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,validateConnectionProfiles,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};
+else globalThis.XMindBackend={handleRemoteSnapshotInspection,handleRemoteRunInspection,handleConnectionAuthentication,BackendClient,SessionHistoryPager,EventStreamSubscription,eventRequiresSnapshot,backendOrigin,validateToken,validateEditInspection,validateVcsStatus,validateVcsBase,validateVcsDiff,providerEnrollmentWire,ProviderProfileController,observeOwnedRun,observeGraphTree,validatePlanning,validatePlanObservation,validateOwnedChild,validatePlanInputText,validateContextObservation,validateContextRequest,validateGraphContext,ContextViewController,SkillViewController,validateSessionSkills,validateSkillCatalogue,AgentSelectionController,validateAgentCatalogue,validateSessionAgent,validateSessionModel,validateMcpAuthorizationServers,validateMcpResourceCatalog,validateMcpAuthorizationAttempt,McpAuthorizationController,parseWorkspaceCommand,QueuedRunSelection};

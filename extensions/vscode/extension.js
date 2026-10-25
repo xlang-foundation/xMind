@@ -633,6 +633,8 @@ async function activate(context) {
           post({type:'mcp-resources',busy:true});
           try{const catalog=await resourceClient.mcpResources();if(current())post({type:'mcp-resources',busy:false,catalog});}
           catch(error){if(current())post({type:'mcp-resources',busy:false,error:error.message});}
+        } else if(message.type==='connection-snapshot-inspect'){
+          const target=client,epoch=generation,workspaceEpoch=workspaceBackend.epoch;await require('./client').handleRemoteSnapshotInspection(target,message,post,()=>panel===view&&client===target&&generation===epoch&&workspaceBackend.epoch===workspaceEpoch&&configuredOrigin()===target.baseUrl);
         } else if(message.type==='connection-run-inspect'){
           const target=client,epoch=generation,workspaceEpoch=workspaceBackend.epoch;await require('./client').handleRemoteRunInspection(target,message,post,()=>panel===view&&client===target&&generation===epoch&&workspaceBackend.epoch===workspaceEpoch&&configuredOrigin()===target.baseUrl);
         } else if(message.type==='connection-authenticate'||message.type==='connection-authentication-read'||message.type==='connection-scopes-read'){
