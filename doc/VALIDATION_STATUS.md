@@ -1,3 +1,9 @@
+## Hosted 1d6: graph passes; worker aggregate deadlines still fail — 2026-10-25
+
+Hosted40190311424 completes178/182 in809.76s. The graph intrinsic-sleep fixture passes in12.47s. Three worker fixtures fail at their aggregate budgets: RPC production subprocess60031.9411ms against60000ms, ledger45.15s and nested-human45.02s. Successful intermediate phases precede these cutoffs; this does not establish an individual IPC deadlock or explain the underlying slowdown. The fourth failure is the already-corrected stale CLI snapshot permission expectation. [Original terminal inventory and artifact hash](evidence/hosted-1d6-worker-deadlines-20261025.json).
+
+Original failed namespaces and dumps are retained and must never be replayed. Missing matching executable images prevent reliable native stack attribution; future failed Windows CI runs now retain the exact worker/backend/runtime images and available symbols. No process deadline changed. Corrected d75 run40192957480 remains the release gate; diagnostic-only d6 run40198358836 queues behind it. Installed76 is unchanged; full delivery remains active and unqualified for a new package.
+
 ## Actual Code MCP resource discovery verified — 2026-10-25
 
 A separate fresh native backend and hidden Microsoft Code Server1.143.1 load the tested unpackaged source extension. The actual xMind pane's Settings/List resources action discovers and renders one resource and one URI template. The controlled peer records zero requests before the action, then exactly one modern discovery/resource/template request and no tool/unknown calls. Source71, Native145 binaries and18 assets remain unchanged; the earlier frozen dependency closure and two Code vendor entry files reverify. [Receipt](evidence/rendered-code-mcp-resources-20261025.json), [actual Code pane](evidence/rendered-code-mcp-resources-20261025.jpg).
