@@ -40,8 +40,27 @@ void command_journal_contract(const std::string& modules,const std::string& stdl
  for(const auto* suffix:{"","-wal","-shm"}){auto candidate=path;candidate+=suffix;std::error_code ignored;std::filesystem::remove(candidate,ignored);}
  std::cout<<"Remote command SQLite journal verifies exact intent conflicts, competing send claims, persisted unknown before send, restart before/after send, terminal admission/rejection and no completed resend. No network or model execution.\n";
 }
+void remote_session_command_contract(const std::string& modules,const std::string& stdlib){
+ const auto path=std::filesystem::temp_directory_path()/("xmind-remote-submit-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(path));unsigned sends=0,lookups=0;
+ const auto negotiation=[](const auto&,const auto&,auto requirements,auto,auto){RemoteNegotiatedGrant g;g.server_id="server-a";g.grant_id="grant-a";g.protocol_version=1;g.grant_revision=1;g.expires_at=requirements.now_unix_seconds+120;g.capabilities=requirements.required_capabilities;g.authorized_scopes={{"workspace-a",{"sessions.read","sessions.create","receipts.read"}}};return g;};
+ const RemoteSessionCommandExchange create=[&](const auto&,const auto&,const auto& grant,const auto& scope,const auto& id,const auto&,auto,auto)->RemoteCommandObservation{++sends;if(id=="lost-reply")throw TransportError("Synthetic reply lost after admission");return {"admitted",RemoteCommandResolution{id,grant.server_id,scope,"sessions.create","session-new",RemoteCommandState::admitted,1}};};
+ const RemoteSessionCommandExchange receipt=[&](const auto&,const auto&,const auto& grant,const auto& scope,const auto& id,const auto&,auto,auto)->RemoteCommandObservation{++lookups;if(lookups==1)return {"not_found",std::nullopt};return {"admitted",RemoteCommandResolution{id,grant.server_id,scope,"sessions.create","session-lost",RemoteCommandState::admitted,1}};};
+ {
+  PersistenceService store(path.string(),{modules,stdlib});ConnectionProfiles profiles(store);profiles.load_or_initialize();const auto catalog=profiles.apply(source("https://remote.example.invalid"),1);const auto profile=catalog.profiles.at(1);RemoteConnectionAuthentication service(store,profiles,negotiation,{},create,receipt);service.authenticate(profile.id,profile.revision,0,secret(),2s);const auto scope=service.open_scope(profile.id,profile.revision,"workspace-a");
+  require(service.create_session(scope,"lost-reply","Original remote title",2s).state==RemoteCommandState::unknown&&sends==1);require(service.create_session(scope,"lost-reply","Original remote title",2s).state==RemoteCommandState::unknown&&sends==1);rejects<Conflict>([&]{service.create_session(scope,"lost-reply","Changed remote title",2s);});require(sends==1);
+  require(service.create_session(scope,"accepted-reply","Accepted title",2s).state==RemoteCommandState::admitted&&sends==2);std::stop_source stop;stop.request_stop();rejects<TransportCancelled>([&]{service.create_session(scope,"cancelled","No send",2s,stop.get_token());});require(sends==2);store.close();
+ }
+ {
+  PersistenceService store(path.string(),{modules,stdlib});ConnectionProfiles profiles(store);const auto profile=profiles.load().profiles.at(1);RemoteConnectionAuthentication service(store,profiles,negotiation,{},create,receipt);auto scope=service.open_scope(profile.id,profile.revision,"workspace-a");require(service.reconcile_session(scope,"lost-reply",2s).state==RemoteCommandState::unknown&&lookups==1);require(service.create_session(scope,"lost-reply","Original remote title",2s).state==RemoteCommandState::unknown&&sends==2);
+  // Current credentials may reconcile the original immutable request without
+  // changing its captured submission identity or replaying its POST.
+  service.authenticate(profile.id,profile.revision,1,secret(),2s);const auto fresh=service.open_scope(profile.id,profile.revision,"workspace-a");rejects<Conflict>([&]{service.reconcile_session(scope,"lost-reply",2s);});const auto resolved=service.reconcile_session(fresh,"lost-reply",2s);require(resolved.state==RemoteCommandState::admitted&&resolved.intent.credential_revision==1&&lookups==2&&sends==2);require(service.reconcile_session(fresh,"lost-reply",2s).state==RemoteCommandState::admitted&&lookups==2);RemoteCommandJournal journal(store);require(!journal.claim_send(resolved.intent));require(profiles.load().active_id=="local");store.close();
+ }
+ for(const auto* suffix:{"","-wal","-shm"}){auto candidate=path;candidate+=suffix;std::error_code ignored;std::filesystem::remove(candidate,ignored);}std::cout<<"Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.\n";
+}
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
     command_journal_contract(argv[1],argv[2]);
+    remote_session_command_contract(argv[1],argv[2]);
     file=std::filesystem::temp_directory_path()/("xmind-remote-auth-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));ConnectionProfile final_profile;
     {
         PersistenceService store(file.string(),{argv[1],argv[2]});ConnectionProfiles profiles(store);profiles.load_or_initialize();auto catalog=profiles.apply(source("https://remote.example.invalid"),1);auto profile=catalog.profiles.at(1);RemoteConnectionCredentials credentials(store,profiles);unsigned calls=0,reads=0;int mode=0,read_mode=0;std::stop_source stop;

@@ -9,6 +9,7 @@ namespace agentflow {
 using RemoteNegotiationExchange=std::function<RemoteNegotiatedGrant(const std::string&,const SecretBytes&,RemoteNegotiationRequirements,std::chrono::milliseconds,std::stop_token)>;
 using RemoteSessionReadExchange=std::function<RemoteObservedSession(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
 // Backend-only captured state; SDK objects expose a separate public identity.
+using RemoteSessionCommandExchange=std::function<RemoteCommandObservation(const std::string&,const SecretBytes&,const RemoteNegotiatedGrant&,const std::string&,const std::string&,const std::string&,std::chrono::milliseconds,std::stop_token)>;
 struct RemoteCapturedScope {ConnectionProfile profile;RemoteNegotiatedGrant grant;std::string scope_id;std::int64_t credential_revision=0;};
 struct RemoteAuthenticationReceipt {
     std::string connection_id,server_id;
@@ -26,7 +27,7 @@ struct RemoteAuthenticationStatus {
 class RemoteConnectionAuthentication {
 public:
     RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&);
-    RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange,RemoteSessionReadExchange = {});
+    RemoteConnectionAuthentication(PersistenceService&,ConnectionProfiles&,RemoteNegotiationExchange,RemoteSessionReadExchange = {},RemoteSessionCommandExchange create = {},RemoteSessionCommandExchange receipt = {});
     RemoteAuthenticationReceipt authenticate(const std::string& profile_id,std::int64_t expected_profile_revision,
         std::int64_t expected_credential_revision,const SecretBytes& credential,std::chrono::milliseconds timeout,std::stop_token stop={});
     // Local encrypted-record observation only; no live revocation check,
@@ -35,8 +36,10 @@ public:
     RemoteCapturedScope open_scope(const std::string& profile_id,std::int64_t expected_profile_revision,const std::string& scope_id);
     void validate_scope(const RemoteCapturedScope&);
     RemoteObservedSession read_session(const RemoteCapturedScope&,const std::string& session_id,std::chrono::milliseconds timeout,std::stop_token stop={});
+    RemoteCommandRecord create_session(const RemoteCapturedScope&,const std::string& request_id,const std::string& title,std::chrono::milliseconds,std::stop_token={});
+    RemoteCommandRecord reconcile_session(const RemoteCapturedScope&,const std::string& request_id,std::chrono::milliseconds,std::stop_token={});
 private:
     RemoteStoredCredential load_scope(const RemoteCapturedScope&);
-    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;
+    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;
 };
 }

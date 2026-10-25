@@ -249,6 +249,64 @@ Network response validation, current-grant fencing, lost-reply observation and
 SDK/CLI/HTTP command methods remain required before remote routing is enabled.
 [Focused real SQLite evidence](evidence/remote-command-journal-20261024.json).
 
+## Implemented native session-command connector (adapters pending)
+
+Native RemoteConnectionAuthentication now joins the journal to typed session
+creation and request observation. This backend service is not yet exposed by
+registered SDK methods, CLI or local HTTP routes; no public command capability
+is advertised and installed74 is unchanged. Production uses verified HTTPS;
+only trusted backend tests may select the exact loopback policy.
+
+Creation requires sessions:1 and receipts:1, plus sessions.create and
+receipts.read in the captured scope (which currently also requires sessions.read).
+Before POST the exact intent is prepared and a single durable unknown claim wins.
+Preflight cancellation before preparation sends nothing; failure after claiming
+leaves unknown conservatively, even if no bytes reached the server. No exception,
+missing receipt or transport error authorizes another POST.
+
+POST /xmind/v1/scopes/{scope}/sessions has exactly this body:
+
+```json
+{"request_id":"REQUEST","operation":"sessions.create","expected_revision":0,"title":"TITLE"}
+```
+
+Expected revision zero denotes a new resource, never replacement. The peer must
+atomically authorize its authenticated actor/scope, deduplicate the exact request
+ID and semantic operation, and admit a durable receipt before acknowledging.
+The OSS connector does not implement the private server or establish that any
+existing Nexus endpoint satisfies this protocol.
+
+GET /xmind/v1/scopes/{scope}/requests/{request_id} observes only that request.
+It requires current receipts.read authorization. A fresh captured grant can
+reconcile an old intent after credential rotation, provided connection, origin,
+server and scope still match. Original intent/profile/credential revisions stay
+unchanged. A retired/stale grant refuses before lookup; it cannot fall back Local.
+
+Every response has exactly binding and receipt. Binding is the same exact
+server/scope/protocol/grant identity used by metadata reads. Known receipts have
+exactly request_id, operation, expected_revision, title, state, resource_id and
+resource_revision, confirming the original request ID/title and revision zero.
+Admitted has an opaque resource ID and positive safe-integer resource revision.
+Rejected and pending have empty resource ID and revision zero. Pending remains
+unknown locally. Admission does not imply model/tool execution completion.
+
+A GET miss instead has exactly this receipt, because the peer cannot know an
+unreceived title. Binding validation still applies:
+
+```json
+{"request_id":"REQUEST","state":"not_found"}
+```
+
+Not-found from POST, extra/missing fields, wrong ID, duplicate keys, mismatched
+identity/title/revisions, oversized responses and redirects refuse. GET not-found
+preserves unknown and never resets prepared or retries. Terminal matching
+receipts settle the original journal entry; all other outcomes preserve it.
+Profile/credential changes or cancellation during observation prevent publication.
+
+The real loopback transport and real SQLite/injected-service tests are separate
+proofs; neither claims a deployed server, native trusted-TLS mutation acceptance
+or public SDK routing. [Native focused evidence](evidence/remote-session-command-native-20261024.json).
+
 ## Explicit workspace and effect enrollment
 
 `Enrollments.Create(request)` proposes request ID, authorized scope ID,

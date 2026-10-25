@@ -12,7 +12,7 @@ namespace {
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
 SecretBytes secret(const std::string& text){return SecretBytes({reinterpret_cast<const std::uint8_t*>(text.data()),text.size()});}
 struct Peer {
-    httplib::Server server;std::thread owner;std::atomic<unsigned> requests=0,redirects=0,reads=0;std::atomic<int> mode=0,read_mode=0;std::atomic_bool valid=true;std::string origin;
+    httplib::Server server;std::thread owner;std::atomic<unsigned> requests=0,redirects=0,reads=0,creates=0,receipts=0;std::atomic<int> mode=0,read_mode=0,command_mode=0;std::atomic_bool valid=true;std::string origin;
     Peer(){
         server.Post("/xmind/v1/negotiate",[&](const auto& request,auto& response){
             ++requests;try{
@@ -49,6 +49,21 @@ struct Peer {
                 case 13:result["binding"]["protocol_version"]=true;break;case 14:result["binding"]["grant_revision"]=true;break;case 15:response.set_content("{private-test-secret","application/json");return;case 16:result["session"]["revision"]=9007199254740992ULL;break;
             }response.set_content(result.dump(),"application/json");
         });
+        const auto reply=[&](const auto& request,auto& response,bool create){
+          if(create)++creates;else ++receipts;
+          if(request.get_header_value("Authorization")!="Bearer isolated-remote-credential"||request.get_header_value("X-XMind-Server-ID")!="server-a"||request.get_header_value("X-XMind-Scope-ID")!="workspace-a"||request.get_header_value("X-XMind-Grant-ID")!="grant-a"||request.get_header_value("X-XMind-Grant-Revision")!="1"||request.get_header_value("X-XMind-Protocol-Version")!="1")valid=false;
+          if(create&&Json::parse(request.body)!=Json{{"request_id","request:a"},{"operation","sessions.create"},{"expected_revision",0},{"title","Exact title"}})valid=false;if(!create&&(!request.body.empty()||request.target!="/xmind/v1/scopes/workspace-a/requests/request%3Aa"))valid=false;
+          Json body={{"binding",{{"server_id","server-a"},{"scope_id","workspace-a"},{"protocol_version",1},{"grant_id","grant-a"},{"grant_revision",1}}},{"receipt",{{"request_id","request:a"},{"operation","sessions.create"},{"expected_revision",0},{"title","Exact title"},{"state","admitted"},{"resource_id","created-session"},{"resource_revision",1}}}};
+          switch(command_mode.load()){
+            case 1:body["receipt"]["title"]="Different intent";break;case 2:body["receipt"]["request_id"]="wrong-request";break;case 3:body["binding"]["scope_id"]="other-scope";break;case 4:body["receipt"]["resource_revision"]=9007199254740992ULL;break;case 5:body["receipt"]["expected_revision"]=true;break;
+            case 6:body["receipt"]={{"request_id","request:a"},{"state","not_found"}};break;
+            case 13:body["receipt"]={{"request_id","wrong-request"},{"state","not_found"}};break;case 14:body["receipt"]={{"request_id","request:a"},{"state","not_found"},{"title","Unexpected field"}};break;case 15:body["receipt"]={{"state","not_found"}};break;
+            case 7:response.status=307;response.set_header("Location",origin+"/redirect-target");return;case 8:response.status=403;response.set_content("private-test-secret","text/plain");return;case 9:response.set_content(std::string(65537,'x'),"application/json");return;
+            case 10:body["receipt"]["state"]="pending";body["receipt"]["resource_id"]="";body["receipt"]["resource_revision"]=0;break;case 11:body["receipt"]["state"]="rejected";body["receipt"]["resource_id"]="";body["receipt"]["resource_revision"]=0;break;
+            case 12:response.set_content("{\"binding\":"+body["binding"].dump()+",\"receipt\":"+body["receipt"].dump()+",\"receipt\":"+body["receipt"].dump()+"}","application/json");return;
+          }response.set_content(body.dump(),"application/json");
+        };
+        server.Post("/xmind/v1/scopes/workspace-a/sessions",[reply](const auto& request,auto& response){reply(request,response,true);});server.Get("/xmind/v1/scopes/workspace-a/requests/request:a",[reply](const auto& request,auto& response){reply(request,response,false);});
         const auto port=server.bind_to_any_port("127.0.0.1");require(port>0,"Remote test peer bind failed");origin="http://127.0.0.1:"+std::to_string(port);owner=std::thread([&]{server.listen_after_bind();});
     }
     ~Peer(){server.stop();if(owner.joinable())owner.join();}
@@ -79,6 +94,13 @@ int main(){try{
     {std::stop_source stopped;stopped.request_stop();bool refused=false;try{read_remote_session(peer.origin,credential,grant,"workspace-a","session-a",2s,RemoteTransportPolicy::isolated_loopback_test,stopped.get_token());}catch(const TransportCancelled&){refused=true;}require(refused,"Pre-cancelled remote read must not send");}
     {bool refused=false;try{read_remote_session(peer.origin,credential,grant,"workspace-a","session-a",2s);}catch(const std::invalid_argument&){refused=true;}require(refused,"Production read must reject unverified HTTP");}
     require(peer.reads==reads_before&&peer.valid&&peer.redirects==0,"Read preflight refusals must send nothing and preserve exact native binding headers");
+    auto command_grant=grant;command_grant.capabilities["receipts"]=1;command_grant.authorized_scopes.front().actions={"sessions.read","sessions.create","receipts.read"};
+    const auto create=[&]{return create_remote_session(peer.origin,credential,command_grant,"workspace-a","request:a","Exact title",2s,RemoteTransportPolicy::isolated_loopback_test);};const auto receipt=[&]{return observe_remote_session_request(peer.origin,credential,command_grant,"workspace-a","request:a","Exact title",2s,RemoteTransportPolicy::isolated_loopback_test);};
+    require(create().resolution->resource_id=="created-session"&&receipt().resolution->resource_id=="created-session","Typed command and receipt paths must confirm exact request intent");
+    for(const auto mode:{1,2,3,4,5,7,8,9,12,13,14,15}){peer.command_mode=mode;for(bool post:{true,false}){const auto before=post?peer.creates.load():peer.receipts.load();bool refused=false;try{if(post)create();else receipt();}catch(const TransportError& e){refused=std::string(e.what()).find("private-test-secret")==std::string::npos;}require(refused&&(post?peer.creates.load():peer.receipts.load())==before+1&&peer.redirects==0,"Invalid command response must refuse once without retry/redirect");}}
+    peer.command_mode=6;require(receipt().state=="not_found"&&!receipt().resolution,"Receipt absence cannot invent a terminal result");{bool refused=false;try{create();}catch(const TransportError&){refused=true;}require(refused,"Creation cannot return not-found as an admission");}for(const auto mode:{10,11}){peer.command_mode=mode;require(create().state==(mode==10?"pending":"rejected"),"Command state must remain authoritative");}
+    peer.command_mode=0;const auto creates_before=peer.creates.load();auto denied=command_grant;denied.authorized_scopes.front().actions={"sessions.read","receipts.read"};{bool refused=false;try{create_remote_session(peer.origin,credential,denied,"workspace-a","request:a","Exact title",2s,RemoteTransportPolicy::isolated_loopback_test);}catch(const TransportError&){refused=true;}require(refused&&peer.creates==creates_before,"Missing creation action cannot send");}require(peer.valid&&peer.redirects==0,"Exact typed binding and command body required");
+    std::cout<<"Actual native typed session POST and receipt GET pass exact request/title/revision binding, admission/pending/rejection/not-found distinctions, malformed/error/redirect/size refusal and no retry. Loopback test only; no production activation.\n";
     std::cout<<"Remote scoped session observation passed two actual controlled GETs and16 exact refusal GETs, fixed binding headers, strict identity/schema/size checks, preflight scope/action/expiry/path/cancellation checks and no redirect/retry. No TLS trust or remote mutation claim.\n";
     std::cout<<"Native remote client made "<<peer.requests<<" controlled bearer-authenticated loopback negotiation requests: positive grant, expired/mismatched/incompatible/malformed responses, HTTP401/403/307 and bounded-response refusal; no retry, downgrade or redirect. Unsafe/default HTTP origins and pre-cancelled calls sent nothing. No TLS trust, profile activation or persistence claim.\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

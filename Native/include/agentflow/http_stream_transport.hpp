@@ -24,7 +24,7 @@ struct ProviderHttpError : TransportError {
 // Backend-selected credential placement; callers cannot supply arbitrary headers.
 enum class CredentialHeader {bearer,x_api_key,x_goog_api_key};
 enum class ProviderHttpProtocol {generic,anthropic,a2a_jsonrpc};
-// Backend-selected remote read binding, never arbitrary caller headers.
+// Backend-selected remote JSON binding, never arbitrary caller headers.
 struct RemoteHttpBinding {std::string server_id,scope_id,grant_id;std::int64_t protocol_version=1,grant_revision=0;};
 struct HttpStreamRequest {
     std::string url,body;

@@ -155,7 +155,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     if(cancel.stop_requested()) throw TransportCancelled("Provider request cancelled");
     if(input.remote_binding){
         const auto& binding=*input.remote_binding;const auto identifier=[](const std::string& value){return !value.empty()&&value.size()<=256&&std::all_of(value.begin(),value.end(),[](unsigned char c){return (c>='a'&&c<='z')||(c>='A'&&c<='Z')||(c>='0'&&c<='9')||c=='_'||c=='-'||c=='.'||c==':';});};
-        if(kind!=TransferKind::json_get||mcp||!bearer||input.credential_header!=CredentialHeader::bearer||input.protocol!=ProviderHttpProtocol::generic||!input.a2a_version.empty()||!input.last_event_id.empty()||binding.protocol_version!=1||binding.grant_revision<=0||!identifier(binding.server_id)||!identifier(binding.scope_id)||!identifier(binding.grant_id))throw std::invalid_argument("Invalid remote read transport binding");
+        if((kind!=TransferKind::json_get&&kind!=TransferKind::json_post)||mcp||!bearer||input.credential_header!=CredentialHeader::bearer||input.protocol!=ProviderHttpProtocol::generic||!input.a2a_version.empty()||!input.last_event_id.empty()||binding.protocol_version!=1||binding.grant_revision<=0||!identifier(binding.server_id)||!identifier(binding.scope_id)||!identifier(binding.grant_id))throw std::invalid_argument("Invalid remote JSON transport binding");
     }
     const auto deadline=Clock::now()+input.deadline;
     const auto parsed=endpoint(input.url);
