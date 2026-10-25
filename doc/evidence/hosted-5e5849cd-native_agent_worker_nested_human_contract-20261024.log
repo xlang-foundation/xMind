@@ -1,0 +1,44 @@
+98/177 Testing: native_agent_worker_nested_human_contract
+98/177 Test: native_agent_worker_nested_human_contract
+Command: "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib" "--nested-human"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_worker_nested_human_contract" start time: Oct 25 00:26 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+{"nested_case":"production-nested-human-read-plain-once","phase":"begin"}
+{"elapsed_ms":2275,"nested_case":"production-nested-human-read-plain-once","phase":"exit"}
+{"nested_case":"production-nested-human-read-plain-twice","phase":"begin"}
+{"elapsed_ms":3082,"nested_case":"production-nested-human-read-plain-twice","phase":"exit"}
+{"nested_case":"production-nested-human-read-counted-once","phase":"begin"}
+{"elapsed_ms":2210,"nested_case":"production-nested-human-read-counted-once","phase":"exit"}
+{"nested_case":"production-nested-human-read-counted-twice","phase":"begin"}
+{"elapsed_ms":3315,"nested_case":"production-nested-human-read-counted-twice","phase":"exit"}
+{"nested_case":"production-nested-human-coding-plain-once","phase":"begin"}
+{"elapsed_ms":2197,"nested_case":"production-nested-human-coding-plain-once","phase":"exit"}
+{"nested_case":"production-nested-human-coding-plain-twice","phase":"begin"}
+{"elapsed_ms":3324,"nested_case":"production-nested-human-coding-plain-twice","phase":"exit"}
+{"nested_case":"production-nested-human-coding-counted-once","phase":"begin"}
+{"elapsed_ms":2420,"nested_case":"production-nested-human-coding-counted-once","phase":"exit"}
+{"nested_case":"production-nested-human-coding-counted-twice","phase":"begin"}
+{"elapsed_ms":3562,"nested_case":"production-nested-human-coding-counted-twice","phase":"exit"}
+{"nested_case":"paused-root-read-plain-resume","phase":"begin"}
+{"elapsed_ms":3416,"nested_case":"paused-root-read-plain-resume","phase":"exit"}
+{"nested_case":"paused-root-read-plain-cancel","phase":"begin"}
+{"elapsed_ms":2405,"nested_case":"paused-root-read-plain-cancel","phase":"exit"}
+{"nested_case":"paused-root-read-counted-resume","phase":"begin"}
+{"elapsed_ms":3758,"nested_case":"paused-root-read-counted-resume","phase":"exit"}
+{"nested_case":"paused-root-read-counted-cancel","phase":"begin"}
+{"elapsed_ms":2542,"nested_case":"paused-root-read-counted-cancel","phase":"exit"}
+{"nested_case":"paused-root-coding-plain-resume","phase":"begin"}
+{"elapsed_ms":3695,"nested_case":"paused-root-coding-plain-resume","phase":"exit"}
+{"nested_case":"paused-root-coding-plain-cancel","phase":"begin"}
+{"elapsed_ms":2641,"nested_case":"paused-root-coding-plain-cancel","phase":"exit"}
+{"nested_case":"paused-root-coding-counted-resume","phase":"begin"}
+<end of output>
+Test time =  45.03 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_nested_human_contract" end time: Oct 25 00:26 Coordinated Universal Time
+"native_agent_worker_nested_human_contract" time elapsed: 00:00:45
+----------------------------------------------------------
+

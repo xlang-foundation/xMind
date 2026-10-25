@@ -1,0 +1,131 @@
+97/177 Testing: native_agent_worker_ledger_contract
+97/177 Test: native_agent_worker_ledger_contract
+Command: "C:/hostedtoolcache/windows/node/22.23.4/x64/node.exe" "D:/a/xMind/xMind/xmind/Native/tests/agent_worker_ledger_peer.mjs" "D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_worker_ledger_contract.exe" "D:/a/xMind/xMind/xlang3/build/Release/modules" "D:/a/xMind/xMind/stdlib-source/Lib"
+Directory: D:/a/xMind/xMind/xmind/build/native
+"native_agent_worker_ledger_contract" start time: Oct 25 00:25 Coordinated Universal Time
+Output:
+----------------------------------------------------------
+Worker ledger raw failure output retained at D:\a\xMind\xMind\xmind\build\native\Testing\Temporary\worker-ledger-failures\ledger-failure-UpbyfP
+node:internal/errors:983
+  const err = new Error(message);
+              ^
+
+Error: Command failed: D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_worker_ledger_contract.exe D:/a/xMind/xMind/xlang3/build/Release/modules D:/a/xMind/xMind/stdlib-source/Lib http://127.0.0.1:63001
+
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at ChildProcess.exithandler (node:child_process:417:12)
+    at ChildProcess.emit (node:events:519:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  code: null,
+  killed: true,
+  signal: 'SIGTERM',
+  cmd: 'D:/a/xMind/xMind/xmind/build/native/Release/agentflow_agent_worker_ledger_contract.exe D:/a/xMind/xMind/xlang3/build/Release/modules D:/a/xMind/xMind/stdlib-source/Lib http://127.0.0.1:63001',
+  stdout: 'Ledger suite phase begin ledger elapsed_ms=0\r\n' +
+    'Ledger phase begin planning-admission\r\n' +
+    'Ledger planning seed case=terminal-failure elapsed_ms=0 remaining_ms=19999\r\n' +
+    'Ledger planning worker-ready case=terminal-failure elapsed_ms=112 remaining_ms=19887\r\n' +
+    'Ledger planning model-reserve case=terminal-failure elapsed_ms=112 remaining_ms=19887\r\n' +
+    'Ledger planning model-start case=terminal-failure elapsed_ms=115 remaining_ms=19884\r\n' +
+    'Ledger planning seed case=terminal-cancel elapsed_ms=176 remaining_ms=19823\r\n' +
+    'Ledger planning worker-ready case=terminal-cancel elapsed_ms=273 remaining_ms=19726\r\n' +
+    'Ledger planning model-reserve case=terminal-cancel elapsed_ms=273 remaining_ms=19726\r\n' +
+    'Ledger planning model-start case=terminal-cancel elapsed_ms=275 remaining_ms=19724\r\n' +
+    'Ledger planning seed case=root-plain-funding elapsed_ms=338 remaining_ms=19661\r\n' +
+    'Ledger planning seed case=root-read-epoch elapsed_ms=367 remaining_ms=19632\r\n' +
+    'Ledger planning seed case=root-read-catalogue elapsed_ms=378 remaining_ms=19621\r\n' +
+    'Ledger planning seed case=root-delegation-unsealed elapsed_ms=391 remaining_ms=19608\r\n' +
+    'Ledger planning seed case=once elapsed_ms=405 remaining_ms=19594\r\n' +
+    'Ledger planning seed case=unfinished elapsed_ms=423 remaining_ms=19576\r\n' +
+    'Ledger planning seed case=no-assistant elapsed_ms=435 remaining_ms=19564\r\n' +
+    'Ledger planning seed case=multiple elapsed_ms=448 remaining_ms=19551\r\n' +
+    'Ledger planning seed case=ordinary-tool elapsed_ms=461 remaining_ms=19538\r\n' +
+    'Ledger planning seed case=wrong-call elapsed_ms=475 remaining_ms=19524\r\n' +
+    'Ledger planning seed case=cancelled elapsed_ms=487 remaining_ms=19512\r\n' +
+    'Ledger planning seed case=expired elapsed_ms=498 remaining_ms=19501\r\n' +
+    'Ledger planning seed case=stale-attempt elapsed_ms=509 remaining_ms=19490\r\n' +
+    'Ledger planning seed case=root-file-unsealed elapsed_ms=522 remaining_ms=19477\r\n' +
+    'Ledger planning seed case=root-file-sealed elapsed_ms=535 remaining_ms=19464\r\n' +
+    'Ledger planning seed case=provisional elapsed_ms=567 remaining_ms=19432\r\n' +
+    'Ledger planning seed case=inspect_plan elapsed_ms=584 remaining_ms=19415\r\n' +
+    'Ledger planning seed case=revise_plan elapsed_ms=632 remaining_ms=19367\r\n' +
+    'Ledger planning seed case=owner-inspection elapsed_ms=652 remaining_ms=19347\r\n' +
+    'Ledger planning seed case=owner-rejection elapsed_ms=875 remaining_ms=19124\r\n' +
+    'Ledger planning seed case=owner-runner elapsed_ms=899 remaining_ms=19100\r\n' +
+    'Ledger planning seed case=slot-owner elapsed_ms=1184 remaining_ms=18815\r\n' +
+    'Ledger planning seed case=slot-owner-accepted elapsed_ms=1432 remaining_ms=18567\r\n' +
+    'Ledger planning seed case=owner-runner-accepted elapsed_ms=1737 remaining_ms=18262\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-runner-accepted elapsed_ms=1849 remaining_ms=18150\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-runner-accepted elapsed_ms=3082 remaining_ms=16917\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-runner-accepted elapsed_ms=3082 remaining_ms=16917\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-runner-accepted elapsed_ms=3097 remaining_ms=16902\r\n' +
+    'Ledger planning seed case=owner-runner-counted elapsed_ms=3135 remaining_ms=16864\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-runner-counted elapsed_ms=3247 remaining_ms=16752\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-runner-counted elapsed_ms=4753 remaining_ms=15246\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-runner-counted elapsed_ms=4753 remaining_ms=15246\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-runner-counted elapsed_ms=4767 remaining_ms=15232\r\n' +
+    'Ledger planning seed case=owner-code-approved-plain elapsed_ms=4807 remaining_ms=15192\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-approved-plain elapsed_ms=4923 remaining_ms=15076\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-approved-plain elapsed_ms=6786 remaining_ms=13213\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-approved-plain elapsed_ms=6786 remaining_ms=13213\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-approved-plain elapsed_ms=6801 remaining_ms=13198\r\n' +
+    'Ledger planning seed case=owner-code-approved-counted elapsed_ms=6840 remaining_ms=13159\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-approved-counted elapsed_ms=6953 remaining_ms=13046\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-approved-counted elapsed_ms=8901 remaining_ms=11098\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-approved-counted elapsed_ms=8901 remaining_ms=11098\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-approved-counted elapsed_ms=8916 remaining_ms=11083\r\n' +
+    'Ledger planning seed case=owner-code-denied-plain elapsed_ms=8956 remaining_ms=11043\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-denied-plain elapsed_ms=9079 remaining_ms=10920\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-denied-plain elapsed_ms=10666 remaining_ms=9333\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-denied-plain elapsed_ms=10666 remaining_ms=9333\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-denied-plain elapsed_ms=10681 remaining_ms=9318\r\n' +
+    'Ledger planning seed case=owner-code-denied-counted elapsed_ms=10724 remaining_ms=9275\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-denied-counted elapsed_ms=10846 remaining_ms=9153\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-denied-counted elapsed_ms=12514 remaining_ms=7485\r\n' +
+    'Ledger planning owner-code-drain-begin case=owner-code-denied-counted elapsed_ms=12515 remaining_ms=7484\r\n' +
+    'Ledger planning owner-code-drain-exit case=owner-code-denied-counted elapsed_ms=12533 remaining_ms=7466\r\n' +
+    'Ledger planning seed case=owner-code-human-plain elapsed_ms=12576 remaining_ms=7423\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-human-plain elapsed_ms=12692 remaining_ms=7307\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-human-plain elapsed_ms=12927 remaining_ms=7072\r\n' +
+    'Ledger planning owner-code-resume-drain-begin case=owner-code-human-plain elapsed_ms=13269 remaining_ms=6730\r\n' +
+    'Ledger planning owner-code-resume-drain-exit case=owner-code-human-plain elapsed_ms=13283 remaining_ms=6716\r\n' +
+    'Ledger planning seed case=owner-code-human-counted elapsed_ms=13298 remaining_ms=6701\r\n' +
+    'Ledger planning owner-code-worker-ready case=owner-code-human-counted elapsed_ms=13422 remaining_ms=6577\r\n' +
+    'Ledger planning owner-code-execution-returned case=owner-code-human-counted elapsed_ms=13699 remaining_ms=6300\r\n' +
+    'Ledger planning owner-code-resume-drain-begin case=owner-code-human-counted elapsed_ms=14035 remaining_ms=5964\r\n' +
+    'Ledger planning owner-code-resume-drain-exit case=owner-code-human-counted elapsed_ms=14049 remaining_ms=5950\r\n' +
+    'Ledger planning seed case=accepted-atomic elapsed_ms=14062 remaining_ms=5937\r\n' +
+    'Ledger planning seed case=rejected-atomic elapsed_ms=14119 remaining_ms=5880\r\n' +
+    'Ledger planning seed case=continuation elapsed_ms=14178 remaining_ms=5821\r\n' +
+    'Ledger planning child-context-prepare case=planning-continuation elapsed_ms=14710 remaining_ms=5289\r\n' +
+    'Ledger planning child-context-prepared case=planning-continuation elapsed_ms=14744 remaining_ms=5255\r\n' +
+    'Ledger planning child-sdk-complete case=planning-continuation elapsed_ms=14902 remaining_ms=5097\r\n' +
+    'Ledger planning child-sdk-completed case=planning-continuation elapsed_ms=14948 remaining_ms=5051\r\n' +
+    'Ledger planning seed case=owner-accepted-context elapsed_ms=15172 remaining_ms=4827\r\n' +
+    'Ledger planning child-context-prepare case=planning-owner-accepted-context elapsed_ms=15459 remaining_ms=4540\r\n' +
+    'Ledger planning child-context-prepared case=planning-owner-accepted-context elapsed_ms=15534 remaining_ms=4465\r\n' +
+    'Ledger planning child-sdk-complete case=planning-owner-accepted-context elapsed_ms=15763 remaining_ms=4236\r\n' +
+    'Ledger planning child-sdk-completed case=planning-owner-accepted-context elapsed_ms=15809 remaining_ms=4190\r\n' +
+    'Ledger planning seed case=stale-settlement elapsed_ms=16101 remaining_ms=3898\r\n' +
+    'Planning admission ledger verified exact native dynamic root, finalized capabilities, active segment, sole latest retired provider call, concurrent at-most-once entry, stale generation refusal, cancellation/expiry before admission and retirement uncertainty. Synthetic process/model receipts only; no planner or IPC dispatch claimed.\r\n' +
+    'Ledger phase end planning-admission elapsed_ms=16124\r\n' +
+    'Ledger phase begin paused-child-drain\r\n' +
+    'Ledger planning seed case=slot-owner-paused elapsed_ms=0 remaining_ms=19999\r\n' +
+    'Ledger planning seed case=slot-owner-resumed elapsed_ms=323 remaining_ms=19676\r\n' +
+    'Ledger phase end paused-child-drain elapsed_ms=962\r\n' +
+    'Ledger phase begin main-process-planning\r\n' +
+    'Ledger phase end main-process-planning elapsed_ms=8565\r\n' +
+    'Ledger phase begin main-planning-delegation\r\n',
+  stderr: ''
+}
+
+Node.js v22.23.4
+<end of output>
+Test time =  45.17 sec
+----------------------------------------------------------
+Test Failed.
+"native_agent_worker_ledger_contract" end time: Oct 25 00:26 Coordinated Universal Time
+"native_agent_worker_ledger_contract" time elapsed: 00:00:45
+----------------------------------------------------------
+

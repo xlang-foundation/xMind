@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-10-25T00:42:47.179Z",
+  "source": "5e5849cd38d0641718af86b8fdf805d0f9ff6d23",
+  "run": 40141348537,
+  "job": 121017624351,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40141348537",
+  "conclusion": "failure",
+  "passed": 173,
+  "failed": 4,
+  "total": 177,
+  "seconds": 827.66,
+  "artifact": {
+    "id": 12580353669,
+    "name": "native-windows-evidence-5e5849cd38d0641718af86b8fdf805d0f9ff6d23",
+    "bytes": 8671008,
+    "sha256": "767a8cdf95a0e04a6c47472eef0cac9e937fe917d60799bb3473bf7272f06b5a"
+  },
+  "failures": [
+    {
+      "name": "native_graph_runner_contract",
+      "seconds": 34.98
+    },
+    {
+      "name": "native_agent_worker_model_rpc_contract",
+      "seconds": 67.8
+    },
+    {
+      "name": "native_agent_worker_ledger_contract",
+      "seconds": 45.17
+    },
+    {
+      "name": "native_agent_worker_nested_human_contract",
+      "seconds": 45.03
+    }
+  ],
+  "graphProcess": {
+    "elapsed_ms": 30060,
+    "exit_code": 1,
+    "id": "09979bf9238a69974ee657cbf73888da",
+    "output_artifact": {
+      "operation_id": "09979bf9238a69974ee657cbf73888da",
+      "state": "complete",
+      "stderr_bytes": 0,
+      "stdout_bytes": 34
+    },
+    "process_tree_retired": true,
+    "profile_id": "powershell",
+    "startup_phases": [
+      "script_entered"
+    ],
+    "state": "uncertain",
+    "termination": "timed_out",
+    "timeout_ms": 30000,
+    "tool": "run_process"
+  },
+  "graphRemoteWorker": {
+    "passed": true,
+    "seconds": 18.18
+  },
+  "ledger": {
+    "recordedAt": "2026-10-25T00:26:03.974Z",
+    "code": null,
+    "killed": true,
+    "signal": "SIGTERM",
+    "requests": 0,
+    "timeoutMs": 45000,
+    "maxBuffer": 1048576,
+    "completedTasksMustNeverBeReplayed": true,
+    "tail": [
+      "Ledger phase begin paused-child-drain",
+      "Ledger planning seed case=slot-owner-paused elapsed_ms=0 remaining_ms=19999",
+      "Ledger planning seed case=slot-owner-resumed elapsed_ms=323 remaining_ms=19676",
+      "Ledger phase end paused-child-drain elapsed_ms=962",
+      "Ledger phase begin main-process-planning",
+      "Ledger phase end main-process-planning elapsed_ms=8565",
+      "Ledger phase begin main-planning-delegation"
+    ],
+    "diagnosis": "Outer45s child wrapper expires during main-planning-delegation after completed planning-admission, paused-child-drain and main-process-planning phases. Exact later operation remains to inspect from retained DB."
+  },
+  "nested": {
+    "begun": 15,
+    "completed": 14,
+    "lastBegun": "paused-root-coding-counted-resume",
+    "diagnosis": "Aggregate45s fixture expires in a later counted coding-resume case; not proof of single-case deadlock."
+  },
+  "retention": {
+    "failedDatabasesAndWalsActuallyUploaded": true,
+    "graphFolder": "xmind-graph-runner-xiXO64",
+    "ledgerFolder": "xmind-worker-ledger-282955950-4184151064",
+    "nestedFolder": "xmind-worker-ledger-1758116391-398261844",
+    "fixtureDirectories": 29,
+    "rawLedgerBytes": 8611,
+    "fixtureReplay": false
+  },
+  "exactUnderlyingCausesRemainUnproven": true,
+  "installedVersion": "0.1.74",
+  "installationChanged": false,
+  "goalComplete": false
+}

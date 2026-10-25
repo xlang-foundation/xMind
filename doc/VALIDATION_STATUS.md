@@ -1,3 +1,9 @@
+## Hosted5e terminal173/177; failed databases now retained — 2026-10-24
+
+Official run40141348537/job121017624351 completes173/177 in827.66s. Graph runner fails an actual PowerShell process at30060ms after script_entered only, with physical tree retired and effect uncertain. Worker RPC production phase exceeds its60s child wrapper; ledger45s wrapper stops during main-planning-delegation; nested-human45s CTest expires in a later counted coding-resume case. Graph remote-worker passes18.18s. Prior f113 native177 pass remains a separate source/run, not acceptance of these failures.
+
+Artifact12580353669 (8671008 bytes, SHA767a8cdf95a0e04a6c47472eef0cac9e937fe917d60799bb3473bf7272f06b5a) verifies. Scoped TEMP/TMP retention now actually uploads original failed graph/ledger/nested databases and WALs, plus complete raw ledger output; no completed task is replayed. Exact causes remain under investigation; no limits/retries changed and installed74 is untouched. [Result and retention inventory](evidence/hosted-native-5e5849cd-result-20261024.json).
+
 ## Trusted mutation acceptance fixtures prepared; local11/11 passes — 2026-10-24
 
 Independent controlled HTTPS peer now admits typed session requests into its deduplication map before intentionally dropping one reply. Explicit-CA Node checks verify duplicate/conflicting IDs, lost reply and original receipt lookup/not-found. Hosted-only native SDK/CLI/origin-view HTTP cases each require exactly2 created resources,1 dropped reply and1 receipt GET, with no duplicate POST; repeated local/terminal observations send nothing. Both admitted journal records are checked before and after SQLite reopen. This is controlled peer acceptance infrastructure, not a private server implementation.
