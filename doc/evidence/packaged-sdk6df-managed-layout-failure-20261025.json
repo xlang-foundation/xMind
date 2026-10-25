@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-25T22:39:18.922Z",
+  "passed": false,
+  "namespace": ".agentflow/m77",
+  "result": {
+    "args": [
+      "--config",
+      "D:/CantorAI2026/xMind/.agentflow/m77/providers.yaml",
+      "--graphs-config",
+      "D:/CantorAI2026/xMind/.agentflow/m77/graphs.json",
+      "--agent-execution",
+      "process-code",
+      "profile-info"
+    ],
+    "code": 2,
+    "stdout": "",
+    "stderr": "Native runtime generation verification failed\r\n"
+  },
+  "tasksSubmitted": 0,
+  "modelCalls": 0,
+  "cause": "Fixture builder hard-linked the candidate runtime to a redundant staging path. Native RuntimeGeneration Handle requires nNumberOfLinks==1 and correctly refuses these aliases.",
+  "source": "Native/src/runtime_generation.cpp:53",
+  "correction": {
+    "recordedAt": "2026-10-25T22:39:00.268Z",
+    "correctedFixtureLayout": true,
+    "removedRedundantStagingAliases": 2337,
+    "activeRuntime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension/native-runtime",
+    "activeNativeFilesSingleLink": true,
+    "packageBytesChanged": false,
+    "vsixChanged": false,
+    "originalFailedNamespace": ".agentflow/m77",
+    "nativeVerifierWeakened": false,
+    "scope": "Remove verified redundant hard-link aliases only; preserves the single actual candidate runtime and all VSIX bytes. Failed original managed startup remains retained."
+  },
+  "productionCodeChanged": false,
+  "vsixChanged": false,
+  "originalFailedFixtureRetained": true,
+  "replayed": false,
+  "budgetChanged": false
+}

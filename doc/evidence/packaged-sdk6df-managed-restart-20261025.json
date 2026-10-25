@@ -1,0 +1,86 @@
+{
+  "recordedAt": "2026-10-25T22:40:18.655Z",
+  "passed": true,
+  "scope": "Candidate77 single-link fixture; managed cold startup, existing-owner attach, actual read graph and paused cancellation, identity-verified owner exit and restart preserving exact sessions/history/completed events. Read-only reconciliation after final evidence filename collision; no task replay or deadline change. No76-to77 upgrade acceptance.",
+  "originalHarnessTerminal": {
+    "exitCode": 1,
+    "error": "EEXIST on second retirement-identity.json; preserve original first receipt"
+  },
+  "sessionId": "8710aa29e1f918c42c050b77d21ee8b8",
+  "completedRoot": "5349848d37ee0fc81a28483ebd51c002",
+  "cancelledRoot": "72e374ce24659e89a22bcdd8ab289671",
+  "historyMessages": 3,
+  "sourceCommandsSha256": "55c30eefff95d898f2131df84982f73ed5166a9e362fe2f5a08b3e6b9d203f87",
+  "readOnlyReconciliation": [
+    {
+      "args": [
+        "profile-info"
+      ],
+      "stdoutSha256": "68a0553d4c98c0b6bc07df343c2c60896c37147f5fcf087f091e0958127d253d"
+    },
+    {
+      "args": [
+        "sessions"
+      ],
+      "stdoutSha256": "3e0f712a1855aac49fd73f051b9b3f96cf520aba6382c95be45b8bd780ab17f8"
+    },
+    {
+      "args": [
+        "history",
+        "8710aa29e1f918c42c050b77d21ee8b8"
+      ],
+      "stdoutSha256": "90f4fa28fcccae4357ff90189f154e7360b1d682f70422f1c826af77f4bb2f57"
+    },
+    {
+      "args": [
+        "graph-events",
+        "5349848d37ee0fc81a28483ebd51c002"
+      ],
+      "stdoutSha256": "d1d8abce805f682ceb1fc7fff86838ad85586e1c63dcba9b0cd110cbcd5ec3a4"
+    },
+    {
+      "args": [
+        "graph",
+        "5349848d37ee0fc81a28483ebd51c002"
+      ],
+      "stdoutSha256": "2b8e620e11007258033b9149261dfbfdf088a977ec9d0f694fde419c66e87696"
+    },
+    {
+      "args": [
+        "graph",
+        "72e374ce24659e89a22bcdd8ab289671"
+      ],
+      "stdoutSha256": "b8469eaf240517acf909f67e7cc78f1c8f489f519f8f05a3d179f38d94571c35"
+    }
+  ],
+  "firstOwner": {
+    "process_birth": "134374415697080506",
+    "process_id": 31640,
+    "image_path": "D:\\CantorAI2026\\xMind\\.agentflow\\m77b\\profiles\\c7ba761bea305f946ff83f9eb19e55bcb981a3fea7c00028ebe041667c01b5c2\\runtime-8abac0d4d4fe9863750f3985fe69b0571b1756f8e1fa5c9ec2ce5f3ac3c93eff\\xmind.exe"
+  },
+  "secondOwner": {
+    "process_birth": "134374415735469579",
+    "process_id": 27936
+  },
+  "secondOwnerExit": {
+    "exited": true,
+    "identity_matches": false,
+    "process_birth": "134374415735469579",
+    "process_id": 27936
+  },
+  "bothOwnerRetirementsObserved": true,
+  "pausedCancellation": true,
+  "historySessionsAndCompletedEventsExactAfterRestart": true,
+  "packageAudit": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension",
+    "archiveSha256": "ead875de402f8e2a53b9fb627b2f7903b19cfd6244136bf5d12e743b2be850c0",
+    "manifestSha256": "a4e03cb0ebff9605e5138587af424b2b27c325493899fc445050552bb8cebdc7",
+    "verifiedPackagedFiles": 2379
+  },
+  "modelCalls": 0,
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false,
+  "releaseAccepted": false
+}
