@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-10-25T08:33:48.150Z",
+  "completedAt": "2026-10-25T08:33:48.726Z",
+  "sourceParent": "4188ce7215684c060bafef1b921e62ca01146895",
+  "passed": true,
+  "projectFiles": 352,
+  "inputsAndFileSetsUnchanged": true,
+  "nodeSha256": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362",
+  "opensslSha256": "6c2e01defbbeb057ee5cd2f69396363c0e7a0ce90df900c95072139fec7ce757",
+  "logSha256": "92bd42beb01e900342b56d2c994271f9cfdaa18d1ca0389b6147bc8907b36983",
+  "scope": "Independent HTTPS peer, explicit CA verification, two snapshot pages and credential refusal",
+  "nativeSnapshotTlsExecuted": false,
+  "systemTrustChanged": false,
+  "installed": false,
+  "cpython": false
+}

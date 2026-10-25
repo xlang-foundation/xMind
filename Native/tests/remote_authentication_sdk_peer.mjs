@@ -19,6 +19,14 @@ export function remoteRunEventsResponse(request,body){
  const events=kind==='initial'?[{sequence:3,run_id:'remote-run',kind:'run.running',payload:{}},{sequence:7,run_id:'remote-run',kind:'tool.completed',payload:{observed:true}}]:kind==='invalid'?[{sequence:7,run_id:'remote-run',kind:'run.completed',payload:{}}]:[];
  return {status:200,kind,value:{binding:base.value.binding,status:kind==='gap'?'gap':kind==='expired'?'epoch_expired':'ok',cursor,events}};
 }
+export function remoteRunSnapshotResponse(request,body){
+ const url=new URL(request.url,'https://peer.invalid');assert.equal(url.pathname,'/xmind/v1/scopes/remote-sdk-workspace/sessions/remote-session/runs/remote-run/snapshot');
+ const base=remoteSessionResponse(request,body);if(base.status!==200)return base;
+ const query=[...url.searchParams];const next=query.length>0;
+ if(next)assert.equal(url.search,'?snapshot_id=snapshot%3Atls&offset=1');
+ const offset=next?1:0;
+ return {status:200,kind:next?'continuation':'initial',value:{binding:base.value.binding,snapshot:{id:'snapshot:tls',server_id:'remote-sdk-server',scope_id:'remote-sdk-workspace',session_id:'remote-session',run_id:'remote-run',epoch:'epoch:snapshot',sequence:11,total_records:2,offset},records:[{ordinal:offset,kind:next?'message':'run',id:next?'snapshot-message':'remote-run',revision:1,payload:next?{text:'Snapshot over verified TLS 🐈'}:{state:'completed'}}],complete:next}};
+}
 export function remoteRunResponse(request,body){
  assert.equal(request.url,'/xmind/v1/scopes/remote-sdk-workspace/sessions/remote-session/runs/remote-run');const result=remoteSessionResponse(request,body);if(result.status===200){delete result.value.session;result.value.run={id:'remote-run',session_id:'remote-session',root_id:'remote-root',state:'completed',revision:7};}return result;
 }
