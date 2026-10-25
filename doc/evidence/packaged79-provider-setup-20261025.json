@@ -1,0 +1,162 @@
+{
+  "recordedAt": "2026-10-25T23:46:12.471Z",
+  "version": "0.1.79",
+  "scope": "Actual packaged79 provider/model setup and reload; configured account catalogue metadata only, no inference",
+  "packageBefore": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension",
+    "archiveSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "manifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "verifiedPackagedFiles": 2379
+  },
+  "packageAfter": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension",
+    "archiveSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "manifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "verifiedPackagedFiles": 2379
+  },
+  "renderedProof": {
+    "passed": true,
+    "before": {
+      "keyInputsEmpty": true,
+      "modelId": "gpt-4.1",
+      "promptEmpty": true,
+      "providerId": "openai",
+      "sendEnabled": true,
+      "sessionId": "ae531a82e9d04abc82d57ad64d5a99f8"
+    },
+    "after": {
+      "keyInputsEmpty": true,
+      "modelId": "gpt-4.1",
+      "promptEmpty": true,
+      "providerId": "openai",
+      "sendEnabled": true,
+      "sessionId": "ae531a82e9d04abc82d57ad64d5a99f8"
+    },
+    "savedKeyUsedWithoutTyping": true,
+    "modelCatalogueCount": 20,
+    "metadataOnly": true,
+    "inferenceSubmitted": false,
+    "reloadRestored": true,
+    "installed": false
+  },
+  "selectedProfile": {
+    "id": "openai",
+    "model": "gpt-4.1",
+    "provider": "openai",
+    "revision": 2,
+    "route_id": "openai.responses"
+  },
+  "sessions": [
+    {
+      "id": "ae531a82e9d04abc82d57ad64d5a99f8",
+      "title": "Browser conversation"
+    }
+  ],
+  "runs": [],
+  "catalogueRequests": [
+    {
+      "path": "/v1/connection-bindings/9df9b315cbe318dbe3c6e2946f8d656e/providers/models",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/a478b39475325132925c46ba83c138e4/providers/models",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/a478b39475325132925c46ba83c138e4/providers/models",
+      "method": "POST",
+      "status": 200
+    }
+  ],
+  "nativeConfigurationRequests": [
+    {
+      "path": "/v1/connection-bindings/9df9b315cbe318dbe3c6e2946f8d656e/providers/models",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/9df9b315cbe318dbe3c6e2946f8d656e/providers/save",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/9df9b315cbe318dbe3c6e2946f8d656e/sessions/ae531a82e9d04abc82d57ad64d5a99f8/model",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/a478b39475325132925c46ba83c138e4/providers/models",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/a478b39475325132925c46ba83c138e4/providers/models",
+      "method": "POST",
+      "status": 200
+    }
+  ],
+  "originalProviderYamlUnchanged": true,
+  "keysTypedIntoBrowser": false,
+  "keysReturnedToBrowser": false,
+  "inferenceSubmitted": false,
+  "paidInference": false,
+  "retirement": {
+    "recordedAt": "2026-10-25T23:45:45.2998342Z",
+    "identityFile": "D:\\CantorAI2026\\xMind\\.agentflow\\provider-ui-v1-package79\\owned-private\\live.json",
+    "retired": [
+      {
+        "birth": "134374452071431160",
+        "identityVerifiedOnHeldProcessHandle": true,
+        "exited": true,
+        "pid": 34804,
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\native-sdk6df-view-lease\\package-qualified\\extension\\native-runtime\\xmind.exe"
+      },
+      {
+        "birth": "134374452031929920",
+        "identityVerifiedOnHeldProcessHandle": true,
+        "exited": true,
+        "pid": 26652,
+        "image": "C:\\Program Files\\nodejs\\node.exe"
+      }
+    ],
+    "installed": false,
+    "managedOwnersPreserved": [
+      31084,
+      11784
+    ]
+  },
+  "initialHarnessFailures": [
+    {
+      "recordedAt": "2026-10-25T23:39:23.302Z",
+      "scope": "Harness setup before Native launch",
+      "failedCommand": "Set-Acl",
+      "error": "Microsoft.PowerShell.Security module could not be loaded in Windows PowerShell child",
+      "backendLaunched": false,
+      "credentialsImported": false,
+      "providerRequests": 0,
+      "tasks": 0,
+      "rootAndWorkspaceVerifiedEmpty": true,
+      "correction": "Use the .NET Framework DirectoryInfo.SetAccessControl API in the same owned-directory guard."
+    },
+    {
+      "recordedAt": "2026-10-25T23:40:03.180Z",
+      "scope": "Harness setup before Native launch",
+      "api": "DirectoryInfo.SetAccessControl",
+      "error": "UnauthorizedAccessException: Attempted to perform an unauthorized operation",
+      "backendLaunched": false,
+      "credentialsImported": false,
+      "providerRequests": 0,
+      "tasks": 0,
+      "correction": "Create a fresh private child with its security descriptor at creation; do not change the inherited owner of an existing directory."
+    }
+  ],
+  "privateFixtureCreatedAtomicallyWithOwnerSystemAcl": true,
+  "credentialDatabasePreserved": true,
+  "neverSubmitTaskSession": "ae531a82e9d04abc82d57ad64d5a99f8",
+  "installed": false,
+  "releaseAccepted": false
+}
