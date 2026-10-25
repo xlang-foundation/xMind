@@ -16,6 +16,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Candidate77 runtime must have one link/file: redundant stage aliases were removed without byte/VSIX changes after native correctly refused hard links in .agentflow/m77. Fresh m77b managed startup/cancel/restart comparisons pass; final receipt-name collision is reconciled read-only. NEVER replay session8710aa29e1f918c42c050b77d21ee8b8/read5349848d37ee0fc81a28483ebd51c002/cancel72e374ce24659e89a22bcdd8ab289671. Both owners retired. Original76 startup failure remains unresolved; no upgrade acceptance.
 
+- V1 blocker: packaged77 workspace create/switch/scoped files/history/reload pass, but full view/adapter restart resets B to launch A. Empty sessions1529aa4c008642b5abbf8f1444867766/A and a90fafab69754063a59404de0fb4ab6c/B remain; zero tasks/models. Repair preference restoration without creating more histories. Isolated .agentflow/u77 retains view10504, owners13476/31548 and adapter session49872; hidden CUA tab3 is handed off at http://127.0.0.1:64430/ui/. Exact identities in restart-live.json. Preserve collector failure; see workspace restart evidence. Installed76 unchanged.
+
 - Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.
 
 - Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.

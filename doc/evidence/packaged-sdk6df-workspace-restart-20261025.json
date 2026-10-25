@@ -1,0 +1,81 @@
+{
+  "recordedAt": "2026-10-25T22:46:37.844Z",
+  "packagedWorkspaceCreationSwitchAndReload": {
+    "passed": true,
+    "seedSession": "1529aa4c008642b5abbf8f1444867766",
+    "otherSession": "a90fafab69754063a59404de0fb4ab6c",
+    "createdAndSelectedSecondWorkspace": true,
+    "scopedFilesAndSessionsVerified": true,
+    "switchBackRestoresOriginalSession": true,
+    "nonDefaultWorkspaceAndSessionRestoredOnReload": true,
+    "missingProviderSendDisabled": true,
+    "relativePathRejected": true,
+    "relativePathMessage": "Invalid view request",
+    "modelCalls": 0,
+    "tabRetainedForRestart": true,
+    "fullRestartAcceptance": false
+  },
+  "fullViewRestart": {
+    "passed": false,
+    "expectedWorkspace": "v1-ui-other77",
+    "expectedSessionId": "a90fafab69754063a59404de0fb4ab6c",
+    "actual": {
+      "sessionId": "1529aa4c008642b5abbf8f1444867766",
+      "sessionIds": [
+        "1529aa4c008642b5abbf8f1444867766"
+      ],
+      "workspace": "v1-ui-seed77⌄"
+    },
+    "adapterAndNativeViewRestarted": true,
+    "modelCalls": 0,
+    "tasksSubmitted": 0,
+    "originalHistoriesPreserved": true,
+    "tabRetainedForRepair": true
+  },
+  "separateCollectorFailure": {
+    "recordedAt": "2026-10-25T22:45:27.184Z",
+    "stage": "First read-only native UI readback after rendered proof",
+    "error": "assert(r.ok) in collection; HTTP status not retained",
+    "uiProof": "rendered-proof.json",
+    "tasksSubmitted": 0,
+    "modelCalls": 0,
+    "originalAdapterExited": true,
+    "originalNativeViewPidAbsent": 29720,
+    "existingManagedOwnersPreserved": [
+      13476,
+      31548
+    ],
+    "replayed": false
+  },
+  "scopedNativeCliReadback": [
+    {
+      "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/v1-ui-seed77",
+      "sessionId": "1529aa4c008642b5abbf8f1444867766",
+      "sessionListSha256": "236692053c4fd30d32ac94ef94c7014230bf9af884cd67554ba6db44194c6693"
+    },
+    {
+      "workspace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/v1-ui-other77",
+      "sessionId": "a90fafab69754063a59404de0fb4ab6c",
+      "sessionListSha256": "9bcf1d5cf499f43a188600b42de7be6bcb8e54fffcdad77db9ab493f901fce05"
+    }
+  ],
+  "packageAudit": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-f86eda4b/package-qualified/extension",
+    "archiveSha256": "ead875de402f8e2a53b9fb627b2f7903b19cfd6244136bf5d12e743b2be850c0",
+    "manifestSha256": "a4e03cb0ebff9605e5138587af424b2b27c325493899fc445050552bb8cebdc7",
+    "verifiedPackagedFiles": 2379
+  },
+  "activeIsolatedFixture": {
+    "nativeViewPid": 10504,
+    "adapterSession": 49872,
+    "origin": "http://127.0.0.1:64430",
+    "profileRoot": "D:/CantorAI2026/xMind/.agentflow/u77/p",
+    "reason": "Retained for workspace preference repair and read-only restoration verification"
+  },
+  "diagnosis": "Browser saves per-workspace conversation selection in sessionStorage, while native view browser session bindings are in memory. No persistent preferred workspace is restored when the native view session is reissued after restart.",
+  "modelCalls": 0,
+  "tasksSubmitted": 0,
+  "releaseAccepted": false,
+  "installed76Changed": false
+}
