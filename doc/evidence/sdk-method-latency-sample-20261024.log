@@ -1,0 +1,1 @@
+Separate-process SDK method latency {"calls":256,"first_call_us":172,"import_us":7698,"max_us":235,"median_us":85,"method":"Host.ApiVersion","over_10ms":0,"p95_us":132,"scope":"separate-process retained SDK method; excludes process startup, model and persistence work","subobject_us":1031,"total_us":23850}

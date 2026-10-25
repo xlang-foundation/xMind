@@ -1,0 +1,60 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T06:01:12.628Z",
+    "sourceParent": "ad5b8313f731d05462d2462aada06f07268e1350",
+    "sourcePatchSha256": "18555bd14007734f17d1fb9e9f9a15a6517d5825bb691d9d93b51c280113c3ee",
+    "build": {
+      "pid": 25972,
+      "launchedAt": "2026-10-25T06:00:15.432Z",
+      "completedAt": "2026-10-25T06:00:46.236Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "078fad1a4b0acc118193936ad356fbe2f45ca7bae802b82cdc4e4a82d4a09a2e"
+    },
+    "test": {
+      "pid": 40720,
+      "launchedAt": "2026-10-25T06:00:48.921Z",
+      "completedAt": "2026-10-25T06:01:09.981Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "843b2262fc440dd57244abdc0435e7fc09414c58db0ba815a27289893ab9f94c"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 21.02,
+    "projectFiles": 2843,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "timing": {
+    "calls": 256,
+    "first_call_us": 172,
+    "import_us": 7698,
+    "max_us": 235,
+    "median_us": 85,
+    "method": "Host.ApiVersion",
+    "over_10ms": 0,
+    "p95_us": 132,
+    "scope": "separate-process retained SDK method; excludes process startup, model and persistence work",
+    "subobject_us": 1031,
+    "total_us": 23850
+  },
+  "methodTransfer": "Ordinary xlang3 root/subobject method from a separate native client process; SDK retains transport/value serialization ownership",
+  "measurement": "Wall-clock steady-clock microseconds; import, subobject acquisition, first method call and 256 retained method samples reported separately",
+  "interpretation": "This sample meets the requested 10ms scale for lightweight Host.ApiVersion calls; no bound asserted for model/persistence/tool work or hosted runs",
+  "productionNativeUnchanged": true,
+  "noDeadlineOrCoverageChange": true,
+  "noPreviouslyCompletedModelOrToolTaskReplayed": true,
+  "installed75Unchanged": true
+}

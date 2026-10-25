@@ -1,0 +1,95 @@
+{
+  "source": "6cc54bee66ffdffadc9a928d5a531cec81af310e",
+  "hostedRunId": 40162311348,
+  "sourceArtifactId": 12588418392,
+  "sourceSamplesSha256": "ace32ae296cc9be73655bc5eb1015f3b6af6561b4c9da7cc07cdceab43605b19",
+  "scope": {
+    "readOnly": true,
+    "elapsedMsScope": "observer",
+    "threadLimit": 128,
+    "environmentIncluded": false,
+    "ownerPid": 8428,
+    "commandLinesIncluded": false,
+    "kind": "scope",
+    "ownerImage": "D:\\a\\xMind\\xMind\\xmind\\build\\native\\Release\\agentflow_graph_runner_contract.exe",
+    "moduleNameLimit": 64
+  },
+  "child": {
+    "pid": 6356,
+    "createdUtc": "2026-10-25T05:35:33.0356620Z",
+    "image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  "samples": [
+    {
+      "sampledUtc": "2026-10-25T05:35:33.3541226Z",
+      "processAgeMs": 318,
+      "cpuMs": 375,
+      "modulePresence": {
+        "management": false,
+        "amsi": true,
+        "utility": false,
+        "automation": true,
+        "stateRepository": true
+      },
+      "topThread": {
+        "waitReason": "UserRequest",
+        "id": 6852,
+        "state": "Wait",
+        "cpuMs": 140.625
+      }
+    },
+    {
+      "sampledUtc": "2026-10-25T05:35:44.0482701Z",
+      "processAgeMs": 11013,
+      "cpuMs": 9250,
+      "modulePresence": {
+        "management": false,
+        "amsi": true,
+        "utility": false,
+        "automation": true,
+        "stateRepository": true
+      },
+      "topThread": {
+        "waitReason": null,
+        "id": 824,
+        "state": "Running",
+        "cpuMs": 8906.25
+      }
+    },
+    {
+      "sampledUtc": "2026-10-25T05:35:54.7077303Z",
+      "processAgeMs": 21672,
+      "cpuMs": 19156.25,
+      "modulePresence": {
+        "management": false,
+        "amsi": true,
+        "utility": false,
+        "automation": true,
+        "stateRepository": true
+      },
+      "topThread": {
+        "waitReason": null,
+        "id": 824,
+        "state": "Running",
+        "cpuMs": 18812.5
+      }
+    }
+  ],
+  "interval": {
+    "elapsedMs": 10659,
+    "processCpuMs": 9906.25,
+    "threadId": 824,
+    "threadCpuMs": 9906.25,
+    "oneCoreBusyPercent": 92.93789286049348
+  },
+  "inference": "The PowerShell child was doing substantial CPU work during the retained interval. This directs further diagnosis toward its execution/module-resolution path; it does not identify the hot code.",
+  "limits": [
+    "No original native or managed stack captured for this PowerShell child",
+    "Module presence observations alone do not prove a module-loading cause",
+    "Current local lightweight SDK timings cannot establish historical hosted worker/persistence latency",
+    "Original failed fixture and database remain untouched; no replay"
+  ],
+  "originalDeadlineMs": 30000,
+  "deadlineUnchanged": true,
+  "causeStillUnproven": true
+}

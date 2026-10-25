@@ -13,6 +13,8 @@
 #include <iostream>
 #include <source_location>
 #include <cstdint>
+#include <chrono>
+#include <vector>
 using namespace agentflow;
 namespace {
 constexpr const char* owner_token="synthetic-remote-sdk-owner-not-live";
@@ -20,9 +22,14 @@ constexpr const char* credential="synthetic-remote-sdk-credential-not-live";
 struct FixtureCheckFailure:std::runtime_error {std::uint_least32_t line,column;explicit FixtureCheckFailure(std::source_location location):std::runtime_error("Remote authentication SDK fixture invariant failed"),line(location.line()),column(location.column()){};};
 void check(bool value,std::source_location location=std::source_location::current()){if(!value)throw FixtureCheckFailure(location);}
 int client(const char* endpoint,bool positive){
-    X::Runtime runtime;const auto root=runtime.ImportRemote("xmind",endpoint);const auto text=[&](const std::string& value){return X::Value(runtime,value);};
+    const auto import_started=std::chrono::steady_clock::now();X::Runtime runtime;const auto root=runtime.ImportRemote("xmind",endpoint);const auto import_us=std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now()-import_started).count();const auto text=[&](const std::string& value){return X::Value(runtime,value);};
     const auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;check(method.Call(args,result));return result;};
     const auto refused=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;check(!method.Call(args,result));};
+    {
+        const auto clock=[]{return std::chrono::steady_clock::now();};const auto micros=[](auto elapsed){return std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();};const auto object_started=clock();const auto host=call(root["Host"],{});const auto method=host["ApiVersion"];const auto subobject_us=micros(clock()-object_started);const auto first_started=clock();check(call(method,{}).ToInt64()==1);const auto first_us=micros(clock()-first_started);std::vector<std::int64_t> samples;samples.reserve(256);const auto repeated_started=clock();
+        for(unsigned i=0;i<256;++i){const auto started=clock();check(call(method,{}).ToInt64()==1);samples.push_back(micros(clock()-started));}const auto total_us=micros(clock()-repeated_started);std::sort(samples.begin(),samples.end());const auto over_10ms=std::count_if(samples.begin(),samples.end(),[](auto value){return value>10000;});
+        std::cout<<"native-sdk-method-latency "<<nlohmann::json{{"calls",samples.size()},{"import_us",import_us},{"subobject_us",subobject_us},{"first_call_us",first_us},{"median_us",samples[samples.size()/2]},{"p95_us",samples[(samples.size()*95+99)/100-1]},{"max_us",samples.back()},{"total_us",total_us},{"over_10ms",over_10ms},{"method","Host.ApiVersion"},{"scope","separate-process retained SDK method; excludes process startup, model and persistence work"}}.dump()<<std::endl;
+    }
     refused(root["Connections"],{text("wrong-synthetic-owner-token")});const auto connections=call(root["Connections"],{text(owner_token)});check(call(connections["Capabilities"],{})["remote_authentication"].ToInt64()==1);
     const auto request=[&](const char* secret){return sdk_values::to_value(runtime.host(),nlohmann::json{{"credential",secret},{"expected_credential_revision",0},{"timeout_ms",5000}});};
     check(call(connections["Capabilities"],{})["remote_authentication_status"].ToInt64()==1);const auto absent=call(connections["Authentication"],{text("remote-sdk"),X::Value(1)});check(absent.Size()==8&&absent["state"].ToString()=="absent"&&absent["credential_revision"].ToInt64()==0&&absent["server_id"].IsNone());
