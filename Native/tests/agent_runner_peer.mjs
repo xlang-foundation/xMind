@@ -119,7 +119,7 @@ const server=createServer((request,response)=>{
         const processTool=body.tools.find(item=>item.function.name==='run_process');assert.ok(processTool?.function.parameters.properties.folder_id,'Agent must receive explicit folder selection in the process tool schema');
         const previous=body.messages.at(-1);let delta,finish;
         if(previous.role==='user'){
-          delta={tool_calls:[{index:0,id:'attached-process',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'powershell',arguments:["[IO.File]::WriteAllText('agent-process-folder.txt',(Get-Location).Path)"],workdir:'.',folder_id:folderId})}}]};finish='tool_calls';
+          delta={tool_calls:[{index:0,id:'attached-process',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'powershell',arguments:["[IO.File]::WriteAllText('agent-process-folder.txt',[Environment]::CurrentDirectory)"],workdir:'.',folder_id:folderId})}}]};finish='tool_calls';
         }else{
           assert.equal(previous.role,'tool');const result=JSON.parse(previous.content);assert.equal(result.exit_code,0);assert.ok(result.operation_id&&result.process_tree_retired);
           delta={content:'Synthetic model observed the successful process in the captured attached folder.'};finish='stop';

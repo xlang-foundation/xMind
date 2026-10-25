@@ -348,7 +348,7 @@ int main(int argc,char** argv) {
         const auto powershell=(std::filesystem::u8path(system_root)/L"System32"/L"WindowsPowerShell"/L"v1.0"/L"powershell.exe").string();
         auto multi_process=multi;multi_process.provider.endpoint=base+"/multi-folder-process?folder_id="+attached_id;
         multi_process.process_profiles.push_back({"powershell",powershell,1,{"-NoLogo","-NoProfile","-NonInteractive","-Command"},std::chrono::seconds(30),{},true});
-        const std::string process_path="agent-process-folder.txt";const std::string command="[IO.File]::WriteAllText('"+process_path+"',(Get-Location).Path)";
+        const std::string process_path="agent-process-folder.txt";const std::string command="[IO.File]::WriteAllText('"+process_path+"',[Environment]::CurrentDirectory)";
         store.create_session("multi-process","Agent process targets the captured secondary folder").get();AgentRunner process_runner(store,multi_process);process_runner.start("multi-process","multi-process","Run a process in the explicitly attached folder");
         const auto process_run=process_runner.execute("multi-process");
         if(process_run.state!=RunState::completed){
