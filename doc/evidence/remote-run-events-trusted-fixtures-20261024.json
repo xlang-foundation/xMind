@@ -1,0 +1,69 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T05:09:18.655Z",
+    "sourceParent": "e4a6ca656f0869f72bb022af23d7138a38c9c1d7",
+    "sourcePatchSha256": "0b0651e4b463547ac285789abd3cd74853a0b219506f887fa5c975cd6b3f1360",
+    "build": {
+      "pid": 2944,
+      "launchedAt": "2026-10-25T05:08:13.670Z",
+      "completedAt": "2026-10-25T05:08:49.766Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "078fad1a4b0acc118193936ad356fbe2f45ca7bae802b82cdc4e4a82d4a09a2e"
+    },
+    "test": {
+      "pid": 36364,
+      "launchedAt": "2026-10-25T05:08:53.041Z",
+      "completedAt": "2026-10-25T05:09:15.391Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "3863feff588ecfac1f287a4ee8b04b0a72c5753f151bfb3b1d95b7c5fa69ce92"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 22.31,
+    "projectFiles": 2841,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d361fe72441253d5e5616a59cdd2932c178bdcbac963076d15a945c92d5e3da4",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "productionNativeUnchangedFromAdapters": true,
+  "changes": [
+    "Independent HTTPS peer validates exact event URL, bearer/binding headers, empty body and once-encoded epoch query",
+    "Initial two-event page, empty reconnect page, retention gap, expired epoch and malformed duplicate sequence",
+    "Separate-process native SDK, CLI and origin-bound HTTP fixtures assert public event pages, fixed error codes, no cursor mutation and local generation refusal",
+    "Per-channel request counts assert exactly one request for each of five modes, with no implicit retry",
+    "Correct stale CLI/HTTP authorized action lists to include existing runs.cancel and new events.read"
+  ],
+  "locallyExecuted": [
+    "Independent Node HTTPS peer with explicit CA verification and default untrusted refusal",
+    "Compiled native SDK client fixture",
+    "Existing public SDK cursor/refusal, native HTTP refusal, backend event page and authorization contracts"
+  ],
+  "notYetExecuted": [
+    "Native SDK/CLI/HTTP positive event delivery through system-trusted hosted TLS",
+    "Actual hosted certificate provisioning after repository evidence TEMP correction"
+  ],
+  "expectedHostedEventCountsPerClient": {
+    "initial": 1,
+    "resume": 1,
+    "gap": 1,
+    "expired": 1,
+    "invalid": 1
+  },
+  "noLocalTrustProvisioning": true,
+  "noEnvironmentImpersonation": true,
+  "installed75Unchanged": true,
+  "fullGoalComplete": false,
+  "completedTasksMustNeverBeReplayed": true
+}

@@ -1,3 +1,9 @@
+## Remote run-event trusted client fixtures — 2026-10-24
+
+The independent HTTPS peer now serves initial/resume/gap/expired/malformed event pages with exact binding/header/query checks. Separate SDK, CLI and origin-bound HTTP fixtures each require the two real event records, empty cursor-preserving resume, reset-required gap/expiry refusal, malformed-page refusal, unchanged caller cursor and local generation rejection. Exact request counts require one call per mode and no automatic retry. Grant actions include events.read; stale CLI/HTTP action-list expectations also now include existing runs.cancel.
+
+Focused11/11 passes22.31s with complete2841/16/1870/30/18598/142 closure hashes and file sets unchanged. The independent Node HTTPS peer cases actually execute with an explicit test CA; the native positive SDK client compiles. Actual system-trusted native SDK/CLI/HTTP events and the hosted certificate-path fix still await hosted execution. Production Native d361fe72 is unchanged from the preceding adapters checkpoint; installed75 remains unchanged, and neither a full gate nor a new package is qualified. [Receipt](evidence/remote-run-events-trusted-fixtures-20261024.json), [focused log](evidence/remote-run-events-trusted-fixtures-focused-20261024.log).
+
 ## Captured remote run-event public adapters — 2026-10-24
 
 Standard SDK OpenScope(...).RunEvents(session,run) now exposes Cursor()/Read(cursor). The shared eight-field cursor includes backend_generation; foreign namespace/generation, malformed integer/bool values and extra keys refuse before dispatch. CLI scope-run-events calls the ordinary SDK methods; owner/origin-bound HTTP scope-run-events calls the same backend service and generation checks. Typed gaps return remote_cursor_reset_required, with no retry or implicit reset. SDK value serialization remains entirely xlang3-owned.
