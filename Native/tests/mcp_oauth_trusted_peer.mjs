@@ -7,7 +7,7 @@ import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {once} from 'node:events';
 import {mkdtemp,readFile,writeFile,rm,realpath} from 'node:fs/promises';
-import {join,resolve,dirname} from 'node:path';
+import {join,resolve,dirname,basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createServer as createTcpServer} from 'node:net';
 import {runRenewalAcceptance,renewalModes} from './mcp_oauth_renewal_peer.mjs';
@@ -93,10 +93,15 @@ export function createOAuthPeer(options,{registeredPort=43211}={}){
 export function trustedRequest(url,ca,{method='GET',body,headers={}}={}){
  return new Promise((resolve,reject)=>{const request=httpsRequest(url,{method,ca,headers,rejectUnauthorized:true},response=>{let text='';response.setEncoding('utf8');response.on('data',data=>{text+=data;if(text.length>65536){request.destroy();reject(Error('Fixture response bound exceeded'));}});response.on('end',()=>resolve({status:response.statusCode,headers:response.headers,body:text}));});request.setTimeout(10000,()=>request.destroy(Error('Fixture HTTPS deadline exceeded')));request.on('error',reject);request.end(body);});
 }
+export async function finalizeTrustedFixtureDirectory(directory,root,passed){
+ const expectedRoot=await realpath(root),bound=await realpath(directory);assert.equal(dirname(bound),expectedRoot);assert.ok(basename(bound).startsWith('xmind-oauth-trust-'));
+ if(passed===true){await rm(bound,{recursive:true,force:true});return {retained:false,path:bound};}
+ await writeFile(join(bound,'failure-retention.json'),JSON.stringify({version:1,fixture:'trusted-native-oauth',passed:false,completedTasksMustNeverBeReplayed:true})+'\n',{flag:'wx'});return {retained:true,path:bound};
+}
 async function hosted(){
  if(process.platform!=='win32'||process.env.GITHUB_ACTIONS!=='true'||process.env.RUNNER_ENVIRONMENT!=='github-hosted'||process.env.RUNNER_OS!=='Windows'||!/^\d+$/.test(process.env.GITHUB_RUN_ID||''))throw Error('Trusted OAuth acceptance requires an isolated GitHub-hosted Windows runner. Never impersonate its environment locally.');
- const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable,remoteSdkExecutable,cliExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
- assert.equal(dirname(await realpath(directory)),tempRoot);let peer,child,exited,timer,installed=false,thumbprint,registeredReservation,occupiedReservation;
+ const [executable,modules,stdlib,openssl,certificateHelper,refreshExecutable,renewalExecutable,remoteSdkExecutable,cliExecutable]=process.argv.slice(2),execute=promisify(execFile),tempRoot=await realpath(process.env.TEMP||process.env.RUNNER_TEMP),directory=await mkdtemp(join(tempRoot,'xmind-oauth-trust-'));
+ assert.equal(dirname(await realpath(directory)),tempRoot);let peer,child,exited,timer,installed=false,thumbprint,registeredReservation,occupiedReservation,passed=false;
  const caFile=join(directory,'ca.cer'),provision=action=>execute('pwsh.exe',['-NoProfile','-NonInteractive','-File',certificateHelper,'-Action',action,'-CertificateFile',caFile,'-Thumbprint',thumbprint],{windowsHide:true,timeout:20000});
  try{
   await execute(openssl,['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(directory,'ca-key.pem'),'-out',join(directory,'ca.pem'),'-days','1','-subj','/CN=xMind isolated OAuth CI '+randomUUID(),'-addext','basicConstraints=critical,CA:TRUE','-addext','keyUsage=critical,keyCertSign,cRLSign'],{windowsHide:true});
@@ -141,11 +146,12 @@ async function hosted(){
   process.stdout.write('Actual separate-process xlang3 SDK authentication passed trusted native HTTPS, wrong-credential refusal, one accepted grant, stale retry without another HTTP request, encrypted credential/grant database reopen and unchanged Local selection. Typed session command creation and lost-reply receipt reconciliation passed; generic run routing remains unavailable.\n');
   process.stdout.write('Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.\n');
   process.stdout.write('Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.\n');
+  passed=true;
  }finally{
   clearTimeout(timer);if(child&&child.exitCode===null&&child.signalCode===null){child.kill();await exited;}if(peer)await peer.close();
   for(const reservation of [registeredReservation,occupiedReservation])if(reservation?.listening)await new Promise(resolve=>reservation.close(resolve));
   if(installed){const removed=JSON.parse((await provision('Remove')).stdout);assert.equal(removed.thumbprint,thumbprint);assert.equal(removed.store,'LocalMachine/Root');process.stdout.write('Owned isolated-runner OAuth machine-root certificate removed and absence confirmed.\n');}
-  assert.equal(dirname(await realpath(directory)),tempRoot);await rm(directory,{recursive:true,force:true});
+  const finalized=await finalizeTrustedFixtureDirectory(directory,tempRoot,passed);if(finalized.retained)process.stderr.write("Retained failed trusted native OAuth fixture: "+finalized.path+"\n");
  }
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await hosted();

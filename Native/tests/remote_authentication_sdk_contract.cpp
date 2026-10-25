@@ -10,11 +10,14 @@
 #include <filesystem>
 #include <algorithm>
 #include <iostream>
+#include <source_location>
+#include <cstdint>
 using namespace agentflow;
 namespace {
 constexpr const char* owner_token="synthetic-remote-sdk-owner-not-live";
 constexpr const char* credential="synthetic-remote-sdk-credential-not-live";
-void check(bool value){if(!value)throw std::runtime_error("Remote authentication SDK fixture invariant failed");}
+struct FixtureCheckFailure:std::runtime_error {std::uint_least32_t line,column;explicit FixtureCheckFailure(std::source_location location):std::runtime_error("Remote authentication SDK fixture invariant failed"),line(location.line()),column(location.column()){};};
+void check(bool value,std::source_location location=std::source_location::current()){if(!value)throw FixtureCheckFailure(location);}
 int client(const char* endpoint,bool positive){
     X::Runtime runtime;const auto root=runtime.ImportRemote("xmind",endpoint);const auto text=[&](const std::string& value){return X::Value(runtime,value);};
     const auto call=[&](const X::Value& method,std::vector<X::Value> args){X::Value result;check(method.Call(args,result));return result;};
@@ -37,10 +40,11 @@ void verify(PersistenceService& store,bool positive){
 }
 }
 int main(int argc,char** argv){try{
+    if(argc==2&&std::string(argv[1])=="diagnostic-check")check(false);
     if(argc==4&&std::string(argv[1])=="client")return client(argv[2],std::string(argv[3])=="positive");if(argc!=5)return 2;const auto database=(std::filesystem::path(argv[1])/"remote-sdk.sqlite").string();check(!std::filesystem::exists(database));bool positive=false;
     {PersistenceService store(database,{argv[2],argv[3]});ConnectionProfiles profiles(store);profiles.load_or_initialize();profiles.apply(nlohmann::json{{"profiles",nlohmann::json::array({{{"id","local"},{"name","Local"},{"kind","local"}},{{"id","remote-sdk"},{"name","Controlled remote SDK"},{"kind","nexus"},{"origin",argv[4]}}})}}.dump(),1);
         {HttpServer http(store,owner_token);const auto port=http.bind(0);check(port>0);std::jthread listener([&]{http.listen();});struct Shutdown{HttpServer& server;~Shutdown(){server.stop();}} shutdown{http};XMindIpcServer server(store,nullptr,owner_token);std::cout<<nlohmann::json{{"endpoint",server.endpoint()},{"http_origin","http://127.0.0.1:"+std::to_string(port)}}.dump()<<std::endl;std::string instruction;check(bool(std::getline(std::cin,instruction)));check(instruction=="verify-positive"||instruction=="verify-refusal");positive=instruction=="verify-positive";verify(store,positive);}
         store.close();}
     {PersistenceService store(database,{argv[2],argv[3]});verify(store,positive);store.close();}
     std::cout<<"remote-sdk-database-reopened"<<std::endl;return 0;
-}catch(const std::exception&){std::cerr<<"Native remote SDK fixture failed; no private material reflected\n";return 1;}}
+}catch(const FixtureCheckFailure& error){std::cerr<<"Native remote SDK fixture failed; check_location="<<error.line<<":"<<error.column<<"; no private material reflected\n";return 1;}catch(const std::exception&){std::cerr<<"Native remote SDK fixture failed; no private material reflected\n";return 1;}}

@@ -1,0 +1,73 @@
+{
+  "recordedAt": "2026-10-25T02:57:43.337Z",
+  "source": "0fe170b0785b8825c39a203a8628572da5ac5f6c",
+  "run": 40150618641,
+  "job": 121044360758,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40150618641",
+  "conclusion": "failure",
+  "native": {
+    "total": 177,
+    "passed": 175,
+    "failed": 2,
+    "seconds": 706.14
+  },
+  "provenance": {
+    "toolchain": "Visual Studio 18 2026",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "processors": 4,
+    "build_parallelism": 4,
+    "windows_default_owner_matches_user": false,
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "toolchain_version": "18.11.12315.225",
+    "xmind": "0fe170b0785b8825c39a203a8628572da5ac5f6c",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "xlang3": "8c7972d124f54ec2f659960ee46bcaf3f80feae5"
+  },
+  "artifact": {
+    "id": 12583294599,
+    "bytes": 5043881,
+    "sha256": "e369f9259e7c85eee719e676391b6371baf3aa6a1292897cdfd2c0e35bd7c10d"
+  },
+  "passed": {
+    "diagnostics": 5.64,
+    "rpc": 55.51,
+    "graphRemote": 12.63,
+    "ledger": 42.41,
+    "nested": 34.81,
+    "deep": 8.57
+  },
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 34.34,
+      "processTimeoutMs": 30000,
+      "processElapsedMs": 30093,
+      "phases": [
+        "script_entered"
+      ],
+      "state": "uncertain",
+      "processTreeRetired": true,
+      "namespace": "xmind-graph-runner-PPkN2J",
+      "operation": "629389b8c670e9b403283513e8e526ad",
+      "completedTasksMustNeverBeReplayed": true,
+      "cause": "Unproven; process did not report delay completion. Module/thread samples do not establish a cause."
+    },
+    {
+      "test": "native_mcp_oauth_trusted_contract",
+      "seconds": 3.77,
+      "detail": "Separate positive SDK client exited1 with generic invariant failure; exact runtime check location unavailable.",
+      "sourceDefect": {
+        "expectedActionCount": 2,
+        "fixtureActionCount": 4,
+        "correctedInLaterSource": true
+      },
+      "cause": "Stale action-count assertion is a confirmed defect; original runtime failure location cannot be established from its generic message.",
+      "failedDatabaseArtifactAvailable": false,
+      "retentionDefect": "Hosted wrapper unconditionally removed RUNNER_TEMP fixture even after failure; fixed by conditional retention under scoped TEMP.",
+      "ownedTestCertificateRemovalConfirmed": true
+    }
+  ],
+  "clearsEarlierLocalTimeouts": false,
+  "installed": false,
+  "goalComplete": false
+}

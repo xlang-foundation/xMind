@@ -1,0 +1,155 @@
+{
+  "recordedAt": "2026-10-25T02:52:51.114Z",
+  "sourceParent": "50435b4a3123f878c8a92548934aa946181e3901",
+  "sourcePatchSha256": "2c3a603452b5594f2378e427512bac1c0798de75c1710ee1fe35086e176912ab",
+  "build": {
+    "pid": 7236,
+    "launchedAt": "2026-10-25T02:51:05.069Z",
+    "completedAt": "2026-10-25T02:52:03.856Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "e061bd4a19c504db3f966904730b21c8aeb818aad9554ce5b894ca01053285b4"
+  },
+  "test": {
+    "pid": 2304,
+    "launchedAt": "2026-10-25T02:52:06.591Z",
+    "completedAt": "2026-10-25T02:52:48.314Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "7bcb77d89f0cca5a6a3aaa1e86a8571d098ef8b41993f49ff5367671754ef3de"
+  },
+  "total": 3,
+  "failed": 0,
+  "passed": 3,
+  "seconds": 41.68,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "89dd966eb6f468410c70c4c79bb29b5e7c2a2fb6c270fbd902f3ced310887bac",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Fixture failure retention, safe source-location diagnostics and per-case synthetic model dispatch observations only; product binary unchanged",
+  "modelDispatches": 80,
+  "cases": 12,
+  "representative": [
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 1,
+      "owner": "root",
+      "elapsedMs": 175
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 2,
+      "owner": "delegated",
+      "elapsedMs": 697
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 3,
+      "owner": "delegated",
+      "elapsedMs": 1071
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 4,
+      "owner": "root",
+      "elapsedMs": 1190
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 5,
+      "owner": "planned",
+      "elapsedMs": 1955
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 6,
+      "owner": "root",
+      "elapsedMs": 2071
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 7,
+      "owner": "delegated",
+      "elapsedMs": 2530
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 8,
+      "owner": "delegated",
+      "elapsedMs": 2807
+    },
+    {
+      "case": "coexisting-read-plain-normal",
+      "ordinal": 9,
+      "owner": "root",
+      "elapsedMs": 2901
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 1,
+      "owner": "root",
+      "elapsedMs": 221
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 2,
+      "owner": "delegated",
+      "elapsedMs": 692
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 3,
+      "owner": "delegated",
+      "elapsedMs": 872
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 4,
+      "owner": "root",
+      "elapsedMs": 970
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 5,
+      "owner": "planned",
+      "elapsedMs": 1381
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 6,
+      "owner": "root",
+      "elapsedMs": 1493
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 7,
+      "owner": "delegated",
+      "elapsedMs": 1801
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 8,
+      "owner": "delegated",
+      "elapsedMs": 1964
+    },
+    {
+      "case": "coexisting-coding-counted-deny",
+      "ordinal": 9,
+      "owner": "root",
+      "elapsedMs": 2060
+    }
+  ],
+  "interpretation": "Offsets span multiple journal operations and worker lifecycle steps, not one IPC call. Fresh ledger pass does not clear earlier full-run timeouts or establish a performance fix.",
+  "failureRetentionPolicyVerified": true,
+  "redactedAssertionLocationControlVerified": true,
+  "localCertificateStoreModified": false
+}

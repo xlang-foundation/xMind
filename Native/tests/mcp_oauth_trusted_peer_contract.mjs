@@ -3,15 +3,16 @@
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,writeFile,stat,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
-import {createOAuthPeer,trustedRequest,access} from './mcp_oauth_trusted_peer.mjs';
+import {createOAuthPeer,trustedRequest,access,finalizeTrustedFixtureDirectory} from './mcp_oauth_trusted_peer.mjs';
 import {renewalModes} from './mcp_oauth_renewal_peer.mjs';
 import {remoteCredential,remoteRunPrompts} from './remote_authentication_sdk_peer.mjs';
 const [openssl]=process.argv.slice(2),execute=promisify(execFile),directory=await mkdtemp(join(tmpdir(),'xmind-oauth-peer-'));let peer;
 try{
+ const retained=await mkdtemp(join(directory,'xmind-oauth-trust-'));await writeFile(join(retained,'sentinel'),'retained original bytes');assert.equal((await finalizeTrustedFixtureDirectory(retained,directory,false)).retained,true);assert.equal(await readFile(join(retained,'sentinel'),'utf8'),'retained original bytes');assert.equal(JSON.parse(await readFile(join(retained,'failure-retention.json'),'utf8')).completedTasksMustNeverBeReplayed,true);const successful=await mkdtemp(join(directory,'xmind-oauth-trust-'));assert.equal((await finalizeTrustedFixtureDirectory(successful,directory,true)).retained,false);await assert.rejects(stat(successful),{code:'ENOENT'});const otherRoot=await mkdtemp(join(directory,'other-root-'));await assert.rejects(finalizeTrustedFixtureDirectory(retained,otherRoot,true));assert.equal(await readFile(join(retained,'sentinel'),'utf8'),'retained original bytes');const unowned=await mkdtemp(join(directory,'unowned-'));await writeFile(join(unowned,'sentinel'),'must remain');await assert.rejects(finalizeTrustedFixtureDirectory(unowned,directory,true));assert.equal(await readFile(join(unowned,'sentinel'),'utf8'),'must remain');
  await execute(openssl,['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(directory,'key.pem'),'-out',join(directory,'cert.pem'),'-days','1','-subj','/CN=localhost','-addext','subjectAltName=IP:127.0.0.1'],{windowsHide:true});
  const ca=await readFile(join(directory,'cert.pem'));peer=createOAuthPeer({key:await readFile(join(directory,'key.pem')),cert:ca});const origin=await peer.listen();
  await assert.rejects(trustedRequest(origin+'/resource/success',undefined),'Default TLS must not trust the self-signed fixture');
