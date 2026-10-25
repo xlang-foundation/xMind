@@ -36,6 +36,8 @@ public:
     RemoteCapturedScope open_scope(const std::string& profile_id,std::int64_t expected_profile_revision,const std::string& scope_id);
     void validate_scope(const RemoteCapturedScope&);
     RemoteObservedSession read_session(const RemoteCapturedScope&,const std::string& session_id,std::chrono::milliseconds timeout,std::stop_token stop={});
+    static bool session_commands_available(const RemoteCapturedScope&);
+    RemoteCommandRecord observe_session_command(const RemoteCapturedScope&,const std::string& request_id);
     RemoteCommandRecord create_session(const RemoteCapturedScope&,const std::string& request_id,const std::string& title,std::chrono::milliseconds,std::stop_token={});
     RemoteCommandRecord reconcile_session(const RemoteCapturedScope&,const std::string& request_id,std::chrono::milliseconds,std::stop_token={});
 private:

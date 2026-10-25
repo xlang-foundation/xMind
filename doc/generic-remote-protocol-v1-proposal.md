@@ -6,7 +6,7 @@ encrypted combined credential/grant storage through embedded xlang3/SQLite,
 cached authentication/scope observation and scoped session metadata reads are
 implemented in the development candidate. The registered Connections subobject
 uses ordinary xlang3 SDK values and methods; CLI and native HTTP adapters use
-the same native service. Remote mutation routing remains unavailable.
+the same native service. Typed captured session creation and receipt observation are implemented in source; general run routing and enrollment remain unavailable.
 
 Actual hosted trusted-TLS authentication is verified through separate SDK,
 CLI and native HTTP clients, including wrong-credential refusal, one grant per
@@ -31,9 +31,12 @@ xmind.Connections(owner_token)
   .Authenticate(profile_id, expected_profile_revision, request)  [implemented]
   .Authentication(profile_id, expected_profile_revision)         [implemented]
   .AuthorizedScopes(profile_id, expected_profile_revision)       [implemented]
-  .OpenScope(profile_id, expected_profile_revision, scope_id)     [read only]
+  .OpenScope(profile_id, expected_profile_revision, scope_id)     [captured scope]
       .Identity()
       .Sessions().Open(session_id)                         [metadata only]
+      .Sessions().Create(request_id, title)                [typed creation]
+      .Requests().Open(request_id)                         [local journal]
+      .Requests().Reconcile(request_id)                    [receipt GET]
   .Open(profile_id, expected_profile_revision)                   [Local only]
       .Identity()
       .Sessions() / .Runs() / .Graphs() / .Models() / .Commands()
@@ -71,10 +74,11 @@ connection selection. Existing root compatibility services remain Local.
 Capability `remote_scoped_session_read:1` advertises this development API.
 `OpenScope` currently requires an authenticated, unexpired grant with exact
 `sessions:1` capability and `sessions.read` permission in the selected scope.
-Its Sessions object exposes only Open; submission, cancellation, history,
-events, enrollment and worker execution are not enabled by this binding.
+Its Sessions object exposes Open and typed Create; run submission, cancellation,
+history, events, enrollment and worker execution are not enabled by this binding.
 The public identity contains connection/profile/credential revisions, server,
-protocol, scope and backend generation, plus `command_routing:false`. It contains
+protocol, scope and backend generation, plus `command_routing` (false for read-only grants; true only when the captured
+grant supports typed session creation and receipt reads). It contains
 no credential or grant ID/revision fields. Local selection remains unchanged.
 
 The connector issues one GET to `/xmind/v1/scopes/{scope_id}/sessions/{session_id}`
@@ -249,12 +253,11 @@ Network response validation, current-grant fencing, lost-reply observation and
 SDK/CLI/HTTP command methods remain required before remote routing is enabled.
 [Focused real SQLite evidence](evidence/remote-command-journal-20261024.json).
 
-## Implemented native session-command connector (adapters pending)
+## Implemented native session-command connector
 
 Native RemoteConnectionAuthentication now joins the journal to typed session
-creation and request observation. This backend service is not yet exposed by
-registered SDK methods, CLI or local HTTP routes; no public command capability
-is advertised and installed74 is unchanged. Production uses verified HTTPS;
+creation and request observation. Registered SDK subobjects, CLI and local HTTP
+adapters now expose it in source; installed74 remains unchanged. Production uses verified HTTPS;
 only trusted backend tests may select the exact loopback policy.
 
 Creation requires sessions:1 and receipts:1, plus sessions.create and
@@ -306,6 +309,45 @@ Profile/credential changes or cancellation during observation prevent publicatio
 The real loopback transport and real SQLite/injected-service tests are separate
 proofs; neither claims a deployed server, native trusted-TLS mutation acceptance
 or public SDK routing. [Native focused evidence](evidence/remote-session-command-native-20261024.json).
+
+## Public captured command adapters (source candidate)
+
+Capabilities remote_scoped_session_create:1 and remote_request_receipts:1
+advertise the methods. Ordinary registered xlang3 objects expose
+OpenScope(id, revision, scope).Sessions().Create(request_id, title) and
+OpenScope(...).Requests().Open(request_id) / Reconcile(request_id).
+Create's first argument is the durable domain request ID, not a chosen remote
+session ID or an IPC call ID. The server chooses the returned resource ID.
+Open is a local journal observation; Reconcile performs the original receipt
+GET only for unknown state. A terminal record never sends another POST or GET.
+
+Each result is exactly binding and request. Request has request_id, operation,
+state, revision, resource_id and resource_revision. The original title, private
+intent, credential, grant ID/revision and remote error text are not projected.
+Backend lifetime/generation and current scope/grant checks fence these objects.
+The binding command_routing flag is true only when this scope supports typed
+session creation plus receipt reads; it does not advertise absent run methods.
+The connection catalog and generic Connections.Open remain Local-only.
+
+CLI after xmind ipc --endpoint lrpc:PORT connections:
+
+- scope-session-create ID REV SCOPE REQUEST TITLE
+- scope-request-open ID REV SCOPE REQUEST
+- scope-request-reconcile ID REV SCOPE REQUEST
+
+Owner or origin-bound local view HTTP routes (POST, no query):
+
+- /v1/connections/scope-session-create: exactly id, expected_profile_revision,
+  scope_id, request_id, title.
+- /v1/connections/scope-request and /v1/connections/scope-request-reconcile:
+  exactly id, expected_profile_revision, scope_id, request_id.
+
+These are thin native service adapters, not an application IPC dispatcher or
+serializer. Local profile selection is unchanged. Source qualification verifies
+seeded terminal SQLite receipts through SDK/HTTP and separate-client refusal
+paths; actual trusted-TLS creation/lost-reply reconciliation through each public
+adapter remains pending hosted acceptance. No new package is installed.
+[Adapter scope and retained regression](evidence/remote-session-command-adapters-20261024.json).
 
 ## Explicit workspace and effect enrollment
 
