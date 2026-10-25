@@ -94,3 +94,21 @@ test('optional diagnostics preserve the actual fast nonzero execution error',{sk
     assert.equal(error.code,7);assert.equal(error.stderr,'fixture-native-exit-7');return true;
   });
 });
+
+test('explicit owner capture records the verified native owner and its thread stack',{skip:!windows,timeout:20000},async()=>{
+  const directory=await mkdtemp(join(root,'xmind-process-observer-'));
+  const launchedAfter=new Date().toISOString(),fixture=run(process.execPath,['-e',"setTimeout(()=>process.stdout.write('owner completed normally'),8000)"]);
+  let diagnostic;
+  try{
+    diagnostic=await observeOwnedProcess(fixture.child,process.execPath,{enabled:true,evidenceRoot:directory,shellPath:await monitorShell(),label:'explicit-native-owner',launchedAfter,intervalMs:200,durationSeconds:15,captureOwner:true,captureStacks:true,stackCaptureAgeMs:1000});
+    const result=await fixture.done;assert.equal(result.code,0,result.stderr);assert.equal(result.stdout,'owner completed normally');
+    assert.equal((await diagnostic.stop()).exitCode,0);
+    const rows=await records(diagnostic.output),samples=rows.filter(row=>row.kind==='process'),dumps=rows.filter(row=>row.kind==='stack_dump');
+    assert.equal(rows[0].ownerIncluded,true);assert.ok(samples.length>0);assert.ok(samples.every(row=>row.pid===fixture.child.pid));
+    assert.equal(dumps.length,1);assert.equal(dumps[0].pid,fixture.child.pid);assert.equal(dumps[0].success,true);assert.equal(dumps[0].fullMemory,false);
+    const dump=await readFile(join(diagnostic.directory,dumps[0].file));assert.equal(dump.subarray(0,4).toString(),'MDMP');
+    const count=dump.readUInt32LE(8),offset=dump.readUInt32LE(12);let threads=0;
+    for(let i=0;i<count;i++){const entry=offset+12*i;if(dump.readUInt32LE(entry)===3)threads=dump.readUInt32LE(dump.readUInt32LE(entry+8));}
+    assert.ok(threads>0);console.log('Actual native owner dump retained at '+diagnostic.output);
+  }finally{await fixture.done;await diagnostic?.stop();}
+});

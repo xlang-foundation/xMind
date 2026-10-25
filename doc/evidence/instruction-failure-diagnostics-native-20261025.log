@@ -1,0 +1,43 @@
+Start testing: Oct 25 02:58 Pacific Daylight Time
+----------------------------------------------------------
+65/184 Testing: native_instruction_configuration_contract
+65/184 Test: native_instruction_configuration_contract
+Command: "C:/Program Files/nodejs/node.exe" "D:/CantorAI2026/xMind/Native/tests/instruction_configuration_peer.mjs" "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_instruction_configuration_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-default-pointer-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_instruction_configuration_contract" start time: Oct 25 02:58 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native instruction configuration passed actual embedded-xlang3 Unicode persistence, backend revisions, malformed/spoofed/oversized imports, SQLite update failure preservation, empty supplement, reopen and corrupt/exhausted revision rejection. Model delivery is a separate integration contract.
+INSTRUCTION_PHASE entered-main
+INSTRUCTION_PHASE initial-store-open
+INSTRUCTION_PHASE store-ready
+INSTRUCTION_PHASE unicode-apply
+INSTRUCTION_PHASE yaml-apply
+INSTRUCTION_PHASE markdown-apply
+INSTRUCTION_PHASE read-saved
+INSTRUCTION_PHASE reject-malformed
+INSTRUCTION_PHASE reject-oversized
+INSTRUCTION_PHASE reject-invalid-utf8
+INSTRUCTION_PHASE trigger-create-open-execute-close
+INSTRUCTION_PHASE reject-storage-update
+INSTRUCTION_PHASE trigger-drop-open-execute-close
+INSTRUCTION_PHASE boundary-apply
+INSTRUCTION_PHASE empty-apply-close
+INSTRUCTION_PHASE store-close
+INSTRUCTION_PHASE store-closed
+INSTRUCTION_PHASE reopen-store-open
+INSTRUCTION_PHASE store-ready
+INSTRUCTION_PHASE reject-stored-version
+INSTRUCTION_PHASE reject-overflow-close
+INSTRUCTION_PHASE store-close
+INSTRUCTION_PHASE store-closed
+INSTRUCTION_PHASE completed
+<end of output>
+Test time =   0.62 sec
+----------------------------------------------------------
+Test Passed.
+"native_instruction_configuration_contract" end time: Oct 25 02:58 Pacific Daylight Time
+"native_instruction_configuration_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 25 02:58 Pacific Daylight Time

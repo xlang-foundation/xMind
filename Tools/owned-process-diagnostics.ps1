@@ -7,6 +7,7 @@ param(
     [ValidateRange(200,5000)][int]$IntervalMs=2000,
     [ValidateRange(1,70)][int]$DurationSeconds=65,
     [switch]$CaptureStacks,
+    [switch]$CaptureOwner,
     [ValidateRange(1000,25000)][int]$StackCaptureAgeMs=15000
 )
 $ErrorActionPreference='Stop'
@@ -35,7 +36,7 @@ function Record($value){
 }
 $stream=[IO.File]::Open($OutputFile,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
 $stream.Dispose()
-Record @{kind='scope';ownerPid=$OwnerProcessId;ownerImage=$OwnerExecutable;readOnly=$true;commandLinesIncluded=$false;environmentIncluded=$false;elapsedMsScope='observer';moduleNameLimit=64;threadLimit=128}
+Record @{kind='scope';ownerPid=$OwnerProcessId;ownerImage=$OwnerExecutable;ownerIncluded=[bool]$CaptureOwner;readOnly=$true;commandLinesIncluded=$false;environmentIncluded=$false;elapsedMsScope='observer';moduleNameLimit=64;threadLimit=128}
 try {
     while($timer.Elapsed.TotalSeconds -lt $DurationSeconds -and -not(Test-Path -LiteralPath $StopFile)){
         # Retrieve only identity/ancestry fields, never command lines or environment.
@@ -62,7 +63,10 @@ try {
         }
         foreach($candidate in $all){
             $id=[int]$candidate.ProcessId
-            if($id -eq $OwnerProcessId -or -not $family.ContainsKey($id) -or $candidate.Name -notin @('powershell.exe','pwsh.exe')){continue}
+            # The exact verified owner is opt-in; other native processes remain excluded.
+            if(-not $family.ContainsKey($id)){continue}
+            if($id -eq $OwnerProcessId){if(-not $CaptureOwner){continue}}
+            elseif($candidate.Name -notin @('powershell.exe','pwsh.exe')){continue}
             $key=[string]$id+':'+$candidate.CreationDate.ToUniversalTime().Ticks
             $needsDump=$CaptureStacks -and $dumped.Count -lt 2 -and -not $dumped.ContainsKey($key) -and ([DateTime]::UtcNow-$candidate.CreationDate.ToUniversalTime()).TotalMilliseconds -ge $StackCaptureAgeMs
             if(-not $needsDump -and $seen.ContainsKey($key) -and ($seen[$key].count -ge 3 -or $timer.ElapsedMilliseconds -lt $seen[$key].nextAt)){continue}

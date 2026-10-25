@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-10-25T09:55:55.168Z",
+  "sourceParent": "a5fd132b3e39a1f694d646799e5b4debaf77c043",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build": {
+    "pid": 26748,
+    "launchedAt": "2026-10-25T09:30:21.062Z",
+    "completedAt": "2026-10-25T09:41:00.192Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "12b1114aaf747a888881d0afe4ea8e567441dab3d30a0177cd8976ae4efa5a43"
+  },
+  "test": {
+    "pid": 27600,
+    "launchedAt": "2026-10-25T09:41:02.988Z",
+    "completedAt": "2026-10-25T09:55:52.390Z",
+    "exitCode": 8,
+    "signal": null,
+    "logSha256": "243f4d7ccb7bb163b38d142529595658c84900c06bc94f22fdfedf4a5f436ba1"
+  },
+  "total": 184,
+  "failed": 1,
+  "passed": 183,
+  "seconds": 889.36,
+  "projectFiles": 2857,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 145,
+  "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": false,
+  "failure": {
+    "contract": "native_instruction_configuration_contract",
+    "nativeDeadlineMs": 30000,
+    "ctestSeconds": 39.59,
+    "originalNamespace": "D:/CantorAI2026/TestProj/xmind-delivery-validation/xmind-instructions-iGG7QW",
+    "originalStorageRetained": false,
+    "storageLossCause": "The original peer unconditionally removed its synthetic namespace in finally, including failure.",
+    "phaseOrThreadEvidenceAvailable": false,
+    "rootCause": "Unresolved. No attribution to the SDK ctypes patch is established.",
+    "replayed": false
+  },
+  "acceptance": "Failed full run; no packaging or installation qualification. Later focused passes cannot replace this result."
+}

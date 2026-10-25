@@ -1,0 +1,71 @@
+{
+  "recordedAt": "2026-10-25T10:02:03.428Z",
+  "scope": "Instruction-fixture failure preservation and exact-owned-native-process diagnostics",
+  "originalFullFailure": "native-sdk35fa-full-failure-20261025.json",
+  "changes": [
+    "Failed synthetic namespace and bounded original stdout/stderr/error metadata are retained; successful fixtures alone are cleaned.",
+    "Flushed phase labels cover startup, persistence, YAML, trigger injection, close and reopen without payload values.",
+    "Owner sampling/dumping is explicit opt-in, checks PID/birth/image, excludes unrelated native processes, preserves existing descendant-only default.",
+    "Native 30000ms and CTest45000ms budgets remain unchanged."
+  ],
+  "focused": {
+    "recordedAt": "2026-10-25T09:58:53.996Z",
+    "sourceParent": "a5fd132b3e39a1f694d646799e5b4debaf77c043",
+    "sourcePatchSha256": "f89eca18cbbb9af1070b01655889b15261de35196681c8efc30ad3b1e34ce9c0",
+    "build": {
+      "pid": 4976,
+      "launchedAt": "2026-10-25T09:58:38.049Z",
+      "completedAt": "2026-10-25T09:58:47.849Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "6dcee35cf057eb6da2953d3d055256cab82c6ec71426f81d8bace9ccd90d1450"
+    },
+    "test": {
+      "pid": 27432,
+      "launchedAt": "2026-10-25T09:58:50.584Z",
+      "completedAt": "2026-10-25T09:58:51.263Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1121c646b7a0dea7d4c15b8ef62943295a7195b752e815e69a76dbad9683f144"
+    },
+    "total": 1,
+    "failed": 0,
+    "passed": 1,
+    "seconds": 0.63,
+    "projectFiles": 2858,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 145,
+    "nativeSha256": "84afd02264066ed00c924c4fd6bbec3a3b82cbb83c3be15e32d0b2932b2866e3",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "diagnosticUnits": {
+    "startedAt": "2026-10-25T10:00:03.860Z",
+    "finishedAt": "2026-10-25T10:00:26.175Z",
+    "exitCode": 0,
+    "signal": null,
+    "pid": 2288,
+    "logSha256": "9a3fcfb90f953dc7d122b2ede87360c9e6ab286268cfcaafe517ea2ed1ca7f04",
+    "trackedInputFiles": 2858,
+    "nativeBinaries": 145,
+    "inputsAndBinariesUnchanged": true,
+    "passed": 6,
+    "failed": 0,
+    "installed": false,
+    "modelCalls": 0
+  },
+  "fullSuitePassed": false,
+  "originalCauseResolved": false,
+  "originalFailedNamespaceReplayed": false,
+  "modelCalls": 0,
+  "cpythonExecuted": false,
+  "installed": false,
+  "limitation": "Fresh 1/1 phase-marked pass is not an explanation of the original timeout or full-suite acceptance. Exact-owner MiniDumpNormal includes a real thread-list stream; private dumps are excluded from Git. A helper-generation syntax failure occurred before native launch and created no test namespace."
+}

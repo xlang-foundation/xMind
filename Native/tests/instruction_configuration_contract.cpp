@@ -5,30 +5,49 @@
 #include <iostream>
 using namespace agentflow;using Json=nlohmann::json;
 namespace {
+void phase(const char* name){std::cerr<<"INSTRUCTION_PHASE "<<name<<std::endl;}
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
 template<class Error,class Action>void rejects(Action action){try{action();}catch(const Error&){return;}throw std::runtime_error("Expected instruction rejection did not occur");}
 }
 int main(int argc,char** argv){if(argc!=4)return 2;try{
+    phase("entered-main");
     const auto database=(std::filesystem::u8path(argv[1])/"instructions.sqlite").string();const std::vector<std::string> imports{argv[2],argv[3]};
     {
-        PersistenceService store(database,imports);AgentInstructionStore configuration(store);const auto absent=configuration.load();require(absent.revision==0&&absent.instructions.empty(),"Fresh storage must not invent an instruction policy");
+        phase("initial-store-open");
+        PersistenceService store(database,imports);phase("store-ready");AgentInstructionStore configuration(store);const auto absent=configuration.load();require(absent.revision==0&&absent.instructions.empty(),"Fresh storage must not invent an instruction policy");
+        phase("unicode-apply");
         const std::string text="General and coding fixture instructions 🌍\nKeep actual tool evidence.";const auto first=configuration.apply(Json{{"instructions",text}}.dump());require(first.revision==1&&first.instructions==text,"Actual Unicode policy must receive a backend revision");require(configuration.apply(Json{{"instructions",text}}.dump()).revision==1,"Unchanged exact bytes must preserve revision");
+        phase("yaml-apply");
         const std::string yaml="instructions: |\n  YAML authoring keeps the native permission boundary.\n  Actual xlang3 SQLite stores this policy.\n";const auto from_yaml=configuration.apply(yaml);require(from_yaml.revision==2&&from_yaml.instructions=="YAML authoring keeps the native permission boundary.\nActual xlang3 SQLite stores this policy.\n","Bounded YAML must import Markdown-compatible multiline instructions");require(configuration.apply(yaml).revision==2,"Unchanged YAML instructions must preserve the backend revision");
+        phase("markdown-apply");
         const std::string markdown="# Coding policy\n\nUse repository tools and inspect actual results. 🌍\n";const auto from_markdown=configuration.apply(markdown);require(from_markdown.revision==3&&from_markdown.instructions==markdown,"A Markdown instruction file must be stored verbatim");
+        phase("read-saved");
         const auto saved=store.information("native-agent","instructions").get();
+        phase("reject-malformed");
         for(const auto source:{"{}","[]",R"({"instructions":1})",R"({"instructions":"x","revision":99})",R"({"instructions":"x","version":1})",R"({"instructions":"x","credential_id":"spoof"})",R"({"instructions":"x","instructions":"y"})",R"({"instructions":"x\u0000y"})"}){rejects<std::invalid_argument>([&]{configuration.apply(source);});require(store.information("native-agent","instructions").get()==saved,"Rejected import must preserve exact saved record");}
+        phase("reject-oversized");
         rejects<std::invalid_argument>([&]{configuration.apply(Json{{"instructions",std::string(32769,'x')}}.dump());});
+        phase("reject-invalid-utf8");
         rejects<std::invalid_argument>([&]{configuration.apply(std::string("{\"instructions\":\"")+char(0xff)+"\"}");});
+        phase("trigger-create-open-execute-close");
         {XlangSqlite inject(database,imports);inject.execute("CREATE TRIGGER reject_instruction_update BEFORE UPDATE ON information WHEN NEW.category='native-agent' AND NEW.id='instructions' BEGIN SELECT RAISE(ABORT,'actual fixture instruction storage failure'); END");}
+        phase("reject-storage-update");
         rejects<DatabaseError>([&]{configuration.apply(R"({"instructions":"changed policy"})");});require(store.information("native-agent","instructions").get()==saved,"Actual SQLite failed update must retain the earlier policy");
+        phase("trigger-drop-open-execute-close");
         {XlangSqlite inject(database,imports);inject.execute("DROP TRIGGER reject_instruction_update");}
+        phase("boundary-apply");
         const auto boundary=configuration.apply(Json{{"instructions",std::string(32768,'x')}}.dump());require(boundary.revision==4&&boundary.instructions.size()==32768,"Exact byte limit must be usable");
-        require(configuration.apply(R"({"instructions":""})").revision==5,"Explicit empty supplement must rotate revision without changing core policy");store.close();
+        phase("empty-apply-close");
+        require(configuration.apply(R"({"instructions":""})").revision==5,"Explicit empty supplement must rotate revision without changing core policy");phase("store-close");store.close();phase("store-closed");
     }
     {
-        PersistenceService store(database,imports);AgentInstructionStore configuration(store);const auto reopened=configuration.load();require(reopened.revision==5&&reopened.instructions.empty(),"Actual SQLite reopen must retain disabled supplement revision");
+        phase("reopen-store-open");
+        PersistenceService store(database,imports);phase("store-ready");AgentInstructionStore configuration(store);const auto reopened=configuration.load();require(reopened.revision==5&&reopened.instructions.empty(),"Actual SQLite reopen must retain disabled supplement revision");
+        phase("reject-stored-version");
         store.put_information("native-agent","instructions",R"({"version":2,"revision":3,"instructions":"invalid stored version"})").get();const auto corrupt=store.information("native-agent","instructions").get();rejects<std::invalid_argument>([&]{configuration.load();});rejects<std::invalid_argument>([&]{configuration.apply(R"({"instructions":"do not overwrite corrupt history"})");});require(store.information("native-agent","instructions").get()==corrupt,"Unsupported stored version must fail closed and preserve evidence");
-        store.put_information("native-agent","instructions",R"({"version":1,"revision":9007199254740991,"instructions":"last revision"})").get();rejects<std::overflow_error>([&]{configuration.apply(R"({"instructions":"overflow"})");});require(configuration.load().revision==9007199254740991,"Revision exhaustion must not wrap or overwrite");store.close();
+        phase("reject-overflow-close");
+        store.put_information("native-agent","instructions",R"({"version":1,"revision":9007199254740991,"instructions":"last revision"})").get();rejects<std::overflow_error>([&]{configuration.apply(R"({"instructions":"overflow"})");});require(configuration.load().revision==9007199254740991,"Revision exhaustion must not wrap or overwrite");phase("store-close");store.close();phase("store-closed");
     }
+        phase("completed");
     std::cout<<"Native instruction configuration passed actual embedded-xlang3 Unicode persistence, backend revisions, malformed/spoofed/oversized imports, SQLite update failure preservation, empty supplement, reopen and corrupt/exhausted revision rejection. Model delivery is a separate integration contract.\n";return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

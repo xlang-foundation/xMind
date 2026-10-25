@@ -20,12 +20,12 @@ export async function observeOwnedProcess(child,executable,{
   evidenceRoot=fileURLToPath(new URL('../build/ci-evidence/process-observations/',import.meta.url)),
   shellPath,launchedAfter=new Date(Date.now()-1000).toISOString(),label='native-contract',
   intervalMs=2000,durationSeconds=65,
-  captureStacks=process.env.GITHUB_ACTIONS==='true'&&process.env.RUNNER_ENVIRONMENT==='github-hosted',stackCaptureAgeMs=15000
+  captureStacks=process.env.GITHUB_ACTIONS==='true'&&process.env.RUNNER_ENVIRONMENT==='github-hosted',stackCaptureAgeMs=15000,captureOwner=false
 }={}){
   if(!enabled)return {stop:async()=>({enabled:false})};
   if(process.platform!=='win32'||!Number.isSafeInteger(child?.pid)||child.pid<1||!/^[a-z][a-z0-9-]{0,63}$/.test(label))throw new Error('Invalid owned process diagnostic binding');
   if(!Number.isSafeInteger(intervalMs)||intervalMs<200||intervalMs>5000||!Number.isSafeInteger(durationSeconds)||durationSeconds<1||durationSeconds>70)throw new Error('Invalid diagnostic observation budget');
-  if(typeof captureStacks!=='boolean'||!Number.isSafeInteger(stackCaptureAgeMs)||stackCaptureAgeMs<1000||stackCaptureAgeMs>25000)throw new Error('Invalid stack capture budget');
+  if(typeof captureOwner!=='boolean'||typeof captureStacks!=='boolean'||!Number.isSafeInteger(stackCaptureAgeMs)||stackCaptureAgeMs<1000||stackCaptureAgeMs>25000)throw new Error('Invalid stack capture budget');
   const image=await realpath(executable);
   if(!shellPath){
     for(const candidate of [join(process.env.ProgramFiles||'C:/Program Files','PowerShell/7/pwsh.exe'),join(process.env.SystemRoot||'C:/Windows','System32/WindowsPowerShell/v1.0/powershell.exe')]){
@@ -41,6 +41,7 @@ export async function observeOwnedProcess(child,executable,{
     '-OwnerProcessId',String(child.pid),'-OwnerExecutable',image,'-OwnerLaunchedAfterUtc',launchedAfter,
     '-OutputFile',output,'-StopFile',stopFile,'-IntervalMs',String(intervalMs),'-DurationSeconds',String(durationSeconds)];
   if(captureStacks)args.push('-CaptureStacks','-StackCaptureAgeMs',String(stackCaptureAgeMs));
+  if(captureOwner)args.push('-CaptureOwner');
   const monitor=spawn(shellPath,args,{windowsHide:true,stdio:'ignore',timeout:80000});
   monitor.unref();
   let stopPromise;

@@ -1,0 +1,50 @@
+TAP version 13
+# Original synthetic failure retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-instruction-retention-p7Hywk\\tmp\\xmind-instructions-RZu255
+# Subtest: instruction peer retains the original failed namespace and command output
+ok 1 - instruction peer retains the original failed namespace and command output
+  ---
+  duration_ms: 118.538
+  type: 'test'
+  ...
+# Actual owner diagnostics retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-uMEuwu\\actual-owner-d801da7e-4962-4e0f-8d11-d675d3f4a0e8\\observations.jsonl
+# Subtest: read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+ok 2 - read-only diagnostic captures its actual PowerShell descendant and excludes an unrelated process and private arguments
+  ---
+  duration_ms: 8416.8018
+  type: 'test'
+  ...
+# Subtest: module presence includes an assembly beyond the bounded name list
+ok 3 - module presence includes an assembly beyond the bounded name list
+  ---
+  duration_ms: 260.2873
+  type: 'test'
+  ...
+# Identity-rejection diagnostics retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-RHUKn5\\mismatched-owner-4254ffb5-5bed-4c66-94b7-7cae4614ad05\\observations.jsonl
+# Subtest: identity mismatch stops observation without terminating the actual root
+ok 4 - identity mismatch stops observation without terminating the actual root
+  ---
+  duration_ms: 4063.616
+  type: 'test'
+  ...
+# Subtest: optional diagnostics preserve the actual fast nonzero execution error
+ok 5 - optional diagnostics preserve the actual fast nonzero execution error
+  ---
+  duration_ms: 272.6684
+  type: 'test'
+  ...
+# Actual native owner dump retained at D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\xmind-process-observer-Ye7J8S\\explicit-native-owner-4996a69b-d032-48b7-8417-a64cf8f9a401\\observations.jsonl
+# Subtest: explicit owner capture records the verified native owner and its thread stack
+ok 6 - explicit owner capture records the verified native owner and its thread stack
+  ---
+  duration_ms: 8179.446
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 21259.4097
