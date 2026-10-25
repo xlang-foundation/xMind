@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-25T07:01:37.386Z",
+  "sourceParent": "842a1bb0d56c65a6b64ac92d2ab6f0e91f422ee5",
+  "sourcePatchSha256": "f3d1159d0191f8c91c91f8eae0d3d09c2ae739b6d6a1214bd796e8f76f76e607",
+  "build": {
+    "pid": 39260,
+    "launchedAt": "2026-10-25T07:00:55.107Z",
+    "completedAt": "2026-10-25T07:01:29.974Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "d71b4787f38e9cbbafd86ccb517c5e0e7e7f62c06aeaa637ee2aff1e58cc2fda"
+  },
+  "test": {
+    "pid": 6708,
+    "launchedAt": "2026-10-25T07:01:32.573Z",
+    "completedAt": "2026-10-25T07:01:34.740Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "25ce24eb922461aa61df25916ec6cd11f0dc9974f664ab25d59745ab9ab6d1d4"
+  },
+  "total": 3,
+  "failed": 0,
+  "passed": 3,
+  "seconds": 2.11,
+  "projectFiles": 2850,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 144,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "newSourceFile": {
+    "path": "Native/tests/remote_snapshot_transport_contract.cpp",
+    "sha256": "0409ec59187afb8deaa597de4458da4135bc8f340c7644cd1d1cca8a7d826c39"
+  },
+  "scope": "Actual native HTTP transport through isolated loopback peer plus decoder and existing connection-client regressions.",
+  "checks": [
+    "Two exact encoded GET pages and captured binding headers",
+    "Default verified-HTTPS policy rejects HTTP before any request",
+    "Six bad response/redirect/status/oversize cases make exactly one request each",
+    "Six pre-send refusals make zero requests",
+    "No redirect follow, automatic retry or input-cursor mutation"
+  ],
+  "remaining": [
+    "Actual positive native trusted-TLS snapshot path",
+    "Captured scope/profile/credential and generation fences around publication",
+    "Durable complete-page assembly and explicit consumer reset",
+    "Public SDK/CLI/HTTP/UI adapters and root-tree snapshots"
+  ],
+  "registeredLocalContracts": 181,
+  "registeredHostedContracts": 179,
+  "installed76Unchanged": true,
+  "fullGoalComplete": false
+}

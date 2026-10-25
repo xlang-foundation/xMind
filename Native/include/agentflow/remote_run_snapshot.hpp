@@ -16,6 +16,13 @@ struct RemoteRunSnapshotPage {
     std::vector<RemoteSnapshotRecord> records;
     bool complete=false;
 };
+void validate_remote_run_snapshot_request(const RemoteNegotiatedGrant&,
+    const RemoteRunEventCursor&,std::int64_t now_unix_seconds,
+    const std::optional<RemoteSnapshotPosition>& continuation=std::nullopt);
+RemoteRunSnapshotPage read_remote_run_snapshot_page(const std::string& origin,
+    const SecretBytes&,const RemoteNegotiatedGrant&,const RemoteRunEventCursor&,
+    const std::optional<RemoteSnapshotPosition>&,std::chrono::milliseconds,
+    RemoteTransportPolicy=RemoteTransportPolicy::verified_https,std::stop_token={});
 // Native network-domain decoder only. The captured service must authorize before
 // and after transport. A decoded page neither resets a cursor nor proves that
 // all pages have been durably assembled or applied by a consumer.

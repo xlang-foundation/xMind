@@ -1,3 +1,9 @@
+## Native remote snapshot transport — 2026-10-25
+
+Native read_remote_run_snapshot_page now uses the existing bounded verified-HTTPS client by default, with no redirect/retry and at most64KiB per response. It validates grant/resource/continuation before dispatch and validates the returned page with current grant expiry after transport. Each call fetches one observation page; no cursor is published or reset. Continuation query pins snapshot_id and offset; opaque path/query IDs encode colons once.
+
+Actual controlled-loopback transport, snapshot decoder and existing connection-client contracts pass3/3 in2.11s. Two positive GET pages, six single-request refusal responses and six zero-request pre-send refusals verify headers, encoding, permission, cancellation and limits. Full2850/16/1870/30/18598/144 closure hashes/file sets remain unchanged. Inventory is181local/179hosted; no new full pass or positive trusted-TLS snapshot claim. Installed76/production executable remain unchanged. Captured service, durable assembly/reset, public adapters and root-tree recovery remain open. [Receipt](evidence/remote-snapshot-transport-20261025.json), [original log](evidence/remote-snapshot-transport-20261025.log). Full goal active.
+
 ## Native remote snapshot-page decoder — 2026-10-24
 
 Added a backend-private snapshot-page model/validator for the next gap-recovery path. Initial and continuation pages pin server/scope/session/run, current grant, snapshot ID, retention epoch, sequence watermark and record count. Same-epoch sequence regression, inconsistent offsets/completion, duplicate identities within a page, unknown record kinds, malformed/duplicate JSON and ungranted/expired observations refuse. Pages are at most64KiB/256records with4096total advertised records; payload objects remain observational data, not tool/effect authority.

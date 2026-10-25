@@ -776,8 +776,8 @@ authoritative snapshot/reset and root-tree checkpoint recovery remain open.
 
 The native decoder now defines a bounded run-only snapshot page. This is a new
 network-domain contract, not an application IPC serializer. No snapshot method
-is advertised through the SDK or negotiation yet. Fetch and captured-service
-integration remain open.
+is advertised through the SDK or negotiation yet. Native one-page retrieval is
+implemented; captured-service integration remains open.
 
 The response has exactly `binding`, `snapshot`, `records` and `complete`.
 Binding uses the existing server/scope/protocol/grant identity fields. Snapshot
@@ -803,7 +803,16 @@ snapshots.read/runs.read/events.read in the captured scope. Snapshot read
 permission must cover the peer's entire authorized projection; it cannot be
 inferred from ordinary metadata read permission.
 
-Still required: verified-HTTPS retrieval, post-response authorization fences,
+The native connector issues one GET to
+`/xmind/v1/scopes/{scope}/sessions/{session}/runs/{run}/snapshot`.
+Continuation adds exactly `?snapshot_id={id}&offset={next_offset}`. Existing
+binding headers and bounded verified-HTTPS transport apply. There are no
+redirects, automatic page loops or retries. Resource/continuation/grant checks
+precede dispatch; response validation checks current grant expiry. Actual
+positive snapshot delivery currently has controlled-loopback evidence only.
+
+Still required: positive native trusted-TLS snapshot verification, captured
+post-response profile/credential/generation authorization fences,
 durable bounded assembly across all pages, cross-page duplicate/refusal checks,
 explicit snapshot acceptance and atomic checkpoint reset. A partial snapshot
 must leave the old accepted cursor untouched. No automatic event retry, model

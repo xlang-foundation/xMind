@@ -1,4 +1,5 @@
 #include "agentflow/remote_connection_client.hpp"
+#include "agentflow/remote_run_snapshot.hpp"
 #include "agentflow/connection_profiles.hpp"
 #include "agentflow/http_stream_transport.hpp"
 #include "agentflow/context_records.hpp"
@@ -39,6 +40,18 @@ RemoteObservedSession read_remote_session(const std::string& origin,const Secret
 }
 void validate_remote_event_scope(const RemoteNegotiatedGrant& grant,const std::string& scope,std::int64_t at){
     if(!identifier(scope)||at<=0)throw std::invalid_argument("Invalid remote event scope");RemoteNegotiationRequirements needs;needs.now_unix_seconds=at;needs.expected_server_id=grant.server_id;needs.required_capabilities={{"events",1}};const auto checked=validate_remote_negotiation(encode_remote_negotiated_grant(grant),needs);const auto found=std::find_if(checked.authorized_scopes.begin(),checked.authorized_scopes.end(),[&](const auto& value){return value.id==scope;});if(found==checked.authorized_scopes.end()||std::find(found->actions.begin(),found->actions.end(),"events.read")==found->actions.end())throw TransportError("Remote scope does not authorize event observation");
+}
+RemoteRunSnapshotPage read_remote_run_snapshot_page(const std::string& origin,const SecretBytes& credential,const RemoteNegotiatedGrant& grant,const RemoteRunEventCursor& resource,const std::optional<RemoteSnapshotPosition>& continuation,std::chrono::milliseconds timeout,RemoteTransportPolicy policy,std::stop_token stop){
+    endpoint_origin(origin,policy);validate_remote_run_snapshot_request(grant,resource,now(),continuation);
+    if(timeout.count()<=0||timeout>std::chrono::minutes(2)||credential.view().empty()||credential.view().size()>8192)throw std::invalid_argument("Invalid remote snapshot request");
+    for(const auto c:credential.view())if(c<33||c>126)throw std::invalid_argument("Invalid remote credential");
+    if(stop.stop_requested())throw TransportCancelled("Remote snapshot observation cancelled before send");
+    HttpStreamRequest request;request.url=origin+"/xmind/v1/scopes/"+component(resource.scope_id)+"/sessions/"+component(resource.session_id)+"/runs/"+component(resource.run_id)+"/snapshot";
+    if(continuation)request.url+="?snapshot_id="+component(continuation->snapshot_id)+"&offset="+std::to_string(continuation->offset);
+    request.deadline=timeout;request.idle_timeout=timeout;request.remote_binding=RemoteHttpBinding{grant.server_id,resource.scope_id,grant.grant_id,1,grant.grant_revision};
+    const auto raw=get_bounded_json(request,&credential,65536,stop);
+    if(stop.stop_requested())throw TransportCancelled("Remote snapshot observation cancelled");
+    return validate_remote_run_snapshot_page(raw,grant,resource,now(),continuation);
 }
 RemoteObservedRunEvents read_remote_run_events(const std::string& origin,const SecretBytes& credential,const RemoteNegotiatedGrant& grant,const RemoteRunEventCursor& after,std::chrono::milliseconds timeout,RemoteTransportPolicy policy,std::stop_token stop){
     endpoint_origin(origin,policy);validate_remote_event_scope(grant,after.scope_id,now());

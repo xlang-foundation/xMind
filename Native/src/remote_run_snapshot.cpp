@@ -14,7 +14,7 @@ std::int64_t integer(const Json& v,std::int64_t low,std::int64_t high=maximum){i
 std::string id(const Json& v){if(!v.is_string()||!identifier(v.get_ref<const std::string&>()))invalid();return v.get<std::string>();}
 void position(const RemoteSnapshotPosition& p){if(!identifier(p.snapshot_id)||!identifier(p.epoch)||p.sequence<0||p.sequence>maximum||p.total_records<1||p.total_records>4096||p.offset<1||p.offset>=p.total_records)throw std::invalid_argument("Invalid remote snapshot continuation");}
 }
-RemoteRunSnapshotPage validate_remote_run_snapshot_page(std::string_view raw,const RemoteNegotiatedGrant& grant,const RemoteRunEventCursor& resource,std::int64_t at,const std::optional<RemoteSnapshotPosition>& continuation){
+void validate_remote_run_snapshot_request(const RemoteNegotiatedGrant& grant,const RemoteRunEventCursor& resource,std::int64_t at,const std::optional<RemoteSnapshotPosition>& continuation){
     if(!identifier(resource.connection_id)||!identifier(resource.server_id)||!identifier(resource.scope_id)||!identifier(resource.session_id)||!identifier(resource.run_id)||resource.server_id!=grant.server_id||resource.sequence<0||resource.sequence>maximum||(!resource.epoch.empty()&&!identifier(resource.epoch))||(resource.epoch.empty()&&resource.sequence!=0)||at<=0)throw std::invalid_argument("Invalid remote snapshot resource");
     if(continuation)position(*continuation);
     RemoteNegotiationRequirements needs;needs.expected_server_id=resource.server_id;needs.now_unix_seconds=at;needs.required_capabilities={{"snapshots",1},{"runs",1},{"events",1}};
@@ -22,6 +22,9 @@ RemoteRunSnapshotPage validate_remote_run_snapshot_page(std::string_view raw,con
     const auto scope=std::find_if(checked.authorized_scopes.begin(),checked.authorized_scopes.end(),[&](const auto& s){return s.id==resource.scope_id;});
     if(scope==checked.authorized_scopes.end())throw TransportError("Remote scope does not authorize snapshots");
     for(const auto* action:{"snapshots.read","runs.read","events.read"})if(std::find(scope->actions.begin(),scope->actions.end(),action)==scope->actions.end())throw TransportError("Remote scope does not authorize snapshots");
+}
+RemoteRunSnapshotPage validate_remote_run_snapshot_page(std::string_view raw,const RemoteNegotiatedGrant& grant,const RemoteRunEventCursor& resource,std::int64_t at,const std::optional<RemoteSnapshotPosition>& continuation){
+    validate_remote_run_snapshot_request(grant,resource,at,continuation);
     if(raw.empty()||raw.size()>65536)invalid();
     try{
         std::vector<std::set<std::string>> objects;
