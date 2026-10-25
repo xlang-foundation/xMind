@@ -1,4 +1,5 @@
 #include "agentflow/remote_event_checkpoint.hpp"
+#include "agentflow/remote_snapshot_store.hpp"
 #include "agentflow/connection_profiles.hpp"
 #include "nlohmann/json.hpp"
 
@@ -28,15 +29,16 @@ void page(const RemoteRunEventCursor& after,const RemoteObservedRunEvents& value
     if(value.cursor.sequence!=sequence)throw std::invalid_argument("Remote checkpoint skips unobserved events");
 }
 Json page(const RemoteObservedRunEvents& value){auto events=Json::array();for(const auto& event:value.events)events.push_back({{"sequence",event.sequence},{"run_id",event.run_id},{"kind",event.kind},{"json",event.json}});return {{"cursor",cursor(value.cursor)},{"events",std::move(events)}};}
-std::string encode(const RemoteEventCheckpoint& value){return Json{{"version",1},{"id",value.consumer.id},{"origin",value.consumer.origin},{"initial",cursor(value.consumer.initial)},{"revision",value.revision},{"accepted",cursor(value.accepted)},{"pending",value.pending?page(*value.pending):Json(nullptr)}}.dump();}
+std::string encode(const RemoteEventCheckpoint& value){Json encoded={{"version",1},{"id",value.consumer.id},{"origin",value.consumer.origin},{"initial",cursor(value.consumer.initial)},{"revision",value.revision},{"accepted",cursor(value.accepted)},{"pending",value.pending?page(*value.pending):Json(nullptr)}};if(value.snapshot_reset){const auto& r=*value.snapshot_reset;encoded["snapshot_reset"]={{"snapshot_id",r.snapshot_id},{"digest",r.digest},{"snapshot_revision",r.snapshot_revision},{"checkpoint_revision",r.checkpoint_revision}};}return encoded.dump();}
 RemoteEventCheckpoint decode(const std::string& raw){
     try{
-        const auto value=Json::parse(raw);if(!value.is_object()||value.size()!=7||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("revision").is_number_integer()||value.at("revision")<1||value.at("revision")>maximum)throw DatabaseError("Invalid remote event checkpoint");
+        const auto value=Json::parse(raw);if(!value.is_object()||(value.size()!=7&&value.size()!=8)||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("revision").is_number_integer()||value.at("revision")<1||value.at("revision")>maximum)throw DatabaseError("Invalid remote event checkpoint");
         RemoteEventCheckpoint result;result.consumer={value.at("id"),value.at("origin"),cursor(value.at("initial"))};valid(result.consumer);result.revision=value.at("revision");result.accepted=cursor(value.at("accepted"));if(!same_scope(result.consumer.initial,result.accepted))throw DatabaseError("Invalid remote event checkpoint");
         if(!value.at("pending").is_null()){
             const auto& pending=value.at("pending");if(!pending.is_object()||pending.size()!=2||!pending.at("events").is_array()||pending.at("events").size()>256)throw DatabaseError("Invalid remote event checkpoint");
             RemoteObservedRunEvents observed;observed.cursor=cursor(pending.at("cursor"));for(const auto& event:pending.at("events")){if(!event.is_object()||event.size()!=4||!event.at("sequence").is_number_integer()||event.at("sequence")<0||event.at("sequence")>maximum)throw DatabaseError("Invalid remote event checkpoint");observed.events.push_back({event.at("sequence"),event.at("run_id"),event.at("kind"),event.at("json")});}page(result.accepted,observed);result.pending=std::move(observed);
         }
+        if(value.contains("snapshot_reset")){const auto& r=value.at("snapshot_reset");if(!r.is_object()||r.size()!=4||!r.at("snapshot_revision").is_number_integer()||!r.at("checkpoint_revision").is_number_integer())throw DatabaseError("Invalid remote snapshot reset receipt");RemoteSnapshotResetReceipt receipt{r.at("snapshot_id"),r.at("digest"),r.at("snapshot_revision"),r.at("checkpoint_revision")};if(!identifier(receipt.snapshot_id)||receipt.digest.size()!=64||receipt.digest.find_first_not_of("0123456789abcdef")!=std::string::npos||receipt.snapshot_revision<1||receipt.snapshot_revision>maximum||receipt.checkpoint_revision<1||receipt.checkpoint_revision>=result.revision)throw DatabaseError("Invalid remote snapshot reset receipt");result.snapshot_reset=std::move(receipt);}
         if(encode(result)!=raw)throw DatabaseError("Invalid remote event checkpoint");return result;
     }catch(const Json::exception&){throw DatabaseError("Invalid remote event checkpoint");}catch(const std::invalid_argument&){throw DatabaseError("Invalid remote event checkpoint");}catch(const RemoteEventCursorGap&){throw DatabaseError("Invalid remote event checkpoint");}
 }
@@ -56,5 +58,16 @@ RemoteEventCheckpoint RemoteEventCheckpoints::accept(const RemoteEventConsumer& 
     if(!result.pending){if(result.revision==expected+1&&result.accepted==accepted)return result;throw Conflict("No staged remote event page");}
     if(result.revision!=expected||result.pending->cursor!=accepted)throw Conflict("Remote event acknowledgement differs from staged page");
     const auto before=encode(result);result.accepted=accepted;result.pending.reset();advance(result);store_.compare_information(category,consumer.id,encode(result),before).get();return result;
+}
+RemoteEventCheckpoint RemoteEventCheckpoints::reset(const RemoteSnapshotBase& base,const std::string& snapshot,std::int64_t expected_snapshot,const std::string& digest){
+    revision(base.checkpoint_revision);revision(expected_snapshot);
+    if(digest.size()!=64||digest.find_first_not_of("0123456789abcdef")!=std::string::npos)throw std::invalid_argument("Invalid snapshot acknowledgement digest");
+    const auto assembly=RemoteRunSnapshots(store_).observe(base,snapshot);
+    if(!assembly.complete||assembly.revision!=expected_snapshot||remote_snapshot_digest(assembly)!=digest)throw Conflict("Snapshot acknowledgement does not name a complete stored assembly");
+    auto result=observe(base.consumer);const RemoteSnapshotResetReceipt receipt{snapshot,digest,expected_snapshot,base.checkpoint_revision};
+    if(result.revision==base.checkpoint_revision+1&&!result.pending&&result.accepted==assembly.cursor&&result.snapshot_reset==receipt)return result;
+    if(result.revision!=base.checkpoint_revision||result.accepted!=base.accepted||result.pending)throw Conflict("Snapshot reset baseline changed or an event page is pending");
+    const auto before=encode(result);result.accepted=assembly.cursor;result.snapshot_reset=receipt;advance(result);
+    store_.compare_information(category,base.consumer.id,encode(result),before).get();return result;
 }
 }

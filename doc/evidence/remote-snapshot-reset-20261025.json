@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-25T07:18:22.867Z",
+  "sourceParent": "e444a79461b194aec1bfcd52ae10494e35ad18f9",
+  "sourcePatchSha256": "4aa63eff60e2be79f117e976bc64b0a23930cf57b4db6cd74b3f311df48ac9be",
+  "build": {
+    "pid": 7416,
+    "launchedAt": "2026-10-25T07:17:18.269Z",
+    "completedAt": "2026-10-25T07:18:13.265Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "d540108727bc15386ed9a66c78d3120435e93588fb9d3c81681375a4d204ab8c"
+  },
+  "test": {
+    "pid": 31096,
+    "launchedAt": "2026-10-25T07:18:16.230Z",
+    "completedAt": "2026-10-25T07:18:20.032Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "df1a81f3237ef7d088d6a3b3697f66df4d02602088e8d303f92190fc054b4ffb"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 3.75,
+  "projectFiles": 2852,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 144,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Backend-private explicit event checkpoint reset from a complete durable native snapshot; real embedded xlang3/SQLite.",
+  "checks": [
+    "Exact stored snapshot revision and complete-content digest required",
+    "Partial snapshot, wrong digest/revision, pending event page and changed baseline refusal",
+    "One SQLite CAS winner for competing snapshot acknowledgements",
+    "Immediate identical acknowledgement is idempotent",
+    "Delayed acknowledgement cannot rewind after event progress",
+    "Reset receipt and complete assembly survive database reopen",
+    "Event page read/stage/accept continues in the replacement epoch",
+    "Existing checkpoint records without reset receipt retain the same encoding; no automatic rewrite",
+    "Malformed persisted reset receipt refusal"
+  ],
+  "remaining": [
+    "Captured-service authorization around fetch/stage/reset",
+    "SDK/CLI/HTTP/UI snapshot and reset adapters with backend-generation fences",
+    "Actual positive native trusted-TLS snapshot acceptance",
+    "Root-tree snapshots/recovery and remaining enrollment/fenced-worker scope"
+  ],
+  "installed76Unchanged": true,
+  "fullGoalComplete": false
+}

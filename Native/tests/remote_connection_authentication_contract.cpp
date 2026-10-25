@@ -306,7 +306,25 @@ void snapshot_store_contract(const std::string& modules,const std::string& stdli
  for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
  std::cout<<"Snapshot assembly: three database lifetimes, partial reopen, duplicate-page idempotence, cross-page duplicate refusal and competing CAS writer; accepted event checkpoint unchanged.\n";
 }
+void snapshot_reset_contract(const std::string& modules,const std::string& stdlib){
+ const auto file=std::filesystem::temp_directory_path()/("xmind-snapshot-reset-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));const RemoteEventConsumer consumer{"reset-consumer","https://remote.example.invalid",{"remote-a","server-a","scope-a","session-a","run-a","",0}};RemoteSnapshotBase saved_base{consumer,1,consumer.initial};std::string winner,digest;
+ auto target=consumer.initial;target.epoch="epoch-new";target.sequence=20;RemoteRunSnapshotPage page{target,{"initial-snapshot","epoch-new",20,1,0},{{"run","run-a","{}",1}},true};
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteEventCheckpoints checkpoints(store),other(store);RemoteRunSnapshots snapshots(store);checkpoints.open(consumer);const auto complete=snapshots.stage(saved_base,0,page);const auto complete_digest=remote_snapshot_digest(complete);rejects<Conflict>([&]{checkpoints.reset(saved_base,page.position.snapshot_id,1,std::string(64,'0'));});rejects<Conflict>([&]{checkpoints.reset(saved_base,page.position.snapshot_id,2,complete_digest);});
+  auto partial=page;partial.position.snapshot_id="partial-snapshot";partial.position.total_records=2;partial.complete=false;const auto incomplete=snapshots.stage(saved_base,0,partial);rejects<Conflict>([&]{checkpoints.reset(saved_base,partial.position.snapshot_id,1,remote_snapshot_digest(incomplete));});
+  auto old=consumer.initial;old.epoch="epoch-old";old.sequence=3;checkpoints.stage(consumer,1,{old,{{3,"run-a","run.running","{}"}}});rejects<Conflict>([&]{checkpoints.reset(saved_base,page.position.snapshot_id,1,complete_digest);});const auto accepted=checkpoints.accept(consumer,2,old);require(accepted.revision==3);rejects<Conflict>([&]{checkpoints.reset(saved_base,page.position.snapshot_id,1,complete_digest);});
+  saved_base={consumer,3,old};page.position.snapshot_id="reset-a";const auto a=snapshots.stage(saved_base,0,page);auto alternative=page;alternative.position.snapshot_id="reset-b";alternative.records[0].payload_json=R"({"observation":"other"})";const auto b=snapshots.stage(saved_base,0,alternative);
+  const auto attempt=[&](const auto& assembly){try{other.reset(saved_base,assembly.snapshot_id,assembly.revision,remote_snapshot_digest(assembly));return 1;}catch(const Conflict&){return 0;}};auto one=std::async(std::launch::async,[&]{return attempt(a);}),two=std::async(std::launch::async,[&]{return attempt(b);});require(one.get()+two.get()==1);const auto reset=checkpoints.observe(consumer);require(reset.revision==4&&reset.accepted==target&&reset.snapshot_reset&&!reset.pending);winner=reset.snapshot_reset->snapshot_id;digest=reset.snapshot_reset->digest;require(checkpoints.reset(saved_base,winner,1,digest).revision==4);
+  auto next=target;next.sequence=21;checkpoints.stage(consumer,4,{next,{{21,"run-a","run.completed","{}"}}});rejects<Conflict>([&]{checkpoints.reset(saved_base,winner,1,digest);});require(checkpoints.accept(consumer,5,next).revision==6);require(checkpoints.observe(consumer).snapshot_reset->snapshot_id==winner);store.close();
+ }
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteEventCheckpoints checkpoints(store);const auto restored=checkpoints.observe(consumer);require(restored.revision==6&&restored.accepted.sequence==21&&restored.accepted.epoch=="epoch-new"&&restored.snapshot_reset&&restored.snapshot_reset->digest==digest);rejects<Conflict>([&]{checkpoints.reset(saved_base,winner,1,digest);});RemoteRunSnapshots snapshots(store);require(snapshots.observe(saved_base,winner).complete);const auto raw=store.information("remote-event-checkpoint-v1",consumer.id).get();auto invalid=Json::parse(raw);invalid["snapshot_reset"]["checkpoint_revision"]=true;store.compare_information("remote-event-checkpoint-v1",consumer.id,invalid.dump(),raw).get();rejects<DatabaseError>([&]{checkpoints.observe(consumer);});store.compare_information("remote-event-checkpoint-v1",consumer.id,raw,invalid.dump()).get();store.close();
+ }
+ for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
+ std::cout<<"Explicit snapshot reset: complete revision/digest required, partial/pending/stale refusals, one competing CAS winner, duplicate acknowledgement, event continuation and durable reset receipt. No authorization or remote effects claimed.\n";
+}
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
+    snapshot_reset_contract(argv[1],argv[2]);
     snapshot_store_contract(argv[1],argv[2]);
     captured_snapshot_contract(argv[1],argv[2]);
     captured_run_read_contract(argv[1],argv[2]);

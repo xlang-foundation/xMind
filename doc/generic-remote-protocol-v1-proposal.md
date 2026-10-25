@@ -853,3 +853,26 @@ database reopen. This store neither fetches pages nor authorizes publication,
 accepts a snapshot, resets an event checkpoint, or retries model/tool work.
 Captured-service integration and explicit authorized atomic checkpoint reset
 remain required. [Store evidence](evidence/remote-snapshot-store-20261025.json).
+
+### Explicit checkpoint reset (backend-private primitive)
+
+RemoteEventCheckpoints.reset takes the captured snapshot baseline, snapshot ID,
+expected assembly revision and complete-content SHA256 digest. It reads that
+assembly from SQLite itself; caller-supplied records or a replacement cursor
+cannot authorize a reset. The digest covers the consumer/baseline, snapshot ID,
+watermark, total and complete ordered records. Partial assemblies refuse.
+
+The current event checkpoint must still match the captured baseline revision
+and accepted cursor, and have no pending event page. Reset performs one SQLite
+compare-and-swap, advancing the accepted cursor and retaining snapshot ID,
+digest, assembly revision and original checkpoint revision as a reset receipt.
+The complete assembly remains stored. An immediate duplicate acknowledgement
+returns the same checkpoint; after further event progress it refuses instead of
+rewinding. Competing acknowledgements for different snapshots have one winner.
+
+No reset receipt is added to old checkpoint records merely by opening them.
+Existing event stage/accept operations preserve a reset receipt when present.
+New-epoch event observation can continue after reset. These persistence rules
+are not authorization or a public reset API: captured-service permission checks,
+retained-object generation fences and SDK/CLI/HTTP/UI methods remain required.
+[Reset evidence](evidence/remote-snapshot-reset-20261025.json).

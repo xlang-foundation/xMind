@@ -1,0 +1,83 @@
+Start testing: Oct 25 00:18 Pacific Daylight Time
+----------------------------------------------------------
+5/181 Testing: native_remote_run_snapshot_contract
+5/181 Test: native_remote_run_snapshot_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_run_snapshot_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_run_snapshot_contract" start time: Oct 25 00:18 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native snapshot page validation: initial/continuation, replacement epoch, stable watermark, resource/grant identity and 30 refusals. No fetch, persistence, cursor reset or routing claimed.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_run_snapshot_contract" end time: Oct 25 00:18 Pacific Daylight Time
+"native_remote_run_snapshot_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/181 Testing: native_remote_connection_client_contract
+6/181 Test: native_remote_connection_client_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_client_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_client_contract" start time: Oct 25 00:18 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Remote run event connector passed namespace/order/last-record cursor binding,20 invalid page modes, explicit retention/epoch gaps, empty reconnect and no-send refusal. No public cursor publication or trusted TLS claim.
+Typed cancellation POST and receipt GET pass exact target/revision binding, admission distinctions, malformed/error refusal and permission isolation; no worker retirement or trusted TLS claim.
+Typed run POST/receipt GET verified exact session/request/revision and known prompt SHA256, outcome distinctions,17 invalid response modes and no-send authorization/input/cancellation refusal. Controlled loopback only; no persisted run execution.
+Actual native typed session POST and receipt GET pass exact request/title/revision binding, admission/pending/rejection/not-found distinctions, malformed/error/redirect/size refusal and no retry. Loopback test only; no production activation.
+Remote scoped session observation passed two actual controlled GETs and16 exact refusal GETs, fixed binding headers, strict identity/schema/size checks, preflight scope/action/expiry/path/cancellation checks and no redirect/retry. No TLS trust or remote mutation claim.
+Native remote client made 10 controlled bearer-authenticated loopback negotiation requests: positive grant, expired/mismatched/incompatible/malformed responses, HTTP401/403/307 and bounded-response refusal; no retry, downgrade or redirect. Unsafe/default HTTP origins and pre-cancelled calls sent nothing. No TLS trust, profile activation or persistence claim.
+<end of output>
+Test time =   1.84 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_client_contract" end time: Oct 25 00:18 Pacific Daylight Time
+"native_remote_connection_client_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+7/181 Testing: native_remote_snapshot_transport_contract
+7/181 Test: native_remote_snapshot_transport_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_snapshot_transport_contract.exe"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_snapshot_transport_contract" start time: Oct 25 00:18 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Native snapshot transport: two exact encoded GET pages, 12 refusals, no redirects/retries or cursor mutation. Controlled loopback only; native trusted TLS remains separate.
+<end of output>
+Test time =   0.21 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_snapshot_transport_contract" end time: Oct 25 00:18 Pacific Daylight Time
+"native_remote_snapshot_transport_contract" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/181 Testing: native_remote_connection_authentication_contract
+9/181 Test: native_remote_connection_authentication_contract
+Command: "D:/CantorAI2026/xMind/build/skill-state-native/Release/agentflow_remote_connection_authentication_contract.exe" "D:/CantorAI2026/xMind/.agentflow/xlang3-lifetime-guard-sdk/Release/modules" "C:/Python/Python314/Lib"
+Directory: D:/CantorAI2026/xMind/build/skill-state-native
+"native_remote_connection_authentication_contract" start time: Oct 25 00:18 Pacific Daylight Time
+Output:
+----------------------------------------------------------
+Explicit snapshot reset: complete revision/digest required, partial/pending/stale refusals, one competing CAS winner, duplicate acknowledgement, event continuation and durable reset receipt. No authorization or remote effects claimed.
+Snapshot assembly: three database lifetimes, partial reopen, duplicate-page idempotence, cross-page duplicate refusal and competing CAS writer; accepted event checkpoint unchanged.
+Captured snapshot service: two pages, malformed typed replies, no-send refusal, cancellation/profile/credential fencing and encrypted reopen; no reset or actual TLS claimed.
+Captured run reads verified exact metadata, six states, no-send refusals and post-response cancellation/profile/credential fencing through real xlang3/SQLite. Controlled backend exchange only.
+Captured remote events passed pre-send namespace refusal, typed-page validation, immutable input cursor, retention gaps, post-response cancellation/profile/credential fencing and encrypted reopen. No public cursor/reset or actual network claim.
+Typed run command journal verified immutable prompt/session revision, cross-operation conflicts, competing single-send claim and prepared/unknown/terminal state across three xlang3/SQLite lifetimes. No networking or run execution.
+Typed cancellation journal passed exact session/run/revision binding, competing send claims, unknown across reopen, immutable admission/rejection and wrong-run receipt refusal. Admission is not worker retirement; no cancellation network dispatch.
+Native cancellation service passed one uncertain send, no resend across reopen/not-found, fresh receipt-only credential reconciliation, original intent retention and terminal no-network observation. Admission is not worker retirement.
+Native run submission service verified one send, lost reply/not-found retention, receipt-only fresh-grant reconciliation across database reopen, terminal no-network observation and post-send credential/cancellation uncertainty. Controlled exchanges only; no remote worker execution.
+Remote command SQLite journal verifies exact intent conflicts, competing send claims, persisted unknown before send, restart before/after send, terminal admission/rejection and no completed resend. No network or model execution.
+Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.
+Native authentication service integrates nine controlled injected negotiation outcomes with real xlang3/SQLite encrypted publication. Read-only observation covers absent/stored/stale-profile/expired states, redacted stale identity, retained revision after database reopen and no exchange. Captured session reads verify scope permission, exact resource result, profile/credential revision fencing, pre-send cancellation and post-response credential rotation refusal. No actual TLS/network exchange in this service fixture; standalone HTTP peer coverage is separate. Remote selection remains disabled.
+<end of output>
+Test time =   1.65 sec
+----------------------------------------------------------
+Test Passed.
+"native_remote_connection_authentication_contract" end time: Oct 25 00:18 Pacific Daylight Time
+"native_remote_connection_authentication_contract" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Oct 25 00:18 Pacific Daylight Time

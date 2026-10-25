@@ -17,6 +17,7 @@ struct RemoteSnapshotAssembly {
     bool complete=false;
     std::string last_page_digest;
 };
+std::string remote_snapshot_digest(const RemoteSnapshotAssembly&);
 // Backend-private observation storage. Authorization belongs to the captured
 // service. A completed assembly does not acknowledge/reset an event checkpoint.
 class RemoteRunSnapshots {
