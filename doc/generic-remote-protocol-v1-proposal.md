@@ -67,6 +67,11 @@ xmind.Connections(owner_token)
       .RunEvents(session_id, run_id).Consumer(consumer_id)
           .Open() / .Read(checkpoint_revision)
           .Accept(checkpoint_revision, cursor)             [explicit acknowledgement]
+          .Snapshot(checkpoint_revision)                  [captured baseline]
+          .ResumeSnapshot(snapshot_id)                    [explicit stored baseline]
+              .Open() / .Read(snapshot_id_or_none, assembly_revision)
+              .Observe(snapshot_id)
+              .Reset(snapshot_id, assembly_revision, digest)
   .Open(profile_id, expected_profile_revision)                   [Local only]
       .Identity()
       .Sessions() / .Runs() / .Graphs() / .Models() / .Commands()
@@ -906,3 +911,46 @@ reset and delayed acknowledgements cannot rewind subsequent events.
 Public retained subobjects, backend-generation fences, CLI/HTTP/UI methods,
 positive native trusted-TLS snapshot acceptance and root-tree recovery remain
 separate requirements. [Integrated native evidence](evidence/remote-snapshot-recovery-service-20261025.json).
+
+### Standard SDK snapshot subobjects
+
+SDK capability remote_run_snapshots:1 now advertises the retained Snapshot
+subobject under a captured remote event consumer. The existing root is registered
+once; these are ordinary xlang3 SDK objects and methods. No application IPC
+dispatcher, serializer, import wrapper or additional listener is introduced.
+
+```text
+consumer = scope.RunEvents(session, run).Consumer(consumer_id)
+snapshot = consumer.Snapshot(checkpoint_revision)
+baseline = snapshot.Open()
+state = snapshot.Read(None, 0)
+state = snapshot.Read(state.snapshot_id, state.revision)  // one next page
+state = snapshot.Observe(state.snapshot_id)              // saved observation
+// Apply the complete observation idempotently before explicitly acknowledging:
+result = snapshot.Reset(state.snapshot_id, state.revision, state.digest)
+```
+
+Open returns binding, consumer_id, checkpoint_revision and accepted cursor.
+Read/Observe return binding, consumer_id, checkpoint_revision, accepted,
+snapshot_id, revision, cursor, total_records, records, complete and digest.
+Record fields are kind, id, revision and payload. Binding and cursors include
+the backend generation; private origin, credential and grant fields are omitted.
+Reset returns binding, checkpoint and snapshot_reset. The reset receipt contains
+snapshot_id, digest, snapshot_revision and original checkpoint_revision.
+Boolean revisions refuse. None is the SDK's ordinary null value.
+
+A client that knows the snapshot ID may explicitly call
+`fresh_consumer.ResumeSnapshot(snapshot_id)` after reconnect. The backend loads
+the original baseline from SQLite and validates its consumer/origin/resource
+under the fresh authorized scope. The resulting object has a new generation;
+it does not revive the old object. Observe can return preserved content after a
+reset. An immediate duplicate Reset remains idempotent if the checkpoint has
+not advanced; later progress causes refusal rather than rewind. Open and Read
+require the captured baseline still to be current.
+
+Separate native host/client processes verify payload/digest transfer, explicit
+reset, owner retirement/rebind, fresh-object resume and database reopen. Cached
+snapshot content is seeded for this SDK fixture; it is not positive network or
+trusted-TLS evidence. SDK lifetime and permission checks apply to every method.
+CLI/native HTTP/UI routes remain open, so the HTTP capability endpoint does not
+yet advertise remote_run_snapshots. [SDK evidence](evidence/remote-snapshot-sdk-20261025.json).

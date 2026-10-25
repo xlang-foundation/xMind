@@ -1,0 +1,76 @@
+{
+  "recordedAt": "2026-10-25T07:42:49.878Z",
+  "sourceParent": "9dd2c59994e698003116bc4e4bd4eeda05af9e7a",
+  "sourcePatchSha256": "0fd9057347995e09561c3118a40c5c0aabd8d651d9fd26e8174cff6a7059b4a5",
+  "build": {
+    "pid": 21904,
+    "launchedAt": "2026-10-25T07:40:59.448Z",
+    "completedAt": "2026-10-25T07:42:38.480Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "fe8beba7acb591a804992631fbe3832b9dc2f594d51dec0cdef5acddcfaafe03"
+  },
+  "test": {
+    "pid": 32424,
+    "launchedAt": "2026-10-25T07:42:41.225Z",
+    "completedAt": "2026-10-25T07:42:47.186Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "676e9756cc5b8f23d51f7e9aa57b023965e8dbc2a4a3d99307f6bd0d364dc3b4"
+  },
+  "total": 6,
+  "failed": 0,
+  "passed": 6,
+  "seconds": 5.92,
+  "projectFiles": 2855,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 145,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "sourceFiles": {
+    "Native/src/remote_snapshot_values.hpp": "660b2ed3cb570ac952c1076b59dfb20829b80dcc85cfaf766f9321e22c5c7245",
+    "Native/tests/remote_snapshot_sdk_contract.cpp": "6183643df87e563ede90a0221a464021143bc4454686daa5141aa2e6d1b4a774",
+    "Native/tests/remote_snapshot_sdk_contract.mjs": "c231ded71ce6a9dc2b69acc8878d1de15dc43e624698b058e08838e6c5150d57"
+  },
+  "peer": {
+    "passed": true,
+    "hostPid": 8488,
+    "clientPid": 38524,
+    "separateProcesses": true,
+    "standardXlang3Methods": true,
+    "ownerRetirementRefused": true,
+    "explicitResumeAfterOwnerReplacement": true,
+    "databaseReopened": true,
+    "networkFetch": false,
+    "modelCalls": 0,
+    "goalComplete": false
+  },
+  "scope": "Ordinary registered xlang3 SDK snapshot subobject methods called from a separate native client process; cached durable observation/reset and explicit resume after owner replacement.",
+  "sdkCapability": "remote_run_snapshots:1",
+  "sdkCapabilitiesCount": 12,
+  "httpCapabilitiesCount": 11,
+  "registeredLocalContracts": 182,
+  "registeredHostedContracts": 180,
+  "checks": [
+    "Consumer.Snapshot/Open/Read/Observe/Reset and ResumeSnapshot",
+    "Boolean revisions and wrong digest refuse",
+    "Public payload and digest fields exclude private origin/grant/credential",
+    "Retired snapshot and consumer objects refuse; new explicit scope/object receives a new generation",
+    "Explicit ResumeSnapshot reopens stored baseline under fresh authorization and supports duplicate reset acknowledgement",
+    "Database reopen preserves assembly and reset receipt"
+  ],
+  "limits": [
+    "No snapshot CLI/native HTTP/UI routes yet; HTTP capability remains unadvertised.",
+    "No positive network fetch in separate SDK test; native trusted-TLS snapshot fixture remains required.",
+    "No new full native gate/package acceptance; installed76/production executable unchanged."
+  ],
+  "goalComplete": false
+}

@@ -48,6 +48,7 @@ public:
     RemoteRunEventCursor run_event_cursor(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id);
     RemoteRunSnapshotPage read_run_snapshot(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,const RemoteRunEventCursor&,const std::optional<RemoteSnapshotPosition>&,std::chrono::milliseconds,std::stop_token={});
     RemoteSnapshotBase capture_run_snapshot(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,std::int64_t expected_checkpoint_revision);
+    RemoteSnapshotBase reopen_run_snapshot(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,const std::string& snapshot_id);
     RemoteSnapshotAssembly observe_run_snapshot(const RemoteCapturedScope&,const RemoteSnapshotBase&,const std::string& snapshot_id);
     RemoteSnapshotAssembly read_run_snapshot_assembly(const RemoteCapturedScope&,const RemoteSnapshotBase&,const std::optional<std::string>& snapshot_id,std::int64_t expected_assembly_revision,std::chrono::milliseconds,std::stop_token={});
     RemoteEventCheckpoint reset_run_snapshot(const RemoteCapturedScope&,const RemoteSnapshotBase&,const std::string& snapshot_id,std::int64_t expected_assembly_revision,const std::string& digest,std::stop_token={});

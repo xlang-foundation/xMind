@@ -24,6 +24,7 @@ class RemoteRunSnapshots {
 public:
     explicit RemoteRunSnapshots(PersistenceService& store):store_(store){}
     RemoteSnapshotAssembly observe(const RemoteSnapshotBase&,const std::string& snapshot_id);
+    RemoteSnapshotAssembly observe(const RemoteEventConsumer&,const std::string& snapshot_id);
     RemoteSnapshotAssembly stage(const RemoteSnapshotBase&,std::int64_t expected_revision,const RemoteRunSnapshotPage&);
 private:PersistenceService& store_;
 };

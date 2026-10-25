@@ -57,6 +57,9 @@ RemoteSnapshotBase RemoteConnectionAuthentication::capture_run_snapshot(const Re
 RemoteSnapshotAssembly RemoteConnectionAuthentication::observe_run_snapshot(const RemoteCapturedScope& scope,const RemoteSnapshotBase& base,const std::string& snapshot){
     authorize_snapshot(scope,base);const auto result=snapshots_.observe(base,snapshot);authorize_snapshot(scope,base);return result;
 }
+RemoteSnapshotBase RemoteConnectionAuthentication::reopen_run_snapshot(const RemoteCapturedScope& scope,const std::string& id,const std::string& session,const std::string& run,const std::string& snapshot){
+    const RemoteEventConsumer consumer{id,scope.profile.origin,run_event_cursor(scope,session,run)};authorize_snapshot(scope,{consumer,1,consumer.initial});const auto saved=snapshots_.observe(consumer,snapshot);authorize_snapshot(scope,saved.base);return saved.base;
+}
 RemoteSnapshotAssembly RemoteConnectionAuthentication::read_run_snapshot_assembly(const RemoteCapturedScope& scope,const RemoteSnapshotBase& base,const std::optional<std::string>& snapshot,std::int64_t expected,std::chrono::milliseconds timeout,std::stop_token stop){
     if(expected<0||expected>=9007199254740991LL||timeout.count()<=0||timeout>std::chrono::minutes(2)||(!snapshot&&expected!=0))throw std::invalid_argument("Invalid snapshot assembly read");
     const auto check=[&]{if(stop.stop_requested())throw TransportCancelled("Snapshot recovery cancelled");authorize_snapshot(scope,base);const auto checkpoint=event_checkpoints_.observe(base.consumer);if(checkpoint.revision!=base.checkpoint_revision||checkpoint.accepted!=base.accepted||checkpoint.pending)throw Conflict("Snapshot recovery baseline changed");};check();

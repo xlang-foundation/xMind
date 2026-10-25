@@ -1,0 +1,65 @@
+{
+  "runId": 40168162157,
+  "jobId": 121097854120,
+  "source": "9cfc1d70d5ea3f52b03567e28417724c92348e05",
+  "native": {
+    "passed": 176,
+    "failed": 1,
+    "total": 177,
+    "seconds": 688.79,
+    "failedTest": "native_graph_runner_contract",
+    "testSeconds": 34.16
+  },
+  "provenance": {
+    "toolchain_version": "18.11.12315.225",
+    "build_parallelism": 4,
+    "xlang3": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+    "xmind": "9cfc1d70d5ea3f52b03567e28417724c92348e05",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "windows_default_owner_matches_user": false,
+    "processors": 4,
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "toolchain": "Visual Studio 18 2026"
+  },
+  "artifact": {
+    "id": 12591186445,
+    "name": "native-windows-evidence-9cfc1d70d5ea3f52b03567e28417724c92348e05",
+    "bytes": 5132392,
+    "sha256": "626646e49ba1eda534c0a9c979e01b2e0fd15055646c8967797e570f53cad2fe"
+  },
+  "failedFixture": {
+    "namespace": "xmind-graph-runner-2GvN6q",
+    "root": "multi-process-root",
+    "child": "4ecc53ed9c9968d6239d34e97682a1f2",
+    "operation": {
+      "elapsed_ms": 30033,
+      "exit_code": 1,
+      "id": "9ca2653e222e81367c579b47b5803744",
+      "output_artifact": {
+        "operation_id": "9ca2653e222e81367c579b47b5803744",
+        "state": "complete",
+        "stderr_bytes": 0,
+        "stdout_bytes": 34
+      },
+      "process_tree_retired": true,
+      "profile_id": "powershell",
+      "startup_phases": [
+        "script_entered"
+      ],
+      "state": "uncertain",
+      "termination": "timed_out",
+      "timeout_ms": 30000,
+      "tool": "run_process"
+    }
+  },
+  "passingChecks": {
+    "graphRemoteSeconds": 13.65,
+    "ledgerSeconds": 39.75,
+    "nestedHumanSeconds": 34.17,
+    "trustedOAuthSeconds": 6.4
+  },
+  "cause": "Unproven. Original PowerShell fixture reached30033ms against30000ms; only script_entered was observed. This is not evidence of a slow xlang3 method call.",
+  "preservation": "Original artifact, observation samples, worker phase timing and failed namespace retained; no failed database queried and no task replayed.",
+  "goalComplete": false
+}
