@@ -1,0 +1,42 @@
+{
+  "fullNativeSource": "d55741e00a7c63cbe16ef1de2e4084a7a1afbaba",
+  "guidanceOnlyDifferences": [
+    "AGENTS.md"
+  ],
+  "pid": 29436,
+  "startedAt": "2026-10-25T05:53:31.516Z",
+  "completedAt": "2026-10-25T05:53:33.708Z",
+  "exitCode": 0,
+  "signal": null,
+  "logSha256": "733c3b208039665cdf82318c0b183e7b6e4022015c1860d0964f7c4c9b895693",
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "source": "35788e53a2178271b719e7971186d62307b276f2",
+  "allCheckedProjectRuntimeDependenciesBinariesAssetHashesAndFileSetsUnchanged": true,
+  "rendered": false,
+  "installed": false,
+  "paidInference": false,
+  "cpython": false,
+  "scenario": "Fresh mkdtemp workspace/database; real native file graphs, human continuation, approved nested write, origin-bound browser cookie recovery and native/gateway restart without completed graph replay",
+  "scope": "HTTP gateway and BrowserController integration; not actual rendered UI",
+  "preflightLimitation": {
+    "recordedAt": "2026-10-25T05:54:30.229Z",
+    "originalPreflightPassed": false,
+    "reason": "Malformed regex in private wrapper; PowerShell emitted nonterminating errors and returned no matching output",
+    "productScenarioExitCode": 0,
+    "productScenarioReplayed": false,
+    "noOverlapAtLaunchNotProven": true,
+    "repairedGuardMatcherCases": 7,
+    "matcherResult": "Seven matcher cases passed",
+    "releaseQualification": false
+  },
+  "repairedGuardCurrentCheck": {
+    "checkedAt": "2026-10-25T05:54:55.939Z",
+    "passed": true,
+    "processes": [],
+    "doesNotEstablishOriginalPreLaunchState": true
+  },
+  "completedScenarioReplayed": false,
+  "originalValidationScriptRetained": true,
+  "releaseQualified": false,
+  "installed75Unchanged": true
+}
