@@ -1,3 +1,4 @@
+#include "fixture_worker_channel.hpp"
 #include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
 #include "agentflow/agent_worker_read_context.hpp"
@@ -88,7 +89,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         }
 
     }
-    if(product_entry){worker->channel().configure_model({false,{access.endpoint,access.ticket,access.pid}},deadline);peer.bind_native_execution(connect_agent_worker_execution(*worker,deadline));}else worker->channel().send({"fixture.boot",Json{{"mode",mode},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump()},deadline);peer.start();
+    if(product_entry){worker->channel().configure_model({false,{access.endpoint,access.ticket,access.pid}},deadline);peer.bind_native_execution(connect_agent_worker_execution(*worker,deadline));}else fixture_worker_channel(worker->channel()).send({"fixture.boot",Json{{"mode",mode},{"model",{{"endpoint",access.endpoint},{"ticket",access.ticket},{"pid",access.pid}}}}.dump()},deadline);peer.start();
     const auto execute_reply=[&]{return product_entry?Json{{"version",1},{"outcome",to_string(peer.native_execution()->execute(deadline))}}.dump():peer.call("fixture.run","{}");};
     if(product_entry){rejects<Conflict>([&]{drain_completed_agent_worker(store,*worker,peer,lease,Clock::now()+5s);});check(worker->alive()&&peer.alive(),"Queued root is not proof of completed drain");rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.execute",R"({"instructions":"forged"})");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.unknown","{}");});rejects<AgentWorkerRpcRemoteError>([&]{peer.call("worker.cancel",R"({"run_id":"foreign"})");});check(store.root_budget(id).get().model_calls_reserved==0,"Rejected product controls must not reserve a model");}
     if(mode.starts_with("product_admission_")||mode.starts_with("product_journal_")){

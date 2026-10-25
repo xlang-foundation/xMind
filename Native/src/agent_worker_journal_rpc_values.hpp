@@ -15,7 +15,7 @@ namespace {
 using Json=nlohmann::json;
 // Leave room for the enclosing RPC string and its escaping. Never truncate an
 // admitted history or event list to make it fit; larger windows need paging.
-constexpr std::size_t max_value_bytes=AgentWorkerChannel::max_message_bytes/2-1024,max_rows=4096;
+constexpr std::size_t max_value_bytes=2*1024*1024-1024,max_rows=4096;
 [[noreturn]] void invalid(){throw AgentWorkerProtocolError("Invalid owned worker journal values");}
 Json parse(const std::string& bytes){
     if(bytes.empty()||bytes.size()>max_value_bytes)invalid();std::vector<std::set<std::string>> keys;

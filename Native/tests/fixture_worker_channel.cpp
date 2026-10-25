@@ -23,7 +23,7 @@ void check(AgentWorkerChannel::Deadline deadline,std::stop_token stop){
     if(Clock::now()>=deadline)throw AgentWorkerChannelTimeout("Fixture SDK channel deadline elapsed");
 }
 void validate(const AgentWorkerMessage& message){
-    if(message.operation.empty()||message.operation.size()>64||message.operation.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789._")!=std::string::npos||message.payload.size()>AgentWorkerChannel::max_message_bytes-message.operation.size())reject();
+    if(message.operation.empty()||message.operation.size()>64||message.operation.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789._")!=std::string::npos||message.payload.size()>FixtureWorkerChannel::max_message_bytes-message.operation.size())reject();
 }
 struct Mailbox {
     std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;
@@ -80,7 +80,7 @@ FixtureWorkerChannel& fixture_worker_channel(AgentWorkerChannel& channel){
     const auto key=connection_key(channel);static std::mutex mutex;static std::map<std::string,std::unique_ptr<FixtureWorkerChannel>> channels;
     std::lock_guard lock(mutex);auto& value=channels[key];if(!value)value=std::make_unique<FixtureWorkerChannel>(std::make_shared<FixtureWorkerChannel::Impl>(channel,key));return *value;
 }
-AgentWorkerChannelStatistics FixtureWorkerChannel::statistics()const{return {impl_->reads.load(),impl_->writes.load(),impl_->cancelled_reads.load(),impl_->cancelled_writes.load()};}
+FixtureWorkerChannelStatistics FixtureWorkerChannel::statistics()const{return {impl_->reads.load(),impl_->writes.load(),impl_->cancelled_reads.load(),impl_->cancelled_writes.load()};}
 void FixtureWorkerChannel::send(const AgentWorkerMessage& message,AgentWorkerChannel::Deadline deadline,std::stop_token stop){
     std::lock_guard writer(impl_->writer);++impl_->writes;
     try{check(deadline,stop);impl_->live();validate(message);const std::vector<X::Value> args{X::Value(impl_->client,message.operation),X::Value(impl_->client,message.payload)};

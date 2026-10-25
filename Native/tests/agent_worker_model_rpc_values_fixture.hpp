@@ -1,3 +1,4 @@
+#include "fixture_worker_channel.hpp"
 #pragma once
 #include "agentflow/agent_worker_model_rpc.hpp"
 #include "agentflow/agent_worker_native_model.hpp"
@@ -9,7 +10,7 @@
 namespace agentflow {
 using Json=nlohmann::json;
 namespace {
-Json request_envelope(const std::string& bytes){if(bytes.empty()||bytes.size()>AgentWorkerChannel::max_message_bytes)throw AgentWorkerRpcRemoteError("rejected");std::vector<std::set<std::string>> keys;return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});}
+Json request_envelope(const std::string& bytes){if(bytes.empty()||bytes.size()>FixtureWorkerChannel::max_message_bytes)throw AgentWorkerRpcRemoteError("rejected");std::vector<std::set<std::string>> keys;return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerRpcRemoteError("rejected");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});}
 ProviderHttpError provider_failure(const std::string& bytes){
     try{
         const auto value=request_envelope(bytes);

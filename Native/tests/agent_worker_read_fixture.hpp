@@ -1,3 +1,4 @@
+#include "fixture_worker_channel.hpp"
 #include "agent_worker_rpc_fixture.hpp"
 // Controlled actual child read RPC. The backend owns real workspace/guidance
 // handles and obtains the tool call from the independent native HTTP peer.
@@ -77,7 +78,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         const auto result=dispatch(method,payload,std::move(sink),cancel);
         if(mode=="read_delivery"){captured.set_value();while(released.wait_for(10ms)!=std::future_status::ready)if(cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");}return result;
     },deadline);
-    worker->channel().send({"fixture.boot",mode},deadline);peer.start();
+    fixture_worker_channel(worker->channel()).send({"fixture.boot",mode},deadline);peer.start();
     if(mode=="read_delivery"||mode=="read_turn_delivery"){
         auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});struct Unblock{std::promise<void>& release;~Unblock(){try{release.set_value();}catch(...){}}} unblock{release};
         check(ready.wait_for(5s)==std::future_status::ready,"Actual read must be captured before the delivery fault");const auto before=store.agent_worker_read_claim(id,"read-attempt","actual-read").get();check(before.state=="returned"&&before.dispatched&&before.success&&Json::parse(before.actual_output_json).at("content")==marker,"Actual native bytes must be durable before reply delivery");

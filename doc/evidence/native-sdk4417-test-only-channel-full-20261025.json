@@ -1,0 +1,1183 @@
+{
+  "recordedAt": "2026-10-25T17:54:18.318Z",
+  "sourceParent": "fcb98244b86ac97a0c4500d1ca689c102b1487d1",
+  "sourcePatchSha256": "6c16c708860cce91016701ee1889a0c1f526d02018bbbfd9abe538c0a055deb4",
+  "build": {
+    "pid": 10688,
+    "launchedAt": "2026-10-25T17:39:05.308Z",
+    "completedAt": "2026-10-25T17:41:11.766Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "91eb18efcae699f52611d6c6e1e281ec3b77db9eeb89c3e59a1fb5061c037fbd"
+  },
+  "test": {
+    "pid": 17764,
+    "launchedAt": "2026-10-25T17:41:14.407Z",
+    "completedAt": "2026-10-25T17:54:15.529Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "29034febd34f334b9b8f519778be252137ace4f64d457ca9afd86802be709e30"
+  },
+  "total": 184,
+  "failed": 0,
+  "passed": 184,
+  "seconds": 781.07,
+  "projectFiles": 2860,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 145,
+  "nativeSha256": "ce3d809288a91be2f2b12df4f69a4992191e0ca813338fb6109dd24a0ebc0337",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": true,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "sdkRevision": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "actualInventory": [
+    "native_root_work_executor_contract",
+    "embedded_xlang_python_callable_contract",
+    "embedded_xlang_authoring_program_contract",
+    "native_remote_negotiation_contract",
+    "native_remote_run_snapshot_contract",
+    "native_remote_connection_client_contract",
+    "native_remote_snapshot_transport_contract",
+    "native_remote_connection_credentials_contract",
+    "native_remote_connection_authentication_contract",
+    "native_json_schema_contract",
+    "native_terminal_key_input_contract",
+    "native_cli_plan_review_contract",
+    "native_mcp_wire_contract",
+    "native_permission_grants_contract",
+    "native_a2a_client_contract",
+    "native_a2a_client_sdk_contract",
+    "native_a2a_agent_registry_contract",
+    "model_stream_protocol_contract",
+    "model_request_contract",
+    "native_context_selection_contract",
+    "native_gemini_request_contract",
+    "native_gemini_stream_contract",
+    "native_gemini_history_contract",
+    "native_provider_history_bridge_contract",
+    "native_anthropic_request_contract",
+    "native_anthropic_stream_contract",
+    "native_anthropic_history_contract",
+    "native_responses_protocol_contract",
+    "native_dynamic_plan_contract",
+    "native_agent_authority_contract",
+    "native_dynamic_plan_repository_contract",
+    "native_context_repository_contract",
+    "native_agent_worker_native_execution_contract",
+    "native_xmind_ipc_lifetime_contract",
+    "native_xmind_ipc_api_contract",
+    "native_context_control_contract",
+    "native_context_cli_contract",
+    "native_context_engine_contract",
+    "native_context_graph_engine_contract",
+    "native_nested_context_graph_engine_contract",
+    "native_provider_yaml_config_contract",
+    "native_planning_http_contract",
+    "native_mcp_resource_route_contract",
+    "native_child_executor_contract",
+    "native_dynamic_plan_engine_contract",
+    "native_dynamic_plan_mcp_contract",
+    "native_secret_protection_contract",
+    "native_a2a_task_control_http_contract",
+    "native_a2a_message_http_contract",
+    "native_a2a_stream_http_contract",
+    "native_a2a_v1_http_contract",
+    "native_responses_agent_http_contract",
+    "native_graph_service_http_contract",
+    "native_provider_cli_contract",
+    "native_provider_setup_contract",
+    "native_graph_runner_contract",
+    "native_graph_mcp_contract",
+    "native_graph_mcp_http_contract",
+    "native_graph_mcp_http_subscription_contract",
+    "native_delegation_contract",
+    "native_delegation_http_contract",
+    "native_graph_checkpoint_contract",
+    "native_graph_children_contract",
+    "native_graph_contract",
+    "native_instruction_configuration_contract",
+    "native_process_configuration_contract",
+    "native_process_executor_contract",
+    "native_agent_process_http_contract",
+    "native_xlang3_default_process_contract",
+    "native_process_adapter_contract",
+    "native_persistent_pty_sessions_contract",
+    "native_mcp_configuration_contract",
+    "native_mcp_oauth_credentials_contract",
+    "native_mcp_oauth_refresh_storage_contract",
+    "native_mcp_oauth_service_contract",
+    "native_mcp_authorization_cli_contract",
+    "native_mcp_oauth_renewal_negative_contract",
+    "native_remote_snapshot_sdk_contract",
+    "native_remote_snapshot_cli_contract",
+    "native_remote_snapshot_http_contract",
+    "native_remote_authentication_sdk_untrusted_contract",
+    "native_mcp_oauth_trusted_peer_contract",
+    "native_schema_worker_contract",
+    "native_mcp_stdio_contract",
+    "native_mcp_handshake_contract",
+    "native_mcp_client_contract",
+    "native_mcp_http_readonly_contract",
+    "native_mcp_http_fallback_contract",
+    "native_language_server_diagnostics_contract",
+    "native_language_server_rust_fixture_check",
+    "native_language_server_rust_analyzer_contract",
+    "native_multifolder_language_server_contract",
+    "native_language_server_configuration_contract",
+    "native_mcp_effect_contract",
+    "native_mcp_input_contract",
+    "native_xlang_python_config_contract",
+    "native_agent_worker_native_planning_contract",
+    "native_agent_worker_model_rpc_contract",
+    "native_agent_worker_graph_no_context_contract",
+    "native_agent_worker_graph_callable_contract",
+    "native_agent_worker_graph_remote_contract",
+    "native_agent_worker_server_contract",
+    "native_agent_worker_coding_server_contract",
+    "native_agent_worker_ledger_contract",
+    "native_agent_worker_nested_human_contract",
+    "native_agent_worker_deep_human_contract",
+    "native_agent_worker_channel_contract",
+    "native_xlang3_shared_memory_worker_contract",
+    "native_agent_service_contract",
+    "native_agent_runner_contract",
+    "native_gemini_agent_contract",
+    "native_anthropic_agent_contract",
+    "native_file_patch_contract",
+    "native_command_context_contract",
+    "native_skill_state_contract",
+    "native_skill_catalogue_contract",
+    "native_create_executor_contract",
+    "native_edit_executor_contract",
+    "native_patch_file_executor_contract",
+    "native_patch_executor_contract",
+    "native_restore_executor_contract",
+    "native_agent_remote_tool_host_contract",
+    "native_agent_file_tool_host_contract",
+    "native_agent_process_tool_host_contract",
+    "native_agent_read_tool_host_contract",
+    "native_patch_tool_contract",
+    "native_approved_edit_http_contract",
+    "native_workspace_tools_contract",
+    "native_repository_instructions_contract",
+    "native_skill_context_contract",
+    "native_chat_provider_contract",
+    "native_gemini_provider_contract",
+    "native_deepseek_provider_contract",
+    "native_deepseek_profile_runtime_contract",
+    "native_provider_model_policy_runtime_contract",
+    "native_anthropic_provider_contract",
+    "native_mcp_oauth_callback_contract",
+    "native_mcp_oauth_refresh_contract",
+    "native_responses_context_contract",
+    "native_http_stream_transport_contract",
+    "native_agent_http_contract",
+    "native_agent_edit_http_contract",
+    "native_agent_patch_http_contract",
+    "native_agent_mcp_http_contract",
+    "native_agent_mcp_http_subscription_contract",
+    "native_mcp_sdk_modern_contract",
+    "native_mcp_sdk_legacy_contract",
+    "native_cli_output_contract",
+    "native_http_cli_contract",
+    "native_cli_vcs_status_contract",
+    "native_cli_vcs_metadata_contract",
+    "native_cli_vcs_diff_contract",
+    "native_unified_program_contract",
+    "native_unified_patch_http_contract",
+    "native_unified_graph_http_contract",
+    "native_unified_mcp_http_contract",
+    "native_console_workspace_contract",
+    "native_local_profile_contract",
+    "native_local_view_contract",
+    "native_local_view_provider_config_contract",
+    "native_workspace_registry_contract",
+    "embedded_xlang_sqlite_contract",
+    "native_incoming_repository_contract",
+    "native_task_list_repository_contract",
+    "native_permission_waiter_contract",
+    "native_operation_repository_contract",
+    "xlang_repository_contract",
+    "persistence_service_contract",
+    "native_backend_owner_contract",
+    "native_profile_record_publication_contract",
+    "native_legacy_owner_contract",
+    "native_owner_process_contract",
+    "native_runtime_generation_contract",
+    "native_backend_owner_http_contract",
+    "native_backend_handoff_contract",
+    "native_connection_profiles_contract",
+    "native_connection_profiles_http_contract",
+    "native_provider_profiles_contract",
+    "native_provider_profile_lsp_responsiveness_contract",
+    "native_provider_profile_runtime_contract",
+    "native_provider_profile_cli_contract",
+    "native_gemini_catalogue_contract",
+    "native_gemini_profile_runtime_contract",
+    "encrypted_credential_repository_contract"
+  ],
+  "terminalContracts": [
+    {
+      "number": 1,
+      "name": "native_root_work_executor_contract",
+      "seconds": 0.08
+    },
+    {
+      "number": 2,
+      "name": "embedded_xlang_python_callable_contract",
+      "seconds": 0.06
+    },
+    {
+      "number": 3,
+      "name": "embedded_xlang_authoring_program_contract",
+      "seconds": 0.17
+    },
+    {
+      "number": 4,
+      "name": "native_remote_negotiation_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 5,
+      "name": "native_remote_run_snapshot_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 6,
+      "name": "native_remote_connection_client_contract",
+      "seconds": 1.41
+    },
+    {
+      "number": 7,
+      "name": "native_remote_snapshot_transport_contract",
+      "seconds": 0.09
+    },
+    {
+      "number": 8,
+      "name": "native_remote_connection_credentials_contract",
+      "seconds": 0.13
+    },
+    {
+      "number": 9,
+      "name": "native_remote_connection_authentication_contract",
+      "seconds": 1.65
+    },
+    {
+      "number": 10,
+      "name": "native_json_schema_contract",
+      "seconds": 0.02
+    },
+    {
+      "number": 11,
+      "name": "native_terminal_key_input_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 12,
+      "name": "native_cli_plan_review_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 13,
+      "name": "native_mcp_wire_contract",
+      "seconds": 0.02
+    },
+    {
+      "number": 14,
+      "name": "native_permission_grants_contract",
+      "seconds": 0.17
+    },
+    {
+      "number": 15,
+      "name": "native_a2a_client_contract",
+      "seconds": 0.23
+    },
+    {
+      "number": 16,
+      "name": "native_a2a_client_sdk_contract",
+      "seconds": 0.35
+    },
+    {
+      "number": 17,
+      "name": "native_a2a_agent_registry_contract",
+      "seconds": 3
+    },
+    {
+      "number": 18,
+      "name": "model_stream_protocol_contract",
+      "seconds": 0.06
+    },
+    {
+      "number": 19,
+      "name": "model_request_contract",
+      "seconds": 0.02
+    },
+    {
+      "number": 20,
+      "name": "native_context_selection_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 21,
+      "name": "native_gemini_request_contract",
+      "seconds": 0.13
+    },
+    {
+      "number": 22,
+      "name": "native_gemini_stream_contract",
+      "seconds": 0.02
+    },
+    {
+      "number": 23,
+      "name": "native_gemini_history_contract",
+      "seconds": 0.09
+    },
+    {
+      "number": 24,
+      "name": "native_provider_history_bridge_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 25,
+      "name": "native_anthropic_request_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 26,
+      "name": "native_anthropic_stream_contract",
+      "seconds": 0.08
+    },
+    {
+      "number": 27,
+      "name": "native_anthropic_history_contract",
+      "seconds": 0.3
+    },
+    {
+      "number": 28,
+      "name": "native_responses_protocol_contract",
+      "seconds": 0.1
+    },
+    {
+      "number": 29,
+      "name": "native_dynamic_plan_contract",
+      "seconds": 0.04
+    },
+    {
+      "number": 30,
+      "name": "native_agent_authority_contract",
+      "seconds": 0.1
+    },
+    {
+      "number": 31,
+      "name": "native_dynamic_plan_repository_contract",
+      "seconds": 3.21
+    },
+    {
+      "number": 32,
+      "name": "native_context_repository_contract",
+      "seconds": 3.4
+    },
+    {
+      "number": 33,
+      "name": "native_agent_worker_native_execution_contract",
+      "seconds": 0.47
+    },
+    {
+      "number": 34,
+      "name": "native_xmind_ipc_lifetime_contract",
+      "seconds": 1.87
+    },
+    {
+      "number": 35,
+      "name": "native_xmind_ipc_api_contract",
+      "seconds": 5.91
+    },
+    {
+      "number": 36,
+      "name": "native_context_control_contract",
+      "seconds": 4.07
+    },
+    {
+      "number": 37,
+      "name": "native_context_cli_contract",
+      "seconds": 0.4
+    },
+    {
+      "number": 38,
+      "name": "native_context_engine_contract",
+      "seconds": 5.04
+    },
+    {
+      "number": 39,
+      "name": "native_context_graph_engine_contract",
+      "seconds": 1.59
+    },
+    {
+      "number": 40,
+      "name": "native_nested_context_graph_engine_contract",
+      "seconds": 0.79
+    },
+    {
+      "number": 41,
+      "name": "native_provider_yaml_config_contract",
+      "seconds": 0.82
+    },
+    {
+      "number": 42,
+      "name": "native_planning_http_contract",
+      "seconds": 0.86
+    },
+    {
+      "number": 43,
+      "name": "native_mcp_resource_route_contract",
+      "seconds": 0.19
+    },
+    {
+      "number": 44,
+      "name": "native_child_executor_contract",
+      "seconds": 0.43
+    },
+    {
+      "number": 45,
+      "name": "native_dynamic_plan_engine_contract",
+      "seconds": 6.4
+    },
+    {
+      "number": 46,
+      "name": "native_dynamic_plan_mcp_contract",
+      "seconds": 14.3
+    },
+    {
+      "number": 47,
+      "name": "native_secret_protection_contract",
+      "seconds": 0.01
+    },
+    {
+      "number": 48,
+      "name": "native_a2a_task_control_http_contract",
+      "seconds": 1.11
+    },
+    {
+      "number": 49,
+      "name": "native_a2a_message_http_contract",
+      "seconds": 0.4
+    },
+    {
+      "number": 50,
+      "name": "native_a2a_stream_http_contract",
+      "seconds": 1.42
+    },
+    {
+      "number": 51,
+      "name": "native_a2a_v1_http_contract",
+      "seconds": 1.27
+    },
+    {
+      "number": 52,
+      "name": "native_responses_agent_http_contract",
+      "seconds": 10.16
+    },
+    {
+      "number": 53,
+      "name": "native_graph_service_http_contract",
+      "seconds": 15.54
+    },
+    {
+      "number": 54,
+      "name": "native_provider_cli_contract",
+      "seconds": 3.47
+    },
+    {
+      "number": 55,
+      "name": "native_provider_setup_contract",
+      "seconds": 1.45
+    },
+    {
+      "number": 56,
+      "name": "native_graph_runner_contract",
+      "seconds": 11.73
+    },
+    {
+      "number": 57,
+      "name": "native_graph_mcp_contract",
+      "seconds": 8.28
+    },
+    {
+      "number": 58,
+      "name": "native_graph_mcp_http_contract",
+      "seconds": 3.13
+    },
+    {
+      "number": 59,
+      "name": "native_graph_mcp_http_subscription_contract",
+      "seconds": 0.77
+    },
+    {
+      "number": 60,
+      "name": "native_delegation_contract",
+      "seconds": 2.26
+    },
+    {
+      "number": 61,
+      "name": "native_delegation_http_contract",
+      "seconds": 1.79
+    },
+    {
+      "number": 62,
+      "name": "native_graph_checkpoint_contract",
+      "seconds": 0.34
+    },
+    {
+      "number": 63,
+      "name": "native_graph_children_contract",
+      "seconds": 0.38
+    },
+    {
+      "number": 64,
+      "name": "native_graph_contract",
+      "seconds": 1.58
+    },
+    {
+      "number": 65,
+      "name": "native_instruction_configuration_contract",
+      "seconds": 0.42
+    },
+    {
+      "number": 66,
+      "name": "native_process_configuration_contract",
+      "seconds": 0.24
+    },
+    {
+      "number": 67,
+      "name": "native_process_executor_contract",
+      "seconds": 10.26
+    },
+    {
+      "number": 68,
+      "name": "native_agent_process_http_contract",
+      "seconds": 11.79
+    },
+    {
+      "number": 69,
+      "name": "native_xlang3_default_process_contract",
+      "seconds": 1.9
+    },
+    {
+      "number": 70,
+      "name": "native_process_adapter_contract",
+      "seconds": 4.48
+    },
+    {
+      "number": 71,
+      "name": "native_persistent_pty_sessions_contract",
+      "seconds": 0.11
+    },
+    {
+      "number": 72,
+      "name": "native_mcp_configuration_contract",
+      "seconds": 0.22
+    },
+    {
+      "number": 73,
+      "name": "native_mcp_oauth_credentials_contract",
+      "seconds": 0.16
+    },
+    {
+      "number": 74,
+      "name": "native_mcp_oauth_refresh_storage_contract",
+      "seconds": 0.21
+    },
+    {
+      "number": 75,
+      "name": "native_mcp_oauth_service_contract",
+      "seconds": 15.7
+    },
+    {
+      "number": 76,
+      "name": "native_mcp_authorization_cli_contract",
+      "seconds": 1.88
+    },
+    {
+      "number": 77,
+      "name": "native_mcp_oauth_renewal_negative_contract",
+      "seconds": 16.15
+    },
+    {
+      "number": 78,
+      "name": "native_remote_snapshot_sdk_contract",
+      "seconds": 0.34
+    },
+    {
+      "number": 79,
+      "name": "native_remote_snapshot_cli_contract",
+      "seconds": 0.93
+    },
+    {
+      "number": 80,
+      "name": "native_remote_snapshot_http_contract",
+      "seconds": 0.42
+    },
+    {
+      "number": 81,
+      "name": "native_remote_authentication_sdk_untrusted_contract",
+      "seconds": 1.81
+    },
+    {
+      "number": 82,
+      "name": "native_mcp_oauth_trusted_peer_contract",
+      "seconds": 0.44
+    },
+    {
+      "number": 83,
+      "name": "native_schema_worker_contract",
+      "seconds": 2.96
+    },
+    {
+      "number": 84,
+      "name": "native_mcp_stdio_contract",
+      "seconds": 3.12
+    },
+    {
+      "number": 85,
+      "name": "native_mcp_handshake_contract",
+      "seconds": 0.75
+    },
+    {
+      "number": 86,
+      "name": "native_mcp_client_contract",
+      "seconds": 1.31
+    },
+    {
+      "number": 87,
+      "name": "native_mcp_http_readonly_contract",
+      "seconds": 0.19
+    },
+    {
+      "number": 88,
+      "name": "native_mcp_http_fallback_contract",
+      "seconds": 0.33
+    },
+    {
+      "number": 89,
+      "name": "native_language_server_diagnostics_contract",
+      "seconds": 5.41
+    },
+    {
+      "number": 90,
+      "name": "native_language_server_rust_fixture_check",
+      "seconds": 0.06
+    },
+    {
+      "number": 91,
+      "name": "native_language_server_rust_analyzer_contract",
+      "seconds": 16.89
+    },
+    {
+      "number": 92,
+      "name": "native_multifolder_language_server_contract",
+      "seconds": 6.27
+    },
+    {
+      "number": 93,
+      "name": "native_language_server_configuration_contract",
+      "seconds": 0.17
+    },
+    {
+      "number": 94,
+      "name": "native_mcp_effect_contract",
+      "seconds": 22.86
+    },
+    {
+      "number": 95,
+      "name": "native_mcp_input_contract",
+      "seconds": 0.57
+    },
+    {
+      "number": 96,
+      "name": "native_xlang_python_config_contract",
+      "seconds": 0.11
+    },
+    {
+      "number": 97,
+      "name": "native_agent_worker_native_planning_contract",
+      "seconds": 0.26
+    },
+    {
+      "number": 98,
+      "name": "native_agent_worker_model_rpc_contract",
+      "seconds": 54.21
+    },
+    {
+      "number": 99,
+      "name": "native_agent_worker_graph_no_context_contract",
+      "seconds": 5.23
+    },
+    {
+      "number": 100,
+      "name": "native_agent_worker_graph_callable_contract",
+      "seconds": 5.16
+    },
+    {
+      "number": 101,
+      "name": "native_agent_worker_graph_remote_contract",
+      "seconds": 11.41
+    },
+    {
+      "number": 102,
+      "name": "native_agent_worker_server_contract",
+      "seconds": 1.72
+    },
+    {
+      "number": 103,
+      "name": "native_agent_worker_coding_server_contract",
+      "seconds": 0.99
+    },
+    {
+      "number": 104,
+      "name": "native_agent_worker_ledger_contract",
+      "seconds": 37.44
+    },
+    {
+      "number": 105,
+      "name": "native_agent_worker_nested_human_contract",
+      "seconds": 30.59
+    },
+    {
+      "number": 106,
+      "name": "native_agent_worker_deep_human_contract",
+      "seconds": 7.28
+    },
+    {
+      "number": 107,
+      "name": "native_agent_worker_channel_contract",
+      "seconds": 3.17
+    },
+    {
+      "number": 108,
+      "name": "native_xlang3_shared_memory_worker_contract",
+      "seconds": 1.44
+    },
+    {
+      "number": 109,
+      "name": "native_agent_service_contract",
+      "seconds": 1.61
+    },
+    {
+      "number": 110,
+      "name": "native_agent_runner_contract",
+      "seconds": 15.19
+    },
+    {
+      "number": 111,
+      "name": "native_gemini_agent_contract",
+      "seconds": 0.51
+    },
+    {
+      "number": 112,
+      "name": "native_anthropic_agent_contract",
+      "seconds": 0.65
+    },
+    {
+      "number": 113,
+      "name": "native_file_patch_contract",
+      "seconds": 0.02
+    },
+    {
+      "number": 114,
+      "name": "native_command_context_contract",
+      "seconds": 0.02
+    },
+    {
+      "number": 115,
+      "name": "native_skill_state_contract",
+      "seconds": 0.22
+    },
+    {
+      "number": 116,
+      "name": "native_skill_catalogue_contract",
+      "seconds": 5.47
+    },
+    {
+      "number": 117,
+      "name": "native_create_executor_contract",
+      "seconds": 1.41
+    },
+    {
+      "number": 118,
+      "name": "native_edit_executor_contract",
+      "seconds": 0.89
+    },
+    {
+      "number": 119,
+      "name": "native_patch_file_executor_contract",
+      "seconds": 1.34
+    },
+    {
+      "number": 120,
+      "name": "native_patch_executor_contract",
+      "seconds": 1.57
+    },
+    {
+      "number": 121,
+      "name": "native_restore_executor_contract",
+      "seconds": 1.24
+    },
+    {
+      "number": 122,
+      "name": "native_agent_remote_tool_host_contract",
+      "seconds": 4.29
+    },
+    {
+      "number": 123,
+      "name": "native_agent_file_tool_host_contract",
+      "seconds": 3.33
+    },
+    {
+      "number": 124,
+      "name": "native_agent_process_tool_host_contract",
+      "seconds": 3.41
+    },
+    {
+      "number": 125,
+      "name": "native_agent_read_tool_host_contract",
+      "seconds": 1.43
+    },
+    {
+      "number": 126,
+      "name": "native_patch_tool_contract",
+      "seconds": 0.73
+    },
+    {
+      "number": 127,
+      "name": "native_approved_edit_http_contract",
+      "seconds": 2.7
+    },
+    {
+      "number": 128,
+      "name": "native_workspace_tools_contract",
+      "seconds": 1.71
+    },
+    {
+      "number": 129,
+      "name": "native_repository_instructions_contract",
+      "seconds": 0.48
+    },
+    {
+      "number": 130,
+      "name": "native_skill_context_contract",
+      "seconds": 0.36
+    },
+    {
+      "number": 131,
+      "name": "native_chat_provider_contract",
+      "seconds": 0.15
+    },
+    {
+      "number": 132,
+      "name": "native_gemini_provider_contract",
+      "seconds": 0.21
+    },
+    {
+      "number": 133,
+      "name": "native_deepseek_provider_contract",
+      "seconds": 0.55
+    },
+    {
+      "number": 134,
+      "name": "native_deepseek_profile_runtime_contract",
+      "seconds": 0.84
+    },
+    {
+      "number": 135,
+      "name": "native_provider_model_policy_runtime_contract",
+      "seconds": 1.12
+    },
+    {
+      "number": 136,
+      "name": "native_anthropic_provider_contract",
+      "seconds": 0.18
+    },
+    {
+      "number": 137,
+      "name": "native_mcp_oauth_callback_contract",
+      "seconds": 0.88
+    },
+    {
+      "number": 138,
+      "name": "native_mcp_oauth_refresh_contract",
+      "seconds": 0.32
+    },
+    {
+      "number": 139,
+      "name": "native_responses_context_contract",
+      "seconds": 1.01
+    },
+    {
+      "number": 140,
+      "name": "native_http_stream_transport_contract",
+      "seconds": 11.65
+    },
+    {
+      "number": 141,
+      "name": "native_agent_http_contract",
+      "seconds": 8.75
+    },
+    {
+      "number": 142,
+      "name": "native_agent_edit_http_contract",
+      "seconds": 9.03
+    },
+    {
+      "number": 143,
+      "name": "native_agent_patch_http_contract",
+      "seconds": 4.71
+    },
+    {
+      "number": 144,
+      "name": "native_agent_mcp_http_contract",
+      "seconds": 3.35
+    },
+    {
+      "number": 145,
+      "name": "native_agent_mcp_http_subscription_contract",
+      "seconds": 0.89
+    },
+    {
+      "number": 146,
+      "name": "native_mcp_sdk_modern_contract",
+      "seconds": 4.16
+    },
+    {
+      "number": 147,
+      "name": "native_mcp_sdk_legacy_contract",
+      "seconds": 3.25
+    },
+    {
+      "number": 148,
+      "name": "native_cli_output_contract",
+      "seconds": 0.15
+    },
+    {
+      "number": 149,
+      "name": "native_http_cli_contract",
+      "seconds": 5.7
+    },
+    {
+      "number": 150,
+      "name": "native_cli_vcs_status_contract",
+      "seconds": 0.2
+    },
+    {
+      "number": 151,
+      "name": "native_cli_vcs_metadata_contract",
+      "seconds": 0.31
+    },
+    {
+      "number": 152,
+      "name": "native_cli_vcs_diff_contract",
+      "seconds": 0.22
+    },
+    {
+      "number": 153,
+      "name": "native_unified_program_contract",
+      "seconds": 1.53
+    },
+    {
+      "number": 154,
+      "name": "native_unified_patch_http_contract",
+      "seconds": 4.14
+    },
+    {
+      "number": 155,
+      "name": "native_unified_graph_http_contract",
+      "seconds": 15.31
+    },
+    {
+      "number": 156,
+      "name": "native_unified_mcp_http_contract",
+      "seconds": 3.47
+    },
+    {
+      "number": 157,
+      "name": "native_console_workspace_contract",
+      "seconds": 1.82
+    },
+    {
+      "number": 158,
+      "name": "native_local_profile_contract",
+      "seconds": 98.79
+    },
+    {
+      "number": 159,
+      "name": "native_local_view_contract",
+      "seconds": 64.59
+    },
+    {
+      "number": 160,
+      "name": "native_local_view_provider_config_contract",
+      "seconds": 22.19
+    },
+    {
+      "number": 161,
+      "name": "native_workspace_registry_contract",
+      "seconds": 0.31
+    },
+    {
+      "number": 162,
+      "name": "embedded_xlang_sqlite_contract",
+      "seconds": 0.04
+    },
+    {
+      "number": 163,
+      "name": "native_incoming_repository_contract",
+      "seconds": 0.29
+    },
+    {
+      "number": 164,
+      "name": "native_task_list_repository_contract",
+      "seconds": 0.34
+    },
+    {
+      "number": 165,
+      "name": "native_permission_waiter_contract",
+      "seconds": 0.81
+    },
+    {
+      "number": 166,
+      "name": "native_operation_repository_contract",
+      "seconds": 0.8
+    },
+    {
+      "number": 167,
+      "name": "xlang_repository_contract",
+      "seconds": 0.4
+    },
+    {
+      "number": 168,
+      "name": "persistence_service_contract",
+      "seconds": 1.74
+    },
+    {
+      "number": 169,
+      "name": "native_backend_owner_contract",
+      "seconds": 1.91
+    },
+    {
+      "number": 170,
+      "name": "native_profile_record_publication_contract",
+      "seconds": 0.28
+    },
+    {
+      "number": 171,
+      "name": "native_legacy_owner_contract",
+      "seconds": 0.5
+    },
+    {
+      "number": 172,
+      "name": "native_owner_process_contract",
+      "seconds": 0.21
+    },
+    {
+      "number": 173,
+      "name": "native_runtime_generation_contract",
+      "seconds": 5.29
+    },
+    {
+      "number": 174,
+      "name": "native_backend_owner_http_contract",
+      "seconds": 6.37
+    },
+    {
+      "number": 175,
+      "name": "native_backend_handoff_contract",
+      "seconds": 3.3
+    },
+    {
+      "number": 176,
+      "name": "native_connection_profiles_contract",
+      "seconds": 0.2
+    },
+    {
+      "number": 177,
+      "name": "native_connection_profiles_http_contract",
+      "seconds": 1.81
+    },
+    {
+      "number": 178,
+      "name": "native_provider_profiles_contract",
+      "seconds": 0.4
+    },
+    {
+      "number": 179,
+      "name": "native_provider_profile_lsp_responsiveness_contract",
+      "seconds": 0.7
+    },
+    {
+      "number": 180,
+      "name": "native_provider_profile_runtime_contract",
+      "seconds": 7.3
+    },
+    {
+      "number": 181,
+      "name": "native_provider_profile_cli_contract",
+      "seconds": 6.24
+    },
+    {
+      "number": 182,
+      "name": "native_gemini_catalogue_contract",
+      "seconds": 11.03
+    },
+    {
+      "number": 183,
+      "name": "native_gemini_profile_runtime_contract",
+      "seconds": 1.63
+    },
+    {
+      "number": 184,
+      "name": "encrypted_credential_repository_contract",
+      "seconds": 0.34
+    }
+  ],
+  "productionAudit": {
+    "recordedAt": "2026-10-25T17:51:49.201Z",
+    "productionSourceFiles": 407,
+    "forbiddenTokens": [
+      "AgentWorkerMessage",
+      "AgentWorkerChannel::send(",
+      "AgentWorkerChannel::receive(",
+      "worker.boot",
+      "worker.execution.ready",
+      "_xmind_fixture_worker_channel"
+    ],
+    "productionMatches": [],
+    "workerLinkSdkMethods": [
+      "Scope",
+      "Close",
+      "ConfigureModel",
+      "PublishExecution",
+      "AnnounceProcess"
+    ],
+    "nativeSha256": "ce3d809288a91be2f2b12df4f69a4992191e0ca813338fb6109dd24a0ebc0337",
+    "fixtureRootAbsentFromProductionExecutable": true,
+    "fixtureLibraryAbsentFromProductionProject": true,
+    "sourceAndBuildEvidenceOnly": true,
+    "fullValidationSession": 24968,
+    "fullSuiteStillPending": false
+  },
+  "productionGenericTransportRemoved": true,
+  "testOnlyFixtureRoot": "_xmind_fixture_worker_channel",
+  "logicalPeerCloseBeforeProcessExitRegressionPassed": true,
+  "previousBuildFailureRetained": "sdk4417-test-only-channel-full: missed callback pointer send call; no tests executed.",
+  "failedModelOrToolNamespacesReplayed": false,
+  "deadlinesChanged": false,
+  "hostedReleaseQualified": false,
+  "nativeSystemTrustIntegrationExecuted": false,
+  "installedVersion": "0.1.76",
+  "fullGoalComplete": false
+}

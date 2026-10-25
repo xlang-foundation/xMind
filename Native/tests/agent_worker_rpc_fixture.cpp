@@ -1,3 +1,4 @@
+#include "fixture_worker_channel.hpp"
 #include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_native_execution.hpp"
 #include "nlohmann/json.hpp"
@@ -20,7 +21,7 @@ constexpr std::uint64_t max_id=9007199254740991;
 void identifier(const std::string& value){if(value.empty()||value.size()>64||value.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789_.")!=std::string::npos)throw AgentWorkerProtocolError("Invalid native RPC method");}
 bool error_code(const std::string& code){return std::set<std::string>{"rejected","unsupported","cancelled","timeout","failed","outcome_unrecorded","provider_http","model_protocol","capacity","budget_exhausted"}.contains(code);}
 Json parse(const std::string& bytes){
-    if(bytes.empty()||bytes.size()>AgentWorkerChannel::max_message_bytes)throw AgentWorkerProtocolError("Native RPC envelope exceeds limits");std::vector<std::set<std::string>> keys;
+    if(bytes.empty()||bytes.size()>FixtureWorkerChannel::max_message_bytes)throw AgentWorkerProtocolError("Native RPC envelope exceeds limits");std::vector<std::set<std::string>> keys;
     return Json::parse(bytes,[&](int depth,Json::parse_event_t event,Json& value){if(depth>8)throw AgentWorkerProtocolError("Invalid native RPC envelope");if(event==Json::parse_event_t::object_start)keys.emplace_back();if(event==Json::parse_event_t::key&&(keys.empty()||!keys.back().insert(value.get<std::string>()).second))throw AgentWorkerProtocolError("Duplicate native RPC field");if(event==Json::parse_event_t::object_end)keys.pop_back();return true;});
 }
 std::uint64_t envelope_id(const Json& value,std::size_t fields){if(!value.is_object()||value.size()!=fields||!value.at("version").is_number_integer()||value.at("version")!=1||!value.at("id").is_number_unsigned())throw AgentWorkerProtocolError("Invalid native RPC envelope");const auto id=value.at("id").get<std::uint64_t>();if(!id||id>max_id)throw AgentWorkerProtocolError("Invalid native RPC identity");return id;}
@@ -42,7 +43,7 @@ struct FixtureWorkerRpcPeer::Impl {
         std::vector<std::stop_source> stops;{std::lock_guard lock(state);if(closed)return;closed=true;for(auto& [id,call]:pending)if(!call->done){call->done=true;call->local_failure=true;call->code=reason;}for(const auto& [id,owner]:active)stops.push_back(owner->stop);}
         session_stop.request_stop();for(auto& stop:stops)stop.request_stop();changed.notify_all();
     }
-    void send(const std::string& operation,const Json& value){std::lock_guard lock(writer);{std::lock_guard guard(state);if(closed)throw AgentWorkerRpcClosed("Native worker RPC is closed");}channel.send({operation,value.dump()},deadline,session_stop.get_token());}
+    void send(const std::string& operation,const Json& value){std::lock_guard lock(writer);{std::lock_guard guard(state);if(closed)throw AgentWorkerRpcClosed("Native worker RPC is closed");}fixture_worker_channel(channel).send({operation,value.dump()},deadline,session_stop.get_token());}
     void reap(){for(auto it=flights.begin();it!=flights.end();)if(it->owner->done.load()){it->thread.join();it=flights.erase(it);}else ++it;}
     void accept(const Json& value){
         const auto id=envelope_id(value,4);const auto method=value.at("method").get<std::string>(),payload=value.at("payload").get<std::string>();identifier(method);std::shared_ptr<Incoming> owner;
@@ -60,7 +61,7 @@ struct FixtureWorkerRpcPeer::Impl {
         })});
     }
     void read(){try{while(!session_stop.stop_requested()){
-        auto message=channel.receive(deadline,session_stop.get_token());const auto value=parse(message.payload);reap();
+        auto message=fixture_worker_channel(channel).receive(deadline,session_stop.get_token());const auto value=parse(message.payload);reap();
         if(message.operation=="rpc.request"){accept(value);continue;}
         if(message.operation=="rpc.cancel"){const auto id=envelope_id(value,2);std::optional<std::stop_source> stop;{std::lock_guard lock(state);const auto found=active.find(id);if(found!=active.end())stop=found->second->stop;else if(id>=incoming)throw AgentWorkerProtocolError("Cancellation has no admitted native RPC");}if(stop)stop->request_stop();continue;}
         const bool event=message.operation=="rpc.event",response=message.operation=="rpc.response",error=message.operation=="rpc.error";if(!event&&!response&&!error)throw AgentWorkerProtocolError("Unsupported native RPC envelope");const auto id=envelope_id(value,error?4:3);const auto payload=value.at("payload").get<std::string>();std::string code;if(error){code=value.at("code").get<std::string>();if(!error_code(code)||payload.size()>4096)throw AgentWorkerProtocolError("Invalid native RPC error");}

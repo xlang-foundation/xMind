@@ -16,20 +16,15 @@ struct AgentWorkerScope {
     std::int64_t workspace_revision=0;
     bool operator==(const AgentWorkerScope&)const=default;
 };
-struct AgentWorkerMessage {std::string operation,payload;};
 struct AgentWorkerServiceAccess {std::string endpoint,ticket;std::uint32_t pid=0;};
 struct AgentWorkerStartup {bool coding=false;AgentWorkerServiceAccess model;};
 struct AgentWorkerPeer {std::string endpoint;std::uint32_t pid=0;std::uint64_t creation_time=0;};
-struct AgentWorkerChannelStatistics {
-    std::uint64_t pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;
-};
 // One reader and one writer may run concurrently; callers join them before
 // destruction. Any I/O/protocol failure poisons the channel; never retry an
 // effect based on transport failure. Native remote objects use xlang3 LRPC;
 // rendezvous waits honor cancellation and the captured deadline.
 class AgentWorkerChannel {
 public:
-    static constexpr std::size_t max_message_bytes=4*1024*1024;
     using Deadline=std::chrono::steady_clock::time_point;
     ~AgentWorkerChannel();
     AgentWorkerChannel(const AgentWorkerChannel&)=delete;
@@ -40,12 +35,9 @@ public:
     const AgentWorkerScope& scope()const noexcept;
     AgentWorkerPeer peer()const;
     bool peer_closed()const noexcept;
-    AgentWorkerChannelStatistics statistics()const noexcept;
     // Owner shutdown only, after readers have joined and writers are excluded.
     // Closing the remote object notifies the peer; it does not kill a PID.
     void close()noexcept;
-    void send(const AgentWorkerMessage&,Deadline,std::stop_token={});
-    AgentWorkerMessage receive(Deadline,std::stop_token={});
     void configure_model(const AgentWorkerStartup&,Deadline,std::stop_token={});
     AgentWorkerStartup receive_model(Deadline,std::stop_token={});
     void publish_execution(const AgentWorkerServiceAccess&,Deadline,std::stop_token={});

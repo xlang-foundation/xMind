@@ -1,3 +1,4 @@
+#include "fixture_worker_channel.hpp"
 #include "agent_worker_rpc_fixture.hpp"
 #include "agentflow/agent_worker_file_rpc.hpp"
 #include "agentflow/create_executor.hpp"
@@ -58,7 +59,7 @@ inline void parent(PersistenceService& store,const std::shared_ptr<const BoundPr
         if(mode=="file_delivery"){captured.set_value();while(released.wait_for(10ms)!=std::future_status::ready)if(cancel.stop_requested())throw AgentWorkerRpcRemoteError("cancelled");}return result;
     },deadline);
     std::unique_ptr<XlangSqlite> sql;if(mode=="file_unrecorded"){sql=std::make_unique<XlangSqlite>((folder/"state.sqlite").string(),imports);sql->execute("CREATE TRIGGER fixture_file_rpc_result_abort BEFORE UPDATE ON information WHEN OLD.category='native-agent-worker-file-claims' AND json_extract(NEW.payload,'$.state')='returned' AND json_extract(NEW.payload,'$.model.owner_run_id')='rpc-file_unrecorded' BEGIN SELECT RAISE(ABORT,'fixture_file_rpc_result_abort'); END");}
-    worker->channel().send({"fixture.boot",mode},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});
+    fixture_worker_channel(worker->channel()).send({"fixture.boot",mode},deadline);peer.start();auto task=std::async(std::launch::async,[&]{return peer.call("fixture.run","{}");});
     struct Cleanup{FixtureWorkerRpcPeer& peer;std::promise<void>& release;~Cleanup(){try{release.set_value();}catch(...){}peer.stop();}} cleanup{peer,release};
     if(mode!="file_denied"&&mode!="file_cancel"){
         const auto until=Clock::now()+5s;std::optional<Operation> pending;

@@ -1,3 +1,4 @@
+#include "fixture_worker_channel.hpp"
 #include "agent_worker_rpc_fixture.hpp"
 // Real authenticated SDK IPC with deliberately synthetic journal replies.
 // This proves client scope/role decoding, not repository child admission.
@@ -57,7 +58,7 @@ inline void parent(std::shared_ptr<const BoundProcessExecutable> image){
             if(attempt=="wrong-assistant")value["actual_assistant_json"]=state=="finished"?"":"invented premature assistant";
             return value.dump();
         },deadline);
-        worker->channel().send({"fixture.boot","journal_role"},deadline);peer.start();
+        fixture_worker_channel(worker->channel()).send({"fixture.boot","journal_role"},deadline);peer.start();
         const auto result=Json::parse(peer.call("fixture.run","{}"));
         check(result.at("pid")==worker->pid()&&result.at("role")== (leaf?"leaf":"parent")&&result.at("rejected")== (graph?36:24)&&calls==(graph?40:27),"Actual scoped child must validate all journal lifecycle replies and reject 24 forged receipts");
         peer.stop();check(worker->wait(Clock::now()+5s)==0,"Journal role fixture child must physically retire");

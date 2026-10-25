@@ -44,9 +44,6 @@ void validate_scope(const AgentWorkerScope& scope){
     identifier(scope.root_id);identifier(scope.run_id);identifier(scope.workspace_id);identifier(scope.generation);
     if(scope.workspace_revision<1||scope.workspace_revision>9007199254740991)protocol();
 }
-void operation(const std::string& value){
-    if(value.empty()||value.size()>64)protocol();for(char c:value)if(!((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='.'||c=='_'))protocol();
-}
 std::string hex(std::span<const std::uint8_t> value){
     constexpr char digits[]="0123456789abcdef";std::string out(value.size()*2,'0');for(std::size_t i=0;i<value.size();++i){out[i*2]=digits[value[i]>>4];out[i*2+1]=digits[value[i]&15];}return out;
 }
@@ -61,11 +58,10 @@ std::wstring quote(const std::wstring& text){
 // Native C++ remote objects use the SDK's shared-memory LRPC transport.
 // A rendezvous accepts one message only while its owning reader is waiting.
 // Tool execution never runs in an IPC callback, so callbacks stay bounded.
-struct IoStatistics {std::atomic<std::uint64_t> pending_reads=0,pending_writes=0,cancelled_reads=0,cancelled_writes=0;};
 struct WorkerProcessReady {std::uint32_t pid=0,parent_pid=0,port=0;std::uint64_t created=0;};
 struct Inbox {
     AgentWorkerScope scope;
-    std::mutex mutex;std::condition_variable changed;bool waiting=false,closed=false;std::optional<AgentWorkerMessage> message;
+    std::mutex mutex;std::condition_variable changed;bool closed=false;
     std::optional<AgentWorkerStartup> startup;
     std::optional<AgentWorkerServiceAccess> execution;
     bool startup_received=false,execution_received=false;
@@ -102,11 +98,6 @@ struct WorkerLinkApi {
     WorkerLinkApi()=default;
     explicit WorkerLinkApi(std::shared_ptr<Inbox> value):inbox(std::move(value)){}
     X::Value Scope();
-    std::int64_t Deliver(std::string name,std::string payload){
-        operation(name);if(payload.size()>AgentWorkerChannel::max_message_bytes-name.size())protocol();if(!inbox)protocol();
-        std::lock_guard lock(inbox->mutex);if(inbox->closed)return -1;if(!inbox->waiting||inbox->message)return 0;
-        inbox->message=AgentWorkerMessage{std::move(name),std::move(payload)};inbox->changed.notify_one();return 1;
-    }
     void Close(){if(!inbox)protocol();std::lock_guard lock(inbox->mutex);inbox->closed=true;inbox->changed.notify_all();}
     void ConfigureModel(bool coding,std::string endpoint,std::string ticket,std::int64_t pid){
         if(!inbox||pid<1||pid>UINT32_MAX)protocol();
@@ -127,7 +118,6 @@ struct WorkerLinkApi {
     }
     BEGIN_PACKAGE(WorkerLinkApi)
         APISET().AddFunc<0>("Scope",&WorkerLinkApi::Scope);
-        APISET().AddFunc<2>("Deliver",&WorkerLinkApi::Deliver);
         APISET().AddFunc<0>("Close",&WorkerLinkApi::Close);
         APISET().AddFunc<4>("ConfigureModel",&WorkerLinkApi::ConfigureModel);
         APISET().AddFunc<3>("PublishExecution",&WorkerLinkApi::PublishExecution);
@@ -190,7 +180,7 @@ struct Attributes {
 X::Value NativeWorkerLinksApi::Open(std::string ticket){auto& host=ipc_host();auto inbox=host.objects.find(ticket);{std::lock_guard lock(inbox->mutex);if(inbox->closed)protocol();}return host.objects.__xlang3_package_->CreateInstance("Link",std::make_shared<WorkerLinkApi>(std::move(inbox)));}
 
 struct AgentWorkerChannel::Impl {
-    AgentWorkerScope scope;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;IoStatistics statistics;
+    AgentWorkerScope scope;std::mutex reader,writer;std::atomic<bool> poisoned=false,closed=false;
     std::shared_ptr<Inbox> inbox=std::make_shared<Inbox>();std::string local,remote_route;std::uint32_t remote_port=0,peer_pid=0;std::uint64_t peer_created=0;Handle peer;
     X::Runtime client;X::Value remote;
     Impl(AgentWorkerScope binding,std::string route):scope(std::move(binding)),local(std::move(route)){inbox->scope=scope;ipc_host().objects.add(local,inbox);}
@@ -210,20 +200,14 @@ AgentWorkerChannel::AgentWorkerChannel(std::unique_ptr<Impl> impl):impl_(std::mo
 AgentWorkerChannel::~AgentWorkerChannel(){close();}
 const AgentWorkerScope& AgentWorkerChannel::scope()const noexcept{return impl_->scope;}
 AgentWorkerPeer AgentWorkerChannel::peer()const{return {"lrpc:"+std::to_string(impl_->remote_port),impl_->peer_pid,impl_->peer_created};}
-bool AgentWorkerChannel::peer_closed()const noexcept{return impl_->closed||impl_->poisoned||(impl_->peer.value&&WaitForSingleObject(impl_->peer.value,0)!=WAIT_TIMEOUT);}
-AgentWorkerChannelStatistics AgentWorkerChannel::statistics()const noexcept{const auto& s=impl_->statistics;return {s.pending_reads.load(),s.pending_writes.load(),s.cancelled_reads.load(),s.cancelled_writes.load()};}
+bool AgentWorkerChannel::peer_closed()const noexcept{
+    if(impl_->closed||impl_->poisoned||(impl_->peer.value&&WaitForSingleObject(impl_->peer.value,0)!=WAIT_TIMEOUT))return true;
+    std::lock_guard lock(impl_->inbox->mutex);return impl_->inbox->closed;
+}
 void AgentWorkerChannel::close()noexcept{
     if(impl_->closed.exchange(true))return;impl_->poisoned=true;
     {std::lock_guard lock(impl_->inbox->mutex);impl_->inbox->closed=true;impl_->inbox->changed.notify_all();}
     try{if(impl_->remote_port){impl_->live();impl_->remote["Close"]();}}catch(...){}
-}
-void AgentWorkerChannel::send(const AgentWorkerMessage& message,Deadline deadline,std::stop_token stop){
-    std::lock_guard lock(impl_->writer);if(impl_->poisoned)protocol();++impl_->statistics.pending_writes;
-    try{check(deadline,stop);operation(message.operation);if(message.payload.size()>max_message_bytes-message.operation.size())protocol();const std::vector<X::Value> arguments{X::Value(impl_->client,message.operation),X::Value(impl_->client,message.payload)};
-        for(;;){check(deadline,stop);impl_->live();X::Value reply;if(!impl_->remote["Deliver"].Call(arguments,reply)||!reply.IsInt64())protocol();const auto result=reply.ToInt64();if(result==1){check(deadline,stop);return;}if(result!=0)protocol();std::this_thread::sleep_for(std::chrono::milliseconds(2));}
-    }catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
-    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_writes;impl_->poisoned=true;throw;}
-    catch(...){impl_->poisoned=true;throw AgentWorkerProtocolError("Worker shared-memory IPC send failed");}
 }
 void AgentWorkerChannel::configure_model(const AgentWorkerStartup& startup,Deadline deadline,std::stop_token stop){
     validate_service_access(startup.model);std::lock_guard writer(impl_->writer);if(impl_->poisoned)protocol();check(deadline,stop);impl_->live();
@@ -248,15 +232,6 @@ AgentWorkerServiceAccess AgentWorkerChannel::receive_execution(Deadline deadline
 void AgentWorkerChannel::wait_peer_closed(Deadline deadline,std::stop_token stop){
     std::lock_guard reader(impl_->reader);auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);
     for(;;){check(deadline,stop);if(inbox.closed)return;impl_->live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));}
-}
-AgentWorkerMessage AgentWorkerChannel::receive(Deadline deadline,std::stop_token stop){
-    std::lock_guard reader(impl_->reader);if(impl_->poisoned)protocol();++impl_->statistics.pending_reads;
-    auto& inbox=*impl_->inbox;std::unique_lock lock(inbox.mutex);inbox.waiting=true;
-    struct Waiting {Inbox& inbox;~Waiting(){inbox.waiting=false;}} waiting{inbox};
-    try{for(;;){check(deadline,stop);if(inbox.message){auto message=std::move(*inbox.message);inbox.message.reset();return message;}if(inbox.closed)protocol();impl_->live();inbox.changed.wait_for(lock,std::chrono::milliseconds(5));}}
-    catch(const AgentWorkerChannelCancelled&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
-    catch(const AgentWorkerChannelTimeout&){++impl_->statistics.cancelled_reads;impl_->poisoned=true;throw;}
-    catch(...){impl_->poisoned=true;throw;}
 }
 std::unique_ptr<AgentWorkerChannel> AgentWorkerChannel::accept_inherited(std::uintptr_t inherited,Deadline deadline,std::stop_token stop){
     check(deadline,stop);Handle mapping(reinterpret_cast<HANDLE>(inherited));if(!mapping.value||mapping.value==INVALID_HANDLE_VALUE)protocol();
