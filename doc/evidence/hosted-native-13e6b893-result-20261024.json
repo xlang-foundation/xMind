@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-10-25T03:50:53.115Z",
+  "source": "13e6b8938d87e402c9f2be329f6aa51134e7948e",
+  "sdk": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+  "stdlibSource": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+  "runId": 40154186064,
+  "jobId": 121054604691,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40154186064",
+  "terminal": "failure",
+  "inventory": 177,
+  "passed": 173,
+  "failed": 4,
+  "seconds": 861.62,
+  "artifact": {
+    "id": 12584879260,
+    "bytes": 8586971,
+    "sha256": "67833a4575908dc26cdee1adf5e6766f12cccd27db35070f8b1ddf15610ecb92"
+  },
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 35.23,
+      "operationId": "54a98708830c091b1bd8ced7a1cdd5e5",
+      "elapsedMs": 30062,
+      "timeoutMs": 30000,
+      "startupPhases": [
+        "script_entered"
+      ],
+      "state": "uncertain",
+      "processTreeRetired": true,
+      "cause": "Unproven"
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "seconds": 68.32,
+      "slowDump": "fixture-4652-4118843-slow.dmp",
+      "cause": "Unproven; no matching original executable/PDB verified for legitimate stack interpretation"
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "seconds": 45.16,
+      "wrapperTimeoutMs": 45000,
+      "planningAdmissionMs": 16179,
+      "pausedChildDrainMs": 983,
+      "mainProcessPlanningMs": 8652,
+      "lastCompletedCase": "coexisting-coding-plain-cancel",
+      "lastCompletedCaseMs": 1238,
+      "otherLastActiveCase": "coexisting-coding-counted-normal",
+      "cause": "Unproven; cumulative work exceeded wrapper deadline"
+    },
+    {
+      "test": "native_agent_worker_nested_human_contract",
+      "seconds": 45.02,
+      "lastBeganCase": "paused-root-coding-counted-resume",
+      "cause": "Unproven; wrapper termination"
+    }
+  ],
+  "separatePasses": {
+    "diagnosticsSeconds": 6.12,
+    "graphRemoteSeconds": 19.64,
+    "deepHumanSeconds": 12.72,
+    "nativeTrustedTlsSeconds": 6.68
+  },
+  "trustedTlsScope": "Synthetic hosted authority: actual native HTTP origin-bound View and separate-process xlang3 SDK authentication, encrypted reopen, session create/lost-reply reconciliation, OAuth and refresh. No real account or rendered login; latest run-submission adapters are later source and remain separately pending.",
+  "ownedTestCertificateRemovedAndAbsenceConfirmed": true,
+  "retainedOriginalFixtureNamespaces": [
+    "xmind-graph-runner-8aOwqK",
+    "xmind-model-rpc-2634713098-1331803486",
+    "xmind-model-rpc-3431926143-13646333",
+    "xmind-model-rpc-571817053-1014508064",
+    "xmind-worker-ledger-2763507256-982440247",
+    "xmind-worker-ledger-877438739-4091728505"
+  ],
+  "completedTasksMustNeverBeReplayed": true,
+  "originalDatabasesQueriedOrMutated": false,
+  "originalLogsRetained": true,
+  "installed75Unchanged": true,
+  "clearsEarlierFailures": false
+}
