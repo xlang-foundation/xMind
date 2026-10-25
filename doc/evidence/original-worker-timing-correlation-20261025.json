@@ -1,0 +1,287 @@
+{
+  "recordedAt": "2026-10-25T11:07:56.342Z",
+  "scope": "Offline original worker state/timing analysis and UTC correlation for future fixture evidence",
+  "originalRun": 40179676972,
+  "analysis": {
+    "queryOnlyCopies": true,
+    "originalTaskReplayed": false,
+    "sourceSqliteFileHashes": {
+      "xmind-model-rpc-1337323787-2703857003/state.sqlite": "223c4882521400d7f6e943a09879d591173462f5f3c7b683cb1324b244d91d59",
+      "xmind-model-rpc-1337323787-2703857003/state.sqlite-wal": "919024ccfb3f07981ebbbe1316c3c16ef00f56fd63ebe74f24b6c9d45dc22fd1",
+      "xmind-model-rpc-1337323787-2703857003/state.sqlite-shm": "a10da3fbcdcbc5b187503f6cb1dd28ad85f7ecc6f1e02bb075c12911b0f807f2",
+      "xmind-model-rpc-2941179673-2707668420/state.sqlite": "2fc46fa85afd8b35acf6f4c29e204ab928cc900242f62860d6839d84c8d36ba4",
+      "xmind-model-rpc-305905714-1184683198/state.sqlite": "d4ede794f9ba3edbc65e4352c99342fd39b55f710c8df552304d215402c18151"
+    },
+    "originalHashesUnchanged": true,
+    "analysisRuntime": "xlang3; no CPython",
+    "sdkExeAndRuntimeDllHashesUnchanged": true,
+    "summaries": [
+      {
+        "namespace": "xmind-model-rpc-1337323787-2703857003",
+        "runCount": 118,
+        "states": {
+          "running": 5,
+          "completed": 77,
+          "cancelled": 20,
+          "queued": 1,
+          "failed": 15
+        },
+        "lastRuns": [
+          [
+            "rpc-worker_context_compact_failure",
+            "failed"
+          ],
+          [
+            "rpc-worker_context_compact_cancel",
+            "cancelled"
+          ],
+          [
+            "rpc-coding-command",
+            "completed"
+          ],
+          [
+            "rpc-service-start",
+            "completed"
+          ],
+          [
+            "rpc-service-stop",
+            "completed"
+          ],
+          [
+            "rpc-coding-async",
+            "completed"
+          ],
+          [
+            "rpc-coding-async-unrecorded",
+            "failed"
+          ],
+          [
+            "rpc-production-coding-remote",
+            "running"
+          ]
+        ],
+        "lastEvents": [
+          [
+            "rpc-production-coding-remote",
+            "run.running"
+          ],
+          [
+            "rpc-production-coding-remote",
+            "worker.lease.admitted"
+          ],
+          [
+            "rpc-production-coding-remote",
+            "agent.workspace_membership"
+          ],
+          [
+            "rpc-production-coding-remote",
+            "run.queued"
+          ],
+          [
+            "rpc-coding-async-unrecorded",
+            "run.failed"
+          ]
+        ],
+        "unretiredLeases": [
+          {
+            "id": "production-coding-remote-generation",
+            "state": "active",
+            "owner_run_id": "rpc-production-coding-remote",
+            "pid": 3864
+          }
+        ]
+      },
+      {
+        "namespace": "xmind-model-rpc-2941179673-2707668420",
+        "runCount": 12,
+        "states": {
+          "completed": 12
+        },
+        "lastRuns": [
+          [
+            "64177f3527c0a857dafeb084f7913dc4",
+            "completed"
+          ],
+          [
+            "6d4e4aa119998b68b5851ba03fe7904b",
+            "completed"
+          ],
+          [
+            "rpc-graph-process-approved",
+            "completed"
+          ],
+          [
+            "2a4ec322832297b6632cb0ac23d8926b",
+            "completed"
+          ],
+          [
+            "d07063f7f10476c946a7063a253adac3",
+            "completed"
+          ],
+          [
+            "rpc-graph-process-denied",
+            "completed"
+          ],
+          [
+            "6a73c0f58c56d5fc877f0611352a26c0",
+            "completed"
+          ],
+          [
+            "5c6933b9254aadd88f6b35cbb64489db",
+            "completed"
+          ]
+        ],
+        "lastEvents": [
+          [
+            "rpc-graph-process-denied",
+            "run.completed"
+          ],
+          [
+            "rpc-graph-process-denied",
+            "conversation.assistant"
+          ],
+          [
+            "rpc-graph-process-denied",
+            "budget.segment.closed"
+          ],
+          [
+            "rpc-graph-process-denied",
+            "graph.child.settled"
+          ],
+          [
+            "rpc-graph-process-denied",
+            "graph.child.settled"
+          ]
+        ],
+        "unretiredLeases": []
+      },
+      {
+        "namespace": "xmind-model-rpc-305905714-1184683198",
+        "runCount": 12,
+        "states": {
+          "completed": 12
+        },
+        "lastRuns": [
+          [
+            "5cc1b65e292a070be2145f2abc233b0d",
+            "completed"
+          ],
+          [
+            "96754c6e2a1518e424aac045584875de",
+            "completed"
+          ],
+          [
+            "rpc-graph-callable-counted-approved",
+            "completed"
+          ],
+          [
+            "662afdc428e4463acc7faa3567af3cc7",
+            "completed"
+          ],
+          [
+            "af04f989e484b54b363d4167e2d5c9a2",
+            "completed"
+          ],
+          [
+            "rpc-graph-callable-counted-denied",
+            "completed"
+          ],
+          [
+            "275a4ee4cd06ce3b0b6a05f7dfd4e182",
+            "completed"
+          ],
+          [
+            "183b744dd9677cbafb40820a2799e24e",
+            "completed"
+          ]
+        ],
+        "lastEvents": [
+          [
+            "rpc-graph-callable-counted-denied",
+            "run.completed"
+          ],
+          [
+            "rpc-graph-callable-counted-denied",
+            "conversation.assistant"
+          ],
+          [
+            "rpc-graph-callable-counted-denied",
+            "budget.segment.closed"
+          ],
+          [
+            "rpc-graph-callable-counted-denied",
+            "graph.child.settled"
+          ],
+          [
+            "rpc-graph-callable-counted-denied",
+            "graph.child.settled"
+          ]
+        ],
+        "unretiredLeases": []
+      }
+    ]
+  },
+  "productionFixture": {
+    "pid": 5732,
+    "elapsedMs": 60022.791399999995,
+    "killed": true,
+    "signal": "SIGTERM",
+    "lastCompletedOutputAtMs": 59709.1659,
+    "finalObservedOutput": "Actual child remote RPC delivery verified one approved peer effect, exact durable acknowledgement, replay rejection and physical child retirement. Synthetic model receipt; no provider request.",
+    "activeLease": {
+      "id": "production-coding-remote-generation",
+      "state": "active",
+      "owner_run_id": "rpc-production-coding-remote",
+      "pid": 3864
+    },
+    "childCreationFileTime": "134373970264775366",
+    "childCreationUtc": "2026-10-25T10:17:06.477Z",
+    "ctestFailureReportedUtc": "2026-10-25T10:17:06.619Z",
+    "approximateCreationToReportedFailureMs": 142,
+    "interpretation": "Outer production-fixture timeout interrupted a newly admitted remote-coding worker after a long successful prefix. This does not establish a deadlock or the latency of that child IPC call. No interrupted task may be replayed."
+  },
+  "retainedSdkMeasurement": {
+    "calls": 256,
+    "first_call_us": 214,
+    "import_us": 11668,
+    "max_us": 273,
+    "median_us": 200,
+    "method": "Host.ApiVersion",
+    "over_10ms": 0,
+    "p95_us": 238,
+    "scope": "separate-process retained SDK method; excludes process startup, model and persistence work",
+    "subobject_us": 1439,
+    "total_us": 52493
+  },
+  "measurementScope": "Only retained Host.ApiVersion across separate processes; not arbitrary model, tool, persistence or startup latency",
+  "changes": {
+    "timing": "UTC start/completion/output observations accompany monotonic elapsed times, with explicit after-spawn observer scope; original rejection and budgets preserved.",
+    "tests": {
+      "startedAt": "2026-10-25T11:04:19.803Z",
+      "finishedAt": "2026-10-25T11:04:21.219Z",
+      "pid": 12940,
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "8546ceb14b8e075346efe1aec3683827ac6a47d79613e6d1470c2aecd33025dc",
+      "sourceAndNodeHashesUnchanged": {
+        "Native/tests/fixture_process_timing.mjs": "98e6e208bca267a15b58e6a1ae1d66ef8623f38786da17c7177277b881dff9dd",
+        "Tools/tests/native-fixture-timing.test.mjs": "5c359ddf78846c7557dc73ce90dd7da188dffa5a6c74e6b03b93ed90617ef969",
+        "C:\\Program Files\\nodejs\\node.exe": "995a3fb3cefad590cd3f4b321532a4b9582fb9c6575320ed2e3e894caac3e362"
+      },
+      "passed": 4,
+      "failed": 0,
+      "nativeSdkExecuted": false,
+      "modelCalls": 0,
+      "cpython": false
+    }
+  },
+  "nativeDumpAnalysisLimit": "System dbgeng opened original native dump, but missing matching module images/symbols prevented reliable stack unwinding; no root-cause claim from that output.",
+  "helperCorrections": [
+    "Optional absent SQLite WAL/SHM files are allowed when copying clean fixture databases; initial preparation stopped before xlang3 ran.",
+    "Offline COM vtable parser corrected to include STDMETHODV entries; no live process was attached or task rerun."
+  ],
+  "installed": false,
+  "goalComplete": false,
+  "timeoutBudgetsChanged": false,
+  "rootCauseResolved": false
+}

@@ -939,6 +939,16 @@ Reset returns binding, checkpoint and snapshot_reset. The reset receipt contains
 snapshot_id, digest, snapshot_revision and original checkpoint_revision.
 Boolean revisions refuse. None is the SDK's ordinary null value.
 
+For a C++ SDK caller, construct that null explicitly with `X::Value(nullptr)`:
+
+```cpp
+X::Value page;
+const bool read = snapshot["Read"].Call({X::Value(nullptr), X::Value(0)}, page);
+```
+
+`X::Value()` is an invalid handle, so it cannot represent the initial null
+snapshot ID. The SDK owns transfer of the ordinary null value across IPC.
+
 A client that knows the snapshot ID may explicitly call
 `fresh_consumer.ResumeSnapshot(snapshot_id)` after reconnect. The backend loads
 the original baseline from SQLite and validates its consumer/origin/resource

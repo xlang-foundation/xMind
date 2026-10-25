@@ -1,0 +1,34 @@
+TAP version 13
+# Subtest: fixture timing retains split UTF-8 stdout and stderr without arguments or environment
+ok 1 - fixture timing retains split UTF-8 stdout and stderr without arguments or environment
+  ---
+  duration_ms: 95.7063
+  type: 'test'
+  ...
+# Subtest: failed fixture output survives rejection with the original exit code
+ok 2 - failed fixture output survives rejection with the original exit code
+  ---
+  duration_ms: 61.8769
+  type: 'test'
+  ...
+# Subtest: disabled timing does not create diagnostic files
+ok 3 - disabled timing does not create diagnostic files
+  ---
+  duration_ms: 46.6109
+  type: 'test'
+  ...
+# Subtest: timeout retains the killed signal without fabricating a successful exit code
+ok 4 - timeout retains the killed signal without fabricating a successful exit code
+  ---
+  duration_ms: 1020.8433
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1281.6574
