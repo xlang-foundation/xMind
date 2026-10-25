@@ -1,0 +1,86 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T05:33:46.132Z",
+    "sourceParent": "d94f2fb281594c9315ab84133b9bfa8caa8d3660",
+    "sourcePatchSha256": "be9bd26152825bfe45bb45c5d841179dfe97978963de24e43bdf8cc2d366ebb7",
+    "build": {
+      "pid": 38160,
+      "launchedAt": "2026-10-25T05:32:49.230Z",
+      "completedAt": "2026-10-25T05:33:20.402Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "078fad1a4b0acc118193936ad356fbe2f45ca7bae802b82cdc4e4a82d4a09a2e"
+    },
+    "test": {
+      "pid": 36076,
+      "launchedAt": "2026-10-25T05:33:23.093Z",
+      "completedAt": "2026-10-25T05:33:43.425Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "1abab33b5b07c2c6aea148668b9f307a044b4103a4f5ab371aa48b916f76d65e"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 20.3,
+    "projectFiles": 2843,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "productionNativeUnchanged": true,
+  "preparedHostedScenarios": [
+    "Separate native SDK consumer initial open, network stage, cached recovery, acknowledgement, duplicate acknowledgement and empty resume",
+    "CLI consumer round-trip with explicit read generation and generation-bound acknowledgement",
+    "Origin-bound native HTTP View consumer round-trip, permission/header/extra-field refusal and exact error statuses",
+    "Native host verifies accepted checkpoint before shutdown and after encrypted SQLite reopen"
+  ],
+  "expectedEventRequestsPerClient": {
+    "initial": 2,
+    "resume": 2,
+    "gap": 1,
+    "expired": 1,
+    "invalid": 1
+  },
+  "countExplanation": "One initial/resume pair for direct event reads; one pair for durable consumer. Cache recovery and acknowledgements add no GET.",
+  "locallyVerified": [
+    "Compiled SDK/host positive fixtures",
+    "Independent HTTPS peer with explicit CA",
+    "Existing actual SDK/HTTP seeded checkpoint integration and service recovery contracts",
+    "Native SDK untrusted-TLS refusal"
+  ],
+  "notYetVerified": [
+    "Positive native system-trusted TLS consumer execution",
+    "Actual positive CLI consumer acknowledgement and database reopen under hosted trust"
+  ],
+  "initialBuildFailure": {
+    "pid": 4252,
+    "launchedAt": "2026-10-25T05:32:01.950Z",
+    "completedAt": "2026-10-25T05:32:28.113Z",
+    "exitCode": 1,
+    "signal": null,
+    "logSha256": "bfda6003c50b73a4a5e39d00dddeeb1ba4cd90bc3807b397cb9e6ed8efe0caca",
+    "cause": "Missing direct remote_event_checkpoint.hpp include in test-only reopen verifier",
+    "fix": "Add explicit checkpoint header",
+    "testsStarted": false,
+    "inputAudit": {
+      "recordedAt": "2026-10-25T05:32:39.081Z",
+      "allProjectSdkLibrariesRuntimeDependenciesAndFileSetsUnchanged": true,
+      "testsStarted": false
+    },
+    "originalLog": "remote-event-consumer-trusted-fixtures-initial-build-20261024.log"
+  },
+  "installed75Unchanged": true,
+  "noLocalTrustProvisioning": true,
+  "noEnvironmentImpersonation": true,
+  "completedTasksMustNeverBeReplayed": true
+}
