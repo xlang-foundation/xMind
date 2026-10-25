@@ -1,0 +1,84 @@
+{
+  "recordedAt": "2026-10-25T22:29:58.392Z",
+  "passed": true,
+  "sessionId": "e79c1b465d3a838371a5ca9ed24c3530",
+  "runId": "41adee13318f1b47b08716af8eab53c4",
+  "state": "completed",
+  "modelCalls": 4,
+  "historyMessages": 8,
+  "approvals": 2,
+  "operations": [
+    {
+      "id": "f22f0308a679392d28a6d7a2491b78e3",
+      "tool": "replace_file",
+      "state": "succeeded",
+      "result": {
+        "after_sha256": "2d7ecfedea2933236cab951fb1ad410715ea9611bc6d13090450e59eef003c16",
+        "before_sha256": "6c7fee9d28b042c49426e404b8d1a142b821888526057760378a4d1bfccecb21",
+        "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000c51b110000000000",
+        "path": "is-negative.cjs",
+        "size": 29,
+        "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000c51b110000000000"
+      }
+    },
+    {
+      "id": "bbf615fb7e0a7de630b722827e0a611c",
+      "tool": "run_process",
+      "state": "succeeded",
+      "result": {
+        "elapsed_ms": 118,
+        "exit_code": 0,
+        "independently_verified": false,
+        "job_id": "bbf615fb7e0a7de630b722827e0a611c",
+        "operation_id": "bbf615fb7e0a7de630b722827e0a611c",
+        "output_artifact": {
+          "operation_id": "bbf615fb7e0a7de630b722827e0a611c",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 28
+        },
+        "pid": 28692,
+        "process_tree_retired": true,
+        "profile_id": "node",
+        "stderr": {
+          "byte_count": 0,
+          "data": "",
+          "encoding": "utf-8",
+          "retained_bytes": 0
+        },
+        "stdout": {
+          "byte_count": 28,
+          "data": "4 is-negative checks passed\n",
+          "encoding": "utf-8",
+          "retained_bytes": 28
+        },
+        "termination": "exited",
+        "truncated": false
+      }
+    }
+  ],
+  "workerRetirements": [
+    {
+      "generation": "3ee9b27a4988edaacf3887a6612630e8",
+      "reason": "completed",
+      "uncertain_model_dispatches": 0
+    }
+  ],
+  "ownerAndWorkerPidsAbsent": [
+    26160,
+    29636
+  ],
+  "runtimeFilesAndHashesUnchanged": true,
+  "nativeSha256": "f86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171",
+  "archiveSha256": "ead875de402f8e2a53b9fb627b2f7903b19cfd6244136bf5d12e743b2be850c0",
+  "archiveBytes": 35279150,
+  "archiveEntries": 2381,
+  "fixtureGateSha256": "8d398300c2a6dc59a0652790f087129acbbdaefcbef867536506f328c0433c77",
+  "packageManifestSha256": "a4e03cb0ebff9605e5138587af424b2b27c325493899fc445050552bb8cebdc7",
+  "paidInference": false,
+  "cpythonExecuted": false,
+  "installed": false,
+  "renderedAcceptance": false,
+  "releaseAccepted": false,
+  "scope": "Actual VSIX-verified candidate CLI using the single shared packaged runtime. Controlled peer; real native read/edit/Node command and SDK process worker. Explicit port; managed profile discovery is separate."
+}

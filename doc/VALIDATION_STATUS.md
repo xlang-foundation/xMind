@@ -2,13 +2,21 @@
 
 Working v1 with solid UI and a reliable coding framework is the only delivery goal. The user removed the old broader goal; do not resume or pursue its feature backlog. Follow [v1 acceptance](WORKING_V1_GOAL.md). Prioritize packaged browser/VS Code/CLI usability and release blockers. Advanced feature breadth is outside this goal unless it blocks v1; a full local contract pass does not prove a usable installed release. Historical checkpoints below retain their original scope and are not current backlog instructions.
 
+## SDK6df6520f: hosted qualification and fresh packaged CLI — 2026-10-25
+
+Hosted40235870242/job121297205277 at1f49b5c3 succeeds: all182 native inventory names match the182 terminal pass records in675.35s; gate hashes, source/SDK/library pins and actual packaged pip25.2 offline installation verify. Extension/browser separation and VSIX packaging steps also succeed. Only189192 bytes of authoritative artifact files are retained locally alongside the job log; no artifact ZIP or duplicate hosted runtime is retained. [Qualification receipt](evidence/hosted-sdk6df-qualified-20261025.json), [native terminal log](evidence/hosted-sdk6df-native-20261025.log).
+
+One candidate0.1.77 VSIX is assembled from local-qualified Nativef86eda4b/SDK6df6520f and accepted client assets:2381 entries,35279150 bytes, SHAead875de402f8e2a53b9fb627b2f7903b19cfd6244136bf5d12e743b2be850c0. Its fresh actual CLI completes read, approved edit and approved Node execution with four checks, four controlled model calls and eight messages. History/watch adds no calls; worker retirement has zero uncertain model dispatches, owner/worker PIDs are absent, and package/input file sets and hashes remain unchanged. NEVER replay sessione79c1b465d3a838371a5ca9ed24c3530/run41adee13318f1b47b08716af8eab53c4. [Packaged CLI receipt](evidence/packaged-sdk6df-cli-20261025.json).
+
+No CPython, paid inference or visible window is used. Installed76 and its required75 rollback verify unchanged. Packaged rendered browser/Code acceptance, remaining v1 lifecycle/restoration checks and safe installation remain open; v1 is not release accepted.
+
 ## SDK6df6520f: complete local native qualification — 2026-10-25
 
 The complete184-contract suite passes together in767.44s against SDK6df6520f and the exact pinned Python3.14.0 pure source. Actual inventory and184 terminal pass names match;2860 project,16 SDK-header,1831 pure-library,30 runtime,18598 Node-dependency and145 native-binary sets/hashes remain unchanged. Native SHAf86eda4b746875be5e3ed09e334ad8e3c969df07142626f62e212e57590a1171. The pinned license is verified separately. No CPython or paid provider inference is used.
 
 Three earlier full-run failures remain recorded: two library/license layout errors, then a Gemini fixture ordering race between durable completion and runtime retirement. The fixture now observes idle before repair without retrying mutations, changing production code or weakening deadlines. Its old peer removed the failed database; original logs/test images/source are retained and future failures retain their fixture. Focused3/3 and1/1 are separate evidence from the new complete184/184 pass. [Receipt and actual inventory](evidence/native-sdk6df-full-20261025.json), [terminal log](evidence/native-sdk6df-full-20261025.log).
 
-The three CI SDK pins now move together to6df6520f; the library pin remains ebf955df. The local gate used this SDK explicitly before that metadata change. Hosted qualification, release packaging, fresh rendered/CLI acceptance and installation preservation remain open; installed76 is unchanged. The working v1 goal remains active.
+The three CI SDK pins now move together to6df6520f; the library pin remains ebf955df. The local gate used this SDK explicitly before that metadata change. Hosted and packaged CLI qualification subsequently pass above; fresh rendered acceptance and installation preservation remain open. Installed76 is unchanged and the working v1 goal remains active.
 
 ## Module-class SDK compatibility qualified; xMind integration gate next — 2026-10-25
 

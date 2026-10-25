@@ -23,7 +23,7 @@ Advanced graph workflows, wider provider coverage, additional MCP/A2A workflows 
 
 ## Current evidence and remaining release work
 
-Checkpoint1f49b5c3 records complete local184/184 native qualification against SDK6df6520f, plus the SDK pip25/26 and fixed performance evidence. This does not qualify a new packaged or installed release. Installed0.1.76 is preserved. Hosted qualification, new package assembly and actual packaged/rendered/installed v1 acceptance remain open. See [validation status](VALIDATION_STATUS.md) and [local native receipt](evidence/native-sdk6df-full-20261025.json).
+Checkpoint1f49b5c3 passes local184/184 and hosted182/182 against SDK6df6520f, including hosted packaged offline pip25.2; SDK pip25/26 and fixed performance evidence remain separate. Candidate0.1.77 VSIX ead875de is assembled and its fresh CLI completes approved read/edit/Node execution. This does not establish rendered or installed release acceptance. Installed0.1.76 is preserved. Packaged browser/Code usability, remaining lifecycle/restoration checks and safe installation remain open. See [validation status](VALIDATION_STATUS.md), [hosted receipt](evidence/hosted-sdk6df-qualified-20261025.json) and [packaged CLI receipt](evidence/packaged-sdk6df-cli-20261025.json).
 
 ## Test artifact retention
 
