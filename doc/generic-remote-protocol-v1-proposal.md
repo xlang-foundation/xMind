@@ -657,3 +657,27 @@ events:1/events.read and the captured session/run namespace. SDK cursor/refusal
 and HTTP refusal integration plus backend positive pages have focused evidence.
 Positive public event delivery over native trusted TLS remains pending. Durable
 cursor acceptance, authoritative snapshot/reset and root-tree streams remain open.
+
+### Durable observation checkpoint foundation
+
+Backend-private RemoteEventCheckpoints binds a consumer ID to exact origin,
+connection, server, scope, session and run. Its initial accepted cursor is zero
+with empty epoch. stage(expected_revision, page) durably retains one validated
+page without advancing accepted; accept(expected_revision, cursor) advances only
+the exact staged cursor. Identical restaging and repeated acknowledgement return
+the original state. Competing/different pages and stale acknowledgements conflict.
+The store never resets epochs, fetches events, retries commands or executes work.
+
+A returned or staged page is not automatically consumed. Pending records survive
+restart so an interrupted consumer can recover its unacknowledged page. Empty
+resume pages leave the revision unchanged. Cursor namespace, strict event order,
+object payloads,256-record/64KiB logical page bounds and JSON-safe integers are
+validated; gaps or epoch replacement still require authoritative snapshot/reset.
+Persistence uses the native PersistenceService compare-and-set through embedded
+xlang3 SQLite. No credentials, grants or local backend generation are persisted
+as authority in these observation records.
+
+This primitive is not authorization: future captured-service integration must
+freshly validate current profile, credential/grant and events.read before
+publishing a retained page or accepting its acknowledgement. SDK/CLI/HTTP
+consumer methods and the authoritative snapshot/reset workflow remain open.

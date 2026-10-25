@@ -1,4 +1,5 @@
 #include "agentflow/remote_command_journal.hpp"
+#include "agentflow/remote_event_checkpoint.hpp"
 #include "../src/remote_event_values.hpp"
 #include <future>
 #include "agentflow/remote_connection_authentication.hpp"
@@ -23,6 +24,30 @@ void remote_event_value_contract(){
  for(const auto* field:{"connection_id","server_id","scope_id","session_id","run_id","epoch","backend_generation"}){auto missing=encoded;missing.erase(field);rejects<std::invalid_argument>([&]{remote_event_values::cursor(missing,"generation-a");});auto invalid=encoded;invalid[field]=true;rejects<std::invalid_argument>([&]{remote_event_values::cursor(invalid,"generation-a");});}
  auto extra=encoded;extra["private_grant"]="must refuse";rejects<std::invalid_argument>([&]{remote_event_values::cursor(extra,"generation-a");});
  const auto page=remote_event_values::page({original,{{3,"run-a","run.running","{}"},{7,"run-a","tool.completed",R"({"observed":true})"}}},"generation-a");require(page.size()==2&&page.at("cursor")==encoded&&page.at("events").size()==2&&page.at("events")[1].at("payload").at("observed")==true&&page.at("events")[0].at("sequence")==3);
+}
+void event_checkpoint_contract(const std::string& modules,const std::string& stdlib){
+ const auto file=std::filesystem::temp_directory_path()/("xmind-event-checkpoint-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));
+ const RemoteEventConsumer consumer{"consumer-a","https://remote.example.invalid",{"remote-a","server-a","scope-a","session-a","run-a","",0}};
+ auto first_cursor=consumer.initial;first_cursor.epoch="epoch:a";first_cursor.sequence=7;const RemoteObservedRunEvents first{first_cursor,{{3,"run-a","run.running","{}"},{7,"run-a","tool.completed",R"({"observed":true})"}}};
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteEventCheckpoints checkpoints(store),other(store);const auto opened=checkpoints.open(consumer);require(opened.revision==1&&opened.accepted==consumer.initial&&!opened.pending&&other.open(consumer).revision==1);
+  auto changed=consumer;changed.origin="https://other.example.invalid";rejects<Conflict>([&]{checkpoints.open(changed);});changed=consumer;changed.initial.run_id="other-run";rejects<Conflict>([&]{checkpoints.observe(changed);});rejects<Conflict>([&]{checkpoints.accept(consumer,1,first.cursor);});
+  for(unsigned mode=0;mode<8;++mode){auto invalid=first;switch(mode){case 0:invalid.cursor.run_id="other-run";break;case 1:invalid.cursor.sequence=8;break;case 2:invalid.events[1].sequence=3;break;case 3:invalid.events[1].run_id="other-run";break;case 4:invalid.events[0].json="[]";break;case 5:invalid.events[0].json="{";break;case 6:invalid.events[0].json=Json{{"oversized",std::string(65536,'x')}}.dump();break;case 7:invalid.cursor.epoch="";break;}rejects<std::invalid_argument>([&]{checkpoints.stage(consumer,1,invalid);});require(checkpoints.observe(consumer).revision==1);}
+  const auto staged=checkpoints.stage(consumer,1,first);require(staged.revision==2&&staged.pending&&staged.pending->cursor==first.cursor&&staged.pending->events.size()==2&&staged.accepted==consumer.initial);require(other.stage(consumer,1,first).revision==2);auto different=first;different.events[1].json=R"({"observed":false})";rejects<Conflict>([&]{other.stage(consumer,1,different);});
+  auto racing=consumer;racing.id="consumer-race";checkpoints.open(racing);auto alternative=first;alternative.cursor.sequence=9;alternative.events[1].sequence=9;const auto attempt=[&](const auto& observed){try{other.stage(racing,1,observed);return 1;}catch(const Conflict&){return 0;}};auto one=std::async(std::launch::async,[&]{return attempt(first);});auto two=std::async(std::launch::async,[&]{return attempt(alternative);});require(one.get()+two.get()==1&&checkpoints.observe(racing).revision==2);
+  store.close();
+ }
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteEventCheckpoints checkpoints(store);const auto restored=checkpoints.observe(consumer);require(restored.revision==2&&restored.accepted==consumer.initial&&restored.pending&&restored.pending->events[1].json==first.events[1].json&&restored.pending->cursor==first.cursor);
+  auto wrong=first.cursor;wrong.sequence=8;rejects<Conflict>([&]{checkpoints.accept(consumer,2,wrong);});rejects<Conflict>([&]{checkpoints.accept(consumer,1,first.cursor);});const auto accepted=checkpoints.accept(consumer,2,first.cursor);require(accepted.revision==3&&accepted.accepted==first.cursor&&!accepted.pending&&checkpoints.accept(consumer,2,first.cursor).revision==3);
+  require(checkpoints.stage(consumer,3,{first.cursor,{}}).revision==3);auto expired=first;expired.cursor.epoch="epoch:b";expired.cursor.sequence=10;expired.events={{10,"run-a","run.completed","{}"}};rejects<RemoteEventCursorGap>([&]{checkpoints.stage(consumer,3,expired);});require(checkpoints.observe(consumer).revision==3);
+  auto next=first;next.cursor.sequence=10;next.events={{10,"run-a","run.completed","{}"}};require(checkpoints.stage(consumer,3,next).revision==4);rejects<Conflict>([&]{checkpoints.accept(consumer,2,first.cursor);});require(checkpoints.accept(consumer,4,next.cursor).revision==5);
+  const auto raw=store.information("remote-event-checkpoint-v1",consumer.id).get();for(unsigned mode=0;mode<4;++mode){auto invalid=Json::parse(raw);switch(mode){case 0:invalid["revision"]=true;break;case 1:invalid["accepted"]["run_id"]="foreign";break;case 2:invalid["accepted"]["sequence"]=9007199254740992ULL;break;case 3:invalid["unexpected"]=true;break;}const auto corrupted=invalid.dump();store.compare_information("remote-event-checkpoint-v1",consumer.id,corrupted,raw).get();rejects<DatabaseError>([&]{checkpoints.observe(consumer);});store.compare_information("remote-event-checkpoint-v1",consumer.id,raw,corrupted).get();}store.close();
+ }
+ {
+  PersistenceService store(file.string(),{modules,stdlib});RemoteEventCheckpoints checkpoints(store);const auto restored=checkpoints.open(consumer);require(restored.revision==5&&restored.accepted.sequence==10&&restored.accepted.epoch=="epoch:a"&&!restored.pending);store.close();
+ }
+ std::filesystem::remove(file);std::filesystem::remove(file.string()+"-wal");std::filesystem::remove(file.string()+"-shm");
 }
 void command_journal_contract(const std::string& modules,const std::string& stdlib){
  remote_event_value_contract();
@@ -225,6 +250,7 @@ int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;tr
     cancel_command_journal_contract(argv[1],argv[2]);
     cancel_command_service_contract(argv[1],argv[2]);
     run_command_service_contract(argv[1],argv[2]);
+    event_checkpoint_contract(argv[1],argv[2]);
     command_journal_contract(argv[1],argv[2]);
     remote_session_command_contract(argv[1],argv[2]);
     file=std::filesystem::temp_directory_path()/("xmind-remote-auth-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));ConnectionProfile final_profile;

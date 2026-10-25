@@ -1,0 +1,77 @@
+{
+  "qualification": {
+    "recordedAt": "2026-10-25T05:15:22.788Z",
+    "sourceParent": "fc9d336747ff4b85624118eb32b125f69b3720ef",
+    "sourcePatchSha256": "4823bf2dd6b3c3daa9af12603c4af404910587b39f6debf70bbfbe20a62d6ec1",
+    "build": {
+      "pid": 26168,
+      "launchedAt": "2026-10-25T05:12:23.454Z",
+      "completedAt": "2026-10-25T05:14:52.293Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "13ac45c69f075fd637ecab1c6b27d1456f138efe04d7c09872fb2af34676fb32"
+    },
+    "test": {
+      "pid": 31780,
+      "launchedAt": "2026-10-25T05:14:55.560Z",
+      "completedAt": "2026-10-25T05:15:19.426Z",
+      "exitCode": 0,
+      "signal": null,
+      "logSha256": "397e5016915822b450d823345fe30261be9570f3de19e6290390cb41ac3c4e36"
+    },
+    "total": 11,
+    "failed": 0,
+    "passed": 11,
+    "seconds": 23.8,
+    "projectFiles": 2843,
+    "sdkSourceFiles": 16,
+    "pureLibraryFiles": 1870,
+    "sdkRuntimeFiles": 30,
+    "nodeDependencyFiles": 18598,
+    "nativeBinaries": 142,
+    "nativeSha256": "1c7655d8e3012a28b151449e9c3857cfe20c9b43716d0cf459435af5984ae023",
+    "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+    "fullNativeSuiteRun": false,
+    "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+    "cpythonExecuted": false,
+    "installed": false,
+    "scopePassed": true
+  },
+  "scope": "Backend-private durable event observation checkpoint foundation",
+  "storage": "PersistenceService information compare-and-set through embedded xlang3 SQLite; no direct SQLite",
+  "binding": [
+    "consumer id",
+    "origin",
+    "connection",
+    "server",
+    "scope",
+    "session",
+    "run"
+  ],
+  "semantics": [
+    "open binds a consumer to its original zero/empty cursor",
+    "stage stores a bounded validated page without moving accepted cursor",
+    "identical restaging is idempotent; different competing page conflicts",
+    "accept requires exact staged revision and cursor; duplicate acknowledgement is idempotent",
+    "empty resume does not advance revision",
+    "epoch replacement requires explicit authoritative reset; no implicit reset"
+  ],
+  "verified": [
+    "three actual database lifetimes",
+    "retained pending page and original accepted cursor after reopen",
+    "exactly one winning competing stage",
+    "namespace/order/payload/size/sequence refusal",
+    "wrong or stale acknowledgement refusal",
+    "duplicate acknowledgement advances only once",
+    "accepted cursor survives later reopen",
+    "malformed/tampered records refuse"
+  ],
+  "limitations": [
+    "not live authorization; service must freshly validate captured scope before returning a retained page or accepting acknowledgement",
+    "not yet integrated into RemoteConnectionAuthentication or public SDK/CLI/HTTP consumer methods",
+    "no authoritative snapshot/reset or root-tree checkpoint workflow",
+    "no new full-suite or installation qualification"
+  ],
+  "installed75Unchanged": true,
+  "completedTasksMustNeverBeReplayed": true
+}

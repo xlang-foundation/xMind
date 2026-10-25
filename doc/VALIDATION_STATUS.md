@@ -1,3 +1,9 @@
+## Durable remote event checkpoint foundation — 2026-10-24
+
+RemoteEventCheckpoints binds a consumer ID to origin/connection/server/scope/session/run. stage durably retains a validated bounded page without moving the accepted cursor; accept requires the exact pending revision/cursor. Same-page staging and duplicate acknowledgement are idempotent, while competing pages, stale/wrong acknowledgement, malformed records and epoch changes refuse. Empty resume does not change revision. All I/O uses PersistenceService/xlang3 SQLite compare-and-set.
+
+Focused11/11 passes23.80s with2843/16/1870/30/18598/142 source/SDK/library/runtime/dependency/binary hashes and file sets exact. Three real database lifetimes prove pending-page recovery, original accepted cursor preservation, explicit single acceptance and final accepted-cursor reopen; competing stages have exactly one winner. This backend-private primitive supplies no authorization. Captured service integration must freshly validate permission before returning cached pages or acknowledging; public consumer methods, authoritative snapshot/reset and root-tree checkpoints remain open. Native1c7655d8 is uninstalled; installed75 unchanged. [Receipt](evidence/remote-event-checkpoint-20261024.json), [focused log](evidence/remote-event-checkpoint-focused-20261024.log).
+
 ## Remote run-event trusted client fixtures — 2026-10-24
 
 The independent HTTPS peer now serves initial/resume/gap/expired/malformed event pages with exact binding/header/query checks. Separate SDK, CLI and origin-bound HTTP fixtures each require the two real event records, empty cursor-preserving resume, reset-required gap/expiry refusal, malformed-page refusal, unchanged caller cursor and local generation rejection. Exact request counts require one call per mode and no automatic retry. Grant actions include events.read; stale CLI/HTTP action-list expectations also now include existing runs.cancel.
