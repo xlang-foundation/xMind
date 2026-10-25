@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-25T00:40:09.157Z",
+  "sourceParent": "885872cb58bcc845d6911c11a22c19afeb5988aa",
+  "sourcePatchSha256": "a8a7bbab5c63185a3b2a2ad8e7845b3b214be328e440caf055ee0c519a5c37e5",
+  "build": {
+    "pid": 39000,
+    "launchedAt": "2026-10-25T00:39:03.989Z",
+    "completedAt": "2026-10-25T00:39:37.698Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "078fad1a4b0acc118193936ad356fbe2f45ca7bae802b82cdc4e4a82d4a09a2e"
+  },
+  "test": {
+    "pid": 43196,
+    "launchedAt": "2026-10-25T00:39:40.941Z",
+    "completedAt": "2026-10-25T00:40:05.984Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "31bcad981e012946cda1c124fc84b4389ca63c903999d3815aa4eb236c9cb8b5"
+  },
+  "total": 11,
+  "failed": 0,
+  "passed": 11,
+  "seconds": 24.99,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "2f564d4587175ce9f467b2177b876c4b085a5d750981cd958bd41e265fcd26bd",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Local qualification of independent HTTPS peer and hosted native SDK/CLI/HTTP mutation acceptance fixtures",
+  "independentPeerEvidence": "Explicit-CA Node HTTPS verifies exact typed body/binding, same-ID same-intent dedupe, conflicting intent409, record-before-reply-loss, admitted receipt lookup and minimal not_found.",
+  "hostedAssertionsAdded": [
+    "Two created resources per public client: normal and lost-reply request.",
+    "Repeated create and conflicting intent cannot issue another POST.",
+    "Open observes local unknown without a GET; Reconcile performs one GET and settles admission.",
+    "Repeated terminal reconciliation causes no GET.",
+    "Peer counters require created:2,lost_reply:1,observed:1 per client and no duplicate POST.",
+    "Encrypted credential/grant and both admitted command records survive actual database reopen."
+  ],
+  "positiveNativeTlsMutationExecutedLocally": false,
+  "windowsTrustChanged": false,
+  "hostedExecutionPending": true,
+  "installedVersion": "0.1.74",
+  "installationChanged": false
+}

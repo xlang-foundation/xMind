@@ -11,16 +11,17 @@ import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createServer as createTcpServer} from 'node:net';
 import {runRenewalAcceptance,renewalModes} from './mcp_oauth_renewal_peer.mjs';
-import {runRemoteAuthenticationSdk,remoteNegotiationResponse,remoteSessionResponse} from './remote_authentication_sdk_peer.mjs';
+import {runRemoteAuthenticationSdk,remoteNegotiationResponse,remoteSessionResponse,remoteCommandResponse} from './remote_authentication_sdk_peer.mjs';
 export const access='synthetic-positive-access-not-live',refresh='synthetic positive refresh not live';
 export function createOAuthPeer(options,{registeredPort=43211}={}){
- const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{},renewal:{},remote:{},remote_sessions:{}};const codes=new Map();let origin,error,tlsFailures=0,tlsConnections=0,tcpConnections=0;
+ const counts={probe:{},metadata:{},authorize:{},tokens:{},authenticated:{},refresh:{},renewal:{},remote:{},remote_sessions:{},remote_commands:{}};const codes=new Map(),remoteCommands=new Map();let origin,error,tlsFailures=0,tlsConnections=0,tcpConnections=0;
  const kinds=new Set(['success','registered','denied','bad-state','bad-issuer','bad-code','cancelled','occupied']);
  const count=(group,kind)=>counts[group][kind]=(counts[group][kind]||0)+1;
  const peer=createServer(options,async(request,response)=>{
   try{
    const url=new URL(request.url,origin),reply=(status,value,headers={})=>{response.writeHead(status,{'Content-Type':'application/json',...headers});response.end(JSON.stringify(value));};
    assert.equal(request.headers.cookie,undefined);let body='';for await(const bytes of request){body+=bytes;if(body.length>65536)throw Error('Synthetic request bound exceeded');}
+   if(url.pathname==='/xmind/v1/scopes/remote-sdk-workspace/sessions'||url.pathname.startsWith('/xmind/v1/scopes/remote-sdk-workspace/requests/')){const result=remoteCommandResponse(request,body,remoteCommands);if(result.created)count('remote_commands','created');if(result.kind!=='admitted')count('remote_commands',result.kind);if(result.drop){response.destroy();return;}reply(result.status,result.value);return;}
    if(url.pathname==='/xmind/v1/negotiate'){const result=remoteNegotiationResponse(request,body);count('remote',result.kind);reply(result.status,result.value);return;}
    if(url.pathname==='/xmind/v1/scopes/remote-sdk-workspace/sessions/remote-session'){const result=remoteSessionResponse(request,body);count('remote_sessions',result.kind);reply(result.status,result.value);return;}
    if(url.pathname.startsWith('/renew-mcp/')){
@@ -132,11 +133,11 @@ async function hosted(){
   assert.deepEqual(peer.counts.refresh,Object.fromEntries(['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect'].map(mode=>[mode,1])));
   await runRenewalAcceptance(renewalExecutable,modules,stdlib,origin,{peer});
   assert.deepEqual(peer.counts.renewal,Object.fromEntries(renewalModes.map(mode=>[mode,1])));assert.equal(peer.counts.refresh.forwarded,undefined);
-  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:1,accepted:1});assert.deepEqual(peer.counts.remote_sessions,{accepted:1});
-  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true,cliExecutable});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:2,accepted:2});assert.deepEqual(peer.counts.remote_sessions,{accepted:2});
-  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true,http:true});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:3,accepted:3});assert.deepEqual(peer.counts.remote_sessions,{accepted:3});
-  process.stdout.write('Actual native HTTP origin-bound view authentication passed trusted HTTPS, wrong-credential refusal, encrypted grant publication/reopen, stored status, stale-retry refusal without another peer request and Local selection retained. Remote routing remains disabled.\n');
-  process.stdout.write('Actual separate-process xlang3 SDK authentication passed trusted native HTTPS, wrong-credential refusal, one accepted grant, stale retry without another HTTP request, encrypted credential/grant database reopen and unchanged Local selection. Remote command routing remains disabled.\n');
+  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:1,accepted:1});assert.deepEqual(peer.counts.remote_sessions,{accepted:1});assert.deepEqual(peer.counts.remote_commands,{created:2,lost_reply:1,observed:1});
+  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true,cliExecutable});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:2,accepted:2});assert.deepEqual(peer.counts.remote_sessions,{accepted:2});assert.deepEqual(peer.counts.remote_commands,{created:4,lost_reply:2,observed:2});
+  await runRemoteAuthenticationSdk(remoteSdkExecutable,modules,stdlib,origin,directory,{positive:true,http:true});peer.assertHealthy();assert.deepEqual(peer.counts.remote,{refused:3,accepted:3});assert.deepEqual(peer.counts.remote_sessions,{accepted:3});assert.deepEqual(peer.counts.remote_commands,{created:6,lost_reply:3,observed:3});
+  process.stdout.write('Actual native HTTP origin-bound view authentication passed trusted HTTPS, wrong-credential refusal, encrypted grant publication/reopen, stored status, stale-retry refusal without another peer request and Local selection retained. Typed session command creation and lost-reply receipt reconciliation passed with no duplicate POST; generic run routing remains unavailable.\n');
+  process.stdout.write('Actual separate-process xlang3 SDK authentication passed trusted native HTTPS, wrong-credential refusal, one accepted grant, stale retry without another HTTP request, encrypted credential/grant database reopen and unchanged Local selection. Typed session command creation and lost-reply receipt reconciliation passed; generic run routing remains unavailable.\n');
   process.stdout.write('Separate actual native single-use refresh protocol passed trusted HTTPS rotation/retention, restricted scope, duplicate JSON, HTTP failure, lost reply and redirect rejection with exactly one request per owner and zero forwarded requests. Synthetic refresh inputs; no durable refresh publication, automatic refresh or client refresh support claimed.\n');
   process.stdout.write('Actual native OAuth service passed trusted HTTPS discovery, default and registered exact-path/port callbacks, occupied-port rejection without fallback, independent S256/code/resource/client binding, two positive code exchanges, encrypted complete grant publication/reopen, bearer MCP discovery before/after reopen, denial/state/issuer/code rejection and cancellation without extra token requests. Synthetic authority and tokens only; no real provider account or rendered/browser-launch acceptance.\n');
  }finally{

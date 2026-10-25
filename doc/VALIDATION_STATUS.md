@@ -1,3 +1,9 @@
+## Trusted mutation acceptance fixtures prepared; local11/11 passes — 2026-10-24
+
+Independent controlled HTTPS peer now admits typed session requests into its deduplication map before intentionally dropping one reply. Explicit-CA Node checks verify duplicate/conflicting IDs, lost reply and original receipt lookup/not-found. Hosted-only native SDK/CLI/origin-view HTTP cases each require exactly2 created resources,1 dropped reply and1 receipt GET, with no duplicate POST; repeated local/terminal observations send nothing. Both admitted journal records are checked before and after SQLite reopen. This is controlled peer acceptance infrastructure, not a private server implementation.
+
+All-target build plus11 focused contracts pass24.99s with complete2840/16/1870/30/18598/142 closures/file sets unchanged; product binary2f564d45 unchanged. No Windows trust modification, positive native TLS mutation execution or paid inference occurs locally. Hosted execution and complete qualification remain pending; installed74 unchanged. [Fixture scope](evidence/remote-session-command-trusted-fixture-20261024.json), [local output](evidence/remote-session-command-trusted-fixture-focused-20261024.log).
+
 ## Captured remote command adapters pass focused validation — 2026-10-24
 
 Ordinary registered xlang3 scope Sessions.Create(request_id,title) and Requests.Open/Reconcile now project the native durable journal; thin CLI and owner/origin-view HTTP adapters use the same service. Command availability is grant-specific; read-only captures remain usable and remote profile activation/run routing stays unavailable. A real SQLite seeded terminal request verifies SDK method identity/lifetime/conflict behavior and all3 actual localhost HTTP routes without remote resend. Separate SDK/CLI/HTTP absent-grant/untrusted paths refuse. Positive trusted-TLS creation and lost-reply reconciliation across these public clients remains pending.
