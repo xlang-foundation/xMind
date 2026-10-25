@@ -1,3 +1,9 @@
+## Hosted d75: complete native pass; packaged pip remains blocked — 2026-10-25
+
+Hosted40192957480/job121181991153 completes the actual182-contract native inventory with zero failures in707.16s. The inventory, expected names, terminal exit and raw contract/test-log hashes verify against the retained native gate. This includes the previously failing worker and hosted trusted-TLS integration contracts. [Receipt](evidence/hosted-d75-native-pass-packaged-pip-failure-20261025.json).
+
+The workflow subsequently fails its packaged xlang3 pip --version command in pip._vendor.platformdirs.windows: TypeError: ord() expected a character. Thus the overall workflow, packaged pip bootstrap/offline installation and release remain unqualified. The isolated SDK investigation targets Unicode-buffer defaults and indexed native writeback; no vendor workaround, SDK replacement or successful correction is claimed yet. Installed76 remains unchanged, and the separate worker-startup SDK-method cleanup is still being built in an isolated checkout.
+
 ## Worker bootstrap IPC audit: remaining application envelope — 2026-10-25
 
 Current native source still uses worker.boot and worker.execution.ready channel envelopes: agent_worker_supervisor.cpp builds a JSON boot payload, and agent_worker_control.cpp parses JSON endpoint/ticket/PID rendezvous metadata. These are startup/control messages; agent_worker_process_rpc.cpp delegates process invocation to the typed service. The legacy peer.call("worker.execute", ...) execution route was not found in the inspected native source. This does not justify claiming every worker boundary uses only SDK value serialization: removing the startup/control application envelopes remains required. Replacement must use ordinary registered SDK service methods/value objects while preserving identity checks, cancellation, deadline and owned-process retirement behavior. No runtime change or new acceptance is claimed by this read-only audit.
