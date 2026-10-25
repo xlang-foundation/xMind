@@ -876,3 +876,33 @@ New-epoch event observation can continue after reset. These persistence rules
 are not authorization or a public reset API: captured-service permission checks,
 retained-object generation fences and SDK/CLI/HTTP/UI methods remain required.
 [Reset evidence](evidence/remote-snapshot-reset-20261025.json).
+
+### Captured snapshot recovery service
+
+The native service now exposes capture_run_snapshot, observe_run_snapshot,
+read_run_snapshot_assembly and reset_run_snapshot. These backend methods are
+not root-object IPC dispatch or public SDK methods. Capture derives the
+consumer's current accepted cursor/revision itself and refuses pending pages.
+An assembly read requires that exact baseline to remain current before fetch,
+before staging and before publication. Profile/credential/grant permission is
+checked around those operations as well.
+
+The first read has no server snapshot ID and expected assembly revision0.
+Known-ID reads require the current revision, or the immediately previous
+revision to recover a staged response without another GET. Complete assemblies
+return cached state. Otherwise one continuation page is fetched and staged;
+there is no automatic page loop or retry. Losing the first response before
+learning its server snapshot ID is not an exactly-once observation guarantee.
+Old partial assemblies are preserved rather than silently overwritten.
+
+Observe and explicit digest reset require current snapshot permission even for
+cached content. A fresh explicitly authorized scope may recover after credential
+rotation. A reset or observation write may persist before a post-write
+cancellation/authorization check refuses publication; fresh authorized
+observation resolves that local metadata result. It never retries a remote
+model/tool effect. The primitive's atomic baseline/digest checks still govern
+reset and delayed acknowledgements cannot rewind subsequent events.
+
+Public retained subobjects, backend-generation fences, CLI/HTTP/UI methods,
+positive native trusted-TLS snapshot acceptance and root-tree recovery remain
+separate requirements. [Integrated native evidence](evidence/remote-snapshot-recovery-service-20261025.json).

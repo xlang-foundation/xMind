@@ -3,6 +3,7 @@
 #include "agentflow/remote_connection_client.hpp"
 #include "agentflow/remote_connection_credentials.hpp"
 #include "agentflow/remote_run_snapshot.hpp"
+#include "agentflow/remote_snapshot_store.hpp"
 #include <functional>
 
 namespace agentflow {
@@ -46,6 +47,10 @@ public:
     RemoteObservedRun read_run(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,std::chrono::milliseconds timeout,std::stop_token stop={});
     RemoteRunEventCursor run_event_cursor(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id);
     RemoteRunSnapshotPage read_run_snapshot(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,const RemoteRunEventCursor&,const std::optional<RemoteSnapshotPosition>&,std::chrono::milliseconds,std::stop_token={});
+    RemoteSnapshotBase capture_run_snapshot(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,std::int64_t expected_checkpoint_revision);
+    RemoteSnapshotAssembly observe_run_snapshot(const RemoteCapturedScope&,const RemoteSnapshotBase&,const std::string& snapshot_id);
+    RemoteSnapshotAssembly read_run_snapshot_assembly(const RemoteCapturedScope&,const RemoteSnapshotBase&,const std::optional<std::string>& snapshot_id,std::int64_t expected_assembly_revision,std::chrono::milliseconds,std::stop_token={});
+    RemoteEventCheckpoint reset_run_snapshot(const RemoteCapturedScope&,const RemoteSnapshotBase&,const std::string& snapshot_id,std::int64_t expected_assembly_revision,const std::string& digest,std::stop_token={});
     RemoteObservedRunEvents read_run_events(const RemoteCapturedScope&,const std::string& session_id,const std::string& run_id,const RemoteRunEventCursor&,std::chrono::milliseconds,std::stop_token={});
     RemoteEventCheckpoint open_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id);
     RemoteEventCheckpoint read_run_event_consumer(const RemoteCapturedScope&,const std::string& consumer_id,const std::string& session_id,const std::string& run_id,std::int64_t expected_revision,std::chrono::milliseconds,std::stop_token={});
@@ -59,6 +64,7 @@ public:
 private:
     RemoteCommandRecord send_command(const RemoteCapturedScope&,const RemoteCommandIntent&,std::chrono::milliseconds,std::stop_token);
     RemoteStoredCredential load_scope(const RemoteCapturedScope&);
-    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;RemoteRunCancelExchange run_cancel_,cancel_receipt_;RemoteRunEventExchange event_read_;RemoteRunSnapshotExchange snapshot_read_;RemoteEventCheckpoints event_checkpoints_;
+    void authorize_snapshot(const RemoteCapturedScope&,const RemoteSnapshotBase&);
+    ConnectionProfiles& profiles_;RemoteConnectionCredentials credentials_;RemoteNegotiationExchange exchange_;RemoteSessionReadExchange session_read_;RemoteCommandJournal commands_;RemoteSessionCommandExchange create_,receipt_;RemoteRunReadExchange run_read_;RemoteRunCommandExchange run_submit_,run_receipt_;RemoteRunCancelExchange run_cancel_,cancel_receipt_;RemoteRunEventExchange event_read_;RemoteRunSnapshotExchange snapshot_read_;RemoteEventCheckpoints event_checkpoints_;RemoteRunSnapshots snapshots_;
 };
 }

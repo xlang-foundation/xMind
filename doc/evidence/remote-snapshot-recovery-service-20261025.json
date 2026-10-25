@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-10-25T07:25:11.977Z",
+  "sourceParent": "6c5920a3f2618651aecf163f68a56abf23309066",
+  "sourcePatchSha256": "f78b48a3f41fe18a0630cf6e4d96ccbd9b817be08d4ca7463f0251dd9190ad99",
+  "build": {
+    "pid": 44808,
+    "launchedAt": "2026-10-25T07:24:13.403Z",
+    "completedAt": "2026-10-25T07:25:02.882Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "b88032294bfc8fb5a2af7ff896ccef68a8408ae35269a6e69a251dd760383f7f"
+  },
+  "test": {
+    "pid": 4748,
+    "launchedAt": "2026-10-25T07:25:05.571Z",
+    "completedAt": "2026-10-25T07:25:09.303Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "264b17a8ed0eba79f46a65771894367d580360bafd280ec132233622cd531183"
+  },
+  "total": 4,
+  "failed": 0,
+  "passed": 4,
+  "seconds": 3.69,
+  "projectFiles": 2852,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 144,
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Captured native run-only snapshot recovery service with real embedded xlang3/SQLite and controlled backend exchange.",
+  "checks": [
+    "Backend-derived current checkpoint baseline",
+    "Two-page fetch and staging with no checkpoint advance",
+    "Known-ID previous-page recovery without another GET",
+    "Explicit digest reset and immediate duplicate acknowledgement",
+    "Credential rotation refuses old captured scope; explicitly reopened scope can observe/reset",
+    "Post-fetch cancellation, credential/profile mutation or checkpoint progress prevents staging",
+    "Cached data and reset require current snapshots.read permission",
+    "Database reopen preserves complete assembly/reset receipt; Local selection unchanged"
+  ],
+  "limitations": [
+    "Post-write cancellation/authorization changes can leave local observation/reset metadata persisted; fresh authorized observation determines the result. No remote model/tool effect is retried.",
+    "First-page recovery without knowing its server snapshot ID is not an exactly-once observation guarantee. No automatic retry occurs.",
+    "SDK/CLI/HTTP/UI methods and retained-object generation checks remain open.",
+    "Positive native trusted-TLS snapshot acceptance and root-tree recovery remain open.",
+    "Installed76/production executable unchanged; no new complete native gate."
+  ],
+  "goalComplete": false
+}
