@@ -257,14 +257,23 @@ observation operation. Revoked read permission refuses reconciliation visibly.
 
 ## Implemented local command journal foundation
 
-`RemoteCommandJournal` is backend-private C++ infrastructure for a typed
-`sessions.create` intent. PersistenceService performs transactional compare and
+`RemoteCommandJournal` is backend-private C++ infrastructure for typed
+`sessions.create` and `runs.submit` intents. A C++ variant distinguishes session
+title from run session/prompt/expected-session-revision; callers cannot supply an
+arbitrary operation string. The run prompt must be nonempty valid UTF-8, at most
+256KiB, and the expected session revision must be a positive JSON-safe integer.
+Both actions share the same durable request-ID namespace: a session creation
+and a run submission cannot reuse one ID for different intent. Existing canonical
+session record bytes remain unchanged. This journal extension does not enable
+network run submission or grant authorization for it.
+
+PersistenceService performs transactional compare and
 publication through embedded xlang3/SQLite. It enables no SDK capability, network
 submission, profile activation or local effect. The connector must independently
 validate current authorization before calling it.
 
 The immutable semantic record contains operation, connection, verified origin,
-server/scope, profile/credential revisions and title. Canonical validated JSON
+server/scope, profile/credential revisions and the typed action fields (session title or run session/revision/prompt). Canonical validated JSON
 bytes provide exact semantic equality; no credential or auth grant is stored.
 The local credential revision is an authorization snapshot fence, not a remote
 actor ID. The peer must derive its actor from authenticated credentials and own

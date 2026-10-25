@@ -17,11 +17,12 @@ std::string source(std::string origin,std::string name="Remote"){return Json{{"p
 }
 void command_journal_contract(const std::string& modules,const std::string& stdlib){
  const auto path=std::filesystem::temp_directory_path()/("xmind-remote-command-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(path));
- const RemoteSessionCreateIntent intent{"request-1","remote-a","https://remote.example.invalid","server-a","scope-a","Original title",2,3};
+ const RemoteCommandIntent intent{"request-1","remote-a","https://remote.example.invalid","server-a","scope-a",2,3,RemoteSessionCreateAction{"Original title"}};
  {
   PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store),second(store);
   require(journal.prepare(intent).state==RemoteCommandState::prepared);require(second.prepare(intent).revision==1);
-  auto changed=intent;changed.title="Different semantic request";rejects<Conflict>([&]{second.prepare(changed);});changed=intent;changed.scope_id="scope-b";rejects<Conflict>([&]{second.prepare(changed);});changed=intent;changed.credential_revision=4;rejects<Conflict>([&]{second.prepare(changed);});
+  require(store.information("remote-command-v1",intent.request_id).get()==Json{{"version",1},{"request_id","request-1"},{"semantic",{{"operation","sessions.create"},{"connection_id","remote-a"},{"origin","https://remote.example.invalid"},{"server_id","server-a"},{"scope_id","scope-a"},{"profile_revision",2},{"credential_revision",3},{"title","Original title"}}},{"state","prepared"},{"revision",1},{"resource_id",""},{"resource_revision",0}}.dump());
+  auto changed=intent;std::get<RemoteSessionCreateAction>(changed.action).title="Different semantic request";rejects<Conflict>([&]{second.prepare(changed);});changed=intent;changed.scope_id="scope-b";rejects<Conflict>([&]{second.prepare(changed);});changed=intent;changed.credential_revision=4;rejects<Conflict>([&]{second.prepare(changed);});
   RemoteCommandResolution admitted{intent.request_id,intent.server_id,intent.scope_id,"sessions.create","session-created",RemoteCommandState::admitted,1};rejects<Conflict>([&]{journal.resolve(intent,admitted);});
   auto one=std::async(std::launch::async,[&]{return journal.claim_send(intent);});auto two=std::async(std::launch::async,[&]{return second.claim_send(intent);});require(static_cast<int>(one.get())+static_cast<int>(two.get())==1);require(journal.observe(intent.request_id).state==RemoteCommandState::unknown);require(!journal.claim_send(intent));require(journal.prepare(intent).state==RemoteCommandState::unknown);
   auto prepared=intent;prepared.request_id="never-sent";journal.prepare(prepared);store.close();
@@ -31,7 +32,7 @@ void command_journal_contract(const std::string& modules,const std::string& stdl
   RemoteCommandResolution proof{intent.request_id,intent.server_id,intent.scope_id,"sessions.create","session-created",RemoteCommandState::admitted,1};auto wrong=proof;wrong.server_id="wrong-server";rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});wrong=proof;wrong.resource_revision=9007199254740992LL;rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});const auto admitted=journal.resolve(intent,proof);require(admitted.state==RemoteCommandState::admitted&&admitted.revision==3);require(journal.resolve(intent,proof).revision==3);require(!journal.claim_send(intent));require(journal.prepare(intent).state==RemoteCommandState::admitted);
   wrong=proof;wrong.state=RemoteCommandState::rejected;wrong.resource_id.clear();wrong.resource_revision=0;rejects<Conflict>([&]{journal.resolve(intent,wrong);});
   auto denied=intent;denied.request_id="rejected-request";journal.prepare(denied);require(journal.claim_send(denied));RemoteCommandResolution rejection{denied.request_id,denied.server_id,denied.scope_id,"sessions.create","",RemoteCommandState::rejected,0};require(journal.resolve(denied,rejection).state==RemoteCommandState::rejected);require(!journal.claim_send(denied));
-  auto invalid=intent;invalid.request_id="../ambiguous";rejects<std::invalid_argument>([&]{journal.prepare(invalid);});invalid=intent;invalid.title=std::string(4097,'x');rejects<std::invalid_argument>([&]{journal.prepare(invalid);});
+  auto invalid=intent;invalid.request_id="../ambiguous";rejects<std::invalid_argument>([&]{journal.prepare(invalid);});invalid=intent;std::get<RemoteSessionCreateAction>(invalid.action).title=std::string(4097,'x');rejects<std::invalid_argument>([&]{journal.prepare(invalid);});
   store.close();
  }
  {
@@ -57,6 +58,31 @@ void remote_session_command_contract(const std::string& modules,const std::strin
   service.authenticate(profile.id,profile.revision,1,secret(),2s);const auto fresh=service.open_scope(profile.id,profile.revision,"workspace-a");rejects<Conflict>([&]{service.reconcile_session(scope,"lost-reply",2s);});const auto resolved=service.reconcile_session(fresh,"lost-reply",2s);require(resolved.state==RemoteCommandState::admitted&&resolved.intent.credential_revision==1&&lookups==2&&sends==2);require(service.reconcile_session(fresh,"lost-reply",2s).state==RemoteCommandState::admitted&&lookups==2);RemoteCommandJournal journal(store);require(!journal.claim_send(resolved.intent));require(profiles.load().active_id=="local");store.close();
  }
  for(const auto* suffix:{"","-wal","-shm"}){auto candidate=path;candidate+=suffix;std::error_code ignored;std::filesystem::remove(candidate,ignored);}std::cout<<"Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.\n";
+}
+void run_command_journal_contract(const std::string& modules,const std::string& stdlib){
+    const auto path=std::filesystem::temp_directory_path()/("xmind-run-command-journal-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(path));
+    const RemoteCommandIntent intent{"run-request","remote-a","https://remote.example.invalid","server-a","scope-a",2,3,RemoteRunSubmitAction{"session-a","Exact user prompt\nwith retained bytes",7}};
+    const RemoteCommandResolution proof{intent.request_id,intent.server_id,intent.scope_id,"runs.submit","remote-run-a",RemoteCommandState::admitted,1};
+    try{
+        {
+            PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store),other(store);require(journal.prepare(intent).revision==1&&remote_command_operation(journal.observe(intent.request_id).intent)==std::string("runs.submit"));require(other.prepare(intent).revision==1);
+            auto different=intent;different.action=RemoteSessionCreateAction{"Unrelated session"};rejects<Conflict>([&]{journal.prepare(different);});
+            for(int mode=0;mode<5;++mode){different=intent;auto& submit=std::get<RemoteRunSubmitAction>(different.action);if(mode==0)submit.prompt+="changed";if(mode==1)submit.session_id="other-session";if(mode==2)++submit.expected_session_revision;if(mode==3)++different.profile_revision;if(mode==4)++different.credential_revision;rejects<Conflict>([&]{journal.prepare(different);});}
+            for(int mode=0;mode<6;++mode){different=intent;different.request_id="invalid-"+std::to_string(mode);auto& submit=std::get<RemoteRunSubmitAction>(different.action);if(mode==0)submit.prompt.clear();if(mode==1)submit.prompt=std::string(262145,'x');if(mode==2)submit.session_id="../outside";if(mode==3)submit.expected_session_revision=0;if(mode==4)submit.expected_session_revision=9007199254740992LL;if(mode==5)submit.prompt=std::string(1,static_cast<char>(255));rejects<std::invalid_argument>([&]{journal.prepare(different);});rejects<NotFound>([&]{journal.observe(different.request_id);});}
+            rejects<Conflict>([&]{journal.resolve(intent,proof);});auto one=std::async(std::launch::async,[&]{return journal.claim_send(intent);});auto two=std::async(std::launch::async,[&]{return other.claim_send(intent);});require(static_cast<int>(one.get())+static_cast<int>(two.get())==1&&journal.observe(intent.request_id).revision==2);
+            different=intent;different.request_id="prepared-run";journal.prepare(different);store.close();
+        }
+        {
+            PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store);const auto unknown=journal.observe(intent.request_id);const auto& action=std::get<RemoteRunSubmitAction>(unknown.intent.action);require(unknown.state==RemoteCommandState::unknown&&action.session_id=="session-a"&&action.expected_session_revision==7&&action.prompt=="Exact user prompt\nwith retained bytes"&&!journal.claim_send(intent));
+            auto wrong=proof;wrong.operation="sessions.create";rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});wrong=proof;wrong.scope_id="other-scope";rejects<std::invalid_argument>([&]{journal.resolve(intent,wrong);});require(journal.resolve(intent,proof).revision==3&&journal.resolve(intent,proof).revision==3);wrong=proof;wrong.resource_id="replacement-run";rejects<Conflict>([&]{journal.resolve(intent,wrong);});require(!journal.claim_send(intent));store.close();
+        }
+        {
+            PersistenceService store(path.string(),{modules,stdlib});RemoteCommandJournal journal(store);const auto admitted=journal.observe(intent.request_id);require(admitted.state==RemoteCommandState::admitted&&admitted.resource_id=="remote-run-a"&&admitted.revision==3&&!journal.claim_send(intent));require(journal.observe("prepared-run").state==RemoteCommandState::prepared);
+            auto rejected=intent;rejected.request_id="rejected-run";journal.prepare(rejected);require(journal.claim_send(rejected));auto denial=proof;denial.request_id=rejected.request_id;denial.state=RemoteCommandState::rejected;denial.resource_id.clear();denial.resource_revision=0;require(journal.resolve(rejected,denial).state==RemoteCommandState::rejected&&!journal.claim_send(rejected));store.close();
+        }
+    }catch(...){std::cerr<<"Run command journal fixture retained at "<<path<<std::endl;throw;}
+    for(const auto* suffix:{"","-wal","-shm"}){auto file=path;file+=suffix;std::error_code ignored;std::filesystem::remove(file,ignored);}
+    std::cout<<"Typed run command journal verified immutable prompt/session revision, cross-operation conflicts, competing single-send claim and prepared/unknown/terminal state across three xlang3/SQLite lifetimes. No networking or run execution."<<std::endl;
 }
 void captured_run_read_contract(const std::string& modules,const std::string& stdlib){
     const auto file=std::filesystem::temp_directory_path()/("xmind-remote-run-read-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));
@@ -88,6 +114,7 @@ void captured_run_read_contract(const std::string& modules,const std::string& st
 }
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
     captured_run_read_contract(argv[1],argv[2]);
+    run_command_journal_contract(argv[1],argv[2]);
     command_journal_contract(argv[1],argv[2]);
     remote_session_command_contract(argv[1],argv[2]);
     file=std::filesystem::temp_directory_path()/("xmind-remote-auth-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));ConnectionProfile final_profile;

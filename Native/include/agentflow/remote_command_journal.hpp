@@ -1,17 +1,22 @@
 #pragma once
 #include "agentflow/persistence_service.hpp"
+#include <variant>
 
 namespace agentflow {
 // Backend-private intent, never an IPC transport call ID or live authorization.
 // Credential revision fences the original local authorization snapshot; the
 // remote peer independently derives and authorizes its actor from credentials.
-struct RemoteSessionCreateIntent {
-    std::string request_id,connection_id,origin,server_id,scope_id,title;
+struct RemoteSessionCreateAction {std::string title;};
+struct RemoteRunSubmitAction {std::string session_id,prompt;std::int64_t expected_session_revision=0;};
+struct RemoteCommandIntent {
+    std::string request_id,connection_id,origin,server_id,scope_id;
     std::int64_t profile_revision=0,credential_revision=0;
+    std::variant<RemoteSessionCreateAction,RemoteRunSubmitAction> action;
 };
+const char* remote_command_operation(const RemoteCommandIntent&) noexcept;
 enum class RemoteCommandState {prepared,unknown,admitted,rejected};
 struct RemoteCommandRecord {
-    RemoteSessionCreateIntent intent;
+    RemoteCommandIntent intent;
     RemoteCommandState state=RemoteCommandState::prepared;
     std::int64_t revision=1;
     std::string resource_id;
@@ -27,12 +32,12 @@ struct RemoteCommandResolution {
 class RemoteCommandJournal {
 public:
     explicit RemoteCommandJournal(PersistenceService& store):store_(store){}
-    RemoteCommandRecord prepare(const RemoteSessionCreateIntent&);
+    RemoteCommandRecord prepare(const RemoteCommandIntent&);
     RemoteCommandRecord observe(const std::string& request_id);
     // Persist unknown BEFORE sending. Exactly one caller can claim prepared.
     // Restart in unknown must reconcile; it must not send this intent again.
-    bool claim_send(const RemoteSessionCreateIntent&);
-    RemoteCommandRecord resolve(const RemoteSessionCreateIntent&,const RemoteCommandResolution&);
+    bool claim_send(const RemoteCommandIntent&);
+    RemoteCommandRecord resolve(const RemoteCommandIntent&,const RemoteCommandResolution&);
 private:
     PersistenceService& store_;
 };

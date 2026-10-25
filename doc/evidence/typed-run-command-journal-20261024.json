@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-10-25T02:07:11.659Z",
+  "sourceParent": "52fdbb4f1276e5a18cb0ab3c36d2126eed97153a",
+  "sourcePatchSha256": "4b1e34c9f8b11392307a573ef701f73b1cb17ab90388cbfb487dcc280985cc61",
+  "build": {
+    "pid": 31316,
+    "launchedAt": "2026-10-25T02:06:11.047Z",
+    "completedAt": "2026-10-25T02:06:44.731Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "22606080fa5ac4ca9560da22e38b621fa57d0bcb42f7cec64c724a1233d5a7ad"
+  },
+  "test": {
+    "pid": 34184,
+    "launchedAt": "2026-10-25T02:06:48.011Z",
+    "completedAt": "2026-10-25T02:07:08.408Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "902e5f24356da183414f0490a681dc4a25c8ecc4417c108934248acf40f20438"
+  },
+  "total": 11,
+  "failed": 0,
+  "passed": 11,
+  "seconds": 20.35,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "ca3a2c9c0d63cd345c85b5122f4a9db9a000a3b089d66739dbfe7ec1256f2c19",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Backend-private typed session-create/run-submit intent variant and shared durable one-send journal; no network run submission enabled",
+  "verifiedInvariants": [
+    "Exact canonical session creation record bytes retained",
+    "Global request-ID conflicts across action types",
+    "Prompt/session/expected revision and profile/credential revision form immutable run intent",
+    "Invalid UTF-8/size/path/revision inputs do not prepare a record",
+    "Two concurrent claimants yield exactly one unknown-before-send claim",
+    "Prepared unknown admitted rejected states persist across three database lifetimes",
+    "Mismatched resolution operation/scope and terminal replacement refuse"
+  ],
+  "initialBuildFailure": {
+    "logSha256": "85ef1b485de4f626879d351e889f725823620805cdcbd24a82fc2e2ea9663782",
+    "inputsAuditedUnchanged": true,
+    "testsExecuted": false,
+    "reason": "Oversized-title regression still accessed removed direct title field",
+    "exitCode": 1
+  },
+  "runSubmissionNetworkEnabled": false
+}
