@@ -58,7 +58,36 @@ void remote_session_command_contract(const std::string& modules,const std::strin
  }
  for(const auto* suffix:{"","-wal","-shm"}){auto candidate=path;candidate+=suffix;std::error_code ignored;std::filesystem::remove(candidate,ignored);}std::cout<<"Typed remote session command service: lost reply persists unknown across SQLite restart; not-found cannot retry; rotated current grant reconciles original request without another send. No actual network/model or SDK activation.\n";
 }
+void captured_run_read_contract(const std::string& modules,const std::string& stdlib){
+    const auto file=std::filesystem::temp_directory_path()/("xmind-remote-run-read-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));
+    try{
+        PersistenceService store(file.string(),{modules,stdlib});ConnectionProfiles profiles(store);profiles.load_or_initialize();auto catalog=profiles.apply(source("https://remote.example.invalid"),1);const auto profile=catalog.profiles.at(1);RemoteConnectionCredentials credentials(store,profiles);
+        unsigned exchanges=0;int mode=0;std::string state="running";std::stop_source cancel;
+        RemoteConnectionAuthentication auth(store,profiles,[](const auto&,const auto&,auto needs,auto,auto){RemoteNegotiatedGrant grant;grant.server_id="server-a";grant.protocol_version=1;grant.grant_id="run-grant";grant.grant_revision=1;grant.expires_at=std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()+60;grant.capabilities=needs.required_capabilities;grant.authorized_scopes={{"workspace-a",{"sessions.read","runs.read"}}};return grant;},{},{},{},
+            [&](const auto& origin,const auto& credential,const auto& grant,const auto& scope,const auto& session,const auto& run,auto timeout,auto){
+                ++exchanges;require(origin==profile.origin&&std::ranges::equal(credential.view(),secret().view())&&grant.server_id=="server-a"&&scope=="workspace-a"&&session=="session-a"&&run=="run-a"&&timeout==2s);
+                RemoteObservedRun result{run,session,"root-a",state,7};
+                if(mode==1)result.id="other-run";if(mode==2)result.session_id="other-session";if(mode==3)result.root_id="../outside";if(mode==4)result.state="unknown";if(mode==5)result.revision=9007199254740992LL;if(mode==6)cancel.request_stop();
+                if(mode==7){const auto stored=credentials.load(profile);credentials.save(profile,grant,credential,stored.revision,grant.expires_at-60);}
+                if(mode==8){const auto current=profiles.load();profiles.apply(source(origin,"Changed during run read"),current.revision);}
+                return result;
+            });
+        auth.authenticate(profile.id,profile.revision,0,secret(),2s);auto scope=auth.open_scope(profile.id,profile.revision,"workspace-a");
+        for(const std::string value:{"queued","running","paused","completed","failed","cancelled"}){state=value;const auto result=auth.read_run(scope,"session-a","run-a",2s);require(result.id=="run-a"&&result.session_id=="session-a"&&result.root_id=="root-a"&&result.state==value&&result.revision==7);}
+        for(mode=1;mode<=5;++mode)rejects<TransportError>([&]{auth.read_run(scope,"session-a","run-a",2s);});
+        mode=0;const auto sent=exchanges;std::stop_source stopped;stopped.request_stop();rejects<TransportCancelled>([&]{auth.read_run(scope,"session-a","run-a",2s,stopped.get_token());});
+        for(const std::string invalid:{"",".","..","../outside","x/y","%2F","?query"})for(bool session:{false,true})rejects<std::invalid_argument>([&]{auth.read_run(scope,session?invalid:"session-a",session?"run-a":invalid,2s);});
+        rejects<std::invalid_argument>([&]{auth.read_run(scope,"session-a","run-a",0ms);});require(exchanges==sent);
+        mode=6;rejects<TransportCancelled>([&]{auth.read_run(scope,"session-a","run-a",2s,cancel.get_token());});
+        mode=7;rejects<Conflict>([&]{auth.read_run(scope,"session-a","run-a",2s);});const auto after_rotation=exchanges;rejects<Conflict>([&]{auth.read_run(scope,"session-a","run-a",2s);});require(exchanges==after_rotation);
+        scope=auth.open_scope(profile.id,profile.revision,"workspace-a");mode=0;auto stored=credentials.load(profile);auto denied=stored.grant;denied.authorized_scopes.front().actions={"sessions.read","runs.submit"};credentials.save(profile,denied,stored.credential,stored.revision,denied.expires_at-60);const auto denied_scope=auth.open_scope(profile.id,profile.revision,"workspace-a");rejects<TransportError>([&]{auth.read_run(denied_scope,"session-a","run-a",2s);});require(exchanges==after_rotation);
+        stored=credentials.load(profile);auto fresh=stored.grant;fresh.authorized_scopes.front().actions={"sessions.read","runs.read"};credentials.save(profile,fresh,stored.credential,stored.revision,fresh.expires_at-60);scope=auth.open_scope(profile.id,profile.revision,"workspace-a");mode=8;rejects<Conflict>([&]{auth.read_run(scope,"session-a","run-a",2s);});require(profiles.load().active_id=="local");store.close();
+    }catch(...){std::cerr<<"Captured run read fixture retained at "<<file<<std::endl;throw;}
+    for(const auto* suffix:{"","-wal","-shm"}){auto path=file;path+=suffix;std::error_code ignored;std::filesystem::remove(path,ignored);}
+    std::cout<<"Captured run reads verified exact metadata, six states, no-send refusals and post-response cancellation/profile/credential fencing through real xlang3/SQLite. Controlled backend exchange only."<<std::endl;
+}
 int main(int argc,char** argv){if(argc!=3)return 2;std::filesystem::path file;try{
+    captured_run_read_contract(argv[1],argv[2]);
     command_journal_contract(argv[1],argv[2]);
     remote_session_command_contract(argv[1],argv[2]);
     file=std::filesystem::temp_directory_path()/("xmind-remote-auth-"+std::to_string(std::random_device{}())+".sqlite");require(!std::filesystem::exists(file));ConnectionProfile final_profile;

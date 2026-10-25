@@ -35,6 +35,7 @@ xmind.Connections(owner_token)
       .Identity()
       .Sessions().Open(session_id)                         [metadata only]
       .Sessions().Create(request_id, title)                [typed creation]
+      .Runs().Open(session_id, run_id)                     [run metadata]
       .Requests().Open(request_id)                         [local journal]
       .Requests().Reconcile(request_id)                    [receipt GET]
   .Open(profile_id, expected_profile_revision)                   [Local only]
@@ -196,10 +197,19 @@ Binding and requested session/run IDs must match exactly. Root identity is an
 opaque resource ID; a child may have a different root. Revision is a positive
 JSON-safe integer. State is one of queued, running, paused, completed, failed
 or cancelled; unknown states, duplicate keys, extra fields and mismatches refuse.
-Grant expiry is checked before and after observation. This connector alone
-does not expose an SDK capability or enable run routing. Captured service and
-SDK/CLI/HTTP adapters, submission, cancellation, events and worker retirement
-remain separate implementation and verification requirements. A terminal run
+Grant expiry is checked before and after observation. The captured service also
+checks the stored profile and credential/grant revisions before sending and
+before publishing a result, including trusted backend exchange results. Existing
+OpenScope admission still requires sessions.read; run observation additionally
+requires runs.read. Capability remote_scoped_run_read:1 advertises
+OpenScope(...).Runs().Open(session_id,run_id). The ordinary SDK subobject returns
+exactly binding and run, with the public captured identity and the five run fields.
+CLI uses connections scope-run-open ID REV SCOPE SESSION RUN. Native HTTP uses
+POST /v1/connections/scope-run with exactly id, expected_profile_revision,
+scope_id, session_id and run_id under the existing owner/origin-bound view checks.
+All adapters call the native service and fence backend generation. They do not
+select a profile or enable run submission. Submission, cancellation, events and
+worker retirement remain separate implementation and verification requirements. A terminal run
 metadata response does not itself establish physical worker retirement.
 
 Proposed resource paths are relative to `/xmind/v1/scopes/{scope_id}`. Encode

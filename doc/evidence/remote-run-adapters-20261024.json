@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-10-25T01:54:54.216Z",
+  "sourceParent": "25d7657b3d4cce68281e6814162e622ee5ed9312",
+  "sourcePatchSha256": "1c82049489d80531a899af2e530b44f4ca90b9af6163d2cad7137ed5eb5770c3",
+  "build": {
+    "pid": 42932,
+    "launchedAt": "2026-10-25T01:52:22.475Z",
+    "completedAt": "2026-10-25T01:54:26.349Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "c91ceb3b1a88e315c60e70342a7a1f246f351ea5ce1c6ffd1ca2a8ef2ed481ed"
+  },
+  "test": {
+    "pid": 43772,
+    "launchedAt": "2026-10-25T01:54:29.748Z",
+    "completedAt": "2026-10-25T01:54:50.717Z",
+    "exitCode": 0,
+    "signal": null,
+    "logSha256": "964e3c6c252334f4fa47588cb2e7990f15ff7a53e77aa8eceba7890829e851a4"
+  },
+  "total": 11,
+  "failed": 0,
+  "passed": 11,
+  "seconds": 20.89,
+  "projectFiles": 2840,
+  "sdkSourceFiles": 16,
+  "pureLibraryFiles": 1870,
+  "sdkRuntimeFiles": 30,
+  "nodeDependencyFiles": 18598,
+  "nativeBinaries": 142,
+  "nativeSha256": "5d99bfcfbd421b6729233a8c9cd3f30ca30ab6539793cf6a2502a0169c3c5acf",
+  "allSourceSdkLibrariesDependenciesBinariesAndFileSetsUnchanged": true,
+  "fullNativeSuiteRun": false,
+  "providerInference": "Synthetic model gateways and local controlled peers only; no paid provider inference",
+  "cpythonExecuted": false,
+  "installed": false,
+  "scopePassed": true,
+  "scope": "Captured native run metadata service plus standard xlang3 Runs.Open subobject, thin CLI and origin-bound HTTP adapters; focused local qualification only",
+  "initialFailure": {
+    "failed": 1,
+    "reason": "New scope-run HTTP route missing from exact view-route authorization list;401 instead of authenticated missing-record404",
+    "retainedNamespace": "xmind-remote-sdk-untrusted-qqYPrn",
+    "taskReplay": false,
+    "total": 11,
+    "passed": 10,
+    "seconds": 20.87,
+    "fixed": "Added scope-run to existing exact route list; unauthenticated401 and extra-field400 checks retained"
+  },
+  "capability": "remote_scoped_run_read:1",
+  "sdk": "Connections(owner).OpenScope(id,revision,scope).Runs().Open(session,run)",
+  "positiveNativeWindowsTlsRunReadVerified": false,
+  "peerOnlyHttpsRunReadVerified": true,
+  "remaining": [
+    "Hosted native trusted TLS positive run reads through SDK/CLI/HTTP",
+    "Full179 qualification; original diagnostics and ledger timeouts unresolved",
+    "Remote run mutations/events/enrollment/fencing and delivery acceptance"
+  ]
+}

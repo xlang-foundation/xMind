@@ -1,0 +1,56 @@
+Test project D:/CantorAI2026/xMind/build/skill-state-native
+      Start   4: native_remote_negotiation_contract
+ 1/11 Test   #4: native_remote_negotiation_contract ....................   Passed    0.02 sec
+      Start   5: native_remote_connection_client_contract
+ 2/11 Test   #5: native_remote_connection_client_contract ..............   Passed    1.01 sec
+      Start   6: native_remote_connection_credentials_contract
+ 3/11 Test   #6: native_remote_connection_credentials_contract .........   Passed    0.26 sec
+      Start   7: native_remote_connection_authentication_contract
+ 4/11 Test   #7: native_remote_connection_authentication_contract ......   Passed    0.50 sec
+      Start  32: native_xmind_ipc_lifetime_contract
+ 5/11 Test  #32: native_xmind_ipc_lifetime_contract ....................   Passed    1.78 sec
+      Start  33: native_xmind_ipc_api_contract
+ 6/11 Test  #33: native_xmind_ipc_api_contract .........................   Passed    6.57 sec
+      Start  76: native_remote_authentication_sdk_untrusted_contract
+ 7/11 Test  #76: native_remote_authentication_sdk_untrusted_contract ...***Failed    1.86 sec
+{"nativeTlsObservation":{"tcpConnections":1,"tlsConnections":1,"tlsFailures":0}}
+Actual xmind CLI authentication/status passed redirected-stdin handling, empty/multiline/oversized/extra-argument refusals without credential echo, untrusted TLS refusal and read-only state without mutation. No positive CLI TLS claim.
+{"finalNativeTlsObservation":{"tcpConnections":3,"tlsConnections":3,"tlsFailures":0}}
+Retained failed remote SDK fixture: D:\CantorAI2026\TestProj\xmind-delivery-validation\xmind-remote-sdk-untrusted-qqYPrn
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+401 !== 404
+
+    at runRemoteAuthenticationSdk (file:///D:/CantorAI2026/xMind/Native/tests/remote_authentication_sdk_peer.mjs:52:198)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///D:/CantorAI2026/xMind/Native/tests/remote_authentication_sdk_untrusted.mjs:14:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 401,
+  expected: 404,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0
+
+      Start  77: native_mcp_oauth_trusted_peer_contract
+ 8/11 Test  #77: native_mcp_oauth_trusted_peer_contract ................   Passed    0.61 sec
+      Start 144: native_http_cli_contract
+ 9/11 Test #144: native_http_cli_contract ..............................   Passed    5.91 sec
+      Start 171: native_connection_profiles_contract
+10/11 Test #171: native_connection_profiles_contract ...................   Passed    0.23 sec
+      Start 172: native_connection_profiles_http_contract
+11/11 Test #172: native_connection_profiles_http_contract ..............   Passed    2.07 sec
+
+91% tests passed, 1 tests failed out of 11
+
+Total Test time (real) =  20.87 sec
+
+The following tests FAILED:
+	 76 - native_remote_authentication_sdk_untrusted_contract (Failed)
+Errors while running CTest
