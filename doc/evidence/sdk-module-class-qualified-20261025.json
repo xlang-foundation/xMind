@@ -1,0 +1,47 @@
+{
+  "sourceParent": "4417a9efbca7608de9855974f46ffa2520a1a416",
+  "sourcePatchSha256": "b750c66a786b9e6ecca0abdedb97177e47b86b9ad3053b2c7fa5fcc29c8da45e",
+  "outputs": {
+    "xlang3_runtime.dll": "a3f185255756bc049e91eaac339fa2d474c3638783bd057650125b51abb89998",
+    "xlang3_runtime.lib": "5c3b83a87597df78f6b90cdb095409f97d57f8ed88dcd5323f32779f902944ab",
+    "xlang3.exe": "7c171cdaa8220dfc6a5c41c17d93b7d93ca73a5ead28fdebc849770de07edf30"
+  },
+  "sdkContracts": {
+    "passed": 6,
+    "total": 6,
+    "exitCode": 0,
+    "logSha256": "8485c74d599c1639a882d8a0ddcd664eae02c9d28d41acd7cd05fe3b7e13ec35"
+  },
+  "moduleRegression": {
+    "exitCode": 0,
+    "signal": null,
+    "cpythonExecuted": false
+  },
+  "ctypesRegressions": [
+    "ctypes_pointer_return",
+    "ctypes_cast_errcheck_array",
+    "ctypes_structure_layout",
+    "ctypes_unicode_buffer_contract"
+  ],
+  "pip25": {
+    "passed": true,
+    "stdlibRevision": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "normalCachePath": true
+  },
+  "pip26": {
+    "passed": true,
+    "normalCachePath": true
+  },
+  "performance": {
+    "passed": true,
+    "cases": 11,
+    "repeats": 21,
+    "warmup": 5,
+    "threshold": 0.1
+  },
+  "originalFileSetsAndHashesPreserved": true,
+  "cpythonExecuted": false,
+  "xmindReleaseQualified": false,
+  "commit": "6df6520f3728678341de3db18c95ff6499103f1a",
+  "fixedBaselinePerformanceReport": "https://github.com/CantorAI/xlang3/blob/6df6520f3728678341de3db18c95ff6499103f1a/doc/performance/data/module-class-compat-20261025/report.json"
+}

@@ -1,0 +1,33 @@
+{
+  "source": "feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+  "runId": 40218841893,
+  "jobId": 121257455378,
+  "native": {
+    "total": 182,
+    "passed": 181,
+    "failed": 1,
+    "seconds": 767.92,
+    "inventoryAndTerminalVerified": true,
+    "failedContract": "native_agent_worker_ledger_contract",
+    "observedSeconds": 45.16
+  },
+  "artifacts": [
+    {
+      "id": 12612016616,
+      "name": "native-windows-evidence-feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+      "bytes": 6375494,
+      "sha256": "0c5c5c639f39b633d08904a928768d6006063fcd9a087591ff1f2bddd43e75dd"
+    },
+    {
+      "id": 12612540354,
+      "name": "native-windows-diagnostic-images-feb42dc2aed7a57518cd5b24105c189b7b044ef7",
+      "bytes": 32228901,
+      "sha256": "7220e003e94a198f3b6a29e662f4ef29d6b76b5147a9444bf6506a3105f59e0f"
+    }
+  ],
+  "preservedFailureDirectory": "ledger-failure-WljCHM",
+  "neverReplay": true,
+  "cause": "Unresolved; original owned fixture exceeded its unchanged 45-second wrapper budget.",
+  "packagedPipSkipped": true,
+  "releaseQualified": false
+}

@@ -1,3 +1,9 @@
+## Module-class SDK compatibility qualified; xMind integration gate next — 2026-10-25
+
+Isolated SDK6df6520f passes six SDK contracts, imported-module reassignment/descriptor/call regressions, four ctypes regressions, offline pip25.2 against the exact hosted3.14.0 source and pip26.2.1, plus the fixed default11 performance gate (21 repeats,5 warmups,10% threshold). No CPython or vendor patch is used. The source is published on the SDK compatibility branch and a separate47-file snapshot retains original4417 headers/modules with the qualified replacement runtime. xMind has not yet been qualified against this SDK and installed76 is unchanged. [SDK qualification](evidence/sdk-module-class-qualified-20261025.json).
+
+Hosted cleanup40218841893/feb42dc2 completes181/182 in767.92s: the ledger fixture exceeds its unchanged45s wrapper (45.16s recorded). Complete actual inventory/terminal names verify; matching artifacts and original failure scope are retained without replay. Packaging is skipped. The earlier451 run remains a separate182/182 native pass followed by its pip25.2 failure; it does not resolve this ledger failure. [Cleanup terminal receipt](evidence/hosted-feb42dc2-ledger-deadline-20261025.json).
+
 ## User scope correction: cross-node execution belongs to Cantor Cluster — 2026-10-25
 
 Scope correction, 2026-10-25: xMind workers are local processes using standard xlang3 IPC. Cross-node worker enrollment, assignment, leases and fencing belong to later Cantor Cluster work and are not xMind delivery requirements. Generic authenticated connection clients remain separate from network worker execution. Removed the unused approval header, implementation and fixture; the Native source tree now matches the already qualified main Native tree exactly. Historical experiment evidence is retained. Browser, Code, CLI and pip packaging work continue; no installed runtime or user data changed.
