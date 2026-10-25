@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-25T22:58:51.133Z",
+  "passed": false,
+  "source": "f5f44eb3",
+  "package": {
+    "version": "0.1.78",
+    "archiveSha256": "56618c027e7a48819e6c99d95952905f759df508dc5d22e668693f3c2095960d",
+    "archiveBytes": 35279467,
+    "entries": 2381,
+    "nativeQualifiedSource": "1f49b5c39ae260a4e6f44aa8b1004f03b3325d85"
+  },
+  "rendered": {
+    "passed": false,
+    "expectedWorkspace": "v1-ui-other77",
+    "actual": {
+      "sessionId": "1529aa4c008642b5abbf8f1444867766",
+      "status": "Workspace switch failed · Invalid view request",
+      "workspace": "v1-ui-seed77⌄"
+    },
+    "observedError": "Workspace switch failed · Invalid view request",
+    "tasksSubmitted": 0,
+    "modelCalls": 0,
+    "tabRetainedForDiagnosis": true
+  },
+  "separateCliAttachment": {
+    "agent_execution": "thread",
+    "origin": "http://127.0.0.1:56405",
+    "process_id": 31548,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\u77\\p\\2867d3b0d97c1866019b54b5a9ec9b5714c521b531423219a4d6dc8b0e50b0b4",
+    "started": false,
+    "workspace": "D:\\CantorAI2026\\TestProj\\xmind-delivery-validation\\v1-ui-other77",
+    "workspace_edits": "approved"
+  },
+  "retainedFixture": {
+    "nativeViewPid": 27084,
+    "nativeViewIdentity": {
+      "process_birth": "134374424256147051",
+      "process_id": 27084
+    },
+    "adapterPid": 15696,
+    "adapterIdentity": {
+      "process_birth": "134374424219625084",
+      "process_id": 15696
+    },
+    "toolSession": 68685,
+    "browser": "http://127.0.0.1:64430/ui/",
+    "profileRoot": "D:/CantorAI2026/xMind/.agentflow/u77/p"
+  },
+  "diagnosis": "Native cold view attachment refuses the existing second workspace with generic HTTP400; CLI attaches that same live profile successfully. Exact native cause not established. Browser-only preference regression fix passes510/185 but actual restart remains unqualified.",
+  "nativeSourceChanged": false,
+  "tasksSubmitted": 0,
+  "modelCalls": 0,
+  "installed76Changed": false,
+  "releaseAccepted": false
+}
