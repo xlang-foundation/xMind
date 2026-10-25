@@ -1,0 +1,121 @@
+{
+  "recordedAt": "2026-10-25T05:51:03.215Z",
+  "runId": 40162311348,
+  "jobId": 121077255300,
+  "url": "https://github.com/xlang-foundation/xMind/actions/runs/40162311348",
+  "terminal": "failure",
+  "provenance": {
+    "xmind": "6cc54bee66ffdffadc9a928d5a531cec81af310e",
+    "toolchain": "Visual Studio 18 2026",
+    "xlang3": "8c7972d124f54ec2f659960ee46bcaf3f80feae5",
+    "stdlib_source": "ebf955df7a89ed0c7968f79faec1de49f61ed7cb",
+    "sqlite_prerequisite": "Included in pinned xlang3 source; no overlay applied",
+    "runtime": "Native xlang3; no CPython execution or bridge",
+    "build_parallelism": 4,
+    "windows_default_owner_matches_user": false,
+    "processors": 4,
+    "toolchain_version": "18.11.12315.225"
+  },
+  "inventory": 177,
+  "passed": 172,
+  "failed": 5,
+  "seconds": 827.7,
+  "artifact": {
+    "id": 12588418392,
+    "name": "native-windows-evidence-6cc54bee66ffdffadc9a928d5a531cec81af310e",
+    "bytes": 8868097,
+    "sha256": "bbb2bfaa0ab4e06fd9341bd451f978803ce0acff5c12aab78ef9c4b167d4d0ca"
+  },
+  "failures": [
+    {
+      "test": "native_graph_runner_contract",
+      "seconds": 35.01,
+      "childId": "5be9efa91117f618d6c42b135b58486c",
+      "operation": {
+        "elapsed_ms": 30042,
+        "exit_code": 1,
+        "id": "3c082727ade37fb6e581a4b41eb96b19",
+        "output_artifact": {
+          "operation_id": "3c082727ade37fb6e581a4b41eb96b19",
+          "state": "complete",
+          "stderr_bytes": 0,
+          "stdout_bytes": 34
+        },
+        "process_tree_retired": true,
+        "profile_id": "powershell",
+        "startup_phases": [
+          "script_entered"
+        ],
+        "state": "uncertain",
+        "termination": "timed_out",
+        "timeout_ms": 30000,
+        "tool": "run_process"
+      },
+      "cause": "Unproven"
+    },
+    {
+      "test": "native_mcp_oauth_trusted_contract",
+      "seconds": 1.03,
+      "cause": "Certificate helper rejected repository evidence TEMP; this source predates97c77038 correction",
+      "positiveNativeTlsNotExecuted": true
+    },
+    {
+      "test": "native_agent_worker_model_rpc_contract",
+      "seconds": 67.51,
+      "wrapperTimeoutMs": 60000,
+      "killed": true,
+      "signal": "SIGTERM",
+      "slowDump": "fixture-8660-4354328-slow.dmp",
+      "cause": "Unproven; no verified matching original executable/PDB stack interpretation"
+    },
+    {
+      "test": "native_agent_worker_ledger_contract",
+      "seconds": 45.16,
+      "recordedAt": "2026-10-25T05:40:44.921Z",
+      "code": null,
+      "killed": true,
+      "signal": "SIGTERM",
+      "requests": 0,
+      "timeoutMs": 45000,
+      "maxBuffer": 1048576,
+      "completedTasksMustNeverBeReplayed": true,
+      "phaseMs": {
+        "planningAdmission": 15268,
+        "pausedChildDrain": 966,
+        "mainProcessPlanning": 8234
+      },
+      "lastActiveCases": [
+        "coexisting-coding-counted-deny",
+        "coexisting-coding-counted-cancel"
+      ],
+      "cause": "Unproven; cumulative fixture work exceeded unchanged wrapper deadline"
+    },
+    {
+      "test": "native_agent_worker_nested_human_contract",
+      "seconds": 45.01,
+      "completedCases": 15,
+      "lastCase": "paused-root-coding-counted-cancel",
+      "cause": "Unproven; CTest timeout"
+    }
+  ],
+  "separatePasses": {
+    "graphRemoteSeconds": 18.71,
+    "deepHumanSeconds": 12.43,
+    "diagnosticsSeconds": 5.99,
+    "localViewSeconds": 59.56
+  },
+  "retainedFixtureNamespaces": [
+    "xmind-graph-runner-Az38gr",
+    "xmind-model-rpc-2076831376-881040365",
+    "xmind-model-rpc-2589796553-486812515",
+    "xmind-model-rpc-4090794965-95927909",
+    "xmind-oauth-trust-QuIKMq",
+    "xmind-worker-ledger-1906132075-4198385718",
+    "xmind-worker-ledger-715326015-3963839915"
+  ],
+  "rawLedgerSha256": "ecf837939826de9f9edf9b34774da0bf90ad2a014f0e217dfe147ad0cdefb16b",
+  "originalDatabasesQueriedOrMutated": false,
+  "completedTasksMustNeverBeReplayed": true,
+  "installed75Unchanged": true,
+  "currentLocalFullPassDoesNotClearHostedFailures": true
+}

@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- Development d55741e0/Native d85a1697 passes full179 in788.06s; installed75 unchanged. Older hosted6cc54bee fails5/177; current hosted40166026077 is live. See doc/VALIDATION_STATUS.md; no replay.
+
 - Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.
 
 - Candidate74 editor updates clean buffer before reload; selected-context coding and history restore pass. NEVER replay session99b136d7bb544013a4d98bbc72705860/rootc3266a85e6704444b2c640e05babc442. See doc/evidence/candidate74-rendered-editor-coding-20261024.json.
@@ -31,7 +33,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Historical hosted view-count failures and corrected gates remain in doc/evidence/hosted-view-inventory-failure-20261019.json; those receipts are not new runtime acceptance.
 
-- Complete e09259c4/native5dc5bc6c local gate passes154/154 in1028.90s with checked2625 project/16 SDK/1870 pure libraries/76 runtime/18598 dependencies/129 native binaries and file sets unchanged. Gate65478 closed0; no local build/test live. Actual installed44 pane/model/inference/reload check passes in one TestProj window; source candidate remains uninstalled. Full receipt doc/evidence/process-module-profile-full-native-20261019.json.
+- Historical e09259c4 qualification guidance is preserved verbatim in doc/development-checkpoints-20261024.md.
 
 - Hosted39309088086/9c5bedbb is terminal failure154/155 in705.36s: graph PowerShell30051ms timeout, script_entered only, uncertain receipt/tree retired; SDK2/2. Official artifact12218800656/69559 bytes SHA1d68fe7a verifies. This is installed44 native source, not the new module policy; no hosted acceptance. See doc/evidence/hosted-native-9c5bedbb-process-timeout-20261019.json.
 
