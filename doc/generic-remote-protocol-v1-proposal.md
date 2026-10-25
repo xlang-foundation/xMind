@@ -1019,10 +1019,16 @@ profile fallback or remote-effect replay is introduced.
 
 Actual HTTP owner/view fixtures verify origin refusal, strict fields, generation
 fencing, reset/idempotence, shared state with a separate SDK/CLI process and
-database reopen. This is cached native HTTP acceptance; positive remote trusted
-TLS and rendered browser/editor snapshot workflows remain open.
+database reopen. This checkpoint covers cached native HTTP acceptance. Later
+[browser](evidence/snapshot-recovery-ui-20261025.json) and
+[Code](evidence/code-snapshot-recovery-20261025.json) checks verify actual rendered
+cached-snapshot observation and explicit acknowledgment. The later
+[hosted SDK flow](evidence/hosted-d500-sdk-success-cli-scope-failure-20261025.json)
+verifies native trusted-TLS snapshot read/reset/reopen before a separate stale
+CLI assertion fails. Rendered remote network snapshot fetching and complete
+updated hosted CLI/HTTP acceptance remain open.
 [HTTP evidence](evidence/remote-snapshot-http-20261025.json).
 
 ### Shared browser/editor snapshot client
 
-BackendClient exposes openRemoteSnapshot, readRemoteSnapshot, observeRemoteSnapshot and resetRemoteSnapshot. Each call is explicit and binds the resource, consumer, server and backend generation. Reset requires a validated complete assembly; partial reads must progress. Capability/origin/close fences and strict public response validation apply before publication. No automatic page loop or acknowledgement is added. Client suites and actual native HTTP integration pass; rendered snapshot workflows remain open. [Evidence](evidence/remote-snapshot-shared-client-20261025.json).
+BackendClient exposes openRemoteSnapshot, readRemoteSnapshot, observeRemoteSnapshot and resetRemoteSnapshot. Each call is explicit and binds the resource, consumer, server and backend generation. Reset requires a validated complete assembly; partial reads must progress. Capability/origin/close fences and strict public response validation apply before publication. No automatic page loop or acknowledgement is added. Client suites and actual native HTTP integration pass. Actual rendered cached-snapshot workflows now have separate browser/Code evidence above; rendered network fetching remains open. [Original shared-client evidence](evidence/remote-snapshot-shared-client-20261025.json).

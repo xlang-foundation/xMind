@@ -130,15 +130,17 @@ Captured model catalog/selection, graph controls/tree streams, commands and
 workspace metadata/membership/file reads now have native SDK/HTTP and shared-client
 integration. Provider configuration mutation and other general operations still
 require integration.
-Actual browser and CLI coding receipts exist; actual rendered VS Code
-coding remains unverified. These results do not establish remote execution.
+Actual browser, CLI and rendered Code coding receipts exist for installed76;
+see the [installation checkpoint](evidence/installed-0.1.76-d55741e0-20261024.json).
+These controlled coding checks do not establish generic remote execution.
 
-The current production source2d98bdde passes the complete173-contract native
+The historical66 source2d98bdde passes the complete173-contract native
 inventory with frozen source/runtime/dependency closures. Accepted client481/165
 assets and the exact qualified0.1.66 runtime pass separate actual browser coding,
 CLI coding and managed package handoff checks. The installed66 isolated smoke
 also passes; protected-user-state verification passes with all five roots unchanged. These receipts
-do not prove authenticated remote routing or rendered VS Code coding. See
+did not prove authenticated remote routing or rendered VS Code coding at that
+checkpoint. Later Code evidence is listed above. See
 [evidence and scope](evidence/candidate-0.1.66-qualified-coding-20261024.json)
 and [installed smoke](evidence/installed-0.1.66-smoke-20261024.json).
 
