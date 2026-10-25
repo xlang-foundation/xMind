@@ -188,3 +188,8 @@ Archived after hosted d55741e0 terminal result (2026-10-24):
 Archived when76 installer completed; preservation pending:
 
 - Development d55741e0/Native d85a1697 passes local179/hosted177; CI staging pin fixed47e9a2e4, hosted packaging pending. Installed75 unchanged; candidate76 CLI/browser/editor tasks complete, NEVER replay. See doc/VALIDATION_STATUS.md.
+
+
+Archived after installed76 preservation/smoke terminal pass:
+
+- Native d85a1697 passes local179/hosted177. Installed76 installer/payload pass; preservation54333 and smoke pending. Exact75 backup verified. NEVER replay candidate76 CLI/browser/editor/handoff tasks. See doc/VALIDATION_STATUS.md.

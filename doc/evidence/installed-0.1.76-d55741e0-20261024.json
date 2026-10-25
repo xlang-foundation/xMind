@@ -1,0 +1,104 @@
+{
+  "recordedAt": "2026-10-25T06:51:32.770Z",
+  "passed": true,
+  "installedVersion": "0.1.76",
+  "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.76",
+  "vsixSha256": "424e68c1541bcc3e69ea8fa392b2f3a18d7254c070de64c48c98354ea226c056",
+  "installedPayloadFilesVerified": 2440,
+  "completeInstalledFileSetVerified": 2442,
+  "installerVsixManifestMatches": true,
+  "packageJsonMatchesExceptInstallerMetadata": true,
+  "runtimeFilesVerified": 2398,
+  "runtimeManifestSha256": "5a9bffc7b97a8c066bc436a066ea75a8213fcbd8b5d5fb3edb2796e305c3c56e",
+  "nativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+  "otherExtensionRegistryEntriesUnchanged": true,
+  "preservedRoots": [
+    "C:/Users/shaw9/.xMind",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+    "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+    "D:/CantorAI2026/xMind/.config"
+  ],
+  "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+  "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+  "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+  "exactOldInstallationBackup": 2442,
+  "visibleWindowRequested": false,
+  "installedNativeExecuted": true,
+  "userProfileBackendStarted": false,
+  "paidInference": false,
+  "renderedVSCode": false,
+  "smoke": {
+    "passed": true,
+    "installedNativeSha256": "d85a16970a42554e61a5b3df863733d3eddfecb89c0c8b543b5e42e43510e4e0",
+    "managedDiscoveryAndReuse": true,
+    "sessionId": "b63970ccecdf512ad4b68c5d4c45fc8b",
+    "completedRoot": "2841c009f90f21230fb720366c0cbf0d",
+    "history": [
+      {
+        "data": {
+          "content": "Read the installed fixture marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph installed.read.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.76 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000002de50f0000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:00000000000000002de50f0000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "installed.read",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Observed installed 0.1.76 native read.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000002de50f0000000000",
+                "path": "installed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:00000000000000002de50f0000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "observedOutput": "Observed installed 0.1.76 native read.\n",
+    "modelCalls": 0,
+    "userProfileRootUsed": false,
+    "ownedBackendIdentityVerifiedAndExitObserved": true,
+    "visibleWindowOpened": false,
+    "renderedVSCode": false
+  },
+  "smokeSourceFreeze": {
+    "passed": true,
+    "sourceFiles": 10287,
+    "hashesAndFileSetsUnchanged": true,
+    "terminal": {
+      "code": 0,
+      "signal": null
+    },
+    "scope": "Installed76 native disposable-profile read/history smoke; source hashes and file sets unchanged",
+    "goalComplete": false
+  },
+  "postSmokeInstalledFileSetAndPayloadVerified": true,
+  "preInstallCandidateProofs": [
+    "candidate-0.1.76-package-cli-20261024.json",
+    "candidate76-rendered-browser-20261024.json",
+    "candidate76-rendered-editor-20261024.json",
+    "candidate76-managed-handoff-20261024.json"
+  ],
+  "qualification": {
+    "localNative179": true,
+    "hostedNative177": true,
+    "hostedPackaging": "staging pin correction pending",
+    "actualRenderedEditor": "controlled local peer; original verifier and cleanup failures retained"
+  },
+  "goalComplete": false
+}
