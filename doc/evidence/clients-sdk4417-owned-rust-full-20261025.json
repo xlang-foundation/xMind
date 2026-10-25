@@ -1,0 +1,81 @@
+{
+  "nativeQualifiedSource": "7755bae6c1fc16e438c04f11d66736c4523316f0",
+  "nativeGateSha256": "5aacd1c93e813d32be876bce2c348316874b9a6ebe9e5a79f4887b9dcf34e00b",
+  "source": "7755bae6c1fc16e438c04f11d66736c4523316f0",
+  "projectFiles": 2854,
+  "dependencyFiles": 14918,
+  "testFiles": {
+    "extension": 23,
+    "browser": 10
+  },
+  "results": {
+    "build": {
+      "pid": 7112,
+      "startedAt": "2026-10-25T16:15:42.743Z",
+      "endedAt": "2026-10-25T16:15:42.821Z",
+      "exitCode": 0,
+      "logSha256": "3745c77551caa8e34a8ad165c14827818df18c5256e73a13de48e21208840ba1"
+    },
+    "extension": {
+      "pid": 27516,
+      "startedAt": "2026-10-25T16:15:42.821Z",
+      "endedAt": "2026-10-25T16:15:47.143Z",
+      "exitCode": 0,
+      "logSha256": "c75bce1c914d1da97c831892c1b34da9127a7b33263a05a24aef0e858972d4a3",
+      "tests": 510,
+      "pass": 510,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 4257.8544
+    },
+    "browser": {
+      "pid": 2460,
+      "startedAt": "2026-10-25T16:15:47.144Z",
+      "endedAt": "2026-10-25T16:16:07.442Z",
+      "exitCode": 0,
+      "logSha256": "99e930a9fffb2c36dfa0976c8831e250211ecbf1c084eacc1f7d51fdd93ebcbc",
+      "tests": 180,
+      "pass": 180,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 20237.9381
+    }
+  },
+  "artifacts": 18,
+  "allSourceDependenciesAndSetsUnchanged": true,
+  "nativeSuiteRun": false,
+  "rendered": false,
+  "installed": false,
+  "paidInference": false,
+  "cpython": false,
+  "passed": true,
+  "recordedAt": "2026-10-25T16:16:51.871Z",
+  "browserArtifacts": {
+    "chat.css": "f9dabefc9e48df7f99c396e76edf574b815e253efc2405c0eb77d2c0f42fa0d9",
+    "browser.css": "e4f83d40ca37cd013b8597fcd71d44c29f6d7a6949a363fa055cb640e6f9d136",
+    "licenses/marked.txt": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c",
+    "browser.js": "dcd90655d13b50aacb694b0a5d87fba386676db743cf9bef8b62b0505c5c2f05",
+    "index.html": "3c7124b8ef5dea387bfd4d7a8f0c957a1cee48d76662cd2f9a807798309cabeb",
+    "licenses/xterm-addon-fit.txt": "e256f01188af527e4d06d21d06fbf785ae9c50d4b328bf03cbe0ba7f0aa4228f",
+    "licenses/xterm.txt": "b569f629d00f2626a8100df2a1798210535621e42164dfd426a6fe5aac7b0ccd",
+    "chat.js": "525a6b872145e870ecc6042c16f9e16cf968d020325a2d9b56f52899f1ce715d",
+    "marked.js": "f424dcb508fdf93e0137a970cfce8f3207ea2e3f37eca5f7556a52875683632a",
+    "patch-review.js": "77cf2303e0a46da5c4063b3d059d25b51ed9877e4d5b6ca254b45387735a3fdb",
+    "xterm-fit.js": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+    "purify.js": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+    "client.js": "0e07a71da8456546bb02b3f3ba5d98685c26bec2ffa9f93fa9b4102dfa82e7d8",
+    "terminal.js": "5353bb5d264705f32ddff0ca80fce74d5934d83fdd26cd14e147cba48156c25e",
+    "xterm.css": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+    "xterm.js": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+    "licenses/dompurify.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "licenses/dompurify-MPL.txt": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+  },
+  "qualifiedNativeReceipt": "native-sdk4417-owned-rust-full-20261025.json",
+  "scope": "Complete client contracts and browser asset build with this checkout dependency tree; actual rendered and packaged coding are separate.",
+  "installedVersion": "0.1.76",
+  "fullGoalComplete": false
+}
