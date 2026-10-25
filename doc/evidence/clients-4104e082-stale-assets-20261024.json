@@ -1,0 +1,6 @@
+{
+  "observedAt": "2026-10-25T03:29:13.308Z",
+  "defaultAssetSha256": "c5ae0320c0bc3e222f0b128982f74280c28ffae5ebd8cf731a5e0412921a0b3a",
+  "currentPageSha256": "3c7124b8ef5dea387bfd4d7a8f0c957a1cee48d76662cd2f9a807798309cabeb",
+  "disposition": "Invalid mixed asset/source validation. Intentionally retire only identity-verified synthetic connection-test child to drain parent and preserve original output; no product task replay."
+}
