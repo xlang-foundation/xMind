@@ -1,3 +1,7 @@
+## Live web UI multi-turn project tests in progress — 2026-10-25
+
+The user requests C++, Python-only through xlang3, and Vue+Vite projects under the dedicated D-drive folder, with every chat/follow-up/approval through the UI and up to$100 total configured-model inference. Python completes3 turns with actual6 then9 tests, correct filtered CLI output and identical rendered history/workspace/model after automatic reload reconnect. [Python receipt](evidence/webui-python-multiturn-20261025.json). C++ exposes generic timeout-argument errors, a missing<string> include and two process-tree timeouts with root exit0/1; its build remains quarantined and no C++ pass is claimed. [Original failures](evidence/webui-cpp-process-timeouts-20261025.json). Vue and the original VS Code authentication persistence fix remain unfinished. Current conservative full-rate token accounting is$0.474414, not an invoice.
+
 ## Current delivery priority: working v1 — 2026-10-25
 
 Working v1 with solid UI and a reliable coding framework is the only delivery goal. The user removed the old broader goal; do not resume or pursue its feature backlog. Follow [v1 acceptance](WORKING_V1_GOAL.md). Prioritize packaged browser/VS Code/CLI usability and release blockers. Advanced feature breadth is outside this goal unless it blocks v1; a full local contract pass does not prove a usable installed release. Historical checkpoints below retain their original scope and are not current backlog instructions.

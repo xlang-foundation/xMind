@@ -1,0 +1,73 @@
+{
+  "recordedAt": "2026-10-26T04:47:28.241Z",
+  "passed": false,
+  "scope": "Original real-model UI C++ project test; retain failure and do not replay uncertain commands",
+  "project": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/cpp-cli",
+  "sessionId": "915e28d27d6e41aeba40ad78a19e3e76",
+  "configure": {
+    "runId": "1ed2dd3bcb2f4474a4c0e64c684b733c",
+    "operationId": "4144511a43d601dc0195f9c8689fa680",
+    "rootPid": 11960,
+    "recordedTermination": "timed_out",
+    "recordedExitCode": 0,
+    "recordedElapsedMs": 120008,
+    "nativeRecordedProcessTreeRetired": true,
+    "generatedCachePointsToExactProject": true,
+    "generator": "Visual Studio 18 2026",
+    "files": {
+      "main.cpp": {
+        "bytes": 1063,
+        "sha256": "04ec3e0a418aeb8b7c189ea1e27dc9bad8f73baedefe5e89b9ff7cb1088fce4e"
+      },
+      "CMakeLists.txt": {
+        "bytes": 408,
+        "sha256": "e1018333fdc137034b0a75dde174c118bb5ca8ad1ae66c6dda50ddabcdbb4e95"
+      },
+      "README.md": {
+        "bytes": 434,
+        "sha256": "be7334277aa39f4f4e93be52a6bfdcc3d6276789b25556c02c35cef130537204"
+      },
+      "build/CMakeCache.txt": {
+        "bytes": 13478,
+        "sha256": "713e29a14699d9d696225f3173d0dd4ab4e4a1cc4c75e519afb3ceb171775901"
+      },
+      "build/statistics_app.slnx": {
+        "bytes": 1430,
+        "sha256": "b26804902fce5c314fa96596828ac877d1027c5d3f11a66371aad19ff787d3b2"
+      },
+      "build/statistics.vcxproj": {
+        "bytes": 83277,
+        "sha256": "61edbc25c2444768800c50e90c55c689ba66c0b2112e87d4843375db87468cf2"
+      }
+    },
+    "originalCommandNotReplayed": true,
+    "causeOfLingeringDescendantNotEstablished": true,
+    "reportedModelInputTokens": 7706,
+    "reportedModelOutputTokens": 56,
+    "conservativePublishedRateCostUsd": 0.01586
+  },
+  "build": {
+    "runId": "a2e0891c38ee43ebacdc61f183e7e42e",
+    "operationId": "ddd36c5db17d32ec3e08899b599474be",
+    "recordedElapsedMs": 120010,
+    "exitCode": 1,
+    "termination": "timed_out",
+    "processTreeRetired": true,
+    "rootPid": 30668,
+    "stdoutBytes": 767,
+    "compilerError": "main.cpp is missing <string> for std::stoi",
+    "cppPassClaimed": false,
+    "workspaceQuarantinePreserved": true,
+    "commandNotReplayed": true,
+    "reportedModelInputTokens": 7863,
+    "reportedModelOutputTokens": 51,
+    "conservativePublishedRateCostUsd": 0.016134
+  },
+  "nativeBudgetsUnchanged": true,
+  "configureReconciledThroughUiAfterInspection": true,
+  "buildQuarantineStillRetained": true,
+  "compilerDescendantCauseNotYetEstablished": true,
+  "modelGeneratorDiagnosisWasIncorrect": true,
+  "actualRejectedArgument": "timeout_ms=240000 exceeded registered cmake maximum120000",
+  "next": "Inspect/repair genuine build issue through UI without replaying original failed commands"
+}

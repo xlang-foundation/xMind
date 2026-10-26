@@ -1,0 +1,212 @@
+{
+  "recordedAt": "2026-10-26T04:47:28.239Z",
+  "passed": true,
+  "installedVersion": "0.1.79",
+  "scope": "Actual web UI chat, saved configured OpenAI provider, real gpt-4.1 Responses inference explicitly authorized by the user",
+  "project": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/python-only",
+  "sessionId": "d86051f1c0654a09b0083f689135a15c",
+  "turns": [
+    "5e2b3897162f4303b5e8b78c008a1809",
+    "c1ff055e7fa84ed4a7df16a35ecc9720",
+    "95f6ecf9c68544d6ba5b24a82a1032d3"
+  ],
+  "initialTests": 6,
+  "enhancedTests": 9,
+  "initialCommandOutcomes": [
+    {
+      "elapsed_ms": 717,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "f4c4016ee3c370feb05fa3efac61bfb5",
+      "operation_id": "f4c4016ee3c370feb05fa3efac61bfb5",
+      "output_artifact": {
+        "operation_id": "f4c4016ee3c370feb05fa3efac61bfb5",
+        "state": "complete",
+        "stderr_bytes": 639,
+        "stdout_bytes": 0
+      },
+      "pid": 33496,
+      "process_tree_retired": true,
+      "profile_id": "xlang3",
+      "stderr": {
+        "byte_count": 639,
+        "data": "test_empty_data (test_expense_report.TestExpenseReport.test_empty_data) ... ok\r\ntest_invalid_amounts (test_expense_report.TestExpenseReport.test_invalid_amounts) ... ok\r\ntest_missing_headers (test_expense_report.TestExpenseReport.test_missing_headers) ... ok\r\ntest_mixed_categories (test_expense_report.TestExpenseReport.test_mixed_categories) ... ok\r\ntest_quoted_category_names (test_expense_report.TestExpenseReport.test_quoted_category_names) ... ok\r\ntest_zero_values (test_expense_report.TestExpenseReport.test_zero_values) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 6 tests in 0.008s\r\n\r\nOK\r\n",
+        "encoding": "utf-8",
+        "retained_bytes": 639
+      },
+      "stdout": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "termination": "exited",
+      "truncated": false
+    }
+  ],
+  "enhancedCommandOutcomes": [
+    {
+      "elapsed_ms": 707,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "53210ae3efb2ad5295e49e38667e1381",
+      "operation_id": "53210ae3efb2ad5295e49e38667e1381",
+      "output_artifact": {
+        "operation_id": "53210ae3efb2ad5295e49e38667e1381",
+        "state": "complete",
+        "stderr_bytes": 925,
+        "stdout_bytes": 0
+      },
+      "pid": 15272,
+      "process_tree_retired": true,
+      "profile_id": "xlang3",
+      "stderr": {
+        "byte_count": 925,
+        "data": "test_category_filtering (test_expense_report.TestExpenseReport.test_category_filtering) ... ok\r\ntest_empty_data (test_expense_report.TestExpenseReport.test_empty_data) ... ok\r\ntest_empty_input_totally (test_expense_report.TestExpenseReport.test_empty_input_totally) ... ok\r\ntest_invalid_amounts (test_expense_report.TestExpenseReport.test_invalid_amounts) ... ok\r\ntest_missing_headers (test_expense_report.TestExpenseReport.test_missing_headers) ... ok\r\ntest_mixed_categories (test_expense_report.TestExpenseReport.test_mixed_categories) ... ok\r\ntest_quoted_category_names (test_expense_report.TestExpenseReport.test_quoted_category_names) ... ok\r\ntest_strict_row_error (test_expense_report.TestExpenseReport.test_strict_row_error) ... ok\r\ntest_zero_values (test_expense_report.TestExpenseReport.test_zero_values) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 9 tests in 0.008s\r\n\r\nOK\r\n",
+        "encoding": "utf-8",
+        "retained_bytes": 925
+      },
+      "stdout": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "termination": "exited",
+      "truncated": false
+    },
+    {
+      "elapsed_ms": 540,
+      "exit_code": 0,
+      "independently_verified": false,
+      "job_id": "acda2c66f412d764e9c2b310744c081b",
+      "operation_id": "acda2c66f412d764e9c2b310744c081b",
+      "output_artifact": {
+        "operation_id": "acda2c66f412d764e9c2b310744c081b",
+        "state": "complete",
+        "stderr_bytes": 0,
+        "stdout_bytes": 92
+      },
+      "pid": 34228,
+      "process_tree_retired": true,
+      "profile_id": "xlang3",
+      "stderr": {
+        "byte_count": 0,
+        "data": "",
+        "encoding": "utf-8",
+        "retained_bytes": 0
+      },
+      "stdout": {
+        "byte_count": 92,
+        "data": "{\r\n  \"categories\": {\r\n    \"lunch\": 1980\r\n  },\r\n  \"row_count\": 2,\r\n  \"total_cents\": 1980\r\n}\r\n",
+        "encoding": "utf-8",
+        "retained_bytes": 92
+      },
+      "termination": "exited",
+      "truncated": false
+    }
+  ],
+  "reload": {
+    "passed": true,
+    "workspace": "python-only\n⌄",
+    "sessionId": "d86051f1c0654a09b0083f689135a15c",
+    "selectedRun": "95f6ecf9c68544d6ba5b24a82a1032d3",
+    "runIds": [
+      "5e2b3897162f4303b5e8b78c008a1809",
+      "c1ff055e7fa84ed4a7df16a35ecc9720",
+      "95f6ecf9c68544d6ba5b24a82a1032d3"
+    ],
+    "model": "gpt-4.1",
+    "beforeHistorySha256": "a8967cfdae18cccaf081057d0bd1134411da986c5ae11b29eb6d18511a735177",
+    "afterHistorySha256": "a8967cfdae18cccaf081057d0bd1134411da986c5ae11b29eb6d18511a735177",
+    "historyCharacters": 7625,
+    "automaticConnection": true,
+    "completedTasksReplayed": false,
+    "reportedUsage": [
+      {
+        "cached": 0,
+        "input": 5252,
+        "output": 1485
+      },
+      {
+        "cached": 5120,
+        "input": 7181,
+        "output": 35
+      },
+      {
+        "cached": 7040,
+        "input": 7548,
+        "output": 253
+      },
+      {
+        "cached": 0,
+        "input": 7990,
+        "output": 66
+      },
+      {
+        "cached": 7936,
+        "input": 9672,
+        "output": 1265
+      },
+      {
+        "cached": 9600,
+        "input": 11056,
+        "output": 152
+      },
+      {
+        "cached": 11008,
+        "input": 11324,
+        "output": 446
+      },
+      {
+        "cached": 11264,
+        "input": 11892,
+        "output": 246
+      },
+      {
+        "cached": 7680,
+        "input": 12248,
+        "output": 35
+      },
+      {
+        "cached": 12160,
+        "input": 12682,
+        "output": 39
+      },
+      {
+        "cached": 12544,
+        "input": 12952,
+        "output": 296
+      },
+      {
+        "cached": 13184,
+        "input": 13355,
+        "output": 316
+      },
+      {
+        "cached": 13312,
+        "input": 13793,
+        "output": 92
+      }
+    ],
+    "conservativePythonCostUsd": 0.311698,
+    "conservativeAllProjectsCostUsd": 0.474414
+  },
+  "sourceFiles": {
+    "expense_report.py": "d82307d5145ea9aba86d637f2040a91387b62e1a1de3ba8ff0f885478dc3ee7e",
+    "README.md": "8f9cdeb0863a34b1df085a0d7fb7c41de8c1db70747dec038c1fc1369c74b25e",
+    "sample.csv": "87b3b825ee4f699ab90f189406a488f003eb45d6c16fabcfccade72f250abea7",
+    "test_expense_report.py": "0b7b5ba4b26e2358a5871dd20a5d1c902cc1adb155e1df3d3d73500f77bb6215"
+  },
+  "allPromptsFollowupsAndApprovalsViaUi": true,
+  "CPythonExecuted": false,
+  "completedEffectsReplayed": false,
+  "budget": {
+    "authorizedTotalUsd": 100,
+    "conservativeAllProjectsAccountedUsd": 0.474414,
+    "pricingSource": "https://developers.openai.com/api/docs/models/gpt-4.1",
+    "note": "Calculated from provider-reported tokens at full published input/output rates, without cache discounts; not an invoice"
+  },
+  "cppAndVueAccepted": false,
+  "vsCodeAuthenticationFixComplete": false
+}
