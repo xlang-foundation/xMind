@@ -3,10 +3,14 @@ const api=globalThis.xMindView||acquireVsCodeApi(),byId=id=>document.getElementB
 const patchReview=globalThis.XMindPatchReview.patchReview;
 const canRestoreFileOperation=globalThis.XMindPatchReview.canRestoreFileOperation;
 let execution=false,activeRun=false,sessionBusy=false,live,streamText='',streamUsage=null,promptFiles=[],historySignature;
-function showRunStatus(text){byId('status').textContent=text;activeRun=['queued','running','paused'].includes(text);syncOperationActivity();skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
+function showRunStatus(text){byId('status').textContent=text;activeRun=['queued','running','paused'].includes(text);progress(text==='paused'?'Waiting for input…':text==='queued'?'Starting…':'Working…');syncOperationActivity();skillControls();agentControls();refreshSendControl();byId('cancel').hidden=!activeRun;}
 let renameCapability=false,forkCapability=false,deleteCapability=false,deletePending=false,forkPending=false,renameSnapshot;
 const forkButtons=new Set();
 let currentWorkspaceRoot;
+let accessState,accessAvailable=false,accessPending=false,streamHasTools=false;
+function refreshAccess(){const control=byId('access-mode');control.hidden=!accessAvailable;control.disabled=!accessAvailable||accessPending;control.value=accessState?.mode||'default';control.classList.toggle('full-access',accessState?.mode==='full');const note=byId('file-mode');if(accessAvailable){note.hidden=false;note.textContent=accessState?.mode==='full'?' · Full access':' · Default permissions';}}
+function progress(label){const view=byId('turn-progress');view.hidden=!activeRun;if(label)byId('turn-progress-text').textContent=label;}
+byId('access-mode').onchange=()=>{const mode=byId('access-mode').value;accessPending=true;refreshAccess();api.postMessage({type:'access-change',session:byId('sessions').selectedOptions[0]?.dataset.sessionId||'',mode,revision:accessState?.revision||0,workspace:accessState?.workspace_id});};
 const operationSections=new Map();
 const operationRows=new Map();
 const a2aTaskInspections=new Map();
@@ -26,7 +30,7 @@ function syncOperationActivity(){
   const phase=empty?'empty':review?'review':activeRun?'running':'settled';
   const summary=byId('operation-activity-summary'),label=(currentOperations.length?'Tools and changes · '+currentOperations.length:'Command output · '+processStreams.size)+(review?' · review needed':'');
   if(summary.textContent!==label)summary.textContent=label;
-  if(phase!==operationActivityPhase){activity.open=phase==='review'||phase==='running';operationActivityPhase=phase;}
+  operationActivityPhase=phase;const pending=currentOperations.find(item=>item.state==='awaiting_approval'),running=currentOperations.find(item=>item.state==='executing');if(pending)progress('Waiting for approval…');else if(running)progress(running.tool==='run_process'?'Running command…':'Applying changes…');
 }
 function pendingApprovals(){return pendingOperations.filter(item=>Date.now()<item.expires_unix_ms&&operationRows.get(item.id)?.section.isConnected);}
 function refreshPendingApprovals(){
@@ -36,7 +40,7 @@ function refreshPendingApprovals(){
   if(label.textContent!==text)label.textContent=text;
   return pending.length>0;
 }
-byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item){byId('operation-activity').open=true;operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});}else refreshPendingApprovals();};
+byId('approval-review').onclick=()=>{const item=pendingApprovals()[0];if(item){byId('run-activity').open=true;byId('operation-activity').open=true;operationRows.get(item.id).section.scrollIntoView({block:'start',behavior:'auto'});}else refreshPendingApprovals();};
 byId('failure-review').onclick=()=>{const card=byId('run-failure');if(!card.hidden)card.scrollIntoView({block:'start',behavior:'auto'});};
 const processStreams=new Map();
 const processArtifactWidgets=new Map();
@@ -200,7 +204,7 @@ function processOutput(value){
     if(processStreams.size>=64){if(!byId('process-stream-limit')){const note=node('p','Additional command output remains in the selected run activity and recorded command results.','inspection-note');note.id='process-stream-limit';byId('process-streams').append(note);}return;}
     const card=node('section',undefined,'process-result process-stream');card.append(node('strong','Captured command output · '+value.profile_id),node('p','Operation '+value.operation_id+' · retained bytes; inspect the recorded operation for its outcome.','inspection-note'));
     state={profile:value.profile_id,card,stdout:{hex:''},stderr:{hex:''}};
-    for(const key of ['stdout','stderr']){const detail=node('details',undefined,'process-output');detail.open=true;const summary=node('summary',key+' · 0 retained bytes'),pre=node('pre','');detail.append(summary,pre);card.append(detail);Object.assign(state[key],{summary,pre});}
+    for(const key of ['stdout','stderr']){const detail=node('details',undefined,'process-output');const summary=node('summary',key+' · 0 retained bytes'),pre=node('pre','');detail.append(summary,pre);card.append(detail);Object.assign(state[key],{summary,pre});}
     byId('process-streams').append(card);processStreams.set(value.operation_id,state);byId('empty').hidden=true;
   }
   const channel=state[value.channel];
@@ -216,7 +220,7 @@ function refreshForkControls(){for(const button of forkButtons)button.disabled=!
 function refreshDeleteControls(){const button=byId('delete-session'),selected=byId('sessions').selectedOptions[0];if(!button)return;button.hidden=!deleteCapability;button.disabled=!deleteCapability||deletePending||sessionBusy||activeRun||!selected?.dataset.sessionId||selected.dataset.sessionActive==='true';}
 function entry(role,data,parent=byId('history'),messageId){
   byId('empty').hidden=true;
-  const card=node('article',undefined,'message '+role);card.append(node('h4',role==='assistant'?'xMind':role==='user'?'You':role));
+  const card=node('article',undefined,'message '+role);if(role!=='user')card.append(node('h4',role==='assistant'?'xMind':role));
   if(role==='tool'){
     let process;try{process=processOutcome(JSON.parse(data.content));}catch{}
     const detail=node('details',undefined,'tool');detail.append(node('summary',process?'Command result · '+process.profile_id:'Tool result'));
@@ -226,14 +230,25 @@ function entry(role,data,parent=byId('history'),messageId){
     card.append(node('p','Completed graph '+data.graph_id+'.'),node('p','Observed node outputs are below. Provider metrics remain on the agent responses.','inspection-note'));
     const detail=node('details',undefined,'tool');detail.append(node('summary','Observed join outputs · '+data.nodes.length+' nodes'),node('pre',JSON.stringify(data.nodes,null,2)));card.append(detail);
   }
-  else {const content=node('div',undefined,'message-body markdown');markdown(content,data.content||data.refusal||'');card.append(content);if(data.tool_calls?.length){const detail=node('details',undefined,'tool');detail.append(node('summary',data.tool_calls.length+' tool request(s)'),node('pre',JSON.stringify(data.tool_calls,null,2)));card.append(detail);}if(role==='assistant'){const info=node('div',undefined,'metrics');metrics(info,data);card.append(info);}}
+  else {const content=node('div',undefined,'message-body markdown');markdown(content,data.content||data.refusal||'');card.append(content);if(data.tool_calls?.length){const detail=node('details',undefined,'tool');detail.append(node('summary',data.tool_calls.length+' tool request(s)'),node('pre',JSON.stringify(data.tool_calls,null,2)));card.append(detail);}if(role==='assistant'){const info=node('div',undefined,'metrics');metrics(info,data);const detail=node('details',undefined,'response-details');detail.append(node('summary','Response details'),info);card.append(detail);}}
   if((role==='user'||role==='assistant')&&typeof messageId==='string'&&/^msg_[1-9][0-9]*$/.test(messageId)){
     const fork=node('button','Fork before this message','message-fork');fork.type='button';fork.title='Create a new conversation ending immediately before this message';fork.disabled=!forkCapability||sessionBusy||forkPending;fork.onclick=()=>{if(fork.disabled)return;forkPending=true;refreshForkControls();api.postMessage({type:'fork-session',id:byId('sessions').value,before:messageId});};forkButtons.add(fork);card.append(fork);
   }
   parent.append(card);return card;
 }
 const olderHistoryButton=node('button','Load older messages','history-older');olderHistoryButton.id='history-older';olderHistoryButton.type='button';olderHistoryButton.hidden=true;olderHistoryButton.onclick=()=>{olderHistoryButton.disabled=true;api.postMessage({type:'history-older'});};byId('history').parentNode.insertBefore(olderHistoryButton,byId('history'));
-function resetLive(){if(live)discardMarkdown(live);byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
+function renderTranscript(history){
+  const container=byId('history'),expanded=new Set([...container.querySelectorAll('.turn-activity[open]')].map(item=>item.dataset.turn));
+  container.replaceChildren();forkButtons.clear();let activity,body,key='older';
+  const details=()=>{if(!activity){activity=node('details',undefined,'turn-activity');activity.dataset.turn=key;activity.open=expanded.has(key);activity.append(node('summary','Activity'));body=node('div');activity.append(body);container.append(activity);}return body;};
+  for(let index=0;index<history.length;index++){
+    const item=history[index],next=history[index+1];
+    if(item.role==='user'){activity=undefined;key=item.id||'turn-'+index;entry(item.role,item.data,container,item.id);continue;}
+    const final=item.role==='assistant'&&!item.data.tool_calls?.length&&(!!item.data.content||!!item.data.refusal)&&(!next||next.role==='user');
+    entry(item.role,item.data,final?container:details(),item.id);
+  }
+}
+function resetLive(){streamHasTools=false;if(live)discardMarkdown(live);byId('live').replaceChildren();live=undefined;streamText='';streamUsage=null;}
 function resetFailure(){byId('run-failure').replaceChildren();byId('run-failure').hidden=true;byId('failure-notice').hidden=true;}
 const protocolDiagnosticCodes=new Set([
   'responses_function_final_mismatch','responses_arguments_mismatch','responses_terminal_mismatch',
@@ -300,12 +315,12 @@ function runFailure(data){
       ['Parameter','provider_error_param',['model','messages','tools','tool_choice','n','stream','stream_options','stream_options.include_usage','max_completion_tokens','max_tokens','temperature','top_p','reasoning_effort','response_format','input','instructions','max_output_tokens']]
     ],lines=[];
     for(const [label,key,allowed] of fields)if(allowed.includes(data[key]))lines.push(label+': '+data[key]);
-    if(lines.length){const detail=node('details');detail.open=true;detail.append(node('summary','Recorded provider diagnostics'),node('pre',lines.join('\n')));card.append(detail);}
+    if(lines.length){const detail=node('details');detail.append(node('summary','Recorded provider diagnostics'),node('pre',lines.join('\n')));card.append(detail);}
   }
   card.append(node('p','This is a backend execution result. Select another run above to inspect its outcome.','inspection-note'));
   if(live){flushMarkdown(live.querySelector('.message-body'));live.classList.remove('streaming');}
 }
-function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;queueMarkdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
+function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.hidden=true;live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;queueMarkdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
 function operations(items){
   currentOperations=items;
   const container=byId('operations'),ids=new Set(items.map(item=>item.id)),sections=[];
@@ -376,7 +391,7 @@ function operations(items){
     }else{
       if(item.tool==='run_process'){let result;try{result=processOutcome(JSON.parse(item.result_json));}catch{}if(result)renderProcessOutcome(section,result);}
       const detail=node('details');detail.append(node('summary','Outcome'),node('pre',item.result_json));section.append(detail);
-      if(typeof canRestoreFileOperation==='function'&&canRestoreFileOperation(item)){const restore=node('button','Restore saved change','operation-restore');restore.title='Start a native restore run; the inverse file change still requires approval';restore.onclick=()=>{restore.disabled=true;api.postMessage({type:'restore-operation',id:item.id});};section.append(restore);}
+      if(typeof canRestoreFileOperation==='function'&&canRestoreFileOperation(item)){const restore=node('button','Restore saved change','operation-restore');restore.title='Start a native restore run using this conversation’s permissions';restore.onclick=()=>{restore.disabled=true;api.postMessage({type:'restore-operation',id:item.id});};section.append(restore);}
     }
     if(item.tool==='run_process'&&item.state==='uncertain'){
       section.append(node('p','Possible command effects remain uncertain. Further effects in this workspace and through this profile are blocked; xMind will not retry the command.','inspection-note'));
@@ -459,7 +474,7 @@ function ownedView(parent,children,histories){
   byId('owned-view').hidden=children.length===0;if(children.length)byId('empty').hidden=true;
   for(const child of children){
     const run=child.run;let row=ownedRows.get(run.id);
-    if(!row){const card=node('details',undefined,'graph-node');card.open=true;const heading=node('summary'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};ownedRows.set(run.id,row);byId('owned-view').append(card);}
+    if(!row){const card=node('details',undefined,'graph-node');const heading=node('summary'),body=node('div',undefined,'graph-output'),responses=node('div',undefined,'graph-responses'),stream=node('div',undefined,'graph-live');card.append(heading,body,responses,stream);row={card,heading,body,responses,stream,text:'',usage:undefined};ownedRows.set(run.id,row);byId('owned-view').append(card);}
      row.state=run.state;row.heading.textContent=(child.node_label||child.task_id)+' · '+run.state;
      row.body.replaceChildren(node('p',child.kind==='dynamic_tool'?'Dynamic tool · model-free':child.preset_id==='workspace.coding'?'Coding agent · effects require their own approval':'Read-only investigation','inspection-note'));
      const identity=node('details');identity.append(node('summary','Run details'),node('p',run.id+(child.kind==='dynamic_tool'?' · deterministic tool claim':' · '+child.preset_id+' · version '+child.preset_revision)));row.body.append(identity);
@@ -533,11 +548,11 @@ function planView(value){
   for(const call of value.calls){const card=node('section',undefined,'plan-call');card.append(node('strong',call.name+' · '+call.state),node('p','Accepted call '+call.id+' · provider call '+call.provider_tool_call_id+' · originating attempt '+call.origin_attempt_id,'inspection-note'));
     if(call.pending){card.append(node('p','Actual model response held until this plan call reports its result.','inspection-note'));if(call.response&&Object.keys(call.response).length){const info=node('div',undefined,'metrics');planResponseMetrics(info,call.response);card.append(info);}}ledger.append(card);}
   const appendChildHistory=(container,childId,label)=>{if(!ownedObservation||ownedObservation.parent_id!==value.run.id)return;const child=ownedObservation.children.find(item=>item.run.id===childId),history=ownedObservation.histories[childId];if(!child||!Array.isArray(history)||!history.length)return;const transcript=node('details',undefined,'nested-owner-history');transcript.append(node('summary',label+' · '+child.run.state+' · '+history.length+' saved messages'));for(const message of history)if(message.role!=='user')entry(message.role,message.data,transcript);container.append(transcript);};
-  const renderNestedOwner=owner=>{const detail=node('details',undefined,'nested-plan');detail.open=true;detail.append(node('summary','Nested plan · '+owner.plan.state+' · revision '+owner.plan.revision));detail.append(node('p','Owner '+owner.owner_run_id+' · run '+owner.run.state+' · plan '+owner.plan.id+' · depth '+owner.depth,'inspection-note'));appendChildHistory(detail,owner.owner_run_id,'Nested owner history');
+  const renderNestedOwner=owner=>{const detail=node('details',undefined,'nested-plan');detail.append(node('summary','Nested plan · '+owner.plan.state+' · revision '+owner.plan.revision));detail.append(node('p','Owner '+owner.owner_run_id+' · run '+owner.run.state+' · plan '+owner.plan.id+' · depth '+owner.depth,'inspection-note'));appendChildHistory(detail,owner.owner_run_id,'Nested owner history');
     const children=node('ul');for(const child of owner.plan.nodes){const item=node('li',child.id+' · '+child.type+' · '+child.state+(child.child_state?' / '+child.child_state:''));if(child.type==='agent')item.append(node('span',' · '+child.preset+' · '+child.objective,'inspection-note'));else if(child.type==='tool')item.append(node('span',' · '+child.tool,'inspection-note'));else item.append(node('span',' · '+child.question,'inspection-note'));const question=owner.questions.find(entry=>entry.id===child.human_request_id);if(child.type==='human'&&question?.state==='waiting'&&['paused','running'].includes(value.run.state)){const form=node('form',undefined,'plan-input'),format=node('select'),input=node('textarea'),button=node('button','Send answer','primary'),error=node('p','','plan-input-error');for(const [kind,label]of [['text','Written answer'],['json','Structured JSON']]){const option=node('option',label);option.value=kind;format.append(option);}format.setAttribute('aria-label','Answer format for '+child.id);input.setAttribute('aria-label','Answer for '+child.id);input.placeholder='Write your answer…';input.maxLength=16384;format.onchange=()=>{error.textContent='';input.placeholder=format.value==='json'?'{}':'Write your answer…';};button.type='submit';form.append(node('p','Your answer continues this task. File changes and external tools keep their separate approvals.','inspection-note'),format,input,error,button);const row={button,request:question.id,planId:owner.plan.id,submitting:false};nestedPlanRows.set(question.id,row);form.onsubmit=event=>{event.preventDefault();const currentOwner=displayedPlan?.nested_plans.find(entry=>entry.plan.id===row.planId),current=currentOwner?.questions.find(entry=>entry.id===row.request);if(!planSelected()||!currentOwner||!current||current.state!=='waiting'||current.backend_node_id!==question.backend_node_id||current.definition_revision!==question.definition_revision||current.published_event_seq!==question.published_event_seq||button.disabled)return;try{let raw;if(format.value==='text'){if(!input.value.trim())throw new Error('Enter an answer.');raw=JSON.stringify({answer:input.value});}else if(format.value==='json'){const parsed=JSON.parse(input.value);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('Enter a valid JSON object.');raw=input.value;}else throw new Error('Choose an answer format.');if(new TextEncoder().encode(raw).length>16384)throw new Error('Your answer is too long. Use a shorter answer.');error.textContent='';row.submitting=true;button.disabled=true;api.postMessage({type:'plan-input',root:value.run.id,plan_id:owner.plan.id,request:question.id,backend_node_id:question.backend_node_id,definition_revision:question.definition_revision,published_event_seq:question.published_event_seq,input_json:raw,expected_revision:owner.plan.revision,expected_state_sequence:owner.plan.state_sequence});}catch(problem){error.textContent=problem instanceof SyntaxError?'Enter a valid JSON object.':problem.message;}};item.append(form);}children.append(item);if(child.type==='agent'&&child.child_run_id)appendChildHistory(item,child.child_run_id,'Agent history · '+child.id);for(const nested of value.nested_plans)if(nested.parent_plan_id===owner.plan.id&&nested.parent_node_label===child.id)item.append(renderNestedOwner(nested));}detail.append(children);
     if(owner.plan.halted)detail.append(node('p','Nested work has an uncertain outcome and is halted for inspection.','inspection-note'));for(const call of owner.calls){const callEntry=node('p',call.name+' · '+call.state+' · '+call.id,'inspection-note');detail.append(callEntry);if(call.pending&&call.response){const info=node('div',undefined,'metrics nested-call-metrics');planResponseMetrics(info,call.response);detail.append(info);}}return detail;};
   for(const task of plan.nodes){let row=planRows.get(task.backend_node_id);
-    if(!row){const card=node('details',undefined,'graph-node plan-node');card.open=true;card.dataset.node=task.id;const heading=node('summary'),body=node('div');card.append(heading,body);row={card,heading,body};planRows.set(task.backend_node_id,row);byId('plan-tasks').append(card);}
+    if(!row){const card=node('details',undefined,'graph-node plan-node');card.dataset.node=task.id;const heading=node('summary'),body=node('div');card.append(heading,body);row={card,heading,body};planRows.set(task.backend_node_id,row);byId('plan-tasks').append(card);}
     row.heading.textContent=task.id+' · '+task.type+' · '+task.state+(task.child_state?' / '+task.child_state:'');
     const question=value.questions.find(question=>question.id===task.human_request_id);
      const definitionSignature=JSON.stringify([task.type,task.definition_revision,task.claim_id,task.objective,task.question,task.preset,task.tool,task.arguments_json,task.depends_on]);
@@ -798,7 +813,13 @@ window.addEventListener('message',event=>{
   else if(m.type==='owned-event')ownedEvent(m);
   else if(m.type==='graph'){clearPlan();graphView(m.record,m.children,m.histories,m.graphs,m.treeInput===true);}
   else if(m.type==='graph-event')graphEvent(m);
-  else if(m.type==='sessions'){byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.active?'● Running · '+session.title:session.title);option.value=session.id;option.dataset.sessionId=session.id;option.dataset.sessionTitle=session.title;option.dataset.sessionActive=session.active?'true':'false';option.title=session.active?'A run is active in this conversation':session.title;option.selected=session.id===m.selected;byId('sessions').append(option);}forkPending=false;deletePending=false;refreshRename();refreshForkControls();refreshDeleteControls();}
+  else if(m.type==='access-state'){
+    const value=m.snapshot,session=byId('sessions').selectedOptions[0]?.dataset.sessionId;
+    if(!value||value.session_id!==session||!['default','full'].includes(value.mode)||!Number.isSafeInteger(value.revision)||value.revision<0||typeof value.workspace_id!=='string'||!value.workspace_id)return;
+    accessState=value;accessPending=false;refreshAccess();
+  }
+  else if(m.type==='access-error'){accessPending=false;refreshAccess();byId('status').textContent=m.text||'Could not change permissions.';}
+  else if(m.type==='sessions'){const priorSession=byId('sessions').selectedOptions[0]?.dataset.sessionId;byId('sessions').replaceChildren();if(!m.sessions.length)byId('sessions').append(node('option','No sessions yet'));for(const session of m.sessions){const option=node('option',session.active?'● Running · '+session.title:session.title);option.value=session.id;option.dataset.sessionId=session.id;option.dataset.sessionTitle=session.title;option.dataset.sessionActive=session.active?'true':'false';option.title=session.active?'A run is active in this conversation':session.title;option.selected=session.id===m.selected;byId('sessions').append(option);}if(priorSession!==m.selected){accessState=undefined;accessPending=false;refreshAccess();}if(accessAvailable&&m.selected)api.postMessage({type:'access-load',session:m.selected});forkPending=false;deletePending=false;refreshRename();refreshForkControls();refreshDeleteControls();}
   else if(m.type==='session-exported'){if(!m.archive||m.archive.format!=='xmind.session'){byId('status').textContent='The backend returned an invalid session archive.';return;}const blob=new Blob([JSON.stringify(m.archive,null,2)+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),link=node('a');link.href=url;link.download='xmind-session-'+byId('sessions').value+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),0);byId('status').textContent='Conversation archive downloaded.';}
   else if(m.type==='session-imported'){byId('status').textContent='Imported conversation · '+m.title;}
   else if(m.type==='session-transfer-error'){byId('status').textContent='Session transfer failed · '+m.text;}
@@ -821,11 +842,11 @@ window.addEventListener('message',event=>{
   else if(m.type==='reset-run'){operations([]);clearPlan();clearMcpInputs();resetLive();resetFailure();resetProcessStreams();clearRunActivity();renderRunContext();}
   else if(m.type==='history'||m.type==='transcript'){
     const signature=JSON.stringify(m.history),changed=m.type==='history'||signature!==historySignature;
-    if(changed){byId('history').replaceChildren();forkButtons.clear();for(const item of m.history)entry(item.role,item.data,undefined,item.id);historySignature=signature;}
+    if(changed){renderTranscript(m.history);historySignature=signature;}
     if(!m.preserveLive)resetLive();if(m.type==='history'){resetFailure();resetProcessStreams();clearRunActivity();}
     olderHistoryButton.hidden=m.historyHasMore!==true;olderHistoryButton.disabled=m.historyLoading===true;olderHistoryButton.textContent=m.historyLoading?'Loading older messages…':'Load older messages';byId('empty').hidden=m.history.length>0||!!live||processStreams.size>0||!byId('run-failure').hidden;refreshForkControls();if(m.preserveOlder===true)scroll.scrollTop=priorTop+(scroll.scrollHeight-priorHeight);
   }
-  else if(m.type==='restore-prompt'){if(typeof m.prompt==='string'&&m.prompt.length>0&&m.prompt.length<=1024){const prompt=byId('prompt'),value=prompt.value.trim()?prompt.value.trimEnd()+'\n\n'+m.prompt:m.prompt,limit=prompt.maxLength>=0?prompt.maxLength:1048576;if(value.length<=limit){prompt.value=value;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();byId('status').textContent='Restore request prepared. Send it when ready; the file change still requires approval.';}}}
+  else if(m.type==='restore-prompt'){if(typeof m.prompt==='string'&&m.prompt.length>0&&m.prompt.length<=1024){const prompt=byId('prompt'),value=prompt.value.trim()?prompt.value.trimEnd()+'\n\n'+m.prompt:m.prompt,limit=prompt.maxLength>=0?prompt.maxLength:1048576;if(value.length<=limit){prompt.value=value;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();byId('status').textContent='Restore request prepared. Send it when ready using the selected permissions.';}}}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
   else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();refreshSendControl();}
@@ -854,8 +875,8 @@ window.addEventListener('message',event=>{
   else if(m.type==='mcp-resources'){renderMcpResources(m);}
   else if(m.type==='mcp-inputs'){renderMcpInputs(m.requests);}
   else if(m.type==='mcp-error'){byId('mcp-status').textContent=m.text;}
-  else if(m.type==='capabilities'){execution=m.execution;renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;deleteCapability=m.sessionDeletion===true;refreshRename();refreshForkControls();refreshDeleteControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
-  else if(m.type==='user'){historySignature=undefined;const card=entry('user',{content:m.text});if(Array.isArray(m.files)&&m.files.length){const list=node('div',undefined,'message-files');for(const file of m.files)if(typeof file.path==='string')list.append(node('span',file.path,'prompt-file'));card.append(list);}resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
+  else if(m.type==='capabilities'){execution=m.execution;if(typeof m.sessionAccessModes==='boolean'){accessAvailable=m.sessionAccessModes;refreshAccess();if(accessAvailable&&byId('sessions').selectedOptions[0]?.dataset.sessionId)api.postMessage({type:'access-load',session:byId('sessions').value});}renameCapability=m.renameSessions===true;forkCapability=m.forkSessions===true;deleteCapability=m.sessionDeletion===true;refreshRename();refreshForkControls();refreshDeleteControls();if(m.agentSelection!==true)clearAgentSelection();const mode=byId('file-mode');if(mode){mode.hidden=typeof m.fileEditProposals!=='boolean';mode.textContent=m.fileEditProposals===true?' · File changes require approval':m.fileEditProposals===false?' · Read only: file changes disabled':'';}refreshAccess();refreshSendControl();renderModels(m.models||[],m.model);if(!execution)byId('status').textContent='Backend connected · configure a model to run an agent';}
+  else if(m.type==='user'){activeRun=true;progress('Starting…');historySignature=undefined;const card=entry('user',{content:m.text});if(Array.isArray(m.files)&&m.files.length){const list=node('div',undefined,'message-files');for(const file of m.files)if(typeof file.path==='string')list.append(node('span',file.path,'prompt-file'));card.append(list);}resetLive();resetFailure();resetProcessStreams();byId('prompt').value='';resizePrompt();clearRunActivity();}
   else if(m.type==='draft'){byId('prompt').value=m.text;resizePrompt();}
   else if(m.type==='append-context'){
     if(!currentWorkspaceRoot||m.root!==currentWorkspaceRoot||typeof m.text!=='string'||!m.text||m.text.length>49152)return;
@@ -863,7 +884,7 @@ window.addEventListener('message',event=>{
     if(combined.length>262144){byId('status').textContent='Context was not added: the draft is too large. Select a smaller range.';return;}
     prompt.value=combined;resizePrompt();prompt.focus();
   }
-  else if(m.type==='event'){const event=m.event;appendRunActivity(event);if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output')processOutput(event.data);else if(event.kind==='model.text'||event.kind==='model.refusal')stream(event.data.text);else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.done'){if(live){flushMarkdown(live.querySelector('.message-body'));live.classList.remove('streaming');}}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
+  else if(m.type==='event'){const event=m.event;appendRunActivity(event);if(event.kind==='run.failed')runFailure(event.data);else if(event.kind==='process.output'){progress('Running command…');processOutput(event.data);}else if(event.kind==='model.text'||event.kind==='model.refusal'){progress('Thinking…');stream(event.data.text);}else if(event.kind==='model.usage'){streamUsage=event.data;if(!live)stream('');metrics(live.querySelector('.metrics'),{usage:streamUsage});}else if(event.kind==='model.tool_delta'){streamHasTools=true;progress('Preparing tools…');}else if(event.kind==='model.finish'){streamHasTools=event.data.reason==='tool_calls';}else if(event.kind==='model.done'){if(live){live.hidden=streamHasTools;flushMarkdown(live.querySelector('.message-body'));live.classList.remove('streaming');}}else if(event.kind==='conversation.assistant'||event.kind==='conversation.tool_turn')resetLive();}
   else if(m.type==='operations'){
     operations(m.operations);
   }

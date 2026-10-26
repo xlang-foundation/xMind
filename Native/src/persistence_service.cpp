@@ -445,6 +445,12 @@ std::future<CredentialMetadata> PersistenceService::put_credential(std::string s
         return repository.put_credential(scope,id,purpose,label,secret,revision);
     });
 }
+std::future<SessionAccessMode> PersistenceService::session_access(std::string session,std::string workspace) {
+    return impl_->submit([session=std::move(session),workspace=std::move(workspace)](Repository& repository){return repository.session_access(session,workspace);});
+}
+std::future<SessionAccessMode> PersistenceService::set_session_access(std::string session,std::string workspace,std::string mode,std::int64_t revision) {
+    return impl_->submit([session=std::move(session),workspace=std::move(workspace),mode=std::move(mode),revision](Repository& repository){return repository.set_session_access(session,workspace,mode,revision);});
+}
 std::future<Operation> PersistenceService::request_operation(std::string id,OperationSpec spec,std::int64_t expiry) {
     return impl_->submit([id=std::move(id),spec=std::move(spec),expiry](Repository& repository){return repository.request_operation(id,spec,expiry);});
 }

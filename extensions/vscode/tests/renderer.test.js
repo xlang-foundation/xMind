@@ -23,6 +23,23 @@ function renderer({batchFrames=false}={}){
   return {dom,posted,paint,pendingFrames:()=>frames.size,send:data=>{dom.window.dispatchEvent(new dom.window.MessageEvent('message',{data}));if(!batchFrames)paint();}};
 }
 
+test('conversation turns show right-side prompts, collapsed activity and the final answer with no user heading',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  const history=[{id:'msg_1',role:'user',data:{content:'Build the project'}},{id:'msg_2',role:'assistant',data:{content:'Inspecting files',tool_calls:[{name:'read_file'}]}},{id:'msg_3',role:'tool',data:{content:'Verbose result'}},{id:'msg_4',role:'assistant',data:{content:'Build complete'}}];
+  r.send({type:'history',history});assert.equal(doc.querySelector('#history>.user h4'),null);assert.equal(doc.querySelectorAll('#history>.assistant').length,1);assert.match(doc.querySelector('#history>.assistant .message-body').textContent,/Build complete/);
+  const activity=doc.querySelector('.turn-activity');assert.equal(activity.open,false);assert.equal(activity.querySelectorAll('.message').length,2);assert.equal(doc.querySelector('#run-activity').open,false);
+  activity.open=true;r.send({type:'transcript',history:[...history,{id:'msg_5',role:'user',data:{content:'Next feature'}}]});assert.equal(doc.querySelector('.turn-activity').open,true,'transcript updates retain explicit expansion');assert.equal(r.posted.length,1,'only readiness is posted; inspecting history executes nothing');
+  r.send({type:'status',text:'running'});assert.equal(doc.getElementById('turn-progress').hidden,false);r.send({type:'event',event:{kind:'model.text',data:{text:'intermediate'}}});assert.equal(doc.querySelector('#live .streaming').hidden,true);r.send({type:'event',event:{kind:'model.tool_delta',data:{}}});r.send({type:'event',event:{kind:'model.done',data:{}}});assert.equal(doc.querySelector('#live article').hidden,true);r.send({type:'status',text:'completed'});assert.equal(doc.getElementById('turn-progress').hidden,true);
+ }finally{r.dom.window.close();}
+});
+test('composer full access uses acknowledged native state and resets between conversations',()=>{
+ const r=renderer(),doc=r.dom.window.document;try{
+  r.send({type:'capabilities',execution:true,sessionAccessModes:true,models:[]});r.send({type:'sessions',sessions:[{id:'one',title:'One'}],selected:'one'});assert.equal(r.posted.at(-1).type,'access-load');
+  const control=doc.getElementById('access-mode');r.send({type:'access-state',snapshot:{session_id:'one',workspace_id:'workspace',revision:2,mode:'default'}});control.value='full';control.dispatchEvent(new r.dom.window.Event('change'));assert.equal(control.value,'default','intent cannot masquerade as accepted access');assert.equal(control.disabled,true);assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'access-change',session:'one',mode:'full',revision:2,workspace:'workspace'});
+  r.send({type:'access-state',snapshot:{session_id:'one',workspace_id:'workspace',revision:3,mode:'full'}});assert.equal(control.value,'full');assert.equal(control.disabled,false);
+  r.send({type:'sessions',sessions:[{id:'two',title:'Two'}],selected:'two'});assert.equal(control.value,'default');r.send({type:'access-state',snapshot:{session_id:'one',workspace_id:'workspace',revision:4,mode:'full'}});assert.equal(control.value,'default','late state cannot grant the replacement conversation full access');
+ }finally{r.dom.window.close();}
+});
 test('agent selector shows explicit process and thread placement from backend metadata',()=>{
  const r=renderer();try{const agents=['process','thread'].map(placement=>({id:'agent.'+placement,revision:1,model_id:'fixture-model',name:placement==='process'?'Isolated reader':'Local reader',description:'',mode:'primary',hidden:false,default:false,permissions:[],placement}));r.send({type:'agent-selection',catalogue:{agents},selection:{session_id:'session-1',revision:0,editable:true,selected:null}});const doc=r.dom.window.document;assert.match(doc.querySelector('#agent option[value="agent.process"]').textContent,/separate process/);assert.match(doc.querySelector('#agent option[value="agent.thread"]').textContent,/backend thread/);}finally{r.dom.window.close();}
 });
@@ -663,7 +680,7 @@ test('command results preserve separate escaped output, hex bytes and actual exi
   assert.match(view.textContent,/stderr · 4 bytes · 4 retained · hex/);assert.match(view.textContent,/capture limit/);assert.match(view.textContent,/not been independently verified/);
   assert.equal(view.querySelectorAll('script').length,0);assert.equal(doc.querySelectorAll('#operations button').length,0);
   r.send({type:'history',history:[{role:'tool',data:{content:JSON.stringify(result),tool_call_id:'fixture-call'}}]});
-  assert.ok(doc.querySelector('#history .process-result'));assert.match(doc.querySelector('#history summary').textContent,/Command result/);r.dom.window.close();
+  assert.ok(doc.querySelector('#history .process-result'));assert.match(doc.querySelector('#history .tool summary').textContent,/Command result/);assert.equal(doc.querySelector('#history .turn-activity').open,false);r.dom.window.close();
 });
 
 test('uncertain commands remain blocked and malformed outcomes retain raw evidence',()=>{
@@ -719,14 +736,14 @@ test('completed tool activity collapses without losing receipts and approvals re
   const operation={id:'activity-file',tool:'create_file',state:'awaiting_approval',workspace_id:'fixture-root',expires_unix_ms:Date.now()+60000,arguments_json:'{"path":"new.cpp","before_content":"","after_content":"reviewed source"}',result_json:'{}'};
   const activity=doc.getElementById('operation-activity');
   r.send({type:'status',text:'running'});r.send({type:'operations',operations:[operation]});
-  assert.equal(activity.hidden,false);assert.equal(activity.open,true);assert.match(activity.querySelector('summary').textContent,/review needed/);
+  assert.equal(activity.hidden,false);assert.equal(activity.open,false);assert.match(activity.querySelector('summary').textContent,/review needed/);
   activity.open=false;let scrolled=false;doc.querySelector('#operations .operation').scrollIntoView=()=>{scrolled=true;};
   doc.getElementById('approval-review').click();assert.equal(activity.open,true);assert.equal(scrolled,true);
   r.send(processOutputFixture('6f6b'));assert.equal(doc.getElementById('process-streams').closest('#operation-activity'),activity);assert.match(activity.textContent,/ok/);
   const completed={...operation,state:'succeeded'};r.send({type:'operations',operations:[completed]});assert.equal(activity.open,true);
-  r.send({type:'status',text:'completed'});assert.equal(activity.open,false);assert.equal(doc.querySelector('#operations .after').textContent,'reviewed source');assert.ok([...doc.querySelectorAll('#operations summary')].some(summary=>summary.textContent==='Outcome'));
+  r.send({type:'status',text:'completed'});assert.equal(activity.open,true);assert.equal(doc.querySelector('#operations .after').textContent,'reviewed source');assert.ok([...doc.querySelectorAll('#operations summary')].some(summary=>summary.textContent==='Outcome'));
   activity.open=true;r.send({type:'operations',operations:[completed]});r.send({type:'status',text:'completed'});assert.equal(activity.open,true,'unchanged polls preserve explicit inspection');
-  activity.open=false;r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.equal(activity.open,true);assert.match(doc.getElementById('operations').textContent,/Creation is uncertain/);
+  activity.open=false;r.send({type:'operations',operations:[{...operation,state:'uncertain'}]});assert.equal(activity.open,false);assert.match(doc.getElementById('operations').textContent,/Creation is uncertain/);
   r.send({type:'reset-run'});assert.equal(activity.hidden,true);assert.equal(r.posted.length,initialMessages,'expanding activity never dispatches effects');
  }finally{r.dom.window.close();}
 });

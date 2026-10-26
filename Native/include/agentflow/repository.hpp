@@ -247,6 +247,8 @@ public:
     std::string information(const std::string& category,const std::string& id);
     // Effect journal and one-operation permissions. Backend callers authorize
     // controller access before deciding; only an owning executor claims/finishes.
+    SessionAccessMode session_access(const std::string& session,const std::string& workspace);
+    SessionAccessMode set_session_access(const std::string& session,const std::string& workspace,const std::string& mode,std::int64_t expected_revision);
     Operation request_operation(const std::string& id,const OperationSpec& spec,std::int64_t expires_unix_ms);
     Operation operation(const std::string& id);
     std::vector<Operation> operations(const std::string& run_id);

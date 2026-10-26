@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- UI layout preview57780: conversation Full access is native, persistent and revisioned; actual create_file succeeded as full-access:1. Shared chat groups verbose activity, progress pulses, user bubbles right/no YOU; browser workspace/session navigation left and hideable Files/Activity right. Tests Native focused2 (not full), extension521, browser186. Preview .agentflow/composer-layout-preview/live.json; original63573/installed80 retained. NEVER replay session845d0da11e974a7eb68c902c9a92045d rootsa7a51d81e36b45868b9bab2bf9ce601d/50bbe9632ee34b20a094be2a32c1e92d. Total conservative$1.499198/$100. See doc/evidence/webui-conversation-layout-20261026.json.
+
 - Auth fix installed0.1.80, native sourcef79c3f2327e1557f7352dfc844a0673bf8647c35, NativeSHAdaef39ff/VSIX6d8ad252/manifestb561039d: full185 Native/519 extension pass; actual Code web-host reload and fresh window reconnect without another sign-in, same Vue root from2folders and exact full rendered history. Installed2381 files match archive. Five user-state roots, old79 original2380files, required75/76 backups2442each and7 native owners unchanged. Native DPAPI+embedded-xlang3 SQLite caches browser-host client tokens; desktop SecretStorage retained. Code tabs10/11/server63300/view17628 are retained outputs; no chat turns or effects replayed. Exact ownership in .agentflow/auth-persistence-validation/code/live.json. Earlier-run picker still resets to latest; separate finding. See doc/evidence/vscode-auth-persistence-0.1.80-20261025.json.
 
 - Latest user test policy: use projects to find xMind bugs. Do not correct project prompts or supply diagnostic fixes/code. Use normal feature requests; observe its own recovery, approve scoped effects, preserve failures. Label earlier guided interventions separately.
@@ -14,7 +16,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - Current user request: test the installed web UI first with multiple chat turns in C++, Python-only (xlang3), and Vue+Vite projects under D:/CantorAI2026/TestProj/webui-project-tests-20261025. User authorizes configured-model inference up to$100 TOTAL for these project exercises only; all prompts/follow-ups/approvals go through UI, never API chat scripts. Preserve old successful tasks. Then finish requested VS Code automatic authentication/reconnect and workspace/history restoration fix. User web UI origin63573 must stay available; exact owners/config in .agentflow/webui-project-tests-20261025.
 
-- Working v1 is delivered and installed as0.1.79: Native184/184, clients510/185, actual packaged browser/Code/CLI coding and fresh installed smoke pass. All2380 installed files match the qualified VSIX; five user-state roots and2 existing owner identities remain unchanged. Exact75/76 rollback copies each retain2442 files. No paid inference or visible desktop. The broader goal remains removed. See doc/evidence/installed-0.1.79-f641f9ff-20261025.json.
+- Installed79 qualification and preserved rollback checkpoint: see doc/development-checkpoints-20261026.md verbatim.
 
 - Installed79 isolated smoke session10d52bf152ced65b437c1f8f31e30cd5/root0342d66ccb3b26a510d9f2ad1231f9dd completed one marker read and durable2-message history with0models; owner identity/held-handle exit verified. NEVER replay. Final installation preservation audit passes; keep both required75/76 rollback copies.
 

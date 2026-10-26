@@ -1,0 +1,42 @@
+.conversation-layout .browser-bar{height:48px;padding:0 18px;gap:12px}
+.conversation-layout .browser-layout{display:flex;overflow:hidden}
+.workspace-navigation{width:240px;min-width:200px;max-width:300px;flex:none;overflow:auto;background:#131821;border-right:1px solid var(--vscode-panel-border);padding:16px 10px;box-sizing:border-box}
+.workspace-navigation>header{display:flex;align-items:center;justify-content:space-between;padding:0 8px 14px;font-size:13px}
+.workspace-navigation button{border:0;background:transparent;text-align:left;cursor:pointer}
+.workspace-row{display:flex;align-items:center;gap:4px;margin:5px 0}
+.workspace-row>button:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;padding:9px}
+.workspace-row>button:last-child{width:28px;padding:5px;text-align:center}
+.workspace-row .selected{color:#c5d7ff}
+.workspace-sessions{margin:0 0 14px 12px;padding-left:9px;border-left:1px solid #344154;display:flex;flex-direction:column;gap:3px}
+.workspace-sessions button{padding:8px 10px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:6px;min-width:0;max-width:100%;color:var(--vscode-descriptionForeground)}
+.workspace-sessions button.selected{background:#25344b;color:var(--vscode-foreground)}
+.workspace-sessions button:hover,.workspace-navigation button:hover{background:#222d3d}
+.workspace-sessions .new-conversation{color:#8eafff;font-size:11px}
+.conversation-layout #agent-sidebar{width:auto;min-width:280px;max-width:none;flex:1;border:0;background:#10141a}
+.conversation-layout #agent-sidebar>main,.conversation-layout #agent-sidebar>footer{padding-left:clamp(20px,5vw,80px);padding-right:clamp(20px,5vw,80px)}
+.conversation-layout #agent-sidebar>main{scrollbar-gutter:stable}
+.conversation-layout #agent-sidebar>header{padding:10px 20px;border-bottom:1px solid var(--vscode-panel-border)}
+.conversation-layout #agent-sidebar .session-header{justify-content:flex-end}
+.navigation-source{display:none!important}
+.conversation-layout #sidebar-divider{display:none}
+.context-inspector{width:360px;min-width:280px;max-width:44vw;flex:none;display:flex;flex-direction:column;background:#171b22;border-left:1px solid var(--vscode-panel-border);overflow:hidden}
+.context-inspector[hidden]{display:none}
+.inspector-controls{display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--vscode-panel-border)}
+.inspector-controls [role=tablist]{display:flex;gap:4px}.inspector-controls button{background:transparent;border:0;padding:7px 12px;cursor:pointer}.inspector-controls [aria-selected=true]{background:#2b374b;border-radius:5px;color:#bcd2ff}
+.inspector-panels{overflow:auto;min-height:0;flex:1}.inspector-panels>[hidden]{display:none!important}
+.conversation-layout .runtime-pane{display:flex;flex-direction:column;min-width:0;padding:16px;overflow:visible}
+.conversation-layout .runtime-pane h1{font-size:14px;margin:0}.conversation-layout .runtime-pane p{font-size:11px}.conversation-layout .workspace-heading{flex-direction:column;align-items:stretch;gap:8px}
+.conversation-layout .workspace-actions{flex-wrap:wrap;gap:5px}.conversation-layout .workspace-actions button{font-size:11px;padding:5px}
+.conversation-layout .workspace-canvas{display:flex;flex-direction:column;min-height:240px;overflow:visible}
+.conversation-layout .file-tree{max-height:40vh;overflow:auto;flex:none;border-right:0;border-bottom:1px solid var(--vscode-panel-border)}
+.conversation-layout .file-preview{min-height:180px;overflow:auto}.conversation-layout .file-preview pre{padding:10px;max-height:50vh}
+.conversation-layout .workspace-diff-controls{display:flex;flex-wrap:wrap;font-size:11px}.conversation-layout .workspace-diff-controls label{min-width:90px;flex:1}
+.conversation-layout #inspector-activity{padding:14px;box-sizing:border-box}.conversation-layout .inspector-run{font-size:11px}.conversation-layout #run-picker{flex-wrap:wrap}.conversation-layout #runs{max-width:100%}
+.conversation-layout #run-activity>summary{display:none}.conversation-layout #run-activity{padding:0}
+.conversation-layout .review-columns{grid-template-columns:1fr}.conversation-layout .local-node{font-size:11px}
+@media(max-width:1100px){.workspace-navigation{width:210px;min-width:180px}.context-inspector{width:300px;min-width:260px}.conversation-layout #agent-sidebar>main,.conversation-layout #agent-sidebar>footer{padding-left:20px;padding-right:20px}}
+@media(max-width:850px){.context-inspector{position:fixed;right:0;top:48px;bottom:0;width:min(400px,90vw);max-width:90vw;z-index:12;box-shadow:-12px 0 40px #0006}.workspace-navigation{width:190px;min-width:160px}.conversation-layout .browser-bar .local-node{display:none}}
+@media(max-width:580px){.workspace-navigation{width:145px;min-width:125px;padding:12px 5px}.workspace-navigation>header{padding-left:4px}.workspace-row>button:first-child{font-size:11px;padding:7px 3px}.workspace-sessions{margin-left:4px;padding-left:4px}.workspace-sessions button{font-size:11px;padding:7px 4px}.conversation-layout #agent-sidebar{min-width:0}.conversation-layout #agent-sidebar>main,.conversation-layout #agent-sidebar>footer{padding-left:12px;padding-right:12px}.conversation-layout .browser-bar{padding:0 10px}.conversation-layout .workspace-label-prefix{display:none}.conversation-layout .workspace-control{max-width:48vw}.conversation-layout .workspace-label-open{max-width:30vw}.conversation-layout .conversation-tools{gap:2px}}
+
+.conversation-layout .session-header #new{display:none}.conversation-layout #inspector-activity>.conversation-tools{display:flex;flex-wrap:wrap;padding-bottom:12px;margin-bottom:10px;border-bottom:1px solid var(--vscode-panel-border)}.workspace-git-details{margin:8px 0;font-size:11px;color:var(--vscode-descriptionForeground)}.workspace-git-details>summary{cursor:pointer;padding:5px 0}
+.conversation-layout .file-tree{width:100%;max-width:none;box-sizing:border-box}.conversation-layout #inspector-activity .skills-view,.conversation-layout #inspector-activity .agent-picker{margin-top:14px}

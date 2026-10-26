@@ -6,8 +6,8 @@
 namespace agentflow {
 Operation PermissionWaiter::acquire(const std::string& id,const OperationSpec& spec,std::int64_t expiry,std::stop_token cancel,std::string trusted_actor) {
     if(cancel.stop_requested()) throw PermissionCancelled("Operation cancelled before proposal");
-    journal_.request_operation(id,spec,expiry).get();
-    if(!trusted_actor.empty())journal_.decide_operation(id,OperationDecision::allow,std::move(trusted_actor)).get();
+    const auto proposal=journal_.request_operation(id,spec,expiry).get();
+    if(!trusted_actor.empty()&&proposal.state==OperationState::awaiting_approval)journal_.decide_operation(id,OperationDecision::allow,std::move(trusted_actor)).get();
     std::mutex mutex;std::condition_variable_any changed;std::unique_lock lock(mutex);
     for(;;) {
         if(cancel.stop_requested()) {

@@ -15,7 +15,8 @@ const sources={
   '/ui/browser.js':'views/browser/browser.js',
   '/ui/marked.js':'extensions/vscode/node_modules/marked/lib/marked.umd.js',
   '/ui/purify.js':'extensions/vscode/node_modules/dompurify/dist/purify.min.js',
-  '/ui/chat.js':'extensions/vscode/media/chat.js'
+  '/ui/chat.js':'extensions/vscode/media/chat.js',
+  '/ui/layout.js':'views/browser/layout.js'
 };
 
 test('browser reload shows saved-settings restoration instead of a false unconfigured state while local reconnect is pending',async()=>{

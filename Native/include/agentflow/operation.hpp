@@ -19,6 +19,10 @@ inline std::string to_string(OperationState state) {
     throw std::invalid_argument("Invalid operation state");
 }
 enum class OperationDecision {allow,deny};
+struct SessionAccessMode {
+    std::string session_id,workspace_id,mode="default";
+    std::int64_t revision=0;
+};
 struct WorkspaceEffectBusy : Conflict {using Conflict::Conflict;};
 struct WorkspaceEffectUncertain : Conflict {using Conflict::Conflict;};
 // Supplied by the owning native runtime, never trusted from a view or model.

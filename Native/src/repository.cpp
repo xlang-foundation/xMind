@@ -4190,6 +4190,31 @@ McpOAuthRefreshRecord Repository::publish_mcp_oauth_refresh(const std::string& i
     changed_one(db.execute("UPDATE credentials SET revision=?,protection=?,ciphertext=? WHERE scope=? AND id=? AND purpose=? AND revision=?",{revision,encrypted.protection,encrypted.ciphertext,binding.scope,binding.credential_id,binding.purpose,binding.credential_revision}));
     auto after=before;after.state="committed";after.published_revision=revision;after.settled_unix_ms=now_ms();refresh_update(db,before,after);tx.commit();return after;
 }
+SessionAccessMode Repository::session_access(const std::string& id,const std::string& workspace) {
+    session(id);identifier(workspace);
+    SessionAccessMode result{id,workspace};
+    const auto rows=impl_->database.execute("SELECT payload FROM information WHERE category='native-session-access' AND id=?",{id}).rows;
+    if(rows.empty())return result;
+    Json value;try{value=Json::parse(text(rows[0][0]));}catch(...){throw DatabaseError("Invalid saved conversation access mode");}
+    if(!value.is_object()||value.size()!=4||value.value("version",0)!=1||!value.contains("workspace_id")||!value["workspace_id"].is_string()||!value.contains("mode")||!value["mode"].is_string()||!value.contains("revision")||!value["revision"].is_number_integer()||value["revision"]<1||value["revision"]>9007199254740991LL||(value["mode"]!="default"&&value["mode"]!="full"))throw DatabaseError("Invalid saved conversation access mode");
+    result.revision=value["revision"].get<std::int64_t>();
+    if(value["workspace_id"]==workspace)result.mode=value["mode"].get<std::string>();
+    return result;
+}
+SessionAccessMode Repository::set_session_access(const std::string& id,const std::string& workspace,const std::string& mode,std::int64_t revision) {
+    if((mode!="default"&&mode!="full")||revision<0||revision>=9007199254740991LL)throw std::invalid_argument("Invalid conversation access mode");
+    auto& db=impl_->database;Transaction transaction(db);auto result=session_access(id,workspace);
+    if(result.revision!=revision)throw Conflict("Conversation access changed; refresh before changing permissions");
+    result.mode=mode;++result.revision;
+    db.execute("INSERT INTO information(category,id,payload) VALUES('native-session-access',?,?) ON CONFLICT(category,id) DO UPDATE SET payload=excluded.payload",{id,Json{{"version",1},{"workspace_id",workspace},{"mode",mode},{"revision",result.revision}}.dump()});
+    // Resolve existing prompts as well as future proposals. No effects are
+    // dispatched here; immutable claims, cancellation and quarantine still apply.
+    if(mode=="full")for(auto operation:pending_operations_for_session(id))if(operation.spec.workspace==workspace&&operation.expires_unix_ms>now_ms()){
+        operation.state=OperationState::ready;operation.decision_actor="full-access:"+std::to_string(result.revision);
+        changed_one(db.execute("UPDATE operations SET state='ready',decision_actor=? WHERE id=? AND state='awaiting_approval'",{operation.decision_actor,operation.id}));impl_->operation_state_event(operation);
+    }
+    transaction.commit();return result;
+}
 Operation Repository::request_operation(const std::string& id,const OperationSpec& input,std::int64_t expiry) {
     identifier(id);identifier(input.run_id);identifier(input.workspace);identifier(input.tool);
     if(id.size()>256 || input.workspace.size()>32768 || input.tool.size()>128) throw std::invalid_argument("Operation identity exceeds its limit");
@@ -4205,7 +4230,13 @@ Operation Repository::request_operation(const std::string& id,const OperationSpe
     const auto resource_offset=resources.size()&&!resources.front().starts_with("workspace:")?0:1;
     for(std::size_t index=0;index<resources.size();++index)changed_one(db.execute("INSERT INTO operation_resources(operation_id,resource,position,state) VALUES(?,?,?,'awaiting_approval')",{id,resources[index],static_cast<std::int64_t>(index)-resource_offset}));
     Operation result{id,std::move(spec),OperationState::awaiting_approval,expiry,"{}",{}};
-    impl_->operation_state_event(result);transaction.commit();return result;
+    impl_->operation_state_event(result);
+    const auto access=session_access(owner.session_id,result.spec.workspace);
+    if(access.mode=="full"){
+        result.state=OperationState::ready;result.decision_actor="full-access:"+std::to_string(access.revision);
+        changed_one(db.execute("UPDATE operations SET state='ready',decision_actor=? WHERE id=?",{result.decision_actor,id}));impl_->operation_state_event(result);
+    }
+    transaction.commit();return result;
 }
 Operation Repository::operation(const std::string& id) {
     const auto rows=impl_->database.execute("SELECT id,run_id,workspace,tool,arguments,state,expires_ms,result,decision_actor FROM operations WHERE id=?",{id}).rows;
@@ -4256,6 +4287,10 @@ Operation Repository::claim_operation(const std::string& id,const OperationSpec&
     if(result.spec.run_id!=actual.run_id || result.spec.workspace!=actual.workspace || result.spec.tool!=actual.tool || result.spec.arguments_json!=arguments || result.spec.resources!=actual.resources)
         throw Conflict("Operation differs from its approval");
     if(run(actual.run_id).state!=RunState::running) throw Conflict("Operation owner is not running");
+    if(result.decision_actor.starts_with("full-access:")){
+        const auto access=session_access(run(actual.run_id).session_id,actual.workspace);
+        if(access.mode!="full"||result.decision_actor!="full-access:"+std::to_string(access.revision))throw Conflict("Full access changed before dispatch; a fresh proposal is required");
+    }
     const bool expired=result.expires_unix_ms<=now_ms();result.state=expired?OperationState::expired:OperationState::executing;
     if(!expired) {
         // BEGIN IMMEDIATE serializes the complete multi-resource check/claim.

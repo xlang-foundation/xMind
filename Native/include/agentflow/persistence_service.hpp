@@ -248,6 +248,8 @@ public:
     std::future<void> delete_language_server_credential_for_replacement(std::string id,std::int64_t expected_revision);
     std::future<void> compare_information(std::string category,std::string id,std::string json,std::optional<std::string> expected);
     std::future<std::string> information(std::string category,std::string id);
+    std::future<SessionAccessMode> session_access(std::string session,std::string workspace);
+    std::future<SessionAccessMode> set_session_access(std::string session,std::string workspace,std::string mode,std::int64_t expected_revision);
     std::future<Operation> request_operation(std::string id,OperationSpec spec,std::int64_t expires_unix_ms);
     std::future<Operation> operation(std::string id);
     std::future<std::vector<Operation>> operations(std::string run_id);

@@ -88,7 +88,7 @@ async function activate(context) {
   const gitChanges = new GitChangesTreeProvider(vscode);
   if(vscode.window.registerTreeDataProvider)context.subscriptions.push(vscode.window.registerTreeDataProvider('xmind.gitChanges',gitChanges));
 
-  const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,fileEditProposals:client?health?.file_edit_proposals:undefined,sessionDeletion:!!client}:message);
+  const post = message => panel?.webview.postMessage(message.type==='capabilities'?{...message,sessionAccessModes:!!client&&health?.session_access_modes===true,fileEditProposals:client?health?.file_edit_proposals:undefined,sessionDeletion:!!client}:message);
   async function readSkills(){
     if(!panel||!client)return;const target=client,version=generation;
     if(health?.skill_controls!==true){if(skillController)skillController.invalidate();return;}
@@ -656,6 +656,20 @@ async function activate(context) {
         } else if(['mcp-start','mcp-renew','mcp-cancel','mcp-open'].includes(message.type)){
           try{if(!mcpRestored)await readMcp();if(message.type==='mcp-start')await mcpController.start(message.server);else if(message.type==='mcp-renew')await mcpController.start(message.server,true);else if(message.type==='mcp-cancel')await mcpController.cancel(message.server);else await mcpController.open(message.server,url=>vscode.env.openExternal(vscode.Uri.parse(url)));}
           catch(error){post({type:'mcp-error',text:error.message});}
+        } else if(message.type==='access-load'||message.type==='access-change'){
+          const target=client;let version=generation;
+          let selected=sessionId;
+          try{
+            if(health?.session_access_modes!==true)throw new Error('Access controls are unavailable on this backend.');
+            if((message.session||undefined)!==selected)throw new Error('The selected conversation changed.');
+            if(!selected){if(message.type!=='access-change')return;const created=await target.createSession('New conversation');if(panel!==view||target!==client||version!==generation)return;await selectSession(created.id);if(sessionId!==created.id||generation!==version+1)return;version=generation;await refresh();selected=sessionId;}
+            let snapshot=await target.sessionAccess(selected);if(panel!==view||target!==client||version!==generation||selected!==sessionId)return;
+            if(message.type==='access-change'){
+              if(message.revision!==snapshot.revision||message.workspace&&message.workspace!==snapshot.workspace_id)throw new Error('Permissions changed. Refresh before selecting access.');
+              snapshot=await target.sessionAccess(selected,{mode:message.mode,workspace_id:snapshot.workspace_id,expected_revision:snapshot.revision});
+            }
+            if(panel===view&&target===client&&version===generation&&selected===sessionId)post({type:'access-state',snapshot});
+          }catch(error){if(panel===view&&version===generation)post({type:'access-error',text:error.message});}
         } else if(message.type==='permission-grants-load'||message.type==='permission-grant-revoke'){
           try{
             const selected=sessionId,version=generation,target=client;if(!selected||message.session!==selected)throw new Error('Select the conversation whose saved permissions you want to inspect.');

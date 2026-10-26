@@ -726,6 +726,13 @@ class BackendClient {
     if(!result||result.id!==requestId||!['ready','denied'].includes(result.state)||result.state!==(decision==='allow'?'ready':'denied'))throw new Error('Permission reply did not settle the requested operation.');
     return result;
   }
+  async sessionAccess(sessionId,change) {
+    executionIdentity(sessionId);
+    if(change&&(!['default','full'].includes(change.mode)||!Number.isSafeInteger(change.expected_revision)||change.expected_revision<0||typeof change.workspace_id!=='string'||!change.workspace_id))throw new Error('Invalid conversation access change.');
+    const value=await this.request('/v1/sessions/'+encodeURIComponent(sessionId)+'/access',change);
+    if(!value||value.session_id!==sessionId||typeof value.workspace_id!=='string'||!value.workspace_id||!Number.isSafeInteger(value.revision)||value.revision<0||!['default','full'].includes(value.mode)||change&&(value.workspace_id!==change.workspace_id||value.mode!==change.mode||value.revision!==change.expected_revision+1))throw new Error('Conversation access acknowledgement changed.');
+    return value;
+  }
   async sessionPermissionGrants(sessionId) {
     executionIdentity(sessionId);const value=await this.#permissionCatalogRequest(sessionId,'/permission-grants');
     if(!value||value.session_id!==sessionId||!Number.isSafeInteger(value.revision)||value.revision<0||!Array.isArray(value.grants)||value.grants.length>256||value.grants.some(item=>!item||typeof item.id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(item.id)||typeof item.workspace_id!=='string'||!item.workspace_id||typeof item.action!=='string'||!item.action||typeof item.resource!=='string'||!item.resource||typeof item.policy_binding!=='string'||!item.policy_binding||!Number.isSafeInteger(item.created_unix_ms)))throw new Error('Invalid saved session permission grants.');

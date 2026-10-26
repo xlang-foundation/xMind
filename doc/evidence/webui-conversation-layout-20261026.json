@@ -1,0 +1,158 @@
+{
+  "date": "2026-10-26T18:32:22.638Z",
+  "scope": "Development preview; not installed as a release",
+  "url": "http://127.0.0.1:57780/ui/",
+  "workspace": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check",
+  "sourceBase": "bde2418245ddf58307769c27a146f865cbfe4fc5",
+  "sourceSha256": {
+    "Native/include/agentflow/operation.hpp": "b1bcf6153328acca7ddab904c87513af6f2e818d347762825ffe1e3505b7f1f7",
+    "Native/include/agentflow/persistence_service.hpp": "acbaa2dc72c2532fff683d7a0d60f25c4c0dc355f8ce777c83969ca1ac5e1000",
+    "Native/include/agentflow/repository.hpp": "a619c758dd6dd6a39755af48ef592d725d97f384d666fa0f4be99c84d4b4a9cb",
+    "Native/src/http_server.cpp": "e2a20cb4f89a10c429ac1a691fe3d6a3626f32d50fd14e5f64e6fdace0c186ce",
+    "Native/src/permission_waiter.cpp": "680328672ecd554d87d6661d139184729869b50a324bc937630d8130963cd379",
+    "Native/src/persistence_service.cpp": "2f4a7f81f19d54324eb12e1139e2bc97f5604601138ad30be9c34267106a7bbb",
+    "Native/src/repository.cpp": "192819b519a01f53b3bdec9b9d9b3bfefa3fc7313f4684838a92038443bafe7b",
+    "Native/tests/permission_grants_contract.cpp": "e89f75dc05f5970ea36b24ea94815efb10324dc354bcbe1913be34fd3fd3cff6",
+    "extensions/vscode/client.js": "bf8e168159400737d091b6136ff4c3e3ca8de1002aa6b8746d7a5dc0f2e535d5",
+    "extensions/vscode/extension.js": "c7067f6a02c1ca1a54d077f385aec3556e84a5713b42f7c46f6d5d405c4a3926",
+    "extensions/vscode/media/chat.css": "d5d2e82e86a445df0f70c3deff965a727d39093fc78be3e5ec54edbbd8443f7c",
+    "extensions/vscode/media/chat.js": "a90221bacf45c90d53de33203c27693244e456dc4a6849559bb140c94596c09d",
+    "extensions/vscode/tests/renderer.test.js": "af61a8858deabb262fc593a2364fd2cf8a43977be57fd33758bdb621896c2c78",
+    "extensions/vscode/webview.js": "e2236913f5bc2ec13467b0222ddfb0e2bec03e47a62277da8e70729224855632",
+    "views/browser/browser.js": "4c96987c48e8cf58e4e26ba3717bab8a15b7b0765eeda90726d460f9fa02d800",
+    "views/browser/build.mjs": "0da9b86c902d79a71255cd696477276f27e6070f7e23a9a05454a34b8247d1e7",
+    "views/browser/page.cjs": "76eefba0886513a38787e7fe4ce45278749d8a6a4daa000d5b08cb0a5908cf4a",
+    "views/browser/server.mjs": "16b239ae483add0a03457d87bd8b47f5a235cd9275d1105909de795b9f567491",
+    "views/browser/tests/classic-script.test.cjs": "fefecf995be9168b85708e497b1685a4d4076da4e295eb5f6a945a84a39753f0",
+    "views/browser/tests/planning-routes.test.cjs": "270a8b943437d2cfe8d9dfd55332aa5b96353502d219ef77125a536212490dbe",
+    "views/browser/layout.js": "3702721d0bb0cb0079eabe97e9bc63eeb251c231a6607488df592faf317b293c",
+    "views/browser/layout.css": "289852292e9c95e6daffd43ca8a92885796ad589b590f4b9bfa6e30701d8ef75",
+    "views/browser/tests/layout.test.cjs": "f14b42c62d94cb94adfb9908dc46775f45c5c07ed69dcaf96285dae82afe2d31"
+  },
+  "nativeSha256": "172439e2cc7bb1b02b0c8e252fb8e093e3ab25d9ef5d69ea97389049710af6cf",
+  "nativeFocusedContracts": {
+    "passed": 2,
+    "names": [
+      "native_permission_grants_contract",
+      "native_permission_waiter_contract"
+    ],
+    "logSha256": "f5b6ef2b9b37311e9fc67fc80bf50970652048df9d672198427ccc5d3cd99965",
+    "fullSuiteRun": false
+  },
+  "extensionTests": 521,
+  "browserTests": 186,
+  "clientLogSha256": {
+    "extension": "70383190d52f9aa036af8e0b2d3aa953f1e76c774b1550e489f174e57bd57405",
+    "browser": "77cab95f913ba0056abd0f6d0ee148c8d33832e30068b32d2887b0220c08d0db"
+  },
+  "ui": {
+    "activityCollapsed": true,
+    "assistantLeft": 304,
+    "filePreview": "Check chat window renders\nVerify message alignment\nTest input area accessibility\n",
+    "historyMessages": 6,
+    "model": "gpt-4.1",
+    "permissions": "full",
+    "session": "845d0da11e974a7eb68c902c9a92045d",
+    "usage": [
+      [
+        "Input 5,102",
+        "Output 194",
+        "Total 5,296",
+        "Cached 0",
+        "Reasoning 0",
+        "gpt-4.1",
+        "OpenAI · Responses",
+        "First token 1.34s",
+        "2.82s"
+      ],
+      [
+        "Input 5,316",
+        "Output 33",
+        "Total 5,349",
+        "Cached 0",
+        "Reasoning 0",
+        "gpt-4.1",
+        "OpenAI · Responses",
+        "First token 1.11s",
+        "1.49s"
+      ],
+      [
+        "Input 5,461",
+        "Output 56",
+        "Total 5,517",
+        "Cached 5,248",
+        "Reasoning 0",
+        "gpt-4.1",
+        "OpenAI · Responses",
+        "First token 1.13s",
+        "1.60s"
+      ]
+    ],
+    "user": [
+      {
+        "background": "rgb(35, 42, 53)",
+        "left": 385.3020935058594,
+        "right": 846.0000305175781
+      },
+      {
+        "background": "rgb(35, 42, 53)",
+        "left": 385.3020935058594,
+        "right": 846.0000305175781
+      }
+    ],
+    "userHeadings": 0,
+    "workspace": "ui-layout-check",
+    "historyRestored": true,
+    "historySha256": "8f623e7cf7f5aee977e01049172aabfc944a54704b6fe955ecf28a2419137342",
+    "nativeOperation": "329ecd96bf0a5550011c7d09aac3d6bd",
+    "nativeDecisionActor": "full-access:1",
+    "nativeOperationState": "succeeded",
+    "roots": [
+      "a7a51d81e36b45868b9bab2bf9ce601d",
+      "50bbe9632ee34b20a094be2a32c1e92d"
+    ],
+    "chatSubmittedThroughUiOnly": true,
+    "nativeMessagesReplayed": false,
+    "detailsHideAndReopenVerified": true,
+    "folderManagementDialogVerified": true
+  },
+  "physicalCreatedFile": {
+    "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check/sample.txt",
+    "sha256": "be0dcc6508523d31c73f0fd179369c69dec12cc82d8e36c42ff322589c0ecf3d"
+  },
+  "inference": {
+    "model": "gpt-4.1",
+    "calls": 3,
+    "inputTokens": 15879,
+    "outputTokens": 283,
+    "cachedInputChargedFullRate": true,
+    "conservativeCostUsd": 0.034022,
+    "conservativeCumulativeUsd": 1.499198,
+    "capUsd": 100,
+    "invoiceClaim": false
+  },
+  "observations": [
+    {
+      "root": "a7a51d81e36b45868b9bab2bf9ce601d",
+      "state": "completed",
+      "result": "Returned a README draft but did not create README.md; preserved as a task-fulfillment finding, not counted as a successful file creation."
+    },
+    {
+      "root": "50bbe9632ee34b20a094be2a32c1e92d",
+      "state": "completed",
+      "result": "Normal subsequent feature request created sample.txt through the native tool with decision actor full-access:1; no per-operation approval prompt."
+    }
+  ],
+  "neverReplay": [
+    "a7a51d81e36b45868b9bab2bf9ce601d",
+    "50bbe9632ee34b20a094be2a32c1e92d"
+  ],
+  "preserved": {
+    "installedVersion": "0.1.80",
+    "originalBrowser": "http://127.0.0.1:63573/ui/",
+    "originalProfileHistoryUnchanged": true,
+    "originalCppQuarantineNotReconciled": true
+  },
+  "screenshot": "webui-conversation-layout-20261026.png",
+  "screenshotSha256": "9b735fa36d1195a5104c0aa64a19e942645e83b6e2e7a2a6e5dce18422cbb146"
+}
