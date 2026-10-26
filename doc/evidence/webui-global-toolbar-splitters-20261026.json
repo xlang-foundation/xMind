@@ -1,0 +1,25 @@
+{
+  "scope": "Browser development preview UI changes; no native release or new model execution",
+  "preview": "http://127.0.0.1:57780/ui/",
+  "globalToolbar": "Restored without the duplicated workspace selector",
+  "workspaceCreation": "Only the sidebar + is visible; its existing creation dialog was opened and cancelled through UI",
+  "workspaceSettings": "Add folder remains visible; New workspace is hidden",
+  "resizing": {
+    "pointerDragVerified": true,
+    "before": {"left": 240, "right": 360},
+    "afterDrag": {"left": 280, "right": 400, "chat": 590},
+    "keyboardVerified": {"left": 252, "right": 372},
+    "restoredToDefaultWidths": true
+  },
+  "focusedClassicScriptAndLayoutTests": {"passed": 5, "failed": 0},
+  "workspaceCataloguesVerifiedThroughUi": {
+    "preview": ["ui-layout-check"],
+    "originalPage": "http://127.0.0.1:63573/ui/",
+    "original": ["cpp-cli", "python-only", "vue-vite"],
+    "reasonForDifference": "The development preview uses an isolated native profile",
+    "originalSelectionPreserved": "vue-vite"
+  },
+  "chatOrToolEffectsReplayed": false,
+  "additionalInference": false,
+  "screenshot": "webui-global-toolbar-splitters-20261026.png"
+}

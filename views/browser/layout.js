@@ -20,14 +20,28 @@
   for(const id of ['skills-view','agent-picker','workflow-picker'])if(byId(id))activity.append(byId(id));
   panels.append(files,activity);inspector.append(controls,panels);layout.append(inspector);
   const toggle=make('button','Details');toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Show or hide workspace files and activity';
-  const sidebarFooter=make('footer',undefined,'navigation-controls');sidebarFooter.setAttribute('aria-label','Application controls');
-  for(const id of ['settings','refresh','connect-view','disconnect-view'])if(byId(id))sidebarFooter.append(byId(id));sidebarFooter.append(toggle);navigation.append(sidebarFooter);
-  // Keep controller targets available without repeating workspace navigation.
-  document.querySelector('.browser-bar').hidden=true;document.querySelector('.conversation-header').hidden=true;
+  const toolbar=document.querySelector('.browser-bar');toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Global toolbar');
+  for(const id of ['refresh','settings','connect-view','disconnect-view'])if(byId(id))toolbar.append(byId(id));toolbar.append(toggle);
+  // Workspace creation belongs to the sidebar +. The existing controller keeps
+  // its command target, while workspace settings only manage existing folders.
+  byId('add-workspace').hidden=true;document.querySelector('.conversation-header').hidden=true;
+  const leftDivider=make('div',undefined,'pane-divider'),rightDivider=make('div',undefined,'pane-divider');leftDivider.id='workspace-divider';rightDivider.id='details-divider';
+  navigation.after(leftDivider);inspector.before(rightDivider);
+  const resize=(divider,pane,variable,min,max,reversed=false)=>{
+    const current=()=>Math.round(pane.getBoundingClientRect().width);
+    const set=value=>{const other=reversed?navigation:inspector,available=layout.getBoundingClientRect().width-(other.hidden?0:other.getBoundingClientRect().width)-290;const limit=Math.max(min,Math.min(max,available));const width=Math.max(min,Math.min(limit,value));layout.style.setProperty(variable,width+'px');divider.setAttribute('aria-valuenow',String(Math.round(width)));};
+    divider.tabIndex=0;divider.setAttribute('role','separator');divider.setAttribute('aria-orientation','vertical');divider.setAttribute('aria-label',reversed?'Resize details panel':'Resize workspace sidebar');divider.setAttribute('aria-valuemin',String(min));divider.setAttribute('aria-valuemax',String(max));divider.setAttribute('aria-valuenow',String(current()));
+    let drag;
+    divider.onpointerdown=event=>{if(event.button!==0)return;event.preventDefault();drag={x:event.clientX,width:current()};divider.setPointerCapture(event.pointerId);divider.classList.add('dragging');};
+    divider.onpointermove=event=>{if(drag)set(drag.width+(event.clientX-drag.x)*(reversed?-1:1));};
+    const end=()=>{drag=undefined;divider.classList.remove('dragging');};divider.onpointerup=end;divider.onpointercancel=end;divider.onlostpointercapture=end;
+    divider.onkeydown=event=>{const step=event.shiftKey?32:12;if(event.key==='Home'){event.preventDefault();set(min);}else if(event.key==='End'){event.preventDefault();set(max);}else if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();set(current()+(event.key==='ArrowRight'?step:-step)*(reversed?-1:1));}};
+  };
+  resize(leftDivider,navigation,'--workspace-pane-width',140,360);resize(rightDivider,inspector,'--details-pane-width',240,640,true);
   let selected='files';
-  const choose=name=>{selected=name;files.hidden=name!=='files';activity.hidden=name!=='activity';if(name==='activity')byId('run-activity').open=true;for(const button of tabs.children){button.setAttribute('aria-selected',String(button.dataset.panel===name));button.tabIndex=button.dataset.panel===name?0:-1;}inspector.hidden=false;toggle.setAttribute('aria-expanded','true');};
+  const choose=name=>{selected=name;files.hidden=name!=='files';activity.hidden=name!=='activity';if(name==='activity')byId('run-activity').open=true;for(const button of tabs.children){button.setAttribute('aria-selected',String(button.dataset.panel===name));button.tabIndex=button.dataset.panel===name?0:-1;}inspector.hidden=false;rightDivider.hidden=false;toggle.setAttribute('aria-expanded','true');};
   for(const [name,label] of [['files','Files'],['activity','Activity']]){const tab=make('button',label);tab.type='button';tab.id='details-'+name;tab.dataset.panel=name;tab.setAttribute('role','tab');tab.setAttribute('aria-controls',name==='files'?files.id:activity.id);tab.onclick=()=>choose(name);tab.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const next=name==='files'?'activity':'files';choose(next);byId('details-'+next).focus();}};tabs.append(tab);}
-  controls.append(tabs,close);close.onclick=()=>{inspector.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus();};toggle.onclick=()=>{if(inspector.hidden)choose(selected);else close.click();};
+  controls.append(tabs,close);close.onclick=()=>{inspector.hidden=true;rightDivider.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus();};toggle.onclick=()=>{if(inspector.hidden)choose(selected);else close.click();};
   choose('files');
   // Approval review reveals its actual controls even when details were hidden.
   byId('approval-review').addEventListener('click',()=>choose('activity'));
