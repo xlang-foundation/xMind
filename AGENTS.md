@@ -6,7 +6,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- VS Code auth fix in progress: BackendAuth delegates browser-host persistence to native DPAPI plus embedded-xlang3 SQLite, scoped to private directory and canonical loopback origin.9 focused JS bridge tests pass. Native contract/full suites and actual Code reload still pending; installed79 and live project owners remain unchanged.
+- VS Code auth fix in progress: BackendAuth delegates browser-host persistence to native DPAPI plus embedded-xlang3 SQLite, scoped to private directory and canonical loopback origin.9 focused JS bridge tests and the full519 extension tests pass. The initial host-harness module-resolution failure is retained; its relative require path was corrected. Native contract/full suites and actual Code reload still pending; installed79 and live project owners remain unchanged.
 
 - Latest user test policy: use projects to find xMind bugs. Do not correct project prompts or supply diagnostic fixes/code. Use normal feature requests; observe its own recovery, approve scoped effects, preserve failures. Label earlier guided interventions separately.
 
