@@ -44,6 +44,12 @@
       "observed": "Independent browser screenshot shows search box beyond task board. Board right849.197937; search right926.697922 at1280x720.",
       "state": "unresolved; no corrective prompt supplied",
       "screenshot": "webui-vue-built-app-20261025.png"
+    },
+    {
+      "id": "vscode-run-picker-reset",
+      "observed": "In actual Code UI, select earlier completed run b18029b9240849518f0e17e6749129af; reload restores same conversation and Vue root but selects latest d8624097c83d4249b38f74f4a7faed13. Full history remains exact.",
+      "state": "unresolved; recorded separately from completed authentication fix",
+      "evidence": "vscode-auth-persistence-0.1.80-20261025.json"
     }
   ],
   "receipts": [
@@ -51,5 +57,5 @@
     "webui-python-multiturn-20261025.json",
     "webui-cpp-process-timeouts-20261025.json"
   ],
-  "originalVsCodeAuthFix": "Still pending; no production source fix yet."
+  "originalVsCodeAuthFix": "Installed0.1.80: actual editor reload and fresh-window automatic authentication, workspace and complete rendered-history restoration passed. Desktop UI remained closed."
 }

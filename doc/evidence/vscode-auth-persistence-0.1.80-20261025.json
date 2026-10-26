@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-25",
+  "version": "0.1.80",
+  "sourceCommit": "f79c3f2327e1557f7352dfc844a0673bf8647c35",
+  "problem": "VS Code browser host uses in-memory SecretStorage when no embedder secretStorageProvider is supplied; external backend credentials vanished on reload.",
+  "implementation": {
+    "native": "DPAPI CurrentUser encryption, bound to private-directory identity and canonical loopback origin; SQLite I/O exclusively through embedded xlang3.",
+    "adapter": "Browser-host Windows x64 credentials restored by a thin private Native stdin/stdout bridge. Desktop SecretStorage behavior is preserved. No tokens in argv, URLs, workspace files or logs.",
+    "credentials": "Client-owned loopback connection tokens only; provider API keys remain on the backend."
+  },
+  "qualification": {
+    "native": {
+      "expected": 185,
+      "passed": 185,
+      "failed": 0,
+      "fullSuite": true,
+      "seconds": 1409.03,
+      "logSha256": "4286795117d2d07425f9fb563d99432f9aaa29e240f89774d35efc1e02f35c7d",
+      "testInventorySha256": "a91fbcc052a8261986a2a09f1f63fd43bf7d1412c0380bbe79b52a21c037dc88",
+      "nativeBinariesFrozen": 146,
+      "binaryInventorySha256": "6b74507086105dd6b264461355bd8716dc591a0afe6fc13a2e76c7d2a1a10562",
+      "inputAudit": {
+        "checkedAt": "2026-10-26T05:57:35.024Z",
+        "sourceCommit": "f79c3f2327e1557f7352dfc844a0673bf8647c35",
+        "counts": {
+          "project": 2863,
+          "sdk": 16,
+          "runtime": 30,
+          "libraries": 1831,
+          "dependencies": {
+            "Native/tests/sdk/node_modules": 3690,
+            "extensions/vscode/node_modules": 14908
+          }
+        }
+      },
+      "allSourceSdkLibrariesDependenciesAndBinaryFileSetsUnchanged": true
+    },
+    "extension": {
+      "fullSuite": true,
+      "passed": 519,
+      "failed": 0,
+      "logSha256": "b2d4dc85e08d7b04929315d7b9636e83b5ed494b7af81d13af52ff66ca1143c8"
+    },
+    "browser": {
+      "previousFullSuite": 185,
+      "reused": true,
+      "proof": "All regenerated browser asset bytes match the prior qualified185-test browser gate. This suite was not repeated."
+    },
+    "rendered": {
+      "firstXmindSignInCount": 1,
+      "browserReload": {
+        "noAuthPrompt": true,
+        "workspaceRestored": true,
+        "historyMatches": true,
+        "historySha256": "6013b5e79f87d5428cf3ce9ce30c6f6fd5a25d3390a632fd9c575ed0a6a07e7e",
+        "earlierRunSelectionRestored": false
+      },
+      "freshWindow": {
+        "noAuthPrompt": true,
+        "noRootPrompt": true,
+        "workspaceRestored": true,
+        "historyMatches": true,
+        "historySha256": "6013b5e79f87d5428cf3ce9ce30c6f6fd5a25d3390a632fd9c575ed0a6a07e7e"
+      },
+      "historyLoadedThroughUi": true,
+      "chatTurnsSubmitted": 0,
+      "effectsReplayed": 0,
+      "host": "Actual browser-hosted VS Code, qualified package0.1.80, existing79 native view/backend and genuine Vue project history.",
+      "workspace": "Vue root selected from Python+Vue multi-folder workspace.",
+      "transcriptHashMeaning": "Normalized complete rendered accessibility transcript after loading older messages; ephemeral AX node numbers removed.",
+      "screenshot": "vscode-auth-restored-20261025.png",
+      "desktopEditorOpened": false
+    },
+    "encryptedStore": {
+      "allVaultFilesExcludePlaintextToken": true,
+      "files": {
+        "client-auth.sqlite": {
+          "bytes": 12288,
+          "sha256": "620a6c86d24d5d62ab0d2f7235ae167a558f45f69703374bbd1453372abef586"
+        },
+        "startup.lock": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "installedSmoke": {
+      "version": "0.1.80",
+      "actualInstalledJavascriptAndNativeProgramExecuted": true,
+      "persistedIntoFreshEphemeralHost": true,
+      "originIsolation": true,
+      "encryptedAtRest": true,
+      "revocationPersists": true,
+      "providerInference": false,
+      "chatTurnsSubmitted": 0,
+      "existingUserDataModified": false,
+      "nativeSha256": "daef39ff0fac5e3f0ad490cc9eee56ac7bb65f7c3b7798d19c67107dd124e422"
+    }
+  },
+  "package": {
+    "archive": "D:/CantorAI2026/xMind/.agentflow/auth-persistence-validation/package/agentflow-0.1.80-auth-persistence.vsix",
+    "archiveSha256": "6d8ad2523c050558550091a211bb65e68cf7188685db474c6459fa768b4e040c",
+    "nativeSha256": "daef39ff0fac5e3f0ad490cc9eee56ac7bb65f7c3b7798d19c67107dd124e422",
+    "runtimeManifestSha256": "b561039d1f200b42737402fba502f709e94a005ced6e6b0f61a1db90f82e9a41",
+    "sdkRevision": "6df6520f3728678341de3db18c95ff6499103f1a",
+    "archiveEntries": 2382
+  },
+  "installation": {
+    "version": "0.1.80",
+    "installedRoot": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.80",
+    "archiveSha256": "6d8ad2523c050558550091a211bb65e68cf7188685db474c6459fa768b4e040c",
+    "nativeSha256": "daef39ff0fac5e3f0ad490cc9eee56ac7bb65f7c3b7798d19c67107dd124e422",
+    "runtimeManifestSha256": "b561039d1f200b42737402fba502f709e94a005ced6e6b0f61a1db90f82e9a41",
+    "installedFiles": 2381,
+    "allInstalledFilesMatchQualifiedArchive": true,
+    "standardVsixManifestExtractionVerified": true,
+    "protectedRoots": {
+      "C:/Users/shaw9/.xMind": {
+        "sha256": "c944b86684e93a5448384df8d498fae1f7de911d93bad4eb11c31435c9a56e2f",
+        "files": 267007,
+        "entries": 294377
+      },
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json": {
+        "sha256": "6e5f1576d675dc013c0377546704503085c4b87bebd14b421187af917a2229da",
+        "files": 1,
+        "entries": 1
+      },
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json": {
+        "absent": true
+      },
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow": {
+        "sha256": "8a3978409e5bb7e045a56060b0717044bcbbb262a0e33aefc5abd851aa881323",
+        "files": 48,
+        "entries": 99
+      },
+      "D:/CantorAI2026/xMind/.config": {
+        "sha256": "e0daf77ccb0c07ff116d7487cffa1b988792780d794ffb4e5ac77fe75c4bd37a",
+        "files": 3,
+        "entries": 4
+      },
+      "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.79": {
+        "sha256": "fb02d653d6872fb372fd79eb0d2ad930e02c14334895b77e8cd78b1c4fbc978e",
+        "files": 2380,
+        "entries": 2659
+      },
+      "D:/CantorAI2026/xMind/.agentflow/installation-backups/0.1.75-before-d55741e0/extension": {
+        "sha256": "0743e9a2c4040e29651c5951c110ef7ce497df6ced4863a7e47f57806a6dbe1e",
+        "files": 2442,
+        "entries": 2719
+      },
+      "D:/CantorAI2026/xMind/.agentflow/installation-backups/0.1.76-before-f641f9ff/extension": {
+        "sha256": "dcfbd82fc99d7e3d684713a83611c58024338929c856349f5e2514858f57d822",
+        "files": 2442,
+        "entries": 2719
+      }
+    },
+    "allEightRootsUnchanged": true,
+    "old79RetainedAtOriginalPath": true,
+    "ownersPreserved": 7,
+    "existingOwnersRetired": false,
+    "desktopEditorOpened": false,
+    "legacyDataMigrationPerformed": false,
+    "installerNotRepeated": true,
+    "registryMetadataPreserved": true
+  },
+  "remainingFindings": {
+    "earlierRecordedRunSelectionResetsToLatest": true,
+    "conversationAndWorkspaceRestorationPassed": true,
+    "projectFailuresNotCorrectedByFurtherPrompts": true,
+    "report": "webui-project-test-findings-20261025.json"
+  },
+  "usage": {
+    "projectTestsConservativeFullRateUsd": 1.465176,
+    "capUsd": 100,
+    "authValidationPaidInference": false,
+    "notInvoice": true
+  },
+  "preservedFailures": [
+    {
+      "log": ".agentflow/auth-persistence-validation/extension-tests.log",
+      "kind": "Initial full host harness failure: new relative production module resolved from test directory; corrected harness, full519 pass follows."
+    },
+    {
+      "log": ".agentflow/auth-persistence-validation/build.log",
+      "kind": "Initial new Native test link failed on existing undeclared profile owner-control dependency; dependency declared and final full185 pass follows."
+    },
+    {
+      "log": ".agentflow/auth-persistence-validation/install.log",
+      "kind": "Installer completed; initial verifier omitted standard .vsixmanifest. Its exact archive bytes were verified, verification resumed without repeating installation."
+    }
+  ],
+  "scopePassed": true
+}
