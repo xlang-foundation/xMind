@@ -6,6 +6,8 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
+- VS Code auth fix in progress: BackendAuth delegates browser-host persistence to native DPAPI plus embedded-xlang3 SQLite, scoped to private directory and canonical loopback origin.9 focused JS bridge tests pass. Native contract/full suites and actual Code reload still pending; installed79 and live project owners remain unchanged.
+
 - Latest user test policy: use projects to find xMind bugs. Do not correct project prompts or supply diagnostic fixes/code. Use normal feature requests; observe its own recovery, approve scoped effects, preserve failures. Label earlier guided interventions separately.
 
 - Current live UI projects: Python sessiond86051f1c0654a09b0083f689135a15c has3 completed turns5e2b3897162f4303b5e8b78c008a1809/c1ff055e7fa84ed4a7df16a35ecc9720/95f6ecf9c68544d6ba5b24a82a1032d3, actual xlang3 tests6 then9, sample1980cents/2rows, exact history/model/workspace reload pass. NEVER replay. C++ session915e28d27d6e41aeba40ad78a19e3e76 configure1ed2dd3bcb2f4474a4c0e64c684b733c and builda2e0891c38ee43ebacdc61f183e7e42e timed out with exit0/1; trees retired, build quarantine retained. Missing<string> is real; descendant cause unproven. Vue session0a57e2e25a694fc7b33746a2f7832e0d has3 completed turns f2c75f56aba747ffa1d9f9a68e91328c/b18029b9240849518f0e17e6749129af/d8624097c83d4249b38f74f4a7faed13: NEVER replay. Turn2 was guided; turn3 ordinary feature request. Final tests/build and app/reload checks pass; search layout overflows77.5px. Cpp/auth remain open. Cost full-rate conservative$1.465176 of$100. Current state: .agentflow/webui-project-tests-20261025/current-task.json.

@@ -1,4 +1,6 @@
 #include "agentflow/local_profile.hpp"
+#include "agentflow/client_auth.hpp"
+#include "agentflow/local_auth.hpp"
 #include "agentflow/mcp_configuration.hpp"
 #include "agentflow/context_records.hpp"
 #include "agentflow/owner_process.hpp"
@@ -19,8 +21,10 @@
 #include <array>
 #include <bcrypt.h>
 #include <chrono>
+#include <charconv>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <map>
 #include <sddl.h>
 #include <set>
@@ -1230,5 +1234,86 @@ void publish_local_view_ready(const std::string &file, const std::string &metada
     require(
         WriteFile(output.value, metadata.data(), static_cast<DWORD>(metadata.size()), &written, nullptr) &&
         written == metadata.size() && FlushFileBuffers(output.value));
+}
+namespace {
+void client_auth_origin(const std::string& origin) {
+    constexpr std::string_view base="http://127.0.0.1";
+    if(origin==base)return;
+    require(origin.starts_with(std::string(base)+":"),"Client authentication requires a canonical loopback origin");
+    const auto port=std::string_view(origin).substr(base.size()+1);int number=0;
+    const auto parsed=std::from_chars(port.data(),port.data()+port.size(),number);
+    require(parsed.ec==std::errc{}&&parsed.ptr==port.data()+port.size()&&number>0&&number<=65535&&
+            std::to_string(number)==port&&number!=80,"Client authentication requires a canonical loopback origin");
+}
+Handle client_auth_file(Store& store) {
+    return store.open(L"client-auth.sqlite",GENERIC_READ|GENERIC_WRITE,OPEN_ALWAYS,FILE_SHARE_READ|FILE_SHARE_WRITE);
+}
+void client_auth_schema(XlangSqlite& db) {
+    db.execute("CREATE TABLE IF NOT EXISTS client_auth(origin TEXT PRIMARY KEY NOT NULL,protection TEXT NOT NULL,ciphertext BLOB NOT NULL)");
+}
+std::string client_auth_context(const Store& store,const std::string& origin) {
+    return store.context()+":vscode-backend-auth:"+origin;
+}
+}
+void save_client_auth(const std::string& directory,const std::vector<std::string>& roots,
+                      const std::string& origin,const SecretBytes& token,bool replace) {
+    client_auth_origin(origin);
+    validate_local_auth_token({reinterpret_cast<const char*>(token.view().data()),token.view().size()});
+    Store store(absolute(directory),true);auto lock=store.lock();auto file=client_auth_file(store);
+    const auto protected_token=protect_secret(token,client_auth_context(store,origin));
+    XlangSqlite db(text(store.directory/L"client-auth.sqlite"),roots);client_auth_schema(db);
+    db.execute(replace?
+        "INSERT INTO client_auth VALUES(?,?,?) ON CONFLICT(origin) DO UPDATE SET protection=excluded.protection,ciphertext=excluded.ciphertext":
+        "INSERT INTO client_auth VALUES(?,?,?) ON CONFLICT(origin) DO NOTHING",
+        {origin,protected_token.protection,protected_token.ciphertext});
+}
+std::optional<SecretBytes> load_client_auth(const std::string& directory,
+    const std::vector<std::string>& roots,const std::string& origin) {
+    client_auth_origin(origin);const auto target=absolute(directory);
+    if(!fs::exists(target))return {};
+    Store store(target);auto lock=store.lock();
+    if(!fs::exists(store.directory/L"client-auth.sqlite"))return {};
+    auto file=client_auth_file(store);
+    XlangSqlite db(text(store.directory/L"client-auth.sqlite"),roots);client_auth_schema(db);
+    const auto rows=db.execute("SELECT protection,ciphertext FROM client_auth WHERE origin=?",{origin}).rows;
+    if(rows.empty())return {};
+    require(rows.size()==1&&rows[0].size()==2&&std::holds_alternative<std::string>(rows[0][0])&&
+            std::holds_alternative<SqlBytes>(rows[0][1]),"Invalid protected client authentication record");
+    auto token=reveal_secret({std::get<std::string>(rows[0][0]),std::get<SqlBytes>(rows[0][1])},client_auth_context(store,origin));
+    validate_local_auth_token({reinterpret_cast<const char*>(token.view().data()),token.view().size()});
+    return token;
+}
+void delete_client_auth(const std::string& directory,const std::vector<std::string>& roots,
+                        const std::string& origin) {
+    client_auth_origin(origin);const auto target=absolute(directory);if(!fs::exists(target))return;
+    Store store(target);auto lock=store.lock();if(!fs::exists(store.directory/L"client-auth.sqlite"))return;
+    auto file=client_auth_file(store);XlangSqlite db(text(store.directory/L"client-auth.sqlite"),roots);client_auth_schema(db);
+    db.execute("DELETE FROM client_auth WHERE origin=?",{origin});
+}
+int run_client_auth(int argc,char** argv) {
+    require(argc==4,"Private client-auth requires ACTION DIRECTORY ORIGIN");
+    const std::string action=argv[1],directory=argv[2],origin=argv[3];
+    require(action=="get"||action=="put"||action=="seed"||action=="delete","Invalid private client-auth action");
+    const auto runtime=absolute(loaded_root());const std::vector<std::string> roots{text(runtime/L"modules"),text(runtime/L"stdlib")};
+    if(action=="put"||action=="seed") {
+        std::string source;char byte;
+        while(std::cin.get(byte)){require(source.size()<1024,"Client authentication input exceeds limits");source+=byte;}
+        auto request=parse(source);SecureZeroMemory(source.data(),source.size());
+        require(request.is_object()&&request.size()==1&&request.contains("token")&&request["token"].is_string(),"Invalid private client authentication input");
+        auto& plain=request["token"].get_ref<std::string&>();
+        SecretBytes token({reinterpret_cast<const std::uint8_t*>(plain.data()),plain.size()});SecureZeroMemory(plain.data(),plain.size());
+        save_client_auth(directory,roots,origin,token,action=="put");std::cout<<"{\"saved\":true}\n";
+    }else if(action=="delete") {
+        delete_client_auth(directory,roots,origin);std::cout<<"{\"deleted\":true}\n";
+    }else {
+        auto token=load_client_auth(directory,roots,origin);
+        if(!token)std::cout<<"{\"token\":null}\n";
+        else {
+            std::cout<<"{\"token\":\"";
+            for(const auto byte:token->view()){if(byte=='\\'||byte=='"')std::cout.put('\\');std::cout.put(static_cast<char>(byte));}
+            std::cout<<"\"}\n";
+        }
+    }
+    return 0;
 }
 } // namespace agentflow

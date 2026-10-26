@@ -9,6 +9,7 @@ const {patchReview,canRestoreFileOperation}=require('./patch-review');
 const { browserViewLauncher } = require('./browser-view');
 const { WorkspaceBackend,machineSetting } = require('./workspace-backend');
 const { resolveNativeRuntime } = require('./native-runtime');
+const { BackendAuth } = require('./backend-auth');
 const { captureEditorSelection } = require('./editor-selection');
 const { XMindPseudoterminal } = require('./terminal');
 const { LanguageServerEditor } = require('./language-server-editor');
@@ -21,6 +22,7 @@ function startupHtml(message) {
 }
 
 async function activate(context) {
+  const backendAuth=new BackendAuth(vscode,context);context.subscriptions.push(backendAuth);
   const browserViews=browserViewLauncher(vscode,context);
   const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime,{onProgress:({elapsedMs})=>{
     if(!sidebarView||panel===sidebarView)return;
@@ -38,7 +40,7 @@ async function activate(context) {
     delete process.env.XMIND_UI_BOOTSTRAP_TOKEN;delete process.env.XMIND_UI_BACKEND_ORIGIN;delete process.env.XMIND_UI_READY_FILE;
     if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting to xMind Server.');
     await vscode.workspace.getConfiguration('agentflow').update('backendUrl',previewOrigin,vscode.ConfigurationTarget.Global);
-    if(token)await context.secrets.store(`xmind.auth:${previewOrigin}`,validateToken(token));
+    if(token)await backendAuth.store(previewOrigin,validateToken(token));
   }
   const showEditReview=editReview(vscode,context);
   let panel;
@@ -504,7 +506,7 @@ async function activate(context) {
       validateInput: value => { try { validateToken(value); return undefined; } catch (error) { return error.message; } }
     });
     if (token === undefined) return false;
-    await context.secrets.store(secretKey(origin), validateToken(token));
+    await backendAuth.store(origin,validateToken(token));
     return true;
   }
   async function configureModel(key,profile,route) {
@@ -550,14 +552,15 @@ async function activate(context) {
     // registration, leaving the view permanently blank on some builds.
     await messages;
     let connection;
-    if(previewOrigin||machineSetting(vscode,'backendMode')==='external'){
+    const externalMode=Boolean(previewOrigin||machineSetting(vscode,'backendMode')==='external');
+    if(externalMode){
       const externalOrigin=previewOrigin??configuredOrigin();
-      if(!await context.secrets.get(secretKey(externalOrigin))&&!await configureToken())return;
-      connection=await workspaceBackend.attach(externalOrigin,await context.secrets.get(secretKey(externalOrigin)));
+      if(!await backendAuth.get(externalOrigin)&&!await configureToken())return;
+      connection=await workspaceBackend.attach(externalOrigin,await backendAuth.get(externalOrigin));
     }else connection=await workspaceBackend.connect();
     const origin=connection.origin,connectionEpoch=workspaceBackend.epoch;
     const connectionCurrent=()=>workspaceBackend.epoch===connectionEpoch&&workspaceBackend.active?.origin===origin;
-    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();Promise.resolve(client?.closeConnection?.()).catch(()=>{});client = new BackendClient(origin, () => context.secrets.get(secretKey(origin)));historyPager=new SessionHistoryPager(client);
+    mcpController?.dispose();mcpController=undefined;contextController?.dispose();contextController=undefined;profileController?.dispose();Promise.resolve(client?.closeConnection?.()).catch(()=>{});client = new BackendClient(origin, () => externalMode?backendAuth.get(origin):context.secrets.get(secretKey(origin)));historyPager=new SessionHistoryPager(client);
     client.bindWorkspace(workspaceBackend);
     await languageServerEditor.connect(client);
     if(!connectionCurrent())throw new Error('Workspace changed while connecting language servers.');

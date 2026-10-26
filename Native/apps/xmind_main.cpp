@@ -1,5 +1,6 @@
 #include "agentflow/program_entries.hpp"
 #include "agentflow/local_profile.hpp"
+#include "agentflow/client_auth.hpp"
 #include "agentflow/workspace_registry.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/agent_worker.hpp"
@@ -47,6 +48,7 @@ void help(){
         "  xmind view --ready-file FILE [local profile options]\n"
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n"
+        "  xmind client-auth get|put|seed|delete DIRECTORY ORIGIN   (private host credential bridge; token via stdin)\n"
         "  xmind worker         (private xlang3 agent tool worker)\n\n"
         "Without --port, the console discovers or starts its persistent local workspace profile.\n"
         "workspace init uses --workspace (or the current directory) as the first folder. Add folders later with workspace add-folder; workspace info lists IDs accepted by Git commands.\n"
@@ -96,6 +98,7 @@ int dispatch(int argc,char** argv){
     if(argc==2&&(std::string_view(argv[1])=="--help"||std::string_view(argv[1])=="help")){help();return 0;}
     if(argc>1){
         const std::string_view mode=argv[1];
+        if(mode=="client-auth")return agentflow::run_client_auth(argc-1,argv+1);
         int (*entry)(int,char**)=nullptr;
         if(mode=="serve")entry=run_server;
         else if(mode=="schema-worker")entry=run_schema_worker;

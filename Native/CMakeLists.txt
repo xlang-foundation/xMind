@@ -1454,6 +1454,13 @@ if(BUILD_TESTING)
       add_test(NAME native_workspace_registry_contract COMMAND agentflow_workspace_registry_contract
         "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
       set_tests_properties(native_workspace_registry_contract PROPERTIES TIMEOUT 45)
+      add_executable(agentflow_client_auth_contract tests/client_auth_contract.cpp)
+      target_link_libraries(agentflow_client_auth_contract PRIVATE agentflow_local_profile)
+      add_custom_command(TARGET agentflow_client_auth_contract POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+        "${AGENTFLOW_XLANG3_SHARED}" "$<TARGET_FILE_DIR:agentflow_client_auth_contract>")
+      add_test(NAME native_client_auth_contract COMMAND agentflow_client_auth_contract
+        "${AGENTFLOW_XLANG3_RUNTIME_DIR}/modules" "${AGENTFLOW_PYTHON_LIB_SOURCE}")
+      set_tests_properties(native_client_auth_contract PROPERTIES TIMEOUT 45)
     endif()
   else()
     message(WARNING "Node.js is required to run the independent HTTP/CLI contract")
