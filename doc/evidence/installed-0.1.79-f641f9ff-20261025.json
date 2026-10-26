@@ -1,0 +1,139 @@
+{
+  "recordedAt": "2026-10-26T00:35:46.440Z",
+  "passed": true,
+  "milestone": "working xMind v1",
+  "version": "0.1.79",
+  "nativeSource": "f641f9ffc42405314547fcc4d0c4f9be933ac1ed",
+  "nativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e",
+  "sdkRevision": "6df6520f3728678341de3db18c95ff6499103f1a",
+  "vsixSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+  "nativeLocalContracts": {
+    "passed": 184,
+    "total": 184,
+    "completeActualInventory": "native-view-lease-sdk6df-20261025.json"
+  },
+  "clientSuites": {
+    "extension": 510,
+    "browser": 185
+  },
+  "packagedBrowser": "packaged79-browser-approval-cancel-20261025.json",
+  "packagedWorkspaceRestart": "packaged79-workspace-restart-20261025.json",
+  "packagedProviderSetup": "packaged79-provider-setup-20261025.json",
+  "packagedCli": "packaged79-cli-20261025.json",
+  "packagedCode": "packaged79-code-20261025.json",
+  "installation": {
+    "recordedAt": "2026-10-26T00:33:54.557Z",
+    "passed": true,
+    "installedVersion": "0.1.79",
+    "installedDirectory": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.79",
+    "vsixSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "installedPayloadFilesVerified": 2378,
+    "completeInstalledFileSetVerified": 2380,
+    "installerVsixManifestMatches": true,
+    "packageJsonMatchesExceptInstallerMetadata": true,
+    "runtimeContentFilesVerified": 2336,
+    "runtimeManifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "nativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e",
+    "sdkRevision": "6df6520f3728678341de3db18c95ff6499103f1a",
+    "runtimeFilesHaveOneLink": true,
+    "otherExtensionRegistryEntriesUnchanged": true,
+    "preservedRoots": [
+      "C:/Users/shaw9/.xMind",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/settings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/keybindings.json",
+      "C:/Users/shaw9/AppData/Roaming/Code/User/globalStorage/agentflow-local.agentflow",
+      "D:/CantorAI2026/xMind/.config"
+    ],
+    "allPreservedUserStateFileSetsAndHashesUnchanged": true,
+    "preservedBeforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "preservedAfterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "exact76BackupFiles": 2442,
+    "required75BackupFiles": 2442,
+    "existingOwnersPreserved": 2,
+    "existingOwnerBirthAndImageVerified": true,
+    "existingOwnersRetired": false,
+    "legacyDataMigrationPerformed": false,
+    "visibleWindowRequested": false,
+    "userProfileBackendStarted": false,
+    "paidInference": false,
+    "installedNativeFunctionalSmoke": true,
+    "desktopEditorAcceptance": false
+  },
+  "installedSmoke": {
+    "recordedAt": "2026-10-26T00:30:29.895Z",
+    "passed": true,
+    "installedVersion": "0.1.79",
+    "installedNativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e",
+    "managedDiscoveryAndReuse": true,
+    "sessionId": "10d52bf152ced65b437c1f8f31e30cd5",
+    "completedRoot": "0342d66ccb3b26a510d9f2ad1231f9dd",
+    "history": [
+      {
+        "data": {
+          "content": "Read the installed fixture marker",
+          "model_id": ""
+        },
+        "id": "msg_1",
+        "role": "user",
+        "seq": 1
+      },
+      {
+        "data": {
+          "content": "Completed graph installed.read79.\n\n```json\n[\n  {\n    \"id\": \"read\",\n    \"output\": {\n      \"content\": \"Observed installed 0.1.79 native read.\\n\",\n      \"folder_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000f43c110000000000\",\n      \"path\": \"installed-marker.txt\",\n      \"source\": \"graph_tool\",\n      \"workspace_id\": \"windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000f43c110000000000\",\n      \"workspace_revision\": 1\n    },\n    \"state\": \"completed\"\n  }\n]\n```",
+          "graph_id": "installed.read79",
+          "nodes": [
+            {
+              "id": "read",
+              "output": {
+                "content": "Observed installed 0.1.79 native read.\n",
+                "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000f43c110000000000",
+                "path": "installed-marker.txt",
+                "source": "graph_tool",
+                "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000f43c110000000000",
+                "workspace_revision": 1
+              },
+              "state": "completed"
+            }
+          ],
+          "source": "graph_join"
+        },
+        "id": "msg_4",
+        "role": "assistant",
+        "seq": 4
+      }
+    ],
+    "observedOutput": "Observed installed 0.1.79 native read.\n",
+    "modelCalls": 0,
+    "providerProfilesEmpty": true,
+    "userProfileRootUsed": false,
+    "ownedBackendIdentityVerifiedHeldHandleAndExitObserved": true,
+    "retirement": {
+      "heldHandleIdentityVerified": true,
+      "exited": true,
+      "pid": 1540,
+      "image": "D:\\CantorAI2026\\xMind\\.agentflow\\installation-update-0.1.79-f641f9ff\\smoke\\profiles\\dd13cb12cfe7c66b1a66040ceffba195412c881a982ad220e74edd5701573524\\runtime-e679c9718b00e5a4e019108ac3541e67dac3ddbf78cb6598ebcb333eeb8a9137\\xmind.exe",
+      "birth": "134374482269478059"
+    },
+    "visibleWindowOpened": false,
+    "desktopEditorAcceptance": false,
+    "completedEffectsReplayed": false
+  },
+  "preservationInventoryStorage": {
+    "encoding": "gzip",
+    "uniqueArchives": 1,
+    "plaintextBytes": 143638472,
+    "compressedBytes": 12060506,
+    "fullOriginalInventoriesRetainedAndVerified": true,
+    "beforeSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "afterSha256": "df7f325ab9184851f2966a5f7b800d08f1bc59fd6722e51f066b2e905bbfd65a",
+    "localStorageManifest": ".agentflow/installation-update-0.1.79-f641f9ff/snapshot-storage.json"
+  },
+  "visibleDesktopOpened": false,
+  "codeAuthenticationPersistenceVerified": false,
+  "codeReloadRequiresReauthenticationInHeadlessServer": true,
+  "paidDevelopmentInference": false,
+  "hostedCurrentNativeRepairQualified": false,
+  "hostedScope": "40235870242 qualifies earlier1f49b5c3; no new hosted job dispatched",
+  "broaderGoalRemoved": true,
+  "goalComplete": true
+}

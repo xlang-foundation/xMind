@@ -27,3 +27,12 @@ Preserved verbatim before the browser approval/cancellation checkpoint; later ex
 - Candidate77 packaged Code passes selected saved-editor context/read/edit/Node4, live buffer update and same-run reload after reauthentication; NEVER replay session4362efdf093a41249a5fe377dfbe1721/rune3bbf9fdeb1a498899fa280143c26a9e. Isolated backend/command and11 identity-verified Code processes retired. Authentication persistence/visible desktop are not proved; installed76 unchanged.
 
 - Candidate77 runtime must have one link/file: redundant stage aliases were removed without byte/VSIX changes after native correctly refused hard links in .agentflow/m77. Fresh m77b managed startup/cancel/restart comparisons pass; final receipt-name collision is reconciled read-only. NEVER replay session8710aa29e1f918c42c050b77d21ee8b8/read5349848d37ee0fc81a28483ebd51c002/cancel72e374ce24659e89a22bcdd8ab289671. Both owners retired. Original76 startup failure remains unresolved; no upgrade acceptance.
+
+
+## Superseded installed75/76 milestone notes
+
+- Installed76 Native d85a1697/SDK8c passes local179/hosted177, CLI/browser/editor/handoff, preservation and smoke. Exact75 backup remains. NEVER replay completed76 tasks. Hosted packaging and full goal remain open; see doc/VALIDATION_STATUS.md.
+
+- Installed75 Nativec17c240b/SDK8c passes full179, clients500/178, fresh CLI/browser/editor coding and74-to75 handoff. Five roots/2442 files/2398 runtime/74 backup/smoke verify. See doc/evidence/installed-0.1.75-859c66da-20261024.json; goal active.
+
+- Installed75 smoke sessiondd7f9cdd53c3546a9fe1aaf50e9abd3c/rootcbc04d940ea8cc5278f403b9cc75aafe completes read/history with0models; owner exited. NEVER replay. Installed74 checkpoint archived verbatim.
