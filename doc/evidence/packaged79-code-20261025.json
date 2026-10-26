@@ -1,0 +1,72 @@
+{
+  "passed": true,
+  "calls": 4,
+  "proof": {
+    "passed": true,
+    "sessionId": "3ae86831a0e84045ab2245b9260562b7",
+    "runId": "4c05f6b8729a4df1836ed16977d35f9c",
+    "cleanFirstCompletion": true,
+    "selectionCommandVerified": true,
+    "selectionRange": "1:1–1:43",
+    "savedEditorBuffer": true,
+    "liveEditorUpdatedBeforeReload": true,
+    "reloadRestored": true,
+    "approvals": 2,
+    "headlessCodeServer": true,
+    "reauthenticationRequired": true,
+    "authenticationPersistenceVerified": false,
+    "desktopEditorShown": false,
+    "liveEditor": "module.exports = (a, b) => Math.max(Math.abs(a), Math.abs(b));\n",
+    "completedEffectsReplayed": false,
+    "paidInference": false
+  },
+  "nativeProof": {
+    "recordedAt": "2026-10-26T00:16:10.589Z",
+    "sessionId": "3ae86831a0e84045ab2245b9260562b7",
+    "runId": "4c05f6b8729a4df1836ed16977d35f9c",
+    "state": "completed",
+    "messages": 8,
+    "operations": 2,
+    "modelCalls": 4,
+    "completedWorkerRetirements": 1,
+    "historySha256": "472bcf54480f560b1b4a7b285834fad20f7c49fea5815e120e3114044ac1be37",
+    "eventsSha256": "dfc656a702d6b02d7c5b4a860a601715e4f7fc23d00fdac9588e73670bc65c02",
+    "operationsSha256": "3210261e45b62baea49985138f03b8140d34b28f0dcc30c7e45440034dab438d",
+    "readOnly": true,
+    "tasksReplayed": false,
+    "renderedAcceptance": false,
+    "packagedAcceptance": false
+  },
+  "packageBefore": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension",
+    "archiveSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "manifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "verifiedPackagedFiles": 2379
+  },
+  "packagedAcceptance": true,
+  "nativeSha256": "78bf31b0dcb93d4dbd9b8fd4a2c2cdbaff9844698a8a42a6f07532b99dc72f6e",
+  "ownedNativeExited": {
+    "code": null,
+    "signal": "SIGTERM"
+  },
+  "paidInference": false,
+  "installedExtensionUnchanged": true,
+  "scope": "Actual VSIX-verified candidate Code selection and native process coding; controlled local peer, shared packaged runtime",
+  "goalComplete": false,
+  "codeServerRetirement": {
+    "identityVerifiedHeldHandles": 9,
+    "allExited": true,
+    "rootPid": 1180,
+    "plannedTerminationAfterCompletedAcceptance": true
+  },
+  "serverTerminal": {
+    "terminal": {
+      "exitCode": 4294967295,
+      "signal": null
+    },
+    "packageUnchanged": true,
+    "userInstallationChanged": false
+  },
+  "connectionTokenRedactedFromPrivateTextLogs": true
+}
