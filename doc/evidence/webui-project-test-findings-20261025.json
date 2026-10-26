@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-25",
+  "testingPolicy": "Normal project requests reveal bugs; do not provide corrective project prompts. Preserve and distinguish guided cases.",
+  "findings": [
+    {
+      "id": "cpp-compile",
+      "observed": "xMind generated std::stoi without including<string>; compiler C2039/C3861; build exit1.",
+      "state": "unresolved, failure retained"
+    },
+    {
+      "id": "cpp-process-retirement",
+      "observed": "CMake configure produced build files and root exit0, but job reached120s; separate build exit1 also reached120s; both trees retired, native effect quarantine preserved.",
+      "cause": "unproven",
+      "state": "unresolved"
+    },
+    {
+      "id": "cpp-test-contract",
+      "observed": "No-argument program returns1 but CTest Stats_NoArgs lacks WILL_FAIL.",
+      "evidence": "source inspection only; CTest has not run",
+      "state": "unresolved"
+    },
+    {
+      "id": "vue-parent-directory",
+      "observed": "Generated src paths failed file_unavailable because src did not exist; xMind blamed permissions and asked user to fix environment.",
+      "intervention": "Operator supplied directory-creation diagnosis in guided turn2; cannot claim unaided recovery."
+    },
+    {
+      "id": "vue-install-order",
+      "observed": "npm install ran in empty folder before manifest; exit0/up-to-date. Later package and vite config omitted matching Vue plugin; initial final response overstated installed dependencies.",
+      "intervention": "Operator supplied dependency diagnosis in guided turn2."
+    },
+    {
+      "id": "vue-test-recovery",
+      "observed": "Generated describe/it were undefined; xMind replaced test registration with custom assert harness and called node:test unsupported. Actual runner reports1 passing file with6 internal checks; storage and counter have no direct unit coverage.",
+      "state": "Execution recovered by xMind; unsupported/coverage claims not supported."
+    },
+    {
+      "id": "vue-missing-stylesheet",
+      "observed": "Build failed on missing src/style.css. xMind created it and reran production build successfully without operator fix.",
+      "state": "self-recovered"
+    },
+    {
+      "id": "vue-layout-overflow",
+      "observed": "Independent browser screenshot shows search box beyond task board. Board right849.197937; search right926.697922 at1280x720.",
+      "state": "unresolved; no corrective prompt supplied",
+      "screenshot": "webui-vue-built-app-20261025.png"
+    }
+  ],
+  "receipts": [
+    "webui-vue-multiturn-20261025.json",
+    "webui-python-multiturn-20261025.json",
+    "webui-cpp-process-timeouts-20261025.json"
+  ],
+  "originalVsCodeAuthFix": "Still pending; no production source fix yet."
+}
