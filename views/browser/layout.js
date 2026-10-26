@@ -19,7 +19,11 @@
   activity.prepend(document.querySelector('.conversation-tools'));
   for(const id of ['skills-view','agent-picker','workflow-picker'])if(byId(id))activity.append(byId(id));
   panels.append(files,activity);inspector.append(controls,panels);layout.append(inspector);
-  const toggle=make('button','Details');toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Show or hide workspace files and activity';document.querySelector('.browser-bar').append(toggle);
+  const toggle=make('button','Details');toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Show or hide workspace files and activity';
+  const sidebarFooter=make('footer',undefined,'navigation-controls');sidebarFooter.setAttribute('aria-label','Application controls');
+  for(const id of ['settings','refresh','connect-view','disconnect-view'])if(byId(id))sidebarFooter.append(byId(id));sidebarFooter.append(toggle);navigation.append(sidebarFooter);
+  // Keep controller targets available without repeating workspace navigation.
+  document.querySelector('.browser-bar').hidden=true;document.querySelector('.conversation-header').hidden=true;
   let selected='files';
   const choose=name=>{selected=name;files.hidden=name!=='files';activity.hidden=name!=='activity';if(name==='activity')byId('run-activity').open=true;for(const button of tabs.children){button.setAttribute('aria-selected',String(button.dataset.panel===name));button.tabIndex=button.dataset.panel===name?0:-1;}inspector.hidden=false;toggle.setAttribute('aria-expanded','true');};
   for(const [name,label] of [['files','Files'],['activity','Activity']]){const tab=make('button',label);tab.type='button';tab.id='details-'+name;tab.dataset.panel=name;tab.setAttribute('role','tab');tab.setAttribute('aria-controls',name==='files'?files.id:activity.id);tab.onclick=()=>choose(name);tab.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const next=name==='files'?'activity':'files';choose(next);byId('details-'+next).focus();}};tabs.append(tab);}
