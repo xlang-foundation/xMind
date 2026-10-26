@@ -1,0 +1,278 @@
+{
+  "recordedAt": "2026-10-26T00:01:24.252Z",
+  "version": "0.1.79",
+  "scope": "Actual packaged browser: denied edit, approved coding/Node4, active cancellation and scoped reload",
+  "rawGate": ".agentflow/packaged79-browser-approval-cancel/owned-private/gate.json",
+  "rawGateSha256": "0536533e782b5c1a534a735a2e85091887e25210f2a5d146e7293b2813449519",
+  "packageBefore": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension",
+    "archiveSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "manifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "verifiedPackagedFiles": 2379
+  },
+  "packageAfter": {
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension/native-runtime",
+    "extension": "D:/CantorAI2026/xMind/.agentflow/client-delivery-validation/native-sdk6df-view-lease/package-qualified/extension",
+    "archiveSha256": "1cddb6a0133f10e7666bff1cfcecb7e86fd9e256d679078bd142f257a7726dbb",
+    "manifestSha256": "bb2459e0f6280e20062b6a549b809d97b2fdc38e78d88148b46a4607981f6a49",
+    "verifiedPackagedFiles": 2379
+  },
+  "renderedProof": {
+    "passed": true,
+    "hiddenBrowser": true,
+    "deny": {
+      "passed": true,
+      "deniedVisible": true,
+      "finalVisible": true,
+      "preview": "module.exports = 'KEEP';\n",
+      "runId": "a7c473c23e7b4fad94d3f0b08e72756f",
+      "runLabel": "completed · a7c473c23e7b4fad94d3f0b08e72756f",
+      "sessionId": "fef87817581d489c800776d28fbf6bc2",
+      "editDenied": true,
+      "fileUnchanged": true
+    },
+    "code": {
+      "passed": true,
+      "sessionId": "db7253c2404d4cc6b33b44dbfbc8fcfa",
+      "runId": "2247e83f7d0b4a87ba846cc8d777e944",
+      "cleanFirstCompletion": true,
+      "filePreviewVerified": true,
+      "approvals": 2,
+      "reloadRestored": true,
+      "before": {
+        "actualCommandVisible": true,
+        "agentId": "v1.ui79.coder",
+        "finalVisible": true,
+        "modelId": "ui79-controlled-coder",
+        "preview": "module.exports = (a, b, c) => (Math.max(a, b, c) - Math.min(a, b, c));\n",
+        "runId": "2247e83f7d0b4a87ba846cc8d777e944",
+        "runLabel": "completed · 2247e83f7d0b4a87ba846cc8d777e944",
+        "sessionId": "db7253c2404d4cc6b33b44dbfbc8fcfa"
+      },
+      "after": {
+        "agentId": "v1.ui79.coder",
+        "deniedPromptAbsent": true,
+        "finalVisible": true,
+        "modelId": "ui79-controlled-coder",
+        "runId": "2247e83f7d0b4a87ba846cc8d777e944",
+        "runLabel": "completed · 2247e83f7d0b4a87ba846cc8d777e944",
+        "sessionId": "db7253c2404d4cc6b33b44dbfbc8fcfa"
+      }
+    },
+    "cancel": {
+      "passed": true,
+      "sessionId": "b144358865d2466bbda02f481e721675",
+      "runId": "9973cc0e9e564a2a82106c53024ff097",
+      "activePeerConfirmedBeforeStop": true,
+      "cancelledThroughUi": true,
+      "reloadRestored": true,
+      "before": {
+        "agentId": "v1.ui79.coder",
+        "modelId": "ui79-controlled-coder",
+        "otherCasePromptsAbsent": true,
+        "preview": "module.exports = 'KEEP';\n",
+        "runId": "9973cc0e9e564a2a82106c53024ff097",
+        "runLabel": "cancelled · 9973cc0e9e564a2a82106c53024ff097",
+        "sessionId": "b144358865d2466bbda02f481e721675",
+        "sessionLabel": "Browser conversation",
+        "stopVisible": false
+      },
+      "after": {
+        "agentId": "v1.ui79.coder",
+        "modelId": "ui79-controlled-coder",
+        "otherCasePromptsAbsent": true,
+        "runId": "9973cc0e9e564a2a82106c53024ff097",
+        "runLabel": "cancelled · 9973cc0e9e564a2a82106c53024ff097",
+        "sessionId": "b144358865d2466bbda02f481e721675"
+      }
+    },
+    "completedEffectsReplayed": false,
+    "paidInference": false,
+    "installed": false
+  },
+  "nativeCoding": {
+    "recordedAt": "2026-10-25T23:58:12.927Z",
+    "sessionId": "db7253c2404d4cc6b33b44dbfbc8fcfa",
+    "runId": "2247e83f7d0b4a87ba846cc8d777e944",
+    "state": "completed",
+    "messages": 8,
+    "operations": 2,
+    "modelCalls": 4,
+    "completedWorkerRetirements": 1,
+    "historySha256": "3cf19271de217c818d3bc5c8b049308755553e2e43bdda8fafabfcf4677207b0",
+    "eventsSha256": "adf505fecc0e521cd32985a96a7a51c91db5822aaedd568f83414b546e31d9d6",
+    "operationsSha256": "7578fa1b93747f94bccea0fca9ecc17b8b74b39f5a3c43372c93eb7b3c25caa5",
+    "readOnly": true,
+    "tasksReplayed": false,
+    "renderedAcceptance": false,
+    "packagedAcceptance": false
+  },
+  "cases": {
+    "deny": {
+      "sessionId": "fef87817581d489c800776d28fbf6bc2",
+      "runId": "a7c473c23e7b4fad94d3f0b08e72756f",
+      "state": "completed",
+      "historyMessages": 6,
+      "operations": [
+        {
+          "id": "545c2d3cfc007cc70a007779c6249dd8",
+          "state": "denied"
+        }
+      ],
+      "worker": {
+        "admitted": {
+          "generation": "515220bddaae710709160561c9c4823e",
+          "pid": 30168,
+          "root_run_id": "a7c473c23e7b4fad94d3f0b08e72756f"
+        },
+        "retired": {
+          "generation": "515220bddaae710709160561c9c4823e",
+          "reason": "completed",
+          "uncertain_model_dispatches": 0
+        }
+      },
+      "historySha256": "3c63deede93d4082822da0a94d7712060bb89c96d6bfacef5b1e5b510bedb353",
+      "eventsSha256": "4054b224e2d4d864aa92f846b657d0bdde52fc0e0845d0bf0d9d6635524d5b75"
+    },
+    "code": {
+      "sessionId": "db7253c2404d4cc6b33b44dbfbc8fcfa",
+      "runId": "2247e83f7d0b4a87ba846cc8d777e944",
+      "state": "completed",
+      "historyMessages": 8,
+      "operations": [
+        {
+          "id": "9fa1c818a7097e07fe7f26c7fbc20703",
+          "state": "succeeded"
+        },
+        {
+          "id": "d8b2c97edc3194fa837fd6a9b8edaee1",
+          "state": "succeeded"
+        }
+      ],
+      "worker": {
+        "admitted": {
+          "generation": "7561f654e2190ad9c06ae69d3a4c7891",
+          "pid": 29292,
+          "root_run_id": "2247e83f7d0b4a87ba846cc8d777e944"
+        },
+        "retired": {
+          "generation": "7561f654e2190ad9c06ae69d3a4c7891",
+          "reason": "completed",
+          "uncertain_model_dispatches": 0
+        }
+      },
+      "historySha256": "61f7406f4338a0b71b123083823abf564c6f81313f1c488d842dad728894c89b",
+      "eventsSha256": "adf505fecc0e521cd32985a96a7a51c91db5822aaedd568f83414b546e31d9d6"
+    },
+    "cancel": {
+      "sessionId": "b144358865d2466bbda02f481e721675",
+      "runId": "9973cc0e9e564a2a82106c53024ff097",
+      "state": "cancelled",
+      "historyMessages": 1,
+      "operations": [],
+      "worker": {
+        "admitted": {
+          "generation": "74789a9af45b605403064ebc44983acf",
+          "pid": 29964,
+          "root_run_id": "9973cc0e9e564a2a82106c53024ff097"
+        },
+        "retired": {
+          "generation": "74789a9af45b605403064ebc44983acf",
+          "reason": "cancelled",
+          "uncertain_model_dispatches": 0
+        }
+      },
+      "historySha256": "6805fd4f2607888765666aaa1e4dcdf22988f5029e86aafe67aa54e36ab138fc",
+      "eventsSha256": "6f7d96c7851eb980c061023e250fa398cba0890efae3a7fe121cf7f02c901a3c"
+    }
+  },
+  "controlledModelCalls": {
+    "DENY": 3,
+    "CODE": 4,
+    "CANCEL": 1
+  },
+  "cancelTransportClosed": true,
+  "decisionRoutes": [
+    {
+      "path": "/v1/connection-bindings/16f716723eea928ffe3701df370653eb/sessions/fef87817581d489c800776d28fbf6bc2/runs/a7c473c23e7b4fad94d3f0b08e72756f/operations/545c2d3cfc007cc70a007779c6249dd8/decision",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/16f716723eea928ffe3701df370653eb/sessions/db7253c2404d4cc6b33b44dbfbc8fcfa/runs/2247e83f7d0b4a87ba846cc8d777e944/operations/9fa1c818a7097e07fe7f26c7fbc20703/decision",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/v1/connection-bindings/16f716723eea928ffe3701df370653eb/sessions/db7253c2404d4cc6b33b44dbfbc8fcfa/runs/2247e83f7d0b4a87ba846cc8d777e944/operations/d8b2c97edc3194fa837fd6a9b8edaee1/decision",
+      "method": "POST",
+      "status": 200
+    }
+  ],
+  "workerAndCommandPidsObservedAbsent": [
+    30168,
+    29292,
+    29964,
+    15652
+  ],
+  "absenceObservation": "Read-only CIM query after retirement events and before backend retirement returned no processes for these IDs; no worker/command termination was attempted.",
+  "retirement": {
+    "installed": false,
+    "identityFile": "D:\\CantorAI2026\\xMind\\.agentflow\\packaged79-browser-approval-cancel\\owned-private\\live.json",
+    "recordedAt": "2026-10-25T23:59:17.7570928Z",
+    "retired": [
+      {
+        "birth": "134374458558147071",
+        "exited": true,
+        "pid": 28260,
+        "identityVerifiedOnHeldProcessHandle": true,
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\native-sdk6df-view-lease\\package-qualified\\extension\\native-runtime\\xmind.exe"
+      },
+      {
+        "birth": "134374458516739015",
+        "exited": true,
+        "pid": 29344,
+        "identityVerifiedOnHeldProcessHandle": true,
+        "image": "C:\\Program Files\\nodejs\\node.exe"
+      }
+    ],
+    "managedOwnersPreserved": [
+      31084,
+      11784
+    ]
+  },
+  "restoreViewRetirement": {
+    "recordedAt": "2026-10-26T00:00:07.4756676Z",
+    "managedOwnersPreserved": [
+      31084,
+      11784
+    ],
+    "identityFile": "D:\\CantorAI2026\\xMind\\.agentflow\\u77\\repair-restart-live.json",
+    "retired": [
+      {
+        "birth": "134374445784125134",
+        "exited": true,
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\client-delivery-validation\\native-sdk6df-view-lease\\package-qualified\\extension\\native-runtime\\xmind.exe",
+        "pid": 32984,
+        "identityVerifiedOnHeldProcessHandle": true
+      },
+      {
+        "birth": "134374445745224570",
+        "exited": true,
+        "image": "C:\\Program Files\\nodejs\\node.exe",
+        "pid": 29836,
+        "identityVerifiedOnHeldProcessHandle": true
+      }
+    ],
+    "installed": false
+  },
+  "guardFileUnchanged": true,
+  "approvedSpanBytesVerified": true,
+  "originalSourceProviderYamlLoaded": false,
+  "realProviderConfigurationLoaded": false,
+  "paidInference": false,
+  "completedEffectsReplayed": false,
+  "installed": false,
+  "releaseAccepted": false
+}
