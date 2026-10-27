@@ -9,3 +9,7 @@
 ## Sidebar session menu predecessor (verbatim)
 
 - Preview57780: native workspace names, compact workspace/session header, first-prompt titles and manual rename persist; Native focused3/browser192 pass. Owner .agentflow/composer-layout-preview/live.json; runtime-naming. Original63573/installed80/providers/backend22920 retained. NEVER replay session845d0da11e974a7eb68c902c9a92045d rootsa7a51d81e36b45868b9bab2bf9ce601d/50bbe9632ee34b20a094be2a32c1e92d, or any of the2 completed roots in naming sessiona943bbb574854eb7b4eab4770ab2f939. Conservative$1.520440/$100. Proof doc/evidence/webui-workspace-session-names-20261026.json.
+
+## Inline hover toolbar predecessor (verbatim)
+
+- Preview57780: hover/focus session menu (rename/archive/restore/delete confirmation), native archive metadata and faster navigation; focused Native2/browser199 pass. Owner .agentflow/composer-layout-preview/live.json (runtime-session-menu); backend22920/installed80/original63573 retained. User renamed workspace to UI layout checks Project, added English and renamed sessions; preserve current names. NEVER replay completed roots in sessions845d0da11e974a7eb68c902c9a92045d or a943bbb574854eb7b4eab4770ab2f939. No agent inference this change; last agent-accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-session-menu-20261026.json.

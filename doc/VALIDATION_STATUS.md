@@ -1,3 +1,9 @@
+## Inline sidebar hover toolbars — 2026-10-26
+
+Workspace rows reveal SVG New Session and Settings controls inline on hover or keyboard focus. Session rows reveal Rename, Archive/Restore and Delete directly; the popup menu is removed. Toolbars overlay the right edge so names use the available width when not hovered. Pointer use hides controls on other rows; keyboard navigation reveals the focused row. Focus is retained when selection causes a row rebuild. Native action contracts and Delete confirmation remain unchanged.
+
+Browser199/199 pass. Actual UI verifies workspace hover, direct Settings, session hover, keyboard Tab access, Rename dialog, Archive/Restore while preserving the open chat, and Delete confirmation/Cancel. All names and exact test history are preserved. A temporary read-only event/animation-frame probe observed27.6 and32.1ms to two animation frames on two connected, visible trusted pointer-entry samples. These are hover-feedback observations, not full backend attachment timings; workspace content still loads asynchronously. The probe was removed and live assets match source. No new agent inference or native runtime was created. [Evidence and screenshots](evidence/webui-inline-hover-toolbars-20261026.json).
+
 ## Sidebar session actions and responsiveness — 2026-10-26
 
 The live preview at http://127.0.0.1:57780/ui/ has a hover/focus SVG menu for each session: Rename, Archive/Restore and Delete with confirmation. Inactive sessions can be managed without opening them. Archive visibility persists in the native workspace registry through embedded xlang3 SQLite, scoped by workspace and checked against the requested workspace identity. History stays in its native session. The native adapter admits only GET/POST for this archive endpoint and retains origin/authentication checks.
