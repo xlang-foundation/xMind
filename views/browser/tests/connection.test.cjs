@@ -66,6 +66,18 @@ test('local session protocol mismatch explains the required restart without aski
  await until(()=>f.element('connection-error').textContent.includes('matching updates'));assert.ok(!f.element('connection-error').textContent.includes('private upstream diagnostic'));
  f.element('connection-cancel').click();assert.equal(f.dialog.open,false);assert.ok(!f.requests.includes('/ui/session/disconnect'));assert.ok(f.posted.some(message=>message.type==='history'));f.close();
 });
+test('workspace creation cancel returns to its launch context for Cancel, close and Escape',async()=>{
+ const f=await fixture({canAdd:true});try{
+  const settings=f.element('workspace-config-dialog'),form=f.element('workspace-add-dialog');
+  for(const button of ['workspace-add-cancel','workspace-add-close',null]){
+   f.element('add-workspace').click();assert.equal(form.open,true);assert.equal(settings.open,false);
+   if(button)f.element(button).click();else form.dispatchEvent(new f.window.Event('cancel',{cancelable:true}));
+   assert.equal(form.open,false);assert.equal(settings.open,false,'sidebar workspace + must not open existing workspace settings after cancellation');
+  }
+  f.element('workspace-config-open').click();f.element('add-workspace-folder').click();f.element('workspace-add-cancel').click();assert.equal(settings.open,true,'Add folder returns to the folder settings that launched it');
+  assert.ok(!f.requests.some(route=>['/ui/workspaces/create','/ui/workspaces/add'].includes(route)),'cancellation must not mutate workspace membership');
+ }finally{f.close();}
+});
 test('Cancel and Escape preserve an existing connection and do not logout or cancel execution',async()=>{
  const f=await fixture();assert.match(f.element('workspace-info').title,/D:\\Projects\\Example/);assert.equal(f.element('workspace-picker').options.length,2);assert.equal(f.element('workspace-picker').disabled,false);assert.equal(f.element('connect-view').hidden,true);f.dialog.showModal();f.element('connection-cancel').click();assert.equal(f.dialog.open,false);assert.equal(f.element('disconnect-view').hidden,false);f.dialog.showModal();f.dialog.dispatchEvent(new f.window.Event('cancel',{cancelable:true}));assert.equal(f.dialog.open,false);assert.ok(!f.requests.some(route=>route.includes('disconnect')||route.includes('cancel')));assert.equal(f.posted.filter(m=>m.type==='history').length,1);f.close();
 });
