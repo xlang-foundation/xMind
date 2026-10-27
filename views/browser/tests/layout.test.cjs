@@ -2,6 +2,17 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {JSDOM}=require('../../../extensions/vscode/node_modules/jsdom');
 const {browserHtml}=require('../page.cjs');
+test('bounded composer menus forward selection, preserve it on Escape, and follow native metadata',async()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only'}),doc=dom.window.document,model=doc.getElementById('model'),changes=[];
+ try{
+  model.replaceChildren();for(const id of ['saved-model','a-very-long-model-name-that-must-not-stretch-the-menu']){const option=doc.createElement('option');option.value=id;option.textContent=id;model.append(option);}model.value='saved-model';model.disabled=false;model.addEventListener('change',()=>changes.push(model.value));
+  dom.window.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));
+  const trigger=doc.getElementById('model-trigger'),popup=doc.getElementById('model-options');assert.equal(trigger.textContent,'saved-model');trigger.click();assert.equal(popup.hidden,false);assert.equal(popup.style.width,'260px');
+  trigger.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true,cancelable:true}));assert.equal(doc.activeElement.dataset.value,'saved-model');popup.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert.equal(popup.hidden,true);assert.deepEqual(changes,[]);assert.equal(doc.activeElement,trigger);
+  trigger.click();popup.querySelectorAll('button')[1].click();assert.deepEqual(changes,['a-very-long-model-name-that-must-not-stretch-the-menu']);assert.equal(popup.hidden,true);assert.equal(trigger.textContent,model.value);
+  const same=doc.getElementById('model-trigger');model.disabled=true;await new Promise(resolve=>setImmediate(resolve));assert.equal(same.disabled,true);assert.equal(doc.getElementById('model-trigger'),same,'Native acknowledgements must not replace the control under the pointer');
+ }finally{dom.window.close();}
+});
 test('unchanged background control updates retain rows and inline hover toolbars',async()=>{
  const dom=new JSDOM(browserHtml(),{runScripts:'outside-only'}),doc=dom.window.document;
  try{

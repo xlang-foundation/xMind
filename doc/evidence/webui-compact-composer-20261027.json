@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T07:12:48.555Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "features": [
+    "SVG + attachment control with original accessible name and attach behavior",
+    "Content-sized provider/model/permission triggers and bounded dark listbox menus; long IDs ellipsize with full titles",
+    "Menu keyboard navigation, Escape/outside dismissal, stable triggers on Native acknowledgement and popup re-anchoring after catalogue refresh",
+    "Immediate model defaults from Native configured profile/session metadata, while background discovery preserves an explicit valid session model",
+    "When active provider has no model, restore a known configured profile from selected Native session/history or last known choice; use the only configured profile when unambiguous, otherwise require a choice"
+  ],
+  "controls": [
+    {
+      "label": "OpenAI",
+      "name": "Saved provider",
+      "width": 62.76041793823242
+    },
+    {
+      "label": "gpt-4.1",
+      "name": "Model",
+      "width": 61.32291793823242
+    },
+    {
+      "label": "Default",
+      "name": "Permissions",
+      "width": 61.125
+    }
+  ],
+  "menuGeometry": {
+    "model": {
+      "anchor": {
+        "bottom": 695.59375,
+        "height": 26,
+        "left": 419.4270935058594,
+        "right": 480.7500114440918,
+        "top": 669.59375,
+        "width": 61.32291793823242,
+        "x": 419.4270935058594,
+        "y": 669.59375
+      },
+      "optionCount": 21,
+      "rect": {
+        "bottom": 664.59375,
+        "height": 260,
+        "left": 419.4270935058594,
+        "right": 679.4270935058594,
+        "top": 404.59375,
+        "width": 260,
+        "x": 419.4270935058594,
+        "y": 404.59375
+      }
+    },
+    "provider": {
+      "height": 149.33334350585938,
+      "width": 200
+    },
+    "permissions": {
+      "height": 65.33333587646484,
+      "options": [
+        "Default permissions",
+        "Full access"
+      ],
+      "width": 180
+    }
+  },
+  "checks": {
+    "plusIconOnly": true,
+    "attachBehaviorPreserved": true,
+    "keyboardModelOption": true,
+    "modelMenuBounded": true,
+    "menuAboveComposerAfterAsyncRefresh": true,
+    "sourceWorkspacePreserved": true,
+    "sourceSessionPreserved": true,
+    "sourceMessageBodiesPreserved": true,
+    "newSessionDefaultMatchesReload": true,
+    "emptyTestSessionArchived": true
+  },
+  "originalUnconfiguredChoice": {
+    "provider": "openai",
+    "model": "gpt-4.1"
+  },
+  "restoredNativeChoice": {
+    "provider": "openai",
+    "model": "gpt-4.1"
+  },
+  "testSession": {
+    "id": "e93dd7a404d74a4e87c402d39bd00945",
+    "messageCount": 0,
+    "model": "gpt-4.1",
+    "provider": "openai",
+    "title": "Browser conversation"
+  },
+  "afterTestReload": {
+    "id": "e93dd7a404d74a4e87c402d39bd00945",
+    "model": "gpt-4.1"
+  },
+  "validation": {
+    "browser": {
+      "passed": 205,
+      "failed": 0,
+      "log": ".agentflow/composer-compact-browser-final.log"
+    },
+    "renderer": {
+      "passed": 125,
+      "failed": 0,
+      "log": ".agentflow/composer-compact-qualified-renderer.log"
+    },
+    "controlledChecks": "Native default without implicit session write, explicit model survives discovery, historical provider restoration, ambiguity refusal, keyboard/select synchronization."
+  },
+  "nativeCodeChanged": false,
+  "installedExtensionChanged": false,
+  "agentSubmittedModelTurns": 0,
+  "screenshots": [
+    "webui-compact-composer-20261027.png",
+    "webui-compact-composer-model-menu-20261027.png"
+  ],
+  "sourceSha256": {
+    "extensions/vscode/webview.js": "1f29c9ab0ac3b8f10fb6be28780cde7089969ff5cb946cb46c1137dc102a9724",
+    "views/browser/browser.js": "03c35864e02c3c50bc3ec0d18f7422c02d70a4e1a61d05bc8efcb52411633cf8",
+    "views/browser/layout.js": "28f44e67f33e7d251841c9d3debf428177ed0a5d72c60e68a3eda0a50338dd99",
+    "views/browser/layout.css": "2599fb24a38815e009808094fd8e699b00788fdc5c523e78b4d4ed8b402a9e13",
+    "views/browser/tests/controller.test.cjs": "7d1e01af0aee08716ef970a0181c1b82a00820bb6d433e6ccb4d2a4288d76a99",
+    "views/browser/tests/layout.test.cjs": "0a21c14bfb3edaa317d2ebb7d55ccf8367eb842734cbabfdf395257134f516b8"
+  },
+  "liveAssetsMatch": true
+}

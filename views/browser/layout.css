@@ -156,3 +156,22 @@ body select{color-scheme:dark}
 body select option,body select optgroup{background:var(--vscode-input-background,#232a35);color:var(--vscode-input-foreground,#e2e6ed)}
 body select option:checked{background:#345fc4;color:#fff}
 body select option:disabled{color:#9ea9ba}
+/* Compact composer controls; popovers stay bounded even for long model IDs. */
+.composer-bar #attach-files{display:inline-flex;align-items:center;justify-content:center;flex:none;width:26px;height:26px;padding:4px}
+.composer-bar #footer-provider,.composer-bar #model,.composer-bar #footer-provider:not([hidden])+#model,.composer-bar #access-mode{flex:0 1 auto;max-width:150px;width:auto}
+.composer-picker-source{display:none!important}
+.composer-picker{display:inline-flex;min-width:0;flex:0 1 auto;max-width:100px}
+.composer-picker[hidden]{display:none!important}
+.composer-picker[data-picker="model"]{max-width:156px}
+.composer-picker[data-picker="access-mode"]{max-width:104px}
+.composer-picker-trigger{display:inline-flex;align-items:center;gap:4px;min-width:0;max-width:100%;height:26px;padding:3px 5px;border:0;background:transparent;font-size:11px}
+.composer-picker-trigger>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.composer-picker-trigger>svg{width:12px;height:12px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5}
+.composer-picker-menu{position:fixed;z-index:200;box-sizing:border-box;max-width:calc(100vw - 16px);max-height:260px;overflow:auto;padding:4px;border:1px solid #3b4657;border-radius:7px;background:#1c2430;color:#e2e6ed;box-shadow:0 8px 24px #0006;scrollbar-width:thin}
+.composer-picker-menu[hidden]{display:none}
+.composer-picker-option{display:block;box-sizing:border-box;width:100%;min-width:0;padding:6px 8px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;line-height:16px;border:0;border-radius:4px;background:transparent;color:inherit}
+.composer-picker-option:hover:not(:disabled),.composer-picker-option:focus-visible{background:#303e54;outline:0}
+.composer-picker-option[aria-selected="true"]{background:#293b59;color:#c4d8ff}
+.composer-picker-option:disabled{opacity:.5}
+
+.composer-picker-trigger.full-access{color:var(--vscode-textLink-foreground,#8eafff)}

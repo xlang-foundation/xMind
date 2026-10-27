@@ -1,5 +1,24 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
+test('sessions without a model use the native last choice immediately and explicit choices survive discovery',async()=>{
+ const posted=[],state={revision:2,active:'saved-provider',profiles:[{id:'saved-provider',route_id:'saved-route',model:'last-used'}]},explicit={model_id:'session-choice',provider_profile_id:'saved-provider',provider_route_id:'saved-route'};
+ const client={runs:async()=>[],sessions:async()=>[{id:'empty'},{id:'explicit'}],sessionModel:async id=>({session_id:id,revision:id==='explicit'?1:0,selected:id==='explicit'?explicit:null}),sessionInbox:async()=>({items:[]}),replaceSessionModel:async()=>{throw Error('Restoring a default must not persist a session selection');}};
+ const view=new BrowserController(client,message=>posted.push(message));view.health={session_model_selection:true,agent_execution:false};view.historyPager.select=async()=>({messages:[]});view.discoverSavedModels=()=>{};
+ view.profileController={state,refresh:async()=>{},models:()=>false,invalidate(){},dispose(){},discover:async()=>{posted.push({type:'model-list',models:[{id:'last-used'},{id:'session-choice'}],model:'last-used'});return true;}};
+ try{
+  await view.select('empty');assert.equal(view.model,'last-used');assert.equal(posted.findLast(message=>message.type==='model-list').model,'last-used');assert.equal(view.sessionModel.selected,null);
+  await view.select('explicit');assert.equal(view.model,'session-choice');assert.equal(posted.findLast(message=>message.type==='model-list').model,'session-choice');
+  view.profileController.models=selected=>{posted.push({type:'model-list',models:[{id:'last-used'},{id:'session-choice'}],model:selected});return true;};await view.discover();assert.equal(posted.findLast(message=>message.type==='model-list').model,'session-choice');assert.equal(view.model,'session-choice');
+ }finally{view.dispose();}
+});
+test('an unconfigured provider restores a known historical model profile but never guesses among ambiguous profiles',async()=>{
+ for(const historical of [true,false]){
+  const state={revision:1,active:'empty',profiles:[{id:'empty',route_id:'empty-route',model:''},{id:'used',route_id:'used-route',model:'last-used'},...(historical?[]:[{id:'another',route_id:'another-route',model:'other-model'}])]},selected=[],posted=[];
+  const view=new BrowserController({runs:async()=>[],sessions:async()=>[{id:'saved'}],sessionModel:async()=>({session_id:'saved',revision:0,selected:null}),sessionInbox:async()=>({items:[]})},message=>posted.push(message));view.health={session_model_selection:true,agent_execution:false};view.historyPager.select=async()=>({messages:historical?[{role:'assistant',data:{provider_context:{profile_id:'used',route_id:'used-route'}}}]:[]});view.discoverSavedModels=()=>{};
+  view.profileController={state,refresh:async()=>{},models:()=>false,invalidate(){},dispose(){},select:async id=>{selected.push(id);state.active=id;}};view.refreshCapabilities=async()=>{};
+  try{await view.select('saved');assert.deepEqual(selected,historical?['used']:[]);assert.equal(view.model,historical?'last-used':undefined);assert.equal(view.sessionModel.selected,null);}finally{view.dispose();}
+ }
+});
 test('workspace readiness waits for chat and permissions but not ancillary run inspection',async()=>{
  let releasePermissions,releaseRun,ready=false,ancillaryReads=0;
  const permissions=new Promise(resolve=>{releasePermissions=resolve;}),run=new Promise(resolve=>{releaseRun=resolve;}),posted=[];
