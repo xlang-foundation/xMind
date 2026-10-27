@@ -1,3 +1,5 @@
+- 2026-10-27: Compact response metadata now displays token icons with exact values; model/provider/TTFT/Time use text without duplicate icons. Idle telemetry opacity .62, inspection .85. Sidebar session names align with workspace text.125 renderer and7 browser layout/responsive tests passed. Live57780 reload preserved active workspace/session and exact message bodies; no model turn submitted. Evidence: [actual UI](evidence/webui-quiet-metrics-20261027.json), [screenshot](evidence/webui-quiet-metrics-20261027.png). Browser upload remains unsupported as recorded below.
+
 ## Browser file chooser correction / upload gap — 2026-10-27
 
 User clarified that + means the browser system file window, independent of workspace folders. The prior workspace attachment dialog and its styling were removed. + now invokes a hidden multiple-file input. Actual UI confirms the browser filechooser event and a selected controlled file outside the configured workspace.

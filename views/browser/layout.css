@@ -93,7 +93,7 @@
 .workspace-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .workspace-chevron{flex:none;color:#8593a8;transition:transform .15s}
 .workspace-toggle[aria-expanded=true] .workspace-chevron{transform:rotate(90deg)}
-.workspace-sessions{margin-left:40px;padding-left:0;border-left:0}
+.workspace-sessions{margin-left:25px;padding-left:0;border-left:0}
 .conversation-layout #workspace-config-dialog #workspace-config-folders-list strong{display:block;margin:0 0 4px;padding:0;border:0;background:transparent;font-size:13px;font-weight:550;color:#e6edf7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conversation-layout #workspace-config-dialog #workspace-config-folders-list small{display:block;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:11px;line-height:17px;font-family:var(--vscode-font-family);color:#9aa9bc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conversation-layout #workspace-config-dialog{max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-x:hidden;overflow-y:auto}

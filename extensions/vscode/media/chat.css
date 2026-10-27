@@ -127,3 +127,8 @@ html,body{overflow-x:hidden}
 @media(hover:none){.message .message-fork{opacity:1;pointer-events:auto}.message-footer .response-metrics{padding-right:22px}}
 
 .message-fork>span{display:none}
+
+/* Secondary telemetry: one compact identifier per value, quiet until inspected. */
+.response-metrics .metric-label{display:none}
+.response-metrics{opacity:.62}
+.response-metrics:hover,.message:focus-within .response-metrics{opacity:.85}

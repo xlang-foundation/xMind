@@ -1,0 +1,353 @@
+{
+  "recordedUtc": "2026-10-27T07:54:52.275Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "rows": [
+    {
+      "height": 16,
+      "items": [
+        {
+          "description": "Input tokens: 9,038",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "9,038"
+        },
+        {
+          "description": "Output tokens: 293",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "293"
+        },
+        {
+          "description": "Total tokens: 9,331",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "9,331"
+        },
+        {
+          "description": "Cached input tokens: 7,808",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "7,808"
+        },
+        {
+          "description": "Reasoning tokens: 0",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "0"
+        },
+        {
+          "description": "Model: deepseek-flash",
+          "icons": 0,
+          "visible": "deepseek-flash"
+        },
+        {
+          "description": "DeepSeek · Chat Completions",
+          "icons": 0,
+          "visible": "DeepSeek · Chat"
+        },
+        {
+          "description": "Time to first token: 1.13s",
+          "icons": 0,
+          "visible": "TTFT 1.13s"
+        },
+        {
+          "description": "Total response time: 2.48s",
+          "icons": 0,
+          "visible": "Time 2.48s"
+        }
+      ],
+      "opacity": "0.62"
+    },
+    {
+      "height": 16,
+      "items": [
+        {
+          "description": "Input tokens: 9,638",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "9,638"
+        },
+        {
+          "description": "Output tokens: 362",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "362"
+        },
+        {
+          "description": "Total tokens: 10,000",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "10,000"
+        },
+        {
+          "description": "Cached input tokens: 9,344",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "9,344"
+        },
+        {
+          "description": "Reasoning tokens: 0",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "0"
+        },
+        {
+          "description": "Model: deepseek-flash",
+          "icons": 0,
+          "visible": "deepseek-flash"
+        },
+        {
+          "description": "DeepSeek · Chat Completions",
+          "icons": 0,
+          "visible": "DeepSeek · Chat"
+        },
+        {
+          "description": "Time to first token: 0.89s",
+          "icons": 0,
+          "visible": "TTFT 0.89s"
+        },
+        {
+          "description": "Total response time: 2.59s",
+          "icons": 0,
+          "visible": "Time 2.59s"
+        }
+      ],
+      "opacity": "0.62"
+    },
+    {
+      "height": 16,
+      "items": [
+        {
+          "description": "Input tokens: 14,029",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "14,029"
+        },
+        {
+          "description": "Output tokens: 610",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "610"
+        },
+        {
+          "description": "Total tokens: 14,639",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "14,639"
+        },
+        {
+          "description": "Cached input tokens: 13,824",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "13,824"
+        },
+        {
+          "description": "Reasoning tokens: 41",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "41"
+        },
+        {
+          "description": "Model: deepseek-flash",
+          "icons": 0,
+          "visible": "deepseek-flash"
+        },
+        {
+          "description": "DeepSeek · Chat Completions",
+          "icons": 0,
+          "visible": "DeepSeek · Chat"
+        },
+        {
+          "description": "Time to first token: 0.95s",
+          "icons": 0,
+          "visible": "TTFT 0.95s"
+        },
+        {
+          "description": "Total response time: 4.55s",
+          "icons": 0,
+          "visible": "Time 4.55s"
+        }
+      ],
+      "opacity": "0.62"
+    },
+    {
+      "height": 16,
+      "items": [
+        {
+          "description": "Input tokens: 10,377",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "10,377"
+        },
+        {
+          "description": "Output tokens: 178",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "178"
+        },
+        {
+          "description": "Total tokens: 10,555",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "10,555"
+        },
+        {
+          "description": "Cached input tokens: 0",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "0"
+        },
+        {
+          "description": "Reasoning tokens: 92",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "92"
+        },
+        {
+          "description": "Model: gpt-5.6-luna",
+          "icons": 0,
+          "visible": "gpt-5.6-luna"
+        },
+        {
+          "description": "OpenAI · Responses",
+          "icons": 0,
+          "visible": "OpenAI · Resp"
+        },
+        {
+          "description": "Time to first token: 3.07s",
+          "icons": 0,
+          "visible": "TTFT 3.07s"
+        },
+        {
+          "description": "Total response time: 4.09s",
+          "icons": 0,
+          "visible": "Time 4.09s"
+        }
+      ],
+      "opacity": "0.62"
+    },
+    {
+      "height": 16,
+      "items": [
+        {
+          "description": "Input tokens: 10,895",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "10,895"
+        },
+        {
+          "description": "Output tokens: 128",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "128"
+        },
+        {
+          "description": "Total tokens: 11,023",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "11,023"
+        },
+        {
+          "description": "Cached input tokens: 10,574",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "10,574"
+        },
+        {
+          "description": "Reasoning tokens: 0",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "0"
+        },
+        {
+          "description": "Model: gpt-5.6-luna",
+          "icons": 0,
+          "visible": "gpt-5.6-luna"
+        },
+        {
+          "description": "OpenAI · Responses",
+          "icons": 0,
+          "visible": "OpenAI · Resp"
+        },
+        {
+          "description": "Time to first token: 1.31s",
+          "icons": 0,
+          "visible": "TTFT 1.31s"
+        },
+        {
+          "description": "Total response time: 2.72s",
+          "icons": 0,
+          "visible": "Time 2.72s"
+        }
+      ],
+      "opacity": "0.62"
+    },
+    {
+      "height": 16,
+      "items": [
+        {
+          "description": "Input tokens: 11,333",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "11,333"
+        },
+        {
+          "description": "Output tokens: 40",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "40"
+        },
+        {
+          "description": "Total tokens: 11,373",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "11,373"
+        },
+        {
+          "description": "Cached input tokens: 11,030",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "11,030"
+        },
+        {
+          "description": "Reasoning tokens: 0",
+          "hiddenLabel": "none",
+          "icons": 1,
+          "visible": "0"
+        },
+        {
+          "description": "Model: gpt-5.6-luna",
+          "icons": 0,
+          "visible": "gpt-5.6-luna"
+        },
+        {
+          "description": "OpenAI · Responses",
+          "icons": 0,
+          "visible": "OpenAI · Resp"
+        },
+        {
+          "description": "Time to first token: 1.71s",
+          "icons": 0,
+          "visible": "TTFT 1.71s"
+        },
+        {
+          "description": "Total response time: 2.22s",
+          "icons": 0,
+          "visible": "Time 2.22s"
+        }
+      ],
+      "opacity": "0.62"
+    }
+  ],
+  "workspaceTextX": 45,
+  "sessionTextX": 45,
+  "sameWorkspace": true,
+  "sameSession": true,
+  "sameMessageBodies": true,
+  "rendererTestsPassed": 125,
+  "browserLayoutTestsPassed": 7,
+  "agentSubmittedModelTurns": 0,
+  "metadataIdleOpacity": "0.62",
+  "sameModel": true,
+  "sameProvider": true
+}
