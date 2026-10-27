@@ -131,17 +131,26 @@ function renderRunContext(run){
   const badge=profileBadge(run?.provider_context);if(!badge)return;
   area.append(node('span','Admitted profile:'),badge,node('span',run.provider_context.model_id));area.hidden=false;
 }
+function metricIcon(kind){
+  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),path=document.createElementNS(ns,'path');
+  for(const [key,value]of Object.entries({viewBox:'0 0 24 24',width:'11',height:'11',fill:'none',stroke:'currentColor','stroke-width':'1.7','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(key,value);
+  path.setAttribute('d',({input:'M12 3v15m-5-5 5 5 5-5M4 21h16',output:'M12 18V3m-5 5 5-5 5 5M4 21h16',total:'M18 4H6l7 8-7 8h12',cache:'M4 6c0-4 16-4 16 0v12c0 4-16 4-16 0Zm0 0c0 4 16 4 16 0M4 12c0 4 16 4 16 0',reason:'M8 4h8v16H8ZM4 8h4m8 0h4M4 16h4m8 0h4M10 1v3m4-3v3m-4 16v3m4-3v3',model:'m12 3 9 5v9l-9 5-9-5V8Zm0 9 9-4m-9 4L3 8m9 4v10',provider:'M3 12h18M12 2c-6 5-6 15 0 20m0-20c6 5 6 15 0 20M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0',ttft:'m13 2-9 12h7l-1 8 10-13h-7Z',time:'M12 6v6l4 2M2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0'})[kind]);svg.append(path);return svg;
+}
 function metrics(el,data={}){
-  const usage=data.usage||{},uncached=usage.input_tokens_scope==='uncached';el.replaceChildren();
-  for(const text of [(uncached?'Input (uncached) ':'Input ')+count(usage.prompt_tokens),'Output '+count(usage.completion_tokens),'Total '+count(usage.total_tokens)])el.append(node('span',text));
-  if(Number.isSafeInteger(usage.cache_creation_input_tokens)&&usage.cache_creation_input_tokens>=0)el.append(node('span','Cache write '+count(usage.cache_creation_input_tokens)));
-  if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))el.append(node('span','Cached '+count(usage.prompt_tokens_details.cached_tokens)));
-  if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))el.append(node('span','Reasoning '+count(usage.completion_tokens_details.reasoning_tokens)));
-  if(data.model)el.append(node('span',data.model));const profile=profileBadge(data.provider_context);if(profile)el.append(profile);
-  if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)el.append(node('span','First token '+(data.first_token_ms/1000).toFixed(2)+'s'));
-  if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)el.append(node('span',(data.elapsed_ms/1000).toFixed(2)+'s'));
+  const usage=data.usage||{},uncached=usage.input_tokens_scope==='uncached',compact=el.classList.contains('response-metrics');el.replaceChildren();
+  const add=(kind,label,value,description)=>{const item=node('span',undefined,compact?'response-metric':'');item.textContent=label+(label?' ':'')+value;if(compact){item.prepend(metricIcon(kind));item.title=description+': '+value;item.setAttribute('aria-label',item.title);}el.append(item);};
+  add('input',compact?(uncached?'In*':'In'):(uncached?'Input (uncached)':'Input'),count(usage.prompt_tokens),uncached?'Uncached input tokens; cache writes and reads excluded':'Input tokens');
+  add('output',compact?'Out':'Output',count(usage.completion_tokens),'Output tokens');add('total',compact?'Tok':'Total',count(usage.total_tokens),'Total tokens');
+  if(Number.isSafeInteger(usage.cache_creation_input_tokens)&&usage.cache_creation_input_tokens>=0)add('cache',compact?'CW':'Cache write',count(usage.cache_creation_input_tokens),'Cache write input tokens');
+  if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))add('cache',compact?'Cache':'Cached',count(usage.prompt_tokens_details.cached_tokens),'Cached input tokens');
+  if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))add('reason',compact?'Reason':'Reasoning',count(usage.completion_tokens_details.reasoning_tokens),'Reasoning tokens');
+  if(data.model)add('model','',data.model,'Model');
+  const profile=profileBadge(data.provider_context);if(profile){if(compact){const full=profile.textContent,short={'chat-completions':'Chat',responses:'Resp','anthropic-messages':'Msgs','gemini-generate-content':'GC'}[data.provider_context.wire];profile.textContent=providerLabel(data.provider_context.provider)+' · '+short;profile.prepend(metricIcon('provider'));profile.classList.add('response-metric');profile.title=full+'\n'+profile.title;profile.setAttribute('aria-label',full);}el.append(profile);}
+  if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)add('ttft',compact?'TTFT':'First token',(data.first_token_ms/1000).toFixed(2)+'s','Time to first token');
+  if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)add('time',compact?'Time':'',(data.elapsed_ms/1000).toFixed(2)+'s','Total response time');
   el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.'+(uncached?' Input (uncached) excludes cache writes and reads.':'');
 }
+
 function processProposal(section,item){
   let plan;try{plan=JSON.parse(item.arguments_json);}catch{}
   if(!plan||typeof plan.profile_id!=='string'||!Number.isSafeInteger(plan.profile_revision)||plan.profile_revision<1||typeof plan.executable!=='string'||typeof plan.executable_id!=='string'||!plan.executable_id||plan.executable_id.length>512||plan.executable_id.includes('\0')||!Array.isArray(plan.arguments)||plan.arguments.length>64||plan.arguments.some(arg=>typeof arg!=='string')||typeof plan.workdir!=='string'||typeof plan.directory_id!=='string'||!plan.directory_id||!Number.isSafeInteger(plan.timeout_ms)||plan.timeout_ms<1||plan.timeout_ms>600000||!Number.isSafeInteger(plan.output_limit)||plan.output_limit<1||plan.output_limit>4194304){
@@ -220,7 +229,7 @@ function refreshForkControls(){for(const button of forkButtons)button.disabled=!
 function refreshDeleteControls(){const button=byId('delete-session'),selected=byId('sessions').selectedOptions[0];if(!button)return;button.hidden=!deleteCapability;button.disabled=!deleteCapability||deletePending||sessionBusy||activeRun||!selected?.dataset.sessionId||selected.dataset.sessionActive==='true';}
 function entry(role,data,parent=byId('history'),messageId){
   byId('empty').hidden=true;
-  const card=node('article',undefined,'message '+role),meta=node('div',undefined,'message-footer');if(role!=='user')card.append(node('h4',role==='assistant'?'xMind':role));
+  const card=node('article',undefined,'message '+role),meta=node('div',undefined,'message-footer');if(role!=='user'&&role!=='assistant')card.append(node('h4',role));
   if(role==='tool'){
     let process;try{process=processOutcome(JSON.parse(data.content));}catch{}
     const detail=node('details',undefined,'tool');detail.append(node('summary',process?'Command result · '+process.profile_id:'Tool result'));
@@ -320,7 +329,7 @@ function runFailure(data){
   card.append(node('p','This is a backend execution result. Select another run above to inspect its outcome.','inspection-note'));
   if(live){flushMarkdown(live.querySelector('.message-body'));live.classList.remove('streaming');}
 }
-function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.hidden=true;live.append(node('h4','xMind · responding'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;queueMarkdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
+function stream(text){if(!live){live=node('article',undefined,'message assistant streaming');live.hidden=true;live.append(node('div',undefined,'message-body markdown'),node('div',undefined,'metrics response-metrics'));byId('live').append(live);byId('empty').hidden=true;}streamText+=text;queueMarkdown(live.querySelector('.message-body'),streamText);metrics(live.querySelector('.metrics'),{usage:streamUsage});}
 function operations(items){
   currentOperations=items;
   const container=byId('operations'),ids=new Set(items.map(item=>item.id)),sections=[];
@@ -489,7 +498,7 @@ function ownedEvent(message){
   // Replayed events of a retired child never synthesize a second live answer.
   if(row.state!=='running'||!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
   if(event.kind==='model.text'||event.kind==='model.refusal')row.text+=event.data.text;if(event.kind==='model.usage')row.usage=event.data;
-  if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4','xMind · child response'),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));row.stream.append(article);}
+  if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('div',undefined,'message-body markdown'),node('div',undefined,'metrics response-metrics'));row.stream.append(article);}
   const body=row.stream.querySelector('.message-body');if(event.kind==='model.text'||event.kind==='model.refusal')queueMarkdown(body,row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done'){flushMarkdown(body);row.stream.firstChild.classList.remove('streaming');}
 }
 let displayedPlan;const planRows=new Map(),nestedPlanRows=new Map();
@@ -630,7 +639,7 @@ function graphEvent(message){
   if(!['model.text','model.refusal','model.usage','model.done'].includes(event.kind))return;
   if(event.kind==='model.text'||event.kind==='model.refusal')row.text+=event.data.text;
   if(event.kind==='model.usage')row.usage=event.data;
-  if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4','xMind · '+message.node_id),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics'));row.stream.append(article);}
+  if(!row.stream.children.length){const article=node('article',undefined,'message assistant streaming');article.append(node('h4',message.node_id),node('div',undefined,'message-body markdown'),node('div',undefined,'metrics response-metrics'));row.stream.append(article);}
   const body=row.stream.querySelector('.message-body');if(event.kind==='model.text'||event.kind==='model.refusal')queueMarkdown(body,row.text);metrics(row.stream.querySelector('.metrics'),{usage:row.usage});if(event.kind==='model.done'){flushMarkdown(body);row.stream.firstChild.classList.remove('streaming');}
 }
 byId('workflow').onchange=()=>{workflowExecutable=!!byId('workflow').selectedOptions[0]?.dataset.executable;api.postMessage({type:'graph-select',id:byId('workflow').value});refreshSendControl();};

@@ -115,3 +115,15 @@ html,body{overflow-x:hidden}
 #history .turn-activity .message{margin:5px 0}
 .turn-progress{gap:7px;padding:6px 0;font-size:12px}
 @media(hover:none){.message.user .message-fork{opacity:1}}
+
+/* Compact, explained response telemetry; message actions appear on intent. */
+.response-metrics .response-metric{display:inline-flex;align-items:center;gap:2px}
+.response-metric svg{width:11px;height:11px;flex:none;opacity:.8}
+.message-footer{position:relative}
+.message-footer>.message-fork{position:absolute;right:0;top:0;width:20px}
+.message .message-fork{opacity:0;pointer-events:none}
+.message:hover .message-fork,.message:focus-within .message-fork{opacity:1;pointer-events:auto}
+.message:hover>.message-footer .response-metrics,.message:focus-within>.message-footer .response-metrics{padding-right:22px}
+@media(hover:none){.message .message-fork{opacity:1;pointer-events:auto}.message-footer .response-metrics{padding-right:22px}}
+
+.message-fork>span{display:none}

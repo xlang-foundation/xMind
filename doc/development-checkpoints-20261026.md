@@ -21,3 +21,7 @@
 ## Compact chat predecessor (verbatim)
 
 - Preview57780: inline hover/focus toolbars; workspace switch readiness ~0.4s vs1.25s (actual UI), browser202 pass. Chat/model/permissions restore before background details; stale reads retired. Native/owners unchanged: .agentflow/composer-layout-preview/live.json; backend22920/installed80/original63573 kept. Preserve user names and completed sessions845d0da11e974a7eb68c902c9a92045d/a943bbb574854eb7b4eab4770ab2f939: NEVER replay. No agent inference; accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-workspace-switch-latency-20261026.json.
+
+## Metric icon polish predecessor (verbatim)
+
+- Preview57780: compact chat (always-visible one-row metrics, inline SVG Fork, tighter spacing) passes125 renderer/202 browser and actual UI. Fork creates a new session before the chosen message; test copy110f91a1fa2cf499fb357f237830eb5b archived. Workspace readiness~0.4s retained. Native owners unchanged: .agentflow/composer-layout-preview/live.json; backend22920/installed80/original63573 kept. Preserve names; NEVER replay completed845d0da11e974a7eb68c902c9a92045d/a943bbb574854eb7b4eab4770ab2f939. No agent inference; accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-compact-chat-20261026.json.

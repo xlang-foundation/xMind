@@ -150,3 +150,9 @@
 .workspace-navigation .hover-toolbar button:disabled{opacity:.35;cursor:default}
 .workspace-navigation .hover-toolbar svg{width:15px;height:15px;flex:none}
 @media(hover:none){.hover-toolbar{opacity:1;visibility:visible;pointer-events:auto}.workspace-row>.workspace-toggle,.workspace-sessions .session-row>.conversation-link{padding-right:var(--row-tools-width)}}
+
+/* Native select menus must keep the webpage dark palette. */
+body select{color-scheme:dark}
+body select option,body select optgroup{background:var(--vscode-input-background,#232a35);color:var(--vscode-input-foreground,#e2e6ed)}
+body select option:checked{background:#345fc4;color:#fff}
+body select option:disabled{color:#9ea9ba}

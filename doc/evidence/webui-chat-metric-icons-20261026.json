@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T06:44:48.709Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "features": [
+    "SVG metric icons and In/Out/Tok/CW/Cache/Reason/TTFT/Time labels with full accessible tooltip descriptions",
+    "Abbreviated provider wire (Resp/Chat/Msgs/GC) with original provider profile identity retained in tooltip",
+    "No repeated assistant xMind headings; meaningful graph node identities retained",
+    "Fork appears on message hover or keyboard focus, with no reserved idle action column",
+    "Composer helper row hidden; existing permission selector and keyboard behavior retained",
+    "Webpage select menus explicitly use dark color scheme and readable option/selected/disabled colors"
+  ],
+  "checks": {
+    "sameWorkspace": true,
+    "sameSession": true,
+    "sameModel": true,
+    "sameProvider": true,
+    "sameDraft": true,
+    "sameBodies": true,
+    "assistantHeadingsRemoved": true,
+    "helperRowHidden": true,
+    "idleForksHidden": true,
+    "hoverForkVisible": true,
+    "otherForkHidden": true,
+    "keyboardForkVisible": true,
+    "metricRowsSingleLine": true,
+    "metricIconsPresent": true
+  },
+  "metrics": [
+    {
+      "clientWidth": 532,
+      "descriptions": [
+        "Input tokens: 5,124",
+        "Output tokens: 45",
+        "Total tokens: 5,169",
+        "Cached input tokens: 0",
+        "Reasoning tokens: 0",
+        "Model: gpt-4.1",
+        "OpenAI · Responses",
+        "Time to first token: 1.24s",
+        "Total response time: 1.84s"
+      ],
+      "height": 16,
+      "icons": 9,
+      "labels": [
+        "In 5,124",
+        "Out 45",
+        "Tok 5,169",
+        "Cache 0",
+        "Reason 0",
+        "gpt-4.1",
+        "OpenAI · Resp",
+        "TTFT 1.24s",
+        "Time 1.84s"
+      ],
+      "scrollWidth": 532
+    },
+    {
+      "clientWidth": 532,
+      "descriptions": [
+        "Input tokens: 5,185",
+        "Output tokens: 33",
+        "Total tokens: 5,218",
+        "Cached input tokens: 0",
+        "Reasoning tokens: 0",
+        "Model: gpt-4.1",
+        "OpenAI · Responses",
+        "Time to first token: 0.97s",
+        "Total response time: 1.31s"
+      ],
+      "height": 16,
+      "icons": 9,
+      "labels": [
+        "In 5,185",
+        "Out 33",
+        "Tok 5,218",
+        "Cache 0",
+        "Reason 0",
+        "gpt-4.1",
+        "OpenAI · Resp",
+        "TTFT 0.97s",
+        "Time 1.31s"
+      ],
+      "scrollWidth": 532
+    }
+  ],
+  "hoverGeometry": [
+    {
+      "clientWidth": 532,
+      "forkOpacity": "1",
+      "hovered": true,
+      "scrollWidth": 532
+    },
+    {
+      "clientWidth": 532,
+      "forkOpacity": "0",
+      "hovered": false,
+      "scrollWidth": 532
+    }
+  ],
+  "dropdowns": [
+    {
+      "id": "footer-provider",
+      "scheme": "dark",
+      "optionCount": 5,
+      "colors": [
+        "rgb(158, 169, 186) on rgb(35, 42, 53)",
+        "rgb(226, 230, 237) on rgb(35, 42, 53)",
+        "rgb(255, 255, 255) on rgb(52, 95, 196)"
+      ]
+    },
+    {
+      "id": "model",
+      "scheme": "dark",
+      "optionCount": 21,
+      "colors": [
+        "rgb(158, 169, 186) on rgb(35, 42, 53)",
+        "rgb(255, 255, 255) on rgb(52, 95, 196)",
+        "rgb(226, 230, 237) on rgb(35, 42, 53)"
+      ]
+    }
+  ],
+  "dropdownObservation": "Both menus opened through UI without changing selection; computed option and selected colors checked. In-app viewport screenshots do not capture the native popup surface.",
+  "validation": {
+    "renderer": {
+      "passed": 125,
+      "failed": 0,
+      "log": ".agentflow/chat-polish-qualified-renderer-final.log"
+    },
+    "browser": {
+      "passed": 202,
+      "failed": 0,
+      "log": ".agentflow/chat-polish-qualified-browser-final.log"
+    }
+  },
+  "nativeCodeChanged": false,
+  "installedExtensionChanged": false,
+  "agentSubmittedModelTurns": 0,
+  "screenshots": [
+    "webui-chat-metric-icons-20261026.png",
+    "webui-chat-fork-hover-20261026.png"
+  ],
+  "sourceSha256": {
+    "extensions/vscode/media/chat.js": "fc5fb415efc782619ca5170bfc68a07d8cd8f457914735d6c7a26797a3c028b5",
+    "extensions/vscode/media/chat.css": "96ce2de4f1ac6928bf2a859bacd243a2ed3ba370c00b28ae50d9f539b6b1848f",
+    "extensions/vscode/webview.js": "787c5261bae1d025010e1176a3866405bf1b77f7aaac24c190f7bcafb2c8c01a",
+    "views/browser/layout.css": "65f621c6203af9d104e25b8ea2cf80bb6be1797f834979894a61f1545f2c5e78",
+    "extensions/vscode/tests/renderer.test.js": "cad3fcb63b853ceffeaf7659f965b99001d1f8a2fb4a206c83020f0c955945f4",
+    "views/browser/tests/classic-script.test.cjs": "f5cbac6251c91567c3708b77aed5f3354ac7f47676a614becf2201a3f3a5f31f"
+  },
+  "failureDiagnosticsRetained": [
+    ".agentflow/metric-icons-renderer-initial.log",
+    ".agentflow/metric-icons-renderer-followup.log",
+    ".agentflow/chat-polish-qualified-browser.log"
+  ],
+  "failureClassification": "Earlier UI assertions expected long metric labels; expectations now use requested abbreviations while retaining exact supplied/absent token and timing assertions."
+}

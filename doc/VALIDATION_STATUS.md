@@ -1,3 +1,9 @@
+## Chat telemetry and control polish — 2026-10-26
+
+Response metrics now use small SVG icons and In/Out/Tok/CW/Cache/Reason/TTFT/Time labels. Provider wires use Resp/Chat/Msgs/GC with full names and recorded profile identity in tooltips. Values remain exact; absent totals remain unavailable, and uncached input remains explicitly described. The repeated xMind response headings and composer helper row are removed. Permission selection and Enter/Shift+Enter behavior are retained. Fork is an icon revealed on message hover or keyboard focus; it uses no idle action column. Native webpage selects now use an explicit dark color scheme, light option text, blue selected options and muted disabled options.
+
+Actual UI verifies idle/hover/keyboard Fork, all metric icons and16px rows, no horizontal overflow at the sampled width including hovered action, no repeated headings/helper, and preserved workspace/session/provider/model/draft/message bodies after reload. Both dropdowns opened without selecting another model/provider; computed option colors are dark/readable. The in-app screenshot covers the viewport rather than the native popup surface. All125 renderer and202 browser checks pass. Earlier old-label assertion failures are retained in .agentflow; expectations were updated without weakening supplied/missing usage checks. No native runtime, installed extension or inference changes. [Evidence and screenshots](evidence/webui-chat-metric-icons-20261026.json).
+
 ## Compact middle chat panel — 2026-10-26
 
 Response metrics are always visible as a quiet single row with no Response details label, disclosure or metric pills. The assistant Fork action shares that row; user Fork is a small inset icon revealed on hover/focus, without a separate row. Transcript margins, user padding, headings, paragraphs, lists, code/table spacing and activity rows are tighter. Exact message content and all reported metric values remain unchanged.
