@@ -13,3 +13,7 @@
 ## Inline hover toolbar predecessor (verbatim)
 
 - Preview57780: hover/focus session menu (rename/archive/restore/delete confirmation), native archive metadata and faster navigation; focused Native2/browser199 pass. Owner .agentflow/composer-layout-preview/live.json (runtime-session-menu); backend22920/installed80/original63573 retained. User renamed workspace to UI layout checks Project, added English and renamed sessions; preserve current names. NEVER replay completed roots in sessions845d0da11e974a7eb68c902c9a92045d or a943bbb574854eb7b4eab4770ab2f939. No agent inference this change; last agent-accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-session-menu-20261026.json.
+
+## Workspace switch latency predecessor (verbatim)
+
+- Preview57780: workspace/session SVG toolbars overlay each row on hover/keyboard focus; session popup removed. Browser199 and actual UI pass; native APIs unchanged from6e225bce. Owner .agentflow/composer-layout-preview/live.json (runtime-session-menu); backend22920/installed80/original63573 retained. Preserve user names UI layout checks Project, English, Task1, Task 2 and conversation 1. NEVER replay completed roots in sessions845d0da11e974a7eb68c902c9a92045d or a943bbb574854eb7b4eab4770ab2f939. No agent inference; last agent-accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-inline-hover-toolbars-20261026.json.

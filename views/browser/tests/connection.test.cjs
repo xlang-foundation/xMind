@@ -18,6 +18,23 @@ async function fixture(options={}){
 }
 async function until(predicate){for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setImmediate(resolve));}throw new Error('Browser connection fixture deadline');}
 
+test('workspace chat becomes usable while old run inspection is pending and stale completion is retired',async()=>{
+ let releaseRun,switched=false;const catalogueSignals=[],pending=new Promise(resolve=>{releaseRun=resolve;}),run={id:'slow-run',session_id:'existing',state:'completed',parent_id:'',graph_root:false};
+ const f=await fixture({nativeReply:(url,init)=>{
+  if(url.pathname==='/ui/workspaces')catalogueSignals.push(init.signal);
+  if(url.pathname==='/ui/workspaces/select'){switched=true;return;}
+  if(url.pathname==='/v1/sessions/existing/runs')return switched?[]:[run];
+  if(url.pathname==='/v1/runs/slow-run')return pending;
+ }});
+ try{
+  await until(()=>f.element('workspace-control').dataset.switching==='false');assert.equal(f.element('workspace-picker').disabled,false);assert.ok(f.posted.some(message=>message.type==='sessions'&&message.selected==='existing'));
+  const picker=f.element('workspace-picker');picker.value='windows-local-file-v1:other';picker.dispatchEvent(new f.window.Event('change'));
+  await until(()=>f.element('workspace-info').title==='D:\\Projects\\Other'&&f.element('workspace-control').dataset.switching==='false');
+  const historyCount=f.posted.filter(message=>message.type==='history').length;releaseRun(run);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(picker.value,'windows-local-file-v1:other');assert.equal(f.posted.filter(message=>message.type==='history').length,historyCount,'Late inspection must not replace the new workspace chat');assert.ok(!f.posted.some(message=>message.type==='error'));assert.ok(catalogueSignals.length>=2);assert.ok(catalogueSignals.every(signal=>signal instanceof f.window.AbortSignal),'Catalogue reads must receive cancellable signals rather than a resolver function');
+ }finally{releaseRun(run);f.close();}
+});
+
 async function untilAutomaticRefresh(predicate){const end=Date.now()+3000;while(Date.now()<end){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,5));}throw new Error('Automatic workspace refresh deadline');}
 function effectFixtureReplies(state){return (url,init)=>{
  const route=url.pathname,workspace_id='windows-local-file-v1:synthetic';

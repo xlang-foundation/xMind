@@ -1,0 +1,869 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T04:22:02.145Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "beforeCommit": "5f20609e",
+  "scope": "Actual UI workspace navigation. No model prompts, inference, tasks, edits, or process launches were submitted through xMind.",
+  "cause": "The page buffered chat/selection until complete run inspection and auxiliary metadata hydration. Independent capability and session-catalogue reads were serialized.",
+  "change": "Publish validated history, selected session/model and permission state before auxiliary inspection; ancillary reads remain generation-owned. Fetch independent metadata in parallel, reuse the initialization session catalogue, and avoid duplicate skill reads.",
+  "measurement": "Read-only temporary production-page click, mutation and Resource Timing probe. Ready is first data-switching=false after a real sidebar click. Timing is a small local sample, not a performance guarantee.",
+  "baseline": [
+    {
+      "click": 1,
+      "name": "English",
+      "readyMs": 1257.2,
+      "nativeSelectMs": 70.2,
+      "feedbackTwoFrameMs": 48.9
+    },
+    {
+      "click": 2,
+      "name": "UI layout checks Project",
+      "readyMs": 1228.3,
+      "nativeSelectMs": 86.9,
+      "feedbackTwoFrameMs": 48.6
+    }
+  ],
+  "improved": [
+    {
+      "click": 1,
+      "name": "English",
+      "readyMs": 352.8,
+      "nativeSelectMs": 85,
+      "feedbackTwoFrameMs": 54.7
+    },
+    {
+      "click": 2,
+      "name": "UI layout checks Project",
+      "readyMs": 425.3,
+      "nativeSelectMs": 108.4,
+      "feedbackTwoFrameMs": 52.6
+    },
+    {
+      "click": 3,
+      "name": "English",
+      "readyMs": 350,
+      "nativeSelectMs": 78.9,
+      "feedbackTwoFrameMs": 54.3
+    },
+    {
+      "click": 4,
+      "name": "UI layout checks Project",
+      "readyMs": 327.1,
+      "nativeSelectMs": 60.6,
+      "feedbackTwoFrameMs": 51.1
+    }
+  ],
+  "exactWorkspaceRestored": true,
+  "exactSessionRestored": true,
+  "exactHistoryPreserved": true,
+  "draftPreserved": true,
+  "historySha256": "3bf208ce7c7ddcd19e342d3135577b440215f3c22ad7649835640e5200c25f1c",
+  "browserValidation": {
+    "passed": 202,
+    "failed": 0,
+    "log": ".agentflow/workspace-switch-qualified-browser-tests-final.log",
+    "additionalChecks": "Gated permissions, stalled run inspection, stale completion after a new workspace selection, and parallel metadata reads."
+  },
+  "nativeCodeChanged": false,
+  "nativeSuiteRerun": false,
+  "agentSubmittedModelTurns": 0,
+  "timelines": {
+    "baselineFirst": [
+      {
+        "timestamp": "2026-10-27T04:13:48.328Z",
+        "click": 1,
+        "event": "click",
+        "name": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:13:48.330Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 2.2,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:13:48.377Z",
+        "click": 1,
+        "event": "frame",
+        "ms": 48.9,
+        "busy": "true",
+        "selected": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:13:48.406Z",
+        "click": 1,
+        "event": "request",
+        "ms": 78,
+        "path": "/ui/workspaces/select",
+        "durationMs": 70.2,
+        "startMs": 2.7
+      },
+      {
+        "timestamp": "2026-10-27T04:13:48.571Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 243.5,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:13:48.715Z",
+        "click": 1,
+        "event": "request",
+        "ms": 387,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 5.2,
+        "startMs": 380.8
+      },
+      {
+        "timestamp": "2026-10-27T04:13:48.888Z",
+        "click": 1,
+        "event": "request",
+        "ms": 560.2,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 6.6,
+        "startMs": 552.3
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.248Z",
+        "click": 1,
+        "event": "request",
+        "ms": 920.4,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 29.2,
+        "startMs": 890.2
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.341Z",
+        "click": 1,
+        "event": "request",
+        "ms": 1012.6,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 30.8,
+        "startMs": 980.9
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.351Z",
+        "click": 1,
+        "event": "request",
+        "ms": 1021.9,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 7.3,
+        "startMs": 1012.5
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.372Z",
+        "click": 1,
+        "event": "request",
+        "ms": 1043.5,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 20.8,
+        "startMs": 1021.8
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.403Z",
+        "click": 1,
+        "event": "request",
+        "ms": 1074.6,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 30,
+        "startMs": 1043.5
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.525Z",
+        "click": 1,
+        "event": "request",
+        "ms": 1197.5,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 29.8,
+        "startMs": 1166.7
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.585Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 1257.2,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.591Z",
+        "click": 1,
+        "event": "request",
+        "ms": 1262.6,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 30.2,
+        "startMs": 1197.3
+      },
+      {
+        "timestamp": "2026-10-27T04:13:49.655Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 1326.9,
+        "value": "false"
+      }
+    ],
+    "baselineSecond": [
+      {
+        "timestamp": "2026-10-27T04:16:59.122Z",
+        "click": 2,
+        "event": "click",
+        "name": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:16:59.123Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 1.4,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:16:59.170Z",
+        "click": 2,
+        "event": "frame",
+        "ms": 48.6,
+        "busy": "true",
+        "selected": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:16:59.216Z",
+        "click": 2,
+        "event": "request",
+        "ms": 95,
+        "path": "/ui/workspaces/select",
+        "durationMs": 86.9,
+        "startMs": 1.9
+      },
+      {
+        "timestamp": "2026-10-27T04:16:59.372Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 242.7,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:16:59.596Z",
+        "click": 2,
+        "event": "request",
+        "ms": 474,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 28.1,
+        "startMs": 444.7
+      },
+      {
+        "timestamp": "2026-10-27T04:16:59.830Z",
+        "click": 2,
+        "event": "request",
+        "ms": 708.1,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 30.5,
+        "startMs": 674.9
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.038Z",
+        "click": 2,
+        "event": "request",
+        "ms": 916.1,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 6,
+        "startMs": 908.9
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.123Z",
+        "click": 2,
+        "event": "request",
+        "ms": 1001.5,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 30.6,
+        "startMs": 969.2
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.153Z",
+        "click": 2,
+        "event": "request",
+        "ms": 1031.2,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 29,
+        "startMs": 1001.4
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.215Z",
+        "click": 2,
+        "event": "request",
+        "ms": 1093.3,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 27.9,
+        "startMs": 1063.9
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.223Z",
+        "click": 2,
+        "event": "request",
+        "ms": 1101.3,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 6.8,
+        "startMs": 1093.3
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.336Z",
+        "click": 2,
+        "event": "request",
+        "ms": 1214.5,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 28.5,
+        "startMs": 1184.9
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.350Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 1228.3,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:17:00.351Z",
+        "click": 2,
+        "event": "request",
+        "ms": 1228.7,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 4.9,
+        "startMs": 1214.5
+      }
+    ],
+    "improved": [
+      {
+        "timestamp": "2026-10-27T04:18:58.260Z",
+        "click": 1,
+        "event": "click",
+        "name": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.262Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 1.9,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.315Z",
+        "click": 1,
+        "event": "frame",
+        "ms": 54.7,
+        "busy": "true",
+        "selected": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.353Z",
+        "click": 1,
+        "event": "request",
+        "ms": 92.8,
+        "path": "/ui/workspaces/select",
+        "durationMs": 85,
+        "startMs": 2.2
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.383Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 123.2,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.536Z",
+        "click": 1,
+        "event": "request",
+        "ms": 276.2,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 5.8,
+        "startMs": 269.5
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.613Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 352.8,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.614Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 353.4,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:18:58.614Z",
+        "click": 1,
+        "event": "request",
+        "ms": 353.5,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 11,
+        "startMs": 330.1
+      },
+      {
+        "timestamp": "2026-10-27T04:18:59.007Z",
+        "click": 1,
+        "event": "request",
+        "ms": 746.1,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 30.1,
+        "startMs": 714.8
+      },
+      {
+        "timestamp": "2026-10-27T04:18:59.066Z",
+        "click": 1,
+        "event": "request",
+        "ms": 806.2,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 18.4,
+        "startMs": 786.3
+      },
+      {
+        "timestamp": "2026-10-27T04:18:59.099Z",
+        "click": 1,
+        "event": "request",
+        "ms": 838.7,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 30.7,
+        "startMs": 806.1
+      },
+      {
+        "timestamp": "2026-10-27T04:18:59.129Z",
+        "click": 1,
+        "event": "request",
+        "ms": 869.1,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 29.3,
+        "startMs": 838.6
+      },
+      {
+        "timestamp": "2026-10-27T04:18:59.160Z",
+        "click": 1,
+        "event": "request",
+        "ms": 899.7,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 29.1,
+        "startMs": 869.1
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.208Z",
+        "click": 2,
+        "event": "click",
+        "name": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.210Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 1.4,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.262Z",
+        "click": 2,
+        "event": "frame",
+        "ms": 52.6,
+        "busy": "true",
+        "selected": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.324Z",
+        "click": 2,
+        "event": "request",
+        "ms": 115.2,
+        "path": "/ui/workspaces/select",
+        "durationMs": 108.4,
+        "startMs": 1.6
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.356Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 147.2,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.528Z",
+        "click": 2,
+        "event": "request",
+        "ms": 319.7,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 6.6,
+        "startMs": 312.2
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.634Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 425.3,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.634Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 425.8,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.635Z",
+        "click": 2,
+        "event": "request",
+        "ms": 426,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 31,
+        "startMs": 387.4
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.906Z",
+        "click": 2,
+        "event": "request",
+        "ms": 697.3,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 31.8,
+        "startMs": 664.3
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.952Z",
+        "click": 2,
+        "event": "request",
+        "ms": 742.9,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 26.8,
+        "startMs": 715.1
+      },
+      {
+        "timestamp": "2026-10-27T04:20:00.961Z",
+        "click": 2,
+        "event": "request",
+        "ms": 752.1,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 7.5,
+        "startMs": 742.9
+      },
+      {
+        "timestamp": "2026-10-27T04:20:01.018Z",
+        "click": 2,
+        "event": "request",
+        "ms": 808.3,
+        "path": "/v1/connection-bindings/:id/sessions/:id/skills",
+        "durationMs": 30.7,
+        "startMs": 775.5
+      },
+      {
+        "timestamp": "2026-10-27T04:20:01.047Z",
+        "click": 2,
+        "event": "request",
+        "ms": 837.7,
+        "path": "/v1/connection-bindings/:id/skills",
+        "durationMs": 27.8,
+        "startMs": 808.2
+      },
+      {
+        "timestamp": "2026-10-27T04:20:57.671Z",
+        "click": 3,
+        "event": "click",
+        "name": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:57.672Z",
+        "click": 3,
+        "event": "busy",
+        "ms": 1.5,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:57.726Z",
+        "click": 3,
+        "event": "frame",
+        "ms": 54.3,
+        "busy": "true",
+        "selected": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:57.757Z",
+        "click": 3,
+        "event": "request",
+        "ms": 85.9,
+        "path": "/ui/workspaces/select",
+        "durationMs": 78.9,
+        "startMs": 1.8
+      },
+      {
+        "timestamp": "2026-10-27T04:20:57.792Z",
+        "click": 3,
+        "event": "busy",
+        "ms": 120.3,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:57.934Z",
+        "click": 3,
+        "event": "request",
+        "ms": 262.3,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 7.7,
+        "startMs": 253.3
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.021Z",
+        "click": 3,
+        "event": "busy",
+        "ms": 350,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.022Z",
+        "click": 3,
+        "event": "busy",
+        "ms": 350.6,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.022Z",
+        "click": 3,
+        "event": "request",
+        "ms": 350.7,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 30.1,
+        "startMs": 313
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.234Z",
+        "click": 4,
+        "event": "click",
+        "name": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.236Z",
+        "click": 4,
+        "event": "busy",
+        "ms": 2.2,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.285Z",
+        "click": 4,
+        "event": "frame",
+        "ms": 51.1,
+        "busy": "true",
+        "selected": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.302Z",
+        "click": 4,
+        "event": "request",
+        "ms": 68.3,
+        "path": "/ui/workspaces/select",
+        "durationMs": 60.6,
+        "startMs": 2.6
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.350Z",
+        "click": 4,
+        "event": "busy",
+        "ms": 115.9,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.494Z",
+        "click": 4,
+        "event": "request",
+        "ms": 260.3,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 20.5,
+        "startMs": 238.6
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.562Z",
+        "click": 4,
+        "event": "busy",
+        "ms": 327.1,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.562Z",
+        "click": 4,
+        "event": "busy",
+        "ms": 327.8,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:20:58.562Z",
+        "click": 4,
+        "event": "request",
+        "ms": 327.9,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 23.6,
+        "startMs": 297
+      }
+    ],
+    "finalSource": [
+      {
+        "timestamp": "2026-10-27T04:23:15.105Z",
+        "click": 1,
+        "event": "click",
+        "name": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.107Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 1.9,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.159Z",
+        "click": 1,
+        "event": "frame",
+        "ms": 53.3,
+        "busy": "true",
+        "selected": "English"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.188Z",
+        "click": 1,
+        "event": "request",
+        "ms": 82.3,
+        "path": "/ui/workspaces/select",
+        "durationMs": 74.5,
+        "startMs": 2.3
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.218Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 112.3,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.380Z",
+        "click": 1,
+        "event": "request",
+        "ms": 275.3,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 19.9,
+        "startMs": 254.3
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.482Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 376.9,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.483Z",
+        "click": 1,
+        "event": "busy",
+        "ms": 377.6,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.483Z",
+        "click": 1,
+        "event": "request",
+        "ms": 377.8,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 28.9,
+        "startMs": 337.8
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.734Z",
+        "click": 2,
+        "event": "click",
+        "name": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.735Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 1.3,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.782Z",
+        "click": 2,
+        "event": "frame",
+        "ms": 48.3,
+        "busy": "true",
+        "selected": "UI layout checks Project"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.819Z",
+        "click": 2,
+        "event": "request",
+        "ms": 85.5,
+        "path": "/ui/workspaces/select",
+        "durationMs": 79.1,
+        "startMs": 1.5
+      },
+      {
+        "timestamp": "2026-10-27T04:23:15.873Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 139.3,
+        "value": "true"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:16.078Z",
+        "click": 2,
+        "event": "request",
+        "ms": 343.4,
+        "path": "/v1/connection-bindings/:id/sessions/:id/messages",
+        "durationMs": 30.7,
+        "startMs": 311.5
+      },
+      {
+        "timestamp": "2026-10-27T04:23:16.145Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 411,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:16.146Z",
+        "click": 2,
+        "event": "busy",
+        "ms": 411.6,
+        "value": "false"
+      },
+      {
+        "timestamp": "2026-10-27T04:23:16.146Z",
+        "click": 2,
+        "event": "request",
+        "ms": 411.7,
+        "path": "/v1/connection-bindings/:id/sessions/:id/permissions",
+        "durationMs": 19.8,
+        "startMs": 385.1
+      }
+    ]
+  },
+  "finalSourceSamples": [
+    {
+      "click": 1,
+      "name": "English",
+      "readyMs": 376.9,
+      "nativeSelectMs": 74.5,
+      "feedbackTwoFrameMs": 53.3
+    },
+    {
+      "click": 2,
+      "name": "UI layout checks Project",
+      "readyMs": 411,
+      "nativeSelectMs": 79.1,
+      "feedbackTwoFrameMs": 48.3
+    }
+  ],
+  "cleanProductionAssets": true,
+  "temporaryProbeRemoved": true,
+  "exactHistoryPreservedAfterCleanReload": true,
+  "selectionPreservedAfterCleanReload": true,
+  "screenshot": "webui-workspace-switch-latency-20261026.png",
+  "sourceSha256": {
+    "views/browser/browser.js": "e8a65c0bf53fe53ac779aeeef1a3eb0413a773aa7c874b358b86994e58a14ab9",
+    "views/browser/tests/controller.test.cjs": "5fd88c7eef7f8d4ae773d5e02bf4eeea869cc07e1fe7a0cff23162d7bccf5237",
+    "views/browser/tests/connection.test.cjs": "82a09e51429a6ff944f5ce68cd52f2d14f2a9c43de16d181b63622884451cbdb"
+  },
+  "catalogueCancellation": "Resolve the AbortSignal factory before requesting the catalogue; retain cancellation/timeouts and generation checks.",
+  "rawTimingReceipt": ".agentflow/workspace-switch-timing-raw.json"
+}

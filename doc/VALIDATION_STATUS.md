@@ -1,3 +1,9 @@
+## Workspace switch readiness — 2026-10-26
+
+The browser previously buffered restored chat and selection until complete run inspection, skills and other metadata reads. In actual UI clicks, the native select request took70–87ms but the sidebar stayed busy for1,228–1,257ms. Activation now publishes restored history, selected session/model and permission state before auxiliary reads. Independent capability/catalogue reads run concurrently; initialization reuses its session catalogue and avoids a duplicate skill read. Background inspection stays owned by its controller/generation; retiring it cannot overwrite the next workspace. Catalogue reads receive resolved AbortSignals so their existing timeout applies.
+
+Final-source actual UI switches completed readiness in376.9ms and411.0ms (roughly3× faster). Four earlier samples with the same navigation scheduling took327.1–425.3ms. This is a small local sample, not a latency guarantee. Back-to-back English/UI layout checks Project switches and clean reload preserve the exact original session and full history. All202 browser tests pass, including gated permission readiness, stalled old inspection, stale completion and concurrent validated metadata reads. No native code/runtime changes or new model turns. The temporary timing probe was removed and live production assets match source. [Timings and evidence](evidence/webui-workspace-switch-latency-20261026.json).
+
 ## Inline sidebar hover toolbars — 2026-10-26
 
 Workspace rows reveal SVG New Session and Settings controls inline on hover or keyboard focus. Session rows reveal Rename, Archive/Restore and Delete directly; the popup menu is removed. Toolbars overlay the right edge so names use the available width when not hovered. Pointer use hides controls on other rows; keyboard navigation reveals the focused row. Focus is retained when selection causes a row rebuild. Native action contracts and Delete confirmation remain unchanged.

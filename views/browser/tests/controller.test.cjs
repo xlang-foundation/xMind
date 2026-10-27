@@ -1,5 +1,29 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
+test('workspace readiness waits for chat and permissions but not ancillary run inspection',async()=>{
+ let releasePermissions,releaseRun,ready=false,ancillaryReads=0;
+ const permissions=new Promise(resolve=>{releasePermissions=resolve;}),run=new Promise(resolve=>{releaseRun=resolve;}),posted=[];
+ const view=new BrowserController({sessions:async()=>[{id:'saved',title:'Saved'}],runs:async()=>[{id:'completed',state:'completed',session_id:'saved'}]},message=>posted.push(message));
+ view.refreshCapabilities=async()=>{view.health={agent_execution:false,provider_profile_admission:false};};view.historyPager.select=async()=>({messages:[{role:'user',json:'saved history'}]});
+ view.refreshSessionPermissions=async()=>permissions;view.poll=async()=>run;view.watch=()=>{};view.readSkills=async()=>{ancillaryReads++;};view.readAgentSelection=async()=>{ancillaryReads++;};view.refreshInbox=async()=>{ancillaryReads++;};
+ try{
+  const initializing=view.initialize({session:'saved',run:'completed'},{onReady:()=>{ready=true;}});
+  await new Promise(resolve=>setImmediate(resolve));assert.equal(ready,false,'Permission state must be restored before enabling the workspace');assert.ok(posted.some(message=>message.type==='history'));
+  releasePermissions();await new Promise(resolve=>setImmediate(resolve));assert.equal(ready,true);assert.equal(view.session,'saved');assert.equal(view.runId,'completed');assert.ok(posted.some(message=>message.type==='sessions'&&message.selected==='saved'));
+  view.dispose();releaseRun();await initializing;assert.equal(ancillaryReads,0,'A retired initialization must not continue reading metadata for another selection');
+ }finally{releasePermissions();releaseRun();view.dispose();}
+});
+
+test('independent capability and session metadata reads start together and preserve native validation',async()=>{
+ const started=[],posted=[];let release,releaseSessions;const pending=new Promise(resolve=>{release=resolve;}),sessionGate=new Promise(resolve=>{releaseSessions=resolve;});
+ const client={health:async()=>({agent_execution:true,agent_planning:true,session_archiving:true,active_session_map:true}),planning:async()=>{started.push('planning');await pending;},models:async()=>{started.push('models');return {models:[]};},graphs:async()=>{started.push('graphs');return {graphs:[]};},sessions:async()=>{started.push('sessions');await pending;return [{id:'saved'}];},request:async()=>{started.push('archives');return {workspace_id:'workspace',session_ids:['saved']};},activeSessions:async()=>{started.push('active');return {data:{saved:{type:'running'}}};}};
+ const view=new BrowserController(client,message=>posted.push(message));
+ try{
+  const capabilities=view.refreshCapabilities();await new Promise(resolve=>setImmediate(resolve));assert.deepEqual(started,['planning','models','graphs']);release();await capabilities;
+  started.length=0;client.sessions=async()=>{started.push('sessions');await sessionGate;return [{id:'saved'}];};const catalog=view.sessionCatalog();await new Promise(resolve=>setImmediate(resolve));assert.deepEqual(started,['sessions','archives','active']);releaseSessions();assert.deepEqual(await catalog,[{id:'saved',archived:true,active:true}]);
+  client.activeSessions=async()=>({data:{saved:{type:'invalid'}}});await assert.rejects(view.sessionCatalog(),/Invalid active session map/);
+ }finally{release();releaseSessions();view.dispose();}
+});
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
 test('session switching reads history and runs concurrently and displays history before provider metadata',async()=>{
