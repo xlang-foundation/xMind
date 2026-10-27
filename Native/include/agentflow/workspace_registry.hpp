@@ -1,9 +1,11 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <stdexcept>
 #include <vector>
 
 namespace agentflow {
+struct WorkspaceNameConflict : std::runtime_error {using std::runtime_error::runtime_error;};
 struct WorkspaceFolderRecord {
     std::string folder_id, identity, root, name;
     std::int64_t ordinal=0;
@@ -26,6 +28,7 @@ public:
         std::string private_storage_root);
     WorkspaceGroupRecord create(const std::string& primary_root,const std::string& name={}) const;
     WorkspaceGroupRecord add_folder(const std::string& workspace_id,const std::string& root) const;
+    WorkspaceGroupRecord rename(const std::string& workspace_id,const std::string& name,const std::string& expected_name) const;
     std::vector<WorkspaceGroupRecord> list() const;
     WorkspaceGroupRecord get(const std::string& workspace_id) const;
 private:

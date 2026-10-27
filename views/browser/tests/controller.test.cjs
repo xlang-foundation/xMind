@@ -2,6 +2,26 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('first browser prompt names an empty default session once through native title CAS',async()=>{
+ const calls=[],saved={id:'named-session',title:'Browser conversation'};
+ const client={sessions:async()=>[{...saved}],historyPage:async(id,count)=>{assert.equal(id,saved.id);assert.equal(count,1);calls.push('history');return {messages:[],has_more:false};},renameSession:async(id,title,expected)=>{assert.equal(id,saved.id);assert.equal(expected,'Browser conversation');calls.push('rename');saved.title=title;},run:async()=>{calls.push('run');return {id:'named-run',session_id:saved.id,state:'queued',parent_id:'',graph_root:false};}};
+ const view=new BrowserController(client,()=>{},{subscriptionFactory:()=>({watch(){},stop(){}})});view.health={agent_execution:true,session_rename:true};view.session=saved.id;
+ try{await view.handle({type:'send',prompt:'  Make\n a small   Vue dashboard  '});assert.equal(saved.title,'Make a small Vue dashboard');assert.deepEqual(calls,['history','rename','run']);await view.nameFirstPrompt('Follow up',view.generation);assert.equal(calls.filter(item=>item==='rename').length,1);}finally{view.dispose();}
+});
+
+test('automatic titles preserve custom names and saved history, and yield to a concurrent manual rename',async()=>{
+ for(const scenario of ['custom','history','conflict']){
+  let renamed=0;const saved={id:'saved',title:scenario==='custom'?'My project':'New conversation'};
+  const view=new BrowserController({sessions:async()=>[saved],historyPage:async()=>({messages:scenario==='history'?[{role:'user'}]:[]}),renameSession:async()=>{renamed++;saved.title='Manual title';throw Object.assign(new Error('Title changed'),{status:409});}},()=>{});view.health={session_rename:true};view.session=saved.id;
+  try{await view.nameFirstPrompt('Automatic title',view.generation);assert.equal(renamed,scenario==='conflict'?1:0);assert.equal(saved.title,scenario==='custom'?'My project':scenario==='conflict'?'Manual title':'New conversation');}finally{view.dispose();}
+ }
+});
+
+test('automatic title reads cannot rename a session after the selection changes',async()=>{
+ let finish,renamed=0;const history=new Promise(resolve=>{finish=resolve;});
+ const view=new BrowserController({sessions:async()=>[{id:'old',title:'New session'}],historyPage:async()=>history,renameSession:async()=>{renamed++;}},()=>{});view.health={session_rename:true};view.session='old';
+ try{const naming=view.nameFirstPrompt('Name from prompt',view.generation);await Promise.resolve();view.stop();view.session='new';finish({messages:[]});await naming;assert.equal(renamed,0);}finally{view.dispose();}
+});
 test('first browser send observes reusable permission details without reloading or resubmitting',async()=>{
  const posted=[],calls=[],operation={id:'permission-first',run_id:'first-run',workspace_id:'workspace',tool:'read_file',state:'awaiting_approval',expires_unix_ms:Date.now()+60000,agent_permission_request:{grantable:true,action:'read_file',resource:'note.txt'}};
  let pending=[];const client={createSession:async()=>{calls.push('create');return {id:'first-session'};},sessionPermissions:async session=>{assert.equal(session,'first-session');calls.push('permissions');return {session_id:session,requests:pending};},run:async()=>{calls.push('run');pending=[operation];return {id:'first-run',session_id:'first-session',state:'running',parent_id:'',graph_root:false};},sessions:async()=>[{id:'first-session'}]};

@@ -48,6 +48,10 @@
   const leftToggle=make('button',undefined,'sidebar-toggle');leftToggle.append(sidebarIcon('left'));leftToggle.id='workspace-toggle';leftToggle.type='button';leftToggle.setAttribute('aria-label','Toggle left sidebar');leftToggle.setAttribute('aria-controls',navigation.id);leftToggle.setAttribute('aria-expanded','true');leftToggle.title='Hide left sidebar';
   const toolbar=document.querySelector('.browser-bar');toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Global toolbar');
   toolbar.prepend(leftToggle);
+  const context=make('div',undefined,'header-context'),workspaceContext=make('button',undefined,'header-workspace'),separator=make('span','/','header-context-separator'),sessionContext=make('button',undefined,'header-session'),sessionLabel=make('span',undefined,'header-session-label');
+  workspaceContext.id='current-workspace';workspaceContext.type='button';workspaceContext.setAttribute('aria-label','Workspace settings');workspaceContext.onclick=()=>byId('workspace-config-open').click();
+  sessionContext.id='current-session';sessionContext.type='button';sessionContext.setAttribute('aria-label','Rename current session');sessionContext.onclick=()=>byId('rename').click();
+  const renameIcon=byId('rename').querySelector('svg').cloneNode(true);sessionContext.append(sessionLabel,renameIcon);context.append(workspaceContext,separator,sessionContext);toolbar.querySelector('strong').after(context);
   if(byId('settings'))toolbar.append(byId('settings'));toolbar.append(toggle);
   toolbar.querySelector('.local-node')?.remove();
   // Connection lifecycle is automatic. Retain controller targets offscreen so
@@ -83,6 +87,9 @@
   const collapsedWorkspaces=new Set();
   const refresh=()=>{
     const picker=byId('workspace-picker'),active=picker.value;list.replaceChildren();add.disabled=byId('add-workspace').disabled;
+    const workspace=picker.selectedOptions[0],session=originalSessions.selectedOptions[0];
+    workspaceContext.textContent=workspace?.dataset.workspaceName||workspace?.textContent||'Workspace';workspaceContext.title=workspaceContext.textContent;workspaceContext.disabled=byId('workspace-config-open').disabled;
+    sessionLabel.textContent=session?.dataset.sessionTitle||session?.textContent||'New session';sessionContext.title=sessionLabel.textContent;sessionContext.disabled=byId('rename').disabled||byId('rename').hidden;
     for(const option of picker.options){
       const name=option.dataset.workspaceName||option.textContent;
       const group=make('section',undefined,'workspace-group'),row=make('div',undefined,'workspace-row'),select=make('button',undefined,'workspace-toggle'),configure=make('button','⚙');
@@ -101,7 +108,7 @@
     }
   };
   const observer=new MutationObserver(refresh);for(const id of ['workspace-picker','sessions'])observer.observe(byId(id),{childList:true,subtree:true,attributes:true});
-  for(const id of ['workspace-config-open','add-workspace'])observer.observe(byId(id),{attributes:true,attributeFilter:['disabled']});
+  for(const id of ['workspace-config-open','add-workspace','rename'])observer.observe(byId(id),{attributes:true,attributeFilter:['disabled','hidden']});
   originalSessions.addEventListener('change',refresh);byId('workspace-picker').addEventListener('change',refresh);refresh();
   // A comparison or terminal request opens Files without submitting a command.
   for(const id of ['workspace-terminal-toggle','workspace-vcs-diff'])byId(id).addEventListener('click',()=>choose('files'));

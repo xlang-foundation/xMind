@@ -98,6 +98,17 @@ int main(int argc,char** argv){
             require(unicode_rejected&&unicode_registry.get(unicode_group.workspace_id).revision==1,"Unicode private roots must reject children without membership changes");
             require(unicode_registry.add_folder(unicode_group.workspace_id,utf8(unicode_fixture.second)).revision==2,"Unicode private boundaries must still allow unrelated public folders");
         }
+        {
+            Fixture names;WorkspaceRegistry named(names.database,roots,utf8(names.storage));
+            const auto initial=named.create(utf8(names.first),"Design studio");
+            require(initial.name=="Design studio"&&initial.folders.front().name=="ProjectA","A custom workspace name must be independent of its first folder name");
+            const auto renamed=named.rename(initial.workspace_id,"Client projects","Design studio");
+            require(renamed.name=="Client projects"&&renamed.workspace_id==initial.workspace_id&&renamed.revision==initial.revision&&renamed.primary_folder_id==initial.primary_folder_id&&renamed.folders.front().root==initial.folders.front().root,"Renaming must preserve identity, membership and admitted-work revision");
+            bool stale=false;try{named.rename(initial.workspace_id,"Stale overwrite","Design studio");}catch(const agentflow::WorkspaceNameConflict&){stale=true;}require(stale,"Stale names cannot overwrite a concurrent rename");
+            for(const auto& bad:{std::string{},std::string("   "),std::string("bad\nname"),std::string(1025,'x')}){bool refused=false;try{named.rename(initial.workspace_id,bad,"Client projects");}catch(const std::invalid_argument&){refused=true;}require(refused,"Invalid workspace names must be rejected");}
+            WorkspaceRegistry restored(names.database,roots,utf8(names.storage));require(restored.create(utf8(names.first)).name=="Client projects","A saved workspace name must survive reopening without default-folder overwrite");
+            require(restored.add_folder(initial.workspace_id,utf8(names.second)).name=="Client projects","Attaching a folder must retain the chosen workspace name");
+        }
         std::cout<<"Native xlang3 workspace registry contracts passed\n";return 0;
     }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }

@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T01:12:20.251Z",
+  "scope": "Real browser UI verification of native workspace names, session naming, and header context. Development preview only.",
+  "url": "http://127.0.0.1:57780/ui/",
+  "workspaceFolder": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check",
+  "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+  "workspaceName": "UI layout checks",
+  "sessionId": "a943bbb574854eb7b4eab4770ab2f939",
+  "manualSessionName": "Workspace naming checks",
+  "automaticSessionName": "Suggest three names for this interface test project.",
+  "completedTurns": 2,
+  "neverReplayAnyRunInThisSession": true,
+  "checks": {
+    "automaticTitleFromFirstUiPrompt": true,
+    "manualTitleSurvivedFollowup": true,
+    "namesSurvivedReload": true,
+    "historySurvivedReload": true,
+    "workspaceSelectionSurvivedReload": true,
+    "sessionSelectionSurvivedReload": true,
+    "automaticReconnectWithoutSignIn": true,
+    "originalSessionIdsAndNamesRetained": true,
+    "originalHistoryUnchanged": true,
+    "originalFullAccessRetained": true,
+    "originalModelRetained": true,
+    "existingTwoFoldersRetained": true
+  },
+  "historySha256": {
+    "originalBefore": "8f623e7cf7f5aee977e01049172aabfc944a54704b6fe955ecf28a2419137342",
+    "originalAfter": "8f623e7cf7f5aee977e01049172aabfc944a54704b6fe955ecf28a2419137342",
+    "testBeforeReload": "3bf208ce7c7ddcd19e342d3135577b440215f3c22ad7649835640e5200c25f1c",
+    "testAfterReload": "3bf208ce7c7ddcd19e342d3135577b440215f3c22ad7649835640e5200c25f1c"
+  },
+  "truncation": {
+    "session": {
+      "clientWidth": 212,
+      "scrollWidth": 408,
+      "text": "Workspace naming checks with a deliberately long session title for truncation",
+      "textOverflow": "ellipsis",
+      "tooltip": "Workspace naming checks with a deliberately long session title for truncation"
+    },
+    "workspace": {
+      "clientWidth": 160,
+      "scrollWidth": 422,
+      "text": "UI layout workspace with a deliberately long name to check header truncation",
+      "textOverflow": "ellipsis",
+      "tooltip": "UI layout workspace with a deliberately long name to check header truncation"
+    }
+  },
+  "uiTurns": [
+    {
+      "prompt": "Suggest three names for this interface test project.",
+      "model": "gpt-4.1",
+      "inputTokens": 5124,
+      "outputTokens": 45,
+      "cachedTokens": 0
+    },
+    {
+      "prompt": "Choose your favorite and explain it in one sentence.",
+      "model": "gpt-4.1",
+      "inputTokens": 5185,
+      "outputTokens": 33,
+      "cachedTokens": 0
+    }
+  ],
+  "accounting": {
+    "source": "Provider-reported usage read from actual UI Response details; full-rate assumption used by earlier project receipts, not an invoice.",
+    "inputUsdPerMillion": 2,
+    "outputUsdPerMillion": 8,
+    "additionalUsd": 0.021242,
+    "cumulativeConservativeUsd": 1.52044,
+    "authorizedCapUsd": 100
+  },
+  "screenshots": [
+    "webui-workspace-session-names-20261026.png",
+    "webui-workspace-name-settings-20261026.png",
+    "webui-header-name-truncation-20261026.png"
+  ],
+  "validation": {
+    "browser": {
+      "passed": 192,
+      "failed": 0,
+      "log": ".agentflow/workspace-session-names-browser-final.log"
+    },
+    "nativeFocused": [
+      {
+        "name": "native_workspace_registry_contract",
+        "passed": true,
+        "log": ".agentflow/workspace-naming-native-tests.log"
+      },
+      {
+        "name": "native_local_view_contract",
+        "passed": true,
+        "seconds": 148.51,
+        "log": ".agentflow/workspace-naming-native-http-tests.log"
+      },
+      {
+        "name": "native_local_view_provider_config_contract",
+        "passed": true,
+        "seconds": 63.36,
+        "log": ".agentflow/workspace-naming-provider-preservation-tests.log"
+      }
+    ],
+    "nativeBuild": "Release xmind succeeded",
+    "nativeFullSuiteRerun": false,
+    "installedReleaseChanged": false,
+    "originalProjectUiChanged": false,
+    "providerRequestsFromSyntheticContracts": 0
+  },
+  "runtime": {
+    "nativeSha256": "6f248f1c0da21dacb539fe2940daf63c16fa2a9264a1f5cdaf049f3c52b23e8f",
+    "manifestSha256": "9e75012a4f109549626a9b7bf6f4e618f7ffef36b75e5245d0319cf86db42294",
+    "managedBackendReused": true,
+    "providerSettingsPreserved": true,
+    "qualification": "Updated development view and browser assets; the existing managed backend and installed 0.1.80 remain in place."
+  },
+  "sourceSha256": {
+    "Native/apps/local_view_main.cpp": "a08fc32e7e71ceb1458c57549f0755c95e708135bf26fa33a4be8eb5a2be0833",
+    "Native/include/agentflow/workspace_registry.hpp": "c943b67cc2eaa4d36f81b2c23d0be5873ae7ba8bd59383b949577cb1e35fb02d",
+    "Native/src/workspace_registry.cpp": "8b93939596195330300924c5dfc2e0d70ad1a0b54b892e54a55f1457a6055dc6",
+    "Native/tests/workspace_registry_contract.cpp": "f4d39900fbadd7489f0c874a0f01eff014d58da24e4d8c13520954eff89ec860",
+    "Native/tests/local_view_contract.mjs": "361aed5bcf25ce43d18f602c67dbe5dc448787710b75a9fdbe28eafb106e355f",
+    "Native/tests/local_view_provider_config_contract.mjs": "bd3c06916511d3fac0b84ad23242f120797e07fae64a6e4772576c7a7aabcbe4",
+    "views/browser/browser.js": "a7fa1a76c13fd0abfebfdd3546fbcc54c2c6aa169f51a54b97fb105bb1666ffe",
+    "views/browser/page.cjs": "5b484171c7897c0e3f2a97be54759e127a0a6de6dabfb5a8c69a6f0ebcf4bb71",
+    "views/browser/server.mjs": "45f3f0a08d8f342028f8155946d17837f36a34deb47356039f3f9fb29051d0cd",
+    "views/browser/layout.js": "112494bec31a30f4644b13fbebf2c2f385cb9e418901ce21ac8d0995c55ddf4e",
+    "views/browser/layout.css": "3b3410259c2be265cc678ccaf92d23040f2fad9f047dbd302dd543faad5bc290"
+  },
+  "priorLayoutEvidence": "webui-conversation-layout-20261026.json"
+}

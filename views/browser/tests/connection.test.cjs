@@ -66,6 +66,18 @@ test('local session protocol mismatch explains the required restart without aski
  await until(()=>f.element('connection-error').textContent.includes('matching updates'));assert.ok(!f.element('connection-error').textContent.includes('private upstream diagnostic'));
  f.element('connection-cancel').click();assert.equal(f.dialog.open,false);assert.ok(!f.requests.includes('/ui/session/disconnect'));assert.ok(f.posted.some(message=>message.type==='history'));f.close();
 });
+test('workspace name editor saves native metadata without replacing the selected workspace or history',async()=>{
+ let name='Example',renameBody;const id='windows-local-file-v1:synthetic';
+ const f=await fixture({canAdd:true,nativeReply:(url,init)=>{
+  if(url.pathname==='/ui/workspaces')return {can_add:true,can_rename:true,selected_workspace_id:id,workspaces:[{workspace_id:id,name,root:'D:\\Projects\\Example',folders:[{folder_id:id,name:'Example',root:'D:\\Projects\\Example',ordinal:0}]}]};
+  if(url.pathname==='/ui/workspaces/rename'){renameBody=JSON.parse(init.body);name=renameBody.name;return {workspace_id:id,name,revision:1};}
+ }});try{
+  const input=f.element('workspace-name');assert.equal(input.value,'Example');input.value='  Studio projects  ';input.dispatchEvent(new f.window.Event('input'));assert.equal(f.element('workspace-name-save').disabled,false);f.element('workspace-name-form').dispatchEvent(new f.window.Event('submit',{bubbles:true,cancelable:true}));
+  await until(()=>f.element('workspace-label').textContent==='Studio projects');assert.deepEqual(renameBody,{workspace_id:id,name:'Studio projects',expected_name:'Example'});assert.equal(f.element('workspace-picker').value,id);assert.equal(f.element('workspace-name-save').disabled,true);
+  f.element('add-workspace').click();assert.equal(f.element('workspace-create-name-group').hidden,false);f.element('workspace-root-input').value='D:\\Projects\\MyFirstFolder';f.element('workspace-root-input').dispatchEvent(new f.window.Event('input'));assert.equal(f.element('workspace-create-name').placeholder,'MyFirstFolder');assert.equal(f.element('workspace-create-name').value,'');
+  assert.ok(!f.requests.some(route=>route==='/v1/runs'||route==='/ui/workspaces/select'),'renaming must not submit, replay or switch any run');
+ }finally{f.close();}
+});
 test('workspace creation cancel returns to its launch context for Cancel, close and Escape',async()=>{
  const f=await fixture({canAdd:true});try{
   const settings=f.element('workspace-config-dialog'),form=f.element('workspace-add-dialog');

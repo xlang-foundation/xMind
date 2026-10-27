@@ -161,6 +161,7 @@ agentflow::VerifiedRuntimeGeneration verify_client_image() {
 int run_local_view(int argc, char **argv) {
     agentflow::LocalProfileOptions options;
     std::string trusted_provider_config;
+    bool preserve_provider_settings=false;
     std::string ready;
     try {
         std::map<std::string, bool> seen;
@@ -171,6 +172,7 @@ int run_local_view(int argc, char **argv) {
                 options.approved_edits = false;
                 continue;
             }
+            if (key == "--preserve-provider-settings") {preserve_provider_settings=true;continue;}
             if (key == "--workspace-edits") {
                 require(i + 1 < argc && std::string_view(argv[i + 1]) == "approved",
                         "--workspace-edits requires the value approved");
@@ -305,6 +307,7 @@ int run_local_view(int argc, char **argv) {
                         metadata["revision"].is_number_integer() && metadata["revision"] >= 0 &&
                         metadata.contains("profiles") && metadata["profiles"].is_array(),
                     "Native provider settings are invalid");
+            if(preserve_provider_settings&&!metadata["profiles"].empty())return;
             const auto config_path = std::filesystem::absolute(trusted_provider_config).u8string();
             const std::string config(reinterpret_cast<const char *>(config_path.data()), config_path.size());
             auto import = client.Post("/v1/provider/configuration/import", headers,
@@ -647,7 +650,7 @@ int run_local_view(int argc, char **argv) {
                                            {"primary_folder_id", group.primary_folder_id}, {"folders", std::move(folders)}});
                     }
                     output.status = 200;
-                    output.set_content(Json{{"can_add", true},
+                    output.set_content(Json{{"can_add", true}, {"can_rename", true},
                                             {"selected_workspace_id", workspace_id},
                                             {"workspaces", std::move(entries)}}.dump(),
                                        "application/json");
@@ -684,6 +687,23 @@ int run_local_view(int argc, char **argv) {
                     output.set_content(Json{{"cancelled", !chosen.has_value()},
                                             {"root", chosen ? Json(*chosen) : Json(nullptr)}}.dump(),
                                        "application/json");
+                    return;
+                }
+                if (request.path == "/v1/workspaces/rename" && request.method == "POST") {
+                    if (host || request.target != request.path || request.get_header_value_count("X-XMind-View-Origin") != 1 ||
+                        request.get_header_value("Content-Type") != "application/json" || request.body.size() > 4096) {
+                        response(output,400,"Invalid workspace rename request");return;
+                    }
+                    std::lock_guard switch_lock(browser_switch_mutex);
+                    const auto [current_id,current]=browser_workspace(supplied,browser_origin);
+                    if(!validate_browser_session(supplied,current,browser_origin)){response(output,401,"Browser view session expired or was revoked");return;}
+                    std::set<std::string> keys;
+                    const auto input=Json::parse(body,[&](int depth,Json::parse_event_t event,Json& value){require(depth<=2,"Invalid workspace rename");if(event==Json::parse_event_t::key)require(keys.insert(value.get<std::string>()).second,"Duplicate workspace rename field");return true;});
+                    require(input.is_object()&&input.size()==3&&input.contains("workspace_id")&&input.at("workspace_id").is_string()&&input.at("workspace_id")==current_id&&input.contains("name")&&input.at("name").is_string()&&input.contains("expected_name")&&input.at("expected_name").is_string(),"Rename the currently selected workspace");
+                    try{const auto group=workspace_registry->rename(current_id,input.at("name").get<std::string>(),input.at("expected_name").get<std::string>());output.status=200;output.set_content(Json{{"workspace_id",group.workspace_id},{"name",group.name},{"revision",group.revision}}.dump(),"application/json");}
+                    catch(const agentflow::WorkspaceNameConflict& error){response(output,409,error.what());}
+                    catch(const std::invalid_argument& error){response(output,400,error.what());}
+                    catch(const std::out_of_range& error){response(output,404,error.what());}
                     return;
                 }
                 if (request.path == "/v1/workspaces/add" && request.method == "POST") {
@@ -859,9 +879,9 @@ int run_local_view(int argc, char **argv) {
                             require(keys.insert(value.get<std::string>()).second, "Duplicate workspace creation field");
                         return true;
                     });
-                    require(selection.is_object() && selection.size() == 1 && selection.contains("root") &&
-                                selection.at("root").is_string(),
-                            "Workspace creation requires one absolute folder path");
+                    require(selection.is_object() && (selection.size() == 1 || (selection.size()==2 && selection.contains("name") && selection.at("name").is_string())) && selection.contains("root") && selection.at("root").is_string(),
+                            "Workspace creation requires an absolute folder path and optional name");
+                    const auto requested_name=selection.value("name",std::string{});
                     const auto requested_root = selection.at("root").get<std::string>();
                     const bool drive_path = requested_root.size() >= 3 &&
                                             ((requested_root[0] >= 'A' && requested_root[0] <= 'Z') ||
@@ -883,7 +903,8 @@ int run_local_view(int argc, char **argv) {
                     }
                     const auto requested_id = requested_workspace->identity();
                     const auto canonical_root = requested_workspace->root_path();
-                    const auto group = workspace_registry->create(canonical_root);
+                    const auto group = workspace_registry->create(canonical_root,requested_name);
+                    if(!requested_name.empty()&&group.name!=requested_name){response(output,409,"This folder already has a workspace; rename that workspace instead");return;}
                     require(group.workspace_id == requested_id && group.primary_folder_id == requested_id &&
                                 !group.folders.empty() && group.folders.front().root == canonical_root,
                             "Native workspace registry resolved a different primary folder");

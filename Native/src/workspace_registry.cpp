@@ -29,7 +29,7 @@ std::int64_t column_integer(const SqlValue& value){
     throw std::runtime_error("Workspace registry returned a non-integer column");
 }
 void validate_name(const std::string& name){
-    if(name.empty()||name.size()>1024||name.find('\0')!=std::string::npos||
+    if(name.empty()||name.find_first_not_of(' ')==std::string::npos||name.size()>1024||name.find('\0')!=std::string::npos||
        std::any_of(name.begin(),name.end(),[](unsigned char c){return c<0x20||c==0x7f;}))
         throw std::invalid_argument("Workspace name must be 1..1024 UTF-8 bytes without control characters");
     if(MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,name.data(),static_cast<int>(name.size()),nullptr,0)<=0)
@@ -165,6 +165,18 @@ WorkspaceGroupRecord WorkspaceRegistry::add_folder(const std::string& id,const s
         db.commit();
     }catch(...){try{db.rollback();}catch(...){}throw;}
     return read_group(db,id);
+}
+WorkspaceGroupRecord WorkspaceRegistry::rename(const std::string& id,const std::string& name,const std::string& expected_name)const{
+    validate_name(name);validate_name(expected_name);
+    XlangSqlite db(database_,xlang_import_roots_);schema(db);db.begin();
+    try{
+        const auto group=read_group(db,id);
+        if(group.name!=expected_name)throw WorkspaceNameConflict("Workspace name changed; refresh before renaming");
+        // Display names do not change membership or invalidate admitted work.
+        const auto changed=db.execute("UPDATE workspace_groups SET name=? WHERE workspace_id=? AND name=?",{name,id,expected_name});
+        if(changed.affected_rows!=1)throw WorkspaceNameConflict("Workspace name changed; refresh before renaming");
+        auto result=read_group(db,id);db.commit();return result;
+    }catch(...){try{db.rollback();}catch(...){}throw;}
 }
 std::vector<WorkspaceGroupRecord> WorkspaceRegistry::list()const{
     XlangSqlite db(database_,xlang_import_roots_);schema(db);
