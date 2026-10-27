@@ -50,6 +50,16 @@
 .conversation-layout .workspace-navigation[hidden]{display:none!important}
 .sidebar-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:6px}
 .sidebar-toggle[aria-expanded=true]{color:#bdd0ff;background:#28364d}
+.conversation-layout #workspace-config-dialog{width:min(480px,calc(100vw - 32px))}
+.conversation-layout .workspace-config-folders{margin-top:12px}
+.conversation-layout #workspace-config-folders-list{margin:0;padding:0;list-style:none}
+.conversation-layout #workspace-config-folders-list li{padding:10px 0}
+.conversation-layout #workspace-config-folders-list small{display:block;margin-top:5px;overflow-wrap:anywhere;color:var(--vscode-descriptionForeground)}
+.settings-advanced{margin-top:16px;padding-top:12px;border-top:1px solid var(--vscode-panel-border)}
+.settings-advanced>summary,.inspector-run>summary{cursor:pointer;color:var(--vscode-descriptionForeground);font-size:12px;padding:5px 0}
+.conversation-layout .redundant-setting-note,.conversation-layout #profile-use[disabled]{display:none!important}
+.conversation-layout #workspace-info:empty,.conversation-layout .workspace-folder-heading>small{display:none}
+.conversation-layout .agent-settings>summary{cursor:pointer;color:var(--vscode-descriptionForeground);font-size:12px;padding:8px 0}
 .conversation-layout .workspace-navigation{width:var(--workspace-pane-width,240px);min-width:140px;max-width:360px}
 .conversation-layout .context-inspector{width:var(--details-pane-width,360px);min-width:240px;max-width:640px}
 .pane-divider{width:5px;flex:none;cursor:col-resize;touch-action:none;background:#202732;position:relative;z-index:2;outline-offset:-1px}

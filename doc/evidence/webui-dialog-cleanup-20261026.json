@@ -1,0 +1,22 @@
+{
+  "scope": "Browser UI audit and clutter reduction",
+  "preview": "http://127.0.0.1:57780/ui/",
+  "browserTests": {"passed": 186, "failed": 0},
+  "verifiedThroughUi": [
+    "Workspace folders contains its folder list, Add folder and Close; no duplicate workspace selector or switching explanation",
+    "Add folder and Create workspace use a short folder-selection form; both were cancelled without modifications",
+    "Settings defaults to provider controls with Advanced collapsed; existing integrations remain reachable",
+    "Activity starts with Run details, command receipts and Agent settings collapsed",
+    "Sidebar SVG toggles and draggable pane dividers remain available"
+  ],
+  "otherChanges": [
+    "Removed repeated successful workspace-path paragraphs from Files; folder paths remain available as hover metadata and in folder management",
+    "Moved Git initialization and status actions into the existing collapsed Git section",
+    "Removed redundant success and idle status text while retaining error messages and approval controls",
+    "Retained and updated workspace identity assertions against DOM metadata after removing the visible explanatory paragraph"
+  ],
+  "modelCalls": 0,
+  "folderChangesSubmitted": false,
+  "previousOperationsReplayed": false,
+  "screenshots": ["webui-clean-workspace-folders-20261026.png", "webui-clean-settings-20261026.png"]
+}

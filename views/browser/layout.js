@@ -7,6 +7,20 @@
   const layout=document.querySelector('.browser-layout'),chat=byId('agent-sidebar'),files=document.querySelector('.runtime-pane');
   if(!layout||!chat||!files)return;
   document.body.classList.add('conversation-layout');
+  const folderDialog=byId('workspace-config-dialog'),folderTargets=make('div');folderTargets.hidden=true;
+  folderDialog.querySelector(':scope > p:not([id])')?.remove();
+  for(const element of [folderDialog.querySelector('label[for="workspace-picker"]'),byId('workspace-picker'),byId('workspace-switch-note'),byId('workspace-membership-note')])if(element)folderTargets.append(element);
+  folderDialog.append(folderTargets);byId('workspace-config-title').textContent='Workspace folders';folderDialog.querySelector('.workspace-config-folders h3')?.remove();
+  const settingsAdvanced=make('details',undefined,'settings-advanced');settingsAdvanced.append(make('summary','Advanced'));
+  for(const id of ['connection-settings','mcp-settings','settings-info'])if(byId(id))settingsAdvanced.append(byId(id));byId('provider-settings').append(settingsAdvanced);
+  byId('settings-info').textContent='API keys are stored securely on this computer.';
+  const providerLabel=document.querySelector('label[for="provider-name"]');if(providerLabel)providerLabel.textContent='Provider';
+  byId('provider-key-status').classList.add('redundant-setting-note');
+  const providerHint=byId('provider-form').querySelector(':scope > p.hint:last-child');if(providerHint)providerHint.hidden=true;
+  const gitDetails=document.querySelector('.workspace-git-details');
+  if(gitDetails){const actions=make('div',undefined,'workspace-actions');for(const id of ['workspace-vcs-status','workspace-vcs-init'])if(byId(id))actions.append(byId(id));gitDetails.querySelector('summary').after(actions);}
+  const status=byId('status'),compactStatus=()=>{status.hidden=['Ready','completed','queued','running','paused'].includes(status.textContent.trim());};
+  new MutationObserver(compactStatus).observe(status,{childList:true,subtree:true,characterData:true});compactStatus();
   const navigation=make('aside',undefined,'workspace-navigation');navigation.id='workspace-navigation';navigation.setAttribute('aria-label','Workspaces and conversations');
   const heading=make('header'),title=make('strong','Workspaces'),add=make('button','＋');add.type='button';add.setAttribute('aria-label','Add workspace');add.title='Create workspace from a folder';add.onclick=()=>byId('add-workspace').click();heading.append(title,add);navigation.append(heading);
   const list=make('nav');list.id='workspace-conversations';list.setAttribute('aria-label','Workspace conversations');navigation.append(list);
@@ -16,9 +30,9 @@
   const close=make('button','×');close.type='button';close.setAttribute('aria-label','Hide details');
   const panels=make('div',undefined,'inspector-panels'),activity=make('section');activity.id='inspector-activity';activity.setAttribute('role','tabpanel');activity.setAttribute('aria-labelledby','details-activity');
   files.id='inspector-files';files.setAttribute('role','tabpanel');files.setAttribute('aria-labelledby','details-files');
-  const selection=make('div',undefined,'inspector-run');for(const id of ['run-picker','run-context','context-view'])if(byId(id))selection.append(byId(id));activity.append(selection,byId('run-activity'));
+  const selection=make('details',undefined,'inspector-run');selection.append(make('summary','Run details'));for(const id of ['run-picker','run-context','context-view'])if(byId(id))selection.append(byId(id));activity.append(selection,byId('run-activity'));
   activity.prepend(document.querySelector('.conversation-tools'));
-  for(const id of ['skills-view','agent-picker','workflow-picker'])if(byId(id))activity.append(byId(id));
+  const agentSettings=make('details',undefined,'agent-settings');agentSettings.append(make('summary','Agent settings'));for(const id of ['skills-view','agent-picker','workflow-picker'])if(byId(id))agentSettings.append(byId(id));activity.append(agentSettings);
   panels.append(files,activity);inspector.append(controls,panels);layout.append(inspector);
   const toggle=make('button',undefined,'sidebar-toggle');toggle.append(sidebarIcon('right'));toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-label','Toggle right sidebar');toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Hide right sidebar';
   const leftToggle=make('button',undefined,'sidebar-toggle');leftToggle.append(sidebarIcon('left'));leftToggle.id='workspace-toggle';leftToggle.type='button';leftToggle.setAttribute('aria-label','Toggle left sidebar');leftToggle.setAttribute('aria-controls',navigation.id);leftToggle.setAttribute('aria-expanded','true');leftToggle.title='Hide left sidebar';
