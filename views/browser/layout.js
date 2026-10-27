@@ -3,6 +3,7 @@
 // ownership of workspace/session selection and folder management.
 (() => {
   const byId=id=>document.getElementById(id),make=(tag,text,cls)=>{const value=document.createElement(tag);if(text)value.textContent=text;if(cls)value.className=cls;return value;};
+  const folderIcon=(size=22)=>{const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS('http://www.w3.org/2000/svg','path');for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:String(size),height:String(size),fill:'none',stroke:'currentColor','stroke-width':'1.6','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(key,value);path.setAttribute('d','M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z M3 10h18');svg.append(path);return svg;};
   const sidebarIcon=side=>{const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'18',height:'18',fill:'none',stroke:'currentColor','stroke-width':'1.7','aria-hidden':'true'}))svg.setAttribute(key,value);const frame=document.createElementNS(ns,'rect');for(const [key,value] of Object.entries({x:'3',y:'4',width:'18',height:'16',rx:'2'}))frame.setAttribute(key,value);const divider=document.createElementNS(ns,'path');divider.setAttribute('d',side==='left'?'M9 4v16':'M15 4v16');svg.append(frame,divider);return svg;};
   const layout=document.querySelector('.browser-layout'),chat=byId('agent-sidebar'),files=document.querySelector('.runtime-pane');
   if(!layout||!chat||!files)return;
@@ -14,6 +15,12 @@
   const addFolder=byId('add-workspace-folder'),plus=document.createElementNS('http://www.w3.org/2000/svg','svg'),plusPath=document.createElementNS('http://www.w3.org/2000/svg','path');
   for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'18',height:'18',fill:'none',stroke:'currentColor','stroke-width':'1.8','stroke-linecap':'round','aria-hidden':'true'}))plus.setAttribute(key,value);
   plusPath.setAttribute('d','M12 5v14M5 12h14');plus.append(plusPath);addFolder.replaceChildren(plus);addFolder.setAttribute('aria-label','Add folder');addFolder.title='Add folder';byId('workspace-config-close').before(addFolder);
+  const folderList=byId('workspace-config-folders-list');
+  const renderFolderRows=()=>{for(const row of folderList.children){if(row.querySelector('.folder-item-icon'))continue;const name=row.querySelector('strong'),path=row.querySelector('small');if(!name||!path)continue;
+    const icon=make('span',undefined,'folder-item-icon');icon.append(folderIcon());
+    const info=make('div',undefined,'folder-item-info');row.title=path.textContent;info.append(name,path);row.append(icon,info);
+  }};
+  new MutationObserver(renderFolderRows).observe(folderList,{childList:true,subtree:true});renderFolderRows();
   const settingsAdvanced=make('details',undefined,'settings-advanced');settingsAdvanced.append(make('summary','Advanced'));
   for(const id of ['connection-settings','mcp-settings','settings-info'])if(byId(id))settingsAdvanced.append(byId(id));byId('provider-settings').append(settingsAdvanced);
   byId('settings-info').textContent='API keys are stored securely on this computer.';
@@ -73,15 +80,18 @@
   byId('approval-review').addEventListener('click',()=>choose('activity'));
   byId('failure-review').addEventListener('click',()=>choose('activity'));
   const originalSessions=byId('sessions');originalSessions.classList.add('navigation-source');
+  const collapsedWorkspaces=new Set();
   const refresh=()=>{
     const picker=byId('workspace-picker'),active=picker.value;list.replaceChildren();add.disabled=byId('add-workspace').disabled;
     for(const option of picker.options){
       const name=option.dataset.workspaceName||option.textContent;
-      const group=make('section',undefined,'workspace-group'),row=make('div',undefined,'workspace-row'),select=make('button',name),configure=make('button','⚙');
-      select.type='button';select.title=option.title||option.textContent;select.setAttribute('aria-expanded',String(option.value===active));select.classList.toggle('selected',option.value===active);
-      select.onclick=()=>{if(picker.value!==option.value){picker.value=option.value;picker.dispatchEvent(new Event('change',{bubbles:true}));}};
+      const group=make('section',undefined,'workspace-group'),row=make('div',undefined,'workspace-row'),select=make('button',undefined,'workspace-toggle'),configure=make('button','⚙');
+      const icon=folderIcon(18);icon.classList.add('workspace-folder-icon');const label=make('span',name,'workspace-name'),chevron=document.createElementNS('http://www.w3.org/2000/svg','svg'),arrow=document.createElementNS('http://www.w3.org/2000/svg','path');for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'12',height:'12',fill:'none',stroke:'currentColor','stroke-width':'1.8','aria-hidden':'true'}))chevron.setAttribute(key,value);arrow.setAttribute('d','m9 5 7 7-7 7');chevron.append(arrow);chevron.classList.add('workspace-chevron');select.append(icon,label,chevron);
+      const expanded=option.value===active&&!collapsedWorkspaces.has(option.value);
+      select.type='button';select.dataset.workspaceId=option.value;select.title=option.title||option.textContent;select.setAttribute('aria-expanded',String(expanded));select.classList.toggle('selected',option.value===active);
+      select.onclick=()=>{if(picker.value!==option.value){collapsedWorkspaces.delete(option.value);picker.value=option.value;picker.dispatchEvent(new Event('change',{bubbles:true}));}else{if(collapsedWorkspaces.has(option.value))collapsedWorkspaces.delete(option.value);else collapsedWorkspaces.add(option.value);refresh();[...list.querySelectorAll('.workspace-toggle')].find(button=>button.dataset.workspaceId===option.value)?.focus();}};
       configure.type='button';configure.setAttribute('aria-label','Configure '+option.textContent+' folders');configure.title='Manage workspace folders';configure.disabled=option.value!==active||byId('workspace-config-open').disabled;configure.onclick=()=>byId('workspace-config-open').click();row.append(select,configure);group.append(row);
-      if(option.value===active){
+      if(expanded){
         const sessions=make('div',undefined,'workspace-sessions');
         for(const session of originalSessions.options)if(session.dataset.sessionId){const button=make('button',session.textContent,'conversation-link');button.type='button';button.title=session.dataset.sessionTitle||session.textContent;button.classList.toggle('selected',session.value===originalSessions.value);if(session.value===originalSessions.value)button.setAttribute('aria-current','page');button.onclick=()=>{originalSessions.value=session.value;originalSessions.dispatchEvent(new Event('change',{bubbles:true}));};sessions.append(button);}
         const fresh=make('button','＋ New conversation','new-conversation');fresh.type='button';fresh.onclick=()=>byId('new').click();sessions.append(fresh);group.append(sessions);
