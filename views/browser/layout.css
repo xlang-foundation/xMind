@@ -81,7 +81,7 @@
 .folder-item-info{flex:1;min-width:0}
 .workspace-row .workspace-toggle{display:flex;align-items:center;gap:8px}
 .workspace-folder-icon{flex:none;color:#d5b574}
-.workspace-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .workspace-chevron{flex:none;color:#8593a8;transition:transform .15s}
 .workspace-toggle[aria-expanded=true] .workspace-chevron{transform:rotate(90deg)}
 .workspace-sessions{margin-left:40px;padding-left:0;border-left:0}
