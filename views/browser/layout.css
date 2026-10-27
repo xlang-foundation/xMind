@@ -15,7 +15,8 @@
 .workspace-sessions button{padding:8px 10px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:6px;min-width:0;max-width:100%;color:var(--vscode-descriptionForeground)}
 .workspace-sessions button.selected{background:#25344b;color:var(--vscode-foreground)}
 .workspace-sessions button:hover,.workspace-navigation button:hover{background:#222d3d}
-.workspace-sessions .new-conversation{color:#8eafff;font-size:11px}
+.workspace-row .workspace-new-session{display:inline-flex;align-items:center;justify-content:center;flex:none;width:26px;height:28px;padding:4px;border-radius:5px;color:#91a9ca}
+.workspace-row .workspace-new-session:hover{background:#29394f;color:#d3e3fa}
 .conversation-layout #agent-sidebar{width:auto;min-width:280px;max-width:none;flex:1;border:0;background:#10141a}
 .conversation-layout #agent-sidebar>main,.conversation-layout #agent-sidebar>footer{padding-left:clamp(20px,5vw,80px);padding-right:clamp(20px,5vw,80px)}
 .conversation-layout #agent-sidebar>main{scrollbar-gutter:stable}
@@ -83,7 +84,7 @@
 .workspace-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .workspace-chevron{flex:none;color:#8593a8;transition:transform .15s}
 .workspace-toggle[aria-expanded=true] .workspace-chevron{transform:rotate(90deg)}
-.workspace-sessions{margin-left:26px;padding-left:0;border-left:0}
+.workspace-sessions{margin-left:40px;padding-left:0;border-left:0}
 .conversation-layout #workspace-config-dialog #workspace-config-folders-list strong{display:block;margin:0 0 4px;padding:0;border:0;background:transparent;font-size:13px;font-weight:550;color:#e6edf7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conversation-layout #workspace-config-dialog #workspace-config-folders-list small{display:block;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:11px;line-height:17px;font-family:var(--vscode-font-family);color:#9aa9bc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .conversation-layout #workspace-config-dialog{max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-x:hidden;overflow-y:auto}
