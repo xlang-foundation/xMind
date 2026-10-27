@@ -46,6 +46,7 @@
 .conversation-layout .file-tree{width:100%;max-width:none;box-sizing:border-box}.conversation-layout #inspector-activity .skills-view,.conversation-layout #inspector-activity .agent-picker{margin-top:14px}
 /* One global toolbar; workspace navigation stays in the left pane. */
 .conversation-layout .browser-bar #workspace-control{display:none!important}
+.conversation-layout .browser-bar>strong{margin-right:auto}
 .conversation-layout .workspace-navigation{width:var(--workspace-pane-width,240px);min-width:140px;max-width:360px}
 .conversation-layout .context-inspector{width:var(--details-pane-width,360px);min-width:240px;max-width:640px}
 .pane-divider{width:5px;flex:none;cursor:col-resize;touch-action:none;background:#202732;position:relative;z-index:2;outline-offset:-1px}

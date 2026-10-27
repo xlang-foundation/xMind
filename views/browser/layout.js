@@ -21,7 +21,12 @@
   panels.append(files,activity);inspector.append(controls,panels);layout.append(inspector);
   const toggle=make('button','Details');toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Show or hide workspace files and activity';
   const toolbar=document.querySelector('.browser-bar');toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Global toolbar');
-  for(const id of ['refresh','settings','connect-view','disconnect-view'])if(byId(id))toolbar.append(byId(id));toolbar.append(toggle);
+  if(byId('settings'))toolbar.append(byId('settings'));toolbar.append(toggle);
+  toolbar.querySelector('.local-node')?.remove();
+  // Connection lifecycle is automatic. Retain controller targets offscreen so
+  // restoring a local session cannot reintroduce manual connection controls.
+  const connectionTargets=make('div');connectionTargets.hidden=true;
+  for(const id of ['connect-view','disconnect-view','refresh'])if(byId(id))connectionTargets.append(byId(id));toolbar.append(connectionTargets);
   // Workspace creation belongs to the sidebar +. The existing controller keeps
   // its command target, while workspace settings only manage existing folders.
   byId('add-workspace').hidden=true;document.querySelector('.conversation-header').hidden=true;
