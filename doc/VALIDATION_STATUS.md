@@ -1,3 +1,11 @@
+## Compact middle chat panel — 2026-10-26
+
+Response metrics are always visible as a quiet single row with no Response details label, disclosure or metric pills. The assistant Fork action shares that row; user Fork is a small inset icon revealed on hover/focus, without a separate row. Transcript margins, user padding, headings, paragraphs, lists, code/table spacing and activity rows are tighter. Exact message content and all reported metric values remain unchanged.
+
+Actual UI sample user messages shrink86.20→36.84px; assistant replies208.88→141.72px and142.59→94.03px. Response metadata is16px high and shares an18px footer with Fork; all sample metric values fit one row at the tested width. Keyboard access reveals the user Fork icon. A real UI fork before the second user message creates session110f91a1fa2cf499fb357f237830eb5b with exactly the preceding two messages, preserving original sessiona943bbb574854eb7b4eab4770ab2f939 and its content. Test copy archived through UI; original selected again. Copied token usage is historical, with no new agent model inference. Workspace switching still restores the original selection/content.
+
+All125 renderer and202 browser tests pass. Native code, native runtime owners and installed extension80 remain unchanged; shared renderer source and live webpage assets are updated. [Evidence and screenshot](evidence/webui-compact-chat-20261026.json).
+
 ## Workspace switch readiness — 2026-10-26
 
 The browser previously buffered restored chat and selection until complete run inspection, skills and other metadata reads. In actual UI clicks, the native select request took70–87ms but the sidebar stayed busy for1,228–1,257ms. Activation now publishes restored history, selected session/model and permission state before auxiliary reads. Independent capability/catalogue reads run concurrently; initialization reuses its session catalogue and avoids a duplicate skill read. Background inspection stays owned by its controller/generation; retiring it cannot overwrite the next workspace. Catalogue reads receive resolved AbortSignals so their existing timeout applies.

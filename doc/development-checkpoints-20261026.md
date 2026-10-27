@@ -17,3 +17,7 @@
 ## Workspace switch latency predecessor (verbatim)
 
 - Preview57780: workspace/session SVG toolbars overlay each row on hover/keyboard focus; session popup removed. Browser199 and actual UI pass; native APIs unchanged from6e225bce. Owner .agentflow/composer-layout-preview/live.json (runtime-session-menu); backend22920/installed80/original63573 retained. Preserve user names UI layout checks Project, English, Task1, Task 2 and conversation 1. NEVER replay completed roots in sessions845d0da11e974a7eb68c902c9a92045d or a943bbb574854eb7b4eab4770ab2f939. No agent inference; last agent-accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-inline-hover-toolbars-20261026.json.
+
+## Compact chat predecessor (verbatim)
+
+- Preview57780: inline hover/focus toolbars; workspace switch readiness ~0.4s vs1.25s (actual UI), browser202 pass. Chat/model/permissions restore before background details; stale reads retired. Native/owners unchanged: .agentflow/composer-layout-preview/live.json; backend22920/installed80/original63573 kept. Preserve user names and completed sessions845d0da11e974a7eb68c902c9a92045d/a943bbb574854eb7b4eab4770ab2f939: NEVER replay. No agent inference; accounted$1.520440/$100 excludes manual UI usage. Proof doc/evidence/webui-workspace-switch-latency-20261026.json.

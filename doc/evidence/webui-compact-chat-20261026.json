@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T04:58:09.718Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "change": "Response metrics are always visible in a small single row without a disclosure label or metric pills. Assistant Fork shares that row; user Fork is an inset hover/focus icon. Transcript margins, user bubbles, Markdown/list spacing and activity rows are tighter.",
+  "geometry": {
+    "before": [
+      {
+        "height": 86.1953125,
+        "role": "message user"
+      },
+      {
+        "height": 208.8828125,
+        "role": "message assistant"
+      },
+      {
+        "height": 86.1953125,
+        "role": "message user"
+      },
+      {
+        "height": 142.5859375,
+        "role": "message assistant"
+      }
+    ],
+    "after": [
+      {
+        "height": 36.84375,
+        "role": "message user forkable"
+      },
+      {
+        "height": 141.71875,
+        "role": "message assistant forkable"
+      },
+      {
+        "height": 36.84375,
+        "role": "message user forkable"
+      },
+      {
+        "height": 94.03125,
+        "role": "message assistant forkable"
+      }
+    ],
+    "footerHeights": [
+      18,
+      18
+    ],
+    "metrics": [
+      {
+        "height": 16,
+        "width": 481,
+        "scrollWidth": 481
+      },
+      {
+        "height": 16,
+        "width": 481,
+        "scrollWidth": 481
+      }
+    ]
+  },
+  "checks": {
+    "sameMessageContent": true,
+    "sameReportedMetrics": true,
+    "responseDetailsLabelRemoved": true,
+    "allSampleMetricsFitOneRow": true,
+    "keyboardUserForkVisible": true,
+    "workspaceAndSessionRestored": true,
+    "draftPreserved": true
+  },
+  "fork": {
+    "sourceSession": "a943bbb574854eb7b4eab4770ab2f939",
+    "testSession": "110f91a1fa2cf499fb357f237830eb5b",
+    "title": "Workspace naming checks (fork #1)",
+    "createdNewSession": true,
+    "beforeSecondUserMessage": true,
+    "sourceContentUnchanged": true,
+    "testCopyArchived": true,
+    "copiedUsageIsHistoricalNotNewInference": true
+  },
+  "validation": {
+    "renderer": {
+      "pass": 125,
+      "fail": 0,
+      "log": ".agentflow/compact-chat-qualified-renderer-tests.log"
+    },
+    "browser": {
+      "pass": 202,
+      "fail": 0,
+      "log": ".agentflow/compact-chat-qualified-browser-tests.log"
+    },
+    "nativeCodeChanged": false,
+    "nativeSuiteRerun": false,
+    "installedExtensionChanged": false
+  },
+  "agentSubmittedModelTurns": 0,
+  "messageBodySha256": "25b3ad6dfa8143d2c9bf07d8869dfbc842c8a495ddeb29217ff9041af8bf325a",
+  "screenshot": "webui-compact-chat-20261026.png",
+  "sourceSha256": {
+    "extensions/vscode/media/chat.js": "98cfcbfac77d1e59e6181d54540e0abdac1d4afa073a48a9bed30f85af0a5674",
+    "extensions/vscode/media/chat.css": "513a557a95be440ad63d6d7ef72de7c0cbe0bda7c451e4b8c9fe71a1d87e50a4",
+    "extensions/vscode/tests/renderer.test.js": "53ac07f721f82e478beeb077b43e3db2fb2edb7d56b7922343a452bbe49dab9b"
+  },
+  "liveAssetsMatchSource": true
+}

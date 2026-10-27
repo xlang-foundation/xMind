@@ -447,7 +447,7 @@ test('conversation rename keeps expected title and draft through conflicts, and 
 test('saved transcript exposes a bounded fork-before control only when the backend supports it',()=>{
  const r=renderer(),doc=r.dom.window.document;r.send({type:'sessions',sessions:[{id:'saved',title:'Saved'}],selected:'saved'});r.send({type:'capabilities',execution:false,forkSessions:true,models:[]});
  r.send({type:'history',history:[{id:'msg_7',seq:7,role:'assistant',data:{content:'Persisted answer'}},{role:'assistant',data:{content:'Unidentified message'}},{id:'bad-id',role:'user',data:{content:'Malformed identity'}}]});
- const buttons=[...doc.querySelectorAll('.message-fork')];assert.equal(buttons.length,1);assert.equal(buttons[0].textContent,'Fork before this message');buttons[0].click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'fork-session',id:'saved',before:'msg_7'});
+ const buttons=[...doc.querySelectorAll('.message-fork')];assert.equal(buttons.length,1);assert.equal(buttons[0].textContent,'Fork');assert.equal(buttons[0].getAttribute('aria-label'),'Fork before this message into a new session');assert.ok(buttons[0].querySelector('svg'));assert.equal(buttons[0].parentElement.className,'message-footer');buttons[0].click();assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'fork-session',id:'saved',before:'msg_7'});
  r.send({type:'runs',runs:[{id:'active',state:'running'}],selected:'active',busy:true});assert.equal(buttons[0].disabled,true);r.send({type:'fork-result',id:'saved',before:'msg_7',success:false,text:'Run active'});assert.equal(doc.getElementById('status').textContent,'Run active');
  r.send({type:'capabilities',execution:false,models:[]});assert.equal(buttons[0].disabled,true);r.dom.window.close();
 });
