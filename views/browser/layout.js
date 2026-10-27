@@ -10,7 +10,10 @@
   const folderDialog=byId('workspace-config-dialog'),folderTargets=make('div');folderTargets.hidden=true;
   folderDialog.querySelector(':scope > p:not([id])')?.remove();
   for(const element of [folderDialog.querySelector('label[for="workspace-picker"]'),byId('workspace-picker'),byId('workspace-switch-note'),byId('workspace-membership-note')])if(element)folderTargets.append(element);
-  folderDialog.append(folderTargets);byId('workspace-config-title').textContent='Workspace folders';folderDialog.querySelector('.workspace-config-folders h3')?.remove();
+  folderDialog.append(folderTargets);byId('workspace-config-title').textContent='Folders';folderDialog.querySelector('.workspace-config-folders h3')?.remove();
+  const addFolder=byId('add-workspace-folder'),plus=document.createElementNS('http://www.w3.org/2000/svg','svg'),plusPath=document.createElementNS('http://www.w3.org/2000/svg','path');
+  for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'18',height:'18',fill:'none',stroke:'currentColor','stroke-width':'1.8','stroke-linecap':'round','aria-hidden':'true'}))plus.setAttribute(key,value);
+  plusPath.setAttribute('d','M12 5v14M5 12h14');plus.append(plusPath);addFolder.replaceChildren(plus);addFolder.setAttribute('aria-label','Add folder');addFolder.title='Add folder';byId('workspace-config-close').before(addFolder);
   const settingsAdvanced=make('details',undefined,'settings-advanced');settingsAdvanced.append(make('summary','Advanced'));
   for(const id of ['connection-settings','mcp-settings','settings-info'])if(byId(id))settingsAdvanced.append(byId(id));byId('provider-settings').append(settingsAdvanced);
   byId('settings-info').textContent='API keys are stored securely on this computer.';

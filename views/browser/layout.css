@@ -50,11 +50,17 @@
 .conversation-layout .workspace-navigation[hidden]{display:none!important}
 .sidebar-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:6px}
 .sidebar-toggle[aria-expanded=true]{color:#bdd0ff;background:#28364d}
-.conversation-layout #workspace-config-dialog{width:min(480px,calc(100vw - 32px))}
+.conversation-layout #workspace-config-dialog{width:min(460px,calc(100vw - 32px));padding:16px;border-radius:12px}
 .conversation-layout .workspace-config-folders{margin-top:12px}
 .conversation-layout #workspace-config-folders-list{margin:0;padding:0;list-style:none}
-.conversation-layout #workspace-config-folders-list li{padding:10px 0}
-.conversation-layout #workspace-config-folders-list small{display:block;margin-top:5px;overflow-wrap:anywhere;color:var(--vscode-descriptionForeground)}
+.conversation-layout #workspace-config-folders-list li{padding:12px;border:1px solid var(--vscode-panel-border);border-radius:7px;background:var(--vscode-editor-background);margin:8px 0}
+.conversation-layout #workspace-config-folders-list strong{display:none}
+.conversation-layout #workspace-config-folders-list small{display:block;font-size:12px;line-height:1.6;overflow-wrap:anywhere;color:var(--vscode-foreground)}
+.conversation-layout #workspace-config-dialog .settings-heading{gap:8px}
+.conversation-layout #workspace-config-dialog .settings-heading h2{flex:1;font-size:14px}
+.conversation-layout #workspace-config-dialog #add-workspace-folder{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:5px;border:0;background:transparent;border-radius:5px}
+.conversation-layout #workspace-config-dialog #add-workspace-folder:hover{background:var(--vscode-toolbar-hoverBackground)}
+.conversation-layout #workspace-config-dialog .workspace-config-actions{display:none}
 .settings-advanced{margin-top:16px;padding-top:12px;border-top:1px solid var(--vscode-panel-border)}
 .settings-advanced>summary,.inspector-run>summary{cursor:pointer;color:var(--vscode-descriptionForeground);font-size:12px;padding:5px 0}
 .conversation-layout .redundant-setting-note,.conversation-layout #profile-use[disabled]{display:none!important}
@@ -67,3 +73,7 @@
 #add-workspace[hidden]{display:none!important}
 @media(max-width:850px){.conversation-layout .context-inspector{top:48px;max-width:90vw}#details-divider{display:none}.conversation-layout .workspace-navigation{width:var(--workspace-pane-width,190px)}}
 @media(max-width:580px){.conversation-layout .workspace-navigation{width:var(--workspace-pane-width,145px)}.conversation-layout .browser-bar .local-node{display:none}}
+.conversation-layout #workspace-config-dialog .workspace-config-folders{padding:0;border:0;background:transparent;box-shadow:none}
+.conversation-layout #workspace-config-dialog #workspace-config-folders-list{padding:0;border:0;background:transparent}
+.conversation-layout #workspace-config-dialog #workspace-config-folders-list li{margin:0;padding:10px 0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.conversation-layout #workspace-config-dialog #workspace-config-folders-list small{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;white-space:normal;overflow:visible;text-overflow:clip;font-size:13px;line-height:1.6}
