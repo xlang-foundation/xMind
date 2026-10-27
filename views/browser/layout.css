@@ -113,3 +113,37 @@
 .conversation-layout .header-context-separator{flex:none;color:#56657a}
 .conversation-layout .header-session svg{flex:none;width:13px;height:13px;opacity:.6}
 @media(max-width:650px){.conversation-layout .header-context{gap:3px;font-size:11px}.conversation-layout .header-context .header-workspace{max-width:95px}.conversation-layout .header-context .header-session{max-width:140px}}
+.session-row{display:flex;align-items:center;gap:2px;min-width:0;border-radius:5px}
+.workspace-sessions .session-row .conversation-link{flex:1;min-width:0;width:auto;margin:0}
+.session-row .session-actions{flex:none;width:25px;height:28px;padding:4px;border:0;background:transparent;color:#9aa9bd;opacity:0;border-radius:4px}
+.session-row:hover .session-actions,.session-row:focus-within .session-actions,.session-actions[aria-expanded="true"]{opacity:1}
+.session-row .session-actions:hover{background:#293547;color:#e8eff8}
+.session-menu{position:fixed;z-index:100;width:168px;padding:5px;border:1px solid #344154;border-radius:8px;background:#1b2431;box-shadow:0 10px 30px #0008}
+.session-menu[hidden]{display:none}
+.session-menu button{display:block;width:100%;text-align:left;padding:8px 11px;border:0;border-radius:4px;background:transparent;color:#d5deeb;font:inherit;font-size:12px}
+.session-menu button:hover:not(:disabled),.session-menu button:focus-visible{background:#2b3a4e}
+.session-menu button:disabled{opacity:.4}
+.session-menu button.danger{color:#f4a0a7;border-top:1px solid #344154;border-radius:0;margin-top:4px;padding-top:11px}
+.archived-sessions-toggle{flex:none;margin:12px 4px 0;padding:9px 10px;text-align:left;border:0;border-top:1px solid #293240;background:transparent;color:#94a3b8;font-size:12px}
+.archived-sessions-toggle[aria-pressed="true"]{color:#dfe8f6;background:#202c3b;border-radius:5px}
+.archived-sessions-toggle[hidden],.session-action-notice[hidden]{display:none}
+.session-action-notice,.empty-session-list{font-size:11px;line-height:1.5;color:#9eacc0;margin:8px 7px;overflow-wrap:anywhere}
+.session-action-dialog{width:420px;max-width:calc(100vw - 48px);padding:22px;border:1px solid #344154;border-radius:12px;background:#171f2a;color:#dce5f1;box-shadow:0 18px 70px #0009}
+.session-action-dialog::backdrop{background:#080c13a6}
+.session-action-dialog form{position:relative;display:flex;flex-direction:column;gap:12px}
+.session-action-dialog h2{font-size:16px;margin:0 30px 9px 0}
+.session-action-dialog label{font-size:12px;color:#aab8cb}
+.session-action-dialog input{box-sizing:border-box;width:100%;padding:10px;border:1px solid #344154;border-radius:6px;background:#111925;color:#e4edf8;font:inherit}
+.session-action-dialog p{font-size:12px;line-height:1.6;overflow-wrap:anywhere;margin:0}
+.session-action-dialog [hidden]{display:none}
+.session-action-dialog button{padding:8px 15px;border:1px solid #364459;border-radius:6px;background:#243247;color:#e1eaf6;font:inherit;font-size:12px}
+.session-action-dialog .session-action-close{position:absolute;right:0;top:-5px;padding:3px 8px;border:0;background:transparent;font-size:20px;color:#9babc1}
+.session-action-buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.session-action-buttons button[type="submit"]{background:#3159b9;border-color:#426acc}
+.session-action-buttons button.danger{background:#8c3441;border-color:#a94351}
+.session-action-error{color:#f2a1a9}
+@media(hover:none){.session-row .session-actions{opacity:1}}
+.workspace-toggle[aria-busy="true"] .workspace-folder-icon{animation:workspace-loading 1s ease-in-out infinite}
+.workspace-navigation[aria-busy="true"] button:disabled{cursor:wait;opacity:.65}
+@keyframes workspace-loading{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.workspace-toggle[aria-busy="true"] .workspace-folder-icon{animation:none}}

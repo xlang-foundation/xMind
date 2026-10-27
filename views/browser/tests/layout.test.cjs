@@ -2,6 +2,30 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {JSDOM}=require('../../../extensions/vscode/node_modules/jsdom');
 const {browserHtml}=require('../page.cjs');
+test('unchanged background control updates retain sidebar rows and an open hover menu',async()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only'}),doc=dom.window.document;
+ try{
+  const workspace=doc.createElement('option');workspace.value='workspace';workspace.textContent='Workspace';doc.getElementById('workspace-picker').append(workspace);const session=doc.createElement('option');session.value='saved';session.textContent='Saved';session.dataset.sessionId='saved';doc.getElementById('sessions').append(session);doc.getElementById('workspace-config-open').disabled=false;doc.getElementById('rename').hidden=false;
+  dom.window.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const row=doc.querySelector('.session-row');row.querySelector('.session-actions').click();assert.equal(doc.getElementById('session-item-menu').hidden,false);
+  doc.getElementById('rename').disabled=doc.getElementById('rename').disabled;doc.getElementById('workspace-config-open').disabled=false;await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.querySelector('.session-row'),row);assert.equal(doc.getElementById('session-item-menu').hidden,false,'Background acknowledgements must not dismiss a menu under the pointer');
+  doc.getElementById('workspace-control').dataset.switching='true';await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.getElementById('current-workspace').disabled,true);assert.equal(doc.querySelector('.conversation-link').disabled,true);assert.equal(doc.getElementById('workspace-navigation').getAttribute('aria-busy'),'true');
+  doc.getElementById('workspace-control').dataset.switching='false';await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.getElementById('current-workspace').disabled,false);assert.equal(doc.querySelector('.conversation-link').disabled,false);
+ }finally{dom.window.close();}
+});
+test('session hover menu targets inactive rows and offers persistent archive and restore intents',async()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/'}),win=dom.window,doc=win.document,calls=[];
+ win.HTMLDialogElement.prototype.showModal=function(){this.open=true;};win.HTMLDialogElement.prototype.close=function(){this.open=false;};win.xMindView={postMessage:message=>calls.push(JSON.parse(JSON.stringify(message)))};
+ try{
+  const workspace=doc.createElement('option');workspace.value='workspace';workspace.textContent='Workspace';doc.getElementById('workspace-picker').append(workspace);
+  const source=doc.getElementById('sessions');for(const [id,title]of [['current','Open chat'],['other','Other chat']]){const option=doc.createElement('option');option.value=id;option.textContent=title;option.dataset.sessionId=id;option.dataset.sessionTitle=title;source.append(option);}source.value='current';source.dataset.archiveAvailable='true';source.dataset.archivedSessionIds='[]';doc.getElementById('rename').hidden=false;doc.getElementById('workspace-config-open').disabled=false;
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));
+  const open=()=>doc.querySelector('[data-session-menu-id="other"]').click(),item=name=>[...doc.querySelectorAll('#session-item-menu button')].find(button=>button.textContent===name),reply=action=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data:{type:'sidebar-session-result',id:'other',action,success:true}}));
+  open();assert.deepEqual([...doc.querySelectorAll('#session-item-menu button')].map(button=>button.textContent),['Rename','Archive','Delete']);item('Rename').click();doc.getElementById('session-action-name').value='Renamed chat';doc.querySelector('#session-action-dialog form').dispatchEvent(new win.Event('submit',{cancelable:true}));assert.deepEqual(calls.at(-1),{type:'sidebar-session-action',id:'other',action:'rename',title:'Renamed chat',expected_title:'Other chat'});assert.equal(source.value,'current');reply('rename');
+  open();item('Archive').click();assert.equal(calls.at(-1).action,'archive');source.dataset.archivedSessionIds='["other"]';reply('archive');await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.querySelectorAll('.conversation-link').length,1);assert.equal(source.value,'current');
+  doc.querySelector('.archived-sessions-toggle').click();assert.equal(doc.querySelector('.conversation-link').textContent,'Other chat');open();assert.ok(item('Restore'));item('Restore').click();assert.equal(calls.at(-1).action,'restore');source.dataset.archivedSessionIds='[]';reply('restore');await new Promise(resolve=>setImmediate(resolve));doc.querySelector('.archived-sessions-toggle').click();
+  open();item('Delete').click();assert.equal(doc.getElementById('session-action-dialog').open,true);assert.equal(calls.at(-1).action,'restore','Delete must wait for confirmation');doc.querySelector('#session-action-dialog form').dispatchEvent(new win.Event('submit',{cancelable:true}));assert.equal(calls.at(-1).id,'other');assert.equal(calls.at(-1).action,'delete');assert.equal(source.value,'current');
+ }finally{win.close();}
+});
 test('header context follows native names and reuses workspace and session rename controls',async()=>{
  const dom=new JSDOM(browserHtml(),{runScripts:'outside-only'}),doc=dom.window.document;
  try{

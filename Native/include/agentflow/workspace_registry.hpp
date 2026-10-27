@@ -29,6 +29,8 @@ public:
     WorkspaceGroupRecord create(const std::string& primary_root,const std::string& name={}) const;
     WorkspaceGroupRecord add_folder(const std::string& workspace_id,const std::string& root) const;
     WorkspaceGroupRecord rename(const std::string& workspace_id,const std::string& name,const std::string& expected_name) const;
+    std::vector<std::string> archived_sessions(const std::string& workspace_id) const;
+    void set_session_archived(const std::string& workspace_id,const std::string& session_id,bool archived) const;
     std::vector<WorkspaceGroupRecord> list() const;
     WorkspaceGroupRecord get(const std::string& workspace_id) const;
 private:

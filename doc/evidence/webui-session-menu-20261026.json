@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T02:08:18.284Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "scope": "Development browser preview: session menu and navigation responsiveness. Real UI metadata actions; no agent-submitted inference turns.",
+  "workspaceName": "UI layout checks Project",
+  "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+  "testSessionId": "a943bbb574854eb7b4eab4770ab2f939",
+  "neverReplayCompletedRuns": true,
+  "checks": {
+    "inactiveRenameDidNotSelectTarget": true,
+    "inactiveRenamePreservedOpenHistory": true,
+    "archiveHidInactiveRow": true,
+    "archiveSurvivedReload": true,
+    "restoreWorked": true,
+    "deleteConfirmationShown": true,
+    "deleteCancelled": true,
+    "existingSessionsNotDeleted": true,
+    "namesRestoredAfterTest": true,
+    "testHistoryUnchanged": true,
+    "userWorkspaceNamesRetained": true,
+    "workspaceSwitchAndSettingsVerified": true
+  },
+  "historySha256": {
+    "openChatBefore": "b73ec0fe1010cc33a6da694425db019d102d5db6ef6512ddd945e41765222e06",
+    "openChatAfterMetadataActions": "b73ec0fe1010cc33a6da694425db019d102d5db6ef6512ddd945e41765222e06",
+    "testConversationBefore": "3bf208ce7c7ddcd19e342d3135577b440215f3c22ad7649835640e5200c25f1c",
+    "testConversationAfter": "3bf208ce7c7ddcd19e342d3135577b440215f3c22ad7649835640e5200c25f1c"
+  },
+  "responsiveness": {
+    "changes": [
+      "Reuse unchanged sidebar rows so background acknowledgements cannot replace a hovered or focused item.",
+      "Read history and runs concurrently; display history before provider controls finish.",
+      "Refresh saved provider model lists in the background and coalesce overlapping requests.",
+      "Avoid current-context refresh for presentation-only session actions.",
+      "Enable navigation after controller activation instead of waiting for the file explorer; show workspace switching state."
+    ],
+    "observedUiMs": {
+      "inactiveRename": 411,
+      "sessionHistoryVisible": 358,
+      "warmWorkspaceSwitchEnglish": 1461,
+      "warmWorkspaceSwitchLayout": 1536
+    },
+    "measurementScope": "Observed end-to-end UI checks include automation overhead. Warm workspace attachments; these are not controlled before/after benchmarks or pure hover latency measurements."
+  },
+  "deleteTestScope": "Existing real histories: confirmation and Cancel only. Actual deletion was exercised on a disposable native HTTP contract session.",
+  "agentSubmittedModelTurns": 0,
+  "lastAgentProjectTestConservativeUsd": 1.52044,
+  "accountingScope": "No new agent inference in this change. User-submitted manual UI turns during development are not included in this earlier agent accounting.",
+  "screenshots": [
+    "webui-session-menu-20261026.png",
+    "webui-session-menu-archived-20261026.png",
+    "webui-session-delete-confirmation-20261026.png"
+  ],
+  "validation": {
+    "browser": {
+      "passed": 199,
+      "failed": 0,
+      "log": ".agentflow/session-menu-final-qualified-browser.log"
+    },
+    "nativeFocused": [
+      {
+        "name": "native_workspace_registry_contract",
+        "passed": true,
+        "seconds": 0.68,
+        "log": ".agentflow/session-menu-native-tests.log"
+      },
+      {
+        "name": "native_local_view_contract",
+        "passed": true,
+        "seconds": 142.2,
+        "log": ".agentflow/session-menu-native-http-qualified.log"
+      }
+    ],
+    "nativeFullSuiteRerun": false,
+    "installedReleaseChanged": false,
+    "existingManagedBackendReused": true
+  },
+  "developmentFailures": [
+    {
+      "log": ".agentflow/session-menu-native-tests.log",
+      "reason": "The new archive route was missing from the browser adapter allowlist. Native registry passed; HTTP failed 404. Fixed before fresh qualification."
+    },
+    {
+      "log": ".agentflow/session-menu-native-http-final.log",
+      "reason": "Native forwarding duplicated the View authorization prefix. HTTP failed 400. Fixed before fresh qualification."
+    }
+  ],
+  "runtime": {
+    "nativeSha256": "9be260eb020c8b52b3c1a6c82d3cbe575cbb9a460a58912e706bf3bfbac5567d",
+    "manifestSha256": "b1a4e804c9964e568bdaa4ada9cb627d88276a963be09955a8e79ed7e7654f26",
+    "scope": "Updated development native view and browser assets; existing managed backend and installed 0.1.80 retained."
+  },
+  "priorEvidence": "webui-workspace-session-names-20261026.json",
+  "sourceSha256": {
+    "Native/apps/local_view_main.cpp": "51c5d6aeb33f2adc484cd3ebaca5b308e86a3181ec799c1ec92d1ab597f4098d",
+    "Native/include/agentflow/workspace_registry.hpp": "57dfbfc3d04e653ad591fe2aebb98c0dd7437fb594f426d764d6fb978fc563e5",
+    "Native/src/workspace_registry.cpp": "34f24e07dd27a7aa98720be9e0d32598a9deef7b05114923c6bedd5b0def59b5",
+    "Native/tests/local_view_contract.mjs": "9f9ae4f808ed87f04df23f40372e5932067087c965ce5c8e27097a361c53886c",
+    "Native/tests/workspace_registry_contract.cpp": "2deb25f4d2cb34bc84ad53d28ee0db93118f3ecf8a0aec7cf53f39bdae672add",
+    "views/browser/browser.js": "e85fe4eaabc58687e2de243669daa9756d6769aed97d264cb953dae0dd900bf4",
+    "views/browser/server.mjs": "f0fc00067462929440c23b71056af43c50a282aca9608587c9535745f78a8bf1",
+    "views/browser/layout.js": "bda643e202986f7e636724cac3a398a23ffefedbe071161f6a18bfd7803f2a66",
+    "views/browser/layout.css": "e7e89df97ae07f7560a2471e2e15ca5e5443b9737a888676a6995737fb88a6d9",
+    "views/browser/tests/controller.test.cjs": "8ccce8133413fdf6a2bfa566bc04dd7421d8069aafaf495ed0f6fb6621fa3e2f",
+    "views/browser/tests/layout.test.cjs": "217a585d8e50d0ccd969d562fa9138749eb7555d65002cbaf410901adc05255d",
+    "views/browser/tests/server.test.cjs": "77473b4040948b07976dfaa60f1b0dcbf6d163b19fb1c65f7f805046ac6bc79b"
+  }
+}

@@ -107,6 +107,11 @@ int main(int argc,char** argv){
             bool stale=false;try{named.rename(initial.workspace_id,"Stale overwrite","Design studio");}catch(const agentflow::WorkspaceNameConflict&){stale=true;}require(stale,"Stale names cannot overwrite a concurrent rename");
             for(const auto& bad:{std::string{},std::string("   "),std::string("bad\nname"),std::string(1025,'x')}){bool refused=false;try{named.rename(initial.workspace_id,bad,"Client projects");}catch(const std::invalid_argument&){refused=true;}require(refused,"Invalid workspace names must be rejected");}
             WorkspaceRegistry restored(names.database,roots,utf8(names.storage));require(restored.create(utf8(names.first)).name=="Client projects","A saved workspace name must survive reopening without default-folder overwrite");
+            named.set_session_archived(initial.workspace_id,"session-a",true);named.set_session_archived(initial.workspace_id,"session-a",true);
+            require(restored.archived_sessions(initial.workspace_id)==std::vector<std::string>{"session-a"},"Archived session visibility must persist without duplicates");
+            const auto other=named.create(utf8(names.second));require(named.archived_sessions(other.workspace_id).empty(),"Archives must remain scoped to their workspace");
+            restored.set_session_archived(initial.workspace_id,"session-a",false);require(named.archived_sessions(initial.workspace_id).empty(),"Restore must remove archived visibility metadata");
+            require(named.get(initial.workspace_id).revision==initial.revision,"Archive presentation must not change folder membership revision");
             require(restored.add_folder(initial.workspace_id,utf8(names.second)).name=="Client projects","Attaching a folder must retain the chosen workspace name");
         }
         std::cout<<"Native xlang3 workspace registry contracts passed\n";return 0;

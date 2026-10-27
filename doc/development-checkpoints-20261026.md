@@ -5,3 +5,7 @@
 ## Preview naming checkpoint predecessor (verbatim)
 
 - UI layout preview57780: conversation Full access is native, persistent and revisioned; actual create_file succeeded as full-access:1. Shared chat groups verbose activity, progress pulses, user bubbles right/no YOU; browser workspace/session navigation left and hideable Files/Activity right. Tests Native focused2 (not full), extension521, browser186. Preview .agentflow/composer-layout-preview/live.json; original63573/installed80 retained. NEVER replay session845d0da11e974a7eb68c902c9a92045d rootsa7a51d81e36b45868b9bab2bf9ce601d/50bbe9632ee34b20a094be2a32c1e92d. Total conservative$1.499198/$100. See doc/evidence/webui-conversation-layout-20261026.json.
+
+## Sidebar session menu predecessor (verbatim)
+
+- Preview57780: native workspace names, compact workspace/session header, first-prompt titles and manual rename persist; Native focused3/browser192 pass. Owner .agentflow/composer-layout-preview/live.json; runtime-naming. Original63573/installed80/providers/backend22920 retained. NEVER replay session845d0da11e974a7eb68c902c9a92045d rootsa7a51d81e36b45868b9bab2bf9ce601d/50bbe9632ee34b20a094be2a32c1e92d, or any of the2 completed roots in naming sessiona943bbb574854eb7b4eab4770ab2f939. Conservative$1.520440/$100. Proof doc/evidence/webui-workspace-session-names-20261026.json.

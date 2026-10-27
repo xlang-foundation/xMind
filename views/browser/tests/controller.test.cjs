@@ -2,6 +2,29 @@ const {test}=require('node:test'),assert=require('node:assert/strict');const {Br
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
 // Synthetic domain replies around the actual browser controller and shared
 // subscription. These tests do not supply native/provider execution.
+test('session switching reads history and runs concurrently and displays history before provider metadata',async()=>{
+ let releaseHistory,releaseProfile,releaseDiscovery,runsStarted=false;const discovery=new Promise(resolve=>{releaseDiscovery=resolve;}),history=new Promise(resolve=>{releaseHistory=resolve;}),profile=new Promise(resolve=>{releaseProfile=resolve;}),posted=[];
+ const view=new BrowserController({runs:async()=>{runsStarted=true;return [];},sessions:async()=>[{id:'fast',title:'Fast'}],sessionInbox:async()=>({items:[]})},message=>posted.push(message));view.health={provider_profile_admission:true};view.historyPager.select=async()=>history;view.profileController={state:{revision:1,active:'saved',profiles:[]},invalidate(){},dispose(){},refresh:async()=>profile,models:()=>false};view.discover=async()=>discovery;
+ try{const selecting=view.select('fast');assert.equal(runsStarted,true,'Run lookup must not wait for the history page');releaseHistory({messages:[{role:'user',json:'{}'}]});await new Promise(resolve=>setImmediate(resolve));assert.ok(posted.some(message=>message.type==='history'&&message.messages.length===1),'Chat content must not wait for provider controls');releaseProfile();let complete=false;selecting.then(()=>{complete=true;});await new Promise(resolve=>setImmediate(resolve));assert.equal(complete,true,'Provider network discovery must not block navigation');releaseDiscovery();await selecting;assert.equal(view.session,'fast');}finally{releaseDiscovery();view.dispose();}
+});
+test('overlapping saved model background refreshes share one provider request',async()=>{
+ let release,started=0;const pending=new Promise(resolve=>{release=resolve;}),view=new BrowserController({},()=>{});view.discover=async()=>{started++;await pending;};
+ try{view.discoverSavedModels();view.discoverSavedModels();assert.equal(started,1);assert.ok(view.savedModelDiscovery);release();await view.savedModelDiscovery.promise;assert.equal(view.savedModelDiscovery,undefined);}finally{view.dispose();}
+});
+test('sidebar renames an inactive session without selecting it or disturbing the current run',async()=>{
+ const posted=[],calls=[],sessions=[{id:'current',title:'Current'},{id:'other',title:'Other'}];
+ const view=new BrowserController({sessions:async()=>sessions,renameSession:async(...args)=>{calls.push(args);sessions[1].title=args[1];}},message=>posted.push(message));view.health={session_rename:true};view.session='current';view.runId='current-run';
+ try{await view.handle({type:'sidebar-session-action',action:'rename',id:'other',title:'Changed',expected_title:'Other'});assert.deepEqual(calls,[['other','Changed','Other']]);assert.equal(view.session,'current');assert.equal(view.runId,'current-run');assert.ok(posted.some(item=>item.type==='sidebar-session-result'&&item.success));}finally{view.dispose();}
+});
+test('sidebar archive and restore use native metadata and preserve the current conversation',async()=>{
+ let archived=false;const posted=[],client={sessions:async()=>[{id:'current',title:'Current'},{id:'other',title:'Other'}],request:async(path,body)=>{assert.equal(path,'/v1/session-archives');if(body){archived=body.archived;return body;}return {workspace_id:'workspace',session_ids:archived?['other']:[]};}};
+ const view=new BrowserController(client,message=>posted.push(message));view.health={session_archiving:true};view.session='current';view.runId='current-run';
+ try{for(const action of ['archive','restore']){await view.handle({type:'sidebar-session-action',action,id:'other'});assert.equal(archived,action==='archive');assert.equal(view.session,'current');assert.equal(view.runId,'current-run');const catalogue=posted.filter(item=>item.type==='sessions').at(-1);assert.equal(catalogue.sessions.find(item=>item.id==='other').archived,archived);assert.equal(catalogue.archive_capability,true);}}finally{view.dispose();}
+});
+test('sidebar deletion respects native refusal without changing the selected session',async()=>{
+ const posted=[],view=new BrowserController({sessions:async()=>[{id:'current',title:'Current'},{id:'other',title:'Other'}],deleteSession:async()=>{throw Object.assign(new Error('Session is active'),{status:409});}},message=>posted.push(message));view.health={};view.session='current';
+ try{await view.handle({type:'sidebar-session-action',action:'delete',id:'other'});assert.equal(view.session,'current');assert.equal(posted.at(-1).success,false);assert.equal(posted.at(-1).text,'Session is active');}finally{view.dispose();}
+});
 test('first browser prompt names an empty default session once through native title CAS',async()=>{
  const calls=[],saved={id:'named-session',title:'Browser conversation'};
  const client={sessions:async()=>[{...saved}],historyPage:async(id,count)=>{assert.equal(id,saved.id);assert.equal(count,1);calls.push('history');return {messages:[],has_more:false};},renameSession:async(id,title,expected)=>{assert.equal(id,saved.id);assert.equal(expected,'Browser conversation');calls.push('rename');saved.title=title;},run:async()=>{calls.push('run');return {id:'named-run',session_id:saved.id,state:'queued',parent_id:'',graph_root:false};}};

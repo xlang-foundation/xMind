@@ -689,6 +689,25 @@ int run_local_view(int argc, char **argv) {
                                        "application/json");
                     return;
                 }
+                if(request.path=="/v1/session-archives"&&(request.method=="GET"||request.method=="POST")){
+                    if(host||request.target!=request.path||request.get_header_value_count("X-XMind-View-Origin")!=1){response(output,400,"Invalid session archive request");return;}
+                    std::lock_guard switch_lock(browser_switch_mutex);const auto [current_id,current]=browser_workspace(supplied,browser_origin);
+                    if(!validate_browser_session(supplied,current,browser_origin)){response(output,401,"Browser view session expired or was revoked");return;}
+                    if(request.method=="GET"){output.status=200;output.set_content(Json{{"workspace_id",current_id},{"session_ids",workspace_registry->archived_sessions(current_id)}}.dump(),"application/json");return;}
+                    require(request.get_header_value("Content-Type")=="application/json"&&request.body.size()<=1024,"Invalid session archive request");std::set<std::string> keys;
+                    const auto input=Json::parse(body,[&](int depth,Json::parse_event_t event,Json& value){require(depth<=2,"Invalid session archive request");if(event==Json::parse_event_t::key)require(keys.insert(value.get<std::string>()).second,"Duplicate session archive field");return true;});
+                    require(input.is_object()&&input.size()==3&&input.contains("workspace_id")&&input["workspace_id"].is_string()&&input.contains("session_id")&&input["session_id"].is_string()&&input.contains("archived")&&input["archived"].is_boolean(),"Choose a session and archive state");
+                    if(input["workspace_id"]!=current_id){response(output,409,"Workspace changed; refresh sessions before archiving");return;}
+                    const auto id=input["session_id"].get<std::string>();require(!id.empty()&&id.size()<=128&&id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")==std::string::npos,"Invalid session identity");
+                    if(input["archived"].get<bool>()){
+                        httplib::Client peer("127.0.0.1",current->port);configure(peer);const httplib::Headers headers{{"Authorization",supplied},{"X-XMind-View-Origin",browser_origin}};
+                        const auto sessions=peer.Get("/v1/sessions",headers);require(sessions&&sessions->status==200,"Session catalogue unavailable");const auto records=Json::parse(sessions->body);require(records.is_array(),"Invalid session catalogue");
+                        if(std::none_of(records.begin(),records.end(),[&](const Json& item){return item.value("id",std::string{})==id;})){response(output,404,"Session not found");return;}
+                        const auto runs=peer.Get("/v1/sessions/"+id+"/runs",headers);require(runs&&runs->status==200,"Session activity unavailable");const auto activity=Json::parse(runs->body);require(activity.is_array(),"Invalid session activity");
+                        if(std::any_of(activity.begin(),activity.end(),[](const Json& run){const auto state=run.value("state",std::string{});return state=="queued"||state=="running"||state=="paused";})){response(output,409,"Wait for this session to finish before archiving it");return;}
+                    }
+                    workspace_registry->set_session_archived(current_id,id,input["archived"].get<bool>());output.status=200;output.set_content(input.dump(),"application/json");return;
+                }
                 if (request.path == "/v1/workspaces/rename" && request.method == "POST") {
                     if (host || request.target != request.path || request.get_header_value_count("X-XMind-View-Origin") != 1 ||
                         request.get_header_value("Content-Type") != "application/json" || request.body.size() > 4096) {
@@ -1096,6 +1115,7 @@ int run_local_view(int argc, char **argv) {
                         browser_sessions.erase(supplied.substr(5));
                     }
                     output.status = result->status;
+                    if(!host&&request.path=="/v1/health"&&result->status==200){auto metadata=Json::parse(result->body);metadata["session_archiving"]=true;output.set_content(metadata.dump(),"application/json");return;}
                     output.set_content(result->body, result->get_header_value("Content-Type"));
                 }
             } catch (const std::invalid_argument &) {

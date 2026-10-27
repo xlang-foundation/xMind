@@ -92,6 +92,7 @@ void schema(XlangSqlite& db){
         "PRIMARY KEY(workspace_id,folder_id),UNIQUE(workspace_id,identity),UNIQUE(workspace_id,ordinal),"
         "FOREIGN KEY(workspace_id) REFERENCES workspace_groups(workspace_id) ON DELETE CASCADE)");
     db.execute("CREATE INDEX IF NOT EXISTS workspace_folders_identity ON workspace_folders(identity)");
+    db.execute("CREATE TABLE IF NOT EXISTS workspace_session_archives(workspace_id TEXT NOT NULL,session_id TEXT NOT NULL,PRIMARY KEY(workspace_id,session_id),FOREIGN KEY(workspace_id) REFERENCES workspace_groups(workspace_id) ON DELETE CASCADE)");
 }
 WorkspaceGroupRecord read_group(XlangSqlite& db,const std::string& id){
     const auto group=db.execute("SELECT workspace_id,name,revision,primary_folder_id FROM workspace_groups WHERE workspace_id=?",{id}).rows;
@@ -185,6 +186,17 @@ std::vector<WorkspaceGroupRecord> WorkspaceRegistry::list()const{
     std::vector<WorkspaceGroupRecord> result;result.reserve(rows.size());
     for(const auto& row:rows){if(row.size()!=1)throw std::runtime_error("Workspace registry index row is invalid");result.push_back(read_group(db,column_text(row.front())));}
     return result;
+}
+std::vector<std::string> WorkspaceRegistry::archived_sessions(const std::string& id)const{
+    XlangSqlite db(database_,xlang_import_roots_);schema(db);read_group(db,id);std::vector<std::string> result;
+    for(const auto& row:db.execute("SELECT session_id FROM workspace_session_archives WHERE workspace_id=? ORDER BY session_id",{id}).rows)result.push_back(column_text(row[0]));return result;
+}
+void WorkspaceRegistry::set_session_archived(const std::string& id,const std::string& session,bool archived)const{
+    if(session.empty()||session.size()>128||session.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")!=std::string::npos)throw std::invalid_argument("Invalid session identity");
+    XlangSqlite db(database_,xlang_import_roots_);schema(db);db.begin();try{read_group(db,id);
+        if(archived){const auto count=db.execute("SELECT count(*) FROM workspace_session_archives WHERE workspace_id=? AND session_id<>?",{id,session}).rows;if(column_integer(count[0][0])>=4096)throw std::invalid_argument("Archived session limit reached");db.execute("INSERT OR IGNORE INTO workspace_session_archives(workspace_id,session_id) VALUES(?,?)",{id,session});}
+        else db.execute("DELETE FROM workspace_session_archives WHERE workspace_id=? AND session_id=?",{id,session});db.commit();
+    }catch(...){try{db.rollback();}catch(...){}throw;}
 }
 WorkspaceGroupRecord WorkspaceRegistry::get(const std::string& id)const{
     XlangSqlite db(database_,xlang_import_roots_);schema(db);db.begin();
