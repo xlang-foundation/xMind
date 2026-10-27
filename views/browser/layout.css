@@ -175,3 +175,11 @@ body select option:disabled{color:#9ea9ba}
 .composer-picker-option:disabled{opacity:.5}
 
 .composer-picker-trigger.full-access{color:var(--vscode-textLink-foreground,#8eafff)}
+
+.attachment-picker{width:min(480px,calc(100vw - 32px));max-width:480px;padding:16px;border:1px solid #3b4657;background:#171e28;color:#e2e6ed}
+.attachment-picker h2{margin:0;font-size:15px}.attachment-picker>p{margin:5px 0 12px;font-size:11px;color:#9ea9ba}
+.attachment-picker-tree.file-tree{width:100%;max-height:min(50vh,400px);min-height:100px;overflow:auto;border:1px solid #303947;border-radius:6px;padding:8px}
+.attachment-picker-tree .workspace-file-row{display:flex;align-items:center}.attachment-picker-tree .workspace-file-row>button:first-child{flex:1;min-width:0}
+.attachment-picker-tree .workspace-file-attach{flex:none;width:20px;height:20px;margin-right:5px;padding:0;border:1px solid #61718a;font-size:0;border-radius:4px}
+.attachment-picker-tree .workspace-file-attach[aria-pressed="true"]{background:#345fc4;border-color:#7599e8}.attachment-picker-tree .workspace-file-attach[aria-pressed="true"]::before{content:'✓';font-size:13px;margin:auto;color:white}
+.attachment-picker-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}.attachment-picker-actions button{padding:5px 12px;font-size:12px}

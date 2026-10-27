@@ -1,3 +1,7 @@
+## Composer attachment popup — 2026-10-27
+
+The + control now opens an actual workspace-file selection modal. It reuses the existing live tree and Native directory/attachment contracts; clicking filenames selects files, Attach adds composer chips, Cancel/Escape rolls back to the prior draft, and the tree returns to the sidebar when closed. Workspace reset closes the picker safely. Actual UI confirms popup visibility, filename selection, Cancel rollback, Attach chip, removal, and unchanged workspace/session. The test file was removed and the popup is left open for the user. All206 browser checks pass. No Native runtime changes, file edits or model inference. [Evidence and screenshot](evidence/webui-attach-popup-20261027.json).
+
 ## Compact composer and model defaults — 2026-10-27
 
 The attachment button is now an SVG + with its original accessible name and attach behavior. Provider/model/permission controls size to their selected text rather than expanding; dark menus are bounded at200/260/180px and to the composer/viewport, with long labels ellipsized and full titles available. The view menus forward the existing select/change contracts, preserve disabled/selected state, support keyboard navigation/Escape/outside dismissal, and re-anchor when asynchronous catalogues arrive.
