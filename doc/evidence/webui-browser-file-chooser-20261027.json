@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "recordedUtc": "2026-10-27T07:37:49.933Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "standardBrowserFileChooserEventConfirmed": true,
+  "multipleFiles": true,
+  "workspacePickerRemoved": true,
+  "selectedFixture": "D:/CantorAI2026/xMind/.agentflow/browser-chooser-check.txt",
+  "fixtureOutsideConfiguredWorkspace": true,
+  "backendUploadImplemented": false,
+  "backendStatusExplicit": true,
+  "noFileUploaded": true,
+  "noAgentModelTurn": true,
+  "browserTests": {
+    "passed": 206,
+    "failed": 0,
+    "log": ".agentflow/browser-file-input-qualified.log"
+  },
+  "screenshot": "webui-browser-file-chooser-20261027.png"
+}

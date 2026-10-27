@@ -1,3 +1,9 @@
+## Browser file chooser correction / upload gap — 2026-10-27
+
+User clarified that + means the browser system file window, independent of workspace folders. The prior workspace attachment dialog and its styling were removed. + now invokes a hidden multiple-file input. Actual UI confirms the browser filechooser event and a selected controlled file outside the configured workspace.
+
+IMPORTANT: xMind currently has no browser-upload endpoint or session upload store. PromptFileAttachment is a workspace path/folder reference captured by Native. Browser-selected files are therefore explicitly rejected as unsupported instead of being represented as uploaded or sent. End-to-end arbitrary local-file attachments remain unfinished pending Native upload/storage/provider-input support.206 browser tests pass; no Native/model calls or data uploads from the test. [Chooser proof](evidence/webui-browser-file-chooser-20261027.json).
+
 ## Composer attachment popup — 2026-10-27
 
 The + control now opens an actual workspace-file selection modal. It reuses the existing live tree and Native directory/attachment contracts; clicking filenames selects files, Attach adds composer chips, Cancel/Escape rolls back to the prior draft, and the tree returns to the sidebar when closed. Workspace reset closes the picker safely. Actual UI confirms popup visibility, filename selection, Cancel rollback, Attach chip, removal, and unchanged workspace/session. The test file was removed and the popup is left open for the user. All206 browser checks pass. No Native runtime changes, file edits or model inference. [Evidence and screenshot](evidence/webui-attach-popup-20261027.json).

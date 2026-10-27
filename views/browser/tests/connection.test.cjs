@@ -17,14 +17,9 @@ async function fixture(options={}){
  try{await until(()=>options.connectionError?window.document.getElementById('connection-error').textContent:posted.some(m=>m.type==='history'));}catch(error){window.dispatchEvent(new window.Event('pagehide'));window.close();throw new Error(`${error.message}; requests=${requests.join(',')}; messages=${JSON.stringify(posted)}`);}return {dom,window,dialog,divider,posted,requests,finderRequests,vcsRequests,vcsInitBodies,sessionAuthorizations,gitConfirmations,element:id=>window.document.getElementById(id),close:()=>{window.dispatchEvent(new window.Event('pagehide'));window.close();}};
 }
 async function until(predicate){for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setImmediate(resolve));}throw new Error('Browser connection fixture deadline');}
-test('composer + opens a file dialog, selecting filenames attaches them and Cancel restores the draft',async()=>{
- const f=await fixture(),dialog=f.element('workspace-attachment-dialog'),tree=f.element('workspace-files');dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new f.window.Event('close'));};
- try{
-  await until(()=>tree.querySelector('button[title="README.md"]'));const home=tree.parentElement;
-  f.window.xMindView.postMessage({type:'attach-files'});assert.equal(dialog.open,true);assert.ok(dialog.contains(tree));tree.querySelector('button[title="README.md"]').click();assert.equal(tree.querySelector('[aria-label="Attach README.md"]').getAttribute('aria-pressed'),'true');
-  [...dialog.querySelectorAll('button')].find(button=>button.textContent==='Cancel').click();assert.equal(dialog.open,false);assert.equal(tree.parentElement,home);assert.equal(f.posted.findLast(message=>message.type==='prompt-files').files.length,0);
-  f.window.xMindView.postMessage({type:'attach-files'});tree.querySelector('button[title="README.md"]').click();[...dialog.querySelectorAll('button')].find(button=>button.textContent==='Attach (1)').click();assert.equal(dialog.open,false);assert.equal(tree.parentElement,home);assert.equal(f.posted.findLast(message=>message.type==='prompt-files').files[0].path,'README.md');
- }finally{f.close();}
+test('composer + opens the browser file input without opening a workspace picker or pretending upload support',async()=>{
+ const f=await fixture(),input=f.element('browser-attachment-files');let opened=0;input.click=()=>{opened++;};
+ try{f.window.xMindView.postMessage({type:'attach-files'});assert.equal(opened,1);assert.equal(input.type,'file');assert.equal(input.multiple,true);assert.equal(f.element('workspace-attachment-dialog'),null);Object.defineProperty(input,'files',{value:[new f.window.File(['sample'],'outside-workspace.txt')]});input.dispatchEvent(new f.window.Event('change'));assert.match(f.posted.findLast(message=>message.type==='error').text,/does not support browser uploads yet/);assert.ok(!f.posted.some(message=>message.type==='prompt-files'&&message.files.length));}finally{f.close();}
 });
 
 test('workspace chat becomes usable while old run inspection is pending and stale completion is retired',async()=>{
