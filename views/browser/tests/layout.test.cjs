@@ -70,3 +70,36 @@ test('browser layout keeps workspace conversations on the left and offers hideab
   doc.getElementById('details-files').click();assert.equal(doc.getElementById('inspector-files').hidden,false);
  }finally{dom.window.close();}
 });
+
+test('inspector separates Changes, opens file previews with Back, and remembers the chosen tab',async()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  win.localStorage.setItem('xmind.browser.details.tab','changes');win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));
+  assert.equal(doc.querySelector('[role=tab][aria-selected=true]').id,'details-changes');assert.ok(doc.querySelector('#inspector-changes #workspace-vcs-diff'));assert.equal(doc.querySelector('#inspector-files .file-tree-heading'),null);
+  doc.getElementById('details-files').click();assert.equal(win.localStorage.getItem('xmind.browser.details.tab'),'files');win.dispatchEvent(new win.Event('workspace-file-preview'));assert.equal(doc.getElementById('workspace-canvas').dataset.preview,'true');doc.querySelector('[aria-label="Back to files"]').click();assert.equal(doc.getElementById('workspace-canvas').dataset.preview,'false');
+  doc.getElementById('details-changes').click();let requests=0;const source=doc.getElementById('workspace-terminal-toggle');source.onclick=()=>requests++;source.disabled=false;await new Promise(resolve=>setImmediate(resolve));doc.getElementById('global-terminal-toggle').click();assert.equal(requests,1);assert.equal(doc.getElementById('inspector-changes').hidden,false);assert.equal(doc.getElementById('browser-terminal-panel').parentElement.id,'agent-sidebar');
+  doc.getElementById('details-changes').dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));assert.equal(doc.activeElement.id,'details-activity');
+ }finally{win.close();}
+});
+
+test('live Activity follows native tool receipts without changing tabs, reexecuting, or expanding verbose details',()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data}));
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});send({type:'event',event:{run_id:'root',seq:1,kind:'tool.started',data:{activity_id:'read',name:'read_file',arguments:{path:'src/main.cpp'}}}});
+  const row=doc.querySelector('.activity-item');assert.match(doc.getElementById('activity-now').textContent,/Reading file · src\/main.cpp/);assert.equal(row.dataset.state,'running');assert.equal(row.open,false);assert.equal(doc.getElementById('inspector-files').hidden,false);assert.equal(doc.getElementById('details-activity').dataset.live,'true');
+  const done={type:'event',event:{run_id:'root',seq:2,kind:'tool.completed',data:{activity_id:'read',name:'read_file',data:{content:'synthetic file fixture'}}}};send(done);send(done);assert.equal(doc.querySelectorAll('.activity-item').length,1);assert.equal(row.dataset.state,'completed');assert.equal(doc.getElementById('activity-finished').open,false);assert.match(row.textContent,/src\/main.cpp/);
+  send({type:'event',event:{run_id:'root',seq:3,kind:'run.completed',data:{}}});assert.equal(doc.getElementById('activity-now').textContent,'Completed');assert.equal(doc.getElementById('details-activity').dataset.live,'false');
+  send({type:'history',history:[]});assert.equal(doc.querySelectorAll('.activity-item').length,0);
+ }finally{win.close();}
+});
+
+test('Activity scopes child calls, preserves interrupted outcomes, and bounds finished rows',()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data})),event=(run_id,seq,kind,data={})=>send({type:run_id==='root'?'event':'owned-event',child_id:run_id==='root'?undefined:run_id,event:{run_id,seq,kind,data}});
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});for(const id of ['child-a','child-b'])event(id,1,'tool.started',{call_id:'same',name:'read_file',arguments:{path:id}});event('child-a',2,'tool.completed',{call_id:'same',name:'read_file',data:'fixture'});event('root',1,'run.completed');assert.equal(doc.querySelectorAll('.activity-item[data-state=running]').length,1);event('child-b',2,'run.failed');assert.equal(doc.querySelectorAll('.activity-item[data-state=interrupted]').length,1);
+  send({type:'reset-run'});for(let i=0;i<105;i++){event('root',i*2+10,'tool.started',{call_id:String(i),name:'read_file',arguments:{path:'fixture-'+i}});event('root',i*2+11,'tool.completed',{call_id:String(i),name:'read_file',data:'fixture'});}assert.equal(doc.querySelectorAll('.activity-item').length,100);assert.match(doc.getElementById('activity-finished').textContent,/Finished · 100/);
+  send({type:'runs',selected:'different',runs:[{id:'different',state:'completed'}]});assert.equal(doc.querySelectorAll('.activity-item').length,0);
+ }finally{win.close();}
+});

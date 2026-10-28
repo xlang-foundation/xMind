@@ -3,6 +3,8 @@
 // ownership of workspace/session selection and folder management.
 (() => {
   const byId=id=>document.getElementById(id),make=(tag,text,cls)=>{const value=document.createElement(tag);if(text)value.textContent=text;if(cls)value.className=cls;return value;};
+  const preference=(key,fallback)=>{try{return localStorage.getItem('xmind.browser.'+key)||fallback;}catch{return fallback;}};
+  const savePreference=(key,value)=>{try{localStorage.setItem('xmind.browser.'+key,String(value));}catch{}};
   const folderIcon=(size=22)=>{const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS('http://www.w3.org/2000/svg','path');for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:String(size),height:String(size),fill:'none',stroke:'currentColor','stroke-width':'1.6','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(key,value);path.setAttribute('d','M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z M3 10h18');svg.append(path);return svg;};
   const actionIcon=name=>{const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');for(const [key,value]of Object.entries({viewBox:'0 0 24 24',width:'16',height:'16',fill:'none',stroke:'currentColor','stroke-width':'1.7','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(key,value);const path=document.createElementNS(ns,'path');path.setAttribute('d',({rename:'m16 3 5 5-12 12H4v-5Z M14 5l5 5',archive:'M4 4h16v4H4z M6 8v12h12V8 M10 12h4',restore:'M4 8h5M4 8V3 M4 8a8 8 0 1 1-1 8',delete:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',settings:'M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2'})[name]);svg.append(path);if(name==='settings')for(const radius of [6,2.5]){const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx','12');circle.setAttribute('cy','12');circle.setAttribute('r',String(radius));svg.append(circle);}return svg;};
   const sidebarIcon=side=>{const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');for(const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'18',height:'18',fill:'none',stroke:'currentColor','stroke-width':'1.7','aria-hidden':'true'}))svg.setAttribute(key,value);const frame=document.createElementNS(ns,'rect');for(const [key,value] of Object.entries({x:'3',y:'4',width:'18',height:'16',rx:'2'}))frame.setAttribute(key,value);const divider=document.createElementNS(ns,'path');divider.setAttribute('d',side==='left'?'M9 4v16':'M15 4v16');svg.append(frame,divider);return svg;};
@@ -44,7 +46,20 @@
   const selection=make('details',undefined,'inspector-run');selection.append(make('summary','Run details'));for(const id of ['run-picker','run-context','context-view'])if(byId(id))selection.append(byId(id));activity.append(selection,byId('run-activity'));
   activity.prepend(document.querySelector('.conversation-tools'));
   const agentSettings=make('details',undefined,'agent-settings');agentSettings.append(make('summary','Agent settings'));for(const id of ['skills-view','agent-picker','workflow-picker'])if(byId(id))agentSettings.append(byId(id));activity.append(agentSettings);
-  panels.append(files,activity);inspector.append(controls,panels);layout.append(inspector);
+  const changes=make('section');changes.id='inspector-changes';changes.setAttribute('role','tabpanel');changes.setAttribute('aria-labelledby','details-changes');
+  if(gitDetails){gitDetails.open=true;changes.append(gitDetails);}
+  changes.prepend(byId('workspace-vcs-state'));changes.append(byId('browser-review'));
+  files.querySelector('.workspace-heading').hidden=true;files.querySelector('.file-tree-heading').remove();
+  const canvas=byId('workspace-canvas'),filePreview=files.querySelector('.file-preview'),back=make('button','←');back.type='button';back.setAttribute('aria-label','Back to files');back.title='Back to files';
+  back.onclick=()=>{canvas.dataset.preview='false';byId('workspace-find-query').focus();};filePreview.querySelector('header').prepend(back);
+  window.addEventListener('workspace-file-preview',()=>{canvas.dataset.preview='true';});
+  new MutationObserver(()=>{if(canvas.hidden)canvas.dataset.preview='false';}).observe(canvas,{attributes:true,attributeFilter:['hidden']});
+  const filesEmpty=make('p','Workspace files will appear when the workspace is ready.','inspector-empty');files.append(filesEmpty);
+  const syncFilesEmpty=()=>filesEmpty.hidden=!canvas.hidden;new MutationObserver(syncFilesEmpty).observe(canvas,{attributes:true,attributeFilter:['hidden']});syncFilesEmpty();
+  selection.prepend(activity.querySelector('.conversation-tools'));activity.append(selection,agentSettings);
+  activity.querySelector('#events').parentElement.querySelector('summary').textContent='Diagnostic log';
+  const terminalPanel=byId('browser-terminal-panel');chat.append(terminalPanel);
+  panels.append(files,changes,activity);inspector.append(controls,panels);layout.append(inspector);
   const toggle=make('button',undefined,'sidebar-toggle');toggle.append(sidebarIcon('right'));toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-label','Toggle right sidebar');toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Hide right sidebar';
   const leftToggle=make('button',undefined,'sidebar-toggle');leftToggle.append(sidebarIcon('left'));leftToggle.id='workspace-toggle';leftToggle.type='button';leftToggle.setAttribute('aria-label','Toggle left sidebar');leftToggle.setAttribute('aria-controls',navigation.id);leftToggle.setAttribute('aria-expanded','true');leftToggle.title='Hide left sidebar';
   const toolbar=document.querySelector('.browser-bar');toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Global toolbar');
@@ -54,6 +69,9 @@
   sessionContext.id='current-session';sessionContext.type='button';sessionContext.setAttribute('aria-label','Rename current session');sessionContext.onclick=()=>byId('rename').click();
   const renameIcon=byId('rename').querySelector('svg').cloneNode(true);sessionContext.append(sessionLabel,renameIcon);context.append(workspaceContext,separator,sessionContext);toolbar.querySelector('strong').after(context);
   if(byId('settings'))toolbar.append(byId('settings'));toolbar.append(toggle);
+  const terminalButton=make('button',undefined,'sidebar-toggle'),terminalSource=byId('workspace-terminal-toggle');terminalButton.id='global-terminal-toggle';terminalButton.type='button';terminalButton.setAttribute('aria-label','Toggle terminal');terminalButton.title='Terminal';
+  terminalButton.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 5 7 7-7 7m10 0h7"/></svg>';
+  terminalButton.onclick=()=>terminalSource.click();const syncTerminal=()=>{terminalButton.disabled=terminalSource.disabled;terminalButton.setAttribute('aria-pressed',String(terminalSource.getAttribute('aria-pressed')==='true'));};new MutationObserver(syncTerminal).observe(terminalSource,{attributes:true,attributeFilter:['disabled','aria-pressed']});syncTerminal();toolbar.insertBefore(terminalButton,toggle);
   toolbar.querySelector('.local-node')?.remove();
   // Connection lifecycle is automatic. Retain controller targets offscreen so
   // restoring a local session cannot reintroduce manual connection controls.
@@ -72,15 +90,17 @@
     let drag;
     divider.onpointerdown=event=>{if(event.button!==0)return;event.preventDefault();drag={x:event.clientX,width:current()};divider.setPointerCapture(event.pointerId);divider.classList.add('dragging');};
     divider.onpointermove=event=>{if(drag)set(drag.width+(event.clientX-drag.x)*(reversed?-1:1));};
-    const end=()=>{drag=undefined;divider.classList.remove('dragging');};divider.onpointerup=end;divider.onpointercancel=end;divider.onlostpointercapture=end;
-    divider.onkeydown=event=>{const step=event.shiftKey?32:12;if(event.key==='Home'){event.preventDefault();set(min);}else if(event.key==='End'){event.preventDefault();set(max);}else if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();set(current()+(event.key==='ArrowRight'?step:-step)*(reversed?-1:1));}};
+    const end=()=>{if(drag&&reversed)savePreference('details.width',current());drag=undefined;divider.classList.remove('dragging');};divider.onpointerup=end;divider.onpointercancel=end;divider.onlostpointercapture=end;
+    divider.onkeydown=event=>{const step=event.shiftKey?32:12;if(event.key==='Home'){event.preventDefault();set(min);}else if(event.key==='End'){event.preventDefault();set(max);}else if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();set(current()+(event.key==='ArrowRight'?step:-step)*(reversed?-1:1));}else return;if(reversed)savePreference('details.width',current());};
+    if(reversed){const saved=Number(preference('details.width',''));if(saved>=min&&saved<=max)set(saved);}
   };
   resize(leftDivider,navigation,'--workspace-pane-width',140,360);resize(rightDivider,inspector,'--details-pane-width',240,640,true);
   let selected='files';
-  const choose=name=>{selected=name;files.hidden=name!=='files';activity.hidden=name!=='activity';if(name==='activity')byId('run-activity').open=true;for(const button of tabs.children){button.setAttribute('aria-selected',String(button.dataset.panel===name));button.tabIndex=button.dataset.panel===name?0:-1;}inspector.hidden=false;rightDivider.hidden=false;toggle.setAttribute('aria-expanded','true');toggle.title='Hide right sidebar';};
-  for(const [name,label] of [['files','Files'],['activity','Activity']]){const tab=make('button',label);tab.type='button';tab.id='details-'+name;tab.dataset.panel=name;tab.setAttribute('role','tab');tab.setAttribute('aria-controls',name==='files'?files.id:activity.id);tab.onclick=()=>choose(name);tab.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const next=name==='files'?'activity':'files';choose(next);byId('details-'+next).focus();}};tabs.append(tab);}
+  const panelNames=['files','changes','activity'];
+  const choose=name=>{selected=panelNames.includes(name)?name:'files';for(const panel of [files,changes,activity])panel.hidden=panel.id!=='inspector-'+selected;if(selected==='activity')byId('run-activity').open=true;for(const button of tabs.children){button.setAttribute('aria-selected',String(button.dataset.panel===selected));button.tabIndex=button.dataset.panel===selected?0:-1;}inspector.hidden=false;rightDivider.hidden=false;toggle.setAttribute('aria-expanded','true');toggle.title='Hide right sidebar';savePreference('details.tab',selected);};
+  for(const [name,label] of [['files','Files'],['changes','Changes'],['activity','Activity']]){const tab=make('button',label);tab.type='button';tab.id='details-'+name;tab.dataset.panel=name;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','inspector-'+name);tab.onclick=()=>choose(name);tab.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const index=panelNames.indexOf(name),next=event.key==='Home'?'files':event.key==='End'?'activity':panelNames[(index+(event.key==='ArrowRight'?1:2))%3];choose(next);byId('details-'+next).focus();}};tabs.append(tab);}
   controls.append(tabs,close);close.onclick=()=>{inspector.hidden=true;rightDivider.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.title='Show right sidebar';toggle.focus();};toggle.onclick=()=>{if(inspector.hidden)choose(selected);else close.click();};
-  choose('files');
+  choose(preference('details.tab','files'));
   // Approval review reveals its actual controls even when details were hidden.
   byId('approval-review').addEventListener('click',()=>choose('activity'));
   byId('failure-review').addEventListener('click',()=>choose('activity'));
@@ -175,6 +195,61 @@
   document.addEventListener('focusin',event=>{if(openComposerMenu&&!openComposerMenu.popup.contains(event.target)&&event.target!==openComposerMenu.trigger)openComposerMenu.close();});
   window.addEventListener('resize',()=>openComposerMenu?.close());
   document.addEventListener('scroll',event=>{if(openComposerMenu&&!openComposerMenu.popup.contains(event.target))openComposerMenu.close();},{capture:true});
-  // A comparison or terminal request opens Files without submitting a command.
-  for(const id of ['workspace-terminal-toggle','workspace-vcs-diff'])byId(id).addEventListener('click',()=>choose('files'));
+  // A bounded display projection of native events, never an execution owner.
+  const liveActivity=make('section',undefined,'live-activity');liveActivity.setAttribute('aria-label','Live tool activity');
+  const now=make('div',undefined,'activity-now'),nowDot=make('span',undefined,'activity-dot'),nowText=make('span','Ready');now.id='activity-now';now.setAttribute('role','status');now.setAttribute('aria-live','polite');nowDot.setAttribute('aria-hidden','true');now.append(nowDot,nowText);
+  const runningList=make('div'),finished=make('details',undefined,'activity-finished'),finishedLabel=make('summary','Finished'),finishedList=make('div'),activityEmpty=make('p','Tool calls and file operations will appear here as xMind works.','inspector-empty');
+  runningList.id='activity-running';finished.id='activity-finished';finished.append(finishedLabel,finishedList);finished.hidden=true;liveActivity.append(now,runningList,finished,activityEmpty);activity.prepend(liveActivity);
+  const activityRows=new Map(),seenEvents=new Set();let activityRun,activityPhase='Ready',activityStage='',activityCounter=0,activityApprovals=0,outputFrame;
+  const activePhase=()=>['queued','running','paused'].includes(activityPhase);
+  const syncActivity=()=>{
+    const executing=[...activityRows.values()].find(row=>row.state==='running'),busy=activePhase()||!!executing;
+    const label=activityApprovals?'Waiting for approval · '+activityApprovals:executing?executing.label+(executing.resource?' · '+executing.resource:''):activityStage||(activityPhase==='running'?'Working…':activityPhase==='queued'?'Starting…':activityPhase==='paused'?'Paused':activityPhase==='completed'?'Completed':activityPhase==='failed'?'Run failed':activityPhase==='cancelled'?'Cancelled':'Ready');
+    if(nowText.textContent!==label)nowText.textContent=label;now.dataset.state=activityApprovals?'waiting':busy?'running':activityPhase==='failed'?'failed':'idle';
+    byId('details-activity').dataset.live=String(busy||activityApprovals>0);activityEmpty.hidden=activityRows.size>0;finished.hidden=finishedList.children.length===0;finishedLabel.textContent='Finished · '+finishedList.children.length;
+  };
+  const clearActivity=()=>{activityRows.clear();seenEvents.clear();runningList.replaceChildren();finishedList.replaceChildren();finished.open=false;activityStage='';activityApprovals=0;activityPhase='Ready';syncActivity();};
+  const parseArguments=value=>{try{return typeof value==='string'?JSON.parse(value):value&&typeof value==='object'?value:{};}catch{return {};}};
+  const toolLabel=name=>({'read_file':'Reading file','list_files':'Listing files','search_files':'Searching files','create_file':'Creating file','replace_file':'Updating file','patch_file':'Editing file','run_process':'Command','delete_file':'Deleting file'}[name]||String(name||'Tool').replaceAll('_',' '));
+  const resourceLabel=args=>{const command=typeof args.profile==='string'?[args.profile,...(Array.isArray(args.arguments)?args.arguments.slice(0,8).filter(value=>typeof value==='string').map(value=>value.slice(0,500)):[])].join(' · '):undefined,value=args.path||args.file_path||args.resource||args.uri||args.url||args.query||args.command||args.executable||command||args.working_directory||args.workdir;return typeof value==='string'?value.slice(0,300):'';};
+  const renderActivityRow=(row,state,result)=>{
+    const prior=row.state;row.state=state;row.card.dataset.state=state;row.stateLabel.textContent=state==='running'?'Running':state==='completed'?'Done':state==='failed'?'Failed':'Interrupted';
+    if(state!=='running'&&prior==='running')row.card.open=false;
+    if(state==='failed'||state==='interrupted'){runningList.append(row.card);}else if(state==='completed')finishedList.append(row.card);else runningList.append(row.card);
+    row.detail.textContent=JSON.stringify(result===undefined?{tool:row.name,arguments:row.args}:{tool:row.name,arguments:row.args,result},null,2).slice(0,6000);
+  };
+  const trimActivity=()=>{while(activityRows.size>100){const oldest=[...activityRows].find(([,row])=>row.state!=='running');if(!oldest)break;oldest[1].card.remove();activityRows.delete(oldest[0]);}};
+  const flushOutput=()=>{outputFrame=undefined;for(const row of activityRows.values())if(row.outputDirty){row.outputDirty=false;const follow=row.output.scrollHeight-row.output.scrollTop-row.output.clientHeight<24;row.output.hidden=false;row.output.textContent=row.tail;if(follow)row.output.scrollTop=row.output.scrollHeight;}};
+  const handleActivityEvent=(event,child)=>{
+    if(!event||typeof event.kind!=='string')return;
+    const kind=event.kind,data=event.data||{},scope=child||event.run_id||activityRun||'root';
+    if(!kind.startsWith('tool.')&&kind!=='process.output'){
+      if(['run.queued','run.running','run.paused','run.completed','run.failed','run.cancelled'].includes(kind)){const phase=kind.slice(4);if(!child){activityPhase=phase;activityStage='';}if(['completed','failed','cancelled'].includes(phase))for(const row of activityRows.values())if(row.scope===scope&&row.state==='running')renderActivityRow(row,'interrupted');syncActivity();}
+      else if(!child&&(kind==='model.text'||kind==='model.reasoning'||kind==='model.tool_delta')){const stage=kind==='model.tool_delta'?'Preparing tools…':kind==='model.text'?'Writing response…':'Thinking…';if(activityStage!==stage){activityStage=stage;syncActivity();}}
+      return;
+    }
+    const receipt=Number.isSafeInteger(event.seq)?scope+':'+event.seq:undefined;if(receipt&&seenEvents.has(receipt))return;if(receipt){seenEvents.add(receipt);if(seenEvents.size>4096)seenEvents.delete(seenEvents.values().next().value);}
+    if(kind==='process.output'){
+      const stream=[...byId('process-streams').children].find(card=>card.dataset.operationId===data.operation_id),candidates=[...activityRows.values()].filter(row=>row.scope===scope&&row.name==='run_process'&&row.state==='running'&&(!row.operationId||row.operationId===data.operation_id));
+      // Reuse the shared renderer's validated, offset-aware UTF-8 output.
+      if(stream&&candidates.length===1){const row=candidates[0];row.operationId=data.operation_id;row.tail=[...stream.querySelectorAll('.process-output')].map(part=>part.querySelector('summary').textContent+'\n'+part.querySelector('pre').textContent).join('\n').slice(-4000);row.outputDirty=true;if(outputFrame===undefined)outputFrame=window.requestAnimationFrame?window.requestAnimationFrame(flushOutput):setTimeout(flushOutput,16);}
+      return;
+    }
+    if(!['tool.started','tool.completed','tool.failed'].includes(kind))return;
+    const identity=data.activity_id||data.call_id||data.plan_node_id;let key=identity?scope+':'+identity:undefined,row=key&&activityRows.get(key);
+    if(!row&&kind!=='tool.started'&&!identity){const candidates=[...activityRows].filter(([,item])=>item.scope===scope&&item.name===data.name&&item.state==='running');if(candidates.length===1){key=candidates[0][0];row=candidates[0][1];}}
+    if(!row){key=key||scope+':display-'+(++activityCounter);const args=parseArguments(data.arguments||data.arguments_json),card=make('details',undefined,'activity-item'),summary=make('summary'),dot=make('span',undefined,'activity-dot'),label=make('span',undefined,'activity-tool-label'),name=make('strong',toolLabel(data.name)),resource=make('small',resourceLabel(args)),stateLabel=make('span',undefined,'activity-tool-state'),detail=make('pre'),output=make('pre',undefined,'activity-output');dot.setAttribute('aria-hidden','true');resource.title=resource.textContent;resource.hidden=!resource.textContent;output.hidden=true;label.append(name,resource);summary.append(dot,label,stateLabel);card.append(summary,output,detail);card.open=false;row={scope,name:data.name,args,card,detail,output,stateLabel,label:toolLabel(data.name),resource:resource.textContent,state:'running',tail:''};activityRows.set(key,row);}
+    renderActivityRow(row,kind==='tool.started'?'running':kind==='tool.failed'?'failed':'completed',kind==='tool.started'?undefined:data.data);trimActivity();activityStage='';syncActivity();
+  };
+  window.addEventListener('message',event=>{
+    if(event.source!==window||event.origin!==location.origin)return;const message=event.data;if(!message||typeof message!=='object')return;
+    if(message.type==='history'||message.type==='reset-run'||message.type==='user'){clearActivity();if(message.type==='user'){activityRun=undefined;activityPhase='queued';syncActivity();}}
+    else if(message.type==='runs'){if(activityRun!==message.selected){clearActivity();activityRun=message.selected;}activityPhase=message.runs?.find(run=>run.id===message.selected)?.state||'Ready';syncActivity();}
+    else if(message.type==='status'&&['Ready','queued','running','paused','completed','failed','cancelled'].includes(message.text)){activityPhase=message.text;activityStage='';syncActivity();}
+    else if(message.type==='operations'){activityApprovals=(message.operations||[]).filter(item=>item.state==='awaiting_approval').length;syncActivity();}
+    else if(['event','owned-event','graph-event'].includes(message.type))handleActivityEvent(message.event,message.type==='event'?undefined:message.child_id||message.event?.run_id||'child');
+  });
+  syncActivity();
+  // Native comparison controls stay in Changes; terminal remains independent.
+  byId('workspace-vcs-diff').addEventListener('click',()=>choose('changes'));
 })();

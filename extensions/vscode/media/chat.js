@@ -212,6 +212,7 @@ function processOutput(value){
   if(!state){
     if(processStreams.size>=64){if(!byId('process-stream-limit')){const note=node('p','Additional command output remains in the selected run activity and recorded command results.','inspection-note');note.id='process-stream-limit';byId('process-streams').append(note);}return;}
     const card=node('section',undefined,'process-result process-stream');card.append(node('strong','Captured command output · '+value.profile_id),node('p','Operation '+value.operation_id+' · retained bytes; inspect the recorded operation for its outcome.','inspection-note'));
+    card.dataset.operationId=value.operation_id;
     state={profile:value.profile_id,card,stdout:{hex:''},stderr:{hex:''}};
     for(const key of ['stdout','stderr']){const detail=node('details',undefined,'process-output');const summary=node('summary',key+' · 0 retained bytes'),pre=node('pre','');detail.append(summary,pre);card.append(detail);Object.assign(state[key],{summary,pre});}
     byId('process-streams').append(card);processStreams.set(value.operation_id,state);byId('empty').hidden=true;

@@ -1,0 +1,75 @@
+{
+  "recordedUtc": "2026-10-28T03:52:50.308Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "actualUi": {
+    "tabs": [
+      "Files",
+      "Changes",
+      "Activity"
+    ],
+    "preview": {
+      "contentCharacters": 290,
+      "showingPreview": true,
+      "state": "Read-only preview",
+      "title": "Amber/Notes.md",
+      "treeVisible": false
+    },
+    "terminal": {
+      "inspectorTab": "Changes",
+      "parent": "agent-sidebar",
+      "status": "Connected to the selected conversation terminal.",
+      "terminalHeight": 230,
+      "visible": true
+    },
+    "terminalClosedAfterCheck": true,
+    "tabRestored": "Activity",
+    "widthBefore": 360,
+    "widthChanged": 372,
+    "widthRestored": 372,
+    "widthPersistencePassed": true,
+    "finishedCollapsedByDefault": true,
+    "workspacePreserved": true,
+    "sessionPreserved": true,
+    "modelPreserved": true,
+    "exactMessageBodiesPreserved": true,
+    "initialHydrationSample": {
+      "sessionLoaded": false,
+      "modelLoaded": true,
+      "renderedMessageBodies": 0
+    },
+    "restoredMessageCount": 20,
+    "settledTab": "Activity",
+    "widthRestoredToOriginal": true,
+    "actualRecordedTools": [
+      {
+        "detailsCollapsed": true,
+        "name": "Command",
+        "resource": "powershell · [System.IO.Path]::GetFullPath('Amber\\Notes.md')",
+        "state": "completed",
+        "validatedOutputCharacters": 112
+      }
+    ]
+  },
+  "tests": {
+    "browser": {
+      "passed": 209,
+      "log": ".agentflow/inspector-final-browser-qualified.log"
+    },
+    "sharedRenderer": {
+      "passed": 125,
+      "log": ".agentflow/inspector-shared-renderer-qualified.log"
+    },
+    "liveStates": "Synthetic native-message fixtures cover start/completion, deduplication, child scope, interruption, session reset, bounded rows and focus/tab behavior. Actual UI checked against existing native event replay, not new inference."
+  },
+  "behavior": {
+    "resource": "Uses native tool arguments; commands show configured profile and arguments.",
+    "output": "Reuses shared renderer validated offset-aware UTF-8 text; bounded to 4,000 characters and coalesced per frame.",
+    "history": "At most 100 settled display rows; active work retained. Stored native journal remains authoritative.",
+    "details": "Tool details collapsed; finished group collapsed by default. Failures/interrupted calls remain visible.",
+    "automaticTabSwitch": false,
+    "backendImplementationOrPermissionChanges": false
+  },
+  "agentSubmittedModelTurns": 0,
+  "reexecutedCompletedCommands": 0,
+  "agentAccountedSpendUnchanged": 1.52044
+}
