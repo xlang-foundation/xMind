@@ -71,7 +71,13 @@ Invoke-CiCommand 'native-configure' $ciCmake @('-S',(Join-Path $ciRoot 'Native')
 # executables, then exercise native profile/view startup and the real thin host.
 # A focused success is diagnostic only: the full build and exact complete
 # contract gate below are still required before packaging or acceptance.
-Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','xmind','--parallel',$ciParallelism.ToString())
+Invoke-CiCommand 'native-process-contract-build' $ciCmake @('--build',$ciNative,'--config','Release','--target','agentflow_process_executor_contract','xmind','xmind_browser_asgi_fixture','--parallel',$ciParallelism.ToString())
+Invoke-CiCommand 'web-test-bootstrap' $ciNode @((Join-Path $ciRoot 'Tools/prepare-web-tests.mjs'),(Join-Path $ciNative 'Release/xmind.exe'),(Join-Path $ciRelease 'modules'),$ciStdlib)
+$ciWeb=Get-Content -LiteralPath (Join-Path $ciRoot 'build/web-test-environment.json') -Raw | ConvertFrom-Json
+$env:XMIND_BROWSER_TEST_RUNTIME=$ciWeb.runtime
+$env:XMIND_BROWSER_TEST_PACKAGES=$ciWeb.packages
+$env:XMIND_BROWSER_TEST_HOST=$ciWeb.fixture
+if($env:GITHUB_ENV){@("XMIND_BROWSER_TEST_RUNTIME=$($ciWeb.runtime)","XMIND_BROWSER_TEST_PACKAGES=$($ciWeb.packages)","XMIND_BROWSER_TEST_HOST=$($ciWeb.fixture)")|Add-Content -LiteralPath $env:GITHUB_ENV}
 Invoke-CiCommand 'native-view-early-ctest' $ciCtest @('--test-dir',$ciNative,'-C','Release','--output-on-failure','--no-tests=error','-R','^native_local_view_contract$')
 Invoke-CiCommand 'native-build' $ciCmake @('--build',$ciNative,'--config','Release','--parallel',$ciParallelism.ToString())
 $ciTests=& $ciCtest --test-dir $ciNative -C Release --show-only=json-v1
@@ -124,6 +130,7 @@ $ciExpected+='native_mcp_sdk_legacy_contract'
 $ciExpected+='native_create_executor_contract'
 $ciExpected+='native_process_adapter_contract'
 $ciExpected+='native_process_executor_contract'
+$ciExpected+='native_web_stream_contract'
 $ciExpected+='native_process_configuration_contract'
 $ciExpected+='native_agent_process_http_contract'
 $ciExpected+='native_instruction_configuration_contract'

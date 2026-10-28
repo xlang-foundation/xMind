@@ -67,6 +67,25 @@ export async function nativeDependencyWheels(inputs){
   for await(const chunk of archive.outputStream){length+=chunk.length;need(length<=128*1024*1024,'Native dependency wheel exceeds its bound.');chunks.push(chunk);}
   return new Map([[`wheels/pydantic_core-${version}-py3-none-win_amd64.whl`,Buffer.concat(chunks)]]);
 }
+// Libraries are installed separately by xmind pip. Packaging only freezes their
+// source/metadata; generated CLI scripts and bytecode are never shipped.
+export async function webLibraryInputs(directory){
+  const root=resolve(directory);await regular(root,true);const files=new Map();let total=0;
+  async function collect(prefix=''){
+    for(const entry of await readdir(join(root,prefix),{withFileTypes:true})){
+      if(entry.name==='__pycache__'||!prefix&&entry.name==='bin')continue;
+      const name=prefix?prefix+'/'+entry.name:entry.name,path=join(root,...name.split('/'));
+      need(relativeFile(name)&&!entry.isSymbolicLink(),'Web libraries contain an unsupported path.');
+      if(entry.isDirectory()){await regular(path,true);await collect(name);continue;}
+      if(/\.(?:pyc|pyo)$/.test(name))continue;
+      need(entry.isFile()&&['module','metadata'].includes(runtimeFileKind('modules/'+name)),'Web libraries contain an unsupported executable or resource.');
+      const value=await bytes(path,16*1024*1024);total+=value.length;need(total<=64*1024*1024&&files.size<5000,'Web library inventory exceeds limits.');files.set('modules/'+name,value);
+    }
+  }
+  await collect();
+  for(const name of ['fastapi/__init__.py','uvicorn/server.py','starlette/applications.py','anyio/__init__.py','pydantic/__init__.py','typing_extensions.py'])need(files.has('modules/'+name),'Install the pinned web requirements with xmind pip first.');
+  return files;
+}
 export async function stageNativeRuntime(options={}){
   need(options.explicitStage===true,'Explicit native runtime staging is required.');
   const {bundle,bundleManifest,bundleManifestSha256,stdlibSource,stdlibLicense,out}=options;
@@ -86,23 +105,35 @@ export async function stageNativeRuntime(options={}){
   need(![...inputs.keys()].some(name=>name.toLowerCase()==='licenses/python-stdlib-license'),'The standard-library license output collides with the accepted bundle.');
   const license=await bytes(licensePath,1024*1024);inputs.set('licenses/Python-STDLIB-LICENSE',license);total+=license.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');
   for(const [name,value]of await nativeDependencyWheels(inputs)){need(!inputs.has(name),'Native dependency wheel collides with an accepted input.');inputs.set(name,value);total+=value.length;need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');}
+  let webInputs;
+  if(options.webLibrarySource){
+    need(isAbsolute(options.webLibrarySource),'Web library sources require an absolute directory.');
+    webInputs=await webLibraryInputs(options.webLibrarySource);
+    for(const [name,value]of webInputs){
+      if(name.endsWith('.x3pkg.dll'))need(inputs.has(name)&&inputs.get(name).equals(value),'Web native bindings must match the accepted xlang3 SDK exactly.');
+      total+=value.length-(inputs.get(name)?.length||0);inputs.set(name,value);
+    }
+    for(const name of ['xmind_web.py','xmind_web_routes.json']){const value=await bytes(join(EXTENSION,'../../views/browser',name),1024*1024);inputs.set('modules/'+name,value);total+=value.length;}
+    need(total<=256*1024*1024,'The complete native runtime exceeds its size limit.');
+  }
   // Verify all source bytes again before publication. Source changes cannot
   // silently combine accepted DLLs with a newer SDK or newer Python source.
   need(raw.equals(await bytes(resolve(bundleManifest),1024*1024)),'The source manifest changed during staging.');
   need(pipBytes.equals(await bytes(pipPath,8*1024*1024))&&JSON.stringify((await readdir(bundled)).filter(name=>/^pip-.+\.whl$/.test(name)))===JSON.stringify(pipWheels),'The pip bootstrap wheel changed during staging.');
   for(const [name,digest]of Object.entries(source.files))need(sha(await bytes(join(sourceRoot,...name.split('/'))))===digest,'Native source bytes changed during staging.');
   need(JSON.stringify(await pureSources(pureRoot))===JSON.stringify(pureNames),'The pure source file set changed during staging.');
+  if(webInputs){const frozen=await webLibraryInputs(options.webLibrarySource);need(frozen.size===webInputs.size&&[...webInputs].every(([name,value])=>frozen.get(name)?.equals(value)),'Web library sources changed during staging.');for(const name of ['xmind_web.py','xmind_web_routes.json'])need((await bytes(join(EXTENSION,'../../views/browser',name),1024*1024)).equals(inputs.get('modules/'+name)),'Web adapter sources changed during staging.');}
   for(const name of pureNames)need((await bytes(join(pureRoot,...name.split('/')),8*1024*1024)).equals(inputs.get('stdlib/'+name)),'A pure source changed during staging.');need(license.equals(await bytes(licensePath,1024*1024)),'The source license changed during staging.');
   await mkdir(output,{recursive:false});const files={};
   for(const [name,value]of inputs){const target=join(output,...name.split('/'));need(inside(output,target),'Native package output path escaped.');await mkdir(dirname(target),{recursive:true});await writeFile(target,value,{flag:'wx',mode:0o600});files[name]=sha(value);}
-  const manifest={schemaVersion:source.schemaVersion,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:source.nativeRevision,sdkRevision:source.sdkRevision,sourceManifestSha256:bundleManifestSha256,stdlib:'Bundled Python3.14 pure source and pip bootstrap, including generic Windows script resources; no CPython runtime, ABI extension, execution or bytecode',pipBootstrap:pip.metadata,files};
+  const manifest={schemaVersion:source.schemaVersion,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:source.nativeRevision,sdkRevision:source.sdkRevision,sourceManifestSha256:bundleManifestSha256,stdlib:'Bundled Python3.14 pure source and pip bootstrap, including generic Windows script resources; no CPython runtime, ABI extension, execution or bytecode',pipBootstrap:pip.metadata,...(webInputs?{embeddedWeb:true}:{}),files};
   await writeFile(join(output,MANIFEST_NAME),JSON.stringify(manifest,null,2)+'\n',{flag:'wx',mode:0o600});const verified=await verifyNativeRuntime(output);
   return {output,manifestSha256:verified.manifestSha256,nativeFiles:REQUIRED_NATIVE.length,pureSourceFiles:pureNames.length,files:Object.keys(files).length,nativeExecuted:false,configAccessed:false,installed:false};
 }
 export async function main(args=process.argv.slice(2)){
   if(!args.length){console.log('Explicit --stage with accepted source manifest, or --verify of an already staged native runtime is required.');return;}
-  if(args[0]==='--verify'){need(args.length===1||args.length===3&&args[1]==='--runtime','Invalid native verification arguments.');const result=await verifyNativeRuntime(args.length===1?join(EXTENSION,'native-runtime'):resolve(args[2]));console.log(JSON.stringify({nativeRuntimeVerified:true,files:Object.keys(result.manifest.files).length,manifestSha256:result.manifestSha256,nativeExecuted:false,installed:false}));return;}
-  need(args[0]==='--stage','Invalid native packaging command.');const values={};for(let i=1;i<args.length;i+=2){const flag=args[i];need(['--bundle','--bundle-manifest','--bundle-manifest-sha','--stdlib-source','--stdlib-license','--out'].includes(flag)&&!Object.hasOwn(values,flag)&&typeof args[i+1]==='string','Invalid native staging arguments.');values[flag]=args[i+1];}
-  console.log(JSON.stringify(await stageNativeRuntime({explicitStage:true,bundle:values['--bundle'],bundleManifest:values['--bundle-manifest'],bundleManifestSha256:values['--bundle-manifest-sha'],stdlibSource:values['--stdlib-source'],stdlibLicense:values['--stdlib-license'],out:values['--out']})));
+  if(args[0]==='--verify'||args[0]==='--verify-web'){need(args.length===1||args.length===3&&args[1]==='--runtime','Invalid native verification arguments.');const verifier=args[0]==='--verify-web'?runtime.verifyNativeWebRuntime:verifyNativeRuntime;const result=await verifier(args.length===1?join(EXTENSION,'native-runtime'):resolve(args[2]));console.log(JSON.stringify({nativeRuntimeVerified:true,files:Object.keys(result.manifest.files).length,manifestSha256:result.manifestSha256,nativeExecuted:false,installed:false}));return;}
+  need(args[0]==='--stage','Invalid native packaging command.');const values={};for(let i=1;i<args.length;i+=2){const flag=args[i];need(['--bundle','--bundle-manifest','--bundle-manifest-sha','--stdlib-source','--stdlib-license','--web-library-source','--out'].includes(flag)&&!Object.hasOwn(values,flag)&&typeof args[i+1]==='string','Invalid native staging arguments.');values[flag]=args[i+1];}
+  console.log(JSON.stringify(await stageNativeRuntime({explicitStage:true,bundle:values['--bundle'],bundleManifest:values['--bundle-manifest'],bundleManifestSha256:values['--bundle-manifest-sha'],stdlibSource:values['--stdlib-source'],stdlibLicense:values['--stdlib-license'],webLibrarySource:values['--web-library-source'],out:values['--out']})));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)main().catch(()=>{console.error('Native runtime packaging failed; verify the accepted source bundle, manifest and pure source inputs.');process.exitCode=1;});

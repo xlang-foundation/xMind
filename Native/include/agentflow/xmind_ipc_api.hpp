@@ -1,6 +1,8 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <functional>
+namespace httplib { struct Request; struct Response; }
 namespace agentflow {
 class PersistenceService;
 class RunExecutor;
@@ -18,6 +20,7 @@ public:
     XMindIpcServer& operator=(const XMindIpcServer&)=delete;
     LocalConnectionBindings& connection_bindings()noexcept;
     const std::string& endpoint()const noexcept;
+    void bind_web_requests(std::function<void(httplib::Request&,httplib::Response&)>,int port,std::function<bool()> running={});
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;

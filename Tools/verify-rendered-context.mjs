@@ -63,7 +63,7 @@ try{
   const after=await ipc('context-open','local','1','owned','synthetic-control-a');assert.equal(after.context.head_revision,1);assert.deepEqual(after.context.checkpoint.usage,{input_tokens:31,output_tokens:7,total_tokens:38});
   await fs.writeFile(out+'/sdk-calls.json',JSON.stringify(calls,null,2)+'\n',{flag:'wx'});await fs.writeFile(out+'/rendered-complete.json',JSON.stringify({passed:true,transport:'Separate xmind.exe processes using registered xlang3 root/Contexts subobject methods',request:id,headRevision:1,neverReplay:true})+'\n',{flag:'wx'});
  }else{
-  const {createBrowserServer}=await import(pathToFileURL(path.resolve('views/browser/server.mjs')).href);view=await createBrowserServer({backend:ready.origin,assetRoot:assets,localAccessToken:token});const origin=await view.listen(0);
+  const {createNativeBrowserFixture}=await import(pathToFileURL(path.resolve('views/browser/tests/native-host.mjs')).href);view=await createNativeBrowserFixture({modules,stdlib,backend:ready.origin,assetRoot:assets,localAccessToken:token});const origin=await view.listen(0);
   await fs.writeFile(out+'/live.json',JSON.stringify({pid:child.pid,browser:origin+'/ui/',...ready},null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({pid:child.pid,browser:origin+'/ui/',session:ready.session}));
  }
  const result=await terminal;await fs.writeFile(out+'/native-terminal.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});assert.equal(result.code,0,stderr);assert(!failure,failure);

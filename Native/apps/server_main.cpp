@@ -1,6 +1,8 @@
 #include "agentflow/http_server.hpp"
+#include "agentflow/program_entries.hpp"
 #if defined(_WIN32)
 #include "agentflow/xmind_ipc_api.hpp"
+#include "agentflow/owner_process.hpp"
 #endif
 #include "agentflow/agent_instructions.hpp"
 #include <charconv>
@@ -14,6 +16,8 @@
 #include <sstream>
 #include <fstream>
 #include <filesystem>
+#include <thread>
+#include <atomic>
 #if defined(_WIN32)
 #include "agentflow/agent_service.hpp"
 #include "agentflow/provider_setup.hpp"
@@ -112,7 +116,7 @@ int run_server(int argc,char** argv) {
         std::map<std::string,std::string> options;
         for(int i=1;i<argc;i+=2) {
             const std::string key=argv[i];
-            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-registry" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state" && key!="--agent-execution") || !options.emplace(key,argv[i+1]).second)
+            if(i+1>=argc || (key!="--db" && key!="--modules" && key!="--stdlib" && key!="--port" && key!="--model" && key!="--model-endpoint" && key!="--model-wire" && key!="--model-tools" && key!="--models" && key!="--model-stream-usage" && key!="--workspace" && key!="--workspace-registry" && key!="--inspection-workspace" && key!="--workspace-edits" && key!="--credential-id" && key!="--workers" && key!="--queue-limit" && key!="--mcp-config" && key!="--process-config" && key!="--language-server-config" && key!="--instructions-config" && key!="--graphs-config" && key!="--provider-config" && key!="--python-tools-config" && key!="--runtime-manifest-sha256" && key!="--owner-receipt" && key!="--legacy-owner-ticket" && key!="--profile-state" && key!="--agent-execution" && key!="--web-assets" && key!="--web-packages" && key!="--web-port") || !options.emplace(key,argv[i+1]).second)
                 throw std::invalid_argument("Usage: xmind_server --db FILE --modules DIR --stdlib DIR [--port PORT] [--provider-config FILE | --model ID --model-endpoint URL] [--python-tools-config FILE] [--language-server-config FILE] [--model-wire chat-completions|responses] [--model-tools supported|unsupported|unknown] [--model-stream-usage supported|unsupported|unknown] [--models ID1,ID2] [--workspace DIR | --inspection-workspace DIR] [--workspace-edits approved] [--credential-id ID] [--workers 1..16] [--queue-limit 1..4096] [--instructions-config FILE] [--graphs-config FILE] [--agent-execution thread|process-read|process-code]");
         }
         for(const auto* key:{"--db","--modules","--stdlib"}) if(!options.contains(key)) throw std::invalid_argument("Missing server configuration");
@@ -438,12 +442,38 @@ int run_server(int argc,char** argv) {
 #endif
         );const auto bound=server.bind(port);
 #if defined(_WIN32)
-        if(options.contains("--profile-state")){if(!runtime_generation||!executor)throw std::invalid_argument("Managed profile publication requires a qualified workspace backend");const auto metadata=executor->execution_workspace();agentflow::publish_local_profile_ready(options.at("--profile-state"),bound,auth,metadata.root,metadata.workspace_id,metadata.authority_id);}
+        ipc_api.bind_web_requests(server.bound_requests(),bound,server.bound_running());
+#endif
+#if defined(_WIN32)
+        if(options.contains("--profile-state")){if(!runtime_generation||!executor)throw std::invalid_argument("Managed profile publication requires a qualified workspace backend");const auto metadata=executor->execution_workspace();agentflow::publish_local_profile_ready(options.at("--profile-state"),bound,auth,metadata.root,metadata.workspace_id,metadata.authority_id,ipc_api.endpoint());}
         {std::lock_guard lock(control_mutex);active_server=&server;}
         SetConsoleCtrlHandler(control,TRUE);
 #endif
         std::cout<<"xMind Server listening on http://127.0.0.1:"<<bound<<std::endl;
-        const auto ok=server.listen();
+        bool ok=false;
+#if defined(_WIN32) && defined(XMIND_UNIFIED_EXECUTABLE)
+        if(options.contains("--web-assets")){
+            if(!options.contains("--profile-state")||!executor)throw std::invalid_argument("Embedded browser requires a managed workspace backend");
+            const auto metadata=executor->execution_workspace();
+            const auto directory=std::filesystem::u8path(options.at("--profile-state")).parent_path();
+            const auto directory_bytes=directory.u8string();
+            auto local=std::make_shared<agentflow::LocalProfileConnection>(agentflow::LocalProfileConnection{
+                metadata.root,std::string(reinterpret_cast<const char*>(directory_bytes.data()),directory_bytes.size()),
+                static_cast<std::uint16_t>(bound),GetCurrentProcessId(),false,
+                agentflow::SecretBytes({reinterpret_cast<const std::uint8_t*>(auth.data()),auth.size()}),
+                options.contains("--workspace-edits"),execution_mode,ipc_api.endpoint(),server.bound_requests()});
+            const auto ready_path=directory/("web-"+std::to_string(GetCurrentProcessId())+"-"+agentflow::inspect_owner_process_birth(GetCurrentProcessId())+".json");
+            const auto ready_bytes=ready_path.u8string();
+            const auto api_running=server.bound_running();
+            std::thread api_listener([&]{server.listen();server.stop();});
+            try{
+                const int web_port=options.contains("--web-port")?std::stoi(options.at("--web-port")):0;
+                ok=run_embedded_local_web_view(std::move(local),options.at("--web-assets"),options.contains("--web-packages")?options.at("--web-packages"):std::string{},std::string(reinterpret_cast<const char*>(ready_bytes.data()),ready_bytes.size()),web_port,api_running)==0;
+            }catch(...){server.stop();api_listener.join();throw;}
+            server.stop();api_listener.join();
+        }else
+#endif
+        ok=server.listen();
 #if defined(_WIN32)
         {std::lock_guard lock(control_mutex);active_server=nullptr;}
         SetConsoleCtrlHandler(control,FALSE);

@@ -15,6 +15,8 @@
 #include <string_view>
 #include <vector>
 #include <set>
+#include "xlang3/cpp/runtime.h"
+#include "python_host.hpp"
 #if defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
@@ -46,6 +48,8 @@ void help(){
         "  xmind [connection options] git-base [FOLDER_ID]\n"
         "  xmind [connection options] git-diff MODE [BASE [CONTEXT]] [--folder-id ID]\n"
         "  xmind view --ready-file FILE [local profile options]\n"
+        "  xmind web --assets DIR [--workspace DIR] [--profile-root DIR] [--packages DIR] [--config FILE] [--mcp-config FILE]\n"
+        "  xmind pip [pip arguments]   (embedded xlang3 package installer)\n"
         "  xmind admin [native administration arguments]\n"
         "  xmind schema-worker   (private bounded schema protocol)\n"
         "  xmind client-auth get|put|seed|delete DIRECTORY ORIGIN   (private host credential bridge; token via stdin)\n"
@@ -85,6 +89,20 @@ agentflow::WorkspaceRegistry workspace_registry(const agentflow::LocalProfileCon
     return agentflow::WorkspaceRegistry(path_text(profile_root/L"workspaces.sqlite"),
         {path_text(package/L"modules"),path_text(package/L"stdlib")},root);
 }
+int embedded_pip(int argc,char** argv){
+    const auto package=package_root();X::Runtime runtime;
+    std::vector<std::string> host_arguments;for(int i=0;i<argc;++i)host_arguments.emplace_back(argv[i]);
+    agentflow::configure_python_host(runtime,package,host_arguments);
+    X::Module system(runtime,"sys");
+    if(system["implementation"]["name"].ToString()!="xlang3")throw std::runtime_error("Package installation requires embedded xlang3");
+    if(argc==2&&std::string_view(argv[1])=="--version"){
+        X::Module pip(runtime,"pip");std::cout<<"pip "<<pip["__version__"].ToString()<<" (xMind embedded xlang3)"<<std::endl;return 0;
+    }
+    X::Module command(runtime,"pip._internal.cli.main");auto arguments=runtime.List();
+    for(int i=1;i<argc;++i)if(!arguments.Append(X::Value(runtime,std::string(argv[i]))))throw std::runtime_error("Cannot construct package arguments");
+    X::Value result;if(!command["main"].Call(std::vector<X::Value>{arguments},result))throw std::runtime_error("Embedded pip failed: "+runtime.LastError());
+    return static_cast<int>(result.ToInt64());
+}
 nlohmann::json workspace_json(const agentflow::WorkspaceGroupRecord& group){
     auto folders=nlohmann::json::array();
     for(const auto& folder:group.folders)
@@ -106,6 +124,8 @@ int dispatch(int argc,char** argv){
         else if(mode=="admin")entry=run_admin;
         else if(mode=="ipc")entry=agentflow::run_xmind_ipc_client;
         else if(mode=="view")entry=run_local_view;
+        else if(mode=="web")entry=run_web;
+        else if(mode=="pip")entry=embedded_pip;
         else if(mode=="worker")entry=agentflow::run_agent_worker;
         else if(mode=="agent-channel-worker")entry=agentflow::run_agent_channel_worker;
 #endif

@@ -2,12 +2,12 @@
 import assert from 'node:assert/strict';import {spawn} from 'node:child_process';import {mkdtemp,mkdir,writeFile,rm,realpath} from 'node:fs/promises';
 import {join,dirname,basename,resolve} from 'node:path';import {tmpdir} from 'node:os';import {randomBytes} from 'node:crypto';import {createRequire} from 'node:module';import {setTimeout as delay} from 'node:timers/promises';
 import {cp,readFile} from 'node:fs/promises';
-import {createBrowserServer} from '../server.mjs';
+import {createNativeBrowserFixture} from './native-host.mjs';
 const require=createRequire(import.meta.url),{BackendClient}=require('../../../extensions/vscode/client.js'),{BrowserController}=require('../browser.js');
 const {browserViewLauncher}=require('../../../extensions/vscode/browser-view.js');
 const [serverArg,modulesArg,stdlibArg,assetsArg]=process.argv.slice(2),server=resolve(serverArg),modules=resolve(modulesArg),stdlib=resolve(stdlibArg),sourceAssets=resolve(assetsArg),root=await mkdtemp(join(tmpdir(),'xmind-browser-contract-')),workspace=join(root,'workspace'),assets=join(root,'assets'),token=randomBytes(32).toString('hex');let child,view,launcher,nativeOrigin,viewOrigin;
 const env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
-async function gateway(){view=await createBrowserServer({backend:nativeOrigin,assetRoot:assets});viewOrigin=await view.listen();return new BackendClient(viewOrigin,()=>token,(url,options)=>fetch(url,{...options,headers:{...options.headers,Origin:viewOrigin}}));}
+async function gateway(){view=await createNativeBrowserFixture({modules,stdlib,backend:nativeOrigin,assetRoot:assets});viewOrigin=await view.listen();return new BackendClient(viewOrigin,()=>token,(url,options)=>fetch(url,{...options,headers:{...options.headers,Origin:viewOrigin}}));}
 async function until(read,predicate){const deadline=Date.now()+10000;while(Date.now()<deadline){const value=await read();if(predicate(value))return value;await delay(20);}throw new Error('Native browser contract deadline');}
 try{
  await cp(resolve(sourceAssets),assets,{recursive:true});
@@ -19,7 +19,7 @@ try{
  assert.equal((await fetch(nativeOrigin+'/v1/view-sessions/revoke',{method:'POST',headers:{Authorization:'View '+durationSession.credential,'X-XMind-View-Origin':viewOrigin,'Content-Type':'application/json'},body:'{}'})).status,200,'Native duration fixture credential must be explicitly revoked');
  assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:sessionHeaders,body:'{}'})).status,401);
  assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Authorization:'Bearer '+ 'x'.repeat(64)},body:'{}'})).status,401);
- const authenticated=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Authorization:'Bearer '+token},body:'{}'});assert.equal(authenticated.status,200);const cookieHeader=authenticated.headers.get('set-cookie');assert.match(cookieHeader,/HttpOnly; SameSite=Strict; Path=\//);assert.ok(!cookieHeader.includes(token));const cookie=cookieHeader.split(';')[0];
+ const authenticated=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...sessionHeaders,Authorization:'Bearer '+token},body:'{}'});assert.equal(authenticated.status,200);const cookieHeader=authenticated.headers.get('set-cookie');assert.match(cookieHeader,/(?=.*;\s*HttpOnly(?:;|$))(?=.*;\s*SameSite=Strict(?:;|$))(?=.*;\s*Path=\/)/i);assert.ok(!cookieHeader.includes(token));const cookie=cookieHeader.split(';')[0];
  const maxAge=/Max-Age=(\d+)(?:;|$)/.exec(cookieHeader);assert.ok(maxAge&&Number(maxAge[1])>0&&Number(maxAge[1])<=28800,'Browser-session persistence must be bounded by the server-side eight-hour expiry');
  const viewCredential=cookie.slice(cookie.indexOf('=')+1),nativeViewHeaders={Authorization:'View '+viewCredential,'X-XMind-View-Origin':viewOrigin,'Content-Type':'application/json'};
  assert.equal((await fetch(nativeOrigin+'/v1/view-sessions',{method:'POST',headers:nativeViewHeaders,body:JSON.stringify({origin:viewOrigin})})).status,401,'A view credential cannot enroll additional sessions');
@@ -46,14 +46,14 @@ try{
   // Launch a second view of the SAME native server; no provider key or database
   // is copied. URL opening is a host fixture; native history is real.
  const opened=[],copied=[],context={extensionUri:{fsPath:resolve('extensions/vscode')},subscriptions:[]};
- launcher=browserViewLauncher({Uri:{parse:value=>value},env:{clipboard:{writeText:async value=>copied.push(value)},openExternal:async value=>{opened.push(value);return true;}}},context,{assetRoot:assets,loadServer:async()=>({createBrowserServer})});
+ launcher=browserViewLauncher({Uri:{parse:value=>value},env:{clipboard:{writeText:async value=>copied.push(value)},openExternal:async value=>{opened.push(value);return true;}}},context,{openNative:async()=>viewOrigin+'/ui/'});
  const sharedUrl=await launcher.open(nativeOrigin,token),sharedUrlParts=new URL(sharedUrl),sharedOrigin=sharedUrlParts.origin;assert.deepEqual(copied,[],'the browser adapter must not copy the owner token');assert.deepEqual(opened,[sharedUrl]);assert.equal(sharedUrlParts.pathname,'/ui/');assert.equal(sharedUrlParts.search,'');assert.ok(!sharedUrl.includes(token));
  const sharedClient=new BackendClient(sharedOrigin,()=>token,(url,options)=>fetch(url,{...options,headers:{...options.headers,Origin:sharedOrigin}}));assert.equal((await sharedClient.graph(id)).checkpoint.nodes[1].output.content,'Actual browser graph bytes\n');assert.equal((await sharedClient.runs(controller.session)).length,1);assert.deepEqual(await sharedClient.history(controller.session),await direct.history(controller.session));assert.deepEqual(await sharedClient.models(),await direct.models());
  // Restart only this disposable native backend at its existing origin. Keep
  // the browser access adapter and its opaque login session alive throughout.
  const restartHeaders={Origin:viewOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'},login=await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...restartHeaders,Authorization:'Bearer '+token},body:'{}'});assert.equal(login.status,200);const retainedCookie=login.headers.get('set-cookie').split(';')[0];
  const stableViewOrigin=viewOrigin,stableViewPort=Number(new URL(viewOrigin).port);await view.close();view=null;
- view=await createBrowserServer({backend:nativeOrigin,assetRoot:assets});viewOrigin=await view.listen(stableViewPort);assert.equal(viewOrigin,stableViewOrigin);
+ view=await createNativeBrowserFixture({modules,stdlib,backend:nativeOrigin,assetRoot:assets});viewOrigin=await view.listen(stableViewPort);assert.equal(viewOrigin,stableViewOrigin);
  assert.equal((await fetch(viewOrigin+'/ui/session',{method:'POST',headers:{...restartHeaders,Cookie:retainedCookie},body:'{}'})).status,200,'Access adapter restart must restore its cookie from native xlang3 persistence');
  const persistedHistory=await direct.history(controller.session),restartArguments=child.spawnargs.slice(1);restartArguments[restartArguments.indexOf('--port')+1]=new URL(nativeOrigin).port;
  const stopped=new Promise(resolve=>child.once('close',resolve));child.kill();await stopped;

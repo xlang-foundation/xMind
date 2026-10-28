@@ -1,21 +1,21 @@
 'use strict';
 const workspaceSkillRouteTest=require('node:test'),workspaceSkillRouteAssert=require('node:assert/strict');
 workspaceSkillRouteTest('session skill controls expose only exact GET and POST routes',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/sessions/session/skills',method),['GET','POST'].includes(method));for(const route of ['/v1/sessions/session/skills/load','/v1/sessions/session/skills/','/v1/sessions/session/skills/../credentials'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),false);
+ const {allowedApiRoute}=await import('./native-host.mjs');for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/sessions/session/skills',method),['GET','POST'].includes(method));for(const route of ['/v1/sessions/session/skills/load','/v1/sessions/session/skills/','/v1/sessions/session/skills/../credentials'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),false);
 });
 workspaceSkillRouteTest('A2A owner routes are narrowly allowlisted for local browser forwarding',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');
+ const {allowedApiRoute}=await import('./native-host.mjs');
  workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/a2a/agents','GET'),true);workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/a2a/agents','POST'),false);
  for(const path of ['/v1/a2a/agents/register','/v1/a2a/agents/research.alpha/enabled','/v1/a2a/agents/research.alpha/remove']){workspaceSkillRouteAssert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute(path,method),false);}
  for(const path of ['/v1/a2a/agents/','/v1/a2a/agents/research%2Falpha/enabled','/v1/a2a/agents/research.alpha/remove/extra'])for(const method of ['GET','POST'])workspaceSkillRouteAssert.equal(allowedApiRoute(path,method),false);
 });
 workspaceSkillRouteTest('workspace skill catalogue is an exact read-only browser route',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');
+ const {allowedApiRoute}=await import('./native-host.mjs');
  for(const route of ['/v1/workspace','/v1/workspace/skills']){workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),true);for(const method of ['POST','PUT','DELETE'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,method),false);}
  for(const route of ['/v1/workspace/skills/load','/v1/workspace/skills/../credentials','/v1/workspace/skills/'])workspaceSkillRouteAssert.equal(allowedApiRoute(route,'GET'),false);
 });
 workspaceSkillRouteTest('browser view cannot invoke the native provider YAML file reader',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');
+ const {allowedApiRoute}=await import('./native-host.mjs');
  for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])workspaceSkillRouteAssert.equal(allowedApiRoute('/v1/provider/configuration/import',method),false);
 });
 // Explicit synthetic native peer/assets: only thin view routing and durable
@@ -23,25 +23,25 @@ workspaceSkillRouteTest('browser view cannot invoke the native provider YAML fil
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createServer}=require('node:http'),{mkdtemp,writeFile,rm}=require('node:fs/promises'),{tmpdir}=require('node:os'),{join}=require('node:path');
 test('context and graph-resume view allowlist restricts methods and exposes no checkpoint/state mutation route',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');
+ const {allowedApiRoute}=await import('./native-host.mjs');
  for(const path of ['/v1/sessions/session/context','/v1/sessions/session/context/requests/request'])for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),method==='GET');
  for(const path of ['/v1/sessions/session/context/compact','/v1/graph-runs/root/resume'])for(const method of ['GET','POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),method==='POST');
  for(const path of ['/v1/sessions/session/context/state','/v1/sessions/session/context/checkpoint','/v1/sessions/session/context/requests/foreign%2Frequest','/v1/sessions/session/context/compact/extra','/v1/graph-runs/root/resume/state'])for(const method of ['GET','POST'])assert.equal(allowedApiRoute(path,method),false);
 });
 test('planning view allowlist exposes only scoped observation, human input and resume methods',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');
+ const {allowedApiRoute}=await import('./native-host.mjs');
  for(const path of ['/v1/agent/planning','/v1/runs/owner/plan']){assert.equal(allowedApiRoute(path,'GET'),true);for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
  for(const path of ['/v1/runs/owner/plan/human/question','/v1/runs/owner/plan/resume']){assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
  for(const path of ['/v1/runs/owner/plan/spawn','/v1/runs/owner/plan/state','/v1/runs/owner/plan/spec','/v1/runs/owner/plan/revise','/v1/runs/owner/plan/human/question/extra','/v1/runs/owner/plan/human/foreign%2Fid','/v1/runs/owner/plan/human/..','/v1/plans/plan/human/question'])for(const method of ['GET','POST'])assert.equal(allowedApiRoute(path,method),false);
 });
 test('MCP elicitation routes are limited to run-scoped reads and one request answer',async()=>{
- const {allowedApiRoute}=await import('../server.mjs');
+ const {allowedApiRoute}=await import('./native-host.mjs');
  for(const path of ['/v1/runs/owner/mcp-inputs']){assert.equal(allowedApiRoute(path,'GET'),true);for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
  for(const path of ['/v1/runs/owner/mcp-inputs/request']){assert.equal(allowedApiRoute(path,'POST'),true);for(const method of ['GET','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute(path,method),false);}
  for(const path of ['/v1/runs/owner/mcp-inputs/','/v1/runs/owner/mcp-inputs/foreign%2Fid','/v1/runs/owner/mcp-inputs/request/extra','/v1/operations/request/mcp-inputs'])for(const method of ['GET','POST'])assert.equal(allowedApiRoute(path,method),false);
 });
 test('view forwards only allowed planning requests at the configured native origin and keeps durable cookie authentication',async()=>{
- const {createBrowserServer}=await import('../server.mjs'),directory=await mkdtemp(join(tmpdir(),'xmind-planning-view-')),observed=[];
+ const {createNativeBrowserFixture}=await import('./native-host.mjs'),directory=await mkdtemp(join(tmpdir(),'xmind-planning-view-')),observed=[];
  for(const name of ['patch-review.js','index.html','browser.js','terminal.js','layout.js','layout.css','browser.css','xterm.css','xterm.js','xterm-fit.js','chat.js','chat.css','client.js','marked.js','purify.js'])await writeFile(join(directory,name),'/* Synthetic access adapter asset */');
  const master='synthetic-planning-view-master-'.padEnd(64,'x'),credential='a'.repeat(64)+'.'+'b'.repeat(64);let expectedOrigin,view;
  const peer=createServer(async(request,response)=>{
@@ -52,7 +52,7 @@ test('view forwards only allowed planning requests at the configured native orig
  });
  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
  try{
-  view=await createBrowserServer({backend:'http://127.0.0.1:'+peer.address().port,assetRoot:directory});expectedOrigin=await view.listen();const sameOrigin={Origin:expectedOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'};
+  view=await createNativeBrowserFixture({backend:'http://127.0.0.1:'+peer.address().port,assetRoot:directory});expectedOrigin=await view.listen();const sameOrigin={Origin:expectedOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'};
   const enrollment=await fetch(expectedOrigin+'/ui/session',{method:'POST',headers:{...sameOrigin,Authorization:'Bearer '+master},body:'{}'});assert.equal(enrollment.status,200);const cookie=enrollment.headers.get('set-cookie').split(';')[0];
   const raw=' {"number":18446744073709551617,"decimal":1.00000000000000000001} ';const body=JSON.stringify({input_json:raw,expected_revision:2,expected_state_sequence:7});
   for(const path of ['/v1/agent/planning','/v1/runs/owner/plan'])assert.equal((await fetch(expectedOrigin+path,{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'}})).status,200);

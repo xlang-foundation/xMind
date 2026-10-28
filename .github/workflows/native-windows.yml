@@ -89,6 +89,9 @@ jobs:
       - name: Verify packaged xlang3 pip bootstrap and offline installation
         working-directory: xmind
         run: node Tools/verify-packaged-pip.mjs extensions/vscode/native-runtime ../stdlib-source/Lib/ensurepip/_bundled build/ci-evidence
+      - name: Verify native main-process web hosting and controlled handoff
+        working-directory: xmind
+        run: node Native/tests/embedded_web_host_contract.mjs extensions/vscode/native-runtime build/browser-assets > build/ci-evidence/native-embedded-web-host.log
       - name: Package and verify shared browser assets
         working-directory: xmind/extensions/vscode
         run: |

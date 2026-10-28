@@ -11,6 +11,7 @@
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "httplib.h"
+#include "native_request_channel.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -397,7 +398,7 @@ void shape(const Json &value, const Store &store, const WorkspaceTools &workspac
             value.at("port").is_number_integer() && value.at("port") >= 0 && value.at("port") <= 65535 &&
             value.contains("approved_edits") && value.at("approved_edits").is_boolean());
     const auto execution=value.value("agent_execution",std::string{"thread"});require(execution=="thread"||execution=="process-read"||execution=="process-code","Invalid protected agent execution mode");
-    for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config","mcp_config"})
+    for(const auto* field:{"provider_config","graphs_config","python_tools_config","language_server_config","process_config","mcp_config","web_assets","web_packages"})
         if(value.contains(field)&&!value.at(field).get<std::string>().empty())require(absolute(value.at(field).get<std::string>()).is_absolute());
     require((!value.contains("process_config")||value.at("process_config").get<std::string>().empty())
                 ?(!value.contains("process_config_digest")||value.at("process_config_digest").get<std::string>().empty())
@@ -569,6 +570,12 @@ Child launch(Store &store, Json &state) {
                                    (store.directory / L"profile.state").native()};
     args.push_back(L"--workspace-registry");
     args.push_back((store.directory.parent_path()/L"workspaces.sqlite").native());
+    for(const auto* field:{"web_assets","web_packages"}){
+        const auto value=state.value(field,std::string{});if(!value.empty()){
+            args.push_back(std::string(field)=="web_assets"?L"--web-assets":L"--web-packages");args.push_back(wide(value));
+        }
+    }
+    if(state.value("web_port",0)>0){args.push_back(L"--web-port");args.push_back(std::to_wstring(state.at("web_port").get<int>()));}
     if(state.contains("owner_receipt")){
         const auto& receipt=state.at("owner_receipt");
         args.push_back(L"--owner-receipt");
@@ -658,6 +665,14 @@ void verify_process(const Json &state) {
                 same(final_path(actual.value), final_path(wanted.value)),
             "Saved profile process image differs; no backend was replaced");
 }
+std::shared_ptr<httplib::Response> profile_sdk_response(const Json& state,const std::string& path,const Json* payload=nullptr){
+    const auto token=state.at("auth").get<std::string>();
+    LocalProfileConnection connection{state.at("workspace").get<std::string>(),state.at("directory").get<std::string>(),state.at("port").get<std::uint16_t>(),state.at("pid").get<std::uint32_t>(),false,
+        SecretBytes({reinterpret_cast<const std::uint8_t*>(token.data()),token.size()}),state.at("approved_edits").get<bool>(),state.value("agent_execution",std::string{"thread"}),state.at("ipc_endpoint").get<std::string>()};
+    NativeRequestChannel channel(connection);const httplib::Headers headers{{"Authorization","Bearer "+token}};
+    try{return payload?channel.Post(path,headers,payload->dump(),"application/json"):channel.Get(path,headers);}
+    catch(const std::exception& error){throw std::runtime_error("Managed SDK route "+path+": "+error.what());}
+}
 bool authenticated(const Json &state) {
     try {
         verify_process(state);
@@ -666,8 +681,14 @@ bool authenticated(const Json &state) {
         client.set_read_timeout(2, 0);
         client.set_follow_location(false);
         const httplib::Headers headers{{"Authorization", "Bearer " + state.at("auth").get<std::string>()}};
-        const auto workspace = client.Get("/v1/workspace", headers),
-                   owner = client.Get("/v1/backend/owner", headers);
+        const auto workspace = state.contains("ipc_endpoint")?profile_sdk_response(state,"/v1/workspace"):std::shared_ptr<httplib::Response>{},
+                   owner = state.contains("ipc_endpoint")?profile_sdk_response(state,"/v1/backend/owner"):std::shared_ptr<httplib::Response>{};
+        if(!state.contains("ipc_endpoint")){
+            const auto legacy_workspace=client.Get("/v1/workspace",headers),legacy_owner=client.Get("/v1/backend/owner",headers);
+            if(!legacy_workspace||!legacy_owner||legacy_workspace->status!=200||legacy_owner->status!=200)return false;
+            const auto w=parse(legacy_workspace->body),o=parse(legacy_owner->body);
+            return w.value("configured",false)&&w.value("root",std::string{})==state.at("workspace").get<std::string>()&&w.value("workspace_id",std::string{})==state.at("workspace_id").get<std::string>()&&w.value("authority_id",std::string{})==state.at("authority").get<std::string>()&&o.at("process_id")==state.at("pid")&&o.at("process_birth")==state.at("birth");
+        }
         if (!workspace || !owner || workspace->status != 200 || owner->status != 200)
             return false;
         const auto w = parse(workspace->body), o = parse(owner->body);
@@ -686,6 +707,15 @@ Json profile_request(int port,const std::string& token,const std::string& path,c
     const auto response=payload?client.Post(path,headers,payload->dump(),"application/json"):client.Get(path,headers);
     if(!response)throw std::runtime_error(std::string("Managed backend owner request failed: ")+(payload?"POST ":"GET ")+path+" (transport "+std::to_string(static_cast<int>(response.error()))+")");
     require(response->body.size()<=128*1024,"Managed backend owner response exceeds limits");
+    if(response->status<200||response->status>=300)throw ProfileRequestError(response->status,path,response->body);
+    return parse(response->body);
+}
+Json profile_request(const Json& state,const std::string& path,const Json* payload=nullptr){
+    // The compatibility path can attach preserved pre-IPC owners for their
+    // existing controlled upgrade. New owners always advertise the SDK endpoint.
+    if(!state.contains("ipc_endpoint"))return profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),path,payload);
+    const auto response=profile_sdk_response(state,path,payload);
+    require(response&&response->body.size()<=128*1024,"Managed backend SDK response exceeds limits");
     if(response->status<200||response->status>=300)throw ProfileRequestError(response->status,path,response->body);
     return parse(response->body);
 }
@@ -715,11 +745,11 @@ void retire_for_upgrade(Store& store,Json& state,const WorkspaceTools& workspace
     std::string retirement_error;
     if(pid&&!observe_owner_exit(pid,birth,0).exited){
         try{
-            Json ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+            Json ws=profile_request(state,"/v1/workspace");
             Json body=authority_body(ws);const auto& receipt=state.at("owner_receipt");
             body["expected_generation"]=receipt.at("generation");body["expected_revision"]=receipt.at("revision");body["receipt_id"]=receipt.at("receipt_id");
             body["target_runtime_root"]=state.at("replacement_runtime");body["target_manifest_sha256"]=state.at("replacement_manifest");body["approved_edits"]=state.at("approved_edits");
-            profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/retire",&body);
+            profile_request(state,"/v1/backend/owner/retire",&body);
         }catch(const std::exception& error){
             // A lost reply can follow a committed retirement. Observe the exact
             // process before deciding; retain a rejection for an unresolved exit.
@@ -916,16 +946,21 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         const bool mcp_configuration_changed=!options.mcp_config.empty()&&
             (state.value("mcp_config",std::string{})!=requested_mcp_path||
              state.value("mcp_config_digest",std::string{})!=requested_mcp_digest);
+        const bool web_configuration_changed=!options.web_assets.empty()&&
+            (state.value("web_assets",std::string{})!=text(absolute(options.web_assets))||
+             state.value("web_packages",std::string{})!=(options.web_packages.empty()?std::string{}:text(absolute(options.web_packages))));
+        if(web_configuration_changed&&!options.upgrade_backend)
+            throw std::invalid_argument("This backend does not host the requested web UI; use an explicit qualified backend upgrade");
         if(state.contains("owner_receipt")&&mcp_configuration_changed)
             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing MCP configuration");
         if(mcp_configuration_changed&&!options.upgrade_backend)
             throw std::invalid_argument("MCP configuration changed; update the existing backend explicitly");
         if(mcp_configuration_changed&&!recovered_stopped_owner&&!state.contains("owner_receipt")){
             require(state.at("phase")=="ready"&&authenticated(state),"Only an authenticated ready owner can validate an MCP update");
-            const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
+            const auto ws=profile_request(state,"/v1/workspace");
             auto request=authority_body(ws);request["document"]=requested_mcp_document;
             try{
-                const auto validated=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/mcp/validate",&request);
+                const auto validated=profile_request(state,"/v1/backend/owner/mcp/validate",&request);
                 require(validated.value("valid",false)&&validated.value("document_sha256",std::string{})==requested_mcp_digest,
                         "Managed owner did not validate this exact MCP update");
             }catch(const ProfileRequestError& error){
@@ -955,12 +990,24 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
             store.write(state);
         }
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(web_configuration_changed||process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
+                if(state.contains("upgrade_intent")&&state.value("replacement_manifest",std::string{})!=loaded_manifest){
+                    // A rejected preflight has not committed an owner handoff.
+                    // An explicit upgrade may select another verified target
+                    // only while the exact protected owner remains ready.
+                    require(options.upgrade_backend&&state.at("phase")=="ready"&&authenticated(state),"Retargeting requires the authenticated ready owner");
+                    const auto current_owner=profile_request(state,"/v1/backend/owner");
+                    require(!current_owner.value("quiesced",true)&&!current_owner.value("retirement_requested",true)&&!current_owner.value("replacement_prepared",true),"A committed owner handoff cannot be retargeted");
+                    auto [target,digest]=stage_current_runtime(store,workspace);
+                    state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
+                    if(web_configuration_changed){state["web_assets"]=text(absolute(options.web_assets));state["web_packages"]=options.web_packages.empty()?std::string{}:text(absolute(options.web_packages));}
+                    store.write(state);
+                }
                 if(!state.contains("upgrade_intent")){
                     require(state.at("phase")=="ready"&&authenticated(state),"Only an authenticated ready owner can be upgraded");
-                    const auto current_owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                    const auto current_owner=profile_request(state,"/v1/backend/owner");
                     require(current_owner.value("retirement_supported",false),"Current managed runtime does not support profile-preserving upgrade");
                     auto [target,digest]=stage_current_runtime(store,workspace);
                     state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
@@ -968,17 +1015,27 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     if(mcp_configuration_changed){state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;}
                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
                     if(policy_requested){state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;}
+                    if(web_configuration_changed){state["web_assets"]=text(absolute(options.web_assets));state["web_packages"]=options.web_packages.empty()?std::string{}:text(absolute(options.web_packages));}
+                    if(!state.value("web_assets",std::string{}).empty()&&!state.contains("web_port")){
+                        const auto prior=store.directory/("web-"+std::to_string(state.at("pid").get<std::uint32_t>())+"-"+state.at("birth").get<std::string>()+".json");
+                        if(fs::exists(prior)){
+                            const auto metadata=parse(file_bytes(prior,16384));
+                            require(metadata.at("process_id")==state.at("pid")&&metadata.at("process_birth")==state.at("birth")&&metadata.at("backend_process_id")==state.at("pid"),"Prior browser owner identity differs");
+                            const auto origin=metadata.at("origin").get<std::string>();constexpr std::string_view prefix="http://127.0.0.1:";require(origin.starts_with(prefix),"Invalid prior browser address");
+                            int port=0;const auto parsed=std::from_chars(origin.data()+prefix.size(),origin.data()+origin.size(),port);require(parsed.ec==std::errc{}&&parsed.ptr==origin.data()+origin.size()&&port>0&&port<=65535,"Invalid prior browser port");state["web_port"]=port;
+                        }
+                    }
                     state["upgrade_intent"]=true;store.write(state);
                 }
-                const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
-                const auto owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                const auto ws=profile_request(state,"/v1/workspace");
+                const auto owner=profile_request(state,"/v1/backend/owner");
                 require(owner.value("retirement_supported",false),"Current managed runtime does not support profile-preserving upgrade");
                 Json quiesced=owner;
                 if(!owner.value("quiesced",false)){
                     Json request=authority_body(ws);request["expected_generation"]=owner.at("generation");request["expected_revision"]=owner.at("revision");
                     request["target_runtime_root"]=state.at("replacement_runtime");request["target_manifest_sha256"]=state.at("replacement_manifest");
                     try {
-                        quiesced=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/quiesce",&request);
+                        quiesced=profile_request(state,"/v1/backend/owner/quiesce",&request);
                     } catch(const ProfileRequestError& error) {
                         bool busy=false;
                         if(error.status==409)try{const auto detail=parse(error.body).value("detail",std::string{});busy=detail=="Native admission is in flight"||detail=="Native execution must be healthy and idle before owner control";}catch(...){}
@@ -1028,6 +1085,8 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
              options.provider_config.empty() ? "" : text(absolute(options.provider_config))},
             {"graphs_config", options.graphs_config.empty() ? "" : text(absolute(options.graphs_config))}};
         state["python_tools_config"]=options.python_tools_config.empty()?"":text(absolute(options.python_tools_config));
+        state["web_assets"]=options.web_assets.empty()?"":text(absolute(options.web_assets));
+        state["web_packages"]=options.web_packages.empty()?"":text(absolute(options.web_packages));
         state["language_server_config"]=options.language_server_config.empty()?"":text(absolute(options.language_server_config));
         state["process_config"]=options.process_config.empty()?"":text(absolute(options.process_config));
         state["process_config_digest"]=options.process_config.empty()?"":context_digest(file_bytes(absolute(options.process_config),256*1024));
@@ -1112,12 +1171,12 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                 child->release();
             if (authenticated(state)){
                 if(state.contains("owner_receipt")){
-                    const auto ws=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/workspace");
-                    auto owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                    const auto ws=profile_request(state,"/v1/workspace");
+                    auto owner=profile_request(state,"/v1/backend/owner");
                     if(owner.value("quiesced",false)){
                         Json request=authority_body(ws);request["expected_generation"]=owner.at("generation");request["expected_revision"]=owner.at("revision");request["receipt_id"]=owner.at("receipt_id");
-                        profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner/activate",&request);
-                        owner=profile_request(state.at("port").get<int>(),state.at("auth").get<std::string>(),"/v1/backend/owner");
+                        profile_request(state,"/v1/backend/owner/activate",&request);
+                        owner=profile_request(state,"/v1/backend/owner");
                     }
                     require(!owner.value("quiesced",true),"Replacement owner remains quiesced; reconnect to resume activation");
                     state.erase("owner_receipt");state.erase("replacement_port");state.erase("replacement_manifest");state.erase("replacement_runtime");store.write(state);
@@ -1144,7 +1203,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state.at("pid").get<std::uint32_t>(),
             started,
             SecretBytes({reinterpret_cast<const std::uint8_t *>(auth.data()), auth.size()}),
-            state.at("approved_edits").get<bool>(),state.value("agent_execution",std::string{"thread"})};
+            state.at("approved_edits").get<bool>(),state.value("agent_execution",std::string{"thread"}),state.value("ipc_endpoint",std::string{})};
 }
 void validate_local_profile_launch(const std::string &state_file,const std::string &workspace_root,
                                    const std::string &runtime_root,const std::string &manifest,
@@ -1194,7 +1253,7 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
 }
 void publish_local_profile_ready(const std::string &state_file, int port, const std::string &token,
                                  const std::string &workspace_root, const std::string &workspace_id,
-                                 const std::string &authority) {
+                                 const std::string &authority,const std::string &ipc_endpoint) {
     const auto path = absolute(state_file);
     require(path.filename() == L"profile.state" && port > 0 && port <= 65535);
     Store store(path.parent_path());
@@ -1209,8 +1268,45 @@ void publish_local_profile_ready(const std::string &state_file, int port, const 
     require(hex(authority, 32));
     state["authority"] = authority;
     state["port"] = port;
+    if(!ipc_endpoint.empty()){
+        require(ipc_endpoint.starts_with("lrpc:")&&ipc_endpoint.size()<=16,"Invalid profile IPC endpoint");
+        state["ipc_endpoint"]=ipc_endpoint;
+    }
     state["phase"] = "ready";
     store.write(state);
+}
+LocalProfileOptions managed_web_view_options(const std::string& directory){
+    Store store(absolute(directory));const auto state=store.state();
+    WorkspaceTools workspace(state.at("workspace").get<std::string>());shape(state,store,workspace);
+    require(state.at("phase")=="ready"&&state.at("pid")==GetCurrentProcessId()&&state.at("birth")==inspect_owner_process_birth(GetCurrentProcessId())&&state.at("runtime")==loaded_root(),"Browser configuration requires its exact managed owner");
+    LocalProfileOptions options;
+    options.provider_config=state.value("provider_config",std::string{});options.graphs_config=state.value("graphs_config",std::string{});
+    options.python_tools_config=state.value("python_tools_config",std::string{});options.language_server_config=state.value("language_server_config",std::string{});
+    options.process_config=state.value("process_config",std::string{});options.mcp_config=state.value("mcp_config",std::string{});
+    options.approved_edits=state.at("approved_edits").get<bool>();options.agent_execution=state.value("agent_execution",std::string{"thread"});return options;
+}
+std::string inspect_managed_web_owner(const std::string& directory){
+    Store store(absolute(directory));const auto state=store.state();WorkspaceTools workspace(state.at("workspace").get<std::string>());shape(state,store,workspace);verify_process(state);
+    return profile_request(state,"/v1/backend/owner").dump();
+}
+std::string finish_retired_managed_web_owner(const std::string& directory){
+    Store store(absolute(directory));auto startup=store.lock();const auto state=store.state();
+    WorkspaceTools workspace(state.at("workspace").get<std::string>());shape(state,store,workspace);
+    require(!state.value("web_assets",std::string{}).empty()&&state.contains("owner_receipt")&&state.contains("replacement_runtime")&&state.contains("replacement_manifest"),"Only an acknowledged managed web handoff can finish retirement");
+    verify_process(state);const auto owner=profile_request(state,"/v1/backend/owner");const auto& receipt=state.at("owner_receipt");
+    require(owner.value("quiesced",false)&&owner.value("retirement_requested",false)&&!owner.value("replacement_prepared",false)&&owner.contains("bootstrap_receipt")&&owner.at("bootstrap_receipt")==receipt&&owner.at("generation")==receipt.at("generation")&&owner.at("receipt_id")==receipt.at("receipt_id")&&owner.at("revision")>=receipt.at("revision")&&owner.at("process_id")==state.at("pid")&&owner.at("process_birth")==state.at("birth"),"Native retirement has not been acknowledged; process was preserved");
+    const auto pid=state.at("pid").get<std::uint32_t>();Handle process(OpenProcess(PROCESS_TERMINATE|PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE,FALSE,pid));require(process.value!=nullptr,"Cannot open acknowledged retired process");
+    FILETIME created{},exit{},kernel{},user{};require(GetProcessTimes(process.value,&created,&exit,&kernel,&user)!=0,"Cannot verify retired process birth");
+    const auto birth=std::to_string((static_cast<std::uint64_t>(created.dwHighDateTime)<<32)|created.dwLowDateTime);require(birth==state.at("birth").get<std::string>(),"Retired process identity changed");
+    std::wstring image(32768,L'\0');DWORD size=static_cast<DWORD>(image.size());require(QueryFullProcessImageNameW(process.value,0,image.data(),&size)!=0,"Cannot verify retired image");image.resize(size);if(image.starts_with(L"\\\\?\\"))image.erase(0,4);
+    require(same(fs::path(image).lexically_normal().native(),(absolute(state.at("runtime").get<std::string>())/L"xmind.exe").native()),"Retired process image differs");
+    require(TerminateProcess(process.value,ERROR_PROCESS_ABORTED)!=0&&WaitForSingleObject(process.value,10000)==WAIT_OBJECT_0,"Acknowledged retired process exit remains unresolved");
+    return Json{{"process_id",pid},{"process_birth",birth},{"native_retirement_acknowledged",true},{"physical_exit_confirmed",true},{"forced_after_retirement",true},{"profile_preserved",true}}.dump();
+}
+void publish_managed_web_port(const std::string& directory,int port){
+    require(port>0&&port<=65535,"Invalid managed browser port");Store store(absolute(directory));auto startup=store.lock();auto state=store.state();
+    require(state.at("phase")=="ready"&&state.at("pid")==GetCurrentProcessId()&&state.at("birth")==inspect_owner_process_birth(GetCurrentProcessId())&&state.at("runtime")==loaded_root(),"Browser port requires its exact managed owner");
+    state["web_port"]=port;store.write(state);
 }
 void validate_local_view_ready(const std::string &file, const std::string &workspace_root) {
     const auto target = absolute(file);

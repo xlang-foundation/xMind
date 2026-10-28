@@ -35,6 +35,7 @@
 #include "agentflow/a2a_agent_registry.hpp"
 #endif
 #include "httplib.h"
+#include "native_request_router.hpp"
 #include "nlohmann/json.hpp"
 #include <charconv>
 #include <iomanip>
@@ -320,7 +321,7 @@ struct HttpServer::Impl {
         bool acquire(){auto count=active.load();while(count<2){if(active.compare_exchange_weak(count,count+1)){acquired=true;return true;}}return false;}
         ~StreamLease(){if(acquired)active.fetch_sub(1);}
     };
-    httplib::Server server;
+    NativeRequestRouter server;
     int port=-1;
     bool owner_admission_open()const{
 #if defined(_WIN32)
@@ -501,7 +502,7 @@ struct HttpServer::Impl {
             }));
             if(owner_control->replacement_supported()){
                 server.Post("/v1/backend/owner/retire",guard_errors([this,encode_owner](const Request& request,Response& response){
-                    if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner control does not accept query parameters");const auto input=body(request,{"expected_generation","expected_revision","receipt_id","expected_workspace_id","expected_workspace_authority_id","target_runtime_root","target_manifest_sha256","approved_edits"});const auto authority=workspace_admission(input);if(!authority||!input.contains("approved_edits")||!input.at("approved_edits").is_boolean())throw std::invalid_argument("Retirement requires workspace authority and an edit policy");VerifiedRuntimeGeneration target(string_field(input,"target_runtime_root",32768),string_field(input,"target_manifest_sha256",64),executor->execution_workspace().root);auto state=owner_control->retire_to({string_field(input,"expected_generation",32),string_field(input,"receipt_id",32),graph_revision(input,"expected_revision")},*authority,target,input.at("approved_edits").get<bool>());reply(response,encode_owner(state));server.stop();
+                    if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner control does not accept query parameters");const auto input=body(request,{"expected_generation","expected_revision","receipt_id","expected_workspace_id","expected_workspace_authority_id","target_runtime_root","target_manifest_sha256","approved_edits"});const auto authority=workspace_admission(input);if(!authority||!input.contains("approved_edits")||!input.at("approved_edits").is_boolean())throw std::invalid_argument("Retirement requires workspace authority and an edit policy");VerifiedRuntimeGeneration target(string_field(input,"target_runtime_root",32768),string_field(input,"target_manifest_sha256",64),executor->execution_workspace().root);auto state=owner_control->retire_to({string_field(input,"expected_generation",32),string_field(input,"receipt_id",32),graph_revision(input,"expected_revision")},*authority,target,input.at("approved_edits").get<bool>());reply(response,encode_owner(state));stopping=true;server.stop();
                 }));
                 server.Post("/v1/backend/owner/activate",guard_errors([this,encode_owner](const Request& request,Response& response){
                     if(request.target.find('?')!=std::string::npos||!request.params.empty())throw std::invalid_argument("Owner control does not accept query parameters");const auto input=body(request,{"expected_generation","expected_revision","receipt_id","expected_workspace_id","expected_workspace_authority_id"});const auto authority=workspace_admission(input);if(!authority)throw std::invalid_argument("Activation requires workspace authority");reply(response,encode_owner(owner_control->activate_replacement({string_field(input,"expected_generation",32),string_field(input,"receipt_id",32),graph_revision(input,"expected_revision")},*authority)));
@@ -1687,4 +1688,11 @@ int HttpServer::bind(int port) {
 }
 bool HttpServer::listen() {if(impl_->port<0) throw std::logic_error("Bind before listen");return impl_->server.listen_after_bind();}
 void HttpServer::stop() {impl_->stopping=true;if(impl_->owns_inbox)impl_->inbox_service->close();impl_->server.stop();}
+std::function<void(httplib::Request&,httplib::Response&)> HttpServer::bound_requests() {
+    return [state=impl_](httplib::Request& request,httplib::Response& response){
+        if(state->stopping){response.status=503;response.set_content("{\"detail\":\"Backend is stopping\"}","application/json");return;}
+        state->server.dispatch(request,response);
+    };
+}
+std::function<bool()> HttpServer::bound_running(){return [state=impl_]{return !state->stopping.load();};}
 }

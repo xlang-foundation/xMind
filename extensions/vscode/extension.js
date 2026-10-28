@@ -23,7 +23,7 @@ function startupHtml(message) {
 
 async function activate(context) {
   const backendAuth=new BackendAuth(vscode,context);context.subscriptions.push(backendAuth);
-  const browserViews=browserViewLauncher(vscode,context);
+  const browserViews=browserViewLauncher(vscode,context,{openNative:()=>workspaceBackend.openBrowser()});
   const workspaceBackend=new WorkspaceBackend(vscode,context,resolveNativeRuntime,{onProgress:({elapsedMs})=>{
     if(!sidebarView||panel===sidebarView)return;
     const text=`Waiting for the local xMind backend… ${Math.floor(elapsedMs/1000)} s elapsed.`;
@@ -1070,9 +1070,9 @@ async function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('agentflow.openBrowser',async()=>{
     try{
       if(!vscode.workspace.isTrusted)throw new Error('Trust the workspace before connecting a browser view.');
-      await open();const origin=configuredOrigin();if(!workspaceBackend.active)throw new Error('Connect the opened workspace before opening its browser.');
-      let token=await context.secrets.get(secretKey(origin));
-      try{const target=new BackendClient(origin,()=>token);await target.health();if(origin!==configuredOrigin())throw new Error('Backend changed while opening the browser. Try again.');await browserViews.open(origin,token);vscode.window.showInformationMessage('xMind Browser is connected to this workspace and uses its models and history.');}finally{token=undefined;}
+      await open();if(!workspaceBackend.active)throw new Error('Connect the opened workspace before opening its browser.');
+      await browserViews.open();await reconnectWorkspace();
+      vscode.window.showInformationMessage('xMind Browser is connected to this workspace and uses its models and history.');
     }catch(error){vscode.window.showErrorMessage(error.message);}
   }));
   function disconnectWorkspace(){

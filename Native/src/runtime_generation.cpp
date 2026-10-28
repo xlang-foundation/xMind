@@ -74,7 +74,14 @@ bool allowed(const std::string& name){
         const auto wheel=name.substr(7);constexpr std::string_view suffix="-py3-none-win_amd64.whl";
         return wheel.size()>suffix.size()&&wheel.ends_with(suffix)&&wheel.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789_.+-")==std::string::npos;
     }
-    if(name.starts_with("modules/")){const auto relative=name.substr(8);if(relative.ends_with(".x3pkg.dll")||relative.ends_with(".py"))return true;const auto separator=relative.find('/');return separator!=std::string::npos&&relative.find('/',separator+1)==std::string::npos&&relative.substr(0,separator).ends_with(".dist-info")&&relative.substr(separator+1)=="METADATA";}
+    if(name.starts_with("modules/")){
+        const auto relative=name.substr(8);if(relative.ends_with(".x3pkg.dll")||relative.ends_with(".py")||relative=="xmind_web_routes.json")return true;
+        static const std::regex typed(R"(^modules/.+/(?:py\.typed|[^/]+\.(?:pyi|md))$)");
+        static const std::regex metadata(R"(^modules/[^/]+\.dist-info/(?:METADATA|WHEEL|RECORD|INSTALLER|REQUESTED|entry_points\.txt|top_level\.txt|direct_url\.json|LICENSE(?:\.[A-Za-z0-9_-]+)?|licenses/.+)$)");
+        if(std::regex_match(name,typed))return true;
+        if(std::regex_match(name,metadata)){const auto lower=folded(name);for(const auto* extension:{".exe",".dll",".pyd",".so",".dylib",".pyc",".pyo",".whl",".zip",".pth"})if(lower.ends_with(extension))return false;return true;}
+        return false;
+    }
     if(name.starts_with("stdlib/")&&name.ends_with(".py"))return true;
     static const std::regex pip_data(R"(^stdlib/pip/(?:py\.typed|_vendor/(?:README\.rst|bom\.cdx\.json|vendor\.txt|certifi/cacert\.pem|.+/py\.typed|.+/(?:LICENSE(?:[._-][A-Za-z0-9.-]+)?|COPYING)|urllib3/contrib/emscripten/emscripten_fetch_worker\.js))$)");
     static const std::regex pip_launcher(R"(^stdlib/pip/_vendor/distlib/[tw](?:32|64(?:-arm)?)\.exe$)");

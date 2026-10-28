@@ -21,8 +21,11 @@
 #include "remote_snapshot_values.hpp"
 #include <optional>
 #include <mutex>
+#include <condition_variable>
 #include "xlang3/xlang3.h"
 #include <stdexcept>
+#include "httplib.h"
+#include "native_response_stream.hpp"
 namespace agentflow {
 namespace {
 struct ApiContext {
@@ -35,6 +38,16 @@ struct ApiContext {
     BackendOwnerControl* owner=nullptr;
     mutable std::shared_mutex lifetime;
     bool active=true;
+    std::mutex web_reply_mutex;
+    std::condition_variable web_reply_changed;
+    std::size_t web_replies=0;
+    bool web_draining=false;
+    void retain_web_reply(){std::lock_guard lock(web_reply_mutex);if(web_draining)throw RunUnavailable("Backend shutting down");if(web_replies>=64)throw RunBusy("Native request capacity is busy");++web_replies;}
+    void release_web_reply(){std::lock_guard lock(web_reply_mutex);if(web_replies)--web_replies;web_reply_changed.notify_all();}
+    void drain_web_replies(){std::unique_lock lock(web_reply_mutex);web_draining=true;web_reply_changed.wait_for(lock,std::chrono::seconds(10),[this]{return web_replies==0;});}
+    std::function<void(httplib::Request&,httplib::Response&)> web_requests;
+    int web_port=0;
+    std::function<bool()> web_running;
     ApiContext(PersistenceService& persistence,RunExecutor* execution,const std::string& auth,BackendOwnerControl* control):store(persistence),executor(execution),token(auth),connections(persistence),authentication(persistence,connections),bindings(persistence,execution,control),owner(control){}
     auto enter()const{std::shared_lock lock(lifetime);if(!active)throw RunUnavailable("unavailable");return lock;}
     std::optional<std::shared_lock<std::shared_mutex>> admit(){if(owner)return owner->admit();return {};}
@@ -67,6 +80,7 @@ struct HostApi {
         APISET().AddFunc<0>("Transport",&HostApi::Transport);
     END_PACKAGE
 };
+#include "web_requests_api.hpp"
 struct SessionsApi {
     std::shared_ptr<ApiContext> context;
     SessionsApi(RootApi*,std::string token);
@@ -363,11 +377,13 @@ struct RootApi {
         APISET().AddClass<0,NativeWorkerLinksApi>("WorkerLinks");
         APISET().AddClass<0,NativePlanningApi>("Planning");
         APISET().AddClass<1,ConnectionsApi,RootApi>("Connections");
+        APISET().AddClass<1,WebRequestsApi,RootApi>("WebRequests");
         APISET().AddClass<1,SessionsApi,RootApi>("Sessions");
         APISET().AddClass<1,RunsApi,RootApi>("Runs");
     END_PACKAGE
 };
 ConnectionsApi::ConnectionsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
+WebRequestsApi::WebRequestsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
 SessionsApi::SessionsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
 RunsApi::RunsApi(RootApi* root,std::string token):context(root->capture()){context->authorize(token);}
 RootApi& api_root(){
@@ -385,6 +401,7 @@ struct XMindIpcServer::Impl {
         try{context->bindings.start();}catch(...){root.context.reset();throw;}
     }
     ~Impl(){
+        context->drain_web_replies();
         {std::unique_lock lock(context->lifetime);context->active=false;}context->bindings.close();
         std::lock_guard lock(root.binding);if(root.context==context)root.context.reset();
     }
@@ -393,4 +410,7 @@ XMindIpcServer::XMindIpcServer(PersistenceService& store,RunExecutor* executor,c
 XMindIpcServer::~XMindIpcServer()=default;
 LocalConnectionBindings& XMindIpcServer::connection_bindings()noexcept{return impl_->context->bindings;}
 const std::string& XMindIpcServer::endpoint()const noexcept{return impl_->endpoint;}
+void XMindIpcServer::bind_web_requests(std::function<void(httplib::Request&,httplib::Response&)> requests,int port,std::function<bool()> running){
+    std::unique_lock lock(impl_->context->lifetime);impl_->context->web_requests=std::move(requests);impl_->context->web_port=port;impl_->context->web_running=std::move(running);
+}
 }

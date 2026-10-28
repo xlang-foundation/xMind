@@ -2,6 +2,8 @@
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/run_executor.hpp"
 #include <string_view>
+#include <functional>
+namespace httplib { struct Request; struct Response; }
 
 namespace agentflow {
 class EditRecoveryReader;
@@ -27,8 +29,10 @@ public:
     int bind(int port); // 0 selects an available loopback port.
     bool listen();
     void stop();
+    std::function<void(httplib::Request&,httplib::Response&)> bound_requests();
+    std::function<bool()> bound_running();
 private:
     struct Impl;
-    std::unique_ptr<Impl> impl_;
+    std::shared_ptr<Impl> impl_;
 };
 }

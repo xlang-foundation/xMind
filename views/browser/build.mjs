@@ -6,7 +6,7 @@ import {createRequire} from 'node:module';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const require=createRequire(import.meta.url);
 
-export async function buildBrowserAssets(targetPath,adapterPath){
+export async function buildBrowserAssets(targetPath){
   const target=resolve(targetPath||join(root,'.agentflow/browser-assets'));
   const {browserHtml}=require('./page.cjs');
   await mkdir(target,{recursive:true});
@@ -20,14 +20,8 @@ export async function buildBrowserAssets(targetPath,adapterPath){
   await mkdir(notices,{recursive:true});
   for(const [source,name] of [['marked/LICENSE','marked.txt'],['dompurify/LICENSE','dompurify.txt'],['dompurify/LICENSE-MPL','dompurify-MPL.txt'],['@xterm/xterm/LICENSE','xterm.txt'],['@xterm/addon-fit/LICENSE','xterm-addon-fit.txt']])
     await copyFile(join(root,'extensions/vscode/node_modules',source),join(notices,name));
-  if(adapterPath){
-    const adapter=resolve(adapterPath);
-    await mkdir(resolve(adapter,'..'),{recursive:true});
-    await copyFile(join(root,'views/browser/server.mjs'),adapter);
-    console.log('Browser access adapter bundled at '+adapter);
-  }
   return target;
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)
-  await buildBrowserAssets(process.argv[2],process.argv[3]);
+  await buildBrowserAssets(process.argv[2]);

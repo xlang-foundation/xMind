@@ -4,9 +4,12 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <functional>
+namespace httplib { struct Request; struct Response; }
 namespace agentflow {
 struct LocalProfileOptions {
     std::string workspace, profile_root, provider_config, graphs_config, python_tools_config, language_server_config, process_config, mcp_config;
+    std::string web_assets,web_packages;
     std::optional<bool> approved_edits;
     bool require_existing_profile = false;
     bool upgrade_backend = false;
@@ -21,6 +24,8 @@ struct LocalProfileConnection {
     SecretBytes auth;
     bool approved_edits = true;
     std::string agent_execution="thread";
+    std::string ipc_endpoint;
+    std::function<void(httplib::Request&,httplib::Response&)> bound_requests;
 };
 struct LocalWorkspaceProfile {
     std::string workspace_id, root, name;
@@ -41,7 +46,7 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
 std::vector<LocalWorkspaceProfile> list_local_workspace_profiles(const std::string &profile_root = {});
 void publish_local_profile_ready(const std::string &state_file, int port, const std::string &token,
                                  const std::string &workspace, const std::string &workspace_id,
-                                 const std::string &authority);
+                                 const std::string &authority,const std::string &ipc_endpoint={});
 // Publish only public adapter metadata outside the selected workspace.
 void validate_local_view_ready(const std::string &file, const std::string &workspace);
 void publish_local_view_ready(const std::string &file, const std::string &metadata,

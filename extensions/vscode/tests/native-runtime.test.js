@@ -98,7 +98,8 @@ test('manifest forbids unknown executables, native Python extensions, traversal 
   assert.equal(require('../native-runtime').runtimeFileKind('modules/pydantic_core-2.50.1+xlang3.dist-info/METADATA'),'metadata');
   assert.equal(require('../native-runtime').runtimeFileKind('wheels/pydantic_core-2.50.1+xlang3-py3-none-win_amd64.whl'),'module');
   assert.equal(require('../native-runtime').runtimeFileKind('wheels/pydantic_core-2.50.1-cp314-cp314-win_amd64.whl'),undefined);
-  assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'modules/pydantic_core-2.50.1+xlang3.dist-info/WHEEL': 'f'.repeat(64) } }), /inventory/);
+  assert.doesNotThrow(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'modules/pydantic_core-2.50.1+xlang3.dist-info/WHEEL': 'f'.repeat(64) } }));
+  for(const name of ['modules/pkg-1.dist-info/licenses/tool.exe','modules/pkg-1.dist-info/evil.pth','modules/other.json'])assert.equal(require('../native-runtime').runtimeFileKind(name),undefined);
   assert.throws(() => validateManifest({ ...f.manifest, files: { ...f.manifest.files, 'XMIND.EXE': 'f'.repeat(64) } }), /inventory/);
   assert.throws(() => validateManifest({ ...f.manifest, bridgeEnabled: true }), /incompatible/);
 });

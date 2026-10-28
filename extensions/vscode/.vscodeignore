@@ -8,3 +8,4 @@ tests/**
 scripts/**
 *.vsix
 package-lock.json
+browser-runtime/server.mjs

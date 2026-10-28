@@ -1,35 +1,23 @@
 'use strict';
-const {join}=require('node:path');
-const {pathToFileURL}=require('node:url');
-const {backendOrigin,validateToken}=require('./client');
+const {backendOrigin}=require('./client');
 
-// Access adapter only: native execution and provider credentials stay on the
-// selected server. The connection token is passed in memory, never to the page.
-function browserViewLauncher(vscode,context,{loadServer=path=>import(pathToFileURL(path).href),assetRoot,serverPath}={}) {
-  let active,opening,disposed=false;
-  async function open(origin,token){
+// The extension opens the native host; it never serves browser HTTP.
+function browserViewLauncher(vscode,context,{openNative}={}) {
+  let opening,disposed=false;
+  async function open(){
     if(disposed)throw new Error('Browser view launcher has closed');
-    origin=backendOrigin(origin);token=validateToken(token);
     if(opening)throw new Error('A browser view is already opening');
+    if(typeof openNative!=='function')throw new Error('Native browser startup is unavailable');
     opening=(async()=>{
-      if(!active||active.origin!==origin){
-        const directory=context.extensionUri.fsPath;
-        const {createBrowserServer}=await loadServer(serverPath||join(directory,'browser-runtime','server.mjs'));
-        if(disposed)throw new Error('Browser view launcher has closed');
-        const view=await createBrowserServer({backend:origin,assetRoot:assetRoot||join(directory,'browser-runtime','assets'),localAccessToken:token});
-        let url;try{url=await view.listen();}catch(error){await view.close().catch(()=>{});throw error;}
-        if(disposed){await view.close();throw new Error('Browser view launcher has closed');}
-        const previous=active;active={origin,view,url:url+'/ui/'};if(previous)await previous.view.close();
-      }
-      // No credential is put in the URL, browser storage, clipboard or page code.
-      token=undefined;
+      const value=await openNative(),url=new URL(value),origin=backendOrigin(url.origin);
+      if(value!==origin+'/ui/'||url.hostname!=='127.0.0.1')throw new Error('Invalid native browser URL');
       if(disposed)throw new Error('Browser view launcher has closed');
-      if(!await vscode.env.openExternal(vscode.Uri.parse(active.url)))throw new Error('The browser could not open the xMind Browser view.');
-      return active.url;
+      if(!await vscode.env.openExternal(vscode.Uri.parse(value)))throw new Error('The browser could not open the xMind Browser view.');
+      return value;
     })();
-    try{return await opening;}finally{opening=undefined;token=undefined;}
+    try{return await opening;}finally{opening=undefined;}
   }
-  function dispose(){disposed=true;const current=active;active=undefined;current?.view.close().catch(()=>{});}
+  function dispose(){disposed=true;/* The native backend owns its lifetime. */}
   context.subscriptions.push({dispose});
   return {open,dispose};
 }

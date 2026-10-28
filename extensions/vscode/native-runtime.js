@@ -36,10 +36,13 @@ async function regular(file, directory = false, io = fs) {
   return info;
 }
 function runtimeFileKind(name) {
+  if (name === 'modules/xmind_web_routes.json') return 'module';
   if (REQUIRED_NATIVE.includes(name)) return 'native';
   // Admit only xlang3 package plugins and their pure Python facades.
   if (name.startsWith('modules/') && (name.endsWith('.x3pkg.dll') || name.endsWith('.py'))) return 'module';
   if (name.startsWith('modules/') && /^modules\/[^/]+\.dist-info\/METADATA$/.test(name)) return 'metadata';
+  if (/^modules\/.+\/(?:py\.typed|[^/]+\.(?:pyi|md))$/.test(name)) return 'metadata';
+  if (/^modules\/[^/]+\.dist-info\/(?:METADATA|WHEEL|RECORD|INSTALLER|REQUESTED|entry_points\.txt|top_level\.txt|direct_url\.json|LICENSE(?:\.[A-Za-z0-9_-]+)?|licenses\/.+)$/.test(name) && !/\.(?:exe|dll|pyd|so|dylib|pyc|pyo|whl|zip|pth)$/i.test(name)) return 'metadata';
   if (/^wheels\/[a-z0-9_.+-]+-py3-none-win_amd64\.whl$/.test(name)) return 'module';
   if (name.startsWith('stdlib/') && name.endsWith('.py')) return 'stdlib';
   if (/^stdlib\/pip\/(?:py\.typed|_vendor\/(?:README\.rst|bom\.cdx\.json|vendor\.txt|certifi\/cacert\.pem|.+\/py\.typed|.+\/(?:LICENSE(?:[._-][A-Za-z0-9.-]+)?|COPYING)|urllib3\/contrib\/emscripten\/emscripten_fetch_worker\.js))$/.test(name)) return 'stdlib';
@@ -96,6 +99,11 @@ async function enumerate(root, io = fs, prefix = '') {
     check(result.length <= 20001, 'The native runtime file inventory exceeds its limit.');
   }
   return result.sort();
+}
+async function verifyNativeWebRuntime(runtimeRoot, options) {
+  const verified=await verifyNativeRuntime(runtimeRoot,options);
+  for(const name of ['xmind_web.py','xmind_web_routes.json','fastapi/__init__.py','uvicorn/server.py','starlette/applications.py','anyio/__init__.py','pydantic/__init__.py','typing_extensions.py'])check(Object.hasOwn(verified.manifest.files,'modules/'+name),'The native runtime is missing embedded web libraries. Package the pinned xmind pip installation before opening the browser.');
+  return verified;
 }
 async function verifyNativeRuntime(runtimeRoot, { io = fs } = {}) {
   runtimeRoot = absolute(runtimeRoot, 'Native runtime directory');
@@ -185,4 +193,4 @@ function nativeProgramEntry(runtime, role) {
   check(['serve', 'admin', 'console', 'schema-worker'].includes(role), 'Unsupported native entry role.');
   return {program:path.join(runtime.runtimeRoot,'xmind.exe'),arguments:role==='console'?[]:[role]};
 }
-module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, isLocalHostConnection, REQUIRED_NATIVE, REQUIRED_STDLIB, REQUIRED_BOOTSTRAP, MANIFEST_NAME };
+module.exports = { resolveNativeRuntime, retainNativeRuntime, verifyNativeRuntime, verifyNativeWebRuntime, validateManifest, validateModuleInventory, relativeFile, runtimeFileKind, nativeProgramEntry, isLocalHostConnection, REQUIRED_NATIVE, REQUIRED_STDLIB, REQUIRED_BOOTSTRAP, MANIFEST_NAME };

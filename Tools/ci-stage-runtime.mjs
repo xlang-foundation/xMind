@@ -48,7 +48,7 @@ need(runtime.REQUIRED_NATIVE.every(name=>Object.hasOwn(files,name)),'A required 
 const manifest={schemaVersion:1,platform:'win32',arch:'x64',bridgeEnabled:false,nativeRevision:sourceRevision,sdkRevision,files};
 const manifestRaw=Buffer.from(JSON.stringify(manifest,null,2)+'\n'),bundleManifest=join(evidence,'accepted-source-manifest.json');
 await writeFile(bundleManifest,manifestRaw,{flag:'wx'});
-const staged=await stageNativeRuntime({explicitStage:true,bundle,bundleManifest,bundleManifestSha256:sha(manifestRaw),stdlibSource:resolve(root,'../stdlib-source/Lib'),stdlibLicense:resolve(root,'../stdlib-source/LICENSE'),out:join(root,'extensions/vscode/native-runtime')});
+const staged=await stageNativeRuntime({explicitStage:true,bundle,bundleManifest,bundleManifestSha256:sha(manifestRaw),stdlibSource:resolve(root,'../stdlib-source/Lib'),stdlibLicense:resolve(root,'../stdlib-source/LICENSE'),webLibrarySource:join(root,'build/web-python'),out:join(root,'extensions/vscode/native-runtime')});
 const report={sourceRevision,sdkRevision,stdlibRevision,contracts:registered.length,sourceFiles:Object.keys(files).length,sourceManifestSha256:sha(manifestRaw),...staged,scope:'File staging from the complete successful native gate; VSIX verification follows separately'};
 await writeFile(join(evidence,'runtime-staging.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
 console.log(JSON.stringify(report));

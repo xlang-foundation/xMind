@@ -12,7 +12,7 @@ Current acceptance and exact source/package scope are tracked in
 checkpoints and rendered-view evidence are historical; they do not accept
 current browser paint, layout, input or installed editor activation.
 
-xMind has a local HTML view using the same sidebar renderer and native API client as the VS Code extension. The desktop layout places the agent sidebar on the right, Settings at its top, and the discovered-model selector beside the composer at the bottom. Drag the divider to resize it; arrow keys, Shift+arrows, Home and End also resize a focused divider. Its width is remembered as a non-secret appearance preference in localStorage. Narrow windows use the available width.
+xMind has a local HTML view using the same conversation renderer and native API client as the VS Code extension. The webpage places workspaces and their sessions on the left, the conversation in the middle, and optional Files, Changes and Activity views on the right. The global toolbar identifies the current workspace and session and toggles either sidebar. Both dividers support dragging and keyboard resizing; their widths are remembered as non-secret appearance preferences. Provider, model and permission controls sit beside the composer. The terminal opens at the bottom of the right sidebar.
 
 Response tables scroll horizontally inside their message rather than squeezing
 headers or breaking inline code identifiers. Focus a table and use the arrow
@@ -31,7 +31,7 @@ reload are verified separately from renderer fixtures.
 [Current browser and installed runtime evidence](evidence/coding-package-0.1.40-20261019.json).
 [Installed shared renderer and preservation](evidence/coding-package-0.1.41-20261019.json).
 
-Connect and Disconnect are accessible SVG icon buttons. The OSS page connects directly to the xMind runtime on the same computer; it has no server-token field. The local launcher enrolls the browser session with its private credential, while the durable session stays in an HttpOnly cookie. If a native restart invalidates that cookie, the local adapter renews it automatically from its private launch credential. If the local runtime cannot enroll the page, the dialog explains how to reopen it from xMind or VS Code. It never asks for a server token. Cancel, close and Escape leave an established session intact; a failed reconnect does not clear the current conversation. Team and remote authentication belong to private Nexus.
+The local page connects automatically through the owning xMind process; it has no Connect, Disconnect, Refresh or server-token controls. FastAPI runs inside that process's embedded xlang3 runtime and calls the bound native request router directly. Other workspace owners use standard xlang3 SDK IPC. Native admission enrolls and renews the durable HttpOnly browser session without exposing a launch credential to JavaScript. A failed reconnect retains the conversation. Team and remote authentication belong to private Nexus.
 
 When the local view is launched with the trusted `.config/providers.yaml`, it
 imports configured provider entries into the selected or added workspace
@@ -45,7 +45,7 @@ can run. The sidebar receives the public profile/model list and uses the
 selected profile on subsequent requests; it never needs or receives the raw
 provider key.
 
-The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. The Node HTTP adapter serves validated view-asset snapshots and forwards a finite allowlist of API requests to a configured loopback native server. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
+The C++ server owns execution, tools, graphs, permissions, providers and history. SQLite I/O remains in embedded xlang3. FastAPI runs in the main xMind process, serves validated view-asset snapshots and calls bound C++ handlers. Other local xMind owners are reached through standard xlang3 IPC. The SDK adapter submits each request once and observes its captured native job; long verification does not block an SDK call. Closing an event response releases its backend admission slot. Managed retirement drains outstanding replies before shutting down. A page reload loads a complete new snapshot from its configured asset directory without restarting the adapter or losing its authenticated sessions. Boundary, route, size and CSP restrictions still apply; a rejected bundle does not revoke backend access. Closing the view does not cancel execution. This is a local HTTP transport. Team deployment, WebRTC and the standalone Electron IDE belong to private Nexus.
 
 The top bar identifies the current workspace. Its name or gear opens Workspace
 Settings, where the user switches workspace, creates one from an existing first
@@ -56,9 +56,9 @@ read-only native workspace-handle reads; directory links and Git metadata are
 omitted, and backend-private `.config` and `.agentflow` paths remain denied.
 Git status plus working-tree, branch and committed diffs use native Git data
 scoped to that selected profile; patch text is displayed as text in the
-workspace review area. The right sidebar holds conversation history, the
-active chat, run activity and approvals; provider and discovered-model
-selection stay below the composer. Agent edits still appear as approval
+workspace review area. Conversation history and approvals stay with the
+middle chat, while live tool and file activity appears in the right sidebar;
+provider and discovered-model selection stay below the composer. Agent edits still appear as approval
 proposals, and full editor, multi-file diff and recovery workflows remain open
 xMind implementation work.
 
@@ -154,94 +154,53 @@ workspace creation routing and cookie rotation pass the webpage contract.
 
 ## Start
 
-In the updated VS Code extension, run **xMind: Open Browser View**. It validates the selected backend, starts a loopback view adapter for that same origin, privately enrolls a durable browser access session and opens a credential-free URL. Models and history remain on the same server as the editor. This command does not create a second agent-history database or copy provider credentials. The launcher reuses its view for the same backend and closes the old access adapter when the configured backend changes. Actual IDE invocation of this command remains pending; host contracts, native sharing and packaged assets are verified.
+The main `xmind.exe` backend hosts FastAPI through embedded xlang3. Python
+calls the bound native request handlers directly. Requests for another local
+workspace use standard xlang3 IPC and captured native SDK objects. The browser
+uses one loopback origin. Node.js is used for frontend builds, the required
+VS Code extension adapter and independent test peers.
 
-From the repository, with the native build and extension dependencies available:
+The VS Code command **xMind: Open Browser View** launches `xmind web` for the
+selected managed profile and opens its credential-free URL. The runtime must
+bundle the web libraries; prepublish and browser startup verify their manifest.
+Installing this updated extension and invoking the command in a rendered IDE
+still requires separate package acceptance.
+
+For a development build, keep libraries inside xMind and install them with its
+embedded installer. The SDK supplies the compatible native Pydantic wheel:
 
 ```powershell
-node views/browser/build.mjs
-node Tools/start-browser.mjs --runtime D:\path\to\verified\native-runtime --port 60405
+$xmindRuntime='D:\CantorAI2026\xMind\.agentflow\xmind-web-runtime'
+$xmindPackages='D:\CantorAI2026\xMind\.agentflow\web-python\site-packages'
+& "$xmindRuntime\xmind.exe" pip --isolated install --only-binary=:all: --no-compile --no-input --find-links "$xmindRuntime\wheels" --target $xmindPackages -r views/browser/requirements-web.txt
+node views/browser/build.mjs .agentflow/xmind-web-assets
+& "$xmindRuntime\xmind.exe" web --workspace D:\path\to\project --assets D:\CantorAI2026\xMind\.agentflow\xmind-web-assets --packages $xmindPackages
 ```
 
-The runtime must be verified and contain the same `xmind.exe` as the current native build; the launcher rejects stale packages. It starts `xmind view` with the shared local profile root and a protected native ready file, then attaches the HTML adapter to that profile-aware host. Do not point `--backend` at generic `xmind serve` when workspace selection is expected. To attach the adapter to a view host already running, pass that host's loopback origin with `--backend`.
+Release staging copies those verified source libraries into the native runtime's
+`modules` directory with `--web-library-source DIR`; a bundled runtime needs no
+`--packages` argument. The FastAPI adapter source is `views/browser/xmind_web.py`.
+No separate Python interpreter or Node HTTP host is started.
 
-To reopen an existing profile using its recorded configuration, add
-`--config-mode saved`. This skips automatic discovery of workspace provider,
-language-server, process and MCP configuration files. Explicit replacement
-configuration paths are refused in this mode. The default `workspace` mode
-retains the existing discovery behavior.
+`Tools/start-browser.ps1` provides the same native launch with `-Workspace`,
+`-RuntimeDirectory`, `-Assets`, optional `-Packages`, `-ProfileRoot`,
+`-ProviderConfig` and `-McpConfig` parameters. Configuration is explicit and
+native-owned. Omitted configuration keeps the recorded profile settings.
+Use `--upgrade-backend` (or `-UpgradeBackend`) to apply a changed runtime or web
+configuration through native quiescence, retirement and replacement. Busy or
+uncertain work is preserved. The public port remains stable across a completed
+managed handoff. Closing the launch command or page leaves native work alive.
 
-To explicitly update the managed backend runtime while retaining that profile,
-add `--upgrade-backend true`. This uses the native owner's existing upgrade and
-busy-owner protections. Merely attaching with `--backend` cannot request an
-upgrade. Normal launches default to `--upgrade-backend false`.
+The page automatically enrolls or restores its HttpOnly, SameSite=Strict native
+session. A stale cookie after an owned restart is renewed without requesting a
+server token or provider key. Workspace changes rotate that cookie. Native
+C++ remains responsible for identity, permissions, execution and persistence.
+The ASGI layer handles bounded HTTP requests, route/query admission, static
+assets, security headers and incremental event delivery. Disconnecting a reader
+closes its observation without replaying or cancelling the admitted work.
 
-Launching again with the same state and matching asset directory rebuilds the
-generated UI files, then reuses the existing browser host and URL. Reload that
-page to load its new validated snapshot. This does not restart the native
-backend, reimport provider settings or resubmit work. A different backend or
-asset directory is rejected before writing those files. A timeout or unavailable
-HTTP observation preserves the existing host and reports that it could not be
-observed; a refused connection permits a new attachment. Do not infer backend
-death from a slow page probe. These UI refresh rules do not apply a new native
-runtime or backend configuration.
-
-Launching again with the same state directory reuses its live browser URL and
-does not start another view. If the existing adapter is attached to a different
-requested backend, startup stops with an explicit message; use a separate state
-directory for a second backend.
-
-The launcher owns the native view it starts. Press Ctrl+C in its console to
-close the browser adapter and retire that native child; Ctrl+Break is also
-handled on Windows. When `--backend` attaches to an existing server, shutdown
-closes only the browser adapter and leaves the shared backend running.
-
-For local language-server support, put trusted profiles in
-`.config/language-servers.yaml`. The profile-aware browser launcher passes that
-file to the native view automatically; use `--language-server-config FILE` to
-select a different trusted file. `Tools/start-ui.ps1` accepts the same switch
-and otherwise uses the repository-local file when present. Both launch paths
-keep the executable and its arguments in owner configuration, never in page or
-model input.
-
-For MCP servers, the profile-aware launcher accepts `--mcp-config FILE` and
-otherwise uses the repository-owned `.config/mcp.json` when present.
-`Tools/start-ui.ps1` accepts `-McpConfig FILE` for its development backend.
-These are trusted host settings, never paths chosen by a page or model.
-Managed profiles keep the imported list when the source file is absent.
-Apply changes through the console's `--mcp-config FILE --upgrade-backend` or
-VS Code's **xMind: Apply Trusted Runtime Configuration**; ordinary reconnection
-does not silently replace the configured server commands.
-
-The profile-aware local launcher keeps its generated access credential in the private launch-state directory and enrolls the page server-side. The VS Code launcher passes its already authenticated local credential directly to the loopback adapter in memory. The page never receives the server credential in JavaScript, a URL, clipboard or browser storage, and users do not enter one. The adapter returns the durable native view credential as an HttpOnly, SameSite=Strict cookie. Reload reconnects with that cookie, which lasts up to eight hours across browser close/reopen and same-origin adapter/backend restarts. Expiry, authority rotation or explicit Disconnect revokes access; Disconnect does not cancel native execution. Only selected session/run/model/workflow IDs are saved in sessionStorage; keys and conversation content are not stored there.
-
-The standalone page attempts cookie-session restoration when it loads. This
-uses the same-origin session endpoint without an Authorization header. When
-launched by the local xMind or VS Code host, the adapter enrolls a fresh browser
-session using its private in-memory local credential. If the browser has no
-valid local enrollment, the page reports that the local runtime needs to be
-reopened from xMind or VS Code; the user is never asked for a server token.
-
-Live browser smoke verification used the actual native profile-aware host and rendered both `xMind` and `TestProj` in the selector. Switching to `TestProj` changed the selected backend and cleared its session list; switching back restored the xMind workspace. No model request or file effect was issued. The smoke test also caught and fixed same-origin GET handling: browsers omit `Origin` on same-origin catalogue reads, so the adapter allows that read while workspace-changing POST still requires the exact view origin. The in-app browser's fetch rejected one abort-signal wrapper; the view retries only that specific pre-request compatibility error without the signal, while normal browsers retain cancellation and timeouts. Workspace timeout and cancellation signals use `AbortController` directly so implementations whose `AbortSignal` static helpers throw `Illegal invocation` still allow profile switches; a browser regression contract exercises that failure mode.
-
-On 2026-10-10, rendered webpage acceptance submitted the existing
-The first rendered acceptance used a profile-aware host whose binary differed
-from the current build; its exact scope remains in the
-[initial live evidence](evidence/browser-workspace-live-20261010.json). A later
-run used the current `xmind.exe` hash and the real standalone webpage at a
-648-pixel viewport. After a page refresh, its HttpOnly session restored without
-entering any server token. **Add workspace** opened the workspace dialog,
-registered `D:\CantorAI2026\xMind` alongside `TestProj`, and selected it. The
-selector then switched back to `TestProj`; the picker re-enabled and the page
-showed the TestProj native workspace. The Add and Connect controls remained
-separate at the narrow viewport. No provider request or workspace file change
-was issued. This proves the browser needs its own **Add workspace** flow
-because it has no VS Code opened-folder context. See the
-[current-build rendered acceptance](evidence/browser-workspace-live-current-build-20261010.json).
-
-Cookie authentication requires browser same-origin fetch metadata, while session enrollment and revocation also require the exact view Origin. Cross-origin requests remain rejected. Session identifiers are not accepted in URLs. There is a 32-session limit and bounded session-request bodies. This cookie is for the loopback HTTP development transport; remote access still requires a separately designed HTTPS/team authentication adapter.
-
-Settings supports provider enrollment and model discovery through the native API. A separate development profile initially starts without a provider key; the existing VS Code preview's saved key is not copied. The user has now configured this webpage profile and completed a live OpenAI Chat Completions response. Its actual rendered and native-persisted usage was observed: 3,679 input, 789 output and 4,468 total tokens, model `chat-latest`, first token 1,425 ms and elapsed 7,200 ms. [Metadata-only evidence](evidence/browser-live-response-metadata.json) excludes conversation content and credentials. This proves one live response and its usage rendering, not full coding/provider parity.
+The previous launcher and acceptance narrative is retained in the
+[2026-10-28 checkpoint archive](development-checkpoints-20261028.md).
 
 ## Historical browser checkpoint
 

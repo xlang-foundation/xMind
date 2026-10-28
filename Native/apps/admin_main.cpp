@@ -11,6 +11,7 @@
 #include "agentflow/legacy_owner.hpp"
 #include "agentflow/legacy_owner_process.hpp"
 #include "agentflow/backend_owner_control.hpp"
+#include "agentflow/program_entries.hpp"
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -37,6 +38,14 @@ bool reflected(const nlohmann::json& value,const std::string& secret){
 }
 int run_admin(int argc,char** argv){
     try {
+#if defined(XMIND_UNIFIED_EXECUTABLE)
+        if(argc==3&&std::string(argv[1])=="inspect-managed-web-owner"){
+            std::cout<<agentflow::inspect_managed_web_owner(argv[2])<<std::endl;return 0;
+        }
+        if(argc==3&&std::string(argv[1])=="finish-retired-web-owner"){
+            std::cout<<agentflow::finish_retired_managed_web_owner(argv[2])<<std::endl;return 0;
+        }
+#endif
         if(argc==3&&std::string(argv[1])=="inspect-legacy-listener"){
             const std::string input=argv[2];std::uint32_t port=0;const auto parsed=std::from_chars(input.data(),input.data()+input.size(),port);if(parsed.ec!=std::errc{}||parsed.ptr!=input.data()+input.size()||port==0||port>65535)throw std::invalid_argument("Invalid legacy listener port");const auto result=agentflow::discover_legacy_listener(static_cast<std::uint16_t>(port));std::cout<<nlohmann::json{{"process_id",result.source.process_id},{"process_birth",result.source.process_birth},{"image_path",result.image_path},{"server_sha256",result.source.server_sha256},{"authenticated",false},{"process_signalled",false}}.dump()<<'\n';return 0;
         }

@@ -6,7 +6,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {spawn}=require('node:child_process');
-const {BackendClient}=require('./client');
+const {BackendClient,backendOrigin}=require('./client');
 function canonicalPath(value){
   if(typeof value!=='string'||!value||value.length>32760||/[\x00-\x1f]/.test(value))throw new Error('Invalid local workspace path.');
   const ordinary=value.startsWith('\\\\?\\UNC\\')?'\\\\'+value.slice(8):value.startsWith('\\\\?\\')?value.slice(4):value;
@@ -222,13 +222,40 @@ class WorkspaceBackend {
       if(metadata.process_id!==child.pid||typeof metadata.process_birth!=='string'||!/^[1-9][0-9]{0,19}$/.test(metadata.process_birth)||!Number.isSafeInteger(metadata.backend_process_id)||metadata.backend_process_id<1||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(metadata.origin))throw new Error('Native view process metadata differs.');
       const actual=workspaceMetadata(metadata.workspace),profileDirectory=canonicalPath(metadata.profile_directory);
       if(!actual.configured||keyPath(actual.root)!==keyPath(canonical)||roots.some(root=>contained(root,profileDirectory)||contained(profileDirectory,root)))throw new Error('Native workspace or private profile differs from the opened folder set.');
-      owner={origin:metadata.origin,canonical,scope,metadata:actual,child,pid:child.pid,backendPid:metadata.backend_process_id,privateDirectory:directory,profileDirectory};
+      owner={origin:metadata.origin,canonical,scope,metadata:actual,child,pid:child.pid,backendPid:metadata.backend_process_id,privateDirectory:directory,profileDirectory,runtime};
       await this.context.secrets.store('xmind.auth:'+owner.origin,token);
       await this.observe(owner);
       await this.importProviders(owner.origin,token,runtime.providerConfig);
       if(!current())throw new Error('Workspace changed while authenticating its native view.');
       this.adapters.set(scope,owner);this.active={...owner,epoch,signature:selection.signature,roots:selection.roots};if(upgradeBackend)this.backendUpgradeRequested=false;return this.active;
     }catch(error){if(owner)this.closeAdapter(owner);else if(child.exitCode==null)child.kill();throw error;}
+  }
+  async openBrowser(){
+    if(this.active&&!this.active.profileDirectory)throw new Error('The embedded browser requires a managed local xMind profile. Start xmind web for the intended workspace.');
+    const owner=await this.connect(),epoch=this.epoch,signature=this.signature();
+    const verifyWeb=this.deps.verifyWebRuntime||require('./native-runtime').verifyNativeWebRuntime;
+    await verifyWeb(path.win32.dirname(owner.runtime.nativeProgram));
+    const args=['web','--workspace',owner.canonical,'--profile-root',path.win32.dirname(owner.profileDirectory),'--assets',path.win32.join(this.context.extensionUri.fsPath,'browser-runtime','assets'),'--upgrade-backend'];
+    if(owner.runtime.providerConfig)args.push('--config',owner.runtime.providerConfig);
+    if(owner.runtime.mcpConfig)args.push('--mcp-config',owner.runtime.mcpConfig);
+    const env={...this.deps.env};for(const key of Object.keys(env))if(key.startsWith('XMIND_UI_')||['XMIND_API_KEY','XMIND_AUTH_TOKEN','XMIND_VIEW_TOKEN'].includes(key))delete env[key];
+    const metadata=await new Promise((resolve,reject)=>{
+      const child=this.deps.spawn(owner.runtime.nativeProgram,args,{cwd:owner.canonical,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
+      let stdout='',stderr='',overflow=false;
+      child.stdout.on('data',bytes=>{if(Buffer.byteLength(stdout)+bytes.length<=16384)stdout+=bytes;else overflow=true;});
+      child.stderr.on('data',bytes=>{if(Buffer.byteLength(stderr)+bytes.length<=4096)stderr+=bytes;});
+      child.once('error',reject);
+      child.once('close',code=>{
+        if(code!==0||overflow){reject(new Error(stderr.trim()||'Native browser startup failed; the profile was preserved.'));return;}
+        try{resolve(JSON.parse(stdout));}catch{reject(new Error('Invalid native browser metadata'));}
+      });
+    });
+    if(this.disposed||epoch!==this.epoch||signature!==this.signature()||!this.vscode.workspace.isTrusted)throw new Error('Workspace changed while opening its native browser.');
+    const browserUrl=new URL(metadata.url);
+    if(metadata.transport!=='embedded-fastapi/xlang3-ipc'||browserUrl.hostname!=='127.0.0.1'||metadata.url!==backendOrigin(browserUrl.origin)+'/ui/')throw new Error('Invalid native browser metadata.');
+    if(!Number.isSafeInteger(metadata.process_id)||metadata.process_id<1||typeof metadata.process_birth!=='string'||!/^[1-9][0-9]{0,19}$/.test(metadata.process_birth)||typeof metadata.profile_directory!=='string'||keyPath(canonicalPath(metadata.profile_directory))!==keyPath(owner.profileDirectory))throw new Error('Native browser owner differs from this workspace.');
+    if(metadata.process_id!==owner.backendPid){this.closeAdapter(owner);this.adapters.delete(owner.scope);this.invalidate();await this.connect();}
+    return metadata.url;
   }
   stateFields(){return this.active?.profileDirectory?{workspace_id:this.active.metadata.workspace_id,profile_directory:this.active.profileDirectory}:undefined;}
   async readWorkspace(origin,token){

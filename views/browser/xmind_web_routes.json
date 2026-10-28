@@ -1,0 +1,44 @@
+{
+  "GET": [
+    "/v1/(?:health|models|workspaces|process/profiles|graphs|mcp/resources|agent/(?:delegation|planning))",
+    "/v1/workspace(?:/(?:membership|skills|commands|files|file|find|folders/(?:files|file|find)))?",
+    "/v1/connections(?:/capabilities)?",
+    "/v1/agents(?:/[A-Za-z0-9_.-]{1,64})?",
+    "/v1/a2a/agents",
+    "/v1/provider/(?:configuration|profiles)",
+    "/v1/session-archives",
+    "/v1/sessions(?:/active)?",
+    "/v1/sessions/[A-Za-z0-9_-]+/(?:history|export|inbox|messages(?:/[A-Za-z0-9_-]+)?|runs|permissions|permission-grants|access|skills|agent|model|terminals|context(?:/requests/[A-Za-z0-9_-]+)?)",
+    "/v1/runs/[A-Za-z0-9_-]+(?:/(?:events(?:/stream)?|tree-events(?:/stream)?|children(?:/[A-Za-z0-9_-]+/history)?|operations|mcp-inputs|plan))?",
+    "/v1/graph-runs/[A-Za-z0-9_-]+(?:/(?:events(?:/stream)?|children(?:/[A-Za-z0-9_-]+/history)?))?",
+    "/v1/operations/[A-Za-z0-9_-]+(?:/(?:output|inspection))?",
+    "/v1/terminals/[a-f0-9]{32}(?:/output)?",
+    "/v1/vcs/(?:status|info|branches|base|diff)",
+    "/v1/mcp/authorization/(?:servers|attempts/[A-Za-z0-9_-]{1,128})",
+    "/v1/connection-bindings/[a-f0-9]{32}/(?:identity|workspace(?:/membership)?|commands|models|providers|skills|agents(?:/[A-Za-z0-9_.-]{1,64})?|graphs|graph-runs/[A-Za-z0-9_-]+(?:/children)?|runs/[A-Za-z0-9_-]+|sessions/[A-Za-z0-9_-]+)",
+    "/v1/connection-bindings/[a-f0-9]{32}/sessions/[A-Za-z0-9_-]+/(?:inbox|skills|agent|model|permissions|permission-grants|context(?:/requests/[A-Za-z0-9_-]+)?)",
+    "/v1/connection-bindings/[a-f0-9]{32}/sessions/[A-Za-z0-9_-]+/runs/[A-Za-z0-9_-]+/(?:operations(?:/[A-Za-z0-9_-]+)?|(?:events|graph-events|tree-events)/stream)"
+  ],
+  "POST": [
+    "/v1/(?:sessions|runs|graph-runs|session-archives|connections|connection-bindings|vcs/init)",
+    "/v1/connections/(?:authentication|authenticate|authorized-scopes|scope-run|scope-run-event-consumer-open|scope-run-snapshot-(?:open|read|observe|reset))",
+    "/v1/provider/(?:configuration|models|profiles(?:/(?:select|models))?)",
+    "/v1/sessions/import",
+    "/v1/sessions/[A-Za-z0-9_-]+/(?:fork|title|inbox|access|skills|agent|model|commands|terminals|context/compact|permissions/[A-Za-z0-9_-]+/reply)",
+    "/v1/runs/[A-Za-z0-9_-]+/(?:cancel|mcp-inputs/[A-Za-z0-9_-]+|plan/(?:resume|human/[A-Za-z0-9_-]+))",
+    "/v1/graph-runs/[A-Za-z0-9_-]+/(?:resume|human/[A-Za-z0-9_.-]+|invocations/[A-Za-z0-9_-]+/human/[A-Za-z0-9_.-]+)",
+    "/v1/operations/[A-Za-z0-9_-]+/(?:decision|reconcile|restore|a2a/(?:inspect|resubscribe|cancel|follow-up))",
+    "/v1/terminals/[a-f0-9]{32}/(?:input|resize|close)",
+    "/v1/a2a/agents/(?:register|[A-Za-z0-9_.-]{1,64}/(?:enabled|remove))",
+    "/v1/mcp/authorization/(?:renewals|attempts(?:/[A-Za-z0-9_-]{1,128}/cancel)?)",
+    "/v1/connection-bindings/[a-f0-9]{32}/(?:sessions|runs|events|runs/[A-Za-z0-9_-]+/cancel|providers/(?:select|save|models|import)|workspace/(?:files|file|find)|graph-runs(?:/[A-Za-z0-9_-]+/(?:resume|human/[A-Za-z0-9_.-]+|invocations/[A-Za-z0-9_-]+/human/[A-Za-z0-9_.-]+))?)",
+    "/v1/connection-bindings/[a-f0-9]{32}/sessions/[A-Za-z0-9_-]+/(?:messages|inbox|skills|agent|model|commands|context/compact|permissions/[A-Za-z0-9_-]+/reply)",
+    "/v1/connection-bindings/[a-f0-9]{32}/sessions/[A-Za-z0-9_-]+/runs/[A-Za-z0-9_-]+/(?:history|children/[A-Za-z0-9_-]+/history|operations/[A-Za-z0-9_-]+/decision)"
+  ],
+  "DELETE": [
+    "/v1/sessions/(?!(?:active|import)$)[A-Za-z0-9_-]+",
+    "/v1/sessions/[A-Za-z0-9_-]+/(?:inbox|permission-grants)/[A-Za-z0-9_-]+",
+    "/v1/connection-bindings/[a-f0-9]{32}",
+    "/v1/connection-bindings/[a-f0-9]{32}/sessions/[A-Za-z0-9_-]+/(?:inbox|permission-grants)/[A-Za-z0-9_-]+"
+  ]
+}

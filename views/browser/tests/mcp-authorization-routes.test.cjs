@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 test('MCP login browser routes expose only exact observation, start and cancel methods',async()=>{
-  const {allowedApiRoute}=await import('../server.mjs');
+  const {allowedApiRoute}=await import('../routes.cjs');
   const reads=['/v1/mcp/authorization/servers','/v1/mcp/authorization/attempts/login-1'];
   assert.equal(allowedApiRoute('/v1/mcp/resources','GET'),true);for(const method of ['POST','PUT','PATCH','DELETE','HEAD'])assert.equal(allowedApiRoute('/v1/mcp/resources',method),false);for(const method of ['GET','POST'])assert.equal(allowedApiRoute('/v1/mcp/resource',method),false,'xMind exposes its own plural MCP resource catalog only');
   const writes=['/v1/mcp/authorization/attempts','/v1/mcp/authorization/renewals','/v1/mcp/authorization/attempts/login-1/cancel'];

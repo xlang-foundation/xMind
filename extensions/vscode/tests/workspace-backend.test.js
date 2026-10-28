@@ -31,6 +31,28 @@ function harness(options={}){
  const resolver=async(_context,_host,config)=>({...runtime,providerConfig:config.providerConfigPath,languageServerConfig:config.languageServerConfigPath,processConfig:config.processConfigPath,mcpConfig:config.mcpConfigPath}),manager=new WorkspaceBackend(vscode,context,resolver,deps);
  return {manager,vscode,context,runtime,deps,launches,state,secrets,picks,resolver,directories,requests,configCandidate,languageServerCandidate,processConfigCandidate,mcpConfigCandidate};
 }
+function browserCommand(h,owner,transform=value=>value){
+ const commands=[];h.manager.deps.verifyWebRuntime=async directory=>assert.equal(directory,'C:\\Runtime');
+ h.manager.deps.spawn=(program,args,config)=>{const child=new EventEmitter();child.stdout=new EventEmitter();child.stderr=new EventEmitter();commands.push({program,args,config,child});queueMicrotask(()=>{child.stdout.emit('data',Buffer.from(JSON.stringify(transform({url:'http://127.0.0.1:62001/ui/',transport:'embedded-fastapi/xlang3-ipc',process_id:owner.backendPid,process_birth:'12345678',profile_directory:owner.profileDirectory}))));child.emit('close',0);});return child;};
+ return commands;
+}
+test('opening the browser never silently replaces an external attachment with another managed backend',async()=>{
+ const h=harness();h.manager.active={origin:'http://127.0.0.1:19100'};await assert.rejects(h.manager.openBrowser(),/managed local/);assert.equal(h.launches.length,0);
+});
+test('browser command starts the verified native web host for the exact active profile without credentials in its arguments',async()=>{
+ const h=harness(),owner=await h.manager.connect(),commands=browserCommand(h,owner);
+ assert.equal(await h.manager.openBrowser(),'http://127.0.0.1:62001/ui/');const command=commands[0];assert.equal(command.program,'C:\\Runtime\\xmind.exe');assert.equal(command.args[0],'web');assert.equal(command.args[command.args.indexOf('--workspace')+1],owner.canonical);assert.equal(command.args[command.args.indexOf('--profile-root')+1],path.win32.dirname(owner.profileDirectory));assert(command.args.includes('--upgrade-backend'));assert.equal(command.config.windowsHide,true);
+ for(const name of ['XMIND_AUTH_TOKEN','XMIND_API_KEY','XMIND_UI_BOOTSTRAP_TOKEN','XMIND_VIEW_TOKEN'])assert.equal(command.config.env[name],undefined);
+ assert.equal(command.args.some(value=>value.includes('stale-master')||value.includes('stale-provider')),false);assert.equal(owner.child.kills,0);
+});
+test('unbundled web dependencies fail before a native browser command can start',async()=>{
+ const h=harness(),owner=await h.manager.connect(),commands=browserCommand(h,owner);h.manager.deps.verifyWebRuntime=async()=>{throw new Error('Missing embedded web libraries');};await assert.rejects(h.manager.openBrowser(),/web libraries/);assert.equal(commands.length,0);assert.equal(owner.child.kills,0);
+});
+test('foreign native browser metadata never replaces the selected workspace view',async()=>{
+ for(const change of [value=>({...value,profile_directory:'D:\\OtherProfile'}),value=>({...value,url:'http://127.0.0.1:62001/ui/?token=secret'}),value=>({...value,transport:'node'})]){
+  const h=harness(),owner=await h.manager.connect();browserCommand(h,owner,change);await assert.rejects(h.manager.openBrowser());assert.equal(owner.child.kills,0);assert.equal(h.manager.active.backendPid,owner.backendPid);
+ }
+});
 test('host launches native view with only the trusted provider path and imports provider YAML through its authenticated API',async()=>{
  const h=harness(),owner=await h.manager.connect(),launch=h.launches[0];assert.equal(launch.program,h.runtime.nativeProgram);assert.equal(launch.args[0],'view');assert.equal(launch.args[launch.args.indexOf('--profile-root')+1],'C:\\User\\.xMind\\p');assert.equal(launch.config.stdio,'ignore');assert.equal(launch.config.cwd,owner.canonical);assert.equal(launch.config.env.XMIND_VIEW_TOKEN,'c'.repeat(64));for(const key of ['XMIND_AUTH_TOKEN','XMIND_API_KEY','XMIND_UI_BOOTSTRAP_TOKEN'])assert.equal(launch.config.env[key],undefined);for(const key of ['--db','--modules','--stdlib','--port','--config'])assert.ok(!launch.args.includes(key));assert.equal(launch.args[launch.args.indexOf('--trusted-provider-config')+1],'D:\\Trusted\\providers.yaml');const imported=h.requests.find(value=>new URL(value.url).pathname==='/v1/provider/configuration/import');assert.ok(imported);assert.equal(imported.request.headers.Authorization,'Bearer '+'c'.repeat(64));assert.deepEqual(JSON.parse(imported.request.body),{path:'D:\\Trusted\\providers.yaml',expected_revision:0});assert.deepEqual(h.manager.stateFields(),{workspace_id:owner.metadata.workspace_id,profile_directory:owner.profileDirectory});
 });

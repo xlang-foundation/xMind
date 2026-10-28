@@ -193,7 +193,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "node ../../views/browser/build.mjs browser-runtime/assets browser-runtime/server.mjs && node scripts/package-native-runtime.mjs --verify",
+    "vscode:prepublish": "node ../../views/browser/build.mjs browser-runtime/assets && node scripts/package-native-runtime.mjs --verify-web",
     "test": "node --test tests/*.test.js",
     "package": "vsce package --allow-missing-repository"
   },

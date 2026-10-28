@@ -10,7 +10,7 @@ import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {createBrowserServer} from '../../views/browser/server.mjs';
+import {createNativeBrowserFixture} from '../../views/browser/tests/native-host.mjs';
 const require=createRequire(import.meta.url),{BrowserController,BrowserSessionClient}=require('../../views/browser/browser.js'),execute=promisify(execFile);
 export const renewalModes=['rotate','retain','scope-expanded','bad-json','http-failure','lost-reply','redirect','cancel','publish-fault'];
 export async function runRenewalAcceptance(executable,modules,stdlib,origin,{negative=false,peer,cli}={}){
@@ -46,7 +46,7 @@ export async function runRenewalAcceptance(executable,modules,stdlib,origin,{neg
   }
   if(negative){
    const backend='http://127.0.0.1:'+port,assets=join(directory,'view-assets');await execute(process.execPath,[fileURLToPath(new URL('../../views/browser/build.mjs',import.meta.url)),assets],{windowsHide:true});
-   browserView=await createBrowserServer({backend,assetRoot:assets});const browserOrigin=await browserView.listen();
+   browserView=await createNativeBrowserFixture({modules,stdlib,backend,assetRoot:assets});const browserOrigin=await browserView.listen();
    const enrollment=await fetch(browserOrigin+'/ui/session',{method:'POST',headers:{...owner,Origin:browserOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'},body:'{}'});assert.equal(enrollment.status,200);const cookie=enrollment.headers.get('set-cookie').split(';')[0],requests=[],messages=[];
    const client=new BrowserSessionClient(browserOrigin,{fetchImpl:(url,options)=>{requests.push({path:new URL(url).pathname,method:options.method});return fetch(url,{...options,headers:{...options.headers,Cookie:cookie,'Sec-Fetch-Site':'same-origin',...(options.method==='POST'?{Origin:browserOrigin}:{})}});}});
    browserController=new BrowserController(client,message=>messages.push(message),{save:()=>{}});await browserController.command({type:'mcp-refresh'});await browserController.command({type:'mcp-renew',server:'renewal.rotate'});

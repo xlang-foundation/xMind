@@ -8,7 +8,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
-import {createBrowserServer} from '../../views/browser/server.mjs';
+import {createNativeBrowserFixture} from '../../views/browser/tests/native-host.mjs';
 const require=createRequire(import.meta.url),{BrowserController,BrowserSessionClient}=require('../../views/browser/browser.js');
 const [executable,modules,stdlib,openssl,cli]=process.argv.slice(2),execute=promisify(execFile);
 const directory=await mkdtemp(join(tmpdir(),'xmind-oauth-service-'));let tls,child,browserView,browserController,httpRequests=0,tlsObservations=0;
@@ -58,7 +58,7 @@ try{
     // the native service. Only browser-platform cookie attachment is supplied
     // by this Node fixture; no domain responses or execution are fabricated.
     const assets=join(directory,'view-assets');await execute(process.execPath,[fileURLToPath(new URL('../../views/browser/build.mjs',import.meta.url)),assets],{windowsHide:true});
-    browserView=await createBrowserServer({backend:base,assetRoot:assets});const browserOrigin=await browserView.listen();
+    browserView=await createNativeBrowserFixture({modules,stdlib,backend:base,assetRoot:assets});const browserOrigin=await browserView.listen();
     const browserEnrollment=await fetch(browserOrigin+'/ui/session',{method:'POST',headers:{...owner,Origin:browserOrigin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'},body:'{}'});assert.equal(browserEnrollment.status,200);const cookie=browserEnrollment.headers.get('set-cookie').split(';')[0];
     const html=await (await fetch(browserOrigin+'/ui/')).text();assert.match(html,/id="mcp-settings"/);assert.match(html,/id="mcp-refresh"/);
     const browserRequests=[],observations=[],saved=[];

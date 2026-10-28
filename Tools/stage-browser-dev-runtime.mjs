@@ -7,13 +7,13 @@ import {execFileSync} from 'node:child_process';
 import {dirname,join,relative,resolve,isAbsolute,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {verifyNativeRuntime} from '../extensions/vscode/native-runtime.js';
-import {nativeDependencyWheels} from '../extensions/vscode/scripts/package-native-runtime.mjs';
+import {nativeDependencyWheels,webLibraryInputs} from '../extensions/vscode/scripts/package-native-runtime.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const values=new Map();
 for(let i=2;i<process.argv.length;i+=2){
   const key=process.argv[i];
-  if(!['--runtime','--built-server','--xlang-runtime','--out'].includes(key)||!process.argv[i+1]||values.has(key))
+  if(!['--runtime','--built-server','--xlang-runtime','--web-packages','--out'].includes(key)||!process.argv[i+1]||values.has(key))
     throw new Error('Use --runtime VERIFIED_DIR --built-server FILE [--xlang-runtime SDK_RELEASE_DIR] --out DIR.');
   values.set(key,process.argv[i+1]);
 }
@@ -102,6 +102,20 @@ if(sdkRuntime){
   const license=join(sdkSource,'modules','pydantic_core','PYDANTIC_CORE_LICENSE.txt');await regular(license);
   const licenseName='licenses/xlang3-pydantic-core/PYDANTIC_CORE_LICENSE.txt';
   await mkdir(dirname(join(output,licenseName)),{recursive:true});await copyFile(license,join(output,licenseName));manifest.files[licenseName]=sha(await readFile(license));
+}
+for(const name of ['xmind_web.py','xmind_web_routes.json']){
+  const webModule='modules/'+name;
+  await copyFile(join(root,'views','browser',name),join(output,...webModule.split('/')));
+  manifest.files[webModule]=sha(await readFile(join(output,...webModule.split('/'))));
+}
+if(values.has('--web-packages')){
+  const source=resolve(values.get('--web-packages')),libraries=await webLibraryInputs(source);
+  for(const [name,value]of libraries){
+    if(name.endsWith('.x3pkg.dll')&&!value.equals(await readFile(join(output,...name.split('/')))))throw new Error('Web native bindings differ from the paired SDK.');
+    const target=join(output,...name.split('/'));await mkdir(dirname(target),{recursive:true});await writeFile(target,value);manifest.files[name]=sha(value);
+  }
+  const frozen=await webLibraryInputs(source);
+  if(frozen.size!==libraries.size||[...libraries].some(([name,value])=>!frozen.get(name)?.equals(value)))throw new Error('Web library sources changed during staging.');
 }
 const dependencyInputs=new Map();for(const name of Object.keys(manifest.files))dependencyInputs.set(name,await readFile(join(output,...name.split('/'))));
 for(const [name,value]of await nativeDependencyWheels(dependencyInputs)){await mkdir(dirname(join(output,name)),{recursive:true});await writeFile(join(output,name),value);manifest.files[name]=sha(value);}

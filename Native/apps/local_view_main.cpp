@@ -1,10 +1,15 @@
 #include "agentflow/local_profile.hpp"
+#include "agentflow/program_entries.hpp"
 #include "agentflow/context_records.hpp"
 #include "agentflow/owner_process.hpp"
 #include "agentflow/runtime_generation.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/workspace_registry.hpp"
 #include "httplib.h"
+#include "../src/native_request_channel.hpp"
+#include "embedded_web.hpp"
+#include "../src/native_request_router.hpp"
+#include <bcrypt.h>
 #include "nlohmann/json.hpp"
 #define NOMINMAX
 #include <windows.h>
@@ -29,6 +34,8 @@
 #include <string>
 #include <string_view>
 #include <thread>
+#include <array>
+#include <vector>
 
 namespace {
 using Json = nlohmann::json;
@@ -158,11 +165,13 @@ agentflow::VerifiedRuntimeGeneration verify_client_image() {
 }
 } // namespace
 
-int run_local_view(int argc, char **argv) {
+int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalProfileConnection> embedded={},std::function<bool()> running={}) {
     agentflow::LocalProfileOptions options;
     std::string trusted_provider_config;
     bool preserve_provider_settings=false;
     std::string ready;
+    std::string web_assets,web_packages;
+    int web_port=0;
     try {
         std::map<std::string, bool> seen;
         for (int i = 1; i < argc; ++i) {
@@ -206,13 +215,22 @@ int run_local_view(int argc, char **argv) {
                 options.mcp_config = value;
             else if (key == "--ready-file")
                 ready = value;
+            else if(key=="--web-assets")web_assets=value;
+            else if(key=="--web-packages")web_packages=value;
+            else if(key=="--web-port"){
+                const auto parsed=std::from_chars(value.data(),value.data()+value.size(),web_port);require(parsed.ec==std::errc{}&&parsed.ptr==value.data()+value.size()&&web_port>=0&&web_port<=65535,"Invalid browser port");
+            }
             else
                 throw std::invalid_argument("Unknown native view option");
         }
         require(!ready.empty(), "Native view requires a private ready-file location");
         const auto *configured = std::getenv("XMIND_VIEW_TOKEN");
-        require(configured != nullptr, "Native view access authentication is unavailable");
-        std::string access = configured;
+        require(configured != nullptr||!web_assets.empty(), "Native view access authentication is unavailable");
+        std::string access=configured?configured:"";
+        if(access.empty()){
+            std::array<unsigned char,32> random{};require(BCryptGenRandom(nullptr,random.data(),static_cast<ULONG>(random.size()),BCRYPT_USE_SYSTEM_PREFERRED_RNG)>=0,"Cannot generate browser host credential");
+            constexpr char hex[]="0123456789abcdef";for(const auto byte:random){access+=hex[byte>>4];access+=hex[byte&15];}
+        }
         require(access.size() == 64 && access.find_first_not_of("0123456789abcdef") == std::string::npos,
                 "Invalid native view access authentication");
         const std::string authorization = "Bearer " + access;
@@ -238,8 +256,9 @@ int run_local_view(int argc, char **argv) {
         // an extension update must not remove it underneath a running view.
         const auto client_generation = verify_client_image();
         const auto client_package_root = client_generation.binding().root;
-        auto connection = std::make_shared<agentflow::LocalProfileConnection>(
-            agentflow::connect_local_profile(options));
+        std::unique_ptr<agentflow::EmbeddedWeb> web;
+        if(!web_assets.empty())web=std::make_unique<agentflow::EmbeddedWeb>(client_package_root,web_packages,web_port);
+        auto connection = embedded?embedded:std::make_shared<agentflow::LocalProfileConnection>(agentflow::connect_local_profile(options));
         const auto profile_root =
             std::filesystem::path(connection->directory).parent_path().u8string();
         const std::string profile_root_utf8(reinterpret_cast<const char *>(profile_root.data()),
@@ -261,13 +280,14 @@ int run_local_view(int argc, char **argv) {
         struct SessionBinding { std::string workspace_id, browser_origin; };
         std::map<std::string, SessionBinding> browser_sessions;
         workspaces.emplace(selected_workspace_id, connection);
-        httplib::Server server;
+        agentflow::NativeRequestRouter server;
         server.new_task_queue = [] { return new httplib::ThreadPool(4, 4, 32); };
         server.set_payload_max_length(1024 * 1024);
         server.set_read_timeout(5, 0);
         server.set_write_timeout(5, 0);
         server.set_keep_alive_timeout(1);
-        const int port = server.bind_to_any_port("127.0.0.1");
+        const int port = web?web->port():server.bind_to_any_port("127.0.0.1");
+        if(web&&embedded)agentflow::publish_managed_web_port(connection->directory,port);
         require(port > 0, "Cannot bind native view adapter");
         const auto origin = "http://127.0.0.1:" + std::to_string(port);
         const std::string master(reinterpret_cast<const char *>(connection->auth.view().data()),
@@ -275,20 +295,14 @@ int run_local_view(int argc, char **argv) {
         std::mutex credential_mutex;
         std::string credential;
         std::int64_t expires = 0;
-        const auto configure = [](httplib::Client &client) {
-            client.set_connection_timeout(2, 0);
-            client.set_read_timeout(15, 0);
-            client.set_write_timeout(5, 0);
-            client.set_follow_location(false);
-        };
         // Reapply the trusted local YAML whenever this view attaches a workspace
         // profile. The native registry merges supplied entries, so profiles
         // already present do not prevent newly added or rotated keys from loading.
         const auto import_shared_provider_config = [&](const std::shared_ptr<agentflow::LocalProfileConnection> &target) {
             if (trusted_provider_config.empty())
                 return;
-            httplib::Client client("127.0.0.1", target->port);
-            configure(client);
+            agentflow::NativeRequestChannel client(*target);
+
             const auto secret = target->auth.view();
             std::string authorization = "Bearer " +
                 std::string(reinterpret_cast<const char *>(secret.data()), secret.size());
@@ -351,8 +365,8 @@ int run_local_view(int argc, char **argv) {
             }
         };
         const auto issue = [&] {
-            httplib::Client client("127.0.0.1", connection->port);
-            configure(client);
+            agentflow::NativeRequestChannel client(*connection);
+
             const auto lease =
                 Json{{"origin", origin},
                      {"process_id", GetCurrentProcessId()},
@@ -392,8 +406,8 @@ int run_local_view(int argc, char **argv) {
         const auto validate_browser_session = [&](const std::string &supplied,
                                                   const std::shared_ptr<agentflow::LocalProfileConnection> &target,
                                                   const std::string &browser_origin) {
-            httplib::Client client("127.0.0.1", target->port);
-            configure(client);
+            agentflow::NativeRequestChannel client(*target);
+
             const auto current = client.Post("/v1/view-sessions/current",
                                              {{"Authorization", supplied},
                                               {"X-XMind-View-Origin", browser_origin}}, "{}", "application/json");
@@ -401,8 +415,8 @@ int run_local_view(int argc, char **argv) {
         };
         const auto issue_browser_session = [&](const std::shared_ptr<agentflow::LocalProfileConnection> &target,
                                                const std::string &browser_origin) {
-            httplib::Client client("127.0.0.1", target->port);
-            configure(client);
+            agentflow::NativeRequestChannel client(*target);
+
             const auto lease =
                 Json{{"origin", browser_origin},
                      {"process_id", GetCurrentProcessId()},
@@ -428,8 +442,8 @@ int run_local_view(int argc, char **argv) {
         const auto revoke_browser_session = [&](const std::string &token,
                                                 const std::shared_ptr<agentflow::LocalProfileConnection> &target,
                                                 const std::string &browser_origin) {
-            httplib::Client client("127.0.0.1", target->port);
-            configure(client);
+            agentflow::NativeRequestChannel client(*target);
+
             const auto revoked = client.Post("/v1/view-sessions/revoke",
                                              {{"Authorization", "View " + token},
                                               {"X-XMind-View-Origin", browser_origin}},
@@ -700,7 +714,7 @@ int run_local_view(int argc, char **argv) {
                     if(input["workspace_id"]!=current_id){response(output,409,"Workspace changed; refresh sessions before archiving");return;}
                     const auto id=input["session_id"].get<std::string>();require(!id.empty()&&id.size()<=128&&id.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")==std::string::npos,"Invalid session identity");
                     if(input["archived"].get<bool>()){
-                        httplib::Client peer("127.0.0.1",current->port);configure(peer);const httplib::Headers headers{{"Authorization",supplied},{"X-XMind-View-Origin",browser_origin}};
+                        agentflow::NativeRequestChannel peer(*current);const httplib::Headers headers{{"Authorization",supplied},{"X-XMind-View-Origin",browser_origin}};
                         const auto sessions=peer.Get("/v1/sessions",headers);require(sessions&&sessions->status==200,"Session catalogue unavailable");const auto records=Json::parse(sessions->body);require(records.is_array(),"Invalid session catalogue");
                         if(std::none_of(records.begin(),records.end(),[&](const Json& item){return item.value("id",std::string{})==id;})){response(output,404,"Session not found");return;}
                         const auto runs=peer.Get("/v1/sessions/"+id+"/runs",headers);require(runs&&runs->status==200,"Session activity unavailable");const auto activity=Json::parse(runs->body);require(activity.is_array(),"Invalid session activity");
@@ -841,8 +855,8 @@ int run_local_view(int argc, char **argv) {
                             "Native profile resolved to a different workspace");
                     const auto issued = issue_browser_session(target, browser_origin);
                     const auto replacement = issued.at("credential").get<std::string>();
-                    httplib::Client metadata_client("127.0.0.1", target->port);
-                    configure(metadata_client);
+                    agentflow::NativeRequestChannel metadata_client(*target);
+
                     const auto metadata = metadata_client.Get(
                         "/v1/workspace", httplib::Headers{{"Authorization", "View " + replacement},
                                                            {"X-XMind-View-Origin", browser_origin}});
@@ -960,8 +974,8 @@ int run_local_view(int argc, char **argv) {
                             "Native workspace identity changed during creation");
                     const auto issued = issue_browser_session(target, browser_origin);
                     const auto replacement = issued.at("credential").get<std::string>();
-                    httplib::Client metadata_client("127.0.0.1", target->port);
-                    configure(metadata_client);
+                    agentflow::NativeRequestChannel metadata_client(*target);
+
                     const auto metadata = metadata_client.Get(
                         "/v1/workspace", httplib::Headers{{"Authorization", "View " + replacement},
                                                            {"X-XMind-View-Origin", browser_origin}});
@@ -1069,17 +1083,17 @@ int run_local_view(int argc, char **argv) {
                     browser_target = browser_workspace(supplied, browser_origin).second;
                 }
                 const auto backend_port = host ? connection->port : browser_target->port;
-                httplib::Client client("127.0.0.1", backend_port);
-                configure(client);
+                agentflow::NativeRequestChannel client(host ? *connection : *browser_target);
+
                 if(streaming){
-                    auto stream=std::make_shared<httplib::ClientImpl::StreamHandle>(client.open_stream("GET",request.target,{},headers));
+                    auto stream=std::make_shared<agentflow::NativeRequestChannel::StreamHandle>(client.open_stream("GET",request.target,{},headers));
                     if(!stream->is_valid()){response(output,503,"Native event observation unavailable");return;}
                     if(stream->response->status!=200){response(output,stream->response->status,"Native event observation rejected");return;}
                     require(stream->response->get_header_value("Content-Type")=="text/event-stream","Invalid native event response");
                     output.set_header("X-Accel-Buffering","no");
                     output.set_chunked_content_provider("text/event-stream",[stream,total=std::size_t{0}](std::size_t,httplib::DataSink& sink)mutable{
                         if(!sink.is_writable())return false;
-                        char bytes[16384];const auto count=stream->read(bytes,sizeof(bytes));
+                        char bytes[16384];const auto count=stream->read(bytes,sizeof(bytes),[&]{return sink.is_writable();});
                         if(count<0||stream->has_read_error())return false;
                         if(count==0){sink.done();return true;}
                         total+=static_cast<std::size_t>(count);if(total>64*1024*1024)return false;
@@ -1131,8 +1145,9 @@ int run_local_view(int argc, char **argv) {
         server.Get(R"(/v1/.*)", forward);
         server.Post(R"(/v1/.*)", forward);
         server.Delete(R"(/v1/.*)", forward);
-        httplib::Client metadata_client("127.0.0.1", connection->port);
-        configure(metadata_client);
+        if(web)web->bind([&](httplib::Request& request,httplib::Response& output){server.dispatch(request,output);},authorization,running);
+        agentflow::NativeRequestChannel metadata_client(*connection);
+
         const auto metadata =
             metadata_client.Get("/v1/workspace", httplib::Headers{{"Authorization", "View " + credential},
                                                                   {"X-XMind-View-Origin", origin}});
@@ -1150,13 +1165,17 @@ int run_local_view(int argc, char **argv) {
                  {"started_backend", connection->started}}
                 .dump(),
             connection->workspace);
-        active_view = &server;
-        SetConsoleCtrlHandler(stop_view, TRUE);
-        const auto ok = server.listen_after_bind();
-        SetConsoleCtrlHandler(stop_view, FALSE);
-        active_view = nullptr;
-        httplib::Client cleanup("127.0.0.1", connection->port);
-        configure(cleanup);
+        bool ok=true;
+        if(web)web->serve(web_assets);
+        else{
+            active_view = &server;
+            SetConsoleCtrlHandler(stop_view, TRUE);
+            ok = server.listen_after_bind();
+            SetConsoleCtrlHandler(stop_view, FALSE);
+            active_view = nullptr;
+        }
+        agentflow::NativeRequestChannel cleanup(*connection);
+
         cleanup.Post("/v1/view-sessions/revoke",
                      {{"Authorization", "View " + credential}, {"X-XMind-View-Origin", origin}}, "{}",
                      "application/json");
@@ -1182,4 +1201,16 @@ int run_local_view(int argc, char **argv) {
         std::cerr << error.what() << '\n';
         return 2;
     }
+}
+int run_local_view(int argc,char** argv){return run_local_view_impl(argc,argv);}
+int run_embedded_local_web_view(std::shared_ptr<agentflow::LocalProfileConnection> connection,const std::string& assets,const std::string& packages,const std::string& ready,int port,std::function<bool()> running){
+    const auto root=std::filesystem::u8path(connection->directory).parent_path().u8string();
+    std::vector<std::string> args{"xmind","--workspace",connection->workspace,"--profile-root",std::string(reinterpret_cast<const char*>(root.data()),root.size()),"--ready-file",ready,"--web-assets",assets};
+    if(!packages.empty()){args.push_back("--web-packages");args.push_back(packages);}
+    if(port){args.push_back("--web-port");args.push_back(std::to_string(port));}
+    const auto shared=agentflow::managed_web_view_options(connection->directory);
+    args.push_back("--preserve-provider-settings");
+    for(const auto& [option,value]:std::vector<std::pair<std::string,std::string>>{{"--trusted-provider-config",shared.provider_config},{"--graphs-config",shared.graphs_config},{"--python-tools-config",shared.python_tools_config},{"--language-server-config",shared.language_server_config},{"--process-config",shared.process_config},{"--mcp-config",shared.mcp_config}}){if(!value.empty()){args.push_back(option);args.push_back(value);}}
+    std::vector<char*> pointers;for(auto& item:args)pointers.push_back(item.data());
+    return run_local_view_impl(static_cast<int>(pointers.size()),pointers.data(),std::move(connection),std::move(running));
 }

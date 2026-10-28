@@ -1,0 +1,5 @@
+# Pure application packages. The native core wheel comes from xMind's SDK.
+fastapi==0.143.0
+uvicorn==0.54.0
+pydantic==2.14.1
+pydantic-core==2.50.1+xlang3
