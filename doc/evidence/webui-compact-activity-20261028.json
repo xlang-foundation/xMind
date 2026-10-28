@@ -1,0 +1,60 @@
+{
+  "recordedUtc": "2026-10-28T07:09:34.724Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "actualUi": {
+    "rows": [
+      {
+        "action": "Read",
+        "expanded": false,
+        "filename": "generate_report.js",
+        "height": 32
+      },
+      {
+        "action": "Edited",
+        "expanded": false,
+        "filename": "generate_report.js",
+        "height": 32
+      },
+      {
+        "action": "Ran",
+        "expanded": false,
+        "filename": "powershell",
+        "height": 32
+      },
+      {
+        "action": "Read",
+        "expanded": false,
+        "filename": "report.md",
+        "height": 32
+      }
+    ],
+    "cardRemoved": true,
+    "details": {
+      "expanded": true,
+      "hasRecordedArguments": true,
+      "otherExpanded": 1
+    },
+    "workspacePreserved": true,
+    "sessionPreserved": true,
+    "modelPreserved": true,
+    "exactHistoryPreserved": true
+  },
+  "behavior": "Every active operation gets a compact filename/action row. A small icon scan runs only while working; approval/paused/finished rows stay still. Paths live in tooltips; details expand on request; finished group remains collapsed by default.",
+  "testScope": "Synthetic native-event tests cover four simultaneous operations, individual expansion, edit_file/replace_file approval alias, review/resume, completion, failure and reset. Actual UI verified four saved native tool receipts without reexecuting any work.",
+  "extraModelTurns": 0,
+  "tests": {
+    "passed": 337,
+    "log": ".agentflow/compact-activity-mcp-qualified.log"
+  },
+  "mcp": {
+    "eventSource": "Native tool.started/tool.completed/tool.failed",
+    "identity": "Native mcp_ fingerprint alias resolved from operation alias/peer_tool/server_config_id",
+    "pendingInput": "Native mcp-inputs operation identities pause the row",
+    "coverage": "Synthetic native MCP fixtures; no live external search invocation"
+  },
+  "sourceHashes": {
+    "views/browser/layout.js": "752a447a6c5186dacbce7002dafd16e03c9320d3ee0a4a0583da4cc3d6e08d04",
+    "views/browser/layout.css": "65a34a812f8bd3cae6dc4b4cf9abaad4129d034583197bf1c43b993a73a64eeb",
+    "views/browser/tests/layout.test.cjs": "984d4cf90306aea54c2eca01aeae150c4b7b9db194c8a7ae92308296a15579b8"
+  }
+}

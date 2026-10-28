@@ -87,7 +87,7 @@ test('live Activity follows native tool receipts without changing tabs, reexecut
  try{
   win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data}));
   send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});send({type:'event',event:{run_id:'root',seq:1,kind:'tool.started',data:{activity_id:'read',name:'read_file',arguments:{path:'src/main.cpp'}}}});
-  const row=doc.querySelector('.activity-item');assert.match(doc.getElementById('activity-now').textContent,/Reading file · src\/main.cpp/);assert.equal(row.dataset.state,'running');assert.equal(row.open,false);assert.equal(doc.getElementById('inspector-files').hidden,false);assert.equal(doc.getElementById('details-activity').dataset.live,'true');
+  const row=doc.querySelector('.activity-item');assert.equal(doc.getElementById('activity-now').textContent,'Working…');assert.equal(row.dataset.state,'running');assert.equal(row.open,false);assert.equal(doc.getElementById('inspector-files').hidden,false);assert.equal(doc.getElementById('details-activity').dataset.live,'true');
   const done={type:'event',event:{run_id:'root',seq:2,kind:'tool.completed',data:{activity_id:'read',name:'read_file',data:{content:'synthetic file fixture'}}}};send(done);send(done);assert.equal(doc.querySelectorAll('.activity-item').length,1);assert.equal(row.dataset.state,'completed');assert.equal(doc.getElementById('activity-finished').open,false);assert.match(row.textContent,/src\/main.cpp/);
   send({type:'event',event:{run_id:'root',seq:3,kind:'run.completed',data:{}}});assert.equal(doc.getElementById('activity-now').textContent,'Completed');assert.equal(doc.getElementById('details-activity').dataset.live,'false');
   send({type:'history',history:[]});assert.equal(doc.querySelectorAll('.activity-item').length,0);
@@ -104,23 +104,36 @@ test('Activity scopes child calls, preserves interrupted outcomes, and bounds fi
  }finally{win.close();}
 });
 
-test('current file preview uses scoped native snapshots and pauses motion while approval is pending',()=>{
+test('compact rows show concurrent files and commands with details closed',()=>{
  const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
  try{
-  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data})),tool=(seq,kind,data)=>send({type:'event',event:{run_id:'root',seq,kind,data}});
-  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});tool(1,'tool.started',{activity_id:'edit',name:'edit_file',arguments:{path:'src/current.js',folder_id:'folder'}});
-  const card=doc.getElementById('current-work');assert.equal(card.dataset.state,'working');assert.equal(doc.getElementById('current-work-name').textContent,'current.js');
-  const op={id:'prepared',run_id:'root',tool:'replace_file',state:'awaiting_approval',arguments_json:JSON.stringify({path:'src/current.js',folder_id:'folder',before_content:'old\n',after_content:'new\n'})};send({type:'operations',operations:[op]});assert.equal(card.dataset.state,'waiting');assert.match(card.querySelector('.current-work-preview').textContent,/- old\+ new/);assert.equal(card.querySelector('.current-work-preview-label').textContent,'Proposed change');
-  send({type:'operations',operations:[{...op,state:'executing'}]});assert.equal(card.dataset.state,'working');tool(2,'tool.completed',{activity_id:'edit',name:'edit_file',data:{operation_id:'prepared'}});assert.equal(card.dataset.state,'done');assert.equal(card.querySelector('.current-work-preview-label').textContent,'Applied change');assert.equal(card.querySelector('[role=progressbar]'),null);
-  send({type:'runs',selected:'other',runs:[{id:'other',state:'running'}]});assert.equal(card.hidden,true);tool(3,'tool.started',{activity_id:'another',name:'replace_file',arguments:{path:'src/current.js',folder_id:'folder'}});assert.equal(card.querySelector('.current-work-preview').hidden,true,'Previous run preview must not bleed into a new call');
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data}));
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});
+  for(const [index,name,args] of [[1,'read_file',{path:'src/main.cpp'}],[2,'edit_file',{path:'src/app.vue'}],[3,'create_file',{path:'test/new.js'}],[4,'run_process',{profile:'powershell',arguments:['node check.js']}]] )send({type:'event',event:{run_id:'root',seq:index,kind:'tool.started',data:{call_id:String(index),name,arguments:args}}});
+  const rows=[...doc.querySelectorAll('#activity-running .activity-item')];assert.equal(rows.length,4);assert.deepEqual(rows.map(row=>row.querySelector('strong').textContent),['main.cpp','app.vue','new.js','powershell']);assert.deepEqual(rows.map(row=>row.querySelector('.activity-tool-state').textContent),['Reading','Editing','Creating','Running']);assert.ok(rows.every(row=>!row.open&&row.dataset.phase==='working'));assert.equal(doc.querySelector('#current-work'),null);assert.equal(doc.getElementById('activity-now').textContent,'Working · 4');assert.equal(doc.getElementById('inspector-files').hidden,false);
+  rows[1].querySelector('summary').click();assert.equal(rows[1].open,true);assert.equal(rows[0].open,false);assert.match(rows[1].querySelector('summary').title,/src\/app.vue/);
  }finally{win.close();}
 });
 
-test('current file card shows reported text results and preserves failed outcomes',()=>{
+test('compact rows pause native edit aliases for approval and preserve failed outcomes',()=>{
  const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
  try{
   win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data})),tool=(seq,kind,data)=>send({type:'event',event:{run_id:'root',seq,kind,data}});
-  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});tool(1,'tool.started',{call_id:'read',name:'read_file',arguments:{path:'report.md'}});tool(2,'tool.completed',{call_id:'read',name:'read_file',data:{content:'Actual reported fixture text',encoding:'utf-8'}});assert.match(doc.querySelector('.current-work-preview').textContent,/Actual reported fixture text/);assert.equal(doc.getElementById('current-work').dataset.state,'done');
-  tool(3,'tool.started',{call_id:'fail',name:'create_file',arguments:{path:'failed.md'}});tool(4,'tool.failed',{call_id:'fail',name:'create_file',data:{error:'Native failure fixture'}});assert.equal(doc.getElementById('current-work').dataset.state,'failed');assert.equal(doc.querySelector('.current-work-state').textContent,'Failed');send({type:'reset-run'});assert.equal(doc.getElementById('current-work').hidden,true);
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});tool(1,'tool.started',{call_id:'edit',name:'edit_file',arguments:{path:'src/app.vue',folder_id:'folder'}});
+  const row=doc.querySelector('.activity-item'),op={id:'prepared',run_id:'root',tool:'replace_file',state:'awaiting_approval',arguments_json:JSON.stringify({path:'src/app.vue',folder_id:'folder',before_content:'old',after_content:'new'})};send({type:'operations',operations:[op]});assert.equal(row.dataset.phase,'waiting');assert.equal(row.querySelector('.activity-tool-state').textContent,'Review');assert.match(row.querySelector('summary').getAttribute('aria-label'),/Waiting for approval/);assert.equal(row.open,false);
+  send({type:'operations',operations:[{...op,state:'executing'}]});assert.equal(row.dataset.phase,'working');tool(2,'tool.completed',{call_id:'edit',name:'edit_file',data:{operation_id:'prepared'}});assert.equal(row.dataset.phase,'completed');assert.equal(row.querySelector('.activity-tool-state').textContent,'Edited');assert.equal(doc.getElementById('activity-finished').open,false);
+  tool(3,'tool.started',{call_id:'fail',name:'create_file',arguments:{path:'failed.md'}});tool(4,'tool.failed',{call_id:'fail',name:'create_file',data:{error:'Native failure fixture'}});assert.equal(doc.querySelector('#activity-running .activity-tool-state').textContent,'Failed');send({type:'reset-run'});assert.equal(doc.querySelectorAll('.activity-item').length,0);
+ }finally{win.close();}
+});
+
+test('MCP rows resolve native opaque aliases and animate only while calling',()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data})),alias='mcp_'+'a'.repeat(48);
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});send({type:'event',event:{run_id:'root',seq:1,kind:'tool.started',data:{call_id:'mcp-call',name:alias,arguments:{query:'example query'}}}});
+  const row=doc.querySelector('.activity-item');assert.equal(row.querySelector('strong').textContent,'MCP tool');assert.equal(row.querySelector('.activity-tool-state').textContent,'Calling');assert.equal(row.dataset.phase,'working');
+  const op={id:'external',run_id:'root',tool:'mcp_tool',state:'awaiting_approval',arguments_json:JSON.stringify({alias,server_config_id:'search-service',peer_tool:'web_search',arguments_json:'{"query":"example query"}'})};send({type:'operations',operations:[op]});assert.equal(row.querySelector('strong').textContent,'web_search · search-service');assert.equal(row.dataset.phase,'waiting');
+  send({type:'operations',operations:[{...op,state:'executing'}]});assert.equal(row.dataset.phase,'working');send({type:'mcp-inputs',requests:[{operation_id:'external'}]});assert.equal(row.dataset.phase,'input');assert.equal(row.querySelector('.activity-tool-state').textContent,'Input');send({type:'mcp-inputs',requests:[]});assert.equal(row.dataset.phase,'working');
+  send({type:'event',event:{run_id:'root',seq:2,kind:'tool.completed',data:{call_id:'mcp-call',name:alias,data:{content:[]}}}});send({type:'operations',operations:[{...op,state:'executed'}]});assert.equal(row.dataset.phase,'completed');assert.equal(row.querySelector('.activity-tool-state').textContent,'Called');assert.equal(row.querySelector('strong').textContent,'web_search · search-service');assert.equal(row.open,false);
  }finally{win.close();}
 });
