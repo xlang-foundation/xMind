@@ -39,9 +39,14 @@ int run_web(int argc,char** argv){
         for(;;){
             if(std::filesystem::exists(ready)){
                 if(std::filesystem::file_size(ready)>16384)throw std::runtime_error("Browser metadata exceeds limits");
-                std::ifstream input(ready);const auto value=nlohmann::json::parse(input);
-                if(value.at("process_id").get<std::uint32_t>()!=connection.process_id||value.at("process_birth").get<std::string>()!=birth)throw std::runtime_error("Browser owner identity differs");
-                std::cout<<nlohmann::json{{"url",value.at("origin").get<std::string>()+"/ui/"},{"process_id",connection.process_id},{"process_birth",birth},{"profile_directory",connection.directory},{"transport","embedded-fastapi/xlang3-ipc"}}.dump()<<std::endl;return 0;
+                // Windows can expose the renamed entry before its publication
+                // handle closes. An unopened stream is not a JSON document.
+                std::ifstream input(ready);
+                if(input.is_open()){
+                    const auto value=nlohmann::json::parse(input);
+                    if(value.at("process_id").get<std::uint32_t>()!=connection.process_id||value.at("process_birth").get<std::string>()!=birth)throw std::runtime_error("Browser owner identity differs");
+                    std::cout<<nlohmann::json{{"url",value.at("origin").get<std::string>()+"/ui/"},{"process_id",connection.process_id},{"process_birth",birth},{"profile_directory",connection.directory},{"transport","embedded-fastapi/xlang3-ipc"}}.dump()<<std::endl;return 0;
+                }
             }
             if(agentflow::observe_owner_exit(connection.process_id,birth,0).exited)throw std::runtime_error("The owned xMind browser host exited; inspect its retained startup log");
             if(std::chrono::steady_clock::now()>=deadline)throw std::runtime_error("Browser readiness is unresolved; reconnect to the same profile without starting a competing owner");

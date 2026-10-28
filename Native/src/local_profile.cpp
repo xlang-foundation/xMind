@@ -1325,11 +1325,19 @@ void publish_local_view_ready(const std::string &file, const std::string &metada
     const auto value = parse(metadata);
     require(value.is_object() && !value.contains("auth") && !value.contains("token") &&
             metadata.size() <= 16384);
-    auto output = store.open(target.filename().c_str(), GENERIC_WRITE, CREATE_NEW);
+    const auto pending = wide("view-" + random_id() + ".tmp");
+    auto output = store.open(pending.c_str(), GENERIC_WRITE, CREATE_NEW);
     DWORD written = 0;
     require(
         WriteFile(output.value, metadata.data(), static_cast<DWORD>(metadata.size()), &written, nullptr) &&
         written == metadata.size() && FlushFileBuffers(output.value));
+    CloseHandle(output.value);
+    output.value = INVALID_HANDLE_VALUE;
+    // Existence is the readiness signal. Publish only the complete, closed
+    // record, and never replace an existing rendezvous supplied by a caller.
+    require(MoveFileExW(extended(store.directory / pending).c_str(),extended(target).c_str(),
+                       MOVEFILE_WRITE_THROUGH) != 0,
+            "Cannot publish complete view rendezvous; existing file was preserved");
 }
 namespace {
 void client_auth_origin(const std::string& origin) {

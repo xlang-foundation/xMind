@@ -107,23 +107,39 @@ class BrowserController {
     return this.mcpController.read();
   }
   present(){this.post({type:'runs',runs:this.runs,selected:this.runId,busy:this.busy()});}
-  async refreshCapabilities(){const version=this.generation,health=await this.client.health();const [,catalogue,graphs]=await Promise.all([Object.hasOwn(health,'agent_planning')?this.client.planning():undefined,health.agent_execution?this.client.models():{models:[]},this.client.graphs().catch(error=>{if(error.status!==404)throw error;return {graphs:[]};})]);if(!this.current(version))return;if(!Array.isArray(catalogue.models)||!Array.isArray(graphs.graphs)||graphs.graphs.some(g=>typeof g.id!=='string'||!Number.isSafeInteger(g.revision)||g.revision<1||typeof g.executable!=='boolean'))throw new Error('Invalid backend capabilities');this.health=health;this.models=catalogue;this.model=catalogue.models.some(m=>m.id===this.model)?this.model:catalogue.default_model;this.graphs=graphs.graphs;if(!this.graphs.some(g=>g.id===this.graphId&&g.executable))this.graphId=undefined;this.post({type:'capabilities',execution:health.agent_execution,sessionAccessModes:health.session_access_modes===true,fileEditProposals:health.file_edit_proposals,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,sessionTransfer:true,sessionDeletion:true,agentSelection:health.agent_selection===true,models:catalogue.models,model:this.model});this.post({type:'graphs',graphs:this.graphs,selected:this.graphId});if(health.provider_profile_admission===true&&!this.profileController)this.profileController=new ProfileController(this.client,message=>{if(message.type!=='status'||!this.runId)this.post(message);});if(this.profileController&&(health.provider_profile_admission!==false||health.graph_provider_profile_admission===true)){await this.profileController.refresh();if(this.current(version))this.profileController.models(this.model);}}
-  async initialize(saved,{onReady}={}){
+  async refreshCapabilities({health:observedHealth}={}){
+    const version=this.generation,health=observedHealth||await this.client.health();
+    if(!this.current(version))return;
+    if(health.provider_profile_admission===true&&!this.profileController)this.profileController=new ProfileController(this.client,message=>{if(message.type!=='status'||!this.runId)this.post(message);});
+    const profiles=this.profileController&&(health.provider_profile_admission!==false||health.graph_provider_profile_admission===true);
+    const [,catalogue,graphs]=await Promise.all([Object.hasOwn(health,'agent_planning')?this.client.planning():undefined,health.agent_execution?this.client.models():{models:[]},this.client.graphs().catch(error=>{if(error.status!==404)throw error;return {graphs:[]};}),profiles?this.profileController.refresh():undefined]);
+    if(!this.current(version))return;if(!Array.isArray(catalogue.models)||!Array.isArray(graphs.graphs)||graphs.graphs.some(g=>typeof g.id!=='string'||!Number.isSafeInteger(g.revision)||g.revision<1||typeof g.executable!=='boolean'))throw new Error('Invalid backend capabilities');this.health=health;this.models=catalogue;this.model=catalogue.models.some(m=>m.id===this.model)?this.model:catalogue.default_model;this.graphs=graphs.graphs;if(!this.graphs.some(g=>g.id===this.graphId&&g.executable))this.graphId=undefined;this.post({type:'capabilities',execution:health.agent_execution,sessionAccessModes:health.session_access_modes===true,fileEditProposals:health.file_edit_proposals,renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,sessionTransfer:true,sessionDeletion:true,agentSelection:health.agent_selection===true,models:catalogue.models,model:this.model});this.post({type:'graphs',graphs:this.graphs,selected:this.graphId});if(profiles)this.profileController.models(this.model);
+  }
+  async initialize(saved,{onReady,health}={}){
     this.model=saved?.model;this.graphId=saved?.graph;this.mcpBindings=saved?.mcp;
-    await this.refreshCapabilities();if(this.disposed)return;
-    const version=this.generation,sessions=await this.sessionCatalog();if(!this.current(version))return;
+    // Reuse only the health read captured for this workspace activation.
+    // Independent catalogue reads need not wait for provider/graph metadata.
+    const version=this.generation;let sessions;
+    if(health){this.health=health;[,sessions]=await Promise.all([this.refreshCapabilities({health}),this.sessionCatalog()]);}
+    else{await this.refreshCapabilities();if(this.disposed)return;sessions=await this.sessionCatalog();}
+    if(!this.current(version))return;
     const selected=sessions.find(session=>session.id===saved?.session)||sessions.at(-1);
-    if(selected)await this.select(selected.id,selected.id===saved?.session?saved?.run:undefined,{sessions,onReady});
+    if(selected)await this.select(selected.id,selected.id===saved?.session?saved?.run:undefined,{sessions,onReady,profilesObserved:true});
     else{this.publishSessions(sessions);onReady?.();}
     if(this.disposed)return;this.scheduleSessionRefresh();
     if(!this.session){this.post({type:'status',text:this.health.agent_execution?'Ready':'Backend connected · open Settings to configure a model'});await this.readSkills();}
     if(this.health?.provider_profile_admission!==false)this.discoverSavedModels();
   }
-  async select(id,preferred,{sessions,onReady}={}){this.stop();const version=this.generation;this.session=id;this.sessionModel=undefined;this.runId=undefined;this.children.clear();this.graphPaths.clear();this.graphOwners.clear();this.graph=undefined;this.operations.clear();this.runOperations.clear();this.sessionPermissionRequests.clear();this.sessionPermissionsLoaded=false;this.post({type:'graph-clear'});this.post({type:'operations',operations:[]});this.post({type:'reset-run'});const [history,runs]=await Promise.all([this.historyPager.select(id),this.client.runs(id)]);if(!this.current(version))return;this.post({type:'history',...history});
-    const previousProfile=this.profileController?.state;if(this.health?.provider_profile_admission!==false||this.health?.graph_provider_profile_admission===true)await this.profileController?.refresh();if(!this.current(version))return;
+  async select(id,preferred,{sessions,onReady,profilesObserved=false}={}){this.stop();const version=this.generation;this.session=id;this.sessionModel=undefined;this.runId=undefined;this.children.clear();this.graphPaths.clear();this.graphOwners.clear();this.graph=undefined;this.operations.clear();this.runOperations.clear();this.sessionPermissionRequests.clear();this.sessionPermissionsLoaded=false;this.post({type:'graph-clear'});this.post({type:'operations',operations:[]});this.post({type:'reset-run'});
+    // Observe independent metadata together, retaining failures until their
+    // generation is checked. History can still render before metadata arrives.
+    const observe=read=>Promise.resolve().then(read).then(value=>({value}),error=>({error})),previousProfile=this.profileController?.state,modelEnabled=this.health?.session_model_selection===true&&typeof this.client.sessionModel==='function';
+    const profileRead=observe(()=>!profilesObserved&&(this.health?.provider_profile_admission!==false||this.health?.graph_provider_profile_admission===true)?this.profileController?.refresh():undefined),modelRead=observe(()=>modelEnabled?this.client.sessionModel(id):undefined),permissionRead=observe(()=>this.refreshSessionPermissions(version));
+    const [history,runs]=await Promise.all([this.historyPager.select(id),this.client.runs(id)]);if(!this.current(version))return;this.post({type:'history',...history});
+    const profile=await profileRead;if(!this.current(version))return;if(Object.hasOwn(profile,'error'))throw profile.error;
     if(previousProfile&&(previousProfile.revision!==this.profileController.state?.revision||previousProfile.active!==this.profileController.state?.active))await this.refreshCapabilities();
     if(!this.current(version))return;let active=this.profileController?.state?.profiles?.find(profile=>profile.id===this.profileController.state.active);if(active?.model)this.model=active.model;const retainedCatalogue=this.showSelectedModel();
-    if(this.health?.session_model_selection===true&&typeof this.client.sessionModel==='function'){try{const state=await this.client.sessionModel(id);if(!this.current(version))return;this.sessionModel=state;
+    if(this.health?.session_model_selection===true&&typeof this.client.sessionModel==='function'){try{const observed=modelEnabled?await modelRead:await observe(()=>this.client.sessionModel(id));if(!this.current(version))return;if(Object.hasOwn(observed,'error'))throw observed.error;const state=observed.value;this.sessionModel=state;
       if(this.profileController){
         const profiles=this.profileController.state?.profiles||[];let savedProfile=state.selected?profiles.find(profile=>profile.id===state.selected.provider_profile_id&&profile.route_id===state.selected.provider_route_id):undefined;
         if(!state.selected&&!active?.model){
@@ -134,7 +150,7 @@ class BrowserController {
         if(savedProfile&&savedProfile.id!==active?.id){await this.profileController.select(savedProfile.id);if(!this.current(version))return;await this.refreshCapabilities();if(!this.current(version))return;active=this.profileController.state.profiles.find(profile=>profile.id===this.profileController.state.active);}
       }
       if(state.selected&&active&&state.selected.provider_profile_id===active.id&&state.selected.provider_route_id===active.route_id)this.model=state.selected.model_id;else if(active?.model)this.model=active.model;this.showSelectedModel();}catch(error){if(error.status!==404)throw error;}}
-    this.runs=runs;const selected=runs.find(run=>run.id===preferred)||runs.at(-1);this.runId=selected?.id;this.cursor=0;this.present();this.remember();if(sessions)this.publishSessions(sessions);else await this.refreshSessions();await this.refreshSessionPermissions(version);if(!this.current(version))return;this.schedulePermissionRefresh(version);onReady?.();
+    this.runs=runs;const selected=runs.find(run=>run.id===preferred)||runs.at(-1);this.runId=selected?.id;this.cursor=0;this.present();this.remember();if(sessions)this.publishSessions(sessions);else await this.refreshSessions();const permissions=await permissionRead;if(!this.current(version))return;if(Object.hasOwn(permissions,'error'))throw permissions.error;this.schedulePermissionRefresh(version);onReady?.();
     // A selection acknowledgement or discovery can be retired by the immediate
     // conversation intent guard after Native has already changed profiles.
     // Recover with the freshly observed saved profile; never replay the CAS or
@@ -591,18 +607,20 @@ else {
   }
   async function activateWorkspace(generation,signal,restorePreferred=false){
     const client=new BrowserSessionClient(location.origin,{requestSignal:signal});
-    const [,initialCatalogue,observedWorkspace]=await Promise.all([client.health(),workspaceCatalogue(signal),restorePreferred?undefined:client.workspace()]);
+    const [observedHealth,initialCatalogue,observedWorkspace]=await Promise.all([client.health(),workspaceCatalogue(signal),restorePreferred?undefined:client.workspace()]);
     if(generation!==connectionGeneration)return;
     let catalogue=initialCatalogue;if(restorePreferred)catalogue=await restoreWorkspacePreference(catalogue,generation,signal);
     if(generation!==connectionGeneration)return;
     const workspace=observedWorkspace||await client.workspace();
     if(!workspace.configured||workspace.workspace_id!==catalogue.selected_workspace_id)throw new Error('The browser session and native workspace catalogue disagree.');
     showWorkspaceCatalogue(catalogue);workspaceControl.dataset.switching='true';picker.disabled=true;element('workspace-config-open').disabled=true;
+    const health=catalogue.selected_workspace_id===initialCatalogue.selected_workspace_id?observedHealth:await client.health();
+    if(generation!==connectionGeneration)return;
     const pending=[],made=makeController(client,generation,pending),saved=readSaved('xmind.view.selection:'+workspace.workspace_id);
     let signalReady;const ready=new Promise(resolve=>{signalReady=resolve;});
     // Restore the validated chat/selection before ancillary run inspection and
     // skill metadata. Those reads remain owned by this controller/generation.
-    const initialization=made.next.initialize(saved,{onReady:signalReady});
+    const initialization=made.next.initialize(saved,{onReady:signalReady,health});
     try{await Promise.race([ready,initialization]);}catch(error){made.next.dispose();throw error;}
     if(generation!==connectionGeneration){made.next.dispose();return;}
     controller?.dispose();controller=made.next;activeWorkspaceClient=client;activeWorkspaceId=workspace.workspace_id;rememberWorkspacePreference(workspace.workspace_id);

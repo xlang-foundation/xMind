@@ -5,8 +5,15 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <memory>
+#include <mutex>
 namespace httplib { struct Request; struct Response; }
 namespace agentflow {
+struct NativeRequestSession;
+struct NativeRequestSessionCache {
+    std::mutex mutex;
+    std::shared_ptr<NativeRequestSession> session;
+};
 struct LocalProfileOptions {
     std::string workspace, profile_root, provider_config, graphs_config, python_tools_config, language_server_config, process_config, mcp_config;
     std::string web_assets,web_packages;
@@ -26,6 +33,9 @@ struct LocalProfileConnection {
     std::string agent_execution="thread";
     std::string ipc_endpoint;
     std::function<void(httplib::Request&,httplib::Response&)> bound_requests;
+    // Move this cache with its authenticated backend connection. Outstanding
+    // replies retain their original session across connection replacement.
+    std::shared_ptr<NativeRequestSessionCache> request_session=std::make_shared<NativeRequestSessionCache>();
 };
 struct LocalWorkspaceProfile {
     std::string workspace_id, root, name;

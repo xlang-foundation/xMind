@@ -1,0 +1,163 @@
+{
+  "date": "2026-10-28",
+  "sourceBase": "f9383096",
+  "sources": {
+    "Native/CMakeLists.txt": "748279ce5cbf4b70548496a0539397541c623fb3278c99c473e12e47dd630078",
+    "Native/apps/web_main.cpp": "4e77fdc654e4f8b54895df395474336386ca0fda660aede1fe71f6e944116e7d",
+    "Native/include/agentflow/local_profile.hpp": "e8616aa533946a5e72e8560f277b0a5fd51b45180d44ce53bc4f98f3d9aa5b0f",
+    "Native/src/local_profile.cpp": "a3c328b78089be3895e1c6f4a71b327829a742a676196d7173b2e7307d0197fa",
+    "Native/src/native_request_channel.hpp": "ae1b23e232f59b7e897fc5848983a7b73e45b87490c81348c1df1185934a55cf",
+    "Native/tests/native_request_session_contract.cpp": "963bce03fc19168de0434bc4f5c8ffac55dbf44a31ceefa5acceb183b7ef9a4d",
+    "Tools/ci-views.mjs": "8d859cf0961a03350f3169f5f8726491445c7b463a1f33f30320485ff9c395d5",
+    "views/browser/browser.js": "c1bdff1e610ff9a68174dd7bd5aa58ac94342e079bda0d00fe5aaea21e79f3fa",
+    "views/browser/tests/controller.test.cjs": "8b680eae859d824a6b2b0fd5f27d670df109ec74fa6741066ad119dbeb4525cc",
+    "views/browser/tests/connection.test.cjs": "2ba91fc82eaef7da98b125395933b11d2db34f3cd3dca41df11920c01e184fd5"
+  },
+  "change": "Reuse an authenticated backend-scoped SDK runtime and imported WebRequests service; probe PID/session generation, invalidate on identity/credential changes, and retain each admitted reply on its original session without replay. Overlap independent browser restore reads and reuse activation observations. Publish readiness metadata atomically and await readable Windows handles.",
+  "reference": {
+    "worldSense": "D:/CantorAI/WorldSense/Backend/src/cantorproxy.py:32; cached root keyed by (pid, session_id)",
+    "pipeline": "D:/CantorAI/WorldSense/Backend/src/perception/pipeline.py:42; retained service objects while identity matches",
+    "cantor": "D:/CantorAI/Cantor/src/Tasks/WorkerProcess.cpp:78; import/service lookup before worker loop",
+    "referenceCodeChanged": false,
+    "frameworkOrSdkChanged": false
+  },
+  "validation": {
+    "scope": "Complete isolated browser JavaScript suite, focused Native contracts, and separate main-process integration; no new full Native suite or hosted CI claim",
+    "browser": {
+      "tests": 174,
+      "passed": 174,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "exitCode": 0,
+      "logSha256": "55b57edd1828ae3716ab75662b7553b706a7eacde357d1214c1dd1019713403f"
+    },
+    "native": {
+      "tests": [
+        "native_request_session_contract",
+        "native_web_stream_contract",
+        "native_local_view_provider_config_contract"
+      ],
+      "passed": 3,
+      "failed": 0,
+      "exitCode": 0,
+      "logSha256": "30208db5e1df6c1aabcb83cf3b36eab274a729afe6a149797739eb7ad871ea4a",
+      "junitSha256": "101ea90016f0078bbd37beef29405f1a903341265668203330e694eb7dd89d1e",
+      "completeDiscoveredInventory": 187,
+      "fullNativeSuiteRun": false,
+      "fixtureEnvironment": {
+        "runtime": ".agentflow/xmind-web-runtime",
+        "packages": ".agentflow/web-python/site-packages"
+      },
+      "coverage": "Single import over repeated/concurrent reads; generation, credential and PID invalidation; failure without replay; connection move, direct dispatch; concurrent readiness readers; trusted provider/MCP configuration and selection preservation."
+    },
+    "mainProcess": {
+      "passed": true,
+      "scope": "Actual main-process FastAPI, standard SDK workspace routing and managed handoff; zero-model graph; no rendered UI claim",
+      "url": "http://127.0.0.1:60790/ui/",
+      "initialOwner": 45428,
+      "replacementOwner": 6296,
+      "peerOwner": 12756,
+      "session": "40e4b17ec08854376188505ca3b86d43",
+      "root": "fb284dfd0fc2d2f86c840fc4ac9035d4",
+      "paidInference": false,
+      "neverReplay": true,
+      "fixtureOwnersCleaned": true
+    },
+    "closure": {
+      "files": 27422,
+      "beforeSha256": "c92aa99359020fe0eb6db5c8ff16b977b0c43dff84df3fb1a5fdc1a9ceb37749",
+      "afterSha256": "c92aa99359020fe0eb6db5c8ff16b977b0c43dff84df3fb1a5fdc1a9ceb37749",
+      "unchanged": true
+    }
+  },
+  "performance": {
+    "metric": "Span from UI /ui/session request start to completion of the first required selected-session history, runs, model and permission reads. Same workspace; individual observed reload traces, not a statistical benchmark or paint timing.",
+    "before": {
+      "initializationRequestSpanMs": 12800,
+      "traceSha256": "affb6685ff221c2a38bf86b37a623e8cef99a96a7b97a1d255aef3e1d1edcb6b"
+    },
+    "afterFrontend": {
+      "initializationRequestSpanMs": 5492,
+      "traceSha256": "466b8ea27afbce4ba57714dce7ee06ee5c33611c1fe230b3c8a5710a9850f921"
+    },
+    "afterPersistentIpc": {
+      "initializationRequestSpanMs": 652,
+      "traceSha256": "d6dbb016f1abe45753c33b52f02447a555ce8405bc3d54d47ff44a61ddd668ea"
+    },
+    "temporaryDiagnostics": "Fetch timing logs in generated assets only; removed and clean asset reloads verified."
+  },
+  "live": {
+    "url": "http://127.0.0.1:58613/ui/",
+    "mainPid": 28948,
+    "mainBirth": "134377020131450921",
+    "mainImage": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-9c134a127c93639a605b5fcf2be0b1f01f58241d720544efc8b413c36238ca55\\xmind.exe",
+    "mainSha": "9283d6cc2ebf4b353ab6d9924fb1dfd9285f9ddb034dab7a9757187b41a56865",
+    "peerPid": 35656,
+    "peerBirth": "134376705305383704",
+    "peerImage": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-e4598605a15350af8c8d5564cb041d00574e501f9a79f558efb93404ecaf1cde\\xmind.exe",
+    "peerSha": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d",
+    "oldMain": {
+      "pid": 44224,
+      "birth": "134376704366237692",
+      "naturalExitObserved": true
+    },
+    "peerPreserved": true,
+    "stagedManifest": "c7502217cdad527f53f63696a29796071fbc0de5318c967ad611ef2af30e3d3b",
+    "runtimeFiles": 2811,
+    "sdkSha256": "a3f185255756bc049e91eaac339fa2d474c3638783bd057650125b51abb89998"
+  },
+  "ui": {
+    "method": "Browser controls on in-app browser tab20; actual FastAPI UI",
+    "nativeUpgradeExact": true,
+    "cleanReloads": [
+      {
+        "workspace": "web-search-check",
+        "session": "Native FastAPI test",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "historyCharacters": 1681,
+        "historySha256": "fddb4b69273c3e34ab0f01910a0547639284be8d411d85ac696cc5c5e6f377ab",
+        "exactBeforeAfterMatch": true
+      },
+      {
+        "workspace": "ui-layout-check",
+        "session": "List the top-level files in this workspace and tell me what it c",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "historyCharacters": 1392,
+        "historySha256": "e42b4d79cbaa1736f407d6ab489831a627490ac8cdf262f5d6f69137841b8e2e",
+        "exactBeforeAfterMatch": true
+      }
+    ],
+    "disclosureVerified": true,
+    "sessionSelectionChecked": true,
+    "newModelRequestsByAgent": 0,
+    "additionalObservedTurn": {
+      "session": "220ac1f383cc45c6813c1588a1dde396",
+      "root": "5941d853102d40f2a3a6a6c311f4ca96",
+      "state": "completed",
+      "prompt": "whats the stats",
+      "submittedByThisAgent": false,
+      "neverReplay": true,
+      "historyPreserved": true
+    },
+    "externalEdge": {
+      "window": 199108,
+      "observation": "Workspace web-search-check, Native FastAPI test, OpenAI/gpt-4.1 and added stats turn present; actual window observed through native AX",
+      "automatedReloadConfirmed": false,
+      "inputFailure": "GetCursorPos Access is denied; no workaround or unlock request attempted"
+    }
+  },
+  "preservedDiagnostics": {
+    "mainProcessInitialFailure": "Replacement51960 started and old29604 exited; CLI read an unopened readiness stream as empty JSON. Failed fixture ewc-68175956 retained; completed session83f73d15230d8448a61b4fe1a160c9c8/root6d13921806fd5f76f6a104521ac4bcee NEVER replay. Fixture owners19328/51960 retired using exact held-handle birth/image/SHA checks.",
+    "otherInitialFailures": [
+      "Synthetic fixture used an invalid LRPC port; corrected within allowed range.",
+      "Readiness observer completion-check race corrected; transient Windows rename sharing violation reproduced and reader corrected.",
+      "Provider-config invocation lacked embedded ASGI fixture environment; configured xlang3 runtime/pip paths and passed."
+    ],
+    "scope": "Original failed logs retained privately; later passes are final-code qualification, not erasure of those failures."
+  },
+  "installedVSCode": "0.1.80 preserved; no new VSIX validation in this checkpoint",
+  "screenshot": "browser-session-load-ipc-20261028.png"
+}
