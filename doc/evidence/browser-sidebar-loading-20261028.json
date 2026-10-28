@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-28",
+  "change": "Keep local workspace disclosure available during native selection and show Loading sessions… instead of stale conversations.",
+  "sourceBase": "d259d73e5384c57f114c65944c547717cd91eb23",
+  "sources": {
+    "views/browser/layout.js": "d30f2ee7a125664ab85da84292f92d855af15b2c3d1d4e802f17bee0bf01fcc0",
+    "views/browser/tests/layout.test.cjs": "32c9c87d7f3511f10ae99bc1d963a8de79966da27ed420d6b4341e4ac04e4e61"
+  },
+  "validation": {
+    "scope": "Complete isolated browser JavaScript suite; existing layout contract extended for disclosure while loading, stale-session exclusion, preserved collapsed choice, and no extra selection dispatch.",
+    "files": [
+      "classic-script.test.cjs",
+      "connection.test.cjs",
+      "controller.test.cjs",
+      "launcher-build.test.cjs",
+      "layout.test.cjs",
+      "mcp-authorization-routes.test.cjs",
+      "responsive-layout.test.cjs",
+      "terminal.test.cjs"
+    ],
+    "tests": 173,
+    "passed": 173,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "durationMs": 20238.1724,
+    "logSha256": "c07d1a8138ffa9d87060f834980943d03207ce6c255f248ee2f4d97d4c57cd72",
+    "closureFiles": 27420,
+    "closureBeforeSha256": "b7b0e98d5ae53f224ae7be2b1bb2aeaf1d9f609e3f058ff625a0b8e9d6f296ae",
+    "closureAfterSha256": "b7b0e98d5ae53f224ae7be2b1bb2aeaf1d9f609e3f058ff625a0b8e9d6f296ae"
+  },
+  "ui": {
+    "method": "Browser controls on ChatGPT in-app browser, tab 20",
+    "url": "http://127.0.0.1:58613/ui/",
+    "localDisclosureDuringLoad": [
+      "Expanded, enabled, Loading sessions…",
+      "Collapsed during loading",
+      "Expanded during loading"
+    ],
+    "restoration": [
+      {
+        "workspace": "ui-layout-check",
+        "session": "List the top-level files in this workspace and tell me what it c",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "fullRenderedHistoryCharacters": 1392,
+        "fullRenderedHistorySha256": "e42b4d79cbaa1736f407d6ab489831a627490ac8cdf262f5d6f69137841b8e2e",
+        "exactBeforeAfterMatch": true
+      },
+      {
+        "workspace": "web-search-check",
+        "session": "Native FastAPI test",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "fullRenderedHistoryCharacters": 1275,
+        "fullRenderedHistorySha256": "051465103ffb63f538906c6d21a8965bf87252e941390001c7f32bea01441144",
+        "exactBeforeAfterMatch": true
+      }
+    ],
+    "externalEdge": {
+      "method": "Native computer-use controls for Microsoft Edge window6489978; separate from in-app browser locators",
+      "url": "http://127.0.0.1:58613/ui/",
+      "automaticReloadReconnect": true,
+      "workspace": "ui-layout-check",
+      "session": "List the top-level files in this workspace and tell me what it c",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "collapseRemovedSessionRow": true,
+      "expandRestoredSessionRow": true,
+      "historyDisplayRestored": true,
+      "exactFullHistoryEquality": "Established separately in both workspaces using in-app browser DOM text"
+    },
+    "newModelRequests": 0,
+    "replayedRuns": 0
+  },
+  "scope": "Frontend-only change served by existing xmind.exe/FastAPI owner44224 on58613. No Native build/full Native suite, installed VS Code update, hosted CI, provider task or project modification for this checkpoint.",
+  "screenshot": "browser-sidebar-loading-20261028.png"
+}
