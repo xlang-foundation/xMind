@@ -77,7 +77,7 @@ test('inspector separates Changes, opens file previews with Back, and remembers 
   win.localStorage.setItem('xmind.browser.details.tab','changes');win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));
   assert.equal(doc.querySelector('[role=tab][aria-selected=true]').id,'details-changes');assert.ok(doc.querySelector('#inspector-changes #workspace-vcs-diff'));assert.equal(doc.querySelector('#inspector-files .file-tree-heading'),null);
   doc.getElementById('details-files').click();assert.equal(win.localStorage.getItem('xmind.browser.details.tab'),'files');win.dispatchEvent(new win.Event('workspace-file-preview'));assert.equal(doc.getElementById('workspace-canvas').dataset.preview,'true');doc.querySelector('[aria-label="Back to files"]').click();assert.equal(doc.getElementById('workspace-canvas').dataset.preview,'false');
-  doc.getElementById('details-changes').click();let requests=0;const source=doc.getElementById('workspace-terminal-toggle');source.onclick=()=>requests++;source.disabled=false;await new Promise(resolve=>setImmediate(resolve));doc.getElementById('global-terminal-toggle').click();assert.equal(requests,1);assert.equal(doc.getElementById('inspector-changes').hidden,false);assert.equal(doc.getElementById('browser-terminal-panel').parentElement.id,'agent-sidebar');
+  doc.getElementById('details-changes').click();let requests=0;const source=doc.getElementById('workspace-terminal-toggle');source.onclick=()=>requests++;source.disabled=false;await new Promise(resolve=>setImmediate(resolve));doc.getElementById('global-terminal-toggle').click();assert.equal(requests,1);assert.equal(doc.getElementById('inspector-changes').hidden,false);assert.equal(doc.getElementById('browser-terminal-panel').parentElement.id,'context-inspector');
   doc.getElementById('details-changes').dispatchEvent(new win.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));assert.equal(doc.activeElement.id,'details-activity');
  }finally{win.close();}
 });
@@ -101,5 +101,26 @@ test('Activity scopes child calls, preserves interrupted outcomes, and bounds fi
   send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});for(const id of ['child-a','child-b'])event(id,1,'tool.started',{call_id:'same',name:'read_file',arguments:{path:id}});event('child-a',2,'tool.completed',{call_id:'same',name:'read_file',data:'fixture'});event('root',1,'run.completed');assert.equal(doc.querySelectorAll('.activity-item[data-state=running]').length,1);event('child-b',2,'run.failed');assert.equal(doc.querySelectorAll('.activity-item[data-state=interrupted]').length,1);
   send({type:'reset-run'});for(let i=0;i<105;i++){event('root',i*2+10,'tool.started',{call_id:String(i),name:'read_file',arguments:{path:'fixture-'+i}});event('root',i*2+11,'tool.completed',{call_id:String(i),name:'read_file',data:'fixture'});}assert.equal(doc.querySelectorAll('.activity-item').length,100);assert.match(doc.getElementById('activity-finished').textContent,/Finished · 100/);
   send({type:'runs',selected:'different',runs:[{id:'different',state:'completed'}]});assert.equal(doc.querySelectorAll('.activity-item').length,0);
+ }finally{win.close();}
+});
+
+test('current file preview uses scoped native snapshots and pauses motion while approval is pending',()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data})),tool=(seq,kind,data)=>send({type:'event',event:{run_id:'root',seq,kind,data}});
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});tool(1,'tool.started',{activity_id:'edit',name:'edit_file',arguments:{path:'src/current.js',folder_id:'folder'}});
+  const card=doc.getElementById('current-work');assert.equal(card.dataset.state,'working');assert.equal(doc.getElementById('current-work-name').textContent,'current.js');
+  const op={id:'prepared',run_id:'root',tool:'replace_file',state:'awaiting_approval',arguments_json:JSON.stringify({path:'src/current.js',folder_id:'folder',before_content:'old\n',after_content:'new\n'})};send({type:'operations',operations:[op]});assert.equal(card.dataset.state,'waiting');assert.match(card.querySelector('.current-work-preview').textContent,/- old\+ new/);assert.equal(card.querySelector('.current-work-preview-label').textContent,'Proposed change');
+  send({type:'operations',operations:[{...op,state:'executing'}]});assert.equal(card.dataset.state,'working');tool(2,'tool.completed',{activity_id:'edit',name:'edit_file',data:{operation_id:'prepared'}});assert.equal(card.dataset.state,'done');assert.equal(card.querySelector('.current-work-preview-label').textContent,'Applied change');assert.equal(card.querySelector('[role=progressbar]'),null);
+  send({type:'runs',selected:'other',runs:[{id:'other',state:'running'}]});assert.equal(card.hidden,true);tool(3,'tool.started',{activity_id:'another',name:'replace_file',arguments:{path:'src/current.js',folder_id:'folder'}});assert.equal(card.querySelector('.current-work-preview').hidden,true,'Previous run preview must not bleed into a new call');
+ }finally{win.close();}
+});
+
+test('current file card shows reported text results and preserves failed outcomes',()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));const send=data=>win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data})),tool=(seq,kind,data)=>send({type:'event',event:{run_id:'root',seq,kind,data}});
+  send({type:'runs',selected:'root',runs:[{id:'root',state:'running'}]});tool(1,'tool.started',{call_id:'read',name:'read_file',arguments:{path:'report.md'}});tool(2,'tool.completed',{call_id:'read',name:'read_file',data:{content:'Actual reported fixture text',encoding:'utf-8'}});assert.match(doc.querySelector('.current-work-preview').textContent,/Actual reported fixture text/);assert.equal(doc.getElementById('current-work').dataset.state,'done');
+  tool(3,'tool.started',{call_id:'fail',name:'create_file',arguments:{path:'failed.md'}});tool(4,'tool.failed',{call_id:'fail',name:'create_file',data:{error:'Native failure fixture'}});assert.equal(doc.getElementById('current-work').dataset.state,'failed');assert.equal(doc.querySelector('.current-work-state').textContent,'Failed');send({type:'reset-run'});assert.equal(doc.getElementById('current-work').hidden,true);
  }finally{win.close();}
 });

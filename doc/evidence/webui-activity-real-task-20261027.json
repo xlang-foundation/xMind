@@ -1,0 +1,246 @@
+{
+  "recordedUtc": "2026-10-28T04:33:46.369Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "sessionId": "0d86307ecb1a48d69966dff5c1d146e6",
+  "sessionName": "Live Activity demo",
+  "runId": "9dfd1c487345441e94add6a3152fd9fa",
+  "doNotReplay": true,
+  "promptSubmittedThrough": "Visible web UI textbox and Send button",
+  "prompt": "Create a small inventory-report project in a new activity-live-demo-20261027 folder inside the primary workspace folder. Keep every change inside that new folder and leave existing project files alone. Create inventory.csv with Notebook (3 at 4.50), Pen (10 at 1.20), Mug (2 at 8.00), and Cable (4 at 6.25). Create a dependency-free JavaScript program that reads this CSV, calculates each subtotal and the grand total, and writes report.md. Run the program with Node, then read report.md back and verify the result. Briefly report the files created, the command outcome, and the verified total.",
+  "provider": "gemini",
+  "model": "models/gemini-3.8-flash",
+  "state": "completed",
+  "samples": [
+    {
+      "failure": "",
+      "now": "Waiting for approval · 1",
+      "rows": [
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/inventory.csv",
+          "state": "running"
+        }
+      ],
+      "run": "9dfd1c487345441e94add6a3152fd9fa",
+      "status": "running",
+      "utc": "2026-10-28T04:28:45.063Z"
+    },
+    {
+      "now": "Waiting for approval · 1",
+      "rows": [
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/inventory.csv",
+          "state": "running"
+        }
+      ],
+      "utc": "2026-10-28T04:29:08.341Z"
+    },
+    {
+      "failure": "",
+      "now": "Working…",
+      "rows": [
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/inventory.csv",
+          "state": "completed"
+        }
+      ],
+      "status": "running",
+      "utc": "2026-10-28T04:29:15.236Z"
+    },
+    {
+      "failure": "",
+      "now": "Waiting for approval · 1",
+      "rows": [
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/generate_report.js",
+          "state": "running"
+        },
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/inventory.csv",
+          "state": "completed"
+        }
+      ],
+      "status": "running",
+      "utc": "2026-10-28T04:29:40.889Z"
+    },
+    {
+      "failure": "",
+      "now": "Completed",
+      "rows": [
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/inventory.csv",
+          "state": "completed"
+        },
+        {
+          "name": "Creating file",
+          "resource": "activity-live-demo-20261027/generate_report.js",
+          "state": "completed"
+        },
+        {
+          "name": "Command",
+          "resource": "powershell · node generate_report.js",
+          "state": "completed"
+        },
+        {
+          "name": "Reading file",
+          "resource": "activity-live-demo-20261027/report.md",
+          "state": "completed"
+        }
+      ],
+      "status": "completed",
+      "utc": "2026-10-28T04:30:38.265Z"
+    }
+  ],
+  "finalTools": [
+    {
+      "output": "",
+      "resource": "activity-live-demo-20261027/inventory.csv",
+      "state": "completed",
+      "receipt": {
+        "tool": "create_file",
+        "arguments": {
+          "content": "Item,Quantity,Price\nNotebook,3,4.50\nPen,10,1.20\nMug,2,8.00\nCable,4,6.25\n",
+          "create_parents": true,
+          "path": "activity-live-demo-20261027/inventory.csv"
+        },
+        "result": {
+          "content_sha256": "f32685f15eb8aabacaeb30bb75dd3cae3c7f8dac536d8c57bbcf8e095956ee27",
+          "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0200000000000000184a110000000000",
+          "operation_id": "ca0f999b85ceb729cdca7506dc6a41ac",
+          "path": "activity-live-demo-20261027/inventory.csv",
+          "size": 72
+        }
+      }
+    },
+    {
+      "output": "",
+      "resource": "activity-live-demo-20261027/generate_report.js",
+      "state": "completed",
+      "receipt": {
+        "tool": "create_file",
+        "arguments": {
+          "content": "const fs = require('fs');\nconst path = require('path');\n\nconst csvPath = path.join(__dirname, 'inventory.csv');\nconst reportPath = path.join(__dirname, 'report.md');\n\nconst rawData = fs.readFileSync(csvPath, 'utf8').trim();\nconst lines = rawData.split(/\\r?\\n/);\nconst headers = lines[0].split(',').map(h => h.trim());\n\nlet grandTotal = 0;\nconst rows = [];\n\nfor (let i = 1; i < lines.length; i++) {\n  const line = lines[i].trim();\n  if (!line) continue;\n  const [item, qtyStr, priceStr] = line.split(',').map(s => s.trim());\n  const quantity = parseInt(qtyStr, 10);\n  const price = parseFloat(priceStr);\n  const subtotal = quantity * price;\n  grandTotal += subtotal;\n\n  rows.push({\n    item,\n    quantity,\n    price: price.toFixed(2),\n    subtotal: subtotal.toFixed(2)\n  });\n}\n\nlet md = '# Inventory Report\\n\\n';\nmd += '| Item | Quantity | Unit Price | Subtotal |\\n';\nmd += '| :--- | :---: | :---: | :---: |\\n';\n\nfor (const row of rows) {\n  md += `| ${row.item} | ${row.quantity} | $${row.price} | $${row.subtotal} |\\n`;\n}\n\nmd += `\\n**Grand Total:** $${grandTotal.toFixed(2)}\\n`;\n\nfs.writeFileSync(reportPath, md, 'utf8');\nconsole.log(`Report generated successfully at ${reportPath}`);\nconsole.log(`Grand Total: $${grandTotal.toFixed(2)}`);\n",
+          "create_parents": true,
+          "path": "activity-live-demo-20261027/generate_report.js"
+        },
+        "result": {
+          "content_sha256": "5dbb9465dc7b6a5165767287d4d78dfdeddd2efc3b945ee3dd8698ee0ad83dfa",
+          "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0300000000000000184a110000000000",
+          "operation_id": "a8ae8c0e9ce68566e20bb70948d2a079",
+          "path": "activity-live-demo-20261027/generate_report.js",
+          "size": 1240
+        }
+      }
+    },
+    {
+      "output": "stdout · 161 retained bytes · UTF-8; controls escaped\nReport generated successfully at D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\activity-live-demo-20261027\\report.md\nGrand Total: $66.50\n\nstderr · 0 retained bytes\n",
+      "resource": "powershell · node generate_report.js",
+      "state": "completed",
+      "receipt": {
+        "tool": "run_process",
+        "arguments": {
+          "arguments": [
+            "node generate_report.js"
+          ],
+          "profile": "powershell",
+          "workdir": "activity-live-demo-20261027"
+        },
+        "result": {
+          "elapsed_ms": 382,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "e30fe863999dc9225f59b3dec7b89dde",
+          "operation_id": "e30fe863999dc9225f59b3dec7b89dde",
+          "output_artifact": {
+            "operation_id": "e30fe863999dc9225f59b3dec7b89dde",
+            "state": "complete",
+            "stderr_bytes": 0,
+            "stdout_bytes": 161
+          },
+          "pid": 13264,
+          "process_tree_retired": true,
+          "profile_id": "powershell",
+          "stderr": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "stdout": {
+            "byte_count": 161,
+            "data": "Report generated successfully at D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\activity-live-demo-20261027\\report.md\nGrand Total: $66.50\n",
+            "encoding": "utf-8",
+            "retained_bytes": 161
+          },
+          "termination": "exited",
+          "truncated": false
+        }
+      }
+    },
+    {
+      "output": "",
+      "resource": "activity-live-demo-20261027/report.md",
+      "state": "completed",
+      "receipt": {
+        "tool": "read_file",
+        "arguments": {
+          "path": "activity-live-demo-20261027/report.md"
+        },
+        "result": {
+          "content": "# Inventory Report\n\n| Item | Quantity | Unit Price | Subtotal |\n| :--- | :---: | :---: | :---: |\n| Notebook | 3 | $4.50 | $13.50 |\n| Pen | 10 | $1.20 | $12.00 |\n| Mug | 2 | $8.00 | $16.00 |\n| Cable | 4 | $6.25 | $25.00 |\n\n**Grand Total:** $66.50\n",
+          "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+          "path": "activity-live-demo-20261027/report.md",
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+          "workspace_revision": 2
+        }
+      }
+    }
+  ],
+  "finalAnswer": "Summary\n1. FILES CREATED\n\nAll files were created exclusively inside activity-live-demo-20261027/:\n\nactivity-live-demo-20261027/inventory.csv: Contains the inventory data:\nNotebook (3 @ 4.50)\nPen (10 @ 1.20)\nMug (2 @ 8.00)\nCable (4 @ 6.25)\nactivity-live-demo-20261027/generate_report.js: Dependency-free Node.js script using built-in fs and path to parse inventory.csv, calculate item subtotals and the grand total, and generate report.md.\nactivity-live-demo-20261027/report.md: Generated Markdown table report containing subtotals and the grand total.\n2. COMMAND OUTCOME\nExecuted node generate_report.js in activity-live-demo-20261027.\nExit code: 0\nStdout:\nReport generated successfully at ...\\activity-live-demo-20261027\\report.md\nGrand Total: $66.50\n\nCopy code\n3. VERIFIED TOTAL\n\nReading report.md confirmed the calculated breakdown and grand total:\n\nNotebook: 3 × $4.50 = $13.50\nPen: 10 × $1.20 = $12.00\nMug: 2 × $8.00 = $16.00\nCable: 4 × $6.25 = $25.00\nVerified Grand Total: $66.50",
+  "usageFromActualRenderedResponses": [
+    "In 7,013Out 88Tok 7,624Reason 523models/gemini-3.8-flashGemini · GCTTFT 4.10sTime 4.10s",
+    "In 7,815Out 465Tok 8,423Cache 4,992Reason 143models/gemini-3.8-flashGemini · GCTTFT 6.89sTime 6.89s",
+    "In 8,645Out 48Tok 8,756Reason 63models/gemini-3.8-flashGemini · GCTTFT 2.52sTime 2.52s",
+    "In 9,060Out 33Tok 9,106Cache 6,879Reason 13models/gemini-3.8-flashGemini · GCTTFT 2.16sTime 2.17s",
+    "In 9,401Out 439Tok 10,001Cache 6,876Reason 161models/gemini-3.8-flashGemini · GCTTFT 2.48sTime 4.87s"
+  ],
+  "budget": {
+    "previousAgentAccountedUsd": 1.52044,
+    "capUsd": 100,
+    "additionalTaskUsage": {
+      "input": 41934,
+      "output": 1073,
+      "reasoning": 903,
+      "cached": 18747,
+      "total": 43910
+    },
+    "newTaskCostUsd": null,
+    "pricingNote": "Gemini pricing not provided in rendered receipts; do not present prior-accounted spend as including this new task."
+  },
+  "independentDiskRead": {
+    "reportSha256": "27d3bb1da36284484f3ae989e0f13df0c1a392743b13ccfb5adda63899fde158",
+    "verifiedTotal": 66.5,
+    "expectedSubtotals": [
+      13.5,
+      12,
+      16,
+      25
+    ],
+    "programRerunByAgent": false
+  },
+  "terminal": {
+    "parent": "context-inspector",
+    "toggleParent": "inspector-controls",
+    "connected": true
+  },
+  "sourcePlacementTests": {
+    "passed": 12,
+    "log": ".agentflow/right-terminal-layout-qualified.log"
+  },
+  "browserTabChangeObservation": "During workspace selection, the app replaced tab14 with tab17. A brief mixed workspace/history Resource not found state cleared after reloading the current visible tab; no task was sent until the new test session was confirmed ready."
+}

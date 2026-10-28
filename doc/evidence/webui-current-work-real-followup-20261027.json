@@ -1,0 +1,237 @@
+{
+  "recordedUtc": "2026-10-28T04:44:39.342Z",
+  "url": "http://127.0.0.1:57780/ui/",
+  "sessionId": "0d86307ecb1a48d69966dff5c1d146e6",
+  "sessionName": "Live Activity demo",
+  "completedRunIds": [
+    "9dfd1c487345441e94add6a3152fd9fa",
+    "03db9ee108724732a571c0e3ced0da5e"
+  ],
+  "doNotReplay": true,
+  "prompts": [
+    "Create a small inventory-report project in a new activity-live-demo-20261027 folder inside the primary workspace folder. Keep every change inside that new folder and leave existing project files alone. Create inventory.csv with Notebook (3 at 4.50), Pen (10 at 1.20), Mug (2 at 8.00), and Cable (4 at 6.25). Create a dependency-free JavaScript program that reads this CSV, calculates each subtotal and the grand total, and writes report.md. Run the program with Node, then read report.md back and verify the result. Briefly report the files created, the command outcome, and the verified total.",
+    "Enhance this inventory report with a Low stock column: an item is low stock when its quantity is below 3. Update the JavaScript program, regenerate report.md, and read the revised report to verify that only Mug is flagged and the grand total is still correct. Keep all changes inside activity-live-demo-20261027."
+  ],
+  "followup": {
+    "state": "completed",
+    "finalAnswer": "Update Summary\n1. CHANGES MADE\nUpdated activity-live-demo-20261027/generate_report.js to determine low-stock status (quantity < 3) and add a Low Stock column to the Markdown table.\nKept all edits strictly inside activity-live-demo-20261027.\n2. EXECUTION OUTCOME\nExecuted node generate_report.js within activity-live-demo-20261027 (Exit code: 0).\nRegenerated activity-live-demo-20261027/report.md.\n3. VERIFICATION OF REPORT.MD\n\nThe regenerated report was read back and verified:\n\nNotebook (qty 3): No\nPen (qty 10): No\nMug (qty 2): Yes (only item flagged for low stock)\nCable (qty 4): No\nGrand Total: Still verified at $66.50",
+    "toolReceipts": [
+      {
+        "name": "Reading file",
+        "receipt": {
+          "arguments": {
+            "path": "activity-live-demo-20261027/generate_report.js"
+          },
+          "result": {
+            "content": "const fs = require('fs');\nconst path = require('path');\n\nconst csvPath = path.join(__dirname, 'inventory.csv');\nconst reportPath = path.join(__dirname, 'report.md');\n\nconst rawData = fs.readFileSync(csvPath, 'utf8').trim();\nconst lines = rawData.split(/\\r?\\n/);\nconst headers = lines[0].split(',').map(h => h.trim());\n\nlet grandTotal = 0;\nconst rows = [];\n\nfor (let i = 1; i < lines.length; i++) {\n  const line = lines[i].trim();\n  if (!line) continue;\n  const [item, qtyStr, priceStr] = line.split(',').map(s => s.trim());\n  const quantity = parseInt(qtyStr, 10);\n  const price = parseFloat(priceStr);\n  const subtotal = quantity * price;\n  grandTotal += subtotal;\n\n  rows.push({\n    item,\n    quantity,\n    price: price.toFixed(2),\n    subtotal: subtotal.toFixed(2)\n  });\n}\n\nlet md = '# Inventory Report\\n\\n';\nmd += '| Item | Quantity | Unit Price | Subtotal |\\n';\nmd += '| :--- | :---: | :---: | :---: |\\n';\n\nfor (const row of rows) {\n  md += `| ${row.item} | ${row.quantity} | $${row.price} | $${row.subtotal} |\\n`;\n}\n\nmd += `\\n**Grand Total:** $${grandTotal.toFixed(2)}\\n`;\n\nfs.writeFileSync(reportPath, md, 'utf8');\nconsole.log(`Report generated successfully at ${reportPath}`);\nconsole.log(`Grand Total: $${grandTotal.toFixed(2)}`);\n",
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+            "path": "activity-live-demo-20261027/generate_report.js",
+            "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+            "workspace_revision": 2
+          },
+          "tool": "read_file"
+        },
+        "resource": "activity-live-demo-20261027/generate_report.js",
+        "state": "completed"
+      },
+      {
+        "name": "Editing file",
+        "receipt": {
+          "arguments": {
+            "expected_occurrences": 1,
+            "new_text": "  const isLowStock = quantity < 3;\n\n  rows.push({\n    item,\n    quantity,\n    price: price.toFixed(2),\n    subtotal: subtotal.toFixed(2),\n    lowStock: isLowStock ? 'Yes' : 'No'\n  });\n}\n\nlet md = '# Inventory Report\\n\\n';\nmd += '| Item | Quantity | Unit Price | Subtotal | Low Stock |\\n';\nmd += '| :--- | :---: | :---: | :---: | :---: |\\n';\n\nfor (const row of rows) {\n  md += `| ${row.item} | ${row.quantity} | $${row.price} | $${row.subtotal} | ${row.lowStock} |\\n`;\n}",
+            "old_text": "  rows.push({\n    item,\n    quantity,\n    price: price.toFixed(2),\n    subtotal: subtotal.toFixed(2)\n  });\n}\n\nlet md = '# Inventory Report\\n\\n';\nmd += '| Item | Quantity | Unit Price | Subtotal |\\n';\nmd += '| :--- | :---: | :---: | :---: |\\n';\n\nfor (const row of rows) {\n  md += `| ${row.item} | ${row.quantity} | $${row.price} | $${row.subtotal} |\\n`;\n}",
+            "path": "activity-live-demo-20261027/generate_report.js"
+          },
+          "result": {
+            "content_sha256": "46786daaa0f3cd37926338bee3fa932ce1d919518d367ea493cd280b2fed66d5",
+            "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0300000000000000184a110000000000",
+            "operation_id": "865f219e6b21d792344c6c6975b97f8a",
+            "path": "activity-live-demo-20261027/generate_report.js",
+            "size": 1355
+          },
+          "tool": "edit_file"
+        },
+        "resource": "activity-live-demo-20261027/generate_report.js",
+        "state": "completed"
+      },
+      {
+        "name": "Command",
+        "receipt": {
+          "arguments": {
+            "arguments": [
+              "node generate_report.js"
+            ],
+            "profile": "powershell",
+            "workdir": "activity-live-demo-20261027"
+          },
+          "result": {
+            "elapsed_ms": 218,
+            "exit_code": 0,
+            "independently_verified": false,
+            "job_id": "61a77003a72f56a5dfe9f7d2011fb6cf",
+            "operation_id": "61a77003a72f56a5dfe9f7d2011fb6cf",
+            "output_artifact": {
+              "operation_id": "61a77003a72f56a5dfe9f7d2011fb6cf",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 161
+            },
+            "pid": 3572,
+            "process_tree_retired": true,
+            "profile_id": "powershell",
+            "stderr": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "stdout": {
+              "byte_count": 161,
+              "data": "Report generated successfully at D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\activity-live-demo-20261027\\report.md\nGrand Total: $66.50\n",
+              "encoding": "utf-8",
+              "retained_bytes": 161
+            },
+            "termination": "exited",
+            "truncated": false
+          },
+          "tool": "run_process"
+        },
+        "resource": "powershell · node generate_report.js",
+        "state": "completed"
+      },
+      {
+        "name": "Reading file",
+        "receipt": {
+          "arguments": {
+            "path": "activity-live-demo-20261027/report.md"
+          },
+          "result": {
+            "content": "# Inventory Report\n\n| Item | Quantity | Unit Price | Subtotal | Low Stock |\n| :--- | :---: | :---: | :---: | :---: |\n| Notebook | 3 | $4.50 | $13.50 | No |\n| Pen | 10 | $1.20 | $12.00 | No |\n| Mug | 2 | $8.00 | $16.00 | Yes |\n| Cable | 4 | $6.25 | $25.00 | No |\n\n**Grand Total:** $66.50\n",
+            "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+            "path": "activity-live-demo-20261027/report.md",
+            "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000",
+            "workspace_revision": 2
+          },
+          "tool": "read_file"
+        },
+        "resource": "activity-live-demo-20261027/report.md",
+        "state": "completed"
+      }
+    ],
+    "samples": [
+      {
+        "card": {
+          "hidden": false,
+          "movingHighlight": "current-work-flow",
+          "name": "generate_report.js",
+          "path": "activity-live-demo-20261027/generate_report.js",
+          "preview": "",
+          "previewLabel": "File content",
+          "state": "working"
+        },
+        "now": "Waiting for approval · 1",
+        "run": "03db9ee108724732a571c0e3ced0da5e",
+        "status": "running",
+        "utc": "2026-10-28T04:38:49.145Z"
+      },
+      {
+        "highlightAnimation": "none",
+        "name": "generate_report.js",
+        "preview": "-   rows.push({\n-     item,\n+   const isLowStock = quantity < 3;\n+ \n+   rows.push({\n+     item,",
+        "previewLabel": "Proposed change",
+        "run": "03db9ee108724732a571c0e3ced0da5e",
+        "scanDisplay": "none",
+        "state": "waiting",
+        "utc": "2026-10-28T04:39:38.826Z"
+      },
+      {
+        "cardState": "waiting",
+        "headline": "Waiting for approval · 1",
+        "run": "03db9ee108724732a571c0e3ced0da5e",
+        "status": "running",
+        "utc": "2026-10-28T04:39:52.916Z"
+      },
+      {
+        "card": {
+          "name": "report.md",
+          "preview": "| Pen | 10 | $1.20 | $12.00 | No |\n| Mug | 2 | $8.00 | $16.00 | Yes |\n| Cable | 4 | $6.25 | $25.00 | No |\n**Grand Total:** $66.50",
+          "state": "done"
+        },
+        "now": "Completed",
+        "run": "03db9ee108724732a571c0e3ced0da5e",
+        "session": "0d86307ecb1a48d69966dff5c1d146e6",
+        "status": "completed",
+        "utc": "2026-10-28T04:41:16.460Z"
+      }
+    ]
+  },
+  "actualUi": {
+    "fixedPendingPreview": {
+      "highlightAnimation": "none",
+      "name": "generate_report.js",
+      "preview": "-   rows.push({\n-     item,\n+   const isLowStock = quantity < 3;\n+ \n+   rows.push({\n+     item,",
+      "previewLabel": "Proposed change",
+      "run": "03db9ee108724732a571c0e3ced0da5e",
+      "scanDisplay": "none",
+      "state": "waiting",
+      "utc": "2026-10-28T04:39:38.826Z"
+    },
+    "completedCard": {
+      "file": "report.md",
+      "highlightAnimation": "none",
+      "preview": "| Pen | 10 | $1.20 | $12.00 | No |\n| Mug | 2 | $8.00 | $16.00 | Yes |\n| Cable | 4 | $6.25 | $25.00 | No |\n**Grand Total:** $66.50",
+      "previewWhiteSpace": "pre",
+      "state": "done"
+    },
+    "terminal": {
+      "chatContainsTerminal": false,
+      "parent": "context-inspector",
+      "status": "Connected to the selected conversation terminal.",
+      "toggleParent": "inspector-controls",
+      "visible": true
+    },
+    "sessionRestored": true,
+    "workspaceRestored": true,
+    "modelRestored": true,
+    "exactMessageBodiesRestored": true
+  },
+  "liveBugFixed": "Native tool.started names edit_file while its prepared operation uses replace_file; canonical display matching now projects the bound diff and pauses animation during approval.",
+  "diskVerification": {
+    "grandTotal": 66.5,
+    "onlyLowStock": "Mug",
+    "reportSha256": "e7acd2a66a77ad868559ebc913a9996b6bf336d0a33687bfc9029c7ff879b63b",
+    "programSha256": "46786daaa0f3cd37926338bee3fa932ce1d919518d367ea493cd280b2fed66d5",
+    "agentDidNotRerunProgram": true
+  },
+  "tests": {
+    "passed": 336,
+    "log": ".agentflow/current-work-release-qualified.log"
+  },
+  "budget": {
+    "capUsd": 100,
+    "previousAgentAccountedUsd": 1.52044,
+    "theseTwoTurnsCostUsd": null,
+    "priceStatus": "Pricing absent from UI receipts; prior-accounted spend excludes these two Gemini turns and manual usage.",
+    "actualTwoTurnUsage": {
+      "input": 99784,
+      "output": 1813,
+      "total": 103242,
+      "cached": 64165,
+      "reasoning": 1645
+    },
+    "responseCount": 10
+  },
+  "uiOnlyChatsAndApprovals": true,
+  "sourceQualification": {
+    "log": ".agentflow/current-work-release-qualified.log",
+    "passed": 336,
+    "files": {
+      "views/browser/layout.js": "a58ef08a547305a04704ed26b2d786d1a782a31cba16c36020c655a84b7c5a61",
+      "views/browser/layout.css": "616dc4cebe987e976dfec2ac4a91efa0fa2c829254bec28da77a03ce7d9a83b4",
+      "extensions/vscode/media/chat.js": "3d0a6c0a13becdafd35264fb9d5a52176876edb6bf191a4376512db1c9bdd875",
+      "views/browser/tests/layout.test.cjs": "072bf07ca065360c4f40526233dbe9f2aa954968a0fe3e48c7d789d0cf97deda",
+      "views/browser/tests/classic-script.test.cjs": "5e899fdbc8d0188fcb45c7436cb80da0d67afdc9a0503a7b0b7963f8c2308922"
+    }
+  }
+}

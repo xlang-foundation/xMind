@@ -58,8 +58,8 @@
   const syncFilesEmpty=()=>filesEmpty.hidden=!canvas.hidden;new MutationObserver(syncFilesEmpty).observe(canvas,{attributes:true,attributeFilter:['hidden']});syncFilesEmpty();
   selection.prepend(activity.querySelector('.conversation-tools'));activity.append(selection,agentSettings);
   activity.querySelector('#events').parentElement.querySelector('summary').textContent='Diagnostic log';
-  const terminalPanel=byId('browser-terminal-panel');chat.append(terminalPanel);
-  panels.append(files,changes,activity);inspector.append(controls,panels);layout.append(inspector);
+  const terminalPanel=byId('browser-terminal-panel');inspector.append(terminalPanel);
+  panels.append(files,changes,activity);inspector.prepend(controls,panels);layout.append(inspector);
   const toggle=make('button',undefined,'sidebar-toggle');toggle.append(sidebarIcon('right'));toggle.id='details-toggle';toggle.type='button';toggle.setAttribute('aria-label','Toggle right sidebar');toggle.setAttribute('aria-controls',inspector.id);toggle.setAttribute('aria-expanded','true');toggle.title='Hide right sidebar';
   const leftToggle=make('button',undefined,'sidebar-toggle');leftToggle.append(sidebarIcon('left'));leftToggle.id='workspace-toggle';leftToggle.type='button';leftToggle.setAttribute('aria-label','Toggle left sidebar');leftToggle.setAttribute('aria-controls',navigation.id);leftToggle.setAttribute('aria-expanded','true');leftToggle.title='Hide left sidebar';
   const toolbar=document.querySelector('.browser-bar');toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Global toolbar');
@@ -71,7 +71,7 @@
   if(byId('settings'))toolbar.append(byId('settings'));toolbar.append(toggle);
   const terminalButton=make('button',undefined,'sidebar-toggle'),terminalSource=byId('workspace-terminal-toggle');terminalButton.id='global-terminal-toggle';terminalButton.type='button';terminalButton.setAttribute('aria-label','Toggle terminal');terminalButton.title='Terminal';
   terminalButton.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 5 7 7-7 7m10 0h7"/></svg>';
-  terminalButton.onclick=()=>terminalSource.click();const syncTerminal=()=>{terminalButton.disabled=terminalSource.disabled;terminalButton.setAttribute('aria-pressed',String(terminalSource.getAttribute('aria-pressed')==='true'));};new MutationObserver(syncTerminal).observe(terminalSource,{attributes:true,attributeFilter:['disabled','aria-pressed']});syncTerminal();toolbar.insertBefore(terminalButton,toggle);
+  terminalButton.onclick=()=>terminalSource.click();const syncTerminal=()=>{terminalButton.disabled=terminalSource.disabled;terminalButton.setAttribute('aria-pressed',String(terminalSource.getAttribute('aria-pressed')==='true'));};new MutationObserver(syncTerminal).observe(terminalSource,{attributes:true,attributeFilter:['disabled','aria-pressed']});syncTerminal();
   toolbar.querySelector('.local-node')?.remove();
   // Connection lifecycle is automatic. Retain controller targets offscreen so
   // restoring a local session cannot reintroduce manual connection controls.
@@ -99,7 +99,7 @@
   const panelNames=['files','changes','activity'];
   const choose=name=>{selected=panelNames.includes(name)?name:'files';for(const panel of [files,changes,activity])panel.hidden=panel.id!=='inspector-'+selected;if(selected==='activity')byId('run-activity').open=true;for(const button of tabs.children){button.setAttribute('aria-selected',String(button.dataset.panel===selected));button.tabIndex=button.dataset.panel===selected?0:-1;}inspector.hidden=false;rightDivider.hidden=false;toggle.setAttribute('aria-expanded','true');toggle.title='Hide right sidebar';savePreference('details.tab',selected);};
   for(const [name,label] of [['files','Files'],['changes','Changes'],['activity','Activity']]){const tab=make('button',label);tab.type='button';tab.id='details-'+name;tab.dataset.panel=name;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','inspector-'+name);tab.onclick=()=>choose(name);tab.onkeydown=event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const index=panelNames.indexOf(name),next=event.key==='Home'?'files':event.key==='End'?'activity':panelNames[(index+(event.key==='ArrowRight'?1:2))%3];choose(next);byId('details-'+next).focus();}};tabs.append(tab);}
-  controls.append(tabs,close);close.onclick=()=>{inspector.hidden=true;rightDivider.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.title='Show right sidebar';toggle.focus();};toggle.onclick=()=>{if(inspector.hidden)choose(selected);else close.click();};
+  controls.append(tabs,terminalButton,close);close.onclick=()=>{inspector.hidden=true;rightDivider.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.title='Show right sidebar';toggle.focus();};toggle.onclick=()=>{if(inspector.hidden)choose(selected);else close.click();};
   choose(preference('details.tab','files'));
   // Approval review reveals its actual controls even when details were hidden.
   byId('approval-review').addEventListener('click',()=>choose('activity'));
@@ -201,25 +201,45 @@
   const runningList=make('div'),finished=make('details',undefined,'activity-finished'),finishedLabel=make('summary','Finished'),finishedList=make('div'),activityEmpty=make('p','Tool calls and file operations will appear here as xMind works.','inspector-empty');
   runningList.id='activity-running';finished.id='activity-finished';finished.append(finishedLabel,finishedList);finished.hidden=true;liveActivity.append(now,runningList,finished,activityEmpty);activity.prepend(liveActivity);
   const activityRows=new Map(),seenEvents=new Set();let activityRun,activityPhase='Ready',activityStage='',activityCounter=0,activityApprovals=0,outputFrame;
+  const currentWork=make('section',undefined,'current-work');currentWork.id='current-work';currentWork.hidden=true;currentWork.setAttribute('aria-label','Current file or tool');
+  const workHeader=make('div',undefined,'current-work-header'),workIcon=make('span',undefined,'current-work-icon'),workInfo=make('div',undefined,'current-work-info'),workEyebrow=make('small','Now working'),workName=make('strong'),workPath=make('small',undefined,'current-work-path'),workState=make('span',undefined,'current-work-state'),workPreviewLabel=make('small',undefined,'current-work-preview-label'),workPreview=make('pre',undefined,'current-work-preview'),workDetails=make('button','Details','current-work-details');
+  workIcon.setAttribute('aria-hidden','true');workIcon.innerHTML='<svg viewBox="0 0 32 40" width="30" height="38" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 2h14l8 8v27H5Z M19 2v9h8 M10 18h12M10 23h12M10 28h8"/></svg><span class="current-work-scan"></span>';
+  workName.id='current-work-name';workInfo.append(workEyebrow,workName);workHeader.append(workIcon,workInfo,workState);workDetails.type='button';workDetails.setAttribute('aria-label','Show current activity details');currentWork.append(workHeader,workPath,workPreviewLabel,workPreview,workDetails);now.after(currentWork);
+  let lastActivityRow,currentWorkRow,featuredActivityRow,workPreviewSignature='';const preparedPreviews=new Map();
+  const changeExcerpt=(before,after)=>{if(before.length+after.length>65536)return 'Large change — expand Details to review.';const a=before.split(/\r?\n/),b=after.split(/\r?\n/);let start=0,endA=a.length,endB=b.length;while(start<endA&&start<endB&&a[start]===b[start])start++;while(endA>start&&endB>start&&a[endA-1]===b[endB-1]){endA--;endB--;}return [...a.slice(start,Math.min(endA,start+2)).filter(Boolean).map(line=>'- '+line),...b.slice(start,Math.min(endB,start+5)).map(line=>'+ '+line)].slice(0,6).map(line=>line.slice(0,160)).join('\n')||'No text changes.';};
+  const syncCurrentWork=executing=>{
+    if(featuredActivityRow!==executing){featuredActivityRow?.card.classList.remove('featured');executing?.card.classList.add('featured');featuredActivityRow=executing;}
+    const row=executing||lastActivityRow;currentWorkRow=row;currentWork.hidden=!row;if(!row)return;
+    const prepared=[...preparedPreviews.values()].reverse().find(item=>item.run===row.scope&&item.tool===(row.name==='edit_file'?'replace_file':row.name)&&item.path===row.args.path&&(!row.args.folder_id||item.folder===row.args.folder_id)&&['awaiting_approval','executing','prepared'].includes(item.state));
+    if(row.state==='running'&&prepared){row.preview=prepared.text;row.preparedOperationId=prepared.id;row.preparedState=prepared.state;}
+    const waiting=row.state==='running'&&prepared?.state==='awaiting_approval',paused=row.state==='running'&&activityPhase==='paused',state=waiting?'waiting':paused?'paused':row.state==='running'?'working':row.state==='completed'?'done':row.state;
+    currentWork.dataset.state=state;currentWork.dataset.kind=row.name==='run_process'?'command':'file';workEyebrow.textContent=row.state==='running'?'Now working':'Last activity';workName.textContent=typeof row.args.path==='string'?row.args.path.split(/[\\/]/).pop():row.name==='run_process'?row.args.profile||'Command':row.label;workName.title=row.resource;workPath.textContent=row.resource;workPath.title=row.resource;workState.textContent=waiting?'Approval needed':paused?'Paused':state==='working'?row.label:state==='done'?'Done':state==='failed'?'Failed':'Interrupted';
+    const content=row.reportedContent;
+    const preview=row.name==='run_process'?row.tail.slice(-900):row.preview||content?.slice(0,900)||'';workPreviewLabel.textContent=row.name==='run_process'?'Latest output':row.preview?(state==='done'?'Applied change':'Proposed change'):'File content';workPreviewLabel.hidden=workPreview.hidden=!preview;
+    const signature=preview+'\n'+state;if(signature!==workPreviewSignature){workPreviewSignature=signature;workPreview.replaceChildren(...preview.split(/\r?\n/).slice(-6).map(line=>make('span',line,line.startsWith('+ ')?'added':line.startsWith('- ')?'removed':'')));}
+  };
+  workDetails.onclick=()=>{const row=currentWorkRow;if(!row)return;const target=[...byId('operations').children].find(card=>card.dataset.operationId===row.preparedOperationId);if(target){byId('run-activity').open=true;byId('operation-activity').open=true;target.scrollIntoView({block:'nearest'});}else{finished.open=row.state==='completed';row.card.open=true;row.card.scrollIntoView({block:'nearest'});}};
   const activePhase=()=>['queued','running','paused'].includes(activityPhase);
   const syncActivity=()=>{
     const executing=[...activityRows.values()].find(row=>row.state==='running'),busy=activePhase()||!!executing;
     const label=activityApprovals?'Waiting for approval · '+activityApprovals:executing?executing.label+(executing.resource?' · '+executing.resource:''):activityStage||(activityPhase==='running'?'Working…':activityPhase==='queued'?'Starting…':activityPhase==='paused'?'Paused':activityPhase==='completed'?'Completed':activityPhase==='failed'?'Run failed':activityPhase==='cancelled'?'Cancelled':'Ready');
-    if(nowText.textContent!==label)nowText.textContent=label;now.dataset.state=activityApprovals?'waiting':busy?'running':activityPhase==='failed'?'failed':'idle';
+    if(nowText.textContent!==label)nowText.textContent=label;now.dataset.state=activityApprovals||activityPhase==='paused'?'waiting':busy?'running':activityPhase==='failed'?'failed':'idle';
     byId('details-activity').dataset.live=String(busy||activityApprovals>0);activityEmpty.hidden=activityRows.size>0;finished.hidden=finishedList.children.length===0;finishedLabel.textContent='Finished · '+finishedList.children.length;
+    syncCurrentWork(executing);
   };
-  const clearActivity=()=>{activityRows.clear();seenEvents.clear();runningList.replaceChildren();finishedList.replaceChildren();finished.open=false;activityStage='';activityApprovals=0;activityPhase='Ready';syncActivity();};
+  const clearActivity=()=>{activityRows.clear();seenEvents.clear();preparedPreviews.clear();lastActivityRow=undefined;runningList.replaceChildren();finishedList.replaceChildren();finished.open=false;activityStage='';activityApprovals=0;activityPhase='Ready';syncActivity();};
   const parseArguments=value=>{try{return typeof value==='string'?JSON.parse(value):value&&typeof value==='object'?value:{};}catch{return {};}};
-  const toolLabel=name=>({'read_file':'Reading file','list_files':'Listing files','search_files':'Searching files','create_file':'Creating file','replace_file':'Updating file','patch_file':'Editing file','run_process':'Command','delete_file':'Deleting file'}[name]||String(name||'Tool').replaceAll('_',' '));
+  const toolLabel=name=>({'read_file':'Reading file','list_files':'Listing files','search_files':'Searching files','create_file':'Creating file','replace_file':'Updating file','patch_file':'Editing file','edit_file':'Editing file','run_process':'Command','delete_file':'Deleting file'}[name]||String(name||'Tool').replaceAll('_',' '));
   const resourceLabel=args=>{const command=typeof args.profile==='string'?[args.profile,...(Array.isArray(args.arguments)?args.arguments.slice(0,8).filter(value=>typeof value==='string').map(value=>value.slice(0,500)):[])].join(' · '):undefined,value=args.path||args.file_path||args.resource||args.uri||args.url||args.query||args.command||args.executable||command||args.working_directory||args.workdir;return typeof value==='string'?value.slice(0,300):'';};
   const renderActivityRow=(row,state,result)=>{
+    row.reportedContent=typeof result?.content==='string'&&(!result.encoding||['utf-8','utf8'].includes(result.encoding))?result.content.slice(0,900):undefined;lastActivityRow=row;
     const prior=row.state;row.state=state;row.card.dataset.state=state;row.stateLabel.textContent=state==='running'?'Running':state==='completed'?'Done':state==='failed'?'Failed':'Interrupted';
     if(state!=='running'&&prior==='running')row.card.open=false;
     if(state==='failed'||state==='interrupted'){runningList.append(row.card);}else if(state==='completed')finishedList.append(row.card);else runningList.append(row.card);
     row.detail.textContent=JSON.stringify(result===undefined?{tool:row.name,arguments:row.args}:{tool:row.name,arguments:row.args,result},null,2).slice(0,6000);
   };
   const trimActivity=()=>{while(activityRows.size>100){const oldest=[...activityRows].find(([,row])=>row.state!=='running');if(!oldest)break;oldest[1].card.remove();activityRows.delete(oldest[0]);}};
-  const flushOutput=()=>{outputFrame=undefined;for(const row of activityRows.values())if(row.outputDirty){row.outputDirty=false;const follow=row.output.scrollHeight-row.output.scrollTop-row.output.clientHeight<24;row.output.hidden=false;row.output.textContent=row.tail;if(follow)row.output.scrollTop=row.output.scrollHeight;}};
+  const flushOutput=()=>{outputFrame=undefined;for(const row of activityRows.values())if(row.outputDirty){row.outputDirty=false;const follow=row.output.scrollHeight-row.output.scrollTop-row.output.clientHeight<24;row.output.hidden=false;row.output.textContent=row.tail;if(follow)row.output.scrollTop=row.output.scrollHeight;}syncCurrentWork([...activityRows.values()].find(row=>row.state==='running'));};
   const handleActivityEvent=(event,child)=>{
     if(!event||typeof event.kind!=='string')return;
     const kind=event.kind,data=event.data||{},scope=child||event.run_id||activityRun||'root';
@@ -246,7 +266,7 @@
     if(message.type==='history'||message.type==='reset-run'||message.type==='user'){clearActivity();if(message.type==='user'){activityRun=undefined;activityPhase='queued';syncActivity();}}
     else if(message.type==='runs'){if(activityRun!==message.selected){clearActivity();activityRun=message.selected;}activityPhase=message.runs?.find(run=>run.id===message.selected)?.state||'Ready';syncActivity();}
     else if(message.type==='status'&&['Ready','queued','running','paused','completed','failed','cancelled'].includes(message.text)){activityPhase=message.text;activityStage='';syncActivity();}
-    else if(message.type==='operations'){activityApprovals=(message.operations||[]).filter(item=>item.state==='awaiting_approval').length;syncActivity();}
+    else if(message.type==='operations'){const items=message.operations||[],ids=new Set(items.map(item=>item.id));for(const id of preparedPreviews.keys())if(!ids.has(id))preparedPreviews.delete(id);for(const item of items){const old=preparedPreviews.get(item.id);if(old){old.state=item.state;continue;}const args=parseArguments(item.arguments_json);if(typeof args.before_content==='string'&&typeof args.after_content==='string')preparedPreviews.set(item.id,{id:item.id,run:item.run_id,tool:item.tool,path:args.path,folder:args.folder_id,state:item.state,text:changeExcerpt(args.before_content,args.after_content)});}activityApprovals=items.filter(item=>item.state==='awaiting_approval').length;syncActivity();}
     else if(['event','owned-event','graph-event'].includes(message.type))handleActivityEvent(message.event,message.type==='event'?undefined:message.child_id||message.event?.run_id||'child');
   });
   syncActivity();
