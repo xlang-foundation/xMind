@@ -269,7 +269,9 @@
       "replayed": false,
       "prompt": "Update the main heading to Neighborhood Workshops and add a short welcome sentence for first-time visitors.",
       "prompt_channel": "actual browser UI",
-      "raw_events": ".agentflow/heading-followup-events.json"
-    }
+      "raw_events": ".agentflow/heading-followup-events.json",
+      "service_owner_finding": "Quota admission refused before inference; prior failed generations retained reservations after old service error path lost counters. Native receipt settlement/release repair in progress."
+    },
+    "current_index_sha256": "6d24d9a303c9b30829f941c36175bcf2593a11cb37c0c4f48a54fbad1bf2bac6"
   }
 }

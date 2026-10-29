@@ -290,6 +290,8 @@ function runFailure(data){
     ?(data.native_error===12030?'The provider connection was reset while receiving the response (WinHTTP 12030).':data.native_error===12029?'xMind could not connect to the model provider (WinHTTP 12029).':'The connection to the model provider failed while sending or reading the response.')+' This run stopped. Review recorded tool outcomes before trying again.'
     :data?.reason==='provider_timeout'
     ?'The model provider did not respond within the configured time limit. This run stopped; review recorded tool outcomes before trying again.'
+    :data?.reason==='model_protocol_error'&&data.protocol_error_code==='chat_provider_error_event'
+    ?'The model provider returned a stream error or an invalid response. This run stopped; review recorded tool outcomes before trying again.'
     :data?.reason==='incompatible_provider_history'
     ?'xMind stopped this request before contacting the provider: this conversation contains provider-specific history that the selected model cannot use. The saved provider key was not the cause. Start a new conversation to use this model, or switch back to the model used for this history. The recorded history is preserved.'
     :data?.reason==='context_binding_changed'
