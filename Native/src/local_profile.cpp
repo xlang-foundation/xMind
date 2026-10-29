@@ -589,7 +589,7 @@ Child launch(Store &store, Json &state) {
         args.push_back(L"approved");
     }
     for (const auto *field : {"provider_config", "graphs_config", "python_tools_config", "language_server_config", "process_config", "mcp_config"}) {
-        if(state.contains("owner_receipt")&&std::string(field)!="provider_config"&&std::string(field)!="process_config"&&std::string(field)!="mcp_config"&&
+        if(state.contains("owner_receipt")&&std::string(field)!="process_config"&&std::string(field)!="mcp_config"&&
            !(std::string(field)=="language_server_config"&&state.value("language_server_config_pending",false)))continue;
         if(std::string(field)=="process_config"&&!state.value("process_config_pending",false))continue;
         if(std::string(field)=="mcp_config"&&!state.value("mcp_config_pending",false))continue;
@@ -1209,7 +1209,8 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
                                    const std::string &runtime_root,const std::string &manifest,
                                    const std::string &auth_token,const std::string &owner_receipt,
                                    const std::string &language_server_config,const std::string &mcp_config,
-                                   std::string *mcp_document,const std::string &agent_execution) {
+                                   std::string *mcp_document,const std::string &agent_execution,
+                                   std::string *provider_route_config) {
     const auto path=absolute(state_file);
     require(path.filename()==L"profile.state"&&hex(manifest,64)&&hex(auth_token,64));
     Store store(path.parent_path());
@@ -1250,6 +1251,9 @@ void validate_local_profile_launch(const std::string &state_file,const std::stri
                     state.value("language_server_config",std::string{})==requested_language_server):requested_language_server.empty(),
                 "Managed profile language-server override differs from its protected upgrade intent");
     }
+    // Expose only the path already owned by this authenticated startup record.
+    // It defines routes; replacement startup must not reimport profile secrets.
+    if(provider_route_config)*provider_route_config=owner_receipt.empty()?std::string{}:state.value("provider_config",std::string{});
 }
 void publish_local_profile_ready(const std::string &state_file, int port, const std::string &token,
                                  const std::string &workspace_root, const std::string &workspace_id,

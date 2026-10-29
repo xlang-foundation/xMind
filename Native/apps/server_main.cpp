@@ -165,7 +165,7 @@ int run_server(int argc,char** argv) {
 #if defined(_WIN32)
         std::unique_ptr<agentflow::VerifiedRuntimeGeneration> runtime_generation;
         std::unique_ptr<agentflow::WorkspaceTools> startup_workspace;
-        std::string protected_mcp_document;
+        std::string protected_mcp_document,protected_provider_route_config;
         if(options.contains("--profile-state")&&!options.contains("--runtime-manifest-sha256"))throw std::invalid_argument("Managed profile state requires a qualified native package");
         if(options.contains("--owner-receipt")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Native and legacy owner preconditions are distinct");
         if(options.contains("--profile-state")&&options.contains("--legacy-owner-ticket"))throw std::invalid_argument("Managed profile startup cannot use a legacy operator ticket");
@@ -176,7 +176,7 @@ int run_server(int argc,char** argv) {
             const auto runtime_root=loaded_runtime_root();
             if(options.contains("--profile-state")){
                 const auto owner_receipt=options.find("--owner-receipt");
-                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{},options.contains("--mcp-config")?options.at("--mcp-config"):std::string{},&protected_mcp_document,execution_mode);
+                agentflow::validate_local_profile_launch(options.at("--profile-state"),startup_workspace->root_path(),runtime_root,options.at("--runtime-manifest-sha256"),auth,owner_receipt==options.end()?std::string{}:owner_receipt->second,options.contains("--language-server-config")?options.at("--language-server-config"):std::string{},options.contains("--mcp-config")?options.at("--mcp-config"):std::string{},&protected_mcp_document,execution_mode,&protected_provider_route_config);
                 runtime_generation=std::make_unique<agentflow::VerifiedRuntimeGeneration>(agentflow::VerifiedRuntimeGeneration::managed_profile_copy(runtime_root,options.at("--runtime-manifest-sha256"),startup_workspace->root_path()));
                 runtime_generation->require_loaded_server_image();
             }else{
@@ -402,9 +402,10 @@ int run_server(int argc,char** argv) {
             add("mistral.chat","mistral","https://api.mistral.ai/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.mistral.ai/v1/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::mistral);
             policies.back().model_capabilities=agentflow::documented_mistral_model_policy();
             add("openrouter.chat","openrouter","https://openrouter.ai/api/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://openrouter.ai/api/v1/models",agentflow::ProviderCatalogueFormat::openrouter);
-            if(options.contains("--provider-config")){
+            const auto provider_route_config=options.contains("--provider-config")?options.at("--provider-config"):protected_provider_route_config;
+            if(!provider_route_config.empty()&&(options.contains("--provider-config")||std::filesystem::exists(std::filesystem::u8path(provider_route_config)))){
                 std::vector<std::string> known;for(const auto& route:routes)known.push_back(route.id);
-                auto configuration=agentflow::read_provider_yaml_config(std::filesystem::absolute(options.at("--provider-config")),known);
+                auto configuration=agentflow::read_provider_yaml_config(std::filesystem::absolute(std::filesystem::u8path(provider_route_config)),known);
                 if(configuration.openai_compatible){
                     const auto& compatible=*configuration.openai_compatible;
                     add("openai.compatible","openai-compatible",compatible.base_url+"/chat/completions",agentflow::ProviderWire::chat_completions,compatible.base_url+"/models",agentflow::ProviderCatalogueFormat::openai);
