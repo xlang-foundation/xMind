@@ -4,6 +4,26 @@
 // behavior. It is not evidence of C++ persistence or real model execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createServer}=require('node:http'),{resolve}=require('node:path');
+test('production native jobs leave the ASGI event loop responsive while a backend read is blocked',async()=>{
+ const {createNativeBrowserFixture}=await import('./native-host.mjs');
+ const credential='a'.repeat(64)+'.'+'b'.repeat(64);let release,entered;const held=new Promise(resolve=>{release=resolve;}),started=new Promise(resolve=>{entered=resolve;});let view,slow;
+ const peer=createServer(async(request,response)=>{
+  for await(const _ of request){}
+  if(request.url==='/v1/view-sessions')response.end(JSON.stringify({credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800}));
+  else if(request.url==='/v1/health'){entered();await held;response.end(JSON.stringify({agent_execution:false}));}
+  else{response.writeHead(404);response.end('{}');}
+ });
+ await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
+ try{
+  view=await createNativeBrowserFixture({backend:'http://127.0.0.1:'+peer.address().port,assetRoot:resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets'),localAccessToken:'synthetic-async-owner-'.padEnd(64,'x'),productionAsync:true});
+  const origin=await view.listen(),session=await fetch(origin+'/ui/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'});assert.equal(session.status,200);const cookie=session.headers.get('set-cookie').split(';')[0];
+  let backendFinished=false;slow=fetch(origin+'/v1/health',{headers:{Cookie:cookie,'Sec-Fetch-Site':'same-origin'},signal:AbortSignal.timeout(10000)}).then(response=>{backendFinished=true;return response;});
+  await Promise.race([started,slow.then(()=>{throw new Error('Native read completed before the peer barrier');})]);
+  const css=await fetch(origin+'/ui/layout.css',{signal:AbortSignal.timeout(3000)});
+  assert.equal(css.status,200);assert.match(await css.text(),/workspace/);assert.equal(backendFinished,false,'UI assets required the blocked native read to finish');
+  release();assert.equal((await slow).status,200);
+ }finally{release();await slow?.catch(()=>{});await view?.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
+});
 test('browser adapter forwards durable native view credentials across restart without retaining the master token',async()=>{
   const {createNativeBrowserFixture}=await import('./native-host.mjs');
   const assetRoot=resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets');

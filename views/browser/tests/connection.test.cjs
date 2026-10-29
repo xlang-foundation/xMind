@@ -17,6 +17,12 @@ async function fixture(options={}){
  try{await until(()=>options.connectionError?window.document.getElementById('connection-error').textContent:posted.some(m=>m.type==='history'));}catch(error){window.dispatchEvent(new window.Event('pagehide'));window.close();throw new Error(`${error.message}; requests=${requests.join(',')}; messages=${JSON.stringify(posted)}`);}return {dom,window,dialog,divider,posted,requests,finderRequests,vcsRequests,vcsInitBodies,sessionAuthorizations,gitConfirmations,element:id=>window.document.getElementById(id),close:()=>{window.dispatchEvent(new window.Event('pagehide'));window.close();}};
 }
 async function until(predicate){for(let i=0;i<100;i++){if(predicate())return;await new Promise(resolve=>setImmediate(resolve));}throw new Error('Browser connection fixture deadline');}
+test('reload observes workspace metadata while health is pending instead of adding a serial connection capture',async()=>{
+ let releaseHealth,workspaceStarted=false;const health=new Promise(resolve=>{releaseHealth=resolve;});
+ const initializing=fixture({nativeReply:url=>{if(url.pathname==='/v1/health')return health;if(url.pathname==='/v1/workspace')workspaceStarted=true;}});let f;
+ try{await until(()=>workspaceStarted);releaseHealth({agent_execution:false,file_edit_proposals:false});f=await initializing;assert.equal(f.element('workspace-picker').value,'windows-local-file-v1:synthetic');assert.equal(f.requests.filter(route=>route==='/v1/workspace').length,1);assert.ok(f.posted.some(message=>message.type==='history'));}
+ finally{releaseHealth({agent_execution:false,file_edit_proposals:false});(f||await initializing).close();}
+});
 test('composer + opens the browser file input without opening a workspace picker or pretending upload support',async()=>{
  const f=await fixture(),input=f.element('browser-attachment-files');let opened=0;input.click=()=>{opened++;};
  try{f.window.xMindView.postMessage({type:'attach-files'});assert.equal(opened,1);assert.equal(input.type,'file');assert.equal(input.multiple,true);assert.equal(f.element('workspace-attachment-dialog'),null);Object.defineProperty(input,'files',{value:[new f.window.File(['sample'],'outside-workspace.txt')]});input.dispatchEvent(new f.window.Event('change'));assert.match(f.posted.findLast(message=>message.type==='error').text,/does not support browser uploads yet/);assert.ok(!f.posted.some(message=>message.type==='prompt-files'&&message.files.length));}finally{f.close();}

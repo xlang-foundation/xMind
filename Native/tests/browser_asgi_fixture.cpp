@@ -12,6 +12,7 @@ public:
     std::shared_ptr<std::atomic_bool> cancelled=std::make_shared<std::atomic_bool>(false);
     std::shared_ptr<agentflow::NativeResponseStream> stream;
     PeerResponse()=default;
+    bool Ready()const{return true;}
     std::int64_t Status()const{return response->status;}
     std::string Body()const{return response->body;}
     bool Streaming()const{return static_cast<bool>(stream);}
@@ -19,6 +20,7 @@ public:
     void Close(){cancelled->store(true);if(client)client->stop();if(stream)stream->close();}
     ~PeerResponse(){Close();}
     BEGIN_PACKAGE(PeerResponse)
+      APISET().AddFunc<0>("Ready",&PeerResponse::Ready);
       APISET().AddFunc<0>("Status",&PeerResponse::Status);
       APISET().AddFunc<0>("Body",&PeerResponse::Body);
       APISET().AddFunc<0>("Streaming",&PeerResponse::Streaming);
@@ -69,6 +71,18 @@ public:
 int main(){
     try{
         std::string input;std::getline(std::cin,input);if(input.size()>65536)throw std::runtime_error("Fixture configuration exceeds limits");const auto config=nlohmann::json::parse(input);
+        if(config.value("production_async",false)){
+            const auto backend=config.at("backend").get<std::string>(),owner=config.at("owner").get<std::string>();
+            if(!std::regex_match(backend,std::regex(R"(http://127\.0\.0\.1:[1-9][0-9]{0,4})")))throw std::runtime_error("Fixture peer must be loopback");
+            agentflow::EmbeddedWeb web(config.at("runtime"),config.at("packages"),config.value("port",0));
+            web.bind([backend](httplib::Request& input,httplib::Response& output){
+                httplib::Client client(backend);client.set_path_encode(false);client.set_connection_timeout(2,0);client.set_read_timeout(15,0);
+                auto request=input;request.path=input.target;request.headers.erase("Host");
+                const auto result=client.send(request);if(!result)throw std::runtime_error("Async fixture peer unavailable");output=*result;
+            },"Bearer "+owner);
+            std::cout<<nlohmann::json{{"origin","http://127.0.0.1:"+std::to_string(web.port())}}.dump()<<std::endl;
+            web.serve(config.at("assets"));return 0;
+        }
         FixtureHost fixture(config);X::Runtime runtime;auto paths=runtime.List();
         for(const auto* key:{"packages","web_source","modules","stdlib"}){const auto path=config.at(key).get<std::string>();runtime.AddImportRoot(path);paths.Append(X::Value(runtime,path));}
         X::Module system(runtime,"sys");system.SetAttr("path",paths);system.SetAttr("dont_write_bytecode",X::Value(runtime,true));

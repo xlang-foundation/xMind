@@ -1,0 +1,371 @@
+{
+  "date": "2026-10-28",
+  "sourceBase": "1e00331ca30832702cd69e9eded75dd58edcc243",
+  "sources": {
+    "Native/CMakeLists.txt": "8ebcfb4ed1de89e328c129c69c94a46c68773be8b4216d3773a497b9f0fd9b12",
+    "Native/apps/embedded_web.hpp": "f897829ee6681f3dbbf995dc7005c68740bdca4cd20f7f4373392444e1fdd712",
+    "Native/src/native_web_request_queue.hpp": "32a8515d4071d81812914b0dacce00e522af50ae64b51a431cfb9d5262e747fa",
+    "Native/tests/native_web_request_queue_test.cpp": "85a78e30fd6de7d3abce6a66ee9944f4bd3104fd690d7937397b9a0588cb2b62",
+    "Native/tests/browser_asgi_fixture.cpp": "f634d3d12d6ead80dd21d2021f07fbdab7755cdccee98bbb7658946637c638a4",
+    "Tools/ci-views.mjs": "ae65f36cb765bd985cf8a9eedd0547bf3d94175c82101e2ebea7f55576a3ec62",
+    "views/browser/browser.js": "c863dc665a2de3a6b0ea3af9bc1334517b27643a28edadb5e98ffd4ffe351742",
+    "views/browser/xmind_web.py": "7fd9027e8d21e764c0ea6c237e3c1263391c4d740d324c468de41e00feb80442",
+    "views/browser/tests/connection.test.cjs": "081b74bc6bfee5bcb2655d2f1f42ae7970cf100d226911518537e753ea546701",
+    "views/browser/tests/native-host.mjs": "52bfeedd0261c52a526ee3d54e1167cdfd011d59db68f2cedf5e03687eff2177",
+    "views/browser/tests/server.test.cjs": "4e21df9710fb2ebf3c934c5890b3c27d724fdd1c61fffc9fa325cfeef49da787"
+  },
+  "problem": "Serial native calls held up the ASGI runtime and reload unnecessarily delayed workspace observation until after health/catalogue reads and connection capture.",
+  "change": "Native C++ owns a bounded queue of one-shot request jobs. ASGI observes readiness without blocking its runtime; cancellation propagates, failures remain attached to the admitted request, and shutdown joins workers before dispatch captures expire. Workspace metadata starts alongside health/catalogue on reload and is discarded/refetched whenever restoring preferences changes workspace. History, Native authentication, connection identities and permission validation remain authoritative.",
+  "qualification": {
+    "inputFiles": 27425,
+    "closures": {
+      "navigation-speed-final-before": "a2956721c7ca35ae414ab8a1cfdbdcaea2d4d8705756d0f2f4b4cae55af86a10",
+      "navigation-speed-final-after": "a2956721c7ca35ae414ab8a1cfdbdcaea2d4d8705756d0f2f4b4cae55af86a10",
+      "navigation-speed-delivered": "a2956721c7ca35ae414ab8a1cfdbdcaea2d4d8705756d0f2f4b4cae55af86a10"
+    },
+    "identical": true,
+    "browser": {
+      "tests": 175,
+      "passed": 175,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "f5dfb3aec42e8e644cfc85bfd425394599176491f59b63264482dfcf27abc939"
+    },
+    "asgi": {
+      "tests": 34,
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "8f278d8a6918bd387e012fadd8dba25048b9ffc24ffb8578d22f0813a048e325"
+    },
+    "native": {
+      "tests": [
+        "native_request_session_contract",
+        "native_web_stream_contract",
+        "native_web_request_queue_contract",
+        "native_local_view_provider_config_contract"
+      ],
+      "passed": 4,
+      "failed": 0,
+      "logSha256": "6574bc05d5f89a5ca68d00846d5dcc85844e60fe3e6b5da40c6b72b2320e76ac",
+      "discoveredFullInventory": 188,
+      "fullInventoryExecuted": false
+    },
+    "mainProcess": {
+      "passed": true,
+      "scope": "Actual main-process FastAPI, standard SDK workspace routing and managed handoff; zero-model graph; no rendered UI claim",
+      "url": "http://127.0.0.1:64956/ui/",
+      "initialOwner": 30252,
+      "replacementOwner": 31064,
+      "peerOwner": 18684,
+      "session": "6e792239896a761a3a8fad96fd2896cd",
+      "root": "4f136dd539471cdc39703c28ecff517a",
+      "paidInference": false,
+      "neverReplay": true
+    },
+    "hostedCIExecuted": false,
+    "installedVsCodeRequalified": false
+  },
+  "regressionGuards": [
+    "An independent native job completes while another remains blocked.",
+    "Pending responses cannot expose metadata before completion.",
+    "Admission is bounded, failures propagate once, completed slots are reusable, cancellation and joined shutdown retain ownership.",
+    "Actual production C++/xlang3/ASGI host serves CSS while a controlled external backend read remains blocked.",
+    "Reload starts workspace observation while health is pending; changed workspace preferences still require a fresh workspace/health observation."
+  ],
+  "live": {
+    "url": "http://127.0.0.1:58613/ui/",
+    "owners": [
+      {
+        "pid": 21648,
+        "birth": "134377070092753901",
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-334641a346e0282d290e3c0766ccee7610382ba39238981f409e5e3647e2ff18\\xmind.exe",
+        "sha256": "5ad9e8697944185d8cdfe27d33a2781a624fbb4115490737938b0014a8d212f2"
+      },
+      {
+        "pid": 35656,
+        "birth": "134376705305383704",
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-e4598605a15350af8c8d5564cb041d00574e501f9a79f558efb93404ecaf1cde\\xmind.exe",
+        "sha256": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d"
+      }
+    ],
+    "previousMain": {
+      "pid": 28948,
+      "birth": "134377020131450921",
+      "naturalExitObserved": true
+    },
+    "peerUnchanged": true,
+    "runtimeManifest": "6dd0e1b4c1ea5f0ce5e1a40c9ce1a296cc54b82044fbae2aa897b7c50493ee9c",
+    "firstReloadAfterHandoff": {
+      "action": "first reload after native handoff A",
+      "ms": 503,
+      "exact": true,
+      "signInPrompt": false
+    },
+    "before": {
+      "workspaces": {
+        "count": 6,
+        "minMs": 709,
+        "maxMs": 1056,
+        "medianMs": 852
+      },
+      "reloads": {
+        "count": 4,
+        "minMs": 1224,
+        "maxMs": 2304,
+        "medianMs": 1538.5
+      },
+      "sessions": {
+        "count": 3,
+        "minMs": 297,
+        "maxMs": 433,
+        "medianMs": 430
+      }
+    },
+    "after": {
+      "workspaces": {
+        "count": 8,
+        "minMs": 546,
+        "maxMs": 820,
+        "medianMs": 626.5
+      },
+      "reloads": {
+        "count": 6,
+        "minMs": 437,
+        "maxMs": 889,
+        "medianMs": 642
+      },
+      "sessions": {
+        "count": 4,
+        "minMs": 315,
+        "maxMs": 484,
+        "medianMs": 389.5
+      }
+    },
+    "medianReductionPercent": {
+      "workspaces": 26.467136150234737,
+      "reloads": 58.271043223919406
+    },
+    "timingMethod": "Individual CUA wall-clock measurements from UI action to expected rendered destination history; reloads also wait for model label. Includes automation overhead. Before results are the immediately preceding live regression on the same two workspaces/three sessions. No statistical or pure paint-time claim.",
+    "samples": [
+      {
+        "action": "first reload after native handoff A",
+        "ms": 503,
+        "exact": true,
+        "signInPrompt": false
+      },
+      {
+        "action": "workspace A→B",
+        "key": "originalB",
+        "ms": 820,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "workspace B→A",
+        "key": "A",
+        "ms": 639,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1681
+      },
+      {
+        "action": "workspace A→B round 2",
+        "key": "originalB",
+        "ms": 603,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "workspace B→A round 2",
+        "key": "A",
+        "ms": 614,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1681
+      },
+      {
+        "action": "workspace A→B round 3",
+        "key": "originalB",
+        "ms": 546,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "workspace B→A round 3",
+        "key": "A",
+        "ms": 658,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1681
+      },
+      {
+        "action": "reload A",
+        "key": "A",
+        "ms": 437,
+        "exact": true,
+        "selectionPreserved": true,
+        "signInPrompt": false
+      },
+      {
+        "action": "workspace A→B before session checks",
+        "key": "originalB",
+        "ms": 562,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "reload originalB",
+        "key": "originalB",
+        "ms": 889,
+        "exact": true,
+        "selectionPreserved": true,
+        "signInPrompt": false
+      },
+      {
+        "action": "session original→do a test",
+        "key": "otherB",
+        "ms": 315,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 486
+      },
+      {
+        "action": "reload otherB",
+        "key": "otherB",
+        "ms": 657,
+        "exact": true,
+        "selectionPreserved": true,
+        "signInPrompt": false
+      },
+      {
+        "action": "session do a test→original",
+        "key": "originalB",
+        "ms": 337,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "session original→do a test round 2",
+        "key": "otherB",
+        "ms": 442,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 486
+      },
+      {
+        "action": "session do a test→original round 2",
+        "key": "originalB",
+        "ms": 484,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "reload originalB",
+        "key": "originalB",
+        "ms": 649,
+        "exact": true,
+        "selectionPreserved": true,
+        "signInPrompt": false
+      },
+      {
+        "action": "reload A",
+        "key": "A",
+        "ms": 443,
+        "exact": true,
+        "selectionPreserved": true,
+        "signInPrompt": false
+      },
+      {
+        "action": "workspace A→B final clean assets",
+        "key": "originalB",
+        "ms": 679,
+        "exact": true,
+        "selectionPreserved": true,
+        "historyLength": 1392
+      },
+      {
+        "action": "reload originalB",
+        "key": "originalB",
+        "ms": 635,
+        "exact": true,
+        "selectionPreserved": true,
+        "signInPrompt": false
+      }
+    ],
+    "baselines": {
+      "originalB": {
+        "workspace": "ui-layout-check",
+        "session": "List the top-level files in this workspace and tell me what it c",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "historyCharacters": 1392,
+        "historySha256": "e42b4d79cbaa1736f407d6ab489831a627490ac8cdf262f5d6f69137841b8e2e",
+        "prompt": "",
+        "runId": "16df2944a87344a79a36ce3b3574072f",
+        "sessionId": "3495c8284fc345fbb22dd0ac18026850"
+      },
+      "A": {
+        "workspace": "web-search-check",
+        "session": "Native FastAPI test",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "historyCharacters": 1681,
+        "historySha256": "fddb4b69273c3e34ab0f01910a0547639284be8d411d85ac696cc5c5e6f377ab",
+        "prompt": "",
+        "runId": "c847d70e443b442e912449392d65c5f9",
+        "sessionId": "220ac1f383cc45c6813c1588a1dde396"
+      },
+      "otherB": {
+        "workspace": "ui-layout-check",
+        "session": "do a test",
+        "provider": "OpenAI",
+        "model": "gpt-4.1",
+        "historyCharacters": 486,
+        "historySha256": "a47e8a9c09233fb2f1c5ebba60786bdb011984f24efba68d73fa12b7eb6e42f2",
+        "prompt": "",
+        "runId": "77a38b9e5f44406a8e10b5740461d6c4",
+        "sessionId": "83106cfc910e4674a39f759959d28872"
+      }
+    },
+    "exactHistoryWorkspaceSessionProviderModelAndSelectedRunRestored": true,
+    "signInPrompts": 0,
+    "consoleIssues": [],
+    "collapseExpand": true,
+    "composerReadyWithoutSubmission": true,
+    "originalChatRestored": true,
+    "profilingRemoved": true
+  },
+  "trace": {
+    "beforeReloadMs": 1222,
+    "afterReloadMs": 623,
+    "beforeWorkspaceToMainMs": 1037,
+    "afterWorkspaceToMainMs": 536,
+    "workspaceSelectionRequest": {
+      "beforeMs": 335,
+      "afterMs": 108
+    },
+    "logs": "Private .agentflow/navigation-speed-before-20261028.json and navigation-speed-after-profile-20261028.json contain bounded paths/timestamps/durations, without headers or bodies."
+  },
+  "limitations": "Workspace changes still perform authenticated native selection, connection capture and current session metadata reads, taking roughly half a second. Native peer35656 retains its earlier binary. No new provider/model/tool execution, external native browser input, hover qualification, installed VSIX or full 188-test Native-suite claim.",
+  "preservedUserSession": {
+    "session": "83106cfc910e4674a39f759959d28872",
+    "root": "77a38b9e5f44406a8e10b5740461d6c4",
+    "agentSubmitted": false,
+    "neverReplay": true
+  },
+  "newModelRequests": 0,
+  "newUserSessions": 0,
+  "screenshot": {
+    "path": "doc/evidence/browser-navigation-speed-20261028.png",
+    "sha256": "9639fba201fb807d807be885310170430fd5c63961f7a7bb89fc33ec6d84d88c"
+  }
+}

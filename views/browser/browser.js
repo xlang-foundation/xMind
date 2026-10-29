@@ -607,11 +607,14 @@ else {
   }
   async function activateWorkspace(generation,signal,restorePreferred=false){
     const client=new BrowserSessionClient(location.origin,{requestSignal:signal});
-    const [observedHealth,initialCatalogue,observedWorkspace]=await Promise.all([client.health(),workspaceCatalogue(signal),restorePreferred?undefined:client.workspace()]);
+    // Observe metadata while authenticating the activation, rather than
+    // serializing a second connection capture on every unchanged reload.
+    // A restored workspace change must discard this earlier observation.
+    const [observedHealth,initialCatalogue,observedWorkspace]=await Promise.all([client.health(),workspaceCatalogue(signal),client.workspace()]);
     if(generation!==connectionGeneration)return;
     let catalogue=initialCatalogue;if(restorePreferred)catalogue=await restoreWorkspacePreference(catalogue,generation,signal);
     if(generation!==connectionGeneration)return;
-    const workspace=observedWorkspace||await client.workspace();
+    const workspace=catalogue.selected_workspace_id===initialCatalogue.selected_workspace_id?observedWorkspace:await client.workspace();
     if(!workspace.configured||workspace.workspace_id!==catalogue.selected_workspace_id)throw new Error('The browser session and native workspace catalogue disagree.');
     showWorkspaceCatalogue(catalogue);workspaceControl.dataset.switching='true';picker.disabled=true;element('workspace-config-open').disabled=true;
     const health=catalogue.selected_workspace_id===initialCatalogue.selected_workspace_id?observedHealth:await client.health();

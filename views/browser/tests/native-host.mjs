@@ -8,10 +8,10 @@ import {once} from 'node:events';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../../..');
 const require=createRequire(import.meta.url);
 export const {allowedApiRoute}=require('../routes.cjs');
-export async function createNativeBrowserFixture({backend,assetRoot,localAccessToken,modules,stdlib}){
+export async function createNativeBrowserFixture({backend,assetRoot,localAccessToken,modules,stdlib,productionAsync=false}){
   let child,origin,closed=false;
   const runtime=process.env.XMIND_BROWSER_TEST_RUNTIME;
-  const config={backend,assets:resolve(assetRoot),web_source:join(root,'views/browser'),
+  const config={backend,assets:resolve(assetRoot),web_source:join(root,'views/browser'),production_async:productionAsync,runtime,
     modules:modules||process.env.XMIND_BROWSER_TEST_MODULES||(runtime&&join(runtime,'modules')),
     stdlib:stdlib||process.env.XMIND_BROWSER_TEST_STDLIB||(runtime&&join(runtime,'stdlib')),
     packages:process.env.XMIND_BROWSER_TEST_PACKAGES};

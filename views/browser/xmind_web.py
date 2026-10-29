@@ -169,7 +169,19 @@ class BrowserApp:
             headers['Authorization'] = authorization
         if last_event:
             headers['Last-Event-ID'] = last_event
-        return await asyncio.to_thread(self.native.Request, method, target, headers, body, owner)
+        # Production returns a native job immediately. The external-peer test
+        # adapter retains its blocking Request interface on an executor thread.
+        if hasattr(self.native, 'RequestAsync'):
+            result = self.native.RequestAsync(method, target, headers, body, owner)
+        else:
+            result = await asyncio.to_thread(self.native.Request, method, target, headers, body, owner)
+        try:
+            while not result.Ready():
+                await asyncio.sleep(0.001)
+            return result
+        except BaseException:
+            result.Close()
+            raise
 
     def set_cookie(self, response, value):
         if type(value) is not dict:
