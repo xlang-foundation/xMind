@@ -132,5 +132,23 @@
     },
     "before": ".agentflow/benchmark-complete-inputs-before.json"
   },
-  "screenshot": ".agentflow/public-benchmark-proverb-failure-20261029.png"
+  "screenshot": ".agentflow/public-benchmark-proverb-failure-20261029.png",
+  "all_exercise_baseline": {
+    "actual_methods_run": 573,
+    "xmind_solutions_created": 0,
+    "helper_and_instruction_hashes": 56,
+    "driver": ".agentflow/run-polyglot-baseline.mjs",
+    "original_test_methods": 584,
+    "report": ".agentflow/polyglot-all-baseline.json",
+    "commands_completed": 34,
+    "scope": "Unmodified-starter environment baseline only; not xMind model success or a full runtime compatibility claim",
+    "original_tests_changed": 0,
+    "loaded_suites": 33,
+    "original_exercises": 34,
+    "expected_import_failure": {
+      "exercise": "go-counting",
+      "reason": "Original upstream starter omits WHITE/BLACK/NONE constants required by its tests; implementation work, not an xlang3 compatibility finding"
+    },
+    "loader_placeholder_errors": 1
+  }
 }
