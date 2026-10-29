@@ -302,6 +302,14 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
     // can supply this local path or obtain the decoded secret-bearing values.
     auto configuration=read_provider_yaml_config(path,allowed_routes);
     std::unique_lock lock(impl_->mutex);
+    if(configuration.openai_compatible){
+        const auto& supplied=*configuration.openai_compatible;
+        const auto& bound=impl_->route("openai.compatible");
+        if(bound.route.provider!="openai-compatible"||bound.route.wire!=ProviderWire::chat_completions||
+           bound.route.endpoint!=supplied.base_url+"/chat/completions"||!bound.catalogue||
+           bound.catalogue->endpoint!=supplied.base_url+"/models"||bound.provider.tools!=supplied.tools||bound.provider.stream_usage!=supplied.stream_usage)
+            throw Conflict("OpenAI-compatible route changed; restart with the trusted configuration");
+    }
     if(expected<0||expected!=impl_->state.revision)throw Conflict("Provider profile runtime revision changed");
     if(impl_->profiles.snapshot().revision!=expected)throw Conflict("Provider YAML registry revision changed");
     const bool supplied_profiles=!configuration.profiles.empty();

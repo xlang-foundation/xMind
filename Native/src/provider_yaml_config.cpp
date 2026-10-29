@@ -3,6 +3,7 @@
 #include "yaml-cpp/eventhandler.h"
 #include "yaml-cpp/exceptions.h"
 #include <algorithm>
+#include <charconv>
 #include <fstream>
 #include <memory>
 #include <set>
@@ -76,12 +77,39 @@ public:
 const Value* field(const Value& value,const std::string& name){for(const auto& [key,node]:value.fields)if(key==name)return node.get();return nullptr;}
 const std::string& text(const Value& value){if(value.mapping||!text_tag(value.tag))fail(ProviderYamlErrorCode::invalid_schema);return value.scalar;}
 void fields(const Value& value,const std::set<std::string>& allowed){if(!value.mapping)fail(ProviderYamlErrorCode::invalid_schema);for(const auto& [key,node]:value.fields){(void)node;if(!allowed.contains(key))fail(ProviderYamlErrorCode::invalid_schema);}}
+Capability capability(const Value& value){const auto& name=text(value);if(name=="supported")return Capability::supported;if(name=="unsupported")return Capability::unsupported;if(name=="unknown")return Capability::unknown;fail(ProviderYamlErrorCode::invalid_schema);}
+std::string compatible_base(const Value& value){
+    auto url=text(value);
+    if(url.empty()||url.size()>2048||url.find_first_of("@?#\\")!=std::string::npos)fail(ProviderYamlErrorCode::invalid_schema);
+    for(const auto byte:url)if(static_cast<unsigned char>(byte)<33||static_cast<unsigned char>(byte)>126)fail(ProviderYamlErrorCode::invalid_schema);
+    const bool secure=url.starts_with("https://");
+    if(!secure&&!url.starts_with("http://"))fail(ProviderYamlErrorCode::invalid_schema);
+    const std::size_t start=secure?8u:7u;const auto end=url.find('/',start);
+    const auto authority=url.substr(start,end==std::string::npos?std::string::npos:end-start);
+    if(authority.empty()||authority.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-:[]")!=std::string::npos)fail(ProviderYamlErrorCode::invalid_schema);
+    auto host=authority;std::string port;
+    if(host.starts_with('[')){
+        const auto close=host.find(']');if(close==std::string::npos)fail(ProviderYamlErrorCode::invalid_schema);
+        if(close+1<host.size()){if(host[close+1]!=':')fail(ProviderYamlErrorCode::invalid_schema);port=host.substr(close+2);if(port.empty())fail(ProviderYamlErrorCode::invalid_schema);}host.resize(close+1);
+    }else if(const auto colon=host.find(':');colon!=std::string::npos){port=host.substr(colon+1);host.resize(colon);if(port.empty())fail(ProviderYamlErrorCode::invalid_schema);}
+    if(host.empty()||(!secure&&host!="127.0.0.1"&&host!="localhost"&&host!="[::1]"))fail(ProviderYamlErrorCode::invalid_schema);
+    if(!port.empty()){unsigned number=0;const auto result=std::from_chars(port.data(),port.data()+port.size(),number);if(result.ec!=std::errc{}||result.ptr!=port.data()+port.size()||number<1||number>65535)fail(ProviderYamlErrorCode::invalid_schema);}
+    while(url.ends_with('/'))url.pop_back();
+    return url;
+}
 ProviderYamlConfig decode(const Value& root,const std::vector<std::string>& allowed_routes){
     if(allowed_routes.empty()||allowed_routes.size()>64)fail(ProviderYamlErrorCode::route_unavailable);std::set<std::string> routes;
     for(const auto& route:allowed_routes){identity(route);if(!routes.insert(route).second)fail(ProviderYamlErrorCode::route_unavailable);}
-    fields(root,{"version","profiles","active_profile"});const auto* version=field(root,"version"),*profiles=field(root,"profiles");
+    fields(root,{"version","profiles","active_profile","openai_compatible"});const auto* version=field(root,"version"),*profiles=field(root,"profiles");
     if(!version||version->mapping||version->scalar!="1"||(version->tag!="?"&&version->tag!="tag:yaml.org,2002:int")||!profiles||!profiles->mapping||profiles->fields.size()>32)fail(ProviderYamlErrorCode::invalid_schema);
     ProviderYamlConfig result;
+    if(const auto* compatible=field(root,"openai_compatible")){
+        fields(*compatible,{"base_url","tools","stream_usage"});const auto* base=field(*compatible,"base_url");if(!base)fail(ProviderYamlErrorCode::invalid_schema);
+        OpenAICompatibleConfig config;config.base_url=compatible_base(*base);
+        if(const auto* tools=field(*compatible,"tools"))config.tools=capability(*tools);
+        if(const auto* usage=field(*compatible,"stream_usage"))config.stream_usage=capability(*usage);
+        result.openai_compatible=std::move(config);routes.insert("openai.compatible");
+    }
     for(const auto& [id,node]:profiles->fields){identity(id);fields(*node,{"route","api_key","model"});const auto* route=field(*node,"route");if(!route)fail(ProviderYamlErrorCode::invalid_schema);const auto& route_id=text(*route);identity(route_id);if(!routes.contains(route_id))fail(ProviderYamlErrorCode::route_unavailable);
         ProviderProfileConfigEntry entry;entry.id=id;entry.route_id=route_id;
         if(const auto* model=field(*node,"model")){entry.model=text(*model);identity(*entry.model);}

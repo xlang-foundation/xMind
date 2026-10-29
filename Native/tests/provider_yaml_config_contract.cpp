@@ -38,6 +38,17 @@ ProviderProfileSnapshot apply(ProviderProfiles& profiles,const std::string& sour
 std::string document(){return "# Explicit synthetic native YAML fixture.\nversion: 1\nactive_profile: claude\nprofiles:\n  claude:\n    route: anthropic.messages\n    api_key: \""+claude_key+"\"\n  openai:\n    route: openai.responses\n    api_key: '"+openai_key+"'\n    model: synthetic-openai-model\n";}
 void pure_parser(const std::filesystem::path& root){
     auto parsed=parse_provider_yaml_config(document(),allowed);
+    parsed=parse_provider_yaml_config("version: 1\nopenai_compatible: {base_url: 'http://127.0.0.1:19445/v1/', tools: unsupported, stream_usage: unsupported}\nprofiles: {cantorserve: {route: openai.compatible}}\n",allowed);
+    require(parsed.openai_compatible&&parsed.openai_compatible->base_url=="http://127.0.0.1:19445/v1"&&parsed.openai_compatible->tools==Capability::unsupported&&parsed.openai_compatible->stream_usage==Capability::unsupported&&parsed.profiles[0].route_id=="openai.compatible","Trusted local configuration registers a normalized compatible endpoint without inventing capabilities");
+    for(const auto& base:std::vector<std::string>{"https://serve.example.com/v1","http://localhost:19445/v1","http://[::1]:19445/v1"}){
+        const auto value=parse_provider_yaml_config("version: 1\nopenai_compatible: {base_url: '"+base+"'}\nprofiles: {}\n",allowed);
+        require(value.openai_compatible->tools==Capability::unknown&&value.openai_compatible->stream_usage==Capability::unknown,"A compatible endpoint alone cannot grant tool or usage capabilities");
+    }
+    for(const auto& base:std::vector<std::string>{"http://serve.example.com/v1","https://user:password@example.com/v1","https://example.com/v1?key=private","https://example.com/v1#fragment","file:///v1","https:///v1","http://127.0.0.1:0/v1","http://127.0.0.1:65536/v1","http://127.0.0.1:/v1","https://example.com\\v1"})
+        reject_yaml("version: 1\nopenai_compatible: {base_url: '"+base+"'}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
+    reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', tools: invented}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
+    reject_yaml("version: 1\nprofiles: {cantorserve: {route: openai.compatible}}\n",ProviderYamlErrorCode::route_unavailable);
+    parsed=parse_provider_yaml_config(document(),allowed);
     require(parsed.profiles.size()==2&&parsed.active_profile=="claude"&&parsed.profiles[0].id=="claude"&&!parsed.profiles[0].model&&same(parsed.profiles[0].key,claude_key),"Genuine block YAML preserves a real key-only input without inventing a model");
     parsed=parse_provider_yaml_config("\xef\xbb\xbf"+document(),allowed);
     require(parsed.profiles.size()==2,"Native YAML reads valid UTF8 BOM and comments");
@@ -87,6 +98,20 @@ void pure_parser(const std::filesystem::path& root){
     std::string many_nodes="version: 1\nprofiles: {}\n";for(int i=0;i<260;++i)many_nodes+="field"+std::to_string(i)+": value\n";reject_yaml(many_nodes,ProviderYamlErrorCode::exceeds_limits);
 }
 void registry(const std::filesystem::path& root,const std::vector<std::string>& imports,const std::string& origin){
+    {
+        PersistenceService store((root/"compatible-route.sqlite").string(),imports);
+        ProviderProfileRoute route{"openai.compatible","openai-compatible",origin+"/chat/completions","server","fixture:yaml:compatible",ProviderWire::chat_completions};
+        ChatProviderConfig provider;provider.endpoint=route.endpoint;provider.tools=Capability::unsupported;
+        ProviderProfileRuntime runtime(store,{},{{route,provider,ProviderCataloguePolicy{origin+"/models",ProviderCatalogueFormat::openai}}});
+        const auto file=root/"compatible-route.yaml";
+        const auto write=[&](const std::string& base,const std::string& tools){std::ofstream output(file);output<<"version: 1\nopenai_compatible: {base_url: '"<<base<<"', tools: "<<tools<<"}\nprofiles: {cantorserve: {route: openai.compatible, api_key: synthetic-compatible-key}}\nactive_profile: cantorserve\n";};
+        write(origin,"unsupported");const auto saved=runtime.import_yaml_configuration(file,0);
+        require(saved.active=="cantorserve"&&saved.profiles.size()==1&&saved.profiles[0].model.empty(),"Compatible native startup encrypts a key-only profile without inventing a selected model");
+        const auto original=store.information("native-provider-profiles","registry").get();
+        write(origin+"/changed","unsupported");rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
+        write(origin,"supported");rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
+        require(store.information("native-provider-profiles","registry").get()==original&&store.credentials("server").get().size()==1,"Endpoint or capability edits cannot redirect saved credentials or partially mutate a running generation");
+    }
     const auto database=(root/"provider-yaml.sqlite").string();ProviderProfileSnapshot saved;
     {
         PersistenceService store(database,imports);ProviderProfiles profiles(store,policy(origin));

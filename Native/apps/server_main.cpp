@@ -402,6 +402,16 @@ int run_server(int argc,char** argv) {
             add("mistral.chat","mistral","https://api.mistral.ai/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://api.mistral.ai/v1/models",agentflow::ProviderCatalogueFormat::openai,agentflow::ChatDialect::mistral);
             policies.back().model_capabilities=agentflow::documented_mistral_model_policy();
             add("openrouter.chat","openrouter","https://openrouter.ai/api/v1/chat/completions",agentflow::ProviderWire::chat_completions,"https://openrouter.ai/api/v1/models",agentflow::ProviderCatalogueFormat::openrouter);
+            if(options.contains("--provider-config")){
+                std::vector<std::string> known;for(const auto& route:routes)known.push_back(route.id);
+                auto configuration=agentflow::read_provider_yaml_config(std::filesystem::absolute(options.at("--provider-config")),known);
+                if(configuration.openai_compatible){
+                    const auto& compatible=*configuration.openai_compatible;
+                    add("openai.compatible","openai-compatible",compatible.base_url+"/chat/completions",agentflow::ProviderWire::chat_completions,compatible.base_url+"/models",agentflow::ProviderCatalogueFormat::openai);
+                    policies.back().provider.tools=compatible.tools;
+                    policies.back().provider.stream_usage=compatible.stream_usage;
+                }
+            }
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue,root_executor_factory);
             if(!bootstrap&&!legacy)configurable->import_legacy_configuration();
             if(options.contains("--provider-config")){

@@ -16,12 +16,17 @@ struct ProviderYamlError : std::runtime_error {
 private:
     ProviderYamlErrorCode code_;
 };
+struct OpenAICompatibleConfig {
+    std::string base_url;
+    Capability tools=Capability::unknown,stream_usage=Capability::unknown;
+};
 struct ProviderYamlConfig {
     std::vector<ProviderProfileConfigEntry> profiles;
     std::optional<std::string> active_profile;
+    std::optional<OpenAICompatibleConfig> openai_compatible;
 };
-// Backend-only input; model/UI protocol cannot provide endpoints, routes or
-// capacity policies. The caller owns the allowed native route identities.
+// Backend-only input; model/UI protocol cannot provide endpoints or policies.
+// Trusted local configuration can register the OpenAI-compatible route.
 // Plaintext is never serialized as a DTO. Caller source buffers remain caller
 // owned; read() wipes its bounded input buffer on every exit.
 ProviderYamlConfig parse_provider_yaml_config(std::string_view source,

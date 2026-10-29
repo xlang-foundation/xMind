@@ -46,6 +46,36 @@ synthetic peer. It does not claim live account or per-model acceptance.
 
 ## Local YAML configuration and native profile integration
 
+Trusted local provider YAML can register an OpenAI-compatible Chat Completions
+endpoint. The base URL includes the API prefix, such as `/v1`; Native appends
+`/models` and `/chat/completions`. For example:
+
+```yaml
+version: 1
+openai_compatible:
+  base_url: http://127.0.0.1:19445/v1
+  tools: unsupported
+  stream_usage: unsupported
+profiles:
+  cantorserve:
+    route: openai.compatible
+    api_key: "ENTER_LOCALLY"
+active_profile: cantorserve
+```
+
+Keys stay in private configuration and Native's encrypted credential store.
+Capabilities default to `unknown`; only declare `supported` when the selected
+server and models implement them. HTTPS is required except for loopback HTTP.
+Credential-bearing URLs, queries and fragments are rejected. A running backend
+rejects changes to its endpoint or capabilities before publishing credentials;
+start a new generation with the updated trusted file. Clients cannot set URLs.
+
+This adapter requires actual OpenAI SSE streaming. Current local CantorServe
+discovery succeeds, but its chat endpoint rejects `stream:true` with HTTP 501
+`unsupported_capability`. Registering the connection does not establish working
+chat, tool use or coding acceptance. No completed response is split into fake
+streaming events.
+
 The new source accepts a trusted local `--provider-config FILE` using native
 yaml-cpp 0.9.0, pinned to upstream commit
 `56e3bb550c91fd7005566f19c079cb7a503223cf`. The full native build and YAML
