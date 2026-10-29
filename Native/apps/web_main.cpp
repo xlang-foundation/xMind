@@ -45,7 +45,7 @@ int run_web(int argc,char** argv){
                 if(input.is_open()){
                     const auto value=nlohmann::json::parse(input);
                     if(value.at("process_id").get<std::uint32_t>()!=connection.process_id||value.at("process_birth").get<std::string>()!=birth)throw std::runtime_error("Browser owner identity differs");
-                    std::cout<<nlohmann::json{{"url",value.at("origin").get<std::string>()+"/ui/"},{"process_id",connection.process_id},{"process_birth",birth},{"profile_directory",connection.directory},{"transport","embedded-fastapi/xlang3-ipc"}}.dump()<<std::endl;return 0;
+                    std::cout<<nlohmann::json{{"url",value.at("origin").get<std::string>()+"/ui/"},{"process_id",connection.process_id},{"process_birth",birth},{"profile_directory",connection.directory},{"transport","embedded-fastapi/xlang3-ipc"},{"windows_tray",value.value("windows_tray",false)}}.dump()<<std::endl;return 0;
                 }
             }
             if(agentflow::observe_owner_exit(connection.process_id,birth,0).exited)throw std::runtime_error("The owned xMind browser host exited; inspect its retained startup log");

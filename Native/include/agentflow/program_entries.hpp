@@ -17,7 +17,7 @@ namespace agentflow {int run_xmind_ipc_client(int argc,char** argv);}
 #if defined(_WIN32)
 int run_local_view(int argc, char** argv);
 int run_web(int argc,char** argv);
-int run_embedded_local_web_view(std::shared_ptr<agentflow::LocalProfileConnection>,const std::string& assets,const std::string& packages,const std::string& ready,int port=0,std::function<bool()> running={});
+int run_embedded_local_web_view(std::shared_ptr<agentflow::LocalProfileConnection>,const std::string& assets,const std::string& packages,const std::string& ready,int port=0,std::function<bool()> running={},std::function<void()> stop={});
 namespace agentflow {
 LocalProfileOptions managed_web_view_options(const std::string& profile_directory);
 void publish_managed_web_port(const std::string& profile_directory,int port);

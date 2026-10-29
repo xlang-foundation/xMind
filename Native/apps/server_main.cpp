@@ -486,7 +486,7 @@ int run_server(int argc,char** argv) {
             std::thread api_listener([&]{server.listen();server.stop();});
             try{
                 const int web_port=options.contains("--web-port")?std::stoi(options.at("--web-port")):0;
-                ok=run_embedded_local_web_view(std::move(local),options.at("--web-assets"),options.contains("--web-packages")?options.at("--web-packages"):std::string{},std::string(reinterpret_cast<const char*>(ready_bytes.data()),ready_bytes.size()),web_port,api_running)==0;
+                ok=run_embedded_local_web_view(std::move(local),options.at("--web-assets"),options.contains("--web-packages")?options.at("--web-packages"):std::string{},std::string(reinterpret_cast<const char*>(ready_bytes.data()),ready_bytes.size()),web_port,api_running,[&server]{server.stop();})==0;
             }catch(...){server.stop();api_listener.join();throw;}
             server.stop();api_listener.join();
         }else

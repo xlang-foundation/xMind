@@ -5,6 +5,7 @@
 #include "agentflow/runtime_generation.hpp"
 #include "agentflow/workspace_tools.hpp"
 #include "agentflow/workspace_registry.hpp"
+#include "agentflow/windows_tray.hpp"
 #include "httplib.h"
 #include "../src/native_request_channel.hpp"
 #include "embedded_web.hpp"
@@ -165,7 +166,7 @@ agentflow::VerifiedRuntimeGeneration verify_client_image() {
 }
 } // namespace
 
-int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalProfileConnection> embedded={},std::function<bool()> running={}) {
+int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalProfileConnection> embedded={},std::function<bool()> running={},std::function<void()> stop={}) {
     agentflow::LocalProfileOptions options;
     std::string trusted_provider_config;
     bool preserve_provider_settings=false;
@@ -1183,6 +1184,11 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
                                                                   {"X-XMind-View-Origin", origin}});
         require(metadata && metadata->status == 200, "Native view workspace unavailable");
         const auto workspace = Json::parse(metadata->body);
+        std::unique_ptr<agentflow::WindowsTray> tray;
+        if(web&&stop){
+            try{tray=std::make_unique<agentflow::WindowsTray>(origin+"/ui/",connection->workspace,std::move(stop));}
+            catch(...){std::cerr<<"Windows tray unavailable; the web UI remains available\n";}
+        }
         agentflow::publish_local_view_ready(
             ready,
             Json{{"origin", origin},
@@ -1192,7 +1198,8 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
                  {"backend_origin", "http://127.0.0.1:" + std::to_string(connection->port)},
                  {"backend_process_id", connection->process_id},
                  {"profile_directory", connection->directory},
-                 {"started_backend", connection->started}}
+                 {"started_backend", connection->started},
+                 {"windows_tray", bool(tray)&&tray->visible()}}
                 .dump(),
             connection->workspace);
         bool ok=true;
@@ -1233,7 +1240,7 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
     }
 }
 int run_local_view(int argc,char** argv){return run_local_view_impl(argc,argv);}
-int run_embedded_local_web_view(std::shared_ptr<agentflow::LocalProfileConnection> connection,const std::string& assets,const std::string& packages,const std::string& ready,int port,std::function<bool()> running){
+int run_embedded_local_web_view(std::shared_ptr<agentflow::LocalProfileConnection> connection,const std::string& assets,const std::string& packages,const std::string& ready,int port,std::function<bool()> running,std::function<void()> stop){
     const auto root=std::filesystem::u8path(connection->directory).parent_path().u8string();
     std::vector<std::string> args{"xmind","--workspace",connection->workspace,"--profile-root",std::string(reinterpret_cast<const char*>(root.data()),root.size()),"--ready-file",ready,"--web-assets",assets};
     if(!packages.empty()){args.push_back("--web-packages");args.push_back(packages);}
@@ -1242,5 +1249,5 @@ int run_embedded_local_web_view(std::shared_ptr<agentflow::LocalProfileConnectio
     args.push_back("--preserve-provider-settings");
     for(const auto& [option,value]:std::vector<std::pair<std::string,std::string>>{{"--trusted-provider-config",shared.provider_config},{"--graphs-config",shared.graphs_config},{"--python-tools-config",shared.python_tools_config},{"--language-server-config",shared.language_server_config},{"--process-config",shared.process_config},{"--mcp-config",shared.mcp_config}}){if(!value.empty()){args.push_back(option);args.push_back(value);}}
     std::vector<char*> pointers;for(auto& item:args)pointers.push_back(item.data());
-    return run_local_view_impl(static_cast<int>(pointers.size()),pointers.data(),std::move(connection),std::move(running));
+    return run_local_view_impl(static_cast<int>(pointers.size()),pointers.data(),std::move(connection),std::move(running),std::move(stop));
 }
