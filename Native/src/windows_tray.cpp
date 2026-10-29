@@ -9,7 +9,6 @@
 #include <atomic>
 #include <charconv>
 #include <cmath>
-#include <cstring>
 #include <filesystem>
 #include <future>
 #include <stdexcept>
@@ -19,7 +18,7 @@
 namespace agentflow {
 namespace {
 constexpr UINT callback_message=WM_APP+73,icon_id=1;
-constexpr UINT open_ui=101,copy_url=102,open_folder=103,quit_server=104;
+constexpr UINT open_ui=101,open_folder=103,quit_server=104;
 constexpr wchar_t window_class[]=L"xMind.LocalWeb.Tray";
 std::wstring wide(const std::string& text){
     if(text.empty())return {};
@@ -47,8 +46,17 @@ HICON make_icon(){
             const double px=x+(sx+0.5)/samples,py=y+(sy+0.5)/samples;
             const double dx=std::max(std::abs(px-16)-8.0,0.0),dy=std::max(std::abs(py-16)-8.0,0.0);
             if(dx*dx+dy*dy>36)continue;
-            const bool cross=px>=8&&px<=24&&py>=8&&py<=24&&(std::abs(px-py)<1.8||std::abs(px+py-32)<1.8);
-            const double t=py/32;r+=cross?255:65+65*t;g+=cross?255:118-40*t;b+=cross?255:240;a+=255;
+            const auto circle=[&](double cx,double cy,double radius){return (px-cx)*(px-cx)+(py-cy)*(py-cy)<=radius*radius;};
+            const auto stroke=[&](double ax,double ay,double bx,double by){
+                const double vx=bx-ax,vy=by-ay,t=std::clamp(((px-ax)*vx+(py-ay)*vy)/(vx*vx+vy*vy),0.0,1.0);
+                return circle(ax+t*vx,ay+t*vy,1.2);
+            };
+            // A branching thought: three generous nodes and an open stem.
+            // The cyan node gives the mark direction without lettering.
+            const bool accent=circle(23,10,3.3);
+            const bool mark=accent||circle(9,10,3.3)||circle(16,18,3.6)||stroke(9,10,16,18)||stroke(23,10,16,18)||stroke(16,18,16,25);
+            const double t=py/32;
+            r+=accent?82:mark?245:35+22*t;g+=accent?230:mark?248:47+6*t;b+=accent?207:mark?255:89+33*t;a+=255;
         }
         constexpr double count=samples*samples;pixels[y*size+x]=(std::uint32_t(a/count)<<24)|(std::uint32_t(r/count)<<16)|(std::uint32_t(g/count)<<8)|std::uint32_t(b/count);
     }
@@ -92,24 +100,18 @@ struct WindowsTray::Impl {
     }
     void launch(const std::wstring& target){
         if(reinterpret_cast<INT_PTR>(ShellExecuteW(window.load(),L"open",target.c_str(),nullptr,nullptr,SW_SHOWNORMAL))<=32)
-            MessageBoxW(window.load(),L"Windows could not open this location. You can copy the web UI address from the tray menu.",L"xMind",MB_OK|MB_ICONINFORMATION);
-    }
-    void copy_address(){
-        if(!OpenClipboard(window.load()))return;
-        const auto bytes=(url.size()+1)*sizeof(wchar_t);const auto memory=GlobalAlloc(GMEM_MOVEABLE,bytes);
-        if(memory){if(auto* target=GlobalLock(memory)){std::memcpy(target,url.c_str(),bytes);GlobalUnlock(memory);EmptyClipboard();if(!SetClipboardData(CF_UNICODETEXT,memory))GlobalFree(memory);}else GlobalFree(memory);}
-        CloseClipboard();
+            MessageBoxW(window.load(),L"Windows could not open this location. Check your default browser or file association.",L"xMind",MB_OK|MB_ICONINFORMATION);
     }
     void menu(){
         const auto popup=CreatePopupMenu();if(!popup)return;
         AppendMenuW(popup,MF_STRING|MF_DISABLED,0,title.c_str());AppendMenuW(popup,MF_SEPARATOR,0,nullptr);
         AppendMenuW(popup,MF_STRING,open_ui,L"Open web UI");SetMenuDefaultItem(popup,open_ui,FALSE);
-        AppendMenuW(popup,MF_STRING,copy_url,L"Copy web UI address");AppendMenuW(popup,MF_STRING,open_folder,L"Open server workspace");
+        AppendMenuW(popup,MF_STRING,open_folder,L"Open workspace");
         AppendMenuW(popup,MF_SEPARATOR,0,nullptr);AppendMenuW(popup,MF_STRING,quit_server,L"Quit this xMind server...");
         POINT point{};GetCursorPos(&point);SetForegroundWindow(window.load());
         const auto action=TrackPopupMenuEx(popup,TPM_RETURNCMD|TPM_NONOTIFY|TPM_RIGHTBUTTON,point.x,point.y,window.load(),nullptr);
         DestroyMenu(popup);PostMessageW(window.load(),WM_NULL,0,0);
-        if(action==open_ui)launch(url);else if(action==open_folder)launch(workspace);else if(action==copy_url)copy_address();
+        if(action==open_ui)launch(url);else if(action==open_folder)launch(workspace);
         else if(action==quit_server&&MessageBoxW(window.load(),L"Quit this xMind server?\n\nActive work on this server will stop. Saved conversations remain on disk.",L"Quit xMind",MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2)==IDYES&&quit)quit();
     }
     static LRESULT CALLBACK procedure(HWND handle,UINT message,WPARAM wparam,LPARAM lparam){
@@ -117,7 +119,7 @@ struct WindowsTray::Impl {
         if(message==WM_NCCREATE){self=static_cast<Impl*>(reinterpret_cast<CREATESTRUCTW*>(lparam)->lpCreateParams);SetWindowLongPtrW(handle,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(self));}
         if(!self)return DefWindowProcW(handle,message,wparam,lparam);
         if(message==self->taskbar_created&&self->taskbar_created){self->add_icon();return 0;}
-        if(message==callback_message){try{const auto event=LOWORD(lparam);if(event==WM_CONTEXTMENU)self->menu();else if(event==NIN_SELECT||event==NIN_KEYSELECT)self->launch(self->url);}catch(...){/* No UI failure may stop the backend. */}return 0;}
+        if(message==callback_message){try{const auto event=LOWORD(lparam);if(event==WM_CONTEXTMENU||event==NIN_SELECT||event==NIN_KEYSELECT)self->menu();}catch(...){/* No UI failure may stop the backend. */}return 0;}
         if(message==WM_CLOSE){DestroyWindow(handle);return 0;}
         if(message==WM_DESTROY){auto data=self->notification();Shell_NotifyIconW(NIM_DELETE,&data);self->installed.store(false);self->window.store(nullptr);PostQuitMessage(0);return 0;}
         return DefWindowProcW(handle,message,wparam,lparam);
