@@ -193,6 +193,21 @@ test('effective backend root uses plain text and folder switch clears the old dr
  try{r.send({type:'workspace',root:'D:\\<img onerror=malicious>\\TestProj',roots:[{},{}],backendChangePending:true});const label=doc.getElementById('workspace-root');assert.equal(label.hidden,false);assert.equal(label.querySelector('img'),null);assert.ok(label.textContent.includes('active root from 2 workspace folders'));assert.ok(label.textContent.includes('Backend changes pending; using saved backend'));r.send({type:'workspace',root:'D:\\TestProj',roots:[{}],backendChangePending:'<img onerror=unsafe>'});assert.ok(!label.textContent.includes('pending'));assert.equal(label.querySelector('img'),null);doc.getElementById('prompt').value='old workspace draft';r.send({type:'workspace-clear'});assert.equal(label.hidden,true);assert.equal(doc.getElementById('prompt').value,'');}finally{r.dom.window.close();}
 });
 
+test('CantorServe saved connections show their product name while preserving connection identity and model selection',()=>{
+ const r=renderer(),doc=r.dom.window.document;
+ const profiles=[{id:'cantorserve',route_id:'openai.compatible',provider:'openai-compatible',model:'qualified-local'}];
+ const routes=[{id:'openai.compatible',provider:'openai-compatible',wire:'chat-completions',discovery:true}];
+ try{
+  r.send({type:'provider-profiles',active:'cantorserve',profiles,routes});
+  assert.equal(doc.getElementById('footer-provider').selectedOptions[0].textContent,'CantorServe');
+  assert.equal(doc.getElementById('provider-name').selectedOptions[0].textContent,'CantorServe · Chat Completions');
+  r.send({type:'model-list',models:[{id:'qualified-local'},{id:'qualified-remote'}],model:'qualified-local'});
+  assert.equal(doc.getElementById('model').value,'qualified-local');
+  assert.equal(doc.getElementById('footer-provider').value,'cantorserve');
+  assert.equal(r.posted.filter(value=>['select-provider','model','save-provider'].includes(value.type)).length,0);
+ }finally{r.dom.window.close();}
+});
+
 test('footer saved-provider chooser uses public profiles, preserves actual selection until acknowledgement and never opens key settings',()=>{
  const r=renderer(),doc=r.dom.window.document,select=doc.querySelector('footer #footer-provider');
  const profiles=[{id:'openai-saved',provider:'openai',model:'fixture-openai'},{id:'claude-key-only',provider:'anthropic',model:''},{id:'gemini-saved',provider:'gemini',model:'models/fixture'},{id:'deepseek-saved',provider:'deepseek',model:'deepseek-flash'}],routes=[];

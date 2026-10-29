@@ -10,10 +10,17 @@ import {tmpdir} from 'node:os';
 const [executable, modules, stdlib] = process.argv.slice(2);
 assert.ok(executable && modules && stdlib);
 const root = await mkdtemp(join(tmpdir(), 'xmind-provider-yaml-'));
-let count = 0, failure;
+let count = 0, brandedCount = 0, failure;
 const server = createServer((request, response) => {
   try {
-    assert.equal(request.method, 'GET');assert.equal(request.url, '/claude-models?limit=1000');
+    assert.equal(request.method, 'GET');
+    if(request.url==='/models'){
+      assert.equal(request.headers.authorization,'Bearer synthetic-branded-key');
+      ++brandedCount;assert.equal(brandedCount,1);
+      response.writeHead(200,{'Content-Type':'application/json'});
+      response.end(JSON.stringify({object:'list',data:['qualified-local','qualified-remote','unqualified-third'].map(id=>({id,object:'model'}))}));return;
+    }
+    assert.equal(request.url, '/claude-models?limit=1000');
     assert.equal(request.headers['x-api-key'], 'synthetic-yaml-claude-key-not-live');
     assert.equal(request.headers['anthropic-version'], '2023-06-01');assert.equal(request.headers.authorization, undefined);
     ++count;assert.equal(count, 1, 'One explicit discovery uses the existing encrypted key-only profile');
@@ -24,7 +31,7 @@ const server = createServer((request, response) => {
 try {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const result = await promisify(execFile)(executable, [root, modules, stdlib, 'http://127.0.0.1:' + server.address().port], {windowsHide: true, timeout: 60000, maxBuffer: 1024 * 1024});
-  if (failure) throw failure;assert.equal(count, 1);process.stdout.write(result.stdout);
+  if (failure) throw failure;assert.equal(count, 1);assert.equal(brandedCount,1);process.stdout.write(result.stdout);
   assert.equal(dirname(resolve(root)), resolve(tmpdir()));assert.ok(basename(root).startsWith('xmind-provider-yaml-'));
   await rm(root, {recursive: true, force: true});
 } catch (error) {

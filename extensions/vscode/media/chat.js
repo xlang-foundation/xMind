@@ -117,13 +117,13 @@ function discardMarkdown(container){for(const body of pendingMarkdown.keys())if(
 const count=value=>Number.isSafeInteger(value)&&value>=0?value.toLocaleString():'—';
 const providerWireLabels={'chat-completions':'Chat Completions',responses:'Responses','anthropic-messages':'Messages','gemini-generate-content':'GenerateContent'};
 const providerWireLabel=value=>typeof value==='string'&&Object.hasOwn(providerWireLabels,value)?providerWireLabels[value]:undefined;
-const providerLabel=value=>value==='openai'?'OpenAI':value==='anthropic'?'Claude':value==='gemini'?'Gemini':value==='deepseek'?'DeepSeek':value==='openrouter'?'OpenRouter':value;
+const providerLabel=(value,profileId)=>value==='openai-compatible'?(profileId?.toLowerCase()==='cantorserve'?'CantorServe':'Custom server'):value==='openai'?'OpenAI':value==='anthropic'?'Claude':value==='gemini'?'Gemini':value==='deepseek'?'DeepSeek':value==='openrouter'?'OpenRouter':value;
 function profileBadge(value){
   const fields=['profile_id','profile_revision','route_id','provider','wire','model_id'];
   if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==fields.length||fields.some(field=>!Object.hasOwn(value,field))||!Number.isSafeInteger(value.profile_revision)||value.profile_revision<1)return;
   for(const field of ['profile_id','route_id','provider','model_id'])if(typeof value[field]!=='string'||!value[field]||value[field].length>256||value[field].startsWith('sk-')||!/^[A-Za-z0-9_.:/-]+$/.test(value[field]))return;
   const wire=providerWireLabel(value.wire);if(!wire)return;
-  const badge=node('span',providerLabel(value.provider)+' · '+wire,'provider-context');badge.title='Provider profile: '+value.profile_id+'\nProfile version: '+value.profile_revision+'\nRoute: '+value.route_id+'\nModel: '+value.model_id;return badge;
+  const badge=node('span',providerLabel(value.provider,value.profile_id)+' · '+wire,'provider-context');badge.title='Provider profile: '+value.profile_id+'\nProfile version: '+value.profile_revision+'\nRoute: '+value.route_id+'\nModel: '+value.model_id;return badge;
 }
 const guidanceLiteral=value=>value.replace(/[\u0000-\u001f\u007f]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
 function renderRunContext(run){
@@ -145,7 +145,7 @@ function metrics(el,data={}){
   if(Number.isSafeInteger(usage.prompt_tokens_details?.cached_tokens))add('cache',compact?'Cache':'Cached',count(usage.prompt_tokens_details.cached_tokens),'Cached input tokens');
   if(Number.isSafeInteger(usage.completion_tokens_details?.reasoning_tokens))add('reason',compact?'Reason':'Reasoning',count(usage.completion_tokens_details.reasoning_tokens),'Reasoning tokens');
   if(data.model)add('model','',data.model,'Model');
-  const profile=profileBadge(data.provider_context);if(profile){if(compact){const full=profile.textContent,short={'chat-completions':'Chat',responses:'Resp','anthropic-messages':'Msgs','gemini-generate-content':'GC'}[data.provider_context.wire];profile.textContent=providerLabel(data.provider_context.provider)+' · '+short;profile.classList.add('response-metric');profile.title=full+'\n'+profile.title;profile.setAttribute('aria-label',full);}el.append(profile);}
+  const profile=profileBadge(data.provider_context);if(profile){if(compact){const full=profile.textContent,short={'chat-completions':'Chat',responses:'Resp','anthropic-messages':'Msgs','gemini-generate-content':'GC'}[data.provider_context.wire];profile.textContent=providerLabel(data.provider_context.provider,data.provider_context.profile_id)+' · '+short;profile.classList.add('response-metric');profile.title=full+'\n'+profile.title;profile.setAttribute('aria-label',full);}el.append(profile);}
   if(Number.isFinite(data.first_token_ms)&&data.first_token_ms>=0)add('ttft',compact?'TTFT':'First token',(data.first_token_ms/1000).toFixed(2)+'s','Time to first token');
   if(Number.isFinite(data.elapsed_ms)&&data.elapsed_ms>=0)add('time',compact?'Time':'',(data.elapsed_ms/1000).toFixed(2)+'s','Total response time');
   el.title='Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.'+(uncached?' Input (uncached) excludes cache writes and reads.':'');
@@ -702,7 +702,7 @@ function savedProviders(){
   const select=byId('footer-provider');select.replaceChildren();
   const profiles=profileState?.profiles||[],active=profiles.find(value=>value.id===profileState?.active);
   const placeholder=node('option',profiles.length?'Choose provider':'Add a provider in Settings');placeholder.value='';placeholder.disabled=true;placeholder.selected=!active;select.append(placeholder);
-  for(const profile of profiles){const option=node('option',providerLabel(profile.provider)+(profile.model?'':' · Choose a model'));option.value=profile.id;option.selected=profile.id===active?.id;option.title=profile.id+' · '+(profile.model||'Choose a model');if(profiles.filter(value=>value.provider===profile.provider).length>1)option.textContent+=' · '+profile.id;select.append(option);}
+  for(const profile of profiles){const option=node('option',providerLabel(profile.provider,profile.id)+(profile.model?'':' · Choose a model'));option.value=profile.id;option.selected=profile.id===active?.id;option.title=profile.id+' · '+(profile.model||'Choose a model');if(profiles.filter(value=>value.provider===profile.provider).length>1)option.textContent+=' · '+profile.id;select.append(option);}
   select.hidden=!profileState;select.disabled=!profiles.length;
 }
 byId('footer-provider').onchange=()=>{
@@ -714,7 +714,7 @@ byId('footer-provider').onchange=()=>{
 };
 function profileRoutes(){
   if(!profileState)return;const selected=profileState.profiles.find(value=>value.id===byId('provider-profile').value),routes=profileState.routes.filter(value=>value.discovery&&providerWireLabel(value.wire)&&(!selected||value.provider===selected.provider));
-  const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',providerLabel(route.provider)+' · '+providerWireLabels[route.wire]);option.value=route.id;choose.append(option);}
+  const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',providerLabel(route.provider,selected?.id)+' · '+providerWireLabels[route.wire]);option.value=route.id;choose.append(option);}
   if(selected)choose.value=selected.route_id;else if(routes.some(value=>value.id==='openai.responses'))choose.value='openai.responses';
   byId('provider-key').required=!selected;byId('provider-key-label').textContent=selected?'API key (optional)':'API key';byId('provider-key-help').textContent=selected?'Leave blank to use the saved key. Enter a new key only to replace it.':'Enter the key for this new profile, then choose a model below after fetching.';
   const keyStatus=byId('provider-key-status');keyStatus.hidden=!selected;keyStatus.textContent=selected?'Saved provider key is configured on this xMind backend and will be used automatically. You do not need to enter it here.':'';
@@ -882,7 +882,7 @@ window.addEventListener('message',event=>{
   else if(m.type==='restore-prompt'){if(typeof m.prompt==='string'&&m.prompt.length>0&&m.prompt.length<=1024){const prompt=byId('prompt'),value=prompt.value.trim()?prompt.value.trimEnd()+'\n\n'+m.prompt:m.prompt,limit=prompt.maxLength>=0?prompt.maxLength:1048576;if(value.length<=limit){prompt.value=value;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();byId('status').textContent='Restore request prepared. Send it when ready using the selected permissions.';}}}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
-  else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();refreshSendControl();}
+  else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider,profile.id)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();refreshSendControl();}
   else if(m.type==='connection-snapshot-inspection'){showRemoteSnapshotInspection(m);}
   else if(m.type==='connection-run-inspection'){showRemoteRunInspection(m);}
   else if(m.type==='connection-authentication'){showConnectionAuthentication(m);}

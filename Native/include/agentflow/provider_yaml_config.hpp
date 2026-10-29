@@ -1,5 +1,6 @@
 #pragma once
 #include "agentflow/provider_profiles.hpp"
+#include "agentflow/provider_model_policy.hpp"
 #include <filesystem>
 #include <stdexcept>
 #include <string_view>
@@ -20,7 +21,9 @@ struct OpenAICompatibleConfig {
     std::string base_url;
     Capability tools=Capability::unknown,stream_usage=Capability::unknown;
     std::optional<std::string> model;
+    std::map<std::string,NativeModelCapabilities> models;
 };
+std::optional<ProviderModelPolicy> compatible_model_policy(const OpenAICompatibleConfig& config);
 struct ProviderYamlConfig {
     std::vector<ProviderProfileConfigEntry> profiles;
     std::optional<std::string> active_profile;

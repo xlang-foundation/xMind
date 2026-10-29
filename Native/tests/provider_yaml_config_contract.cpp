@@ -50,6 +50,13 @@ void pure_parser(const std::filesystem::path& root){
     reject_yaml("version: 1\nprofiles: {cantorserve: {route: openai.compatible}}\n",ProviderYamlErrorCode::route_unavailable);
     parsed=parse_provider_yaml_config("version: 1\nopenai_compatible: {base_url: 'http://127.0.0.1:19446/v1', model: qwen3.5-2b-code-32k, tools: supported, stream_usage: supported}\nprofiles: {}\n",allowed);
     require(parsed.openai_compatible->model=="qwen3.5-2b-code-32k","Compatible declarations can bind capabilities to one exact qualified model");
+    parsed=parse_provider_yaml_config("version: 1\nopenai_compatible: {base_url: 'http://127.0.0.1:19446/v1', tools: supported, stream_usage: supported, models: {qualified-local: {}, qualified-remote: {tools: unsupported}}}\nprofiles: {}\n",allowed);
+    const auto qualified=compatible_model_policy(*parsed.openai_compatible);
+    require(qualified&&qualified->models.size()==2&&qualified->models.at("qualified-local").tools==Capability::supported&&qualified->models.at("qualified-remote").tools==Capability::unsupported,"Exact per-model capabilities preserve independent qualification");
+    for(const auto& invalid:std::vector<std::string>{"models: {}","model: one, models: {two: {}}","models: {one: {tools: invented}}","provider_name: ''","provider_name: 'contains spaces'","models: {one: {endpoint: 'https://elsewhere.invalid'}}"})
+        reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', "+invalid+"}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
+    reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', models: {one: {}, one: {}}}\nprofiles: {}\n",ProviderYamlErrorCode::duplicate_field);
+    reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', models: {private-fixture-key: {}}}\nprofiles: {one: {route: openai.compatible, api_key: private-fixture-key}}\n",ProviderYamlErrorCode::invalid_schema);
     reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', model: ''}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
     parsed=parse_provider_yaml_config(document(),allowed);
     require(parsed.profiles.size()==2&&parsed.active_profile=="claude"&&parsed.profiles[0].id=="claude"&&!parsed.profiles[0].model&&same(parsed.profiles[0].key,claude_key),"Genuine block YAML preserves a real key-only input without inventing a model");
@@ -116,6 +123,31 @@ void registry(const std::filesystem::path& root,const std::vector<std::string>& 
         {std::ofstream output(file);output<<"version: 1\nopenai_compatible: {base_url: '"<<origin<<"', tools: unsupported, model: unqualified}\nprofiles: {}\n";}
         rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
         require(store.information("native-provider-profiles","registry").get()==original&&store.credentials("server").get().size()==1,"Endpoint or capability edits cannot redirect saved credentials or partially mutate a running generation");
+    }
+    {
+        PersistenceService store((root/"branded-compatible.sqlite").string(),imports);
+        const std::string source="version: 1\nopenai_compatible: {base_url: '"+origin+"', tools: supported, stream_usage: supported, models: {qualified-local: {}, qualified-remote: {}}}\nprofiles: {cantorserve: {route: openai.compatible, api_key: synthetic-branded-key, model: qualified-local}}\nactive_profile: cantorserve\n";
+        const auto configuration=parse_provider_yaml_config(source,allowed);
+        ProviderProfileRoute route{"openai.compatible","openai-compatible",origin+"/chat/completions","server","fixture:yaml:branded",ProviderWire::chat_completions};
+        ChatProviderConfig provider;provider.endpoint=route.endpoint;provider.tools=Capability::supported;provider.stream_usage=Capability::supported;
+        ProviderProfileExecutionPolicy policy{route,provider,ProviderCataloguePolicy{origin+"/models",ProviderCatalogueFormat::openai}};
+        policy.model_capabilities=compatible_model_policy(*configuration.openai_compatible);
+        ProviderProfileRuntime runtime(store,{}, {policy});
+        const auto file=root/"branded-compatible.yaml";
+        {std::ofstream output(file);output<<source;}
+        const auto saved=runtime.import_yaml_configuration(file,0);
+        require(runtime.profile_routes().back().provider=="openai-compatible"&&runtime.configuration().profiles.back().provider=="openai-compatible","Adding models preserves the existing provider and saved credential identity");
+        const auto discovered=runtime.discover_models("cantorserve","openai.compatible",secret(""),saved.revision);
+        require(discovered==std::vector<std::string>{"qualified-local","qualified-remote"},"Actual catalogue discovery admits both qualified models and filters the unqualified entry");
+        const auto original=store.information("native-provider-profiles","registry").get();
+        for(const bool add_model: {false,true}){
+            auto update=source;
+            const auto original_models=std::string("qualified-remote: {}");
+            update.replace(update.find(original_models),original_models.size(),add_model?"qualified-remote: {}, qualified-third: {}":"qualified-remote: {tools: unsupported}");
+            {std::ofstream output(file);output<<update;}
+            rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
+        }
+        require(store.information("native-provider-profiles","registry").get()==original&&runtime.configuration().active=="cantorserve","Changing live model membership or capabilities cannot alter active selection or credentials");
     }
     const auto database=(root/"provider-yaml.sqlite").string();ProviderProfileSnapshot saved;
     {

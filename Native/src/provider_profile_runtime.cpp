@@ -305,10 +305,22 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
     if(configuration.openai_compatible){
         const auto& supplied=*configuration.openai_compatible;
         const auto& bound=impl_->route("openai.compatible");
+        const auto expected_policy=compatible_model_policy(supplied);
+        const auto same_policy=[&]{
+            if(expected_policy.has_value()!=bound.model_capabilities.has_value())return false;
+            if(!expected_policy)return true;
+            if(expected_policy->wire!=bound.model_capabilities->wire||expected_policy->models.size()!=bound.model_capabilities->models.size())return false;
+            for(const auto& [id,caps]:expected_policy->models){
+                const auto found=bound.model_capabilities->models.find(id);if(found==bound.model_capabilities->models.end())return false;
+                const auto& actual=found->second;
+                if(caps.tools!=actual.tools||caps.stream_usage!=actual.stream_usage||caps.output_limit!=actual.output_limit||caps.reasoning_efforts!=actual.reasoning_efforts||caps.tool_reasoning_effort!=actual.tool_reasoning_effort)return false;
+            }
+            return true;
+        };
         if(bound.route.provider!="openai-compatible"||bound.route.wire!=ProviderWire::chat_completions||
            bound.route.endpoint!=supplied.base_url+"/chat/completions"||!bound.catalogue||
            bound.catalogue->endpoint!=supplied.base_url+"/models"||bound.provider.tools!=supplied.tools||bound.provider.stream_usage!=supplied.stream_usage||
-           (supplied.model?(!bound.model_capabilities||bound.model_capabilities->models.size()!=1||!bound.model_capabilities->models.contains(*supplied.model)):bound.model_capabilities.has_value()))
+           !same_policy())
             throw Conflict("OpenAI-compatible route changed; restart with the trusted configuration");
     }
     if(expected<0||expected!=impl_->state.revision)throw Conflict("Provider profile runtime revision changed");

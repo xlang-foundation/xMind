@@ -81,6 +81,30 @@ use `model: qwen3.5-2b-code-32k`, `tools: supported` and
 aliases or establish full coding acceptance. No completed response is split into
 fake streaming events.
 
+For several independently qualified models on one server, replace the singular
+`model` declaration with an exact `models` mapping. Each entry inherits the route's
+tool/usage declarations and can override either. An unknown catalogue model
+remains excluded; `model` and `models` cannot be combined. For example:
+
+```yaml
+openai_compatible:
+  base_url: http://127.0.0.1:19446/v1
+  tools: supported
+  stream_usage: supported
+  models:
+    qwen3.5-2b-code-32k: {}
+    qwen3.5-2b-code-32k-shawn: {}
+    qwen3.8-27b-chat-4k: {}
+```
+
+The saved `cantorserve` connection displays **CantorServe** in the provider
+chooser, settings and run badges. Its existing internal route and encrypted
+credential identity stay intact. Other custom connections display **Custom
+server**. Adding catalogue choices does not change the selected model. The27B
+alias currently has only4K total context (3072input/1024output), which cannot
+accommodate a full coding-agent tool catalogue; listing it does not qualify
+large-context workspace coding.
+
 The new source accepts a trusted local `--provider-config FILE` using native
 yaml-cpp 0.9.0, pinned to upstream commit
 `56e3bb550c91fd7005566f19c079cb7a503223cf`. The full native build and YAML

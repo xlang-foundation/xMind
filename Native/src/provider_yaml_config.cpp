@@ -104,18 +104,28 @@ ProviderYamlConfig decode(const Value& root,const std::vector<std::string>& allo
     if(!version||version->mapping||version->scalar!="1"||(version->tag!="?"&&version->tag!="tag:yaml.org,2002:int")||!profiles||!profiles->mapping||profiles->fields.size()>32)fail(ProviderYamlErrorCode::invalid_schema);
     ProviderYamlConfig result;
     if(const auto* compatible=field(root,"openai_compatible")){
-        fields(*compatible,{"base_url","tools","stream_usage","model"});const auto* base=field(*compatible,"base_url");if(!base)fail(ProviderYamlErrorCode::invalid_schema);
+        fields(*compatible,{"base_url","tools","stream_usage","model","models"});const auto* base=field(*compatible,"base_url");if(!base)fail(ProviderYamlErrorCode::invalid_schema);
         OpenAICompatibleConfig config;config.base_url=compatible_base(*base);
         if(const auto* tools=field(*compatible,"tools"))config.tools=capability(*tools);
         if(const auto* usage=field(*compatible,"stream_usage"))config.stream_usage=capability(*usage);
         if(const auto* model=field(*compatible,"model")){config.model=text(*model);identity(*config.model);}
+        if(const auto* models=field(*compatible,"models")){
+            if(config.model||!models->mapping||models->fields.empty()||models->fields.size()>32)fail(ProviderYamlErrorCode::invalid_schema);
+            for(const auto& [id,entry]:models->fields){
+                identity(id);fields(*entry,{"tools","stream_usage"});
+                NativeModelCapabilities capabilities;capabilities.tools=config.tools;capabilities.stream_usage=config.stream_usage;
+                if(const auto* tools=field(*entry,"tools"))capabilities.tools=capability(*tools);
+                if(const auto* usage=field(*entry,"stream_usage"))capabilities.stream_usage=capability(*usage);
+                config.models.emplace(id,std::move(capabilities));
+            }
+        }
         result.openai_compatible=std::move(config);routes.insert("openai.compatible");
     }
     for(const auto& [id,node]:profiles->fields){identity(id);fields(*node,{"route","api_key","model"});const auto* route=field(*node,"route");if(!route)fail(ProviderYamlErrorCode::invalid_schema);const auto& route_id=text(*route);identity(route_id);if(!routes.contains(route_id))fail(ProviderYamlErrorCode::route_unavailable);
         ProviderProfileConfigEntry entry;entry.id=id;entry.route_id=route_id;
         if(const auto* model=field(*node,"model")){entry.model=text(*model);identity(*entry.model);}
         if(const auto* key=field(*node,"api_key")){const auto& scalar=text(*key);for(const auto byte:scalar)if(static_cast<unsigned char>(byte)<33||static_cast<unsigned char>(byte)>126)fail(ProviderYamlErrorCode::invalid_schema);entry.key=SecretBytes({reinterpret_cast<const std::uint8_t*>(scalar.data()),scalar.size()});}
-        if(!entry.key.view().empty()){const auto bytes=entry.key.view();const auto reflects=[&](const std::string& value){return std::search(value.begin(),value.end(),bytes.begin(),bytes.end(),[](char a,std::uint8_t b){return static_cast<unsigned char>(a)==b;})!=value.end();};if(reflects(entry.id)||(entry.model&&reflects(*entry.model)))fail(ProviderYamlErrorCode::invalid_schema);}
+        if(!entry.key.view().empty()){const auto bytes=entry.key.view();const auto reflects=[&](const std::string& value){return std::search(value.begin(),value.end(),bytes.begin(),bytes.end(),[](char a,std::uint8_t b){return static_cast<unsigned char>(a)==b;})!=value.end();};if(reflects(entry.id)||(entry.model&&reflects(*entry.model)))fail(ProviderYamlErrorCode::invalid_schema);if(result.openai_compatible){const auto& compatible=*result.openai_compatible;if(compatible.model&&reflects(*compatible.model))fail(ProviderYamlErrorCode::invalid_schema);for(const auto& [id,caps]:compatible.models){(void)caps;if(reflects(id))fail(ProviderYamlErrorCode::invalid_schema);}}}
         result.profiles.push_back(std::move(entry));
     }
     // A partial document may select an unspecified existing profile. Its actual
@@ -123,6 +133,12 @@ ProviderYamlConfig decode(const Value& root,const std::vector<std::string>& allo
     if(const auto* active=field(root,"active_profile")){result.active_profile=text(*active);identity(*result.active_profile);}
     return result;
 }
+}
+std::optional<ProviderModelPolicy> compatible_model_policy(const OpenAICompatibleConfig& config){
+    if(!config.model&&config.models.empty())return std::nullopt;
+    ProviderModelPolicy policy;policy.wire=ProviderWire::chat_completions;policy.models=config.models;
+    if(config.model){NativeModelCapabilities capabilities;capabilities.tools=config.tools;capabilities.stream_usage=config.stream_usage;policy.models.emplace(*config.model,std::move(capabilities));}
+    return policy;
 }
 ProviderYamlConfig parse_provider_yaml_config(std::string_view source,const std::vector<std::string>& routes){
     if(source.empty()||source.size()>file_limit)fail(ProviderYamlErrorCode::exceeds_limits);
