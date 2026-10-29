@@ -7,7 +7,12 @@
     "platform_guards": "Library and test targets are inside if(WIN32); declarations and implementation use _WIN32. Shared entry signature and invocation are in existing Windows-only branches.",
     "icon": "Native supersampled gradient X; no new runtime assets or third-party dependency",
     "owner": "One icon per production embedded web owner, never per CLI/IPC client or worker",
-    "menu": ["Open web UI", "Copy web UI address", "Open server workspace", "Quit this xMind server..."],
+    "menu": [
+      "Open web UI",
+      "Copy web UI address",
+      "Open server workspace",
+      "Quit this xMind server..."
+    ],
     "quit": "Confirmation before calling the existing server.stop shutdown path",
     "lifecycle": "Dedicated native message thread, Explorer TaskbarCreated recovery, icon/window removal at owner shutdown",
     "browser_address": "Canonical public loopback /ui/ URL only; no credential or query string",
@@ -19,7 +24,12 @@
     "native_view_provider_regression": "passed 38.42s after readiness metadata changes",
     "non_windows": "Guard/path review only; no Linux or macOS build was run",
     "live_menu_clicks": "Not performed: computer control was stopped by the user's Escape key; no further Computer Use calls were made",
-    "logs": [".agentflow/windows-tray-shell-build.log", ".agentflow/windows-tray-shell-tests.log", ".agentflow/windows-tray-final-view-tests.log", ".agentflow/windows-tray-live-handoff.log"]
+    "logs": [
+      ".agentflow/windows-tray-shell-build.log",
+      ".agentflow/windows-tray-shell-tests.log",
+      ".agentflow/windows-tray-final-view-tests.log",
+      ".agentflow/windows-tray-live-handoff.log"
+    ]
   },
   "live_delivery": {
     "previous_pid": 3948,
@@ -29,7 +39,47 @@
     "url": "http://127.0.0.1:55653/ui/",
     "windows_tray": true,
     "handoff": "Authenticated native managed upgrade; same profile, URL and saved sessions; no prompt or tool replay",
-    "sessions_preserved": ["7860b0bff71a4b53b425c10ee5399cbe", "934abd92c300c3a7376a363cf6acb217"],
-    "cantor_unchanged": {"pid": 5040, "birth": "2026-10-29T09:47:24.7220770-07:00", "node_id": "618367c4896d99c06ae8cf663909a519", "portal_authorization_preserved": true}
+    "sessions_preserved": [
+      "7860b0bff71a4b53b425c10ee5399cbe",
+      "934abd92c300c3a7376a363cf6acb217"
+    ],
+    "cantor_unchanged": {
+      "pid": 5040,
+      "birth": "2026-10-29T09:47:24.7220770-07:00",
+      "node_id": "618367c4896d99c06ae8cf663909a519",
+      "portal_authorization_preserved": true
+    }
+  },
+  "revised_design": {
+    "source_commit": "163d695e9a523a56a94180e96999aa1192c918c7",
+    "native_sha256": "f6d3217f5f6f64a3fa3e4eb35f4b66d36dca374ab79e9420da00f1c46016fec4",
+    "icon": "Three connected thought nodes, white/cyan on a rounded indigo tile; no X or lettering",
+    "vector_reference": "doc/assets/windows-tray-symbol.svg",
+    "activation": "Mouse click, right-click and keyboard selection open the menu; browser opens only from explicit Open web UI selection",
+    "menu": [
+      "Open web UI",
+      "Open workspace",
+      "Quit this xMind server..."
+    ],
+    "removed": "Copy web UI address and all clipboard code",
+    "native_tray_contract": "passed 0.09s",
+    "live_owner": {
+      "previous_pid": 6084,
+      "pid": 32408,
+      "birth": "134377691640063691",
+      "url": "http://127.0.0.1:55653/ui/",
+      "windows_tray": true
+    },
+    "cantor_preserved": {
+      "pid": 5040,
+      "birth": "2026-10-29T09:47:24.7220770-07:00",
+      "node_id": "618367c4896d99c06ae8cf663909a519"
+    },
+    "scope": "Windows-only icon/menu revision; no model inference or replay; no new live interactive menu-click acceptance claimed",
+    "logs": [
+      ".agentflow/tray-symbol-menu-build.log",
+      ".agentflow/tray-symbol-menu-tests.log",
+      ".agentflow/tray-symbol-menu-handoff.log"
+    ]
   }
 }
