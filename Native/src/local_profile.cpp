@@ -1,4 +1,5 @@
 #include "agentflow/local_profile.hpp"
+#include "agentflow/provider_yaml_config.hpp"
 #include "agentflow/client_auth.hpp"
 #include "agentflow/local_auth.hpp"
 #include "agentflow/mcp_configuration.hpp"
@@ -904,12 +905,33 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                 store.write(state);recovered_stopped_owner=true;
             }
         }
-        for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 3>{
-                 {{"provider_config", options.provider_config}, {"graphs_config", options.graphs_config},
+        for (const auto &[field, value] : std::array<std::pair<const char *, std::string>, 2>{
+                 {{"graphs_config", options.graphs_config},
                   {"python_tools_config", options.python_tools_config}}})
             if (!value.empty())
                 require(state.value(field, std::string{}) == text(absolute(value)),
                         "Profile launch configuration changed; update the existing backend explicitly");
+        const auto requested_provider_path=options.provider_config.empty()?std::string{}:text(absolute(options.provider_config));
+        const bool provider_configuration_changed=!options.provider_config.empty()&&
+            state.value("provider_config",std::string{})!=requested_provider_path;
+        if(state.contains("owner_receipt")&&provider_configuration_changed)
+            throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing provider configuration");
+        if(provider_configuration_changed&&!options.upgrade_backend)
+            throw std::invalid_argument("Provider configuration changed; update the existing backend explicitly");
+        if(provider_configuration_changed){
+            // Validate before quiescence. Custom routes are admitted only by the
+            // trusted document; existing routes come from the authenticated owner.
+            std::vector<std::string> routes;
+            if(!recovered_stopped_owner){
+                require(state.at("phase")=="ready"&&authenticated(state),"Only an authenticated ready owner can validate a provider update");
+                const auto providers=profile_request(state,"/v1/provider/profiles");
+                for(const auto& route:providers.at("routes"))routes.push_back(route.at("id").get<std::string>());
+            }else routes={"openai.chat","openai.responses","anthropic.messages","gemini.generate-content","deepseek.chat","xai.responses","mistral.chat","openrouter.chat"};
+            (void)read_provider_yaml_config(absolute(options.provider_config),routes);
+        }
+        if((recovered_stopped_owner||state.contains("upgrade_intent"))&&provider_configuration_changed){
+            state["provider_config"]=requested_provider_path;store.write(state);
+        }
         const auto requested_language_server_path=options.language_server_config.empty()?std::string{}:text(absolute(options.language_server_config));
         const bool language_server_configuration_changed=!options.language_server_config.empty()&&
             state.value("language_server_config",std::string{})!=requested_language_server_path;
@@ -990,7 +1012,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
             store.write(state);
         }
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(web_configuration_changed||process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(web_configuration_changed||provider_configuration_changed||process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(state.contains("upgrade_intent")&&state.value("replacement_manifest",std::string{})!=loaded_manifest){
@@ -1011,6 +1033,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     require(current_owner.value("retirement_supported",false),"Current managed runtime does not support profile-preserving upgrade");
                     auto [target,digest]=stage_current_runtime(store,workspace);
                     state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
+                    if(provider_configuration_changed)state["provider_config"]=requested_provider_path;
                     if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
                     if(mcp_configuration_changed){state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;}
                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}

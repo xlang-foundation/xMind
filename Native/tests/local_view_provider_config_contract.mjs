@@ -82,8 +82,10 @@ try{
   const switched=await fetch(browserOrigin+'/ui/workspaces/select',{method:'POST',headers:{...headers,Cookie:cookie},body:JSON.stringify({workspace_id:workspace.workspace_id})});assert.equal(switched.status,200,await switched.clone().text());cookie=switched.headers.get('set-cookie').split(';')[0];
  }
  assert.deepEqual(await publicProfiles(),chosenState,'Native view reattachment with unchanged OpenAI-default YAML preserves the user-selected Claude registry');
+ await fs.appendFile(yaml,'openai_compatible:\n  base_url: http://127.0.0.1:19446/v1\n  tools: supported\n  model: fixture-model\n');
  const add=await fetch(browserOrigin+'/ui/workspaces/create',{method:'POST',headers:{...headers,Cookie:cookie},body:JSON.stringify({root:added})});assert.equal(add.status,200,await add.clone().text());cookie=add.headers.get('set-cookie').split(';')[0];
  discovered=await publicProfiles();assert.deepEqual(discovered.profiles.map(value=>value.id).sort(),['claude','openai']);assert.ok(!JSON.stringify(discovered).includes('synthetic-openai-key-never-sent'));
+ assert.ok(discovered.routes.some(route=>route.id==='openai.compatible'),'A newly created workspace must inherit the trusted custom route before importing profiles');
  assert.ok(seededProfile.process_id);await profilePid(exe,profiles,added,languageServers);for(const workspace of [initial,existing,added]){const configured=await command(exe,['--profile-root',profiles,'--workspace',workspace,'mcp-servers'],{cwd:workspace});assert.deepEqual(configured,{servers:[{id:'fixture-mcp',revision:1,enabled:false,transport:'http'}],runtime_state:'per_run'});}
  // A preview handoff can explicitly retain user-owned settings even when the
  // trusted file contains new profiles or changes its default selection.

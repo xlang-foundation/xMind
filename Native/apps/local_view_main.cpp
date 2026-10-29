@@ -986,7 +986,7 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
                     auto selected = options;
                     selected.workspace = canonical_root;
                     selected.profile_root = profile_root_utf8;
-                    selected.provider_config.clear();
+                    selected.provider_config = trusted_provider_config;
                     selected.graphs_config.clear();
                     selected.approved_edits.reset();
                     selected.require_existing_profile = false;
