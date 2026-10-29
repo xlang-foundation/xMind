@@ -478,6 +478,9 @@ test('model protocol failure shows only recognized diagnostics and preserves con
     r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code}}});assert.equal(card.querySelector('details'),null);assert.ok(!card.textContent.includes('private-fixture-key'));assert.equal(card.querySelector('script'),null);
   }
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code:'model_response_invalid'}}});assert.equal(card.querySelector('pre').textContent,'model_response_invalid');
+  for(const protocol_error_code of ['chat_provider_error_event','chat_tool_finish_reason_mismatch','chat_tool_arguments_not_object','model_turn_incomplete']){
+    r.send({type:'event',event:{kind:'run.failed',data:{reason:'model_protocol_error',protocol_error_code,message:'private fixture provider body'}}});assert.equal(card.querySelector('pre').textContent,protocol_error_code);assert.ok(!card.textContent.includes('private fixture provider body'));
+  }
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'agent_error',protocol_error_code:'responses_arguments_mismatch'}}});assert.equal(card.querySelector('details'),null);r.send({type:'reset-run'});assert.equal(card.hidden,true);r.dom.window.close();
 });
 test('failure review stays outside transcript scrolling and navigates without replay',()=>{

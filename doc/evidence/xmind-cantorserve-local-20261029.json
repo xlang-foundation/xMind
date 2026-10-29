@@ -190,7 +190,8 @@
       "changed_files": false,
       "replayed": false,
       "no_diagnostic_followup_prompt": true,
-      "raw_events": ".agentflow/faq-followup-events.json"
+      "raw_events": ".agentflow/faq-followup-events.json",
+      "service_owner_finding": "Native generation reached EOS; apply_patch.patches was invalid JSON at character4125. Rejected without repair or execution. Service owner is retaining native usage16222 input/946 sampled output."
     },
     "handoffs": [
       {
@@ -226,7 +227,9 @@
       "initial_view_attempt": "missing fixture package environment; retained log, then corrected environment and reran focused contract",
       "renderer": "127 focused pass",
       "browser": "218 pass with native fixture environment",
-      "agent_runner": "1/1 focused pass in9.92s"
+      "agent_runner": "1/1 focused pass in9.92s",
+      "provider_handoff_and_protocol": "2/2 focused pass in42.06s; malformed config preserves owner, valid config handoff preserves full registry and custom route",
+      "renderer_chat_diagnostics": "127/127 passed; fixed chat diagnostics visible, unknown/provider body remains excluded"
     },
     "preview_runtime": {
       "engine": "xlang3 FastAPI/uvicorn read-only generated-file preview",
@@ -246,6 +249,27 @@
       ".agentflow/coding-first-completed.png",
       ".agentflow/workshop-registration-passed.png",
       ".agentflow/main-workspace-model-ready.png"
-    ]
+    ],
+    "diagnostic_runtime": {
+      "source_commit": "a449cf93e6b1246dd7df621ce4a5f00252df9dc8",
+      "sha256": "84ab43c6d52213876c0b0e308c8026aac8955c5ffb1caebfd9377e7574a002de",
+      "pid": 35468,
+      "birth": "134377462497568646",
+      "url_preserved": true,
+      "history_restored": true,
+      "log": ".agentflow/coding-chat-diagnostic-handoff.log"
+    },
+    "heading": {
+      "root": "b0f2d06ba7aa4daaad0a5132487b0885",
+      "state": "failed",
+      "reason": "model_protocol_error",
+      "diagnostic": "chat_provider_error_event",
+      "elapsed_ms": 200,
+      "changed_files": false,
+      "replayed": false,
+      "prompt": "Update the main heading to Neighborhood Workshops and add a short welcome sentence for first-time visitors.",
+      "prompt_channel": "actual browser UI",
+      "raw_events": ".agentflow/heading-followup-events.json"
+    }
   }
 }

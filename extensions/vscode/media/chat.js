@@ -271,6 +271,10 @@ const protocolDiagnosticCodes=new Set([
   'responses_identity_mismatch','responses_model_identity_mismatch','responses_final_identity_mismatch',
   'responses_message_mismatch','responses_text_mismatch','responses_summary_mismatch',
   'responses_usage_invalid','responses_limit_exceeded','chat_stream_incomplete','model_response_invalid',
+  'chat_tool_finish_without_calls','chat_tool_identity_invalid','chat_tool_arguments_not_object',
+  'chat_tool_finish_reason_mismatch','chat_data_after_end','chat_finish_reason_missing',
+  'chat_provider_error_event','chat_usage_invalid','chat_data_after_finish','chat_tool_identity_changed',
+  'chat_finish_reason_unsupported','model_turn_incomplete',
   'anthropic_overloaded_error','anthropic_rate_limit_error','anthropic_server_error','anthropic_stream_error'
 ]);
 function runFailure(data){
