@@ -102,6 +102,16 @@ The platform combines xMind's general-agent and graph concepts with selected cod
 
 Coding has three OSS clients: native console CLI, HTML/browser UI and the VS Code extension. They use the same local xMind Server API and durable session/event contracts. Views render backend state; execution, tools, permissions, model routing and persistence remain in C++ with embedded xlang3.
 
+Browser and computer control follows the user's 2026-10-28 scope decision:
+xMind connects to external automation tools through its native MCP client.
+The MCP server owns the browser or desktop driver; xMind retains tool admission,
+permissions, workspace/session ownership and Activity reporting. Skills describe
+the workflow but do not provide the executable driver. This decision does not
+claim that a browser or desktop MCP server is already configured or validated.
+Nexus may add its own controller later; that private implementation is outside
+the current xMind work. xMind's FastAPI UI continues to run inside xmind.exe
+through embedded xlang3, independently of an automation MCP server's runtime.
+
 The installed 0.1.4 checkpoint completed an authenticated native owner upgrade
 in the existing TestProj profile, preserving all 22 messages and seven runs.
 The launcher retains the profile database and explicitly rejects unknown owner
