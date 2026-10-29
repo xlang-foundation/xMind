@@ -1,0 +1,259 @@
+{
+  "recordedAt": "2026-10-29T06:49:40.372Z",
+  "scope": "Actual configured-model xMind browser chat, external Microsoft Playwright MCP; no API chat submissions or project code fixes",
+  "sourceBase": "87ffbeb9",
+  "ui": "http://127.0.0.1:58613/ui/",
+  "project": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check",
+  "sessionId": "bc49677b9f964ec7a363437c6a94c5da",
+  "roots": [
+    "6702f18f19014886bff7f1a34a535bcf",
+    "d81d5fe44a7d426b89e06866a5e98164",
+    "e1b4f8d153bd4d85a77989ab45c3503e",
+    "1ed4e3be19f04c97ab2e5efc56f7d425"
+  ],
+  "neverReplay": true,
+  "browserOperations": [
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "9481c661cc12146e9cb772c488567a49"
+    },
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "b5c05d5bf86b2c19fb6f6407f8cf377d"
+    },
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "78751e68156ac36f060874afe465a838"
+    },
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "852d3408091f8b54e3808c355d5417c4"
+    },
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "374c165ce9d31ef1d2f78432ca4dd357"
+    },
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "c719690474a1ecc3e017880b4efc27a7"
+    },
+    {
+      "state": "succeeded",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "b440f2f64217db89d97e54366e39a4a1"
+    },
+    {
+      "state": "failed",
+      "run": "d81d5fe44a7d426b89e06866a5e98164",
+      "operation": "b82a89b6c09e73454b0000d85c930cfb"
+    },
+    {
+      "state": "succeeded",
+      "run": "e1b4f8d153bd4d85a77989ab45c3503e",
+      "operation": "e76ffafb48d95ee8c031a4b8e997e390"
+    },
+    {
+      "state": "succeeded",
+      "run": "e1b4f8d153bd4d85a77989ab45c3503e",
+      "operation": "d8ab27d948f11fcd16f60b217e8ce19f"
+    },
+    {
+      "state": "succeeded",
+      "run": "e1b4f8d153bd4d85a77989ab45c3503e",
+      "operation": "98ed1e1c33dfd2484f7b20dcfba68f8b"
+    },
+    {
+      "state": "succeeded",
+      "run": "e1b4f8d153bd4d85a77989ab45c3503e",
+      "operation": "89e61dcea1ae489a1fd2678d82142337"
+    },
+    {
+      "state": "succeeded",
+      "run": "e1b4f8d153bd4d85a77989ab45c3503e",
+      "operation": "aa742db852fa37426a249ef14001de2e"
+    },
+    {
+      "state": "succeeded",
+      "run": "e1b4f8d153bd4d85a77989ab45c3503e",
+      "operation": "3d162559938141bb8cc8254f5d3cc0e7"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "b836cea0cc862f4b43a8bf4486ba99fd"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "1233f12fa192c3d28eb021b5c0ae562c"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "60106f44be8db050ee141ac388bdc0a5"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "3954daa6f21a0e1dca09e4344366ae95"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "b89e208ba05fc14b37d7bad51591faa9"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "6b447e08c2ea9c362055ea493fb68d33"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "55ced4f89696c67e7343005397c37119"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "9cb3d285c2e842059195309aff3061e6"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "ce0402fcb41024743e7c95c89ac6ecd9"
+    },
+    {
+      "state": "succeeded",
+      "run": "1ed4e3be19f04c97ab2e5efc56f7d425",
+      "operation": "85c247fed8cde008b4d94d79729bba01"
+    }
+  ],
+  "startup": {
+    "root": "6702f18f19014886bff7f1a34a535bcf",
+    "operation": "eafc076b70b390d90f7e56520974819e",
+    "profile": "xlang3",
+    "timeoutMs": 7033,
+    "pid": 46412,
+    "processTreeRetired": true,
+    "state": "failed after explicit UI review",
+    "note": "Existing automatic process profile launched xlang3.exe with a seven-second command deadline. Original failure preserved. No restart/replay of that operation."
+  },
+  "launcher": {
+    "intervention": true,
+    "process": {
+      "Pid": 4300,
+      "CreationDate": "2026-10-28T23:39:26.301763-07:00",
+      "ExecutablePath": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-80868183c050af28fb7db3c04516c4fa6087cde1d01584c3f90303c32829e0bf\\xmind.exe",
+      "Sha256": "BF645F718A5F84B238FF6C7B0925FF740C90D873B9B458ADCE361A80453FF368",
+      "CommandLine": "D:/CantorAI2026/xMind/.agentflow/web-search-preview/fp/105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb/runtime-80868183c050af28fb7db3c04516c4fa6087cde1d01584c3f90303c32829e0bf/xmind.exe admin --db D:/CantorAI2026/xMind/.agentflow/playwright-mcp/project-server-launch.sqlite --modules D:/CantorAI2026/xMind/.agentflow/web-search-preview/fp/105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb/runtime-80868183c050af28fb7db3c04516c4fa6087cde1d01584c3f90303c32829e0bf/modules --stdlib D:/CantorAI2026/xMind/.agentflow/web-search-preview/fp/105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb/runtime-80868183c050af28fb7db3c04516c4fa6087cde1d01584c3f90303c32829e0bf/stdlib import-program D:/CantorAI2026/xMind/.agentflow/playwright-mcp project_server_launch serve"
+    },
+    "url": "http://127.0.0.1:8000",
+    "note": "Separate temporary test harness in xmind.exe admin embedded xlang3 invokes the unchanged project Handler on loopback. No Node web server or CPython. Initial wrapper failure (sys.path unavailable) retained; launcher changed, project unchanged. Autonomous app startup did not pass."
+  },
+  "attachment": {
+    "operationId": "b82a89b6c09e73454b0000d85c930cfb",
+    "reason": "browser_file_upload requires related modal state; paperclip click opened no chooser; no upload request or file observed",
+    "peerIsError": true,
+    "error": "The tool \"browser_file_upload\" can only be used when there is related modal state present.",
+    "state": "failed after explicit audited MCP review; original run stays failed",
+    "uploadsDirectoryEntries": [],
+    "previewAndRemoval": "blocked; not passed"
+  },
+  "confirmed": {
+    "sendButton": "Project POST /api/chat returned 200, outgoing test text and echo visible in actual MCP screenshot",
+    "enterToSend": "browser_type submit:true produced outgoing Enter key send test and echo; server POST 200",
+    "counters": "Screenshots show Sent 0 and Replies 0 with a newly sent message and reply visible",
+    "browserContinuity": {
+      "operationId": "b836cea0cc862f4b43a8bf4486ba99fd",
+      "observed": "First browser_find in next chat turn returned Page URL: about:blank and no prior marker. New MCP request prefix; no cross-turn browser continuity verified."
+    },
+    "activity": "Actual browser tool rows updated live through navigation, find, type, click, upload and screenshots"
+  },
+  "unqualified": [
+    "Same-page reload persistence: later chat turn began in about:blank, so a fresh navigation is not proof of reload behavior. Source review shows only in-memory initial state, but no same-context reload acceptance claim.",
+    "Reset: the model initially claimed pass after clicking on an already fresh initial page. No populated-chat Reset pass is claimed.",
+    "Responsive resizing, image preview/removal, upload endpoint validation and visual model image understanding were not verified."
+  ],
+  "modelReportCaveat": "Both original model reports retained verbatim in chat. Their Reset and reload conclusions exceed the observed evidence: the marker was absent before Reset, and the next turn began on about:blank. No populated-chat Reset or same-context reload pass is claimed. The screenshots show three initial sample messages, not only one incoming message as the model stated.",
+  "originalFiles": [
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\index.html",
+      "sha256": "554ea03f54562bb3cca4311e455acb9efd4799100a0ae10d7b501f6b8c87f402",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\README.md",
+      "sha256": "f6e0376e6fea84f3453a0b5d6074269af09a2223f380f7ee5cf8486322c0caff",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\sample.txt",
+      "sha256": "be0dcc6508523d31c73f0fd179369c69dec12cc82d8e36c42ff322589c0ecf3d",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\server.py",
+      "sha256": "91015d3af549d6099b1b0ec57c1563dadbbb72e96dafaa3b6e565773d3c2887c",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\SPEC.md",
+      "sha256": "48b7ecf5390d9adf0e1e42c5b12c3a35ee7b4914d67fd02a3810b9cec3d7bffa",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\todovmc-artifact-xmind-browser-check-2.png",
+      "sha256": "48597b7167c06e76cc75508deada99f593ff84ac86fc0ec520429e7dac0f377f",
+      "unchanged": true
+    },
+    {
+      "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\ui-layout-check\\workspace-isolation-note-20261028.md",
+      "sha256": "747541ac63f971a4e05cea3622d67d08e6c2d155311097f50a37927e8856d2e0",
+      "unchanged": true
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "evidence-chat-basic.png",
+      "bytes": 38010,
+      "sha256": "7e1ede4f5aec7502492c5e1c16bd4f8b3cb30069b43421cb0b4fa3d8ffc268a7"
+    },
+    {
+      "name": "evidence-final-ui.png",
+      "bytes": 38562,
+      "sha256": "1d0ceecdaba57e634fed1a0e6362fd6d2fc8dbeccef451ca0da760e574e514d2"
+    },
+    {
+      "name": "evidence-after-reset.png",
+      "bytes": 32099,
+      "sha256": "62b3c9ddc1d43116b9ffaaccc466250671fbac7e66308d818e5cf0c296bb4240"
+    }
+  ],
+  "xmindRestoration": {
+    "sameWorkspaceSessionProviderModelHistory": true,
+    "sameSelectedRoot": true,
+    "sameSession": true,
+    "olderMessagesLoadedThroughUi": true,
+    "historyCharacters": 4752,
+    "signInPrompt": false
+  },
+  "tests": "No product code changed and no automated suite rerun. This is actual UI/MCP acceptance and failure evidence only.",
+  "chatUsage": "Recorded final-response metrics only, not aggregate billed usage; original $100 total configured-model budget remains applicable.",
+  "screenshots": [
+    "playwright-project-activity-20261028.png",
+    "playwright-project-browser-20261028.png"
+  ],
+  "privateEvidence": ".agentflow/playwright-mcp/project-ui-test.json",
+  "browserCallCounts": {
+    "total": 24,
+    "succeeded": 23,
+    "failed": 1
+  },
+  "liveScreenshot": "playwright-project-live-20261028.png"
+}
