@@ -905,13 +905,15 @@ async function activate(context) {
           if(panel!==view||version!==generation||reviewed.get(proposal.id)!==proposal)return;
           if(page.run_id!==proposal.run_id||page.total_bytes!==artifact[message.channel+'_bytes'])throw new Error('The process output artifact changed.');
           post({type:'process-output-page',id:proposal.id,channel:message.channel,page});
-        } else if (message.type === 'reconcile-process' && typeof message.id === 'string') {
-          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before reconciling a process effect.');
+        } else if (['reconcile-process','reconcile-mcp-error'].includes(message.type) && typeof message.id === 'string') {
+          if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before reconciling an external effect.');
           const proposal=reviewed.get(message.id);
-          if(!proposal||!observedOperation(proposal.run_id)||proposal.state!=='uncertain'||proposal.tool!=='run_process'||typeof message.note!=='string')throw new Error('Select a recorded uncertain process in the selected run.');
-          const version=generation,result=await client.reconcileProcess(proposal.id,message.note);
+          const mcp=message.type==='reconcile-mcp-error';
+          if(!proposal||!observedOperation(proposal.run_id)||proposal.state!=='uncertain'||proposal.tool!==(mcp?'mcp_tool':'run_process')||typeof message.note!=='string')throw new Error('Select a recorded uncertain operation in the selected run.');
+          if(mcp&&JSON.parse(proposal.result_json)?.reason!=='mcp_peer_reported_tool_error')throw new Error('Select a recorded MCP tool error.');
+          const version=generation,result=await (mcp?client.reconcileMcpError(proposal.id,message.note):client.reconcileProcess(proposal.id,message.note));
           if(panel!==view||version!==generation||reviewed.get(proposal.id)!==proposal)return;
-          if(!result||result.id!==proposal.id||result.run_id!==proposal.run_id||result.state!=='failed'||JSON.parse(result.result_json)?.reconciliation?.acknowledges_possible_side_effects!==true)throw new Error('The native host did not confirm process reconciliation.');
+          if(!result||result.id!==proposal.id||result.run_id!==proposal.run_id||result.state!=='failed'||JSON.parse(result.result_json)?.reconciliation?.acknowledges_possible_side_effects!==true||(mcp&&JSON.parse(result.result_json)?.reconciliation?.kind!=='acknowledged_mcp_error'))throw new Error('The native host did not confirm reconciliation.');
           await poll();
         } else if (message.type === 'inspect-edit' && typeof message.id === 'string') {
           if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before inspecting an edit.');

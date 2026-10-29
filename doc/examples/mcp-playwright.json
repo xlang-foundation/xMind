@@ -1,0 +1,21 @@
+{
+  "servers": [
+    {
+      "id": "playwright",
+      "enabled": true,
+      "transport": "stdio",
+      "executable": "C:/Program Files/nodejs/node.exe",
+      "working_directory": "D:/Projects/Example",
+      "arguments": [
+        "D:/xMindTools/playwright-mcp/node_modules/@playwright/mcp/cli.js",
+        "--browser", "msedge",
+        "--executable-path", "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+        "--headless",
+        "--isolated",
+        "--sandbox",
+        "--image-responses", "omit",
+        "--output-dir", "D:/xMindTools/playwright-mcp/output"
+      ]
+    }
+  ]
+}

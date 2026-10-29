@@ -497,6 +497,9 @@ std::future<Operation> PersistenceService::expire_operation(std::string id) {
 std::future<Operation> PersistenceService::reconcile_interrupted_process(std::string id,std::string actor,std::string note) {
     return impl_->submit([id=std::move(id),actor=std::move(actor),note=std::move(note)](Repository& repository){return repository.reconcile_interrupted_process(id,actor,note);});
 }
+std::future<Operation> PersistenceService::reconcile_acknowledged_mcp_error(std::string id,std::string actor,std::string note) {
+    return impl_->submit([id=std::move(id),actor=std::move(actor),note=std::move(note)](Repository& repository){return repository.reconcile_acknowledged_mcp_error(id,actor,note);});
+}
 std::future<std::vector<CredentialMetadata>> PersistenceService::credentials(std::string scope) {
     return impl_->observe([scope=std::move(scope)](Repository& repository){return repository.credentials(scope);});
 }

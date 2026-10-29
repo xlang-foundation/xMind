@@ -760,6 +760,7 @@ class BackendClient {
     if(bytes<16||bytes>1024||/[\r\n\0]/.test(note))throw new Error('Enter a one-line reconciliation note of 16–1,024 UTF-8 bytes.');
     return this.request(`/v1/operations/${encodeURIComponent(id)}/reconcile`,{note,acknowledge_possible_side_effects:true});
   }
+  reconcileMcpError(id,note) { return this.reconcileProcess(id,note); }
   inspectA2aTask(id, includeArtifacts = false) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/inspect`, includeArtifacts ? {include_artifacts:true} : {}); }
   resubscribeA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/resubscribe`, {}, 30000); }
   cancelA2aTask(id) { return this.request(`/v1/operations/${encodeURIComponent(id)}/a2a/cancel`, {}); }

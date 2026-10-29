@@ -266,6 +266,7 @@ public:
     std::future<McpInputRequest> answer_mcp_input_request(std::string run_id,std::string id,std::string response_json,std::string actor);
     std::future<McpInputRequest> retire_mcp_input_request(std::string id,std::string reason);
     std::future<Operation> reconcile_interrupted_process(std::string id,std::string actor,std::string note);
+    std::future<Operation> reconcile_acknowledged_mcp_error(std::string id,std::string actor,std::string note);
     std::future<CredentialMetadata> put_credential(std::string scope,std::string id,
         std::string purpose,std::string label,SecretBytes secret,std::int64_t expected_revision);
     std::future<std::vector<CredentialMetadata>> credentials(std::string scope);

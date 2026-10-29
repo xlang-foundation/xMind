@@ -415,6 +415,17 @@ function operations(items){
         reconcile.onclick=()=>{reconcile.disabled=true;api.postMessage({type:'reconcile-process',id:item.id,note:note.value.trim()});};section.append(reconcile);
       }
     }
+    if(item.tool==='mcp_tool'&&item.state==='uncertain'){
+      let receipt,reply;try{receipt=JSON.parse(item.result_json);reply=JSON.parse(receipt.response_json);}catch{}
+      if(receipt?.reason==='mcp_peer_reported_tool_error'&&typeof receipt.request_id==='string'&&receipt.request_id&&reply?.jsonrpc==='2.0'&&reply.id===receipt.request_id&&!reply.error&&reply.result?.isError===true&&Array.isArray(reply.result.content)){
+        section.append(node('p','Review the recorded tool error and any external side effects. Resolving this error keeps the failed call in history and does not repeat it.','inspection-note'));
+        const note=node('textarea');note.rows=2;note.maxLength=1024;note.placeholder='What did you inspect?';note.setAttribute('aria-label','MCP error review note');section.append(note);
+        const acknowledge=node('input');acknowledge.type='checkbox';const label=node('label','I reviewed this tool error and accept possible external side effects.');label.prepend(acknowledge);section.append(label);
+        const reconcile=node('button','Resolve recorded MCP error');reconcile.disabled=true;
+        const update=()=>{const value=note.value.trim(),bytes=new TextEncoder().encode(value).length;reconcile.disabled=!acknowledge.checked||bytes<16||bytes>1024||/[\r\n\0]/.test(value);};acknowledge.onchange=update;note.oninput=update;
+        reconcile.onclick=()=>{reconcile.disabled=true;api.postMessage({type:'reconcile-mcp-error',id:item.id,note:note.value.trim()});};section.append(reconcile);
+      }
+    }
     operationExtras(section,item,reviewable,fileReviewActions);
     if(fileReviewActions?.childElementCount){const before=section.querySelector('pre.before'),anchor=before?.previousSibling||section.querySelector('.inspection-note')||null;section.insertBefore(fileReviewActions,anchor);}
     operationRows.set(item.id,{signature,section});sections.push(section);

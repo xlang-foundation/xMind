@@ -9,6 +9,7 @@
 #include <iostream>
 #include <atomic>
 #include <random>
+#include "nlohmann/json.hpp"
 
 using namespace agentflow;
 namespace {
@@ -175,6 +176,26 @@ int main(int argc,char** argv) {
          require(upgraded.credentials("local").size()==1,"v2 migration must preserve encrypted credential metadata");
 #endif
          XlangSqlite inspect(legacy,roots);require(std::get<std::int64_t>(inspect.execute("PRAGMA user_version").rows[0][0])==35,"Operation schema migration must advance to current version");}
+        const auto mcp_recovery_database=(folder.path/"mcp-recovery.sqlite").string();
+        {
+            Repository store(mcp_recovery_database,roots);using Json=nlohmann::json;
+            for(const std::string name:{"recorded","active","unknown","wrong-id","success","non-mcp"}){
+                start(store,name);OperationSpec effect{name,"workspace-"+name,name=="non-mcp"?"run_process":"mcp_tool",Json{{"server_config_id","peer-"+name}}.dump(),{"mcp-server:peer-"+name}};
+                store.request_operation(name,effect,expiry());store.decide_operation(name,OperationDecision::allow,"controller");store.claim_operation(name,effect);
+                const auto request="request-"+name;const Json response={{"jsonrpc","2.0"},{"id",name=="wrong-id"?"another-request":request},{"result",{{"content",Json::array({{{"type","text"},{"text","Browser startup failed"}}})},{"isError",name!="success"}}}};
+                store.finish_operation(name,OperationState::uncertain,Json{{"reason",name=="unknown"?"mcp_dispatch_outcome_unknown":"mcp_peer_reported_tool_error"},{"request_id",request},{"response_json",response.dump()}}.dump());
+                if(name!="active")store.transition(name,RunState::running,RunState::failed);
+            }
+            const std::string note="Reviewed saved browser startup error and external effects.";
+            for(const std::string name:{"active","unknown","wrong-id","success","non-mcp"})rejects<Conflict>([&]{store.reconcile_acknowledged_mcp_error(name,"controller",note);});
+            rejects<std::invalid_argument>([&]{store.reconcile_acknowledged_mcp_error("recorded","controller","short");});
+            start(store,"next");OperationSpec next{"next","workspace-recorded","mcp_tool",R"({"server_config_id":"peer-recorded"})",{"mcp-server:peer-recorded"}};store.request_operation("next",next,expiry());store.decide_operation("next",OperationDecision::allow,"controller");rejects<WorkspaceEffectUncertain>([&]{store.claim_operation("next",next);});
+            const auto original=Json::parse(store.operation("recorded").result_json);const auto resolved=store.reconcile_acknowledged_mcp_error("recorded","controller",note);const auto receipt=Json::parse(resolved.result_json);
+            require(resolved.state==OperationState::failed&&receipt["response_json"]==original["response_json"]&&receipt["reconciliation"]["acknowledges_possible_side_effects"]==true,"MCP resolution must retain the actual error and explicit audit");
+            require(store.run("recorded").state==RunState::failed,"Resolution must not replay or complete the failed run");rejects<Conflict>([&]{store.reconcile_acknowledged_mcp_error("recorded","controller",note);});
+            store.claim_operation("next",next);store.finish_operation("next",OperationState::succeeded,"{}");
+        }
+        {Repository reopened(mcp_recovery_database,roots);require(reopened.operation("recorded").state==OperationState::failed&&reopened.operation("unknown").state==OperationState::uncertain,"Reopen must preserve resolution and unrelated quarantine");}
         const auto resource_database=(folder.path/"resources.sqlite").string();
         {
             Repository store(resource_database,roots);start(store,"a");start(store,"b");start(store,"c");

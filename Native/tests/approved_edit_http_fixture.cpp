@@ -68,6 +68,10 @@ int main(int argc,char** argv) {
             store.finish_operation(operation,OperationState::uncertain,nlohmann::json{{"termination","timed_out"},{"process_tree_retired",true},{"output_artifact",{{"operation_id",operation},{"state","complete"},{"stdout_bytes",15},{"stderr_bytes",0}}}}.dump()).get();
             store.transition(run,RunState::running,RunState::failed).get();
         }
+        store.create_session("mcp-recovery","Recorded MCP error").get();store.start_prompt_run("run-mcp-recovery","mcp-recovery",R"({"content":"MCP error fixture"})").get();store.transition("run-mcp-recovery",RunState::queued,RunState::running).get();
+        OperationSpec mcp_spec{"run-mcp-recovery",std::string(argv[2])+"-mcp","mcp_tool",R"({"server_config_id":"fixture-mcp"})",{"mcp-server:fixture-mcp"}};
+        store.request_operation("uncertain-mcp",mcp_spec,expiry).get();store.decide_operation("uncertain-mcp",OperationDecision::allow,"fixture-controller").get();store.claim_operation("uncertain-mcp",mcp_spec).get();
+        store.finish_operation("uncertain-mcp",OperationState::uncertain,nlohmann::json{{"reason","mcp_peer_reported_tool_error"},{"request_id","fixture-request"},{"response_json",R"({"jsonrpc":"2.0","id":"fixture-request","result":{"isError":true,"content":[{"type":"text","text":"Browser startup failed"}]}})"}}.dump()).get();store.transition("run-mcp-recovery",RunState::running,RunState::failed).get();
         HttpServer server(store,token,nullptr,&inspector);const auto port=server.bind(0);Serving serving(server);
         Editing allowed(executor,"allow-edit","run-allow",workspace.plan_replacement("allowed.txt","original","approved native"),OperationState::succeeded);
         Editing denied(executor,"deny-edit","run-deny",workspace.plan_replacement("denied.txt","original","must not change"),OperationState::denied);

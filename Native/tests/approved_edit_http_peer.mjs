@@ -73,6 +73,11 @@ try {
   assert.equal((await request('/v1/operations/missing/inspection')).status,404);
   assert.equal((await request('/v1/operations/allow-edit/inspection')).status,409);
   const reconcilePath='/v1/operations/uncertain-process/reconcile';
+  const mcpPath='/v1/operations/uncertain-mcp/reconcile',mcpNote='Reviewed recorded MCP startup error and possible external effects.';
+  assert.equal((await request(mcpPath,{note:mcpNote,acknowledge_possible_side_effects:true},{Authorization:'Bearer wrong'})).status,401);
+  assert.equal((await request(mcpPath,{note:mcpNote})).status,400);
+  const mcpResolved=await request(mcpPath,{note:mcpNote,acknowledge_possible_side_effects:true});assert.equal(mcpResolved.status,200);const mcpReceipt=JSON.parse(mcpResolved.data.result_json);assert.equal(mcpReceipt.reason,'mcp_peer_reported_tool_error');assert.equal(mcpReceipt.reconciliation.kind,'acknowledged_mcp_error');assert.equal(mcpReceipt.reconciliation.note,mcpNote);
+  assert.equal((await request(mcpPath,{note:mcpNote,acknowledge_possible_side_effects:true})).status,409,'MCP resolution must not replay an already resolved operation');
   assert.equal((await request(reconcilePath,{note:'I inspected the workspace and output.'},{Authorization:'Bearer wrong'})).status,401);
   assert.equal((await request(reconcilePath,{note:'I inspected the workspace and output.'})).status,400,'Possible side effects require explicit acknowledgment');
   assert.equal((await request(reconcilePath,{note:'short',acknowledge_possible_side_effects:true})).status,400,'Reconciliation requires an audit note');

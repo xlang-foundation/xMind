@@ -270,6 +270,9 @@ public:
     // The operator note is durable audit data; this never claims the command
     // had no side effects or retries it.
     Operation reconcile_interrupted_process(const std::string& id,const std::string& actor,const std::string& note);
+    // Operator acknowledgment of an intact, correlated MCP error reply only.
+    // Lost replies and other unknown effects remain quarantined; never replay.
+    Operation reconcile_acknowledged_mcp_error(const std::string& id,const std::string& actor,const std::string& note);
     // Backend-internal operations. Service must authorize scope before calling.
     // expected_revision=0 creates; positive revisions rotate with stale-write rejection.
     // Deleted identities are retired permanently to prevent stale-reference reuse.

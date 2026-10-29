@@ -1,0 +1,366 @@
+{
+  "date": "2026-10-28",
+  "sourceBaseCommit": "2d61d4ac3318245804ec4d54d4d4b06c6c72797d",
+  "sourcePatchSha256": "805a3ac83da77eb71da306f8e70466076aa93bc8e0baf812910ea9a90c2c8d8e",
+  "scope": "Production xMind C++ MCP client to official Microsoft Playwright MCP; real configured-model prompts and every effect approval entered through the web UI. No API chat scripts or direct browser-task calls from the acceptance harness.",
+  "url": "http://127.0.0.1:58613/ui/",
+  "integration": {
+    "package": "@playwright/mcp",
+    "version": "0.0.83",
+    "integrity": "sha512-oNcl+Ae2/IAjhfPeP46BfIkSakfmprY+aOtkv5MjrQ4lPav4/yNtPhL0iq8SlIM90oApWgBDUxaNKvktazUKOg==",
+    "dependencies": {
+      "node_modules/@playwright/mcp": "0.0.83",
+      "node_modules/playwright": "1.64.0-alpha-1790635538000",
+      "node_modules/playwright-core": "1.64.0-alpha-1790635538000"
+    },
+    "discoveredBrowserTools": 25,
+    "transport": "stdio",
+    "browser": "Installed Microsoft Edge156.0.4314.50; isolated headless profile with sandbox enabled and explicit executable path",
+    "observations": "Accessibility snapshots; screenshots saved as artifacts, image base64 omitted from model tool text",
+    "configuredWorkspaces": [
+      "web-search-check",
+      "ui-layout-check"
+    ],
+    "servers": [
+      {
+        "id": "exa-search",
+        "enabled": true,
+        "transport": "http",
+        "endpoint": "https://mcp.exa.ai/mcp?tools=web_search_exa"
+      },
+      {
+        "id": "playwright",
+        "enabled": true,
+        "transport": "stdio",
+        "executable": "C:/Program Files/nodejs/node.exe",
+        "working_directory": "D:/CantorAI2026/TestProj/webui-project-tests-20261025",
+        "arguments": [
+          "D:/CantorAI2026/xMind/.agentflow/playwright-mcp/node_modules/@playwright/mcp/cli.js",
+          "--browser",
+          "msedge",
+          "--executable-path",
+          "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+          "--headless",
+          "--isolated",
+          "--sandbox",
+          "--image-responses",
+          "omit",
+          "--output-dir",
+          "D:/CantorAI2026/xMind/.agentflow/playwright-mcp/output"
+        ]
+      }
+    ],
+    "webArchitecture": "FastAPI remains inside xmind.exe through embedded xlang3; Node runs the independent MCP peer only"
+  },
+  "failure": {
+    "session": "9aca5feb5d1440d28a90328758149b14",
+    "root": "b1f4d9bb38d14b07a95710ebf9941cf8",
+    "operation": "9c0621523fd61e6d82104b750a28b9e4",
+    "initialState": "failed run / uncertain operation",
+    "reason": "MCP peer returned an intact isError reply: automatic Edge discovery used a missing Program Files environment value. Browser startup failed before navigation.",
+    "configurationFix": "Explicit installed Edge executable path; package unchanged",
+    "originalRunRetained": true,
+    "operationResolvedThroughUi": true,
+    "resolutionPreservesOriginalError": true,
+    "automaticReplay": false,
+    "neverReplay": true
+  },
+  "recovery": {
+    "implementation": "Explicit controller review of correlated recorded MCP tool-error replies after every owner in the run ancestry is failed/cancelled. Requires bounded audit note and side-effect acknowledgment; retains original reply/run, records actor/time, and changes only that operation to failed. Lost/mismatched replies and active owners remain blocked.",
+    "actualUiNote": "Reviewed the recorded Edge startup failure: the executable was not found before navigation. Accepting possible external effects; keep the failed call and do not replay it.",
+    "acknowledgmentObserved": true,
+    "liveUpdate": "The old runtime rejected live quiescence with an unresolved operation. Only exact idle peer11604 was stopped with held-handle birth/image/hash checks; supported stopped-owner recovery installed the qualified runtime without clearing quarantine. UI visibly retained uncertain state until the explicit review action.",
+    "controlledStop": {
+      "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-60349708948442e8b08396710319ce921d6aca6d6e3af37784e6a169730fbfa9\\xmind.exe",
+      "physicalExitConfirmed": true,
+      "heldIdentityVerified": true,
+      "birth": "134377221379850750",
+      "sha256": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d",
+      "pid": 11604,
+      "reason": "Live update was explicitly rejected by the unresolved-operation guard; terminal browser startup error remains quarantined for UI review after supported stopped-owner recovery",
+      "quarantineCleared": false,
+      "operationReplayed": false
+    }
+  },
+  "actualTask": {
+    "session": "9aca5feb5d1440d28a90328758149b14",
+    "root": "eb8349ceaf334506ba5da50ad55a049b",
+    "prompt": "Now use the browser to test the TodoMVC page at https://demo.playwright.dev/todomvc. Add 'xMind browser check 2', mark it complete, report the remaining-item count and save a screenshot as a test artifact. Do not change project source files.",
+    "state": "completed",
+    "model": "gpt-4.1",
+    "provider": "OpenAI",
+    "operations": [
+      {
+        "id": "982e0ddc5eff4967a127f620957c9719",
+        "peerTool": "browser_navigate",
+        "arguments": {
+          "url": "https://demo.playwright.dev/todomvc"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-4",
+        "replySha256": "042d5b30a9ec2850ce320778b036c83cde97902afa7a261ae052152de5f87349",
+        "peerText": "### Ran Playwright code\n```js\nawait page.goto('https://demo.playwright.dev/todomvc');\n```\n### Page\n- Page URL: https://demo.playwright.dev/todomvc/#/\n- Page Title: React • TodoMVC\n### Snapshot\n- [Snapshot](..\\..\\..\\xMind\\.agentflow\\playwright-mcp\\output\\page-2026-10-29T05-03-18-609Z.yml)\n### Events\n- New console entries: ..\\..\\..\\xMind\\.agentflow\\playwright-mcp\\output\\console-2026-10-29T05-03-18-113Z.log#L1",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "a690f1427e19209b30541b409b637ed0",
+        "peerTool": "browser_find",
+        "arguments": {
+          "text": "What needs to be done?"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-5",
+        "replySha256": "b4ec7307a8ec1e7fd92b5b16a4a87d6ff92e4a9cfea6a37df2e605cf08226953",
+        "peerText": "### Result\nFound 1 match for \"What needs to be done?\":\n\n- generic [ref=e1]:\n  - generic [ref=e2]:\n    ...\n    - link \"real TodoMVC app.\" [ref=e3] [cursor=pointer]:\n      - /url: https://todomvc.com/\n  - generic [ref=e6]:\n    - heading \"todos\" [level=1] [ref=e7]\n    - textbox \"What needs to be done?\" [active] [ref=e8]\n  - contentinfo [ref=e9]:\n    - paragraph [ref=e10]: Double-click to edit a todo\n    - paragraph [ref=e11]:\n### Page\n- Page URL: https://demo.playwright.dev/todomvc/#/\n- Page Title: React • TodoMVC\n- Console: 1 errors, 0 warnings\n### Events\n- New console entries: ..\\..\\..\\xMind\\.agentflow\\playwright-mcp\\output\\console-2026-10-29T05-03-18-113Z.log#L2",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "b13579213ea58b40f59dbfde3c55b929",
+        "peerTool": "browser_type",
+        "arguments": {
+          "text": "xMind browser check 2",
+          "target": "e8",
+          "element": "textbox with label 'What needs to be done?'"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-6",
+        "replySha256": "103b6f98876690b4e3a1115a43ebcea93bc57297417dd4e9f8f3e9e9d77dfe38",
+        "peerText": "### Ran Playwright code\n```js\nawait page.getByRole('textbox', { name: 'What needs to be done?' }).fill('xMind browser check 2');\n```",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "b9bf9eefafc50149b1fcbb5949d3236d",
+        "peerTool": "browser_press_key",
+        "arguments": {
+          "key": "Enter"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-7",
+        "replySha256": "dce8ea31b76e58b798eb37b6f918e3882a6aeea402c01d399b62919de882aa6b",
+        "peerText": "### Ran Playwright code\n```js\n// Press Enter\nawait page.keyboard.press('Enter');\n```\n### Page\n- Page URL: https://demo.playwright.dev/todomvc/#/\n- Page Title: React • TodoMVC\n- Console: 1 errors, 0 warnings\n### Snapshot\n- [Snapshot](..\\..\\..\\xMind\\.agentflow\\playwright-mcp\\output\\page-2026-10-29T05-05-17-280Z.yml)",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "d9edca3906ffa14a069c56f110e870e0",
+        "peerTool": "browser_find",
+        "arguments": {
+          "text": "xMind browser check 2"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-8",
+        "replySha256": "0e7c1c76e23903181f2cb5047da14ca64def0d43891fd02611cb469ed112576a",
+        "peerText": "### Result\nFound 1 match for \"xMind browser check 2\":\n\n- generic [ref=e1]:\n  - generic [ref=e5]:\n    - generic [ref=e15]:\n      - list [ref=e18]:\n        - listitem [ref=e19]:\n          - generic [ref=e20]:\n            - checkbox \"Toggle Todo\" [ref=e21]\n            - generic [ref=e22]: xMind browser check 2\n            - text: ×\n    - generic [ref=e23]:\n      - generic [ref=e24]:",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "045e3490ef2d999dae39b9dc7f9d78bd",
+        "peerTool": "browser_click",
+        "arguments": {
+          "element": "checkbox for 'xMind browser check 2'",
+          "target": "e21"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-9",
+        "replySha256": "82661fe9f7565d974cff34ae714a33d389d42e85f801edc419cb9c4e89e41c98",
+        "peerText": "### Ran Playwright code\n```js\nawait page.getByRole('checkbox', { name: 'Toggle Todo' }).click();\n```\n### Page\n- Page URL: https://demo.playwright.dev/todomvc/#/\n- Page Title: React • TodoMVC\n- Console: 1 errors, 0 warnings\n### Snapshot\n- [Snapshot](..\\..\\..\\xMind\\.agentflow\\playwright-mcp\\output\\page-2026-10-29T05-06-36-035Z.yml)",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "4ce974a741b90358743f1151c985abf3",
+        "peerTool": "browser_find",
+        "arguments": {
+          "text": "item left"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-10",
+        "replySha256": "2ae7ed43f97369be4a5b93bd2fcfcfbc71001cbbe82b97ab542172f5b039bb51",
+        "peerText": "### Result\nNo matches found for \"item left\".",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "8c10b5eaa210528c0bd462275fe24794",
+        "peerTool": "browser_find",
+        "arguments": {
+          "text": "left"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-11",
+        "replySha256": "5e71f38cda4a0a3ba4e27696e8fec2f6c18c7d345c39253609aaa37c9476bbda",
+        "peerText": "### Result\nFound 1 match for \"left\":\n\n- generic [ref=e1]:\n  - generic [ref=e5]:\n    - generic [ref=e23]:\n      - generic [ref=e24]:\n        - strong [ref=e25]: \"0\"\n        - text: items left\n      - list [ref=e26]:\n        - listitem [ref=e27]:\n          - link \"All\" [ref=e28] [cursor=pointer]:",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      },
+      {
+        "id": "913342c521ec402820af6f9e76bf700a",
+        "peerTool": "browser_take_screenshot",
+        "arguments": {
+          "filename": "todovmc-artifact-xmind-browser-check-2.png",
+          "scale": "css"
+        },
+        "state": "succeeded",
+        "configRevision": 2,
+        "requestId": "xmind-519810f58faf008996d723bb8a0c9fa6-12",
+        "replySha256": "9c4cdcdc37507d9e4de467bfe98e1ddf92ff69285654124aef0097f5ccf504a5",
+        "peerText": "### Result\n- [Screenshot of viewport](./todovmc-artifact-xmind-browser-check-2.png)\n### Ran Playwright code\n```js\n// Screenshot viewport and save it as ./todovmc-artifact-xmind-browser-check-2.png\nawait page.screenshot({\n  path: './todovmc-artifact-xmind-browser-check-2.png',\n  scale: 'css',\n  type: 'png'\n});\n```",
+        "controllerDecision": "Reviewed and allowed once through web UI",
+        "neverReplay": true
+      }
+    ],
+    "remainingItems": 0,
+    "checkedTodo": "xMind browser check 2",
+    "screenshot": {
+      "original": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check/todovmc-artifact-xmind-browser-check-2.png",
+      "evidence": "doc/evidence/playwright-mcp-browser-20261028.png",
+      "bytes": 33003,
+      "sha256": "48597b7167c06e76cc75508deada99f593ff84ac86fc0ec520429e7dac0f377f"
+    },
+    "snapshotSha256": "fd4d99f56cd9d9542058459f418017ad80d4da53f33ae6d7ddd71e8bcb8d89e5",
+    "neverReplay": true
+  },
+  "restoration": {
+    "checks": [
+      {
+        "workspace": "A",
+        "historyExact": true,
+        "ids": {
+          "prompt": "",
+          "runId": "55be7667b21344f689a7b5ca5b25fcdf",
+          "sessionId": "6622de1037bd4532a1ebfd21e28a6f01"
+        }
+      },
+      {
+        "workspace": "B",
+        "historyExact": true,
+        "ids": {
+          "prompt": "",
+          "runId": "44981f3041794f85bb9625e2f88ce2d5",
+          "sessionId": "59e88d0d56054220929276804107940c"
+        }
+      }
+    ],
+    "reload": {
+      "historyExact": true,
+      "ids": {
+        "prompt": "",
+        "runId": "eb8349ceaf334506ba5da50ad55a049b",
+        "sessionId": "9aca5feb5d1440d28a90328758149b14"
+      },
+      "noSignIn": true
+    },
+    "workspaceLists": [
+      "web-search-check\nNative FastAPI test\nCEDAR-A-1028: Read README.md in this workspace and summarize the",
+      "ui-layout-check\nList the top-level files in this workspace and tell me what it c\ndo a test\nMAPLE-B-1028: Read README.md in this workspace and summarize the\nUse the browser to test https://demo.playwright.dev/todomvc. Add"
+    ],
+    "testFiles": [
+      {
+        "workspace": "web-search-check",
+        "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/web-search-check/workspace-isolation-note-20261028.md",
+        "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+        "bytes": 75,
+        "sha256": "18d6308f184336f20a64d77bbdebcf37c3cb2080b837ac1d74ea142c7623027b"
+      },
+      {
+        "workspace": "ui-layout-check",
+        "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check/workspace-isolation-note-20261028.md",
+        "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+        "bytes": 74,
+        "sha256": "747541ac63f971a4e05cea3622d67d08e6c2d155311097f50a37927e8856d2e0"
+      }
+    ],
+    "uiConsoleWarningsErrors": 0
+  },
+  "qualification": {
+    "native": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        "native_mcp_configuration_contract",
+        "native_mcp_effect_contract",
+        "native_approved_edit_http_contract",
+        "native_operation_repository_contract"
+      ],
+      "log": "doc/evidence/playwright-mcp-native-focused-20261028.log",
+      "sha256": "0bbf08bfb519e28dc6d5897efbcc90000b3b70b3b3b5a917cc21340dd03778ad",
+      "inventorySha256": "c7ce13b4b96dbb95505cce4474c283154c52fd8f3cc7f45709e0835af93e9c70"
+    },
+    "clients": {
+      "browser": {
+        "passed": 183,
+        "failed": 0,
+        "log": "doc/evidence/playwright-mcp-browser-tests-20261028.log",
+        "sha256": "ba9914a8a126972d05d5b24a3f9428a3249be105edb448ea60d5fa6d37faa81b"
+      },
+      "extension": {
+        "passed": 528,
+        "failed": 0,
+        "log": "doc/evidence/playwright-mcp-extension-tests-20261028.log",
+        "sha256": "5bf89eaf93fc00ac37701c86ae075422b74bee1b32125de3b51f8ff8fc0c665d"
+      }
+    },
+    "inputs": {
+      "nativeFiles": 27425,
+      "nativeBeforeSha256": "e6e4b4722268de310552d78758b24bc6e4658e69d51c3b6f5afaf769f9d3f926",
+      "nativeAfterTestsSha256": "e6e4b4722268de310552d78758b24bc6e4658e69d51c3b6f5afaf769f9d3f926",
+      "nativeAfterLiveSha256": "e6e4b4722268de310552d78758b24bc6e4658e69d51c3b6f5afaf769f9d3f926",
+      "peerFiles": 198,
+      "peerBeforeSha256": "9c45d47c1189c925e418ea27b935553bdeecb5e5dc46646abca7bc1a227e86e8",
+      "peerAfterTestsSha256": "9c45d47c1189c925e418ea27b935553bdeecb5e5dc46646abca7bc1a227e86e8",
+      "peerAfterLiveSha256": "9c45d47c1189c925e418ea27b935553bdeecb5e5dc46646abca7bc1a227e86e8",
+      "identicalWithinQualifiedPhase": true
+    },
+    "runtime": {
+      "nativeSha256": "bf645f718a5f84b238ff6c7b0925ff740c90d873b9b458adce361a80453ff368",
+      "manifestSha256": "e00eff517a90d05d7459af920850d7e8ce113333aa5cdfb293c1704fcdcc428b",
+      "files": 2811
+    },
+    "owners": [
+      {
+        "pid": 7628,
+        "birth": "134377236560760404",
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-b11e8966ffd1639fcdeaa63864084e552f4dc9e762b3907357c69e54948c940c\\xmind.exe",
+        "sha256": "bf645f718a5f84b238ff6c7b0925ff740c90d873b9b458adce361a80453ff368"
+      },
+      {
+        "pid": 16576,
+        "birth": "134377236427701215",
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-80868183c050af28fb7db3c04516c4fa6087cde1d01584c3f90303c32829e0bf\\xmind.exe",
+        "sha256": "bf645f718a5f84b238ff6c7b0925ff740c90d873b9b458adce361a80453ff368"
+      }
+    ],
+    "initialBuildFailure": {
+      "reason": "New repository test used nlohmann/json.hpp without an explicit third_party include directory; corrected CMake target include path before the successful build and tests.",
+      "originalLog": ".agentflow/playwright-mcp/native-build.log",
+      "sha256": "fa3c532661febb4b6f3d4096816ccc5be2d49f5ed576032cb8062b9e2a9158b7",
+      "terminalExcerpt": "  agentflow_xlang_worker.vcxproj -> D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\agentflow_xlang_worker.lib\n  xmind_schema_worker.vcxproj -> D:\\CantorAI2026\\xMind\\build\\skill-state-native\\Release\\xmind_schema_worker.exe\n  operation_repository_contract.cpp\nD:\\CantorAI2026\\xMind\\Native\\tests\\operation_repository_contract.cpp(12,10): error C1083: Cannot open include file: 'nlohmann/json.hpp': No such file or directory [D:\\CantorAI2026\\xMind\\build\\skill-state-native\\agentflow_operation_repository_contract.vcxproj]\n"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "doc/evidence/playwright-mcp-browser-20261028.png",
+      "sha256": "48597b7167c06e76cc75508deada99f593ff84ac86fc0ec520429e7dac0f377f"
+    },
+    {
+      "path": "doc/evidence/playwright-mcp-activity-20261028.png",
+      "sha256": "c7a01f54bf9f5ec72fd5bb473d53767e08e4fe688f32ffd4f64c83fff1546dc4"
+    }
+  ],
+  "knownExternalConsole": "The public demo returned404 for favicon.ico; task interactions and artifact verification passed. No user project was corrected.",
+  "usage": "Two configured-model UI prompts; original failed root and new distinct-marker successful root. Final visible completion counters15329 input/106 output/15435 total, cached14976, reasoning0 apply only to the final response, not all model calls. No invoice amount or dollar total inferred; existing project-test authorization remains capped at $100 total.",
+  "limitations": "Actual acceptance is the two current local web-UI profiles and isolated headless Edge. Browser capability only; no desktop automation installed. No full Native188, ASGI35, installed VS Code or hosted CI rerun claimed. Native4 focused and complete browser183/extension528 scopes remain distinct.",
+  "retained": true
+}

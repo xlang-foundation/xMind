@@ -4400,6 +4400,22 @@ Operation Repository::reconcile_interrupted_process(const std::string& id,const 
     impl_->event(result.spec.run_id,"operation.reconciled",Json{{"operation_id",id},{"tool",result.spec.tool},{"actor",actor},{"reconciled_unix_ms",timestamp},{"acknowledges_possible_side_effects",true}}.dump());
     transaction.commit();return result;
 }
+Operation Repository::reconcile_acknowledged_mcp_error(const std::string& id,const std::string& actor,const std::string& note) {
+    identifier(actor);if(actor.size()>4096)throw std::invalid_argument("Controller identity exceeds its limit");
+    if(note.size()<16||note.size()>1024||note.find_first_of("\r\n")!=std::string::npos||note.find('\0')!=std::string::npos)throw std::invalid_argument("Reconciliation note must be 16 to 1,024 characters on one line");
+    try{(void)Json(actor).dump();(void)Json(note).dump();}catch(const Json::exception&){throw std::invalid_argument("Invalid reconciliation audit text");}
+    auto& db=impl_->database;Transaction transaction(db);auto result=operation(id);
+    if(result.state!=OperationState::uncertain||result.spec.tool!="mcp_tool")throw Conflict("Only an uncertain MCP tool error can be reconciled here");
+    auto owner=run(result.spec.run_id);std::set<std::string> owners;
+    for(;;){if(!owners.insert(owner.id).second||owners.size()>64)throw Conflict("Invalid MCP owner ancestry");if(owner.state!=RunState::failed&&owner.state!=RunState::cancelled)throw Conflict("An active MCP owner cannot be reconciled");if(owner.parent_id.empty())break;owner=run(owner.parent_id);}
+    Json receipt,envelope;try{receipt=Json::parse(result.result_json);if(!receipt.is_object()||receipt.value("reason",std::string{})!="mcp_peer_reported_tool_error"||!receipt.contains("request_id")||!receipt["request_id"].is_string()||receipt["request_id"].get_ref<const std::string&>().empty()||!receipt.contains("response_json")||!receipt["response_json"].is_string())throw Conflict("MCP error has no recorded reply");envelope=Json::parse(receipt["response_json"].get<std::string>());}catch(const Json::exception&){throw Conflict("Saved MCP reply is invalid");}
+    if(!envelope.is_object()||envelope.value("jsonrpc",std::string{})!="2.0"||!envelope.contains("id")||envelope["id"]!=receipt["request_id"]||envelope.contains("error")||!envelope.contains("result")||!envelope["result"].is_object()||!envelope["result"].contains("isError")||envelope["result"]["isError"]!=true||!envelope["result"].contains("content")||!envelope["result"]["content"].is_array())throw Conflict("MCP reply does not prove a correlated tool error");
+    const auto timestamp=now_ms();receipt["reconciliation"]={{"actor",actor},{"note",note},{"reconciled_unix_ms",timestamp},{"acknowledges_possible_side_effects",true},{"kind","acknowledged_mcp_error"}};
+    const auto encoded=receipt.dump();if(encoded.size()>1024*1024)throw DatabaseError("Reconciled MCP receipt exceeds its limit");
+    changed_one(db.execute("UPDATE operations SET state='failed',result=? WHERE id=? AND state='uncertain'",{encoded,id}));result.state=OperationState::failed;result.result_json=encoded;impl_->operation_state_event(result);
+    impl_->event(result.spec.run_id,"operation.reconciled",Json{{"operation_id",id},{"tool",result.spec.tool},{"actor",actor},{"reconciled_unix_ms",timestamp},{"acknowledges_possible_side_effects",true},{"kind","acknowledged_mcp_error"}}.dump());
+    transaction.commit();return result;
+}
 std::size_t Repository::recover_interrupted(const BackendLease& owner) {
     if(!owner.covers(impl_->path)) throw Conflict("Recovery requires this database's owner lease");
     auto& db=impl_->database; Transaction transaction(db);

@@ -1626,9 +1626,10 @@ struct HttpServer::Impl {
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/reconcile)",guarded([this](const Request& request,Response& response) {
             if(request.target.find('?')!=std::string::npos||!request.params.empty()||request.body.size()>4096)throw std::invalid_argument("Process reconciliation request exceeds limits");
             const auto value=body(request,{"note","acknowledge_possible_side_effects"});
-            if(!value.contains("acknowledge_possible_side_effects")||!value["acknowledge_possible_side_effects"].is_boolean()||!value["acknowledge_possible_side_effects"].get<bool>())throw std::invalid_argument("Explicit acknowledgment of possible process side effects is required");
+            if(!value.contains("acknowledge_possible_side_effects")||!value["acknowledge_possible_side_effects"].is_boolean()||!value["acknowledge_possible_side_effects"].get<bool>())throw std::invalid_argument("Explicit acknowledgment of possible side effects is required");
             const auto note=string_field(value,"note",1024);
-            reply(response,encode(persistence.reconcile_interrupted_process(identifier(request.matches[1]),"local-owner",note).get()));
+            const auto id=identifier(request.matches[1]);const auto observed=persistence.operation(id).get();
+            reply(response,encode(observed.spec.tool=="mcp_tool"?persistence.reconcile_acknowledged_mcp_error(id,"local-owner",note).get():persistence.reconcile_interrupted_process(id,"local-owner",note).get()));
         }));
         server.Post(R"(/v1/operations/([A-Za-z0-9_-]+)/decision)",guarded([this](const Request& request,Response& response) {
             const auto value=body(request,{"decision"});const auto decision=string_field(value,"decision",8);

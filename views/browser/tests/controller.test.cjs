@@ -1,5 +1,10 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
+test('MCP error resolution is scoped to the observed receipt and requires a native audited result',async()=>{
+ const posted=[],calls=[],operation={id:'op',run_id:'run',workspace_id:'workspace',tool:'mcp_tool',state:'uncertain',arguments_json:'{}',result_json:JSON.stringify({reason:'mcp_peer_reported_tool_error'}),expires_unix_ms:0};let current=operation,valid=true,polls=0;
+ const view=new BrowserController({operation:async()=>current,reconcileMcpError:async(...args)=>{calls.push(args);return{...operation,state:'failed',result_json:JSON.stringify({reconciliation:{kind:'acknowledged_mcp_error',acknowledges_possible_side_effects:valid}})};}},m=>posted.push(m));view.runId='run';view.runs=[{id:'run',state:'failed'}];view.operations.set('op',operation);view.poll=async()=>{polls++;};
+ try{current={...operation,result_json:'{}'};await view.handle({type:'reconcile-mcp-error',id:'op',note:'Reviewed saved tool error.'});assert.equal(calls.length,0);current=operation;valid=false;await view.handle({type:'reconcile-mcp-error',id:'op',note:'Reviewed saved tool error.'});assert.equal(polls,0);valid=true;await view.handle({type:'reconcile-mcp-error',id:'op',note:'Reviewed saved tool error.'});assert.equal(polls,1);assert.deepEqual(calls.at(-1),['op','Reviewed saved tool error.']);}finally{view.dispose();}
+});
 test('browser session catalogue is read from its explicit workspace instead of the mutable active cookie scope',async()=>{
  const sessions=[{id:'owned',title:'Workspace A',active:false,archived:false}],view=new BrowserController({workspaceSessionCatalogue:async()=>({workspace_id:'workspace-a',sessions}),sessions:async()=>{throw Error('Unscoped catalogue must not be read');}},()=>{});view.health={workspace_session_catalogue:1};
  try{assert.equal(await view.sessionCatalog(),sessions);assert.equal(view.archiveWorkspaceId,'workspace-a');}finally{view.dispose();}
