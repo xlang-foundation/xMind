@@ -14,6 +14,17 @@ current browser paint, layout, input or installed editor activation.
 
 xMind has a local HTML view using the same conversation renderer and native API client as the VS Code extension. The webpage places workspaces and their sessions on the left, the conversation in the middle, and optional Files, Changes and Activity views on the right. The global toolbar identifies the current workspace and session and toggles either sidebar. Both dividers support dragging and keyboard resizing; their widths are remembered as non-secret appearance preferences. Provider, model and permission controls sit beside the composer. The terminal opens at the bottom of the right sidebar.
 
+On Windows, the embedded web server adds an xMind icon to the notification
+area (possibly inside the tray overflow). Click it to open the web UI, or
+right-click for **Open web UI**, **Copy web UI address**, **Open server
+workspace**, and **Quit this xMind server...**. Quitting asks for confirmation
+and stops that server through its existing shutdown path. Each web owner has
+one icon; CLI clients and workers do not add more icons. The icon is removed
+when its owner exits and is restored after Explorer restarts. Startup output
+reports `windows_tray: true` when Windows accepts the notification icon.
+Tray support is compiled only on Windows; other OS build paths are unchanged.
+[Validation scope](evidence/windows-tray-20261029.json).
+
 Response tables scroll horizontally inside their message rather than squeezing
 headers or breaking inline code identifiers. Focus a table and use the arrow
 keys, or scroll it with the pointer/touch controls. This shared-renderer change

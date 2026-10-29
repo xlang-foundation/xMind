@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-29",
+  "scope": "Windows-only native tray for the embedded web owner; no complete release or model-editing acceptance claim",
+  "source_commit": "6026e2adcf6f3c7c0683a37b24a001d9df6afebd",
+  "native_sha256": "90ebaea2385e6711d529255c2ac2cb887d62168de69e2ba4462e0d0081607d69",
+  "implementation": {
+    "platform_guards": "Library and test targets are inside if(WIN32); declarations and implementation use _WIN32. Shared entry signature and invocation are in existing Windows-only branches.",
+    "icon": "Native supersampled gradient X; no new runtime assets or third-party dependency",
+    "owner": "One icon per production embedded web owner, never per CLI/IPC client or worker",
+    "menu": ["Open web UI", "Copy web UI address", "Open server workspace", "Quit this xMind server..."],
+    "quit": "Confirmation before calling the existing server.stop shutdown path",
+    "lifecycle": "Dedicated native message thread, Explorer TaskbarCreated recovery, icon/window removal at owner shutdown",
+    "browser_address": "Canonical public loopback /ui/ URL only; no credential or query string",
+    "headless": "Absent notification area does not prevent the web backend from serving"
+  },
+  "validation": {
+    "release_build": "passed",
+    "actual_tray_contract": "passed 0.11s: Shell_NotifyIconGetRect verifies real registration, hidden window, simulated self-only Explorer notification recovery and cleanup; rejects invalid/nonlocal addresses",
+    "native_view_provider_regression": "passed 38.42s after readiness metadata changes",
+    "non_windows": "Guard/path review only; no Linux or macOS build was run",
+    "live_menu_clicks": "Not performed: computer control was stopped by the user's Escape key; no further Computer Use calls were made",
+    "logs": [".agentflow/windows-tray-shell-build.log", ".agentflow/windows-tray-shell-tests.log", ".agentflow/windows-tray-final-view-tests.log", ".agentflow/windows-tray-live-handoff.log"]
+  },
+  "live_delivery": {
+    "previous_pid": 3948,
+    "previous_birth": "134377661417594784",
+    "replacement_pid": 6084,
+    "replacement_birth": "134377684585139897",
+    "url": "http://127.0.0.1:55653/ui/",
+    "windows_tray": true,
+    "handoff": "Authenticated native managed upgrade; same profile, URL and saved sessions; no prompt or tool replay",
+    "sessions_preserved": ["7860b0bff71a4b53b425c10ee5399cbe", "934abd92c300c3a7376a363cf6acb217"],
+    "cantor_unchanged": {"pid": 5040, "birth": "2026-10-29T09:47:24.7220770-07:00", "node_id": "618367c4896d99c06ae8cf663909a519", "portal_authorization_preserved": true}
+  }
+}
