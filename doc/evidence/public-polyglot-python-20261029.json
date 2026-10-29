@@ -1,11 +1,11 @@
 {
-  "status": "blocked_pending_larger_qualified_27b_context",
+  "status": "in_progress_first_qualified_32k_exercise_passed",
   "source": "https://github.com/Aider-AI/polyglot-benchmark",
   "revision": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f",
   "scope": "34 Python practice exercises; xMind browser workflow, not official Aider harness or leaderboard score",
   "workspace": "D:/CantorAI2026/TestProj/xmind-polyglot-python-20261029",
   "ui": "http://127.0.0.1:59449/ui/",
-  "model": "qwen3.8-27b-chat-4k",
+  "model": "qwen3.8-27b-chat-32k",
   "isolation": "Separate qualified Shawn GPU; pre-existing local stock-app run preserved",
   "runtime": "D:/CantorAI2026/xMind/.agentflow/local-runtime/xlang3.exe",
   "baseline": ".agentflow/polyglot-python-baseline-20261029.json",
@@ -76,6 +76,34 @@
       "attempt": 2,
       "tools_run": 0,
       "prompt": "Continue the unfinished proverb exercise. Complete its implementation and run the original tests with xlang3 until they pass. Keep all supplied tests unchanged."
+    },
+    {
+      "model_attempt": 1,
+      "prompt": "Implement the proverb exercise using proverb/.docs/instructions.md and its existing starter file. Follow the evaluation rules in README.md. Keep the original tests unchanged and run them with xlang3 until they all pass.",
+      "screenshot": ".agentflow/demo-20261029/proverb-ui-passed.png",
+      "implementation_sha256": "8d68fc019170bd0473c9fc7518ce25f5ff0d013f1c56845ca7c9d95cfa8e7572",
+      "process_operation": "42ef207ec8439ed442ec5adeb12096b9",
+      "independent_test_log": ".agentflow/demo-20261029/proverb-independent-tests.log",
+      "run_id": "a8c5cfd1a80d41c7ada15d733f6ca75b",
+      "original_inputs_hash_mismatches": 0,
+      "model": "qwen3.8-27b-chat-32k",
+      "exercise": "proverb",
+      "original_tests": 8,
+      "approval": "Scoped edit reviewed and allowed in browser UI",
+      "final_response_metrics": {
+        "response_time_display": "37.23s",
+        "input_tokens": 10702,
+        "scope": "Final provider response only; not aggregate run token usage or duration",
+        "ttft_display": "34.90s",
+        "output_tokens": 69,
+        "total_tokens": 10771
+      },
+      "edit_operation": "34d6016a006134a944042977bcc1c50a",
+      "attempt": 3,
+      "process_profile": "xlang3",
+      "process_exit_code": 0,
+      "tests_passed": 8,
+      "status": "completed"
     }
   ],
   "argument_feedback_fix": {
@@ -113,7 +141,7 @@
   },
   "python_file_differences_from_upstream": 0,
   "attempted_exercises": 2,
-  "completed_exercises": 0,
+  "completed_exercises": 1,
   "unattempted_exercises": 32,
   "original_ui_restored": {
     "process_birth": "134377781272312889",
@@ -176,5 +204,6 @@
     "qualified_total_context": 4096,
     "selected_in_ui": true,
     "provider_capacity_source": "D:/CantorStorage/CantorServe/logs/client-acceptance-window.json"
-  }
+  },
+  "remaining_exercises": 33
 }
