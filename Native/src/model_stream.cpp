@@ -97,7 +97,20 @@ std::string_view model_protocol_diagnostic(const ModelProtocolError& error) {
         {"Claude stream is invalid","anthropic_stream_invalid"},
         {"Invalid Claude JSON event","anthropic_json_event_invalid"},
         {"Incomplete Claude stream","anthropic_stream_incomplete"},
-        {"Incomplete or invalid model stream","chat_stream_incomplete"}})
+        {"Incomplete or invalid model stream","chat_stream_incomplete"},
+        {"Tool finish without tool calls","chat_tool_finish_without_calls"},
+        {"Incomplete or duplicate model tool identity","chat_tool_identity_invalid"},
+        {"Tool arguments must be a JSON object","chat_tool_arguments_not_object"},
+        {"Tool calls with an inconsistent finish reason","chat_tool_finish_reason_mismatch"},
+        {"Model data after end marker","chat_data_after_end"},
+        {"Model end marker without a finish reason","chat_finish_reason_missing"},
+        {"Provider returned an invalid or error event","chat_provider_error_event"},
+        {"Invalid model usage","chat_usage_invalid"},
+        {"Invalid model token count","chat_usage_invalid"},
+        {"Choice data after its finish reason","chat_data_after_finish"},
+        {"Tool identity changed","chat_tool_identity_changed"},
+        {"Unsupported model finish reason","chat_finish_reason_unsupported"},
+        {"Model did not produce a complete supported turn","model_turn_incomplete"}})
         if(message==text)return code;
     // Never persist provider exception text as a UI diagnostic. Preserve the
     // detailed allowlist above, but make unknown validation failures visible

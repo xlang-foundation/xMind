@@ -30,6 +30,13 @@ int main() {
     try {
         require(model_protocol_diagnostic(ModelProtocolError("Model output token limit reached before completing the agent turn"))=="model_output_limit","A truncated agent turn must have a clear, provider-safe diagnostic");
         require(model_protocol_diagnostic(ModelProtocolError("private fixture validation detail"))=="model_response_invalid","Unclassified response failures must use a stable content-free diagnostic");
+        {
+            bool completed=false,rejected=false;
+            ChatCompletionStream stream([&](const ModelEvent& event){if(event.kind=="model.done")completed=true;});
+            try{stream.feed(framed(R"({"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c","function":{"name":"read_file","arguments":"{}"}}]},"finish_reason":"stop"}]})"));stream.finish();}
+            catch(const ModelProtocolError& error){rejected=true;require(model_protocol_diagnostic(error)=="chat_tool_finish_reason_mismatch","A tool/finish mismatch must expose a fixed diagnostic without provider content");}
+            require(rejected&&!completed,"An inconsistent tool finish must never become executable completion");
+        }
         for(std::size_t boundary=0;boundary<=tools.size();++boundary) {
             std::vector<ModelEvent> events;ChatCompletionStream stream([&](const ModelEvent& event){events.push_back(event);});
             stream.feed(std::string_view(tools).substr(0,boundary));stream.feed(std::string_view(tools).substr(boundary));

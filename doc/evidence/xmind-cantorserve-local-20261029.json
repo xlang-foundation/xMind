@@ -137,5 +137,115 @@
       "qwen35-2b-chat32k-tool-result-continuation.json"
     ],
     "focused_yaml_test": "1/1 passed"
+  },
+  "integration_checkpoint": {
+    "source_commit": "9a24de8b96c9aca123314bf9ca017d7ed4a78970",
+    "scope": "Actual browser create-file coding, native managed handoff and workspace/model restoration; multi-turn edits remain failing. No full-suite or complete integration claim.",
+    "endpoint": "http://127.0.0.1:19446/v1",
+    "model": "qwen3.5-2b-code-32k",
+    "ui": "http://127.0.0.1:55653/ui/",
+    "preview": "http://127.0.0.1:52762/index.html",
+    "profile_root": "C:/Users/shaw9/.xMind/cantorserve-coding-validation-20261029",
+    "workspace": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/cantorserve-html-20261029",
+    "session": "7860b0bff71a4b53b425c10ee5399cbe",
+    "create": {
+      "root": "0d4ba435310643a7851c87c92acba6e1",
+      "state": "completed",
+      "operation": "0ce6e4b2a1835f323181719bb232981c",
+      "prompt": "Create a simple, responsive index.html for a community workshop. Include a welcome heading, three event cards, and a registration button that shows a friendly confirmation when clicked. Keep everything in one file.",
+      "ordinary_feature_request": true,
+      "prompt_channel": "actual browser UI",
+      "file_approval": "actual browser UI, one index.html create_file",
+      "model_tool_result_continuation": true,
+      "rendered_registration_button_click": "Registration Successful!",
+      "index_sha256": "6d24d9a303c9b30829f941c36175bcf2593a11cb37c0c4f48a54fbad1bf2bac6",
+      "replayed": false,
+      "manually_corrected_project_code": false
+    },
+    "theme": {
+      "root": "f9d53252e52445f999e574b0bc11896e",
+      "state": "failed",
+      "reason": "provider_timeout",
+      "elapsed_ms": 120059,
+      "changed_files": false,
+      "replayed": false,
+      "deadline_unchanged": true,
+      "raw_events": ".agentflow/followup-timeout-tree-events.json"
+    },
+    "faq": {
+      "root": "6da6052ef4954ee6afda3ff8d62dd7ff",
+      "state": "failed",
+      "reason": "model_protocol_error",
+      "diagnostic": "model_response_invalid",
+      "elapsed_ms": 207545,
+      "ordinary_feature_request": true,
+      "prompt_channel": "actual browser UI",
+      "prompt": "Add an FAQ section below the events with three expandable questions about registration, accessibility, and what to bring.",
+      "autonomous_recovery": [
+        "edit_file content_conflict",
+        "read_file completed",
+        "create_file content_conflict",
+        "next model response rejected"
+      ],
+      "changed_files": false,
+      "replayed": false,
+      "no_diagnostic_followup_prompt": true,
+      "raw_events": ".agentflow/faq-followup-events.json"
+    },
+    "handoffs": [
+      {
+        "from_pid": 21200,
+        "to_pid": 47580,
+        "url_preserved": true,
+        "rendered_history_preserved": true,
+        "source": "373de00541fafae608f5c1b110d21e250722c2e4",
+        "log": ".agentflow/coding-handoff-fixed.log"
+      },
+      {
+        "from_pid": 34484,
+        "to_pid": 11980,
+        "workspace": "D:/CantorAI2026/xMind",
+        "api_origin": "http://127.0.0.1:58685",
+        "custom_route_preserved": true,
+        "ui_discovered_models": 1,
+        "log": ".agentflow/main-workspace-provider-handoff.log"
+      },
+      {
+        "from_pid": 47580,
+        "to_pid": 49896,
+        "birth": "134377460549529996",
+        "url_preserved": true,
+        "rendered_history_preserved": true,
+        "log": ".agentflow/coding-workspace-provider-handoff.log"
+      }
+    ],
+    "test_scopes": {
+      "yaml": "1/1 passed",
+      "workspace_custom_route": "1/1 passed in21.70s",
+      "local_profile": "fails before new assertions: xlang3 Unicode-path startup, No mapping for Unicode character in target code page; retained fixture xmind-local-profile-6QevdW",
+      "initial_view_attempt": "missing fixture package environment; retained log, then corrected environment and reran focused contract",
+      "renderer": "127 focused pass",
+      "browser": "218 pass with native fixture environment",
+      "agent_runner": "1/1 focused pass in9.92s"
+    },
+    "preview_runtime": {
+      "engine": "xlang3 FastAPI/uvicorn read-only generated-file preview",
+      "pid": 50904,
+      "stdlib_http_server_gap": "xlang3 IntEnum HTTPStatus %d formatting failed; original log retained; no CPython fallback"
+    },
+    "preserved_failed_handoffs": [
+      ".agentflow/qualified-model-handoff.log",
+      "earlier provider-config override rejection"
+    ],
+    "remaining": [
+      "CantorServe final stream/model tool protocol investigation",
+      "ordinary follow-up edit qualification in xMind",
+      "OpenCode fresh UI qualification evidence from service owner"
+    ],
+    "screenshots": [
+      ".agentflow/coding-first-completed.png",
+      ".agentflow/workshop-registration-passed.png",
+      ".agentflow/main-workspace-model-ready.png"
+    ]
   }
 }

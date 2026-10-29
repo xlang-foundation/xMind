@@ -87,6 +87,14 @@ try{
  discovered=await publicProfiles();assert.deepEqual(discovered.profiles.map(value=>value.id).sort(),['claude','openai']);assert.ok(!JSON.stringify(discovered).includes('synthetic-openai-key-never-sent'));
  assert.ok(discovered.routes.some(route=>route.id==='openai.compatible'),'A newly created workspace must inherit the trusted custom route before importing profiles');
  assert.ok(seededProfile.process_id);await profilePid(exe,profiles,added,languageServers);for(const workspace of [initial,existing,added]){const configured=await command(exe,['--profile-root',profiles,'--workspace',workspace,'mcp-servers'],{cwd:workspace});assert.deepEqual(configured,{servers:[{id:'fixture-mcp',revision:1,enabled:false,transport:'http'}],runtime_state:'per_run'});}
+ // Explicit provider-path changes validate before retiring an authenticated
+ // owner, then register routes without reimporting or replacing saved keys.
+ const addedBefore=await profilePid(exe,profiles,added,languageServers),savedAdded=await publicProfiles();
+ const rejectedYaml=path.join(base,'rejected-providers.yaml');await fs.writeFile(rejectedYaml,'version: [invalid\n');
+ const rejectedUpgrade=await invoke(exe,['--profile-root',profiles,'--workspace',added,'--config',rejectedYaml,'--upgrade-backend','profile-info'],{cwd:added});assert.equal(rejectedUpgrade.code,2);assert.equal((await profilePid(exe,profiles,added,languageServers)).process_id,addedBefore.process_id);
+ const nextYaml=path.join(base,'next-providers.yaml');await fs.copyFile(yaml,nextYaml);
+ const replaced=await command(exe,['--profile-root',profiles,'--workspace',added,'--config',nextYaml,'--upgrade-backend','profile-info'],{cwd:added});await rememberOwner(exe,replaced.process_id);assert.notEqual(replaced.process_id,addedBefore.process_id);assert.equal(replaced.origin,addedBefore.origin);
+ assert.deepEqual(await command(exe,['--profile-root',profiles,'--workspace',added,'provider-profiles'],{cwd:added}),savedAdded,'Provider handoff preserves the complete saved registry and custom route');
  // A preview handoff can explicitly retain user-owned settings even when the
  // trusted file contains new profiles or changes its default selection.
  await browser.close();browser=undefined;viewProcess.kill();await new Promise(resolve=>viewProcess.once('close',resolve));await fs.rm(ready,{force:true});
