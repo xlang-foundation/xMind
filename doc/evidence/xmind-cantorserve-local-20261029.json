@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-29",
+  "scope": "Local build, startup and trusted OpenAI-compatible provider configuration; not full release or live coding acceptance",
+  "source_commit": "bbb401a2edc9003d7b0bc3a64fc65e4430b16bc7",
+  "branch": "codex/cantorserve-compatible",
+  "xlang3_commit": "be164c587886053c040afbfee621cbb60a03b843",
+  "xlang3_bridge_enabled": false,
+  "build_environment": {
+    "compiler": "Visual Studio 18 2026 x64 Release",
+    "rust_toolchain": "1.85.1",
+    "notes": "Initial SDK lacked LrpcListen. Fast-forwarded to merged origin/main. Initial Cargo 1.80.1 failed an edition2024 dependency; installed 1.85.1 selected without changing global defaults. Original failed logs retained."
+  },
+  "tests": {
+    "xlang3": {"selected": 63, "passed": 62, "failed": ["xlang3_native_library_path"], "excluded": ["xlang3_cli_pickle_interop requires CPython"], "failure": "No mapping for the Unicode character exists in the target multi-byte code page."},
+    "xmind_native_baseline": {"source": "b858b04edc99433b4601b1493a3c51967f660f94", "total": 185, "passed": 176, "failed": ["native_xlang3_default_process_contract", "native_mcp_oauth_service_contract", "native_mcp_oauth_renewal_negative_contract", "native_skill_catalogue_contract", "native_agent_patch_http_contract", "native_unified_patch_http_contract", "native_local_profile_contract", "native_local_view_contract", "native_local_view_provider_config_contract"], "duration_seconds": 612.86},
+    "extension": {"passed": 528, "failed": 0},
+    "browser_final": {"passed": 218, "failed": 0, "notes": "Native ASGI fixture and embedded-xlang3 packages configured. Earlier missing-assets and missing-environment failures retained separately."},
+    "compatible_provider_yaml_final": {"passed": 1, "failed": 0, "coverage": "URL validation, capability defaults, encrypted key-only registration and atomic rejection of changed credential destinations/capabilities"},
+    "native_web_environment_focused": {"passed": 4, "failed": 0, "tests": ["native_mcp_oauth_service_contract", "native_mcp_oauth_renewal_negative_contract", "native_skill_catalogue_contract", "native_local_view_provider_config_contract"]},
+    "qualification_limit": "Focused passes are not combined into a final full-suite pass. Native child-process/Unicode startup and CLI move-preview baseline findings remain unresolved. No performance gate or real model completion claimed."
+  },
+  "runtime": {
+    "directory": "D:/CantorAI2026/xMind/.agentflow/local-runtime",
+    "xmind_sha256": "a451b6160f4741e17378845f56828b927826aa52fd55defa617edc4497b62af3",
+    "url": "http://127.0.0.1:64083/ui/",
+    "owner_pid": 45184,
+    "owner_birth": "134377420833941539",
+    "transport": "embedded-fastapi/xlang3-ipc",
+    "previous_empty_profile_url_preserved": "http://127.0.0.1:50245/ui/"
+  },
+  "cantorserve": {
+    "profile_id": "cantorserve",
+    "route": "openai.compatible",
+    "base_url": "http://127.0.0.1:19445/v1",
+    "key_source": "Existing private operator key; value never included in evidence, command arguments or Git",
+    "saved_model": null,
+    "tools": "unsupported",
+    "stream_usage": "unsupported",
+    "initial_authenticated_discovery": ["qwen3-1.7b-demo", "qwen3.5-4b"],
+    "streaming_request_status": 501,
+    "streaming_error": "unsupported_capability: End-to-end incremental streaming has not passed runtime acceptance",
+    "later_discovery_status": 503,
+    "later_discovery_error": "CantorServe broker call failed; inspect the node service logs",
+    "later_discovery_ports": [19445, 19446],
+    "ui_observed": "Saved openai-compatible key-only profile visible. Fetch models displays provider HTTP 503.",
+    "startup_with_model": "Rejected because workspace coding requires declared model tool capability; key-only registration starts successfully",
+    "live_inference_acceptance": false,
+    "coordination": "Integration state sent to existing CantorServe chat under user's check-with request; no Cantor/CantorServe process or source modified."
+  },
+  "local_logs": [
+    ".agentflow/build-20261029.log",
+    ".agentflow/xlang3-build-20261029.log",
+    ".agentflow/xlang3-build-configured-20261029.log",
+    ".agentflow/xlang3-build-rust185-20261029.log",
+    ".agentflow/xlang3-tests-20261029.log",
+    ".agentflow/build-updated-sdk-20261029.log",
+    ".agentflow/compatible-provider-build-20261029.log",
+    ".agentflow/compatible-provider-tests-20261029.log",
+    ".agentflow/browser-tests-native-20261029.log",
+    ".agentflow/native-web-environment-tests-20261029.log"
+  ]
+}
