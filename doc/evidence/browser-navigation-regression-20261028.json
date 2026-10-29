@@ -1,0 +1,288 @@
+{
+  "date": "2026-10-29T00:01:46.012Z",
+  "sourceCommit": "1be597e78363e9a427c22f97f820eb431e9df13e",
+  "scope": "Actual live in-app browser UI only. No production changes, new sessions, model requests, completed-run replay, or fresh automated-suite claim.",
+  "ui": "http://127.0.0.1:58613/ui/",
+  "hosting": "FastAPI in the existing main xmind.exe; existing SDK peer retained",
+  "owners": {
+    "main": 28948,
+    "peer": 35656
+  },
+  "qualificationInputs": {
+    "files": 27422,
+    "beforeSha256": "c92aa99359020fe0eb6db5c8ff16b977b0c43dff84df3fb1a5fdc1a9ceb37749",
+    "afterSha256": "c92aa99359020fe0eb6db5c8ff16b977b0c43dff84df3fb1a5fdc1a9ceb37749",
+    "identical": true
+  },
+  "counts": {
+    "workspaceSwitches": 8,
+    "sessionSwitches": 4,
+    "reloads": 4
+  },
+  "timingMethod": "Wall-clock around CUA browser actions and a visible locator for the expected destination history. Includes browser automation overhead. Initial two workspace measurements wait for destination session rows; initial session measurement waits only for sidebar selection; those are excluded from chat-ready summaries. Reloads also wait for the expected model label. Small individual sample set, not a statistical rendering benchmark.",
+  "chatReadyTimings": {
+    "workspaces": {
+      "count": 6,
+      "minMs": 709,
+      "maxMs": 1056,
+      "medianMs": 852
+    },
+    "sessions": {
+      "count": 3,
+      "minMs": 297,
+      "maxMs": 433,
+      "medianMs": 430
+    },
+    "reloads": [
+      1224,
+      2304,
+      1415,
+      1662
+    ]
+  },
+  "baselines": {
+    "originalB": {
+      "workspace": "ui-layout-check",
+      "session": "List the top-level files in this workspace and tell me what it c",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1392,
+      "historySha256": "e42b4d79cbaa1736f407d6ab489831a627490ac8cdf262f5d6f69137841b8e2e",
+      "prompt": "",
+      "runId": "16df2944a87344a79a36ce3b3574072f",
+      "sessionId": "3495c8284fc345fbb22dd0ac18026850"
+    },
+    "A": {
+      "workspace": "web-search-check",
+      "session": "Native FastAPI test",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1681,
+      "historySha256": "fddb4b69273c3e34ab0f01910a0547639284be8d411d85ac696cc5c5e6f377ab",
+      "prompt": "",
+      "runId": "c847d70e443b442e912449392d65c5f9",
+      "sessionId": "220ac1f383cc45c6813c1588a1dde396"
+    },
+    "otherB": {
+      "workspace": "ui-layout-check",
+      "session": "do a test",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 486,
+      "historySha256": "a47e8a9c09233fb2f1c5ebba60786bdb011984f24efba68d73fa12b7eb6e42f2",
+      "prompt": "",
+      "runId": "77a38b9e5f44406a8e10b5740461d6c4",
+      "sessionId": "83106cfc910e4674a39f759959d28872"
+    }
+  },
+  "samples": [
+    {
+      "action": "workspace B→A",
+      "ms": 1027,
+      "workspace": "web-search-check",
+      "session": "Native FastAPI test",
+      "historyLength": 1681
+    },
+    {
+      "action": "workspace A→B",
+      "ms": 896,
+      "exact": true,
+      "comparisonNote": "Initial JSON comparison differed only by object key insertion order; every field and full history match."
+    },
+    {
+      "action": "session original→do a test",
+      "ms": 285,
+      "workspace": "ui-layout-check",
+      "session": "do a test",
+      "model": "gpt-4.1",
+      "historyLength": 1392,
+      "measurement": "Sidebar selection only; history was still transitioning. Excluded from chat-ready timing."
+    },
+    {
+      "action": "session do a test→original",
+      "ms": 297,
+      "measurement": "click→expected rendered chat",
+      "exact": true
+    },
+    {
+      "action": "session original→do a test",
+      "ms": 430,
+      "measurement": "click→expected rendered chat",
+      "exact": true
+    },
+    {
+      "action": "workspace B→A (round 2)",
+      "ms": 1056,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "web-search-check",
+      "session": "Native FastAPI test",
+      "historyLength": 1681
+    },
+    {
+      "action": "workspace A→B remembers do a test",
+      "ms": 857,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "do a test",
+      "historyLength": 486
+    },
+    {
+      "action": "workspace B→A (round 3)",
+      "ms": 733,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "web-search-check",
+      "session": "Native FastAPI test",
+      "historyLength": 1681
+    },
+    {
+      "action": "workspace A→B (round 3)",
+      "ms": 709,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "do a test",
+      "historyLength": 486
+    },
+    {
+      "action": "reload otherB",
+      "ms": 1224,
+      "measurement": "reload call→expected chat and model rendered",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "promptPreserved": true,
+      "signInPrompt": false,
+      "ids": {
+        "prompt": "",
+        "runId": "77a38b9e5f44406a8e10b5740461d6c4",
+        "sessionId": "83106cfc910e4674a39f759959d28872"
+      }
+    },
+    {
+      "action": "session do a test→original (round 2)",
+      "ms": 433,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "List the top-level files in this workspace and tell me what it c",
+      "historyLength": 1392
+    },
+    {
+      "action": "reload originalB",
+      "ms": 2304,
+      "measurement": "reload call→expected chat and model rendered",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "promptPreserved": true,
+      "signInPrompt": false,
+      "ids": {
+        "prompt": "",
+        "runId": "16df2944a87344a79a36ce3b3574072f",
+        "sessionId": "3495c8284fc345fbb22dd0ac18026850"
+      }
+    },
+    {
+      "action": "workspace B→A before reload",
+      "ms": 847,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "web-search-check",
+      "session": "Native FastAPI test",
+      "historyLength": 1681
+    },
+    {
+      "action": "reload A",
+      "ms": 1415,
+      "measurement": "reload call→expected chat and model rendered",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "promptPreserved": true,
+      "signInPrompt": false,
+      "ids": {
+        "prompt": "",
+        "runId": "c847d70e443b442e912449392d65c5f9",
+        "sessionId": "220ac1f383cc45c6813c1588a1dde396"
+      }
+    },
+    {
+      "action": "workspace A→B after reload",
+      "ms": 863,
+      "measurement": "click→expected rendered chat",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "List the top-level files in this workspace and tell me what it c",
+      "historyLength": 1392
+    },
+    {
+      "action": "reload originalB",
+      "ms": 1662,
+      "measurement": "reload call→expected chat and model rendered",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "promptPreserved": true,
+      "signInPrompt": false,
+      "ids": {
+        "prompt": "",
+        "runId": "16df2944a87344a79a36ce3b3574072f",
+        "sessionId": "3495c8284fc345fbb22dd0ac18026850"
+      }
+    },
+    {
+      "action": "collapse active workspace",
+      "ms": 361,
+      "state": {
+        "expanded": "false",
+        "sessionRowsVisible": []
+      },
+      "chatPreserved": true
+    },
+    {
+      "action": "expand active workspace",
+      "ms": 329,
+      "chatPreserved": true
+    },
+    {
+      "action": "composer readiness without submission",
+      "sendEnabledWithDraft": false,
+      "draftCleared": true,
+      "invalidMeasurement": true,
+      "note": "The exact accessible name Send did not match the actual Send ↑ control. Retained as harness diagnostics, not a product failure."
+    },
+    {
+      "action": "composer readiness without submission (correct control)",
+      "sendEnabledWithDraft": true,
+      "draftVisible": true,
+      "draftCleared": true,
+      "sendEnabledAfterClearing": true
+    }
+  ],
+  "results": {
+    "exactHistoryWorkspaceSessionProviderModelRestoration": true,
+    "selectedRunPreservedAcrossAllReloads": true,
+    "signInPrompts": 0,
+    "consoleWarningsAndErrors": 0,
+    "collapseExpandPreserveChat": true,
+    "composerReadyWithoutSubmission": true,
+    "originalWorkspaceSessionRestored": true
+  },
+  "limitations": "Session changes are subsecond. Workspace chat readiness still takes about 0.7–1.1 seconds and full reloads 1.2–2.3 seconds; do not describe those as instantaneous. External native browser input and hover latency were not requalified in this run. Installed VS Code and the previously qualified automated suites were not rerun.",
+  "harnessDiagnostics": [
+    "The initial object-stringification comparison differed only by key insertion order; field-by-field values and full history matched.",
+    "The exact Send accessible-name locator did not match the actual Send ↑ control. Its false isEnabled observation is retained as invalidMeasurement; the DOM-grounded #send locator confirms the real control is enabled."
+  ],
+  "preservedUserAddedSession": {
+    "id": "83106cfc910e4674a39f759959d28872",
+    "title": "do a test",
+    "completedRoot": "77a38b9e5f44406a8e10b5740461d6c4",
+    "agentSubmitted": false,
+    "instruction": "NEVER replay this completed root."
+  },
+  "newModelRequests": 0,
+  "newSessions": 0,
+  "screenshot": {
+    "path": "doc/evidence/browser-navigation-regression-20261028.png",
+    "sha256": "9639fba201fb807d807be885310170430fd5c63961f7a7bb89fc33ec6d84d88c"
+  }
+}
