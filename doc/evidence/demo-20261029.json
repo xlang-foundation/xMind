@@ -90,10 +90,76 @@
     "run_started": false
   },
   "opencode": {
-    "status": "Web UI live; original Wordy project prepared; worker window released for normal coding prompt",
+    "status": "In progress; user added please run it from desktop at15:33; same session preserved; independent xlang3 regex gap confirmed",
     "project": "D:/CantorStorage/CantorServe/clients/opencode-project-20261029-1508",
     "planned_task": "Original public Wordy exercise plus a small web calculator with an xlang3 Python backend; original tests unchanged",
-    "ui": "http://127.0.0.1:17777/"
+    "ui": "http://127.0.0.1:17777/",
+    "session_url": "http://127.0.0.1:17777/server/aHR0cDovLzEyNy4wLjAuMToxNzc3Nw/session/ses_e76418e7dffeMh36qTpreL58I0",
+    "original_tests_sha256": "3c8bf5b17e14c8f8953107c0ae9600be0c0d96e578cf442526dbedf0c57889da",
+    "original_tests_total": 25,
+    "tests_passed": null,
+    "runtime_gap": {
+      "scope": "independent xlang3 regex compatibility reproduction",
+      "cases": [
+        {
+          "pattern": "^-?\\d+$",
+          "value": "1",
+          "expected": true,
+          "actual": false,
+          "passed": false
+        },
+        {
+          "pattern": "^-?\\d+$",
+          "value": "123",
+          "expected": true,
+          "actual": false,
+          "passed": false
+        },
+        {
+          "pattern": "^-?\\d+$",
+          "value": "-5",
+          "expected": true,
+          "actual": true,
+          "passed": true
+        },
+        {
+          "pattern": "^-?\\d+$",
+          "value": "abc",
+          "expected": false,
+          "actual": false,
+          "passed": true
+        },
+        {
+          "pattern": "^-?[0-9]+$",
+          "value": "1",
+          "expected": true,
+          "actual": false,
+          "passed": false
+        },
+        {
+          "pattern": "^\\d+$",
+          "value": "1",
+          "expected": true,
+          "actual": true,
+          "passed": true
+        },
+        {
+          "pattern": "^a?b$",
+          "value": "b",
+          "expected": true,
+          "actual": false,
+          "passed": false
+        },
+        {
+          "pattern": "^a?b$",
+          "value": "ab",
+          "expected": true,
+          "actual": true,
+          "passed": true
+        }
+      ]
+    },
+    "desktop_session_opened": true
   },
   "preserved_config_failure": {
     "reason": "Narrowing the model policy before importing the new saved default blocked restart; legacy declarations restored and same profile recovered",
