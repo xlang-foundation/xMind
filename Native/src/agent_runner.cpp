@@ -45,6 +45,24 @@
 namespace agentflow {
 namespace {
 using Json=nlohmann::json;
+Json invalid_tool_arguments(const ModelToolCall& call,const std::vector<ModelToolDefinition>& tools){
+    Json error={{"code","invalid_arguments"},{"message","Arguments do not match the tool contract"}};
+    // Only report names already present in the admitted public schema. Never
+    // expose exception text, argument values, or infer missing arguments.
+    try{
+        const auto found=std::find_if(tools.begin(),tools.end(),[&](const auto& tool){return tool.name==call.name;});
+        if(found==tools.end())return Json{{"error",error}};
+        const auto schema=Json::parse(found->input_schema_json),arguments=Json::parse(call.arguments_json);
+        if(!arguments.is_object()||!schema.contains("required")||!schema.at("required").is_array())return Json{{"error",error}};
+        auto missing=Json::array();
+        for(const auto& field:schema.at("required"))if(field.is_string()&&!arguments.contains(field.get<std::string>()))missing.push_back(field);
+        if(!missing.empty()){
+            error["missing_required"]=missing;
+            error["message"]="Arguments do not match the tool contract. Supply the missing required fields listed in missing_required using the original tool schema.";
+        }
+    }catch(const Json::exception&){}
+    return Json{{"error",error}};
+}
 template<class Host> std::unique_ptr<Host> checked_tool_host(std::unique_ptr<Host> host){
     if(!host)throw std::runtime_error("Configured agent tool owner is unavailable");
     return host;
@@ -1051,7 +1069,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const AgentPermissionDenied&) {output={{"error",{{"code","agent_permission_denied"},{"message","The selected agent permission rules denied this resource; the tool was not dispatched"}}}};}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
                 catch(const ToolFileError&) {output={{"error",{{"code","file_unavailable"},{"message","File is unavailable, binary, outside limits or unreadable"}}}};}
-                catch(const std::invalid_argument&) {output={{"error",{{"code","invalid_arguments"},{"message","Arguments do not match the tool contract"}}}};}
+                catch(const std::invalid_argument&) {output=invalid_tool_arguments(call,request.tools);}
                 cancelled(token);
                 journal_.append_event(id,success?"tool.completed":"tool.failed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
                 const auto content=exact_output.value_or(output.dump());results.push_back(Json{{"content",content},{"tool_call_id",call.id}}.dump());

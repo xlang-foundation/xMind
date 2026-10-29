@@ -480,6 +480,11 @@ int main(int argc,char** argv) {
         rejects<DatabaseError>([&]{store.complete_run("atomic",R"({"content":"Answer"})").get();});
         require(store.run("atomic").get().state==RunState::running && store.history("atomic").get().size()==1,"Final answer/state must roll back together");
         faults.execute("DROP TRIGGER reject_completion");store.complete_run("atomic",R"({"content":"Answer"})").get();
+        auto missing_argument_settings=settings;missing_argument_settings.provider.endpoint=base+"/missing-edit-argument";missing_argument_settings.approved_edits=true;
+        store.create_session("missing-edit-argument","Missing required edit field feedback").get();
+        AgentRunner missing_argument_runner(store,missing_argument_settings);missing_argument_runner.start("missing-edit-argument","missing-edit-argument","Make a scoped edit using the declared contract.");
+        require(missing_argument_runner.execute("missing-edit-argument").state==RunState::completed,"Missing required edit field must reach the model as safe actionable feedback");
+        require(store.operations("missing-edit-argument").get().empty(),"Invalid edit arguments must not create an effect or approval proposal");
         store.create_session("blocker-session","Uncertain process effect fixture").get();
         store.start_prompt_run("blocker-run","blocker-session",R"({"content":"Synthetic uncertain process receipt"})").get();
         store.transition("blocker-run",RunState::queued,RunState::running).get();

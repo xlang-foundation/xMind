@@ -19,6 +19,7 @@ const server=createServer((request,response)=>{
       assert.ok(!source.includes('engine-protocol-test-not-a-real-key'));
       const body=JSON.parse(source);assert.equal(body.model,'fixture-deployment');assert.equal(body.stream,true);
       const expectedTools=request.url==='/python-tool-filtered'?['read_file']:['read_repository_instructions','read_file','list_files','search_files','find_files','glob_files','list_skills','load_skill'];if(request.url==='/python-tool'||request.url==='/python-tool-worker')expectedTools.push('python_uppercase');if(request.url.startsWith('/multi-folder-process'))expectedTools.push('run_process','wait_process','stop_process');if(request.url.startsWith('/multi-folder-patch')||request.url.startsWith('/multi-root-patch')||request.url==='/blocked-effect')expectedTools.push('edit_file','create_file','apply_patch','restore_operation');if(request.url.startsWith('/multi-folder-lsp'))expectedTools.push('language_server');
+      if(request.url==='/missing-edit-argument')expectedTools.push('edit_file','create_file','apply_patch','restore_operation');
       assert.deepEqual(body.tools.map(item=>item.function.name),expectedTools);
       if(request.url==='/error') {response.writeHead(429,{'Content-Type':'application/json'});response.end('{"error":"do-not-log-provider-body"}');return;}
       response.writeHead(200,{'Content-Type':'text/event-stream'});
@@ -42,6 +43,21 @@ const server=createServer((request,response)=>{
           assert.equal(JSON.parse(outputs[1].content).error.code,'access_denied');
           assert.ok(systemMessage.content.includes('Attached root guidance marker.'));assert.ok(systemMessage.content.includes('Attached nested guidance marker.'));
           delta={content:'Synthetic model received actual attached guidance and retained the foreign-folder rejection.'};finish='stop';
+        }
+        response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
+      }
+      if(request.url==='/missing-edit-argument'){
+        const previous=body.messages.at(-1);let delta,finish;
+        if(previous.role==='user'){
+          delta={tool_calls:[{index:0,id:'missing-edit-guidance',type:'function',function:{name:'read_repository_instructions',arguments:JSON.stringify({directory:'.'})}}]};finish='tool_calls';
+        }else if(previous.tool_call_id==='missing-edit-guidance'){
+          delta={tool_calls:[{index:0,id:'missing-edit-path',type:'function',function:{name:'edit_file',arguments:JSON.stringify({old_text:'private-argument-value-not-for-diagnostics',new_text:'must-not-be-written'})}}]};finish='tool_calls';
+        }else{
+          assert.equal(previous.role,'tool');const result=JSON.parse(previous.content);
+          assert.equal(result.error.code,'invalid_arguments');assert.deepEqual(result.error.missing_required,['path']);
+          assert.ok(!previous.content.includes('private-argument-value-not-for-diagnostics'));
+          assert.ok(!previous.content.includes('must-not-be-written'));
+          delta={content:'Synthetic model received the missing required path without any file effect.'};finish='stop';
         }
         response.write('data: '+JSON.stringify({choices:[{index:0,delta,finish_reason:finish}]})+'\n\n');response.end('data: [DONE]\n\n');return;
       }
@@ -206,5 +222,5 @@ try {
   await mkdir(join(workspace,'.agents','skills','manual'));await writeFile(join(workspace,'.agents','skills','manual','SKILL.md'),'---\nname: User-only guide\ndisable-model-invocation: true\n---\nSynthetic user-only active body: inspect actual companion bytes.\n');await writeFile(join(workspace,'.agents','skills','manual','helper.txt'),'Actual user-only companion bytes\n');
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   let result;try{result=await withOwnedProcessDiagnostics(execute(executable,[join(folder,'state.sqlite'),modules,stdlib,workspace,`http://127.0.0.1:${server.address().port}`,...(rustAnalyzer?[rustAnalyzer]:[]),workerExecutable],{windowsHide:true,timeout:60000}),executable,{label:'agent-runner'});}catch(error){if(failure)throw failure;throw error;}
-  if(failure) throw failure;assert.equal(requests,rustAnalyzer?57:52);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);succeeded=true;
+  if(failure) throw failure;assert.equal(requests,rustAnalyzer?60:55);assert.equal(skillRequests,3);assert.equal(skillCapacityRequests,2);assert.equal(skillFollowRequests,2);assert.equal(manualRequests,2);assert.equal(clearRequests,1);assert.equal(pythonRequests,2);assert.equal(pythonWorkerRequests,2);assert.equal(pythonFilteredRequests,1);process.stdout.write(result.stdout);succeeded=true;
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));assert.equal(dirname(resolve(folder)),resolve(tmpdir()));assert.ok(basename(folder).startsWith('xmind-agent-'));if(succeeded)await rm(folder,{recursive:true,force:true});else process.stderr.write('Agent runner failure evidence retained at '+folder+'\n');}

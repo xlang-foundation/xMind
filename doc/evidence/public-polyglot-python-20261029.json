@@ -1,0 +1,52 @@
+{
+  "status": "in_progress_not_qualified",
+  "source": "https://github.com/Aider-AI/polyglot-benchmark",
+  "revision": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f",
+  "scope": "34 Python practice exercises; xMind browser workflow, not official Aider harness or leaderboard score",
+  "workspace": "D:/CantorAI2026/TestProj/xmind-polyglot-python-20261029",
+  "ui": "http://127.0.0.1:55653/ui/",
+  "model": "qwen3.5-2b-code-32k-shawn",
+  "isolation": "Separate qualified Shawn GPU; pre-existing local stock-app run preserved",
+  "runtime": "D:/CantorAI2026/xMind/.agentflow/local-runtime/xlang3.exe",
+  "baseline": ".agentflow/polyglot-python-baseline-20261029.json",
+  "rules": [
+    "All model prompts, follow-ups, and effect approvals through browser UI",
+    "Original tests frozen by SHA256; no test weakening or reference solutions",
+    "Implementation supplied by xMind, not evaluator",
+    "Record first attempt and recovery turns separately; never replay completed effects"
+  ],
+  "baseline_control": {
+    "exercise": "wordy",
+    "result": "25 original tests ran under xlang3; all 25 failed against original pass stub",
+    "log": ".agentflow/polyglot-wordy-baseline.log"
+  },
+  "turns": [
+    {
+      "exercise": "affine-cipher",
+      "attempt": 1,
+      "status": "failed_time_limit",
+      "prompt": "Implement the affine-cipher exercise from affine-cipher/.docs/instructions.md in its existing starter file. Read README.md for the evaluation rules. Keep all supplied tests unchanged, run the exercise tests using xlang3, and complete the exercise only when all of its tests pass.",
+      "run_id": "489c0c114ca04de6aab6eb55c01ed460",
+      "observed_outcomes": [
+        "8 successful read/list/guidance calls",
+        "3 rejected edit calls; first content_conflict, later invalid_arguments",
+        "No implementation or test changes applied"
+      ]
+    }
+  ],
+  "argument_feedback_fix": {
+    "no_argument_values_exposed": true,
+    "result": "passed",
+    "frozen_source_runtime_paths": 12391,
+    "scope": "Synthetic inference peer plus actual native edit validation and model continuation; no live model acceptance claim",
+    "missing_required": [
+      "path"
+    ],
+    "closure_unchanged": true,
+    "binaries": ".agentflow/benchmark-argument-feedback-binaries.json",
+    "log": ".agentflow/benchmark-argument-feedback-tests.log",
+    "seconds": 10.22,
+    "no_effect_or_approval_proposal": true,
+    "test": "native_agent_runner_contract"
+  }
+}
