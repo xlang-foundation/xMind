@@ -48,6 +48,9 @@ void pure_parser(const std::filesystem::path& root){
         reject_yaml("version: 1\nopenai_compatible: {base_url: '"+base+"'}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
     reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', tools: invented}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
     reject_yaml("version: 1\nprofiles: {cantorserve: {route: openai.compatible}}\n",ProviderYamlErrorCode::route_unavailable);
+    parsed=parse_provider_yaml_config("version: 1\nopenai_compatible: {base_url: 'http://127.0.0.1:19446/v1', model: qwen3.5-2b-code-32k, tools: supported, stream_usage: supported}\nprofiles: {}\n",allowed);
+    require(parsed.openai_compatible->model=="qwen3.5-2b-code-32k","Compatible declarations can bind capabilities to one exact qualified model");
+    reject_yaml("version: 1\nopenai_compatible: {base_url: 'https://example.com/v1', model: ''}\nprofiles: {}\n",ProviderYamlErrorCode::invalid_schema);
     parsed=parse_provider_yaml_config(document(),allowed);
     require(parsed.profiles.size()==2&&parsed.active_profile=="claude"&&parsed.profiles[0].id=="claude"&&!parsed.profiles[0].model&&same(parsed.profiles[0].key,claude_key),"Genuine block YAML preserves a real key-only input without inventing a model");
     parsed=parse_provider_yaml_config("\xef\xbb\xbf"+document(),allowed);
@@ -110,6 +113,8 @@ void registry(const std::filesystem::path& root,const std::vector<std::string>& 
         const auto original=store.information("native-provider-profiles","registry").get();
         write(origin+"/changed","unsupported");rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
         write(origin,"supported");rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
+        {std::ofstream output(file);output<<"version: 1\nopenai_compatible: {base_url: '"<<origin<<"', tools: unsupported, model: unqualified}\nprofiles: {}\n";}
+        rejects<Conflict>([&]{runtime.import_yaml_configuration(file,saved.revision);});
         require(store.information("native-provider-profiles","registry").get()==original&&store.credentials("server").get().size()==1,"Endpoint or capability edits cannot redirect saved credentials or partially mutate a running generation");
     }
     const auto database=(root/"provider-yaml.sqlite").string();ProviderProfileSnapshot saved;

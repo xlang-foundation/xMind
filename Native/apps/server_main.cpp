@@ -410,6 +410,12 @@ int run_server(int argc,char** argv) {
                     add("openai.compatible","openai-compatible",compatible.base_url+"/chat/completions",agentflow::ProviderWire::chat_completions,compatible.base_url+"/models",agentflow::ProviderCatalogueFormat::openai);
                     policies.back().provider.tools=compatible.tools;
                     policies.back().provider.stream_usage=compatible.stream_usage;
+                    if(compatible.model){
+                        agentflow::ProviderModelPolicy model_policy;model_policy.wire=agentflow::ProviderWire::chat_completions;
+                        agentflow::NativeModelCapabilities capabilities;capabilities.tools=compatible.tools;capabilities.stream_usage=compatible.stream_usage;
+                        model_policy.models.emplace(*compatible.model,std::move(capabilities));
+                        policies.back().model_capabilities=std::move(model_policy);
+                    }
                 }
             }
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue,root_executor_factory);

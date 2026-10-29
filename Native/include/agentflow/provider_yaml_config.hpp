@@ -19,6 +19,7 @@ private:
 struct OpenAICompatibleConfig {
     std::string base_url;
     Capability tools=Capability::unknown,stream_usage=Capability::unknown;
+    std::optional<std::string> model;
 };
 struct ProviderYamlConfig {
     std::vector<ProviderProfileConfigEntry> profiles;

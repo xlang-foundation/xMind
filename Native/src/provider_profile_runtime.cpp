@@ -307,7 +307,8 @@ ProviderProfileRuntimeMetadata ProviderProfileRuntime::import_yaml_configuration
         const auto& bound=impl_->route("openai.compatible");
         if(bound.route.provider!="openai-compatible"||bound.route.wire!=ProviderWire::chat_completions||
            bound.route.endpoint!=supplied.base_url+"/chat/completions"||!bound.catalogue||
-           bound.catalogue->endpoint!=supplied.base_url+"/models"||bound.provider.tools!=supplied.tools||bound.provider.stream_usage!=supplied.stream_usage)
+           bound.catalogue->endpoint!=supplied.base_url+"/models"||bound.provider.tools!=supplied.tools||bound.provider.stream_usage!=supplied.stream_usage||
+           (supplied.model?(!bound.model_capabilities||bound.model_capabilities->models.size()!=1||!bound.model_capabilities->models.contains(*supplied.model)):bound.model_capabilities.has_value()))
             throw Conflict("OpenAI-compatible route changed; restart with the trusted configuration");
     }
     if(expected<0||expected!=impl_->state.revision)throw Conflict("Provider profile runtime revision changed");

@@ -65,16 +65,21 @@ active_profile: cantorserve
 
 Keys stay in private configuration and Native's encrypted credential store.
 Capabilities default to `unknown`; only declare `supported` when the selected
-server and models implement them. HTTPS is required except for loopback HTTP.
+server and models implement them. An optional `openai_compatible.model` binds
+discovery, selection and execution to one exact qualified model; other aliases
+do not inherit its capability declaration. HTTPS is required except for loopback HTTP.
 Credential-bearing URLs, queries and fragments are rejected. A running backend
 rejects changes to its endpoint or capabilities before publishing credentials;
 start a new generation with the updated trusted file. Clients cannot set URLs.
 
-This adapter requires actual OpenAI SSE streaming. Current local CantorServe
-discovery succeeds, but its chat endpoint rejects `stream:true` with HTTP 501
-`unsupported_capability`. Registering the connection does not establish working
-chat, tool use or coding acceptance. No completed response is split into fake
-streaming events.
+This adapter requires actual OpenAI SSE streaming. The initial local CantorServe
+endpoint rejected streaming with HTTP 501. Its newer `qwen3.5-2b-code-32k` path
+subsequently passed conversation, incremental streaming with native usage, and
+a tool-call/result continuation test. A trusted declaration for that model can
+use `model: qwen3.5-2b-code-32k`, `tools: supported` and
+`stream_usage: supported` under `openai_compatible`. This does not qualify older
+aliases or establish full coding acceptance. No completed response is split into
+fake streaming events.
 
 The new source accepts a trusted local `--provider-config FILE` using native
 yaml-cpp 0.9.0, pinned to upstream commit

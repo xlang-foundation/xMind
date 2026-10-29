@@ -104,10 +104,11 @@ ProviderYamlConfig decode(const Value& root,const std::vector<std::string>& allo
     if(!version||version->mapping||version->scalar!="1"||(version->tag!="?"&&version->tag!="tag:yaml.org,2002:int")||!profiles||!profiles->mapping||profiles->fields.size()>32)fail(ProviderYamlErrorCode::invalid_schema);
     ProviderYamlConfig result;
     if(const auto* compatible=field(root,"openai_compatible")){
-        fields(*compatible,{"base_url","tools","stream_usage"});const auto* base=field(*compatible,"base_url");if(!base)fail(ProviderYamlErrorCode::invalid_schema);
+        fields(*compatible,{"base_url","tools","stream_usage","model"});const auto* base=field(*compatible,"base_url");if(!base)fail(ProviderYamlErrorCode::invalid_schema);
         OpenAICompatibleConfig config;config.base_url=compatible_base(*base);
         if(const auto* tools=field(*compatible,"tools"))config.tools=capability(*tools);
         if(const auto* usage=field(*compatible,"stream_usage"))config.stream_usage=capability(*usage);
+        if(const auto* model=field(*compatible,"model")){config.model=text(*model);identity(*config.model);}
         result.openai_compatible=std::move(config);routes.insert("openai.compatible");
     }
     for(const auto& [id,node]:profiles->fields){identity(id);fields(*node,{"route","api_key","model"});const auto* route=field(*node,"route");if(!route)fail(ProviderYamlErrorCode::invalid_schema);const auto& route_id=text(*route);identity(route_id);if(!routes.contains(route_id))fail(ProviderYamlErrorCode::route_unavailable);
