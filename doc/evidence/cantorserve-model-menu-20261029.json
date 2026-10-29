@@ -1,0 +1,40 @@
+{
+  "state": "passed_with_remaining_release_gates",
+  "source_commit": "26912306285bc99e22ede27eb44c350da9b112e7",
+  "scope": "CantorServe product label and multiple exact qualified model choices in the existing browser workspace",
+  "ui": "http://127.0.0.1:55653/ui/",
+  "provider_label": "CantorServe",
+  "models": ["qwen3.5-2b-code-32k", "qwen3.5-2b-code-32k-shawn", "qwen3.8-27b-chat-4k"],
+  "selected_model": "qwen3.5-2b-code-32k",
+  "profile_revision": 1,
+  "saved_profile_and_session_catalog_unchanged": true,
+  "native_executable_sha256": "81f5d172de8db6463609e2b1829bfe6ff10e83280691f6d59a8f4ce3f3a41075",
+  "served_chat_js_sha256": "e17bc506c2dcbe1e094dcc49c01d4a6c06862d6ee3b58ef4b0085cda9604dc8b",
+  "native_owner_pid": 35472,
+  "native_owner_birth": "134377762229133148",
+  "tests": {
+    "renderer": "128/128 passed",
+    "native_provider_yaml_config_contract": "1/1 passed in 1.18s",
+    "native_local_view_provider_config_contract": "1/1 passed in 49.63s",
+    "frozen_native_source_and_binary_inputs": 2780,
+    "live_catalogue": "Actual saved-key xMind native discovery returned the three models with HTTP200",
+    "served_dom": "JSDOM rendered actual served HTML/scripts with actual native metadata and model catalogue; label and model choices passed"
+  },
+  "earlier_attempts": [
+    "The new synthetic catalogue fixture initially omitted required list/model object fields; retained failed run, corrected fixture, then repeated the focused native contract.",
+    "The handoff fixture initially lacked its required embedded-xlang3 web-package environment; retained failure, configured the existing verified pure packages, then repeated the focused contract.",
+    "The first operator discovery probe supplied an empty key string and received HTTP400; the saved-key probe then correctly omitted that optional field and passed. No key or model was changed."
+  ],
+  "preservation": {
+    "cantor_and_cantorserve_untouched": true,
+    "workspace_and_history_preserved": true,
+    "encrypted_key_identity_preserved": true,
+    "chat_or_tool_requests_replayed": false,
+    "live_inference_submitted_for_this_change": false,
+    "older_runtime_and_private_config_backups_retained": true
+  },
+  "limits": [
+    "Focused contracts and live discovery/DOM checks, not a new full native-suite or screenshot acceptance claim.",
+    "The 27B profile has only 4096 total context, 3072 input and1024 output tokens; it does not fit the full coding-agent tool catalogue."
+  ]
+}
