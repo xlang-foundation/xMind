@@ -556,6 +556,13 @@ test('unknown failure reasons remain safe and DOM callback exceptions invalidate
   const broken=renderer();broken.dom.window.document.getElementById('provider-settings').showModal=()=>{throw new Error('Synthetic callback failure');};broken.dom.window.document.getElementById('settings').click();
   assert.throws(()=>broken.dom.window.close(),/Renderer event callbacks must not fail silently/,'An actual DOM callback exception must invalidate the fixture instead of becoming a green test');
 });
+test('transport failures distinguish connection reset without exposing exception text',()=>{
+  const r=renderer(),doc=r.dom.window.document;
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_transport_error',native_error:12030,message:'private-fixture-key'}}});
+  const card=doc.getElementById('run-failure');assert.match(card.textContent,/connection was reset/);assert.match(card.textContent,/12030/);assert.ok(!card.textContent.includes('private-fixture-key'));
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_transport_error',native_error:'private-fixture-key'}}});
+  assert.ok(!card.textContent.includes('private-fixture-key'));assert.match(card.textContent,/connection to the model provider failed/i);
+});
 test('recorded provider identifiers render without raw error messages or unknown fields',()=>{
   const r=renderer(),doc=r.dom.window.document;
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:400,provider_error_type:'invalid_request_error',provider_error_code:'unsupported_parameter',provider_error_param:'n',message:'private-fixture-key'}}});

@@ -1,5 +1,6 @@
 #include "agentflow/mcp_client_factory.hpp"
 #include "agentflow/agent_runner.hpp"
+#include "provider_transport_diagnostic.hpp"
 #include "agentflow/agent_terminal_handoff.hpp"
 #include "agentflow/agent_model_values.hpp"
 #include "agentflow/agent_file_tool_host.hpp"
@@ -1107,7 +1108,11 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
           return terminate(RunState::failed,detail);
       }
       catch(const TransportTimeout&) {return terminate(RunState::failed,{{"reason","provider_timeout"}});}
-      catch(const TransportError&) {return terminate(RunState::failed,{{"reason","provider_transport_error"}});}
+        catch(const TransportError& error) {
+            Json detail={{"reason","provider_transport_error"}};
+            if(const auto code=provider_native_transport_error(error.what()))detail["native_error"]=*code;
+            return terminate(RunState::failed,detail);
+        }
       catch(const ModelProtocolError& error) {Json detail={{"reason","model_protocol_error"}};const auto code=model_protocol_diagnostic(error);if(!code.empty())detail["protocol_error_code"]=std::string(code);return terminate(RunState::failed,detail);}
       catch(const IncompatibleProviderHistory&) {return terminate(RunState::failed,{{"reason","incompatible_provider_history"}});}
       catch(const std::exception&) {return terminate(RunState::failed,{{"reason","agent_error"}});}

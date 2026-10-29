@@ -237,9 +237,13 @@ Run cancel_after_stream(AgentRunner& runner,PersistenceService& store,const std:
     return result;
 }
 }
+#include "../src/provider_transport_diagnostic.hpp"
 int main(int argc,char** argv) {
     if(argc!=7&&argc!=8) return 2;
     try {
+        require(provider_native_transport_error("Native provider request failed (code 12030)")==12030,"Native connection reset diagnostic is retained");
+        require(provider_native_transport_error("Native HTTP operation failed (code 12029)")==12029,"Native connection failure diagnostic is retained");
+        require(!provider_native_transport_error("private-key-12030")&&!provider_native_transport_error("Native provider request failed (code private)")&&!provider_native_transport_error("Native provider request failed (code 12030) private-key"),"Transport diagnostics never publish unknown exception text");
         const std::vector<std::string> roots{argv[2],argv[3]};
         PersistenceService store(argv[1],roots);
         split_journal_membership(store,roots,std::filesystem::path(argv[4]));

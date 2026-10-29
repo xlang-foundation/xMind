@@ -420,7 +420,8 @@ int run_server(int argc,char** argv) {
             }
             auto configurable=std::make_unique<agentflow::ProviderProfileRuntime>(persistence,std::move(settings),std::move(policies),workers,queue,root_executor_factory);
             if(!bootstrap&&!legacy)configurable->import_legacy_configuration();
-            if(options.contains("--provider-config")){
+            if(options.contains("--provider-config")&&!options.contains("--owner-receipt")){
+                // Handoff loads route policy above without reimporting keys or selection.
                 try{configurable->import_yaml_configuration(std::filesystem::absolute(options.at("--provider-config")),configurable->configuration().revision);}
                 catch(...){throw std::runtime_error("Provider YAML configuration could not be imported");}
             }
