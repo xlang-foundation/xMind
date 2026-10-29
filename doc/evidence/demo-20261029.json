@@ -232,5 +232,60 @@
       "CurrentMSVC19.51.36257 LTCG internal compiler error; raw log retained",
       "One-file IPO workaround also ICEd and was removed; originaloptimization flags retained forv142candidate"
     ]
+  },
+  "desktop": {
+    "status": "qualified_limited_vision_demo_profile",
+    "alias": {
+      "capabilities": {
+        "max_input_tokens": 512,
+        "streaming": false,
+        "vlm": true,
+        "chat_messages": false,
+        "tools": false
+      },
+      "task": "vlm",
+      "id": "qwen3-vl-2b-desktop-fast",
+      "reservation_units": 640,
+      "profile_id": "qwen3_vl_2b_desktop_fast_v1",
+      "model_id": "Qwen3-VL-2B-Instruct",
+      "max_output_tokens": 128,
+      "resource_key": "GarnetDesktopQwen3VL2BFast"
+    },
+    "node_id": "a5dc3e8a08569649988d33d353b53519",
+    "cantor_pid": 1720,
+    "gpu": "RTX4060Ti8GB",
+    "worldsense_http_status": 200,
+    "max_input_tokens": 512,
+    "max_output_tokens": 128,
+    "http_status": 200,
+    "seconds": 13.9961902,
+    "request_id": "40d726b630934e27b29744243630e27d",
+    "usage": {
+      "prompt_tokens": 82,
+      "completion_tokens": 31,
+      "total_tokens": 113,
+      "visual_tokens": 60
+    },
+    "settlement": {
+      "alias_id": "qwen3-vl-2b-desktop-fast",
+      "created_at": "2026-10-29 16:14:38.173883-07:00",
+      "measured_units": 113,
+      "outcome": "ok",
+      "project_id": "11d9dd6f-1760-420d-98f7-37c488d0bf1c",
+      "request_id": "40d726b6-3093-4e27-b297-44243630e27d",
+      "state": "settled",
+      "usage": {
+        "duration_ms": 13511.8069,
+        "output_tokens": 31,
+        "prompt_tokens": 82,
+        "provider_node_id": "a5dc3e8a08569649988d33d353b53519",
+        "visual_tokens": 60
+      }
+    },
+    "fixture": "D:/CantorStorage/CantorServe/media/testlab/statue-desktop-640x384.jpg",
+    "limitation": "JPEGvisiononly; fixed240patch geometry;640x384fixtureverified; arbitrarydimensions,text-only,toolsandstreamingnotqualified",
+    "existing_services_and_identity_preserved": true,
+    "testlab_ui_untouched": true,
+    "evidence": "D:/CantorStorage/CantorServe/logs/desktop-api-qualification-20261029.json"
   }
 }
