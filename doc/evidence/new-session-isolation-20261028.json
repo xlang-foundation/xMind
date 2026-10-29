@@ -1,0 +1,205 @@
+{
+  "date": "2026-10-28",
+  "sourceCommit": "f04044218579e75a7ccb97c0213d7da7fa429438",
+  "scope": "Actual live web UI creation, six configured-model turns and reloads; every chat prompt was entered and sent through browser controls, never an API chat script. No source changes, Native suite rerun or installed-editor claim.",
+  "url": "http://127.0.0.1:58613/ui/",
+  "sessions": [
+    {
+      "workspace": "web-search-check",
+      "sessionId": "6622de1037bd4532a1ebfd21e28a6f01",
+      "title": "CEDAR-A-1028: Read README.md in this workspace and summarize the",
+      "label": "CEDAR-A-1028",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "turns": [
+        {
+          "prompt": "CEDAR-A-1028: Read README.md in this workspace and summarize the project in one sentence. Remember CEDAR-A-1028 as this chat’s test label. Do not modify any files.",
+          "root": "c738396ffd72456aa5808e1f3357a0d9",
+          "state": "completed",
+          "neverReplay": true
+        },
+        {
+          "prompt": "What test label did I give this chat? Also list the top-level file and folder names in this workspace. Keep the answer short and do not modify anything.",
+          "root": "f430ffdd18844e48866cd1a766c30ed2",
+          "state": "completed",
+          "neverReplay": true
+        },
+        {
+          "prompt": "Reply with only this chat’s test label, followed by \" / turn three complete\".",
+          "root": "66f2a8f69eec4f0ea7df468d4074d048",
+          "state": "completed",
+          "neverReplay": true
+        }
+      ],
+      "historyCharacters": 1045,
+      "historySha256": "bce396fbee767f06735995fe59842e54863801fd69f64e44828aef5f18533887",
+      "selectedRun": "66f2a8f69eec4f0ea7df468d4074d048",
+      "responseMetricEntries": 5
+    },
+    {
+      "workspace": "ui-layout-check",
+      "sessionId": "59e88d0d56054220929276804107940c",
+      "title": "MAPLE-B-1028: Read README.md in this workspace and summarize the",
+      "label": "MAPLE-B-1028",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "turns": [
+        {
+          "prompt": "MAPLE-B-1028: Read README.md in this workspace and summarize the project in one sentence. Remember MAPLE-B-1028 as this chat’s test label. Do not modify any files.",
+          "root": "242d117030a24d129fefb5afd97b34c2",
+          "state": "completed",
+          "neverReplay": true
+        },
+        {
+          "prompt": "What test label did I give this chat? Also list the top-level file and folder names in this workspace. Keep the answer short and do not modify anything.",
+          "root": "453ac00a0ef6477f8052adda30757011",
+          "state": "completed",
+          "neverReplay": true
+        },
+        {
+          "prompt": "Reply with only this chat’s test label, followed by \" / turn three complete\".",
+          "root": "35c7c664238a4dddb99772d4e4001eb4",
+          "state": "completed",
+          "neverReplay": true
+        }
+      ],
+      "historyCharacters": 1023,
+      "historySha256": "23ff54aca90e56cf5bd2e6052040664ba39d7c0e5ed10740f3c270d0f0d2ecf9",
+      "selectedRun": "35c7c664238a4dddb99772d4e4001eb4",
+      "responseMetricEntries": 5
+    }
+  ],
+  "results": {
+    "newSessions": 2,
+    "completedTurns": 6,
+    "reloads": 3,
+    "exactHistoryAndWorkspaceSessionModelRestoration": true,
+    "selectedRunsRestored": true,
+    "foreignChatLabelsAbsent": true,
+    "distinctWorkspaceCatalogues": true,
+    "preExistingChatsUnchanged": true,
+    "consoleWarningsAndErrors": 0
+  },
+  "checks": [
+    {
+      "action": "reload",
+      "workspace": "ui-layout-check",
+      "key": "B",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "foreignMarkerAbsent": true,
+      "historyCharacters": 1023
+    },
+    {
+      "action": "switch to A new session",
+      "exact": true
+    },
+    {
+      "action": "reload",
+      "workspace": "web-search-check",
+      "key": "A",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "foreignMarkerAbsent": true,
+      "historyCharacters": 1045
+    },
+    {
+      "action": "switch to B new session",
+      "exact": true
+    },
+    {
+      "action": "reload",
+      "workspace": "ui-layout-check",
+      "key": "B",
+      "exact": true,
+      "sessionAndRunPreserved": true,
+      "foreignMarkerAbsent": true,
+      "historyCharacters": 1023
+    }
+  ],
+  "workspaceLists": [
+    {
+      "sessionIds": [
+        "220ac1f383cc45c6813c1588a1dde396",
+        "6622de1037bd4532a1ebfd21e28a6f01"
+      ],
+      "titles": [
+        "Native FastAPI test",
+        "CEDAR-A-1028: Read README.md in this workspace and summarize the"
+      ],
+      "workspace": "web-search-check"
+    },
+    {
+      "sessionIds": [
+        "3495c8284fc345fbb22dd0ac18026850",
+        "83106cfc910e4674a39f759959d28872",
+        "59e88d0d56054220929276804107940c"
+      ],
+      "titles": [
+        "List the top-level files in this workspace and tell me what it c",
+        "do a test",
+        "MAPLE-B-1028: Read README.md in this workspace and summarize the"
+      ],
+      "workspace": "ui-layout-check"
+    }
+  ],
+  "findings": [
+    {
+      "workspace": "web-search-check",
+      "turn": 1,
+      "result": "README read failed and the following directory listing was empty. A read-only filesystem check independently confirms README.md absent and zero top-level entries. Failure retained in the restored history; project prompts/files were not corrected."
+    },
+    {
+      "workspace": "ui-layout-check",
+      "result": "README read succeeded; the following turn listed README.md, index.html, sample.txt, server.py and activity-live-demo-20261027."
+    },
+    {
+      "result": "The first B snapshot was taken while creation was pending and still displayed the previous session. Subsequent UI receipts prove the submitted prompt ran in new session59e88d0d56054220929276804107940c; that new session has only its own three turns, and the original B history remains exact."
+    }
+  ],
+  "usage": {
+    "reportedResponseMetricEntries": 10,
+    "reportedCounters": {
+      "input": 61901,
+      "output": 272,
+      "total": 62173,
+      "cached": 29696,
+      "reasoning": 0
+    },
+    "raw": [
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 5,927 · Out 21 · Tok 5,948 · Cache 0 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 1.34s · Time 1.58s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 5,976 · Out 60 · Tok 6,036 · Cache 0 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 1.29s · Time 2.47s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,074 · Out 15 · Tok 6,089 · Cache 0 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 1.03s · Time 1.53s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,176 · Out 28 · Tok 6,204 · Cache 6,016 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 1.06s · Time 1.53s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,227 · Out 12 · Tok 6,239 · Cache 6,144 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 0.80s · Time 1.05s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 5,884 · Out 21 · Tok 5,905 · Cache 0 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 0.99s · Time 1.19s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,259 · Out 35 · Tok 6,294 · Cache 0 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 0.99s · Time 1.25s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,332 · Out 15 · Tok 6,347 · Cache 4,864 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 0.95s · Time 1.05s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,485 · Out 53 · Tok 6,538 · Cache 6,272 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 1.22s · Time 1.55s",
+      "Provider-reported tokens and backend-measured timings. A dash means unavailable; token counts are never estimated.\nIn 6,561 · Out 12 · Tok 6,573 · Cache 6,400 · Reason 0 · gpt-4.1 · OpenAI · Resp · TTFT 1.23s · Time 1.39s"
+    ],
+    "pricing": "No invoice amount supplied by the UI; no dollar charge inferred. Existing configured-model project-test authorization remains capped at $100 total, including earlier exercises."
+  },
+  "qualificationInputs": {
+    "files": 27425,
+    "beforeSha256": "3b3cc8c3a4759f38622e55ab1d3951155714ddc16dad9424029f773c8723e17d",
+    "afterSha256": "3b3cc8c3a4759f38622e55ab1d3951155714ddc16dad9424029f773c8723e17d",
+    "identical": true
+  },
+  "screenshots": [
+    {
+      "workspace": "web-search-check",
+      "path": "doc/evidence/new-session-isolation-a-20261028.png",
+      "sha256": "0e557a3437de486ef2a1b1585f92997450ce4c86e34c807449543323aade9153"
+    },
+    {
+      "workspace": "ui-layout-check",
+      "path": "doc/evidence/new-session-isolation-b-20261028.png",
+      "sha256": "79773f2d4ab2168cc8f323ec672cbd60e47cd886466160ea100edc183fe64784"
+    }
+  ],
+  "newUserSessionsRetained": true,
+  "finalSelectedSession": "59e88d0d56054220929276804107940c",
+  "neverReplay": "All six recorded roots are completed. Do not resend or replay them.",
+  "limitations": "Local in-app browser acceptance of the two existing workspaces. No file modifications were requested; the absent README in A is a preserved task result, not a successful read."
+}
