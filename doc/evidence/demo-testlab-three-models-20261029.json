@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "source": "CantorServe browser Test Lab",
+  "endpoint": "http://127.0.0.1:19445",
+  "started_at": "2026-10-29T22:57:03.878Z",
+  "stopped": false,
+  "config": {
+    "protocol": "openai",
+    "workload": "text",
+    "models": [
+      "qwen3.5-2b-code-32k",
+      "qwen3.5-2b-code-32k-shawn",
+      "qwen3.8-27b-chat-32k"
+    ],
+    "requests": 3,
+    "concurrency": 1,
+    "max_tokens": 32,
+    "prompt": "Explain what an API gateway does in one short sentence.",
+    "warmups": 0
+  },
+  "summary": {
+    "elapsed_seconds": 8.041,
+    "completed": 3,
+    "successful": 3,
+    "failed": 0,
+    "successful_requests_per_second": 0.373087924387514,
+    "p50_ms": 2450.6999999955297,
+    "p95_ms": 4430.4000000059605,
+    "output_tokens": 89,
+    "requests_with_token_counts": 3,
+    "measured_output_tokens_per_second": 11.068275090162915
+  },
+  "results": [
+    {
+      "index": 0,
+      "model": "qwen3.5-2b-code-32k",
+      "ok": true,
+      "status": 200,
+      "output_tokens": 30,
+      "prompt_tokens": 24,
+      "worker": "618367c4896d99c06ae8cf663909a519",
+      "request_id": "0bbe42bb146840c7a8b55cb737419275",
+      "served_model_id": "Qwen3.5-2B",
+      "served_profile_id": "qwen35_2b_chat_32k_v1",
+      "text": "An API gateway acts as a central entry point that routes incoming requests to the appropriate backend services while managing security, rate limiting, and traffic distribution.",
+      "latency_ms": 1143.2999999970198,
+      "finished_ms": 1155.7999999970198
+    },
+    {
+      "index": 1,
+      "model": "qwen3.5-2b-code-32k-shawn",
+      "ok": true,
+      "status": 200,
+      "output_tokens": 27,
+      "prompt_tokens": 24,
+      "worker": "c988bb3eeb407352b1fb0fc6cf3e6462",
+      "request_id": "cda3f31e1ecd4e48a0424deeedd19c59",
+      "served_model_id": "Qwen3.5-2B",
+      "served_profile_id": "qwen35_2b_chat_32k_ampere_v1",
+      "text": "An API gateway acts as a central entry point that routes, validates, and secures incoming requests before they reach the backend services.",
+      "latency_ms": 4430.4000000059605,
+      "finished_ms": 5587.5
+    },
+    {
+      "index": 2,
+      "model": "qwen3.8-27b-chat-32k",
+      "ok": true,
+      "status": 200,
+      "output_tokens": 32,
+      "prompt_tokens": 24,
+      "worker": "4700c065d4d742379c48d9d5328be19b",
+      "request_id": "bed3d6cca261411d8256f4b54960a87b",
+      "served_model_id": "Qwen3.8-27B",
+      "served_profile_id": "qwen38_27b_nvfp4_chat_32k_v2",
+      "text": "An API gateway acts as a single entry point for all client requests, routing them to the appropriate backend services while handling cross-cutting concerns like authentication, rate limiting",
+      "latency_ms": 2450.6999999955297,
+      "finished_ms": 8039.5999999940395
+    }
+  ],
+  "notes": [
+    "No warmups; complete-response HTTP latency, not TTFT.",
+    "Unknown token counters and executor identities are null, never inferred.",
+    "Different models constitute a mixed workload; replica balancing requires the same model/profile on multiple nodes."
+  ]
+}

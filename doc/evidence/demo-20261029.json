@@ -1,5 +1,5 @@
 {
-  "status": "xmind_proverb_passed_opencode_in_progress_testlab_prepared",
+  "status": "xmind_proverb_passed_testlab_3_passed_wordy_interrupted_runtime_candidate_unqualified",
   "deadline": "2026-10-29T16:30:00-07:00",
   "timezone": "America/Los_Angeles",
   "requirements": [
@@ -87,17 +87,33 @@
     "requests": 3,
     "concurrency": 1,
     "max_output_tokens": 32,
-    "run_started": false
+    "run_started": true,
+    "status": "completed",
+    "report": "doc/evidence/demo-testlab-three-models-20261029.json",
+    "screenshot": ".agentflow/demo-20261029/testlab-three-real-requests.png",
+    "summary": {
+      "elapsed_seconds": 8.041,
+      "completed": 3,
+      "successful": 3,
+      "failed": 0,
+      "successful_requests_per_second": 0.373087924387514,
+      "p50_ms": 2450.6999999955297,
+      "p95_ms": 4430.4000000059605,
+      "output_tokens": 89,
+      "requests_with_token_counts": 3,
+      "measured_output_tokens_per_second": 11.068275090162915
+    },
+    "manual_demo": "User requested this tab remain open for their own demo tests; no further UI actions after physical Escape"
   },
   "opencode": {
-    "status": "In progress; user added please run it from desktop at15:33; same session preserved; independent xlang3 regex gap confirmed",
+    "status": "Wordy interrupted through both normal UI owner Stop controls after repeated identical regex probes; original project/history preserved; original25tests ran with8failures14errors",
     "project": "D:/CantorStorage/CantorServe/clients/opencode-project-20261029-1508",
     "planned_task": "Original public Wordy exercise plus a small web calculator with an xlang3 Python backend; original tests unchanged",
     "ui": "http://127.0.0.1:17777/",
     "session_url": "http://127.0.0.1:17777/server/aHR0cDovLzEyNy4wLjAuMToxNzc3Nw/session/ses_e76418e7dffeMh36qTpreL58I0",
     "original_tests_sha256": "3c8bf5b17e14c8f8953107c0ae9600be0c0d96e578cf442526dbedf0c57889da",
     "original_tests_total": 25,
-    "tests_passed": null,
+    "tests_passed": 3,
     "runtime_gap": {
       "scope": "independent xlang3 regex compatibility reproduction",
       "cases": [
@@ -159,11 +175,62 @@
         }
       ]
     },
-    "desktop_session_opened": true
+    "desktop_session_opened": true,
+    "tests_failed": 22,
+    "failed_test_log": ".agentflow/demo-20261029/wordy-interim-independent-tests.log",
+    "prepared_next_project": "D:/CantorAI2026/TestProj/opencode-polyglot-demo-20261029",
+    "prepared_next_project_status": "Original upstream34starters/tests frozen in Git; folder selected in desktop IDE; no prompt submitted because user stopped Computer Use"
   },
   "preserved_config_failure": {
     "reason": "Narrowing the model policy before importing the new saved default blocked restart; legacy declarations restored and same profile recovered",
     "log": ".agentflow/demo-20261029/provider-update.stderr.log",
     "recovery": ".agentflow/demo-20261029/provider-recovery.stdout.log"
+  },
+  "runtime_candidate": {
+    "status": "not_installed_not_committed_performance_inconclusive",
+    "source_parent": "be164c587886053c040afbfee621cbb60a03b843",
+    "worktree": ".agentflow/xlang3-regex-optional",
+    "branch": "codex/xmind-regex-optional-20261029",
+    "build": ".agentflow/xlang3-regex-optional-build-v142",
+    "candidate_dll_sha256": "38cfc5122209d3f564a83fe0a208effd0f48d5d8c20e7af498b8fb2ad7b812bc",
+    "baseline_dll_sha256": "7220570f36cb7cb6599658eab000abac4eee76ead19f62395dd0c4f1130254dd",
+    "regex_fixtures": {
+      "passed": 10,
+      "total": 10,
+      "baseline_regression_failed": true,
+      "log": ".agentflow/demo-20261029/regex-fixtures.json"
+    },
+    "native_agent_contract": {
+      "passed": true,
+      "inference": "synthetic peer; real filesystem/SQLite/native workers",
+      "log": ".agentflow/demo-20261029/regex-native-agent-contract-frozen.log"
+    },
+    "web_adapter": {
+      "passed": 28,
+      "total": 28,
+      "log": ".agentflow/demo-20261029/regex-web-adapter-configured-tests.log",
+      "initial_harness_failure": "Missing runtime configuration key; original27/28 log preserved separately"
+    },
+    "performance": {
+      "cases": 11,
+      "repeats": 21,
+      "warmup": 5,
+      "threshold": 0.1,
+      "first_exit": 2,
+      "pinned_exit": 2,
+      "pinned_affinity_mask": 256,
+      "first_report": ".agentflow/demo-20261029/regex-performance.json",
+      "pinned_report": ".agentflow/demo-20261029/regex-performance-pinned.json"
+    },
+    "frozen_inputs": {
+      "count": 28019,
+      "mismatches": 0,
+      "before": ".agentflow/demo-20261029/regex-expanded-inputs-before.json",
+      "after": ".agentflow/demo-20261029/regex-expanded-inputs-after-performance.json"
+    },
+    "compiler_failures": [
+      "CurrentMSVC19.51.36257 LTCG internal compiler error; raw log retained",
+      "One-file IPO workaround also ICEd and was removed; originaloptimization flags retained forv142candidate"
+    ]
   }
 }
