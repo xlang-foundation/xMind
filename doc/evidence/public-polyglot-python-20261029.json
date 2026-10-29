@@ -1,11 +1,11 @@
 {
-  "status": "blocked_on_model_coding_quality_stronger_profile_unqualified",
+  "status": "blocked_pending_larger_qualified_27b_context",
   "source": "https://github.com/Aider-AI/polyglot-benchmark",
   "revision": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f",
   "scope": "34 Python practice exercises; xMind browser workflow, not official Aider harness or leaderboard score",
   "workspace": "D:/CantorAI2026/TestProj/xmind-polyglot-python-20261029",
   "ui": "http://127.0.0.1:59449/ui/",
-  "model": "qwen3.5-2b-code-32k-shawn",
+  "model": "qwen3.8-27b-chat-4k",
   "isolation": "Separate qualified Shawn GPU; pre-existing local stock-app run preserved",
   "runtime": "D:/CantorAI2026/xMind/.agentflow/local-runtime/xlang3.exe",
   "baseline": ".agentflow/polyglot-python-baseline-20261029.json",
@@ -64,6 +64,18 @@
         "evidence": "D:/CantorStorage/CantorServe/logs/xmind-proverb-failure-settlement.json",
         "output_tokens": 406
       }
+    },
+    {
+      "model": "qwen3.8-27b-chat-4k",
+      "effects": 0,
+      "diagnostic": "chat_provider_error_event",
+      "exercise": "proverb",
+      "provider_receipt_cause": "requested from CantorServe; exact cause not yet verified",
+      "run_id": "a019217457804d3b86cacb8ad86130d9",
+      "status": "failed_provider_stream_error_before_tools",
+      "attempt": 2,
+      "tools_run": 0,
+      "prompt": "Continue the unfinished proverb exercise. Complete its implementation and run the original tests with xlang3 until they pass. Keep all supplied tests unchanged."
     }
   ],
   "argument_feedback_fix": {
@@ -150,5 +162,19 @@
       "reason": "Original upstream starter omits WHITE/BLACK/NONE constants required by its tests; implementation work, not an xlang3 compatibility finding"
     },
     "loader_placeholder_errors": 1
+  },
+  "initial_model": "qwen3.5-2b-code-32k-shawn",
+  "selected_27b": {
+    "qualified_output_limit": 1024,
+    "reference_counter_scope": "Previous 2B provider request, not measured 27B request input",
+    "qualified_input_limit": 3072,
+    "reference_prompt_tokens": 10964,
+    "larger_context": "16K/32K component tests passed; full-model qualification pending; not published as qualified",
+    "user_authorized": true,
+    "current_alias": "qwen3.8-27b-chat-4k",
+    "screenshot": ".agentflow/public-benchmark-27b-attempt-20261029.png",
+    "qualified_total_context": 4096,
+    "selected_in_ui": true,
+    "provider_capacity_source": "D:/CantorStorage/CantorServe/logs/client-acceptance-window.json"
   }
 }
