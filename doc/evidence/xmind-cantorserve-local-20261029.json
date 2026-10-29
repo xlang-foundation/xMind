@@ -11,12 +11,58 @@
     "notes": "Initial SDK lacked LrpcListen. Fast-forwarded to merged origin/main. Initial Cargo 1.80.1 failed an edition2024 dependency; installed 1.85.1 selected without changing global defaults. Original failed logs retained."
   },
   "tests": {
-    "xlang3": {"selected": 63, "passed": 62, "failed": ["xlang3_native_library_path"], "excluded": ["xlang3_cli_pickle_interop requires CPython"], "failure": "No mapping for the Unicode character exists in the target multi-byte code page."},
-    "xmind_native_baseline": {"source": "b858b04edc99433b4601b1493a3c51967f660f94", "total": 185, "passed": 176, "failed": ["native_xlang3_default_process_contract", "native_mcp_oauth_service_contract", "native_mcp_oauth_renewal_negative_contract", "native_skill_catalogue_contract", "native_agent_patch_http_contract", "native_unified_patch_http_contract", "native_local_profile_contract", "native_local_view_contract", "native_local_view_provider_config_contract"], "duration_seconds": 612.86},
-    "extension": {"passed": 528, "failed": 0},
-    "browser_final": {"passed": 218, "failed": 0, "notes": "Native ASGI fixture and embedded-xlang3 packages configured. Earlier missing-assets and missing-environment failures retained separately."},
-    "compatible_provider_yaml_final": {"passed": 1, "failed": 0, "coverage": "URL validation, capability defaults, encrypted key-only registration and atomic rejection of changed credential destinations/capabilities"},
-    "native_web_environment_focused": {"passed": 4, "failed": 0, "tests": ["native_mcp_oauth_service_contract", "native_mcp_oauth_renewal_negative_contract", "native_skill_catalogue_contract", "native_local_view_provider_config_contract"]},
+    "xlang3": {
+      "selected": 63,
+      "passed": 62,
+      "failed": [
+        "xlang3_native_library_path"
+      ],
+      "excluded": [
+        "xlang3_cli_pickle_interop requires CPython"
+      ],
+      "failure": "No mapping for the Unicode character exists in the target multi-byte code page."
+    },
+    "xmind_native_baseline": {
+      "source": "b858b04edc99433b4601b1493a3c51967f660f94",
+      "total": 185,
+      "passed": 176,
+      "failed": [
+        "native_xlang3_default_process_contract",
+        "native_mcp_oauth_service_contract",
+        "native_mcp_oauth_renewal_negative_contract",
+        "native_skill_catalogue_contract",
+        "native_agent_patch_http_contract",
+        "native_unified_patch_http_contract",
+        "native_local_profile_contract",
+        "native_local_view_contract",
+        "native_local_view_provider_config_contract"
+      ],
+      "duration_seconds": 612.86
+    },
+    "extension": {
+      "passed": 528,
+      "failed": 0
+    },
+    "browser_final": {
+      "passed": 218,
+      "failed": 0,
+      "notes": "Native ASGI fixture and embedded-xlang3 packages configured. Earlier missing-assets and missing-environment failures retained separately."
+    },
+    "compatible_provider_yaml_final": {
+      "passed": 1,
+      "failed": 0,
+      "coverage": "URL validation, capability defaults, encrypted key-only registration and atomic rejection of changed credential destinations/capabilities"
+    },
+    "native_web_environment_focused": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        "native_mcp_oauth_service_contract",
+        "native_mcp_oauth_renewal_negative_contract",
+        "native_skill_catalogue_contract",
+        "native_local_view_provider_config_contract"
+      ]
+    },
     "qualification_limit": "Focused passes are not combined into a final full-suite pass. Native child-process/Unicode startup and CLI move-preview baseline findings remain unresolved. No performance gate or real model completion claimed."
   },
   "runtime": {
@@ -36,12 +82,18 @@
     "saved_model": null,
     "tools": "unsupported",
     "stream_usage": "unsupported",
-    "initial_authenticated_discovery": ["qwen3-1.7b-demo", "qwen3.5-4b"],
+    "initial_authenticated_discovery": [
+      "qwen3-1.7b-demo",
+      "qwen3.5-4b"
+    ],
     "streaming_request_status": 501,
     "streaming_error": "unsupported_capability: End-to-end incremental streaming has not passed runtime acceptance",
     "later_discovery_status": 503,
     "later_discovery_error": "CantorServe broker call failed; inspect the node service logs",
-    "later_discovery_ports": [19445, 19446],
+    "later_discovery_ports": [
+      19445,
+      19446
+    ],
     "ui_observed": "Saved openai-compatible key-only profile visible. Fetch models displays provider HTTP 503.",
     "startup_with_model": "Rejected because workspace coding requires declared model tool capability; key-only registration starts successfully",
     "live_inference_acceptance": false,
@@ -58,5 +110,32 @@
     ".agentflow/compatible-provider-tests-20261029.log",
     ".agentflow/browser-tests-native-20261029.log",
     ".agentflow/native-web-environment-tests-20261029.log"
-  ]
+  ],
+  "qualified_model_update": {
+    "source_commit": "43b87c71c84af987b7c837a22918e719ce40314d",
+    "handoff_logs": ".agentflow/qualified-model-handoff.log",
+    "run_state": "failed",
+    "stream_usage": "supported",
+    "ui_result": "Model selected and Send enabled; declared tool capability error resolved",
+    "elapsed_ms": 10139,
+    "owner_pid": 39588,
+    "full_suite_rerun": false,
+    "replayed": false,
+    "owner_birth": "134377430514716812",
+    "model": "qwen3.5-2b-code-32k",
+    "real_ui_prompt": "Reply with a short greeting.",
+    "url": "http://127.0.0.1:63152/ui/",
+    "runtime_sha256": "a708f4b4e515f4c659d19a598604497faa47ac9db3be61938c725051ebed37ee",
+    "handoff_finding": "Managed replacement omits provider_config; custom route unavailable and replacement startup fails. Original profile and logs retained. Fresh qualified owner starts directly; no user data rewritten.",
+    "run_error": "provider_transport_error",
+    "tools": "supported",
+    "scope": "Only the exact qualified model is eligible; older aliases filtered by native policy",
+    "run_id": "c03c4df561af47dc80de2296d2482d95",
+    "cantorserve_evidence": [
+      "qwen35-2b-chat32k-stream-attempt2.json",
+      "qwen35-2b-chat32k-tool-attempt1.json",
+      "qwen35-2b-chat32k-tool-result-continuation.json"
+    ],
+    "focused_yaml_test": "1/1 passed"
+  }
 }
