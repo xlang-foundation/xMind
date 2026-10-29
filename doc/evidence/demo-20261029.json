@@ -1,0 +1,46 @@
+{
+  "status": "preparing_not_yet_demo_qualified",
+  "deadline": "2026-10-29T16:30:00-07:00",
+  "timezone": "America/Los_Angeles",
+  "requirements": ["One running xMind instance and one active public benchmark profile", "Real coding, unchanged public tests and measured provider results", "OpenCode web project through the same CantorServe", "Preserve failed runs and saved history"],
+  "xmind": {
+    "ui": "http://127.0.0.1:59449/ui/",
+    "workspace": "D:/CantorAI2026/TestProj/xmind-polyglot-python-20261029",
+    "process_id": 34592,
+    "process_birth": "134377852318369698",
+    "active_profile": "b8c91e6aa2576f008c73f2da618ff1dda9f107fbd8e78c22772622398c1c762b",
+    "launch_helper": ".agentflow/start-demo-xmind.ps1",
+    "model": "qwen3.8-27b-chat-32k",
+    "current_run": "a8c5cfd1a80d41c7ada15d733f6ca75b",
+    "current_exercise": "proverb",
+    "current_run_status": "running; no pass claimed"
+  },
+  "consolidation": {
+    "retired_idle_processes": [34172, 37804],
+    "identity_checks": "Exact PID, creation time and image path verified; SQL run states all terminal before stop",
+    "archived_profile_root": "C:/Users/shaw9/.xMind/cantorserve-coding-validation-20261029/.demo-archive-20261029",
+    "archived_profiles": ["bf2aa978d809d00625bf35153307875fe62d0b3f9415f266a20cef5e46d1b24d", "802a4190b3b099b88d69457527e155f5d780d7557643896ed5d462d464602636"],
+    "preservation": "Session, message, run and operation row hashes match before/after archive; no history deleted",
+    "before": ".agentflow/demo-20261029/archived-history-before.json",
+    "after": ".agentflow/demo-20261029/archived-history-after.json",
+    "restore_note": "Protected profile records are bound to their original paths. Restore an archived directory to its original immediate child path under the profile root before reopening it; never launch from inside the archive."
+  },
+  "provider": {
+    "api": "http://127.0.0.1:19446/v1",
+    "node_id": "618367c4896d99c06ae8cf663909a519",
+    "portal_auth": "preserved",
+    "model": "qwen3.8-27b-chat-32k",
+    "qualified_input_tokens": 28672,
+    "qualified_output_tokens": 4096,
+    "qualified_context_tokens": 32768,
+    "api_timeout_seconds": 660,
+    "worker_timeout_seconds": 600,
+    "xmind_provider_timeout": "Existing native client deadline retained; no global deadline change or long-context xMind acceptance claimed",
+    "evidence": "D:/CantorStorage/CantorServe/logs/qwen38-32k-demo-ready.json",
+    "inference_coordination": "xMind first, OpenCode deferred until worker window released"
+  },
+  "benchmark": {"source": "https://github.com/Aider-AI/polyglot-benchmark", "revision": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f", "dataset_exercises": 34, "original_test_methods": 584, "tests_changed": 0, "official_aider_score": false},
+  "testlab": {"url": "http://127.0.0.1:19445/testlab", "discovery": "Observed 6 authorized models after API restart; no manual model IDs needed", "prepared_models": ["qwen3.5-2b-code-32k", "qwen3.5-2b-code-32k-shawn", "qwen3.8-27b-chat-32k"], "requests": 3, "concurrency": 1, "max_output_tokens": 32, "run_started": false},
+  "opencode": {"status": "Project/web UI preparation delegated to the existing authorized CantorServe chat; inference deferred", "project": "D:/CantorStorage/CantorServe/clients/opencode-project-20261029-1508", "planned_task": "Original public Wordy exercise plus a small web calculator with an xlang3 Python backend; original tests unchanged"},
+  "preserved_config_failure": {"reason": "Narrowing the model policy before importing the new saved default blocked restart; legacy declarations restored and same profile recovered", "log": ".agentflow/demo-20261029/provider-update.stderr.log", "recovery": ".agentflow/demo-20261029/provider-recovery.stdout.log"}
+}
