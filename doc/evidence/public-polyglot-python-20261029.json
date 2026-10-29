@@ -4,7 +4,7 @@
   "revision": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f",
   "scope": "34 Python practice exercises; xMind browser workflow, not official Aider harness or leaderboard score",
   "workspace": "D:/CantorAI2026/TestProj/xmind-polyglot-python-20261029",
-  "ui": "http://127.0.0.1:55653/ui/",
+  "ui": "http://127.0.0.1:59449/ui/",
   "model": "qwen3.5-2b-code-32k-shawn",
   "isolation": "Separate qualified Shawn GPU; pre-existing local stock-app run preserved",
   "runtime": "D:/CantorAI2026/xMind/.agentflow/local-runtime/xlang3.exe",
@@ -32,6 +32,22 @@
         "3 rejected edit calls; first content_conflict, later invalid_arguments",
         "No implementation or test changes applied"
       ]
+    },
+    {
+      "prompt": "Continue the unfinished affine-cipher exercise. Complete the implementation, run its original tests with xlang3, and resolve any failures until they all pass. Keep the supplied tests unchanged.",
+      "exercise": "affine-cipher",
+      "status": "cancelled_after_repeated_invalid_calls",
+      "attempt": 2,
+      "run_id": "2e60dc3804124332b9f8e0c19f722aa1",
+      "reason": "Two repeated missing path errors after live missing_required feedback; no file effects; stopped for repeated invalid calls, not observation delay"
+    },
+    {
+      "exercise": "proverb",
+      "attempt": 1,
+      "selection_reason": "Fresh smaller exercise to isolate basic edit/test path; no benchmark score inferred from this selection",
+      "run_id": "0a5156d63d814c08ac6683774e0e79e0",
+      "prompt": "Implement the proverb exercise using proverb/.docs/instructions.md and its existing starter file. Follow the evaluation rules in README.md. Keep the original tests unchanged and run them with xlang3 until they all pass.",
+      "status": "running"
     }
   ],
   "argument_feedback_fix": {
@@ -47,16 +63,24 @@
     "log": ".agentflow/benchmark-argument-feedback-tests.log",
     "seconds": 10.22,
     "no_effect_or_approval_proposal": true,
-    "test": "native_agent_runner_contract"
+    "test": "native_agent_runner_contract",
+    "live_feedback": "Observed missing_required path in actual Shawn model tool result; model repeated omission"
   },
   "entry_navigation_fix": {
     "log": ".agentflow/benchmark-entry-navigation-final-tests.log",
     "scope": "Public static entry document top-level navigation only; API/session exact-origin checks retained",
     "seconds": 42.58,
     "passed": 28,
-    "rendered_acceptance": "pending",
+    "rendered_acceptance": "passed: Edge409865272 loaded entry, restored failed history and selected Shawn model",
     "tests": 28,
     "frozen_source_runtime_paths": 12392,
     "closure_unchanged": true
+  },
+  "backend": {
+    "process_birth": "134377776885759472",
+    "native_sha256": "519302fa1310b32cf1ff68c5ace20e49d3aed13bc47c95b70b8c61940103636d",
+    "native_revision": "e1ce2464e2ec34c8cb53d7714c3ab6d0f6f80aee",
+    "managed_upgrade": "idle benchmark profile only; original owners34172/35472 retained",
+    "pid": 16876
   }
 }
