@@ -4,6 +4,17 @@
 // behavior. It is not evidence of C++ persistence or real model execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createServer}=require('node:http'),{resolve}=require('node:path');
+test('inactive workspace session reads preserve their explicit scope and reject malformed or mutating requests',async()=>{
+ const {createNativeBrowserFixture}=await import('./native-host.mjs');const credential='a'.repeat(64)+'.'+'b'.repeat(64),seen=[];let view;
+ const peer=createServer(async(request,response)=>{for await(const _ of request){}if(request.url==='/v1/view-sessions')response.end(JSON.stringify({credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800}));else{seen.push([request.method,request.url]);response.end(JSON.stringify({workspace_id:'windows-local-file-v1:other',sessions:[],archive_capability:true}));}});
+ await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));
+ try{
+  view=await createNativeBrowserFixture({backend:'http://127.0.0.1:'+peer.address().port,assetRoot:resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets'),localAccessToken:'synthetic-catalogue-owner-'.padEnd(64,'x')});const origin=await view.listen(),session=await fetch(origin+'/ui/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'}),cookie=session.headers.get('set-cookie').split(';')[0],headers={Cookie:cookie,'Sec-Fetch-Site':'same-origin'};
+  const route='/ui/workspaces/sessions?workspace_id=windows-local-file-v1%3Aother',result=await fetch(origin+route,{headers});assert.equal(result.status,200);assert.equal(result.headers.get('set-cookie'),null);assert.equal((await result.json()).workspace_id,'windows-local-file-v1:other');assert.deepEqual(seen,[['GET','/v1/workspaces/sessions?workspace_id=windows-local-file-v1:other']]);
+  for(const query of ['','?workspace_id=invalid','?workspace_id=windows-local-file-v1:other&workspace_id=windows-local-file-v1:other','?workspace_id=windows-local-file-v1:other&extra=x'])assert.equal((await fetch(origin+'/ui/workspaces/sessions'+query,{headers})).status,400);
+  assert.equal((await fetch(origin+route,{method:'POST',headers:{...headers,Origin:origin,'Content-Type':'application/json'},body:'{}'})).status,400);assert.equal(seen.length,1);
+ }finally{await view?.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
+});
 test('production native jobs leave the ASGI event loop responsive while a backend read is blocked',async()=>{
  const {createNativeBrowserFixture}=await import('./native-host.mjs');
  const credential='a'.repeat(64)+'.'+'b'.repeat(64);let release,entered;const held=new Promise(resolve=>{release=resolve;}),started=new Promise(resolve=>{entered=resolve;});let view,slow;

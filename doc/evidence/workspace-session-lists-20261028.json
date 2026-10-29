@@ -1,0 +1,212 @@
+{
+  "date": "2026-10-28",
+  "sourceBase": "95264b01",
+  "sources": {
+    "Native/apps/local_view_main.cpp": "bcbc23ada4ef9fcf2d158d842c8358819fc7f812852f605e99a980a667e416d1",
+    "Native/tests/embedded_web_host_contract.mjs": "02b604594fab248c7684773ae9d13c226a8837f74adb30e18c63daaec3201019",
+    "Tools/ci-views.mjs": "f5af13ea762531d2b6d03fa5dc12aa9c0e948d017ca56932b0e744801fe43705",
+    "views/browser/browser.js": "e328786a8439e6c0c5b8338c213557f6e618e77e7e20bf4227b197e574e00568",
+    "views/browser/layout.css": "23e9168b51d17f75695ffde82105a447f5765f333c630bb8e872bed7c9ac3610",
+    "views/browser/layout.js": "7646137eabc582e42cb9cccacc5dbc7dac9bb1718c8b28ddfd6759f3670e2b0f",
+    "views/browser/tests/connection.test.cjs": "59b9f01d989bbb1e67c02007e591de6ccb975e87206d9851aae6ff4a779b5718",
+    "views/browser/tests/controller.test.cjs": "e0a99af95fa6e42210d017c334e7f8f84a66e73a156d80612245ae542afcdaf9",
+    "views/browser/tests/layout.test.cjs": "17e0c16bf9ad699480513dbc5ea6b3c5e70bc82f7a93a197a6a1073b68b62989",
+    "views/browser/tests/server.test.cjs": "bc775e4df1d94e2d743327a8aac5320ad9079c168d74ddb31b68681a2597625e",
+    "views/browser/xmind_web.py": "e1529011e941eafcbbe57f7a86bb096d68f4374ec5900152b18f56cf7409219e"
+  },
+  "problem": "The sidebar reused one active native select as its session source, coupled expansion with workspace selection, and saved selection using a mutable selected-workspace variable. It had no independent workspace catalogue. Earlier acceptance switched active workspaces rather than keeping multiple groups expanded.",
+  "change": "C++ serves a read-only catalogue for an explicit registered workspace after validating browser access, without changing its selected workspace/cookie or issuing a browser lease. Session lists and expansion state are keyed by workspace; selected rows/actions are scoped by workspace plus session ID. Controllers capture their workspace for saves/posts, suppress retired responses, and read scoped catalogues. Clicking a session in another workspace uses the normal native selection handler and preserves an already-restored inspected run.",
+  "qualification": {
+    "files": 27425,
+    "nativeAndTransportClosure": {
+      "before": "0d5ab4d4997cde682d44dbbc84eb30499b317ed285fb87601f41c3e9aafe9d4b",
+      "after": "0d5ab4d4997cde682d44dbbc84eb30499b317ed285fb87601f41c3e9aafe9d4b",
+      "identical": true
+    },
+    "finalUiClosure": {
+      "before": "3b3cc8c3a4759f38622e55ab1d3951155714ddc16dad9424029f773c8723e17d",
+      "after": "3b3cc8c3a4759f38622e55ab1d3951155714ddc16dad9424029f773c8723e17d",
+      "identical": true
+    },
+    "phaseChanges": [
+      "assets/browser.js",
+      "source/Tools/ci-views.mjs",
+      "source/views/browser/browser.js",
+      "source/views/browser/tests/connection.test.cjs"
+    ],
+    "phaseExplanation": "The final UI-only refinement updates the native select/header immediately through the existing change handler. All Native sources/binaries, SDK, runtime/Python modules and transport tests remain identical to the preceding Native/transport qualification. The final complete browser suite and actual rendered UI cover this refinement.",
+    "browser": {
+      "tests": 181,
+      "passed": 181,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "75bd73479d80b068000b86063425534984ce3683734d719c4ec1b3cae2ac4c13"
+    },
+    "asgi": {
+      "tests": 35,
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "logSha256": "ce444f60a21e2e2c2cc6e6a28ee274545beff452a7bd5e68a21ea1b4478d7142"
+    },
+    "native": {
+      "tests": [
+        "native_request_session_contract",
+        "native_web_stream_contract",
+        "native_web_request_queue_contract",
+        "native_local_view_contract",
+        "native_local_view_provider_config_contract"
+      ],
+      "passed": 5,
+      "failed": 0,
+      "fullInventory": 188,
+      "fullInventoryExecuted": false,
+      "logSha256": "ae470784de34293a36bf400b25a63a78b064ac909c6993b65b195dd89092258a"
+    },
+    "mainProcess": {
+      "passed": true,
+      "scope": "Actual main-process FastAPI, standard SDK workspace routing and managed handoff; zero-model graph; no rendered UI claim",
+      "url": "http://127.0.0.1:49229/ui/",
+      "initialOwner": 59148,
+      "replacementOwner": 53152,
+      "peerOwner": 51104,
+      "session": "9f9d0925aaef278bbcac217a19c82921",
+      "root": "699ffd8cd5dd19459d7a2da5771d6a60",
+      "paidInference": false,
+      "neverReplay": true
+    }
+  },
+  "regressionGuards": [
+    "Independently expanded workspaces with deliberately identical session IDs retain distinct titles and only one active selection.",
+    "The old shared select cannot populate a newly selected workspace while its catalogue loads.",
+    "Foreign workspace catalogue receipts are rejected.",
+    "Sidebar selection updates the normal native select immediately and does not replay selection of an already-restored session.",
+    "Native read-only A/B catalogues return distinct saved/empty session sets without changing selected workspace or cookie.",
+    "Malformed, duplicate and mutating transport requests are rejected."
+  ],
+  "actualUi": {
+    "url": "http://127.0.0.1:58613/ui/",
+    "groups": [
+      {
+        "expanded": "true",
+        "sessions": [
+          {
+            "id": "220ac1f383cc45c6813c1588a1dde396",
+            "title": "Native FastAPI test",
+            "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000294b110000000000"
+          }
+        ],
+        "workspace": "web-search-check"
+      },
+      {
+        "expanded": "true",
+        "sessions": [
+          {
+            "id": "3495c8284fc345fbb22dd0ac18026850",
+            "title": "List the top-level files in this workspace and tell me what it c",
+            "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000"
+          },
+          {
+            "id": "83106cfc910e4674a39f759959d28872",
+            "title": "do a test",
+            "workspaceId": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000be44110000000000"
+          }
+        ],
+        "workspace": "ui-layout-check"
+      }
+    ],
+    "independentCollapse": {
+      "a": "false",
+      "b": "true"
+    },
+    "expansionLeavesActiveChatAndIdsUnchanged": true,
+    "finalSessionChecks": [
+      {
+        "action": "open session under its workspace",
+        "workspace": "web-search-check",
+        "session": "Native FastAPI test",
+        "exact": true,
+        "idsExact": true,
+        "historyLength": 1681
+      },
+      {
+        "action": "open session under its workspace",
+        "workspace": "ui-layout-check",
+        "session": "do a test",
+        "exact": true,
+        "idsExact": true,
+        "historyLength": 486
+      },
+      {
+        "action": "open session under its workspace",
+        "workspace": "web-search-check",
+        "session": "Native FastAPI test",
+        "exact": true,
+        "idsExact": true,
+        "historyLength": 1681
+      },
+      {
+        "action": "open session under its workspace",
+        "workspace": "ui-layout-check",
+        "session": "List the top-level files in this workspace and tell me what it c",
+        "exact": true,
+        "idsExact": true,
+        "historyLength": 1392
+      }
+    ],
+    "originalHistoryModelWorkspaceSessionAndInspectedRunRestored": true,
+    "bothExpandedAfterReload": true,
+    "activityRestored": true,
+    "consoleIssues": [],
+    "signInPrompt": false,
+    "initialHeaderLag": {
+      "finding": {
+        "action": "open session from expanded workspace",
+        "workspace": "ui-layout-check",
+        "session": "List the top-level files in this workspace and tell me what it c",
+        "exact": false,
+        "runPreserved": true,
+        "sessionId": "3495c8284fc345fbb22dd0ac18026850",
+        "runId": "77a38b9e5f44406a8e10b5740461d6c4"
+      },
+      "resolved": true
+    },
+    "screenshot": {
+      "path": "doc/evidence/workspace-session-lists-20261028.png",
+      "sha256": "a16b1091192a0b438cde7af1aa82b41321b23061e2c481de8ade4d356c9e5856"
+    }
+  },
+  "live": {
+    "owners": [
+      {
+        "pid": 36752,
+        "birth": "134377089762234594",
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-0660e937abbe71d43fda471d5164f7fdb5ac48e7f84bfd091be62fbb36ac70ac\\xmind.exe",
+        "sha256": "47236c53f969dc32156f87cfe22336c91b0c58262af5f7f117b8fa086d7c0ff0"
+      },
+      {
+        "pid": 35656,
+        "birth": "134376705305383704",
+        "image": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-e4598605a15350af8c8d5564cb041d00574e501f9a79f558efb93404ecaf1cde\\xmind.exe",
+        "sha256": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d"
+      }
+    ],
+    "oldMain": {
+      "pid": 21648,
+      "birth": "134377070092753901",
+      "naturalExitObserved": true
+    },
+    "peerUnchanged": true,
+    "manifest": "00a4f98773d2bd774bad0542a3b079dd126de47819497be164ed080412827b84"
+  },
+  "newModelRequests": 0,
+  "newUserSessions": 0,
+  "neverReplay": {
+    "fixtureSession": "9f9d0925aaef278bbcac217a19c82921",
+    "fixtureRoot": "699ffd8cd5dd19459d7a2da5771d6a60",
+    "userRoot": "77a38b9e5f44406a8e10b5740461d6c4"
+  },
+  "limitations": "Local source/runtime and actual in-app browser acceptance. External native browser input, installed VS Code/VSIX, hosted CI and the full 188-test Native inventory were not requalified. Inactive session actions require selecting that workspace first."
+}

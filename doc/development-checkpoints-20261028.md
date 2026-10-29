@@ -101,3 +101,7 @@ Settings supports provider enrollment and model discovery through the native API
 ## Embedded web IPC checkpoint before asynchronous request jobs
 
 - Embedded web: xmind.exe hosts FastAPI/xlang3, direct C++/cached SDK IPC; bundled libraries .agentflow/web-python/site-packages. UI58613 owner28948; peer35656 unchanged. Node51253/57780 stopped; preserve their native backends. Completed roots in .agentflow/embedded-web-task.json and .agentflow/session-loading-task-20261028.json: NEVER replay. Native base: doc/evidence/embedded-web-native-20261028.json. IPC/restore: doc/evidence/browser-session-load-ipc-20261028.json.
+
+## Web request performance checkpoint before workspace session isolation
+
+- Embedded web: FastAPI/xlang3 inside xmind.exe; bounded native jobs, cached SDK IPC. UI58613 main21648; peer35656 unchanged; old28948 exited. Node51253/57780 stopped; preserve native backends. NEVER replay roots in .agentflow/embedded-web-task.json and .agentflow/session-loading-task-20261028.json. Libraries .agentflow/web-python/site-packages. Validation/owners/fixture: doc/evidence/browser-navigation-speed-20261028.json; previous guidance archived verbatim in doc/development-checkpoints-20261028.md.

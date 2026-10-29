@@ -268,6 +268,12 @@ class BrowserApp:
                 if not credential:
                     return self.reply(401, {'detail': 'A browser session is required'})
                 suffix = path[len('/ui/workspaces'):]
+                if suffix == '/sessions':
+                    query = request.query_params
+                    if request.method != 'GET' or set(query) != {'workspace_id'} or len(query.getlist('workspace_id')) != 1 or not re.fullmatch(r'windows-local-file-v1:[A-Za-z0-9:._-]{1,200}', query['workspace_id']):
+                        raise ValueError('Choose one registered workspace')
+                    status, value = await self.json_call('GET', '/v1/workspaces/sessions?workspace_id=' + query['workspace_id'], credential=credential)
+                    return self.reply(status, value)
                 if suffix not in WORKSPACE_ROUTES or has_query or request.method != ('POST' if suffix else 'GET'):
                     return self.reply(404, {'detail': 'Workspace route not found'})
                 body = await self.body(request, 4096) if suffix else ''

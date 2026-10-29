@@ -53,6 +53,11 @@ try{
   assert.notEqual(peer.process_id,original.process_id);assert.equal((await client.workspace()).root,await fs.realpath(second));
   const catalogueBefore=await (await request('/ui/workspaces')).json();assert.equal(catalogueBefore.workspaces.length,2);
   const firstId=catalogueBefore.workspaces.find(item=>path.resolve(item.root)===path.resolve(first)).workspace_id;
+  const secondId=catalogueBefore.workspaces.find(item=>path.resolve(item.root)===path.resolve(second)).workspace_id,cookieBeforeCatalogue=cookie;
+  const [firstCatalogue,secondCatalogue]=await Promise.all([request('/ui/workspaces/sessions?workspace_id='+encodeURIComponent(firstId)),request('/ui/workspaces/sessions?workspace_id='+encodeURIComponent(secondId))]);
+  assert.equal(firstCatalogue.status,200);assert.equal(secondCatalogue.status,200);assert.equal(cookie,cookieBeforeCatalogue,'Expanding workspaces must not replace the browser cookie');
+  assert.equal((await firstCatalogue.json()).sessions[0].id,session.id);assert.deepEqual((await secondCatalogue.json()).sessions,[]);assert.equal((await (await request('/ui/workspaces')).json()).selected_workspace_id,secondId);
+  assert.equal((await request('/ui/workspaces/sessions?workspace_id=windows-local-file-v1:missing')).status,404);
   assert.equal((await request('/ui/workspaces/select',{workspace_id:firstId})).status,200);
   client=makeClient();
   assert.deepEqual(await client.graph(run.id),graph);

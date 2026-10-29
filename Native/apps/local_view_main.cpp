@@ -641,6 +641,36 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
                     }
                     return;
                 }
+                if(request.path=="/v1/workspaces/sessions"&&request.method=="GET"){
+                    if(host||request.get_header_value_count("X-XMind-View-Origin")!=1||request.params.size()!=1||!request.has_param("workspace_id")||!body.empty()){
+                        response(output,400,"Choose one registered workspace");return;
+                    }
+                    const auto requested_id=request.get_param_value("workspace_id");
+                    std::shared_ptr<agentflow::LocalProfileConnection> target;
+                    {
+                        std::lock_guard switch_lock(browser_switch_mutex);
+                        const auto [current_id,current]=browser_workspace(supplied,browser_origin);
+                        if(!validate_browser_session(supplied,current,browser_origin)){response(output,401,"Browser view session expired or was revoked");return;}
+                        const auto catalogue=agentflow::list_local_workspace_profiles(profile_root_utf8);
+                        const auto chosen=std::find_if(catalogue.begin(),catalogue.end(),[&](const auto& item){return item.workspace_id==requested_id;});
+                        if(chosen==catalogue.end()){response(output,404,"Workspace is not in the native local profile catalogue");return;}
+                        {std::lock_guard lock(browser_state_mutex);const auto found=workspaces.find(requested_id);if(found!=workspaces.end())target=found->second;else if(workspaces.size()>=32){response(output,429,"Too many attached workspaces");return;}}
+                        if(!target){auto selected=options;selected.workspace=chosen->root;selected.profile_root=profile_root_utf8;selected.provider_config.clear();selected.graphs_config.clear();selected.approved_edits.reset();selected.require_existing_profile=true;target=std::make_shared<agentflow::LocalProfileConnection>(agentflow::connect_local_profile(selected));std::lock_guard lock(browser_state_mutex);workspaces.emplace(requested_id,target);}
+                    }
+                    require(agentflow::WorkspaceTools(target->workspace).identity()==requested_id,"Session catalogue resolved a different workspace");
+                    agentflow::NativeRequestChannel peer(*target);
+                    std::string owner(reinterpret_cast<const char*>(target->auth.view().data()),target->auth.view().size());
+                    httplib::Headers owner_headers{{"Authorization","Bearer "+owner}};SecureZeroMemory(owner.data(),owner.size());
+                    // This read never changes the browser's selected workspace,
+                    // issues a browser lease, or creates a conversation/run.
+                    const auto sessions=peer.Get("/v1/sessions",owner_headers),active=peer.Get("/v1/sessions/active",owner_headers);
+                    require(sessions&&sessions->status==200,"Workspace sessions unavailable");
+                    auto entries=Json::parse(sessions->body);require(entries.is_array(),"Invalid workspace session catalogue");
+                    Json activity=Json::object();if(active&&active->status==200)activity=Json::parse(active->body).at("data");else require(active&&active->status==404,"Workspace session activity unavailable");
+                    const auto archived=workspace_registry->archived_sessions(requested_id);
+                    for(auto& item:entries){const auto id=item.at("id").get<std::string>();item["active"]=activity.contains(id);item["archived"]=std::find(archived.begin(),archived.end(),id)!=archived.end();}
+                    output.status=200;output.set_content(Json{{"workspace_id",requested_id},{"sessions",std::move(entries)},{"archive_capability",true}}.dump(),"application/json");return;
+                }
                 if (request.path == "/v1/workspaces" && request.method == "GET") {
                     if (host || request.target != request.path ||
                         request.get_header_value_count("X-XMind-View-Origin") != 1) {
@@ -1129,7 +1159,7 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
                         browser_sessions.erase(supplied.substr(5));
                     }
                     output.status = result->status;
-                    if(!host&&request.path=="/v1/health"&&result->status==200){auto metadata=Json::parse(result->body);metadata["session_archiving"]=true;output.set_content(metadata.dump(),"application/json");return;}
+                    if(!host&&request.path=="/v1/health"&&result->status==200){auto metadata=Json::parse(result->body);metadata["session_archiving"]=true;metadata["workspace_session_catalogue"]=1;output.set_content(metadata.dump(),"application/json");return;}
                     output.set_content(result->body, result->get_header_value("Content-Type"));
                 }
             } catch (const std::invalid_argument &) {

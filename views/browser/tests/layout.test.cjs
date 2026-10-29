@@ -2,6 +2,28 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {JSDOM}=require('../../../extensions/vscode/node_modules/jsdom');
 const {browserHtml}=require('../page.cjs');
+test('workspace disclosures open independently and keep same-ID sessions scoped to their own workspace',async()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document,calls=[];
+ try{
+  const picker=doc.getElementById('workspace-picker'),source=doc.getElementById('sessions');for(const id of ['a','b']){const option=doc.createElement('option');option.value=id;option.textContent=id;picker.append(option);}picker.value='a';
+  const option=doc.createElement('option');option.value='same';option.textContent='Only A';option.dataset.sessionId='same';source.append(option);win.xMindView={postMessage:message=>calls.push(JSON.parse(JSON.stringify(message)))};
+  win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));doc.querySelector('[aria-label="Toggle sessions in b"]').click();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(picker.value,'a','Expanding another workspace must not switch the active chat');assert.deepEqual(calls.at(-1),{type:'workspace-session-list',workspace_id:'b'});
+  win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data:{type:'workspace-session-catalogue',workspace_id:'b',sessions:[{id:'same',title:'Only B',active:false,archived:false}]}}));
+  const groups=doc.querySelectorAll('.workspace-group');assert.equal(groups[0].querySelector('.conversation-link').textContent,'Only A');assert.equal(groups[1].querySelector('.conversation-link').textContent,'Only B');assert.equal(doc.querySelectorAll('.workspace-disclosure[aria-expanded="true"]').length,2);assert.equal(doc.querySelectorAll('.conversation-link[aria-current="page"]').length,1);
+  groups[1].querySelector('.conversation-link').click();assert.deepEqual(calls.at(-1),{type:'workspace-session-select',workspace_id:'b',id:'same'});doc.querySelector('[aria-label="Toggle sessions in a"]').click();assert.equal(doc.querySelectorAll('.workspace-sessions').length,1);assert.equal(doc.querySelector('.conversation-link').textContent,'Only B');
+ }finally{win.close();}
+});
+test('switching workspace cannot copy the old global session select into the new workspace catalogue',async()=>{
+ const dom=new JSDOM(browserHtml(),{runScripts:'outside-only',url:'http://localhost/ui/'}),win=dom.window,doc=win.document;
+ try{
+  const picker=doc.getElementById('workspace-picker'),source=doc.getElementById('sessions');for(const id of ['a','b']){const option=doc.createElement('option');option.value=id;option.textContent=id;picker.append(option);}const old=doc.createElement('option');old.value='old';old.textContent='A history';old.dataset.sessionId='old';source.append(old);win.xMindView={postMessage(){}};win.eval(fs.readFileSync(path.join(__dirname,'../layout.js'),'utf8'));
+  doc.querySelector('[aria-label="Toggle sessions in b"]').click();picker.value='b';doc.getElementById('workspace-control').dataset.switching='true';picker.dispatchEvent(new win.Event('change'));await new Promise(resolve=>setImmediate(resolve));
+  const b=()=>[...doc.querySelectorAll('.workspace-group')].find(group=>group.querySelector('.workspace-name').textContent==='b');assert.equal(b().querySelector('.conversation-link'),null);
+  const fresh=doc.createElement('option');fresh.value='new';fresh.textContent='B history';fresh.dataset.sessionId='new';source.replaceChildren(fresh);win.dispatchEvent(new win.MessageEvent('message',{source:win,origin:win.location.origin,data:{type:'sessions',workspace_id:'b'}}));doc.getElementById('workspace-control').dataset.switching='false';await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(b().querySelector('.conversation-link').textContent,'B history');assert.equal(doc.querySelector('.workspace-group .conversation-link').textContent,'A history');
+ }finally{win.close();}
+});
 test('bounded composer menus forward selection, preserve it on Escape, and follow native metadata',async()=>{
  const dom=new JSDOM(browserHtml(),{runScripts:'outside-only'}),doc=dom.window.document,model=doc.getElementById('model'),changes=[];
  try{
@@ -21,7 +43,7 @@ test('unchanged background control updates retain rows and inline hover toolbars
   doc.getElementById('rename').disabled=doc.getElementById('rename').disabled;doc.getElementById('workspace-config-open').disabled=false;await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.querySelector('.session-row'),row);assert.equal(doc.querySelector('.session-toolbar'),toolbar,'Background acknowledgements must not replace the toolbar under the pointer');
   const other=doc.createElement('option');other.value='other';other.textContent='Other';doc.getElementById('workspace-picker').append(other);let workspaceChanges=0;doc.getElementById('workspace-picker').addEventListener('change',()=>workspaceChanges++);
   doc.getElementById('workspace-control').dataset.switching='true';await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.getElementById('current-workspace').disabled,true);assert.equal(doc.querySelector('.conversation-link'),null,'Do not expose stale sessions while the new workspace loads');assert.equal(doc.querySelector('.workspace-sessions').textContent,'Loading sessions…');assert.equal(doc.getElementById('workspace-navigation').getAttribute('aria-busy'),'true');assert.equal(doc.querySelector('[data-workspace-id="other"]').disabled,true);
-  const toggle=()=>doc.querySelector('[data-workspace-id="workspace"]');assert.equal(toggle().disabled,false);toggle().click();assert.equal(toggle().getAttribute('aria-expanded'),'false');assert.equal(doc.querySelector('.workspace-sessions'),null);toggle().click();assert.equal(toggle().getAttribute('aria-expanded'),'true');assert.equal(doc.querySelector('.workspace-sessions').textContent,'Loading sessions…');toggle().click();assert.equal(workspaceChanges,0,'Disclosure must not send another workspace selection');
+  const toggle=()=>doc.querySelector('[data-workspace-id="workspace"]').parentElement.querySelector('.workspace-disclosure');assert.equal(toggle().disabled,false);toggle().click();assert.equal(toggle().getAttribute('aria-expanded'),'false');assert.equal(doc.querySelector('.workspace-sessions'),null);toggle().click();assert.equal(toggle().getAttribute('aria-expanded'),'true');assert.equal(doc.querySelector('.workspace-sessions').textContent,'Loading sessions…');toggle().click();assert.equal(workspaceChanges,0,'Disclosure must not send another workspace selection');
   doc.getElementById('workspace-control').dataset.switching='false';await new Promise(resolve=>setImmediate(resolve));assert.equal(doc.getElementById('current-workspace').disabled,false);assert.equal(toggle().getAttribute('aria-expanded'),'false','Completion preserves disclosure chosen during loading');toggle().click();assert.equal(doc.querySelector('.conversation-link').disabled,false);assert.equal(doc.querySelector('.conversation-link').textContent,'Saved');assert.equal(doc.querySelector('[data-workspace-id="other"]').disabled,false);assert.equal(workspaceChanges,0);
  }finally{dom.window.close();}
 });

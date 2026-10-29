@@ -1,5 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
+test('browser session catalogue is read from its explicit workspace instead of the mutable active cookie scope',async()=>{
+ const sessions=[{id:'owned',title:'Workspace A',active:false,archived:false}],view=new BrowserController({workspaceSessionCatalogue:async()=>({workspace_id:'workspace-a',sessions}),sessions:async()=>{throw Error('Unscoped catalogue must not be read');}},()=>{});view.health={workspace_session_catalogue:1};
+ try{assert.equal(await view.sessionCatalog(),sessions);assert.equal(view.archiveWorkspaceId,'workspace-a');}finally{view.dispose();}
+});
 test('sessions without a model use the native last choice immediately and explicit choices survive discovery',async()=>{
  const posted=[],state={revision:2,active:'saved-provider',profiles:[{id:'saved-provider',route_id:'saved-route',model:'last-used'}]},explicit={model_id:'session-choice',provider_profile_id:'saved-provider',provider_route_id:'saved-route'};
  const client={runs:async()=>[],sessions:async()=>[{id:'empty'},{id:'explicit'}],sessionModel:async id=>({session_id:id,revision:id==='explicit'?1:0,selected:id==='explicit'?explicit:null}),sessionInbox:async()=>({items:[]}),replaceSessionModel:async()=>{throw Error('Restoring a default must not persist a session selection');}};
