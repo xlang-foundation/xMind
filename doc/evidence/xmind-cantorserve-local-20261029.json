@@ -331,6 +331,26 @@
       "raw_provider_body_exposed": false,
       "rate_limit_distinguished_from_quota": true,
       "log": ".agentflow/provider-quota-renderer-tests.log"
-    }
+    },
+    "clean_fork": {
+      "session": "934abd92c300c3a7376a363cf6acb217",
+      "parent": "7860b0bff71a4b53b425c10ee5399cbe",
+      "before_message": "msg_9",
+      "copied_successful_history": true,
+      "effects_replayed": false,
+      "root": "e827e8741e274fc0bebe76a7e2cc3566",
+      "prompt": "Add a short About section explaining that the workshops are designed for complete beginners.",
+      "ordinary_feature_request": true,
+      "prompt_channel": "actual browser UI",
+      "state": "failed",
+      "elapsed_ms": 16986,
+      "reason": "model_protocol_error",
+      "diagnostic": "chat_provider_error_event",
+      "tool_calls": 0,
+      "changed_files": false,
+      "raw_events": ".agentflow/fork-about-events.json",
+      "service_prerequisites": "Owner confirmed local virtual test budget1048576 units applied, no financial-cap change, quiet19446/2B window"
+    },
+    "current_acceptance": "Startup, saved provider/model, workspace/session lists and rendered history restored after reboot. Ordinary editing remains blocked by provider stream errors; no end-to-end working claim."
   }
 }
