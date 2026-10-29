@@ -30,8 +30,8 @@ async function browserFetch(input,options={}){const runtime=browserRuntime();try
 // Browser authentication stays in an HttpOnly cookie. Domain validation and
 // committed-event parsing remain shared with the native editor client.
 class BrowserSessionClient extends BackendClient {
-  constructor(origin,{fetchImpl=browserFetch,requestSignal=(timeoutMs=15000)=>browserTimeoutSignal(timeoutMs)}={}){super(origin,()=>{throw new Error('Browser views use session authentication');},fetchImpl);this.requestSignal=requestSignal;}
-  async request(path,body,timeoutMs=15000,method){const init={method:method||(body===undefined?'GET':'POST'),headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),credentials:'same-origin',redirect:'error'};const signal=this.requestSignal(timeoutMs);if(signal)init.signal=signal;const response=await this.fetch(this.baseUrl+path,init);const data=await BackendClient.responseJson(response);if(!response.ok){const error=new Error(typeof data?.detail==='string'?data.detail:`Backend returned ${response.status}`);error.status=response.status;throw error;}return data;}
+  constructor(origin,{fetchImpl=browserFetch,requestSignal=(timeoutMs=15000)=>browserTimeoutSignal(timeoutMs),onOwnerSessionLost}={}){super(origin,()=>{throw new Error('Browser views use session authentication');},fetchImpl);this.requestSignal=requestSignal;this.onOwnerSessionLost=onOwnerSessionLost;}
+  async request(path,body,timeoutMs=15000,method){const init={method:method||(body===undefined?'GET':'POST'),headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),credentials:'same-origin',redirect:'error'};const signal=this.requestSignal(timeoutMs);if(signal)init.signal=signal;const response=await this.fetch(this.baseUrl+path,init);const data=await BackendClient.responseJson(response);if(!response.ok){if(response.status===401&&data?.detail==='Browser view session is no longer active')this.onOwnerSessionLost?.();const error=new Error(typeof data?.detail==='string'?data.detail:`Backend returned ${response.status}`);error.status=response.status;throw error;}return data;}
   async openEventStream(path,signal){if(signal?.aborted)throw new Error('Event stream was aborted');const init={method:'GET',headers:{Accept:'text/event-stream'},credentials:'same-origin',redirect:'error'};if(signal)init.signal=browserCombinedTimeoutSignal(signal,35000);return this.fetch(this.baseUrl+path,init);}
 }
 // Thin view controller. All execution, permissions and persistence stay native.
@@ -642,7 +642,16 @@ else {
     const restored=await workspaceCatalogue(signal());if(restored.selected_workspace_id!==id)throw new Error('The saved workspace changed while reconnecting.');return restored;
   }
   async function activateWorkspace(generation,signal,restorePreferred=false){
-    const client=new BrowserSessionClient(location.origin,{requestSignal:signal});
+    const client=new BrowserSessionClient(location.origin,{requestSignal:signal,onOwnerSessionLost:()=>{
+      if(generation!==connectionGeneration||!controller||connectionAttempt)return;
+      const prompt=element('prompt'),draft=prompt.value;
+      controller.dispose();controller=undefined;
+      post({type:'capabilities',execution:false,models:[]});
+      post({type:'status',text:'Reconnecting to the updated xMind server…'});
+      // Restore the authenticated workspace/session, never replay a failed
+      // request or a send. Keep any text typed while reconnecting as well.
+      void connect().then(()=>{if(!prompt.value&&draft){prompt.value=draft;prompt.dispatchEvent(new Event('input',{bubbles:true}));}if(controller)post({type:'status',text:'Connection restored. Your draft is ready; press Send when you want to continue.'});});
+    }});
     // Observe metadata while authenticating the activation, rather than
     // serializing a second connection capture on every unchanged reload.
     // A restored workspace change must discard this earlier observation.

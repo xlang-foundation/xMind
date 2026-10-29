@@ -14,6 +14,12 @@ current browser paint, layout, input or installed editor activation.
 
 xMind has a local HTML view using the same conversation renderer and native API client as the VS Code extension. The webpage places workspaces and their sessions on the left, the conversation in the middle, and optional Files, Changes and Activity views on the right. The global toolbar identifies the current workspace and session and toggles either sidebar. Both dividers support dragging and keyboard resizing; their widths are remembered as non-secret appearance preferences. Provider, model and permission controls sit beside the composer. The terminal opens at the bottom of the right sidebar.
 
+If an open tab retains a session from a replaced web owner, it reconnects
+through the existing local session flow and restores its workspace and
+conversation. The draft stays in the composer. No failed command or message
+is resent automatically; review the draft and press Send after reconnection.
+[Recovery validation](evidence/browser-owner-session-recovery-20261029.json).
+
 On Windows, the embedded web server adds an xMind icon to the notification
 area (possibly inside the tray overflow). Clicking or right-clicking the icon
 opens its menu: **Open web UI**, **Open workspace**, and **Quit this xMind

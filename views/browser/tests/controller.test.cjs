@@ -1,5 +1,15 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');const {BrowserController,BrowserSessionClient}=require('../browser.js');
 const {planFixture,inputMessage,nestedWaitPlanFixture}=require('../../../extensions/vscode/tests/plan-fixture');
+
+test('a lost owner session requests recovery without replaying a mutation or treating revocation as restart',async()=>{
+ for(const detail of ['Browser view session is no longer active','Browser view session expired or was revoked','Invalid provider key']){
+  let calls=0,recoveries=0;
+  const client=new BrowserSessionClient('http://127.0.0.1:60405',{requestSignal:()=>undefined,onOwnerSessionLost:()=>{recoveries++;},fetchImpl:async()=>{calls++;return new Response(JSON.stringify({detail}),{status:401,headers:{'Content-Type':'application/json'}});}});
+  await assert.rejects(client.request('/v1/sessions/saved/runs',{prompt:'go'}),error=>error.status===401);
+  assert.equal(calls,1,'An uncertain user action must never be repeated automatically');
+  assert.equal(recoveries,detail==='Browser view session is no longer active'?1:0);
+ }
+});
 test('MCP error resolution is scoped to the observed receipt and requires a native audited result',async()=>{
  const posted=[],calls=[],operation={id:'op',run_id:'run',workspace_id:'workspace',tool:'mcp_tool',state:'uncertain',arguments_json:'{}',result_json:JSON.stringify({reason:'mcp_peer_reported_tool_error'}),expires_unix_ms:0};let current=operation,valid=true,polls=0;
  const view=new BrowserController({operation:async()=>current,reconcileMcpError:async(...args)=>{calls.push(args);return{...operation,state:'failed',result_json:JSON.stringify({reconciliation:{kind:'acknowledged_mcp_error',acknowledges_possible_side_effects:valid}})};}},m=>posted.push(m));view.runId='run';view.runs=[{id:'run',state:'failed'}];view.operations.set('op',operation);view.poll=async()=>{polls++;};

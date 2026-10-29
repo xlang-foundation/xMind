@@ -1,0 +1,25 @@
+{
+  "scope": "Browser owner-session recovery; no provider/model coding acceptance claim",
+  "observed": {
+    "url": "http://127.0.0.1:55653/ui/",
+    "browser": "User's existing Edge tab",
+    "failure": "Browser view session is no longer active",
+    "draft": "go",
+    "cause": "Open tab retained a view session belonging to the previous web owner after a managed tray update"
+  },
+  "change": {
+    "trigger": "Exact native HTTP401 detail identifying a missing owner session",
+    "recovery": "Single connection attempt restores the saved workspace and conversation through existing same-origin HttpOnly session enrollment",
+    "draft": "Kept in the current DOM; text entered during recovery is not overwritten",
+    "replay": "Failed requests, sends and mutations are never retried automatically",
+    "security": "Explicit revocation and provider-key failures do not trigger this recovery; no keys or cookies exposed to JavaScript"
+  },
+  "validation": {
+    "controller_and_connection_fixtures": "162/162 passed in20.21s",
+    "regressions": ["Lost-owner POST issued exactly once", "Revocation/provider401 do not masquerade as owner restart", "Reauthentication restores a non-default workspace", "Draft retained without any session mutation"],
+    "live_browser": "Reconnected through browser controls, selected profile/model and history restored, user's go draft restored and left unsent",
+    "log": ".agentflow/browser-owner-reconnect-final-tests.log",
+    "automatic_live_handoff": "Not newly forced solely for this test; automatic recovery tested with HTTP/DOM fixtures",
+    "native_restart_required": false
+  }
+}
