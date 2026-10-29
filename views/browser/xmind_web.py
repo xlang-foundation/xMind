@@ -218,7 +218,13 @@ class BrowserApp:
             return self.reply(403, {'detail': 'View origin rejected'})
         if request.scope.get('raw_path', path.encode()) != path.encode('ascii', errors='replace'):
             return self.reply(404, {'detail': 'View route not found'})
-        if (origin is not None and not same_origin) or request.headers.get('sec-fetch-site') in ('cross-site', 'same-site'):
+        # A top-level navigation may originate in another local xMind tab.
+        # The public entry document carries no credentials or workspace data;
+        # authentication and every API request still require the exact origin.
+        entry_navigation = (path == '/ui/' and not has_query and request.method == 'GET'
+                            and request.headers.get('sec-fetch-mode') == 'navigate'
+                            and request.headers.get('sec-fetch-dest') == 'document')
+        if not entry_navigation and ((origin is not None and not same_origin) or request.headers.get('sec-fetch-site') in ('cross-site', 'same-site')):
             return self.reply(403, {'detail': 'View origin rejected'})
         if request.method in ('POST', 'DELETE', 'PUT', 'PATCH') and (not same_origin or request.headers.get('content-type') not in (('application/json', None) if request.method == 'DELETE' else ('application/json',))):
             return self.reply(403, {'detail': 'Same-origin JSON access required'})

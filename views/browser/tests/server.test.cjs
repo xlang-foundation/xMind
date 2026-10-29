@@ -4,6 +4,21 @@
 // behavior. It is not evidence of C++ persistence or real model execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createServer}=require('node:http'),{resolve}=require('node:path');
+test('public entry permits top-level navigation while API and session origins stay exact',async()=>{
+ const {request}=require('node:http'),{createNativeBrowserFixture}=await import('./native-host.mjs');let view;
+ const peer=createServer((request,response)=>{response.writeHead(500);response.end();});
+ const get=(url,headers)=>new Promise((resolve,reject)=>{const req=request(url,{headers},response=>{response.resume();response.on('end',()=>resolve(response.statusCode));});req.on('error',reject);req.end();});
+ try{
+  await new Promise(resolve=>peer.listen(0,'127.0.0.1',resolve));view=await createNativeBrowserFixture({backend:'http://127.0.0.1:'+peer.address().port,assetRoot:resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets')});const origin=await view.listen();
+  const navigation={Origin:'http://127.0.0.1:1','Sec-Fetch-Site':'same-site','Sec-Fetch-Mode':'navigate','Sec-Fetch-Dest':'document'};
+  assert.equal(await get(origin+'/ui/',navigation),200);
+  assert.equal(await get(origin+'/ui/?unexpected=1',navigation),403);
+  assert.equal(await get(origin+'/v1/health',navigation),403);
+  assert.equal(await get(origin+'/ui/session',navigation),403);
+  assert.equal(await get(origin+'/ui/',{...navigation,'Sec-Fetch-Dest':'iframe'}),403);
+  assert.equal(await get(origin+'/ui/',{...navigation,'Sec-Fetch-Mode':'cors'}),403);
+ }finally{if(view)await view.close();peer.closeAllConnections();await new Promise(resolve=>peer.close(resolve));}
+});
 test('inactive workspace session reads preserve their explicit scope and reject malformed or mutating requests',async()=>{
  const {createNativeBrowserFixture}=await import('./native-host.mjs');const credential='a'.repeat(64)+'.'+'b'.repeat(64),seen=[];let view;
  const peer=createServer(async(request,response)=>{for await(const _ of request){}if(request.url==='/v1/view-sessions')response.end(JSON.stringify({credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800}));else{seen.push([request.method,request.url]);response.end(JSON.stringify({workspace_id:'windows-local-file-v1:other',sessions:[],archive_capability:true}));}});

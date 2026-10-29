@@ -48,5 +48,15 @@
     "seconds": 10.22,
     "no_effect_or_approval_proposal": true,
     "test": "native_agent_runner_contract"
+  },
+  "entry_navigation_fix": {
+    "log": ".agentflow/benchmark-entry-navigation-final-tests.log",
+    "scope": "Public static entry document top-level navigation only; API/session exact-origin checks retained",
+    "seconds": 42.58,
+    "passed": 28,
+    "rendered_acceptance": "pending",
+    "tests": 28,
+    "frozen_source_runtime_paths": 12392,
+    "closure_unchanged": true
   }
 }
