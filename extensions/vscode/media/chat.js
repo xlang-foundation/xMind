@@ -284,6 +284,8 @@ function runFailure(data){
   const status=data?.status;
   card.append(node('p',data?.reason==='provider_http_error'&&status===404
     ?'The model provider could not find the selected model or endpoint (HTTP 404). Choose another discovered model or check the provider route.'
+    :data?.reason==='provider_http_error'&&status===429&&data.provider_error_code==='insufficient_quota'
+    ?'The model provider refused this request because its quota is exhausted (HTTP 429). Check the provider account quota or budget before starting another run. Recorded tool outcomes are preserved.'
     :data?.reason==='provider_http_error'&&Number.isInteger(status)&&status>=100&&status<=599
     ?'The model provider returned HTTP '+status+'. This run stopped before completing its response.'
     :data?.reason==='provider_transport_error'

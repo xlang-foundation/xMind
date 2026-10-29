@@ -577,6 +577,9 @@ test('recorded provider identifiers render without raw error messages or unknown
   assert.match(card.textContent,/could not find the selected model or endpoint \(HTTP 404\)/i);assert.match(card.textContent,/Code: NOT_FOUND/);assert.ok(!card.textContent.includes('private provider response'));
   r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:404,message:'private provider response'}}});
   assert.match(card.textContent,/could not find the selected model or endpoint \(HTTP 404\)/i);assert.ok(!card.textContent.includes('private provider response'));
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:429,provider_error_code:'insufficient_quota',message:'private provider response'}}});
+  assert.match(card.textContent,/quota is exhausted \(HTTP 429\)/);assert.match(card.textContent,/provider account quota or budget/);assert.ok(!card.textContent.includes('private provider response'));
+  r.send({type:'event',event:{kind:'run.failed',data:{reason:'provider_http_error',status:429,provider_error_code:'rate_limit_exceeded'}}});assert.match(card.textContent,/returned HTTP 429/);assert.ok(!card.textContent.includes('quota is exhausted'));
 });
 
 test('durable command output renders independent channels without executing markup or controls',()=>{

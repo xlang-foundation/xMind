@@ -273,5 +273,64 @@
       "service_owner_finding": "Quota admission refused before inference; prior failed generations retained reservations after old service error path lost counters. Native receipt settlement/release repair in progress."
     },
     "current_index_sha256": "6d24d9a303c9b30829f941c36175bcf2593a11cb37c0c4f48a54fbad1bf2bac6"
+  },
+  "post_reboot_recovery": {
+    "boot_local": "2026-10-29T04:32:16-07:00",
+    "resumed_local": "2026-10-29T09:46:00-07:00",
+    "initial_owners_and_listeners": "none for the task backends; old process IDs not reused as authorization",
+    "startup_failure": "Registered process executable changed; administrator must reimport its profile",
+    "powershell": {
+      "prior_sha256": "60c9b29843624dd8af6b6a7b26147753be6aeef65098b9a503cc50850afe410f",
+      "current_sha256": "d8f182560210d43baaf767d482ad1dc1207372522e91413b9d5e515a875e552d",
+      "signature": "Valid",
+      "signer": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "recovery": "Native offline admin import-processes, same executable path/arguments/timeout/approval setting, revision1->2 for both existing task workspaces; no raw database edits"
+    },
+    "coding_owner": {
+      "pid": 3948,
+      "birth": "134377661417594784",
+      "ui": "http://127.0.0.1:55653/ui/"
+    },
+    "main_owner": {
+      "pid": 34172,
+      "api": "http://127.0.0.1:53715"
+    },
+    "preview": {
+      "pid": 28068,
+      "url": "http://127.0.0.1:52762/index.html",
+      "engine": "xlang3 FastAPI/uvicorn read-only generated-file preview"
+    },
+    "history": "Original completed run plus all three failed follow-ups present after actual browser restore; selected provider and model restored without new credentials",
+    "replayed_roots": false,
+    "probe_gap": "xlang3 sqlite3.connect uri=True rejected; inspection used existing-file check, query_only pragma and SELECT through xlang3, with no CPython fallback",
+    "logs": [
+      ".agentflow/post-reboot-web-start.log",
+      ".agentflow/post-reboot-process-reimport.log",
+      ".agentflow/post-reboot-main-process-reimport.log",
+      ".agentflow/post-reboot-web-recovered.log",
+      ".agentflow/post-reboot-main-start.log"
+    ],
+    "footer_qualification": {
+      "root": "936e5822def742aaa76f62874f6c92ec",
+      "prompt": "Add a short footer note welcoming beginners and people attending their first workshop.",
+      "ordinary_feature_request": true,
+      "prompt_channel": "actual browser UI",
+      "state": "failed",
+      "elapsed_ms": 48096,
+      "reason": "provider_http_error",
+      "http_status": 429,
+      "provider_error_code": "insufficient_quota",
+      "first_tool": "edit_file content_conflict; no effect",
+      "recovery_call": "refused by quota admission",
+      "changed_files": false,
+      "raw_events": ".agentflow/post-reboot-footer-events.json",
+      "prior_failed_roots_replayed": false
+    },
+    "ui_quota_explanation": {
+      "focused_renderer_tests": "127/127 passed",
+      "raw_provider_body_exposed": false,
+      "rate_limit_distinguished_from_quota": true,
+      "log": ".agentflow/provider-quota-renderer-tests.log"
+    }
   }
 }
