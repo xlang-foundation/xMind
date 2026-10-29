@@ -1,0 +1,257 @@
+{
+  "date": "2026-10-28",
+  "sourceCommit": "bde232ec74e1fdff203ec3e23dee752854e78e0a",
+  "scope": "Actual restart of both existing xMind processes and rendered web UI restoration. Exact held process handles, births, images and hashes verified before intentional stops; normal managed startup reused each original binary and existing profile. No new chat prompts, sign-in submissions or file effects.",
+  "url": "http://127.0.0.1:58613/ui/",
+  "owners": [
+    {
+      "workspace": "ui-layout-check",
+      "oldPid": 35656,
+      "oldBirth": "134376705305383704",
+      "oldImage": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-e4598605a15350af8c8d5564cb041d00574e501f9a79f558efb93404ecaf1cde\\xmind.exe",
+      "oldSha256": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d",
+      "oldExitConfirmed": true,
+      "newPid": 37948,
+      "newBirth": "134377208638223826",
+      "newImage": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-e4598605a15350af8c8d5564cb041d00574e501f9a79f558efb93404ecaf1cde\\xmind.exe",
+      "newSha256": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d",
+      "profileDirectory": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb",
+      "method": "Exact-held-handle process stop and normal managed same-profile startup",
+      "harnessFinding": "WaitForExit completed and valid metadata/new live owner verified; the first wrapper treated a missing ExitCode as failure. The successful peer startup was observed and never repeated."
+    },
+    {
+      "workspace": "web-search-check",
+      "oldPid": 36752,
+      "oldBirth": "134377089762234594",
+      "oldImage": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-0660e937abbe71d43fda471d5164f7fdb5ac48e7f84bfd091be62fbb36ac70ac\\xmind.exe",
+      "oldSha256": "47236c53f969dc32156f87cfe22336c91b0c58262af5f7f117b8fa086d7c0ff0",
+      "oldExitConfirmed": true,
+      "newPid": 40496,
+      "newBirth": "134377208952274286",
+      "newImage": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-0660e937abbe71d43fda471d5164f7fdb5ac48e7f84bfd091be62fbb36ac70ac\\xmind.exe",
+      "newSha256": "47236c53f969dc32156f87cfe22336c91b0c58262af5f7f117b8fa086d7c0ff0",
+      "profileDirectory": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1",
+      "url": "http://127.0.0.1:58613/ui/",
+      "launcherExitCode": null,
+      "method": "Exact-held-handle process stop and normal managed same-profile startup"
+    }
+  ],
+  "results": {
+    "ownersRestarted": 2,
+    "sameNativeBinaries": true,
+    "sameProfilesAndOrigin": true,
+    "reloads": 3,
+    "workspaces": 2,
+    "workspaceSessionCounts": [
+      2,
+      3
+    ],
+    "allFiveSessionsAvailable": true,
+    "testChatsExactFullHistory": true,
+    "testSelectedRunsProviderModelRestored": true,
+    "editedFileContentsAndActivityRestored": true,
+    "signInPrompts": 0,
+    "signInActions": 0,
+    "newChatTurns": 0,
+    "replayedOperations": 0,
+    "consoleWarningsAndErrors": 0
+  },
+  "checks": [
+    {
+      "action": "first reload after both owners restarted",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "MAPLE-B-1028: Read README.md in this workspace and summarize the",
+      "sessionId": "59e88d0d56054220929276804107940c",
+      "selectedRun": "44981f3041794f85bb9625e2f88ce2d5",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1938,
+      "historySha256": "84524efa69772cc43a1c91b28d9b288ec41149bdc0833ebbec504e6a35979987",
+      "noSignInPrompt": true,
+      "preview": {
+        "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+        "title": "workspace-isolation-note-20261028.md"
+      },
+      "activitySha256": "bbb67d01521ffdbef18bb7f66c833eb60783dcf11bc1b31fc852e4f8d5dd6baf"
+    },
+    {
+      "action": "switch to A after both owners restarted",
+      "exact": true,
+      "workspace": "web-search-check",
+      "session": "CEDAR-A-1028: Read README.md in this workspace and summarize the",
+      "sessionId": "6622de1037bd4532a1ebfd21e28a6f01",
+      "selectedRun": "55be7667b21344f689a7b5ca5b25fcdf",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1971,
+      "historySha256": "2f03ec3f4bae3e3aca921fc3be72f3093ef1efa7795736714b04396189de516c",
+      "preview": {
+        "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+        "title": "web-search-check / workspace-isolation-note-20261028.md"
+      },
+      "activitySha256": "d8e92ea61537d04c979066689ff3606edc2bdf49731e142beee2215b26441d24"
+    },
+    {
+      "action": "reload A after both owners restarted",
+      "exact": true,
+      "workspace": "web-search-check",
+      "session": "CEDAR-A-1028: Read README.md in this workspace and summarize the",
+      "sessionId": "6622de1037bd4532a1ebfd21e28a6f01",
+      "selectedRun": "55be7667b21344f689a7b5ca5b25fcdf",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1971,
+      "historySha256": "2f03ec3f4bae3e3aca921fc3be72f3093ef1efa7795736714b04396189de516c",
+      "noSignInPrompt": true
+    },
+    {
+      "action": "return to B test after inspecting all older sessions",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "MAPLE-B-1028: Read README.md in this workspace and summarize the",
+      "sessionId": "59e88d0d56054220929276804107940c",
+      "selectedRun": "44981f3041794f85bb9625e2f88ce2d5",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1938,
+      "historySha256": "84524efa69772cc43a1c91b28d9b288ec41149bdc0833ebbec504e6a35979987"
+    },
+    {
+      "action": "final reload B",
+      "exact": true,
+      "workspace": "ui-layout-check",
+      "session": "MAPLE-B-1028: Read README.md in this workspace and summarize the",
+      "sessionId": "59e88d0d56054220929276804107940c",
+      "selectedRun": "44981f3041794f85bb9625e2f88ce2d5",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1938,
+      "historySha256": "84524efa69772cc43a1c91b28d9b288ec41149bdc0833ebbec504e6a35979987",
+      "noSignInPrompt": true
+    }
+  ],
+  "olderSessions": [
+    {
+      "workspace": "web-search-check",
+      "session": "Native FastAPI test",
+      "sessionId": "220ac1f383cc45c6813c1588a1dde396",
+      "selectedRun": "5941d853102d40f2a3a6a6c311f4ca96",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1681,
+      "historySha256": "fddb4b69273c3e34ab0f01910a0547639284be8d411d85ac696cc5c5e6f377ab",
+      "exactToEarlierSnapshot": true
+    },
+    {
+      "workspace": "ui-layout-check",
+      "session": "List the top-level files in this workspace and tell me what it c",
+      "sessionId": "3495c8284fc345fbb22dd0ac18026850",
+      "selectedRun": "16df2944a87344a79a36ce3b3574072f",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 1392,
+      "historySha256": "e42b4d79cbaa1736f407d6ab489831a627490ac8cdf262f5d6f69137841b8e2e",
+      "exactToEarlierSnapshot": true
+    },
+    {
+      "workspace": "ui-layout-check",
+      "session": "do a test",
+      "sessionId": "83106cfc910e4674a39f759959d28872",
+      "selectedRun": "07a84a9bb594869ea8b2948fd141eb9a",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "historyCharacters": 12547,
+      "historySha256": "07c3d855e71b8303a36b9daa278d4525dd4d065d0c8d93c8b68c35b15562c5d4",
+      "exactToEarlierSnapshot": false,
+      "originalPrefixRetained": true,
+      "note": "Earlier baseline contains only the first turn; this user-owned chat now has additional user turns. Its older page and original complete first-turn text are retained. No messages were submitted by this agent.",
+      "observedHistoricalRoots": [
+        {
+          "root": "77a38b9e5f44406a8e10b5740461d6c4",
+          "neverReplay": true
+        },
+        {
+          "root": "2a860fefab574f65867dd37c96bcf6b9",
+          "neverReplay": true
+        },
+        {
+          "root": "0293fde52046411c984b84cb9feb126a",
+          "neverReplay": true
+        },
+        {
+          "root": "8622f2da3fa14ab6b2cca3f9c0c7a94c",
+          "neverReplay": true
+        },
+        {
+          "root": "7c2d4df0ee124d1aa347e58560acffdb",
+          "neverReplay": true
+        },
+        {
+          "root": "0ac29bd83a164b1b9acb3bc9ebc64d88",
+          "neverReplay": true
+        },
+        {
+          "root": "0f5cf70bd83b94c04d24f6b5f6e906e2",
+          "neverReplay": true
+        },
+        {
+          "root": "07a84a9bb594869ea8b2948fd141eb9a",
+          "neverReplay": true
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "workspace": "web-search-check",
+      "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/web-search-check/workspace-isolation-note-20261028.md",
+      "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+      "bytes": 75,
+      "sha256": "18d6308f184336f20a64d77bbdebcf37c3cb2080b837ac1d74ea142c7623027b"
+    },
+    {
+      "workspace": "ui-layout-check",
+      "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check/workspace-isolation-note-20261028.md",
+      "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+      "bytes": 74,
+      "sha256": "747541ac63f971a4e05cea3622d67d08e6c2d155311097f50a37927e8856d2e0"
+    }
+  ],
+  "workspaceLists": [
+    "web-search-check\nNative FastAPI test\nCEDAR-A-1028: Read README.md in this workspace and summarize the",
+    "ui-layout-check\nList the top-level files in this workspace and tell me what it c\ndo a test\nMAPLE-B-1028: Read README.md in this workspace and summarize the"
+  ],
+  "qualificationInputs": {
+    "files": 27425,
+    "beforeSha256": "b876a44c839fa3cb47fca8c26245bd24d1cb68488e8fb45b5081626d3c224cc3",
+    "afterSha256": "b876a44c839fa3cb47fca8c26245bd24d1cb68488e8fb45b5081626d3c224cc3",
+    "identical": true
+  },
+  "screenshots": [
+    {
+      "path": "doc/evidence/restart-persistence-a-20261028.png",
+      "sha256": "e146f0d7b9b02f20320bfa054d66ef6459a5fafb8a697aef54292ea9c4d2e5d8"
+    },
+    {
+      "path": "doc/evidence/restart-persistence-b-20261028.png",
+      "sha256": "6b949e304c45ff6cf2f81643c3295b78b281bd94ba5e6895e5c8279c8f3d6199"
+    }
+  ],
+  "findings": [
+    "The first PowerShell wrapper treated a missing launcher ExitCode as failure. Its valid readiness metadata and new live peer37948 proved successful startup; that peer was observed and never launched twice. Main startup then completed normally. This was an observation-wrapper issue, not an xMind startup failure.",
+    "The user-owned do a test chat contains seven newer roots beyond its earlier one-turn snapshot. Load older messages recovered its original exact first-turn text; all eight historical roots and12547 rendered characters are present. Its full extended history was not snapshotted before this restart, so byte-for-byte equality of that extension is not claimed."
+  ],
+  "limitations": "Local in-app browser restart acceptance using the existing saved authentication state. Both stops were explicit process termination followed by cold startup, not a graceful-shutdown claim. No product code changed; automated suites, installed VS Code and hosted CI were not rerun. All prior completed roots remain non-replayable.",
+  "finalSelection": {
+    "workspace": "ui-layout-check",
+    "session": "MAPLE-B-1028: Read README.md in this workspace and summarize the",
+    "sessionId": "59e88d0d56054220929276804107940c",
+    "selectedRun": "44981f3041794f85bb9625e2f88ce2d5",
+    "provider": "OpenAI",
+    "model": "gpt-4.1",
+    "historyCharacters": 1938,
+    "historySha256": "84524efa69772cc43a1c91b28d9b288ec41149bdc0833ebbec504e6a35979987"
+  },
+  "retained": true
+}
