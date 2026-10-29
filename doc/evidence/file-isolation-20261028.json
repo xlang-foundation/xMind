@@ -1,0 +1,474 @@
+{
+  "date": "2026-10-28",
+  "sourceBaseCommit": "fd29af0ddc089b639a723cb2e11ad5b03956ba70",
+  "url": "http://127.0.0.1:58613/ui/",
+  "scope": "Actual web UI prompts, reviewed approvals, file previews, workspace switches and reloads. No API chat calls or direct project-file edits. Four completed configured-model turns in the two retained test sessions.",
+  "sessions": [
+    {
+      "workspace": "web-search-check",
+      "sessionId": "6622de1037bd4532a1ebfd21e28a6f01",
+      "label": "CEDAR-A-1028",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "turns": [
+        {
+          "action": "create",
+          "prompt": "Create workspace-isolation-note-20261028.md in this workspace’s primary root with exactly this content:\n# CEDAR-A-1028\nstate: created\nnote: belongs to web-search-check\n\nDo not change any other file.",
+          "root": "92114b5e4ae54a3e8d3302a2af4eef19",
+          "operation": "c0d7b5879639c947f56bdd50c1fb3109",
+          "state": "completed",
+          "neverReplay": true
+        },
+        {
+          "action": "edit",
+          "prompt": "Edit workspace-isolation-note-20261028.md in the primary root: change \"state: created\" to \"state: edited\" and add a final line \"revision: 2\". Keep its label and note unchanged. Do not modify any other file.",
+          "root": "55be7667b21344f689a7b5ca5b25fcdf",
+          "operation": "f3b54005cfad86cbdac1bad911c3e6a2",
+          "state": "completed",
+          "neverReplay": true
+        }
+      ],
+      "file": {
+        "workspace": "web-search-check",
+        "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/web-search-check/workspace-isolation-note-20261028.md",
+        "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+        "bytes": 75,
+        "sha256": "18d6308f184336f20a64d77bbdebcf37c3cb2080b837ac1d74ea142c7623027b"
+      },
+      "createdPreview": {
+        "content": "# CEDAR-A-1028\nstate: created\nnote: belongs to web-search-check\n",
+        "state": "Read-only preview",
+        "title": "web-search-check / workspace-isolation-note-20261028.md"
+      },
+      "editedPreview": {
+        "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+        "title": "web-search-check / workspace-isolation-note-20261028.md"
+      },
+      "selectedRun": "55be7667b21344f689a7b5ca5b25fcdf",
+      "historyCharacters": 1971,
+      "historySha256": "2f03ec3f4bae3e3aca921fc3be72f3093ef1efa7795736714b04396189de516c"
+    },
+    {
+      "workspace": "ui-layout-check",
+      "sessionId": "59e88d0d56054220929276804107940c",
+      "label": "MAPLE-B-1028",
+      "provider": "OpenAI",
+      "model": "gpt-4.1",
+      "turns": [
+        {
+          "action": "create",
+          "prompt": "Create workspace-isolation-note-20261028.md in this workspace’s primary root with exactly this content:\n# MAPLE-B-1028\nstate: created\nnote: belongs to ui-layout-check\n\nDo not change any other file.",
+          "root": "110c6c02b24e4f219b3a585abbc52931",
+          "operation": "e5876d912f57144f6b3ce640d8809376",
+          "state": "completed",
+          "neverReplay": true
+        },
+        {
+          "action": "edit",
+          "prompt": "Edit workspace-isolation-note-20261028.md in the primary root: change \"state: created\" to \"state: edited\" and add a final line \"revision: 2\". Keep its label and note unchanged. Do not modify any other file.",
+          "root": "44981f3041794f85bb9625e2f88ce2d5",
+          "operation": "d8d1328c6baf54cbbc95b6dc054cc168",
+          "state": "completed",
+          "neverReplay": true
+        }
+      ],
+      "file": {
+        "workspace": "ui-layout-check",
+        "path": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/ui-layout-check/workspace-isolation-note-20261028.md",
+        "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+        "bytes": 74,
+        "sha256": "747541ac63f971a4e05cea3622d67d08e6c2d155311097f50a37927e8856d2e0"
+      },
+      "createdPreview": {
+        "content": "# MAPLE-B-1028\nstate: created\nnote: belongs to ui-layout-check\n",
+        "title": "workspace-isolation-note-20261028.md"
+      },
+      "editedPreview": {
+        "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+        "title": "workspace-isolation-note-20261028.md"
+      },
+      "selectedRun": "44981f3041794f85bb9625e2f88ce2d5",
+      "historyCharacters": 1938,
+      "historySha256": "84524efa69772cc43a1c91b28d9b288ec41149bdc0833ebbec504e6a35979987"
+    }
+  ],
+  "results": {
+    "createdFiles": 2,
+    "editedFiles": 2,
+    "newSessions": 0,
+    "completedTurns": 4,
+    "reloads": 2,
+    "workspaceSwitchesAfterFix": 2,
+    "exactFullHistories": true,
+    "workspaceSessionProviderModelAndSelectedRunRestored": true,
+    "fileContentsAndNativeOperationIdsCorrect": true,
+    "foreignChatLabelsAndActivityAbsent": true,
+    "previewResetVerifiedBothDirections": true,
+    "consoleWarningsAndErrors": 0,
+    "signInRequired": false
+  },
+  "checks": [
+    {
+      "action": "reload",
+      "workspace": "B",
+      "historyExact": true,
+      "ids": {
+        "prompt": "",
+        "runId": "44981f3041794f85bb9625e2f88ce2d5",
+        "sessionId": "59e88d0d56054220929276804107940c"
+      },
+      "preview": {
+        "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+        "title": "workspace-isolation-note-20261028.md"
+      },
+      "activitySha256": "702329a4f478d3ed2ecf3ffb8f748c8a745651ef4a3264b0abf86b3f2fa6d580",
+      "operationRestored": true,
+      "previewMode": "false"
+    },
+    {
+      "action": "reload",
+      "workspace": "A",
+      "historyExact": true,
+      "ids": {
+        "prompt": "",
+        "runId": "55be7667b21344f689a7b5ca5b25fcdf",
+        "sessionId": "6622de1037bd4532a1ebfd21e28a6f01"
+      },
+      "preview": {
+        "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+        "title": "web-search-check / workspace-isolation-note-20261028.md"
+      },
+      "activitySha256": "d8e92ea61537d04c979066689ff3606edc2bdf49731e142beee2215b26441d24",
+      "operationRestored": true
+    },
+    {
+      "action": "switch",
+      "workspace": "A",
+      "historyExact": true,
+      "ids": {
+        "prompt": "",
+        "runId": "55be7667b21344f689a7b5ca5b25fcdf",
+        "sessionId": "6622de1037bd4532a1ebfd21e28a6f01"
+      },
+      "preview": {
+        "content": "# CEDAR-A-1028\nstate: edited\nnote: belongs to web-search-check\nrevision: 2\n",
+        "title": "web-search-check / workspace-isolation-note-20261028.md"
+      },
+      "activitySha256": "dff165fbfe8e18b8f248fe12b0ad046b0e0930b41002355890d3ba18ef8727ec",
+      "operationRestored": true,
+      "previewMode": "false"
+    },
+    {
+      "action": "switch",
+      "workspace": "B",
+      "historyExact": true,
+      "ids": {
+        "prompt": "",
+        "runId": "44981f3041794f85bb9625e2f88ce2d5",
+        "sessionId": "59e88d0d56054220929276804107940c"
+      },
+      "preview": {
+        "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+        "title": "workspace-isolation-note-20261028.md"
+      },
+      "activitySha256": "bbb67d01521ffdbef18bb7f66c833eb60783dcf11bc1b31fc852e4f8d5dd6baf",
+      "operationRestored": true,
+      "previewMode": "false"
+    }
+  ],
+  "finding": {
+    "problem": "Switching workspace from an open preview cleared the content but retained preview mode, hiding the new workspace file tree behind an empty preview.",
+    "fix": "Reset preview mode whenever the workspace canvas refresh has no current file selection.",
+    "regression": "The new focused case failed before the fix (true !== false); the fixed complete browser suite passes all182 cases.",
+    "attachedFolder": "web-search-check explicitly includes ui-layout-check as its second folder. Its MAPLE file is correctly accessible under that attached folder heading. Primary-root files retain different content/hashes; chats and Activity remain separate.",
+    "attachedFolderPreview": {
+      "content": "# MAPLE-B-1028\nstate: edited\nnote: belongs to ui-layout-check\nrevision: 2\n",
+      "title": "ui-layout-check / workspace-isolation-note-20261028.md",
+      "workspace": "web-search-check"
+    }
+  },
+  "tests": {
+    "browser": {
+      "files": [
+        {
+          "path": "views/browser/tests/classic-script.test.cjs",
+          "sha256": "5e899fdbc8d0188fcb45c7436cb80da0d67afdc9a0503a7b0b7963f8c2308922"
+        },
+        {
+          "path": "views/browser/tests/connection.test.cjs",
+          "sha256": "6735212dfb99382644a032f0675302f4755b5527f5e94b19b365c5bcc3741406"
+        },
+        {
+          "path": "views/browser/tests/controller.test.cjs",
+          "sha256": "e0a99af95fa6e42210d017c334e7f8f84a66e73a156d80612245ae542afcdaf9"
+        },
+        {
+          "path": "views/browser/tests/launcher-build.test.cjs",
+          "sha256": "f3b6a081ce3fdacf90d7af0aa24ac0a761b5b4765b179a5a09d96ed170203f56"
+        },
+        {
+          "path": "views/browser/tests/layout.test.cjs",
+          "sha256": "17e0c16bf9ad699480513dbc5ea6b3c5e70bc82f7a93a197a6a1073b68b62989"
+        },
+        {
+          "path": "views/browser/tests/mcp-authorization-routes.test.cjs",
+          "sha256": "0fd56991b8ba5b3711680f1c5d28c6b4cccca55f62334a97403ab6961f1a6377"
+        },
+        {
+          "path": "views/browser/tests/responsive-layout.test.cjs",
+          "sha256": "1ff728f6dfcb540984d88347dbe70d0bc1a48d260b86655d629f27fd35c390a4"
+        },
+        {
+          "path": "views/browser/tests/terminal.test.cjs",
+          "sha256": "ad94c9fb1097b8135e8579dd97f6675a10fea5db46a5203095f3afd4d0f74001"
+        }
+      ],
+      "inventory": [
+        "browser reload shows saved-settings restoration instead of a false unconfigured state while local reconnect is pending",
+        "full webpage streams a response, persists a queued follow-up and dispatches it after the turn",
+        "production browser footer drives the same saved-provider CAS and explicit model enrollment using public metadata only",
+        "production classic scripts share a realm without collisions and restore owned history through the browser bridge",
+        "switching workspace from an open file preview returns the new workspace to its file tree",
+        "expanding an inactive workspace reads only its scoped session catalogue without selecting it",
+        "a catalogue response for another workspace is rejected instead of relabeling its sessions",
+        "opening a sidebar session updates the native select immediately through the existing selection handler",
+        "reload observes workspace metadata while health is pending instead of adding a serial connection capture",
+        "composer + opens the browser file input without opening a workspace picker or pretending upload support",
+        "workspace chat becomes usable while old run inspection is pending and stale completion is retired",
+        "completed backend effects refresh the explorer and preserve expanded folders and current file preview",
+        "a pending workspace refresh cannot apply the previous workspace after switching",
+        "automatic workspace refresh preserves the filename query and updates its selected preview",
+        "standalone webpage restores its existing HttpOnly session after reload without asking for the master token",
+        "local session protocol mismatch explains the required restart without asking for a server token",
+        "workspace name editor saves native metadata without replacing the selected workspace or history",
+        "workspace creation cancel returns to its launch context for Cancel, close and Escape",
+        "Cancel and Escape preserve an existing connection and do not logout or cancel execution",
+        "local same-machine Connect reuses the server-owned credential without opening the token dialog",
+        "workspace Git action requires confirmation and reports successful initialization",
+        "workspace Git action reports an existing repository and honors cancellation",
+        "workspace Git status includes the branch and validated native file counts",
+        "browser Git controls select and consistently route a registered secondary folder",
+        "browser renders native Git diff files as text and never injects patch markup",
+        "browser infers a branch review base or explains when the user must supply one",
+        "Git status distinguishes a clean repository from a workspace without Git",
+        "older backend without Git metadata keeps the existing status view usable",
+        "workspace canvas loads native folders lazily and previews the selected workspace file",
+        "workspace file tree stages a current-workspace file reference for the browser composer",
+        "local Browse opens the native folder picker and registers its selected path on the same xMind node",
+        "cancelling the native folder picker leaves the typed workspace path unchanged",
+        "workspace name and gear both open the workspace switcher and folder settings",
+        "a folder picker that finishes after switching workspaces does not leave Browse disabled",
+        "fixed-workspace mode explains disabled folder registration and local profile mode enables it",
+        "browser workspace switch reloads scoped history and does not cancel prior backend runs",
+        "browser workspace switch remains usable when AbortSignal static helpers throw Illegal invocation",
+        "a rejected local reconnect reports how to restore the connection without exposing a token prompt",
+        "cancelling an in-flight reconnect prevents late popup or conversation changes",
+        "Cancel aborts pending network work and immediate retry stays owned by the new attempt",
+        "sidebar divider supports drag, keyboard bounds and remembered width",
+        "a workspace starts from one chosen folder and accepts more folders later",
+        "workspace filename finder opens native fuzzy results from the active root",
+        "workspace filename finder searches and previews attached folders independently",
+        "Add folder attaches to the selected workspace without switching its session",
+        "one registered workspace explains why the switcher is disabled",
+        "connection sign-in form clears credentials and observes storage without switching workspace",
+        "authorized scope inspection renders public actions without selecting a remote connection",
+        "snapshot recovery renders bounded text, refuses partial acknowledgement and requires inspection after an unknown reset",
+        "remembered workspace is restored before scoped history loads after a new native session",
+        "manual selection replaces the saved workspace preference instead of restoring the previous choice",
+        "saved workspace IDs outside the authenticated catalogue are never submitted",
+        "workspace preference storage failure preserves the native selected workspace",
+        "saved workspace restore rejection is visible and does not load a different workspace history",
+        "browser session catalogue is read from its explicit workspace instead of the mutable active cookie scope",
+        "sessions without a model use the native last choice immediately and explicit choices survive discovery",
+        "an unconfigured provider restores a known historical model profile but never guesses among ambiguous profiles",
+        "workspace readiness waits for chat and permissions but not ancillary run inspection",
+        "independent capability and session metadata reads start together and preserve native validation",
+        "workspace activation reuses its health and profile observations and overlaps catalogue with capabilities",
+        "session switching overlaps history, runs, provider, model and permissions without blocking history",
+        "overlapping saved model background refreshes share one provider request",
+        "sidebar renames an inactive session without selecting it or disturbing the current run",
+        "sidebar archive and restore use native metadata and preserve the current conversation",
+        "sidebar deletion respects native refusal without changing the selected session",
+        "first browser prompt names an empty default session once through native title CAS",
+        "automatic titles preserve custom names and saved history, and yield to a concurrent manual rename",
+        "automatic title reads cannot rename a session after the selection changes",
+        "first browser send observes reusable permission details without reloading or resubmitting",
+        "browser invalidates workspace views once per observed terminal operation state without invoking a tool",
+        "browser bounds completed-effect observations across long coding histories",
+        "browser leaves persisted prompt admission to a backend advertising queue dispatch",
+        "browser queues selected workspace files with the prompt while another run is active",
+        "browser attaches to a run claimed by the backend after the active run settles",
+        "browser queued claim follows an already-known active run",
+        "browser queued claim preserves explicit inspection",
+        "browser waits for committed terminal stream acknowledgement before following a queued claim",
+        "browser reports a queued-selection persistence failure after advancing its observation epoch",
+        "browser removes only the selected idle session after confirmation and clears its transcript",
+        "browser reports deletion cancellation and refuses removal during active work",
+        "browser surfaces and replies to a pending approval from another run in the selected session",
+        "browser empty conversation adopts its first externally admitted running run and transcript",
+        "browser empty conversation adopts its first externally admitted completed run and transcript",
+        "browser session refresh discovers an externally admitted running run without changing the inspected run",
+        "browser session refresh discovers an externally admitted completed run without changing the inspected run",
+        "browser stale session approval cannot rewind an observed ready operation",
+        "browser stale session approval cannot rewind an observed succeeded operation",
+        "browser stale session approval cannot rewind an observed denied operation",
+        "browser accepts only a path-bound read-only inspection for an uncertain patch addition",
+        "browser starts a native restore run only for a fresh successful file operation",
+        "browser conversation permission manager lists scoped grants and revokes only the observed revision",
+        "browser retrieves bounded saved process output pages only for an observed completed command",
+        "browser older-history command publishes the expanded transcript for scroll-preserving prepend",
+        "browser session client shares the committed parser using cookies without bearer access",
+        "browser session client accepts successful no-content native operations",
+        "browser allows a bounded A2A follow-up request to span native peer discovery and reply",
+        "browser cookie stream refuses invalid scope and pre-abort before fetch and reports expired access",
+        "browser renders streamed chunks directly and reconciles only durable changes",
+        "browser coalesces concurrent snapshots and runs one follow-up for intervening durable events",
+        "browser terminal command snapshot drains its current feed before retiring observation",
+        "browser selection retirement aborts the feed and rejects late events from that conversation",
+        "browser event arriving during a snapshot does not render that committed record twice",
+        "browser resolves new graph child ownership after an older snapshot finishes",
+        "browser graph initial snapshot reads committed events before child ownership",
+        "browser graph terminal snapshot reads committed events before child ownership",
+        "browser graph snapshot still rejects an event without owned child metadata",
+        "browser forwards actual native file-proposal policy and clears unsupported legacy metadata without writes",
+        "browser user skill commands use the selected session and stop publishing after disposal",
+        "conversation selection recovers the new provider catalogue after its native selection acknowledgement is retired",
+        "a second conversation/profile observation rejects the retired recovery catalogue and publishes only its current native binding",
+        "browser imported key-only profiles guide the footer selection without a new-key error or provider calls",
+        "browser provider discovery leaves the selected run status intact for setup, success and failure",
+        "browser initializes saved provider profiles before any session is selected",
+        "browser startup discovers the active saved profile catalogue without delaying workspace readiness",
+        "browser saved catalogue remains usable after settings close, new conversation and selection without automatic profile writes",
+        "browser saves a selected model to the active conversation with provider and revision binding",
+        "browser footer provider command uses native profile CAS and saved-key discovery, with no automatic model enrollment",
+        "browser selection conflict recovers execution and saved models without selecting or admitting again",
+        "browser busy provider rejection preserves the current conversation model",
+        "browser graph resume requires displayed and freshly verified backend eligibility/CAS and never retries conflicts",
+        "browser context control uses actual discovery and discards a stale session/model generation before compaction",
+        "browser binds raw human input and explicit final-human resume to actual displayed and freshly observed plan identities",
+        "browser accepts a nested human answer against that nested plan CAS and resumes after one answered branch",
+        "browser rejects stale CAS, changed question identity, duplicate keys, foreign roots and observation conflicts before any controller mutation",
+        "browser generation change during a fresh plan check discards response and cannot answer the prior selected owner",
+        "browser transient plan GET conflicts discard actions and retry only bounded read observation",
+        "owned observation rejects a same-session status for another root and selection resets cursor backlog",
+        "normal Agent shows native-owned investigations and drains terminal child history without a graph selection",
+        "browser refreshes a stale provider selection before admitting the next run",
+        "profile conflicts refresh the displayed account and model without replaying the retained task",
+        "browser sends its known profile revision and retains the prompt when native admission rejects a stale view",
+        "browser slash command uses the current command catalogue and selected graph run route",
+        "browser Settings preserves the selected profile route through private discovery and footer enrollment",
+        "rename sends the displayed expected title only for the selected supported conversation and retains conflicts",
+        "session catalogue marks active runs from the native status map and rejects malformed status data",
+        "browser fork uses the selected saved message boundary and refuses foreign or busy sources",
+        "Responses saved-key discovery and model selection preserve backend-reported wire",
+        "restoring the native view does not wait for provider catalogue discovery",
+        "new runs attach the browser stream before the session refresh completes",
+        "browser observation starts its reconciliation snapshot without blocking streamed events",
+        "view catches a completion between event and status reads and drains final events",
+        "an obsolete view response cannot overwrite the next selection",
+        "provider key is consumed privately, IDs must come from discovery, disposal clears unsaved state",
+        "stale operation bytes cannot produce an approval request",
+        "browser refreshes an A2A task only through its exact acknowledged saved operation",
+        "browser artifact fetch explicitly requests remote A2A artifacts through the saved task inspection",
+        "browser can inspect a stream-observed task on an uncertain A2A send without replaying it",
+        "browser resumes a saved A2A event stream through the local backend",
+        "browser confirms and sends one explicit cancellation for the exact acknowledged A2A task",
+        "browser A2A input-required follow-up uses the saved task and refreshes its durable sequence",
+        "browser patch comparison revalidates owned snapshots and never submits approval",
+        "browser approval shows the exact reviewed patch and clears it when the selected run changes",
+        "browser cannot compare malformed patch absence and missing batch manifest",
+        "browser Settings manages public Nexus addresses and leaves Local active until Nexus authentication exists",
+        "browser MCP Settings explicitly loads the native resource catalog without mixing OAuth state",
+        "browser file attachments carry workspace membership revision into native run admission",
+        "browser graph mode admits workspace file references through graphRun with the observed revision",
+        "browser observes nested histories operations and live events through validated immediate parents",
+        "browser human input rejects missing or descendant owner even when the root node name matches",
+        "browser submits nested answers only from the validated owner and both displayed revisions",
+        "explicit browser conversation selection does not require an unavailable saved-provider catalogue",
+        "browser startup and capability refresh skip automatic unsupported saved-provider work",
+        "browser request preserves empty-error status and never repeats an unconfirmed mutation",
+        "prebuilt native browser assets contain current shared renderer bytes and refresh in place",
+        "workspace disclosures open independently and keep same-ID sessions scoped to their own workspace",
+        "switching workspace cannot copy the old global session select into the new workspace catalogue",
+        "bounded composer menus forward selection, preserve it on Escape, and follow native metadata",
+        "unchanged background control updates retain rows and inline hover toolbars",
+        "inline session toolbar targets inactive rows and offers archive and restore directly",
+        "header context follows native names and reuses workspace and session rename controls",
+        "browser layout keeps workspace conversations on the left and offers hideable Files and Activity tabs",
+        "inspector separates Changes, opens file previews with Back, and remembers the chosen tab",
+        "live Activity follows native tool receipts without changing tabs, reexecuting, or expanding verbose details",
+        "Activity scopes child calls, preserves interrupted outcomes, and bounds finished rows",
+        "compact rows show concurrent files and commands with details closed",
+        "compact rows pause native edit aliases for approval and preserve failed outcomes",
+        "MCP rows resolve native opaque aliases and animate only while calling",
+        "MCP login browser routes expose only exact observation, start and cancel methods",
+        "narrow browser layout overrides later workspace and sidebar defaults",
+        "filename search button overrides the full-width file-tree button rule",
+        "browser terminal creates a session-bound native PTY and relays UTF-8, input, resize and close",
+        "browser terminal refuses a late PTY after its conversation admission is revoked"
+      ],
+      "passed": 182,
+      "failed": 0,
+      "log": "doc/evidence/file-isolation-browser-20261028.log",
+      "logSha256": "5f3f7fddf84400766dee1ea344232505692f54c32e662f0043062e950d6043b1"
+    },
+    "preFixRegression": {
+      "passed": 0,
+      "failed": 1,
+      "log": "doc/evidence/file-isolation-preview-before-20261028.log",
+      "logSha256": "b6e91ab9520d89a6b8aa5c906c582051452e25d2a2cee322ffa1ed62f43f23ae"
+    }
+  },
+  "qualificationInputs": {
+    "files": 27425,
+    "effectPhaseBeforeSha256": "3b3cc8c3a4759f38622e55ab1d3951155714ddc16dad9424029f773c8723e17d",
+    "effectPhaseAfterSha256": "3b3cc8c3a4759f38622e55ab1d3951155714ddc16dad9424029f773c8723e17d",
+    "effectPhaseIdentical": true,
+    "fixQualifiedBeforeSha256": "b876a44c839fa3cb47fca8c26245bd24d1cb68488e8fb45b5081626d3c224cc3",
+    "fixQualifiedAfterSha256": "b876a44c839fa3cb47fca8c26245bd24d1cb68488e8fb45b5081626d3c224cc3",
+    "fixPhaseIdentical": true,
+    "changedInputs": [
+      "assets/browser.js",
+      "source/Tools/ci-views.mjs",
+      "source/views/browser/browser.js",
+      "source/views/browser/tests/connection.test.cjs"
+    ]
+  },
+  "owners": [
+    {
+      "Id": 36752,
+      "Birth": "134377089762234594",
+      "Path": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\aa25d3dde9bc4b78b0f90b99a1150d5840a44689313fa7f5b31e92c7311ffde1\\runtime-0660e937abbe71d43fda471d5164f7fdb5ac48e7f84bfd091be62fbb36ac70ac\\xmind.exe",
+      "Sha256": "47236c53f969dc32156f87cfe22336c91b0c58262af5f7f117b8fa086d7c0ff0"
+    },
+    {
+      "Id": 35656,
+      "Birth": "134376705305383704",
+      "Path": "D:\\CantorAI2026\\xMind\\.agentflow\\web-search-preview\\fp\\105dcdebcdcc62b44da55aa7cd463e52dee99df7f52150d5a66bdf41be87ebcb\\runtime-e4598605a15350af8c8d5564cb041d00574e501f9a79f558efb93404ecaf1cde\\xmind.exe",
+      "Sha256": "b6d145d4b8d67c97c55919bc5e08b4e0d2f4613e9a18a1432a2e8e9389d88e9d"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "doc/evidence/file-isolation-a-files-20261028.png",
+      "sha256": "e146f0d7b9b02f20320bfa054d66ef6459a5fafb8a697aef54292ea9c4d2e5d8"
+    },
+    {
+      "path": "doc/evidence/file-isolation-a-activity-20261028.png",
+      "sha256": "59a3433f2cab30acbd6e895d391a52faba65f2c03bf21f3ed2075b901fad2893"
+    },
+    {
+      "path": "doc/evidence/file-isolation-b-files-20261028.png",
+      "sha256": "6b949e304c45ff6cf2f81643c3295b78b281bd94ba5e6895e5c8279c8f3d6199"
+    },
+    {
+      "path": "doc/evidence/file-isolation-b-activity-20261028.png",
+      "sha256": "35c81af88dc4c161a384ff6f3e01fd6a2b24a72c217a0681d72222f1fad05ea1"
+    }
+  ],
+  "retained": true,
+  "finalSelectedSession": "59e88d0d56054220929276804107940c",
+  "neverReplay": "All four roots and their approved effects are complete. Never resend the prompts or replay the recorded operations.",
+  "usage": "Existing configured-model authorization remains capped at $100 total across project tests. No invoice amount is supplied by these UI receipts; no dollar charge inferred.",
+  "limitations": "Local in-app browser acceptance. Frontend-only fix; Native/ASGI suites, installed editor and hosted CI were not rerun. Existing Native main and peer processes were preserved; only browser assets were rebuilt and reloaded."
+}

@@ -572,7 +572,7 @@ else {
     const expanded=new Set(preserveView?[...workspaceFiles.querySelectorAll('button[aria-expanded="true"]')].map(button=>JSON.stringify([button.dataset.folderId,button.dataset.workspacePath])):[]);
     const canvasVersion=++workspaceCanvasGeneration,previewVersion=++filePreviewGeneration;++fileFindGeneration;workspacePreviewSelection=selection;
     workspaceFindQuery.value=query;workspaceFindQuery.disabled=false;workspaceFindSubmit.disabled=false;workspaceFindStatus.hidden=true;workspaceFindStatus.textContent='';workspaceCanvas.hidden=false;workspaceRefresh.disabled=true;workspaceFiles.replaceChildren();
-    if(!selection){fileTitle.textContent='Select a file';fileContent.textContent='Choose a file from the workspace tree to preview it here.';fileState.textContent='Files are read from the selected workspace folders.';}
+    if(!selection){workspaceCanvas.dataset.preview='false';fileTitle.textContent='Select a file';fileContent.textContent='Choose a file from the workspace tree to preview it here.';fileState.textContent='Files are read from the selected workspace folders.';}
     try{
       if(query){const expectedFind=fileFindGeneration+1;await findWorkspaceFiles(query);if(generation!==connectionGeneration||workspaceId!==selectedWorkspaceId||fileFindGeneration!==expectedFind||workspaceFindQuery.value.trim()!==query)return;if(selection&&!workspacePreviewSelection){const button=[...workspaceFiles.querySelectorAll('button[data-workspace-path]')].find(button=>button.dataset.folderId===selection.folderId&&button.dataset.workspacePath===selection.path);await showWorkspaceFile(client,workspaceId,generation,selection.folderId,selection.path,button);}return;}
       for(const folder of workspaceFolders){

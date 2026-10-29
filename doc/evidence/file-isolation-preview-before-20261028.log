@@ -1,0 +1,32 @@
+TAP version 13
+# Subtest: switching workspace from an open file preview returns the new workspace to its file tree
+not ok 1 - switching workspace from an open file preview returns the new workspace to its file tree
+  ---
+  duration_ms: 144.7095
+  type: 'test'
+  location: 'D:\\CantorAI2026\\xMind\\views\\browser\\tests\\connection.test.cjs:20:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'true' !== 'false'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'false'
+  actual: 'true'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (D:\CantorAI2026\xMind\views\browser\tests\connection.test.cjs:22:575)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 833.6737
