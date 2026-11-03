@@ -827,7 +827,10 @@ function validateWorkspaceMembership(value,workspace){
   if(!value||typeof value!=='object'||Array.isArray(value)||![baseFields,enrichedFields].some(fields=>Object.keys(value).length===fields.length&&fields.every(field=>Object.hasOwn(value,field))))throw new Error('Invalid metadata field set');
   if(value.workspace_id!==workspace.workspace_id||!Number.isSafeInteger(value.revision)||value.revision<1||value.primary_folder_id!==workspace.workspace_id||!Array.isArray(value.folders)||!value.folders.length||value.folders.length>256)throw new Error('The native host returned invalid workspace membership.');
   const nameOf=root=>root.split(/[\\/]+/).filter(Boolean).at(-1)||root,ids=new Set(),roots=new Set();
-  if(Object.hasOwn(value,'name')&&(value.root!==workspace.root||value.name!==nameOf(workspace.root)))throw new Error('The native host changed the workspace identity.');
+  if(Object.hasOwn(value,'name')){
+    if(value.root!==workspace.root)throw new Error('The native host changed the workspace identity.');
+    if(typeof value.name!=='string'||!value.name||!/[^ ]/.test(value.name)||new TextEncoder().encode(value.name).length>1024||/[\x00-\x1f\x7f]/.test(value.name))throw new Error('The native host returned an invalid workspace name.');
+  }
   const folders=value.folders.map((folder,ordinal)=>{
     const fields=['folder_id','root'],enriched=['folder_id','root','name','ordinal'];
     if(!folder||typeof folder!=='object'||Array.isArray(folder)||![fields,enriched].some(expected=>Object.keys(folder).length===expected.length&&expected.every(field=>Object.hasOwn(folder,field))))throw new Error('Invalid metadata field set');
@@ -836,7 +839,7 @@ function validateWorkspaceMembership(value,workspace){
     ids.add(folder.folder_id);roots.add(folder.root);return {...folder,name:nameOf(folder.root),ordinal};
   });
   if(folders[0].folder_id!==value.primary_folder_id||folders[0].root!==workspace.root)throw new Error('The native host changed the workspace primary folder.');
-  return {...value,name:nameOf(workspace.root),root:workspace.root,folders};
+  return {...value,name:Object.hasOwn(value,'name')?value.name:nameOf(workspace.root),root:workspace.root,folders};
 }
 function validateVcsFolderId(value){if(typeof value!=='string'||!value||value.length>256||/[\x00-\x1f]/.test(value))throw new Error('Invalid Git workspace folder selection.');return value;}
 function vcsFolderQuery(folderId){return folderId===undefined?'':'?'+new URLSearchParams({folder_id:validateVcsFolderId(folderId)}).toString();}

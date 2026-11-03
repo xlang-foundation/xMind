@@ -54,7 +54,8 @@ test('native workspace membership is validated and enriched for editor folder se
  const client=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async url=>{requests.push(url);return{ok:true,json:async()=>url.endsWith('/v1/workspace')?workspace:response};});
  assert.deepEqual(await client.workspaceMembership(),group);assert.deepEqual(requests.map(url=>new URL(url).pathname),['/v1/workspace','/v1/workspace/membership']);
  response=group;assert.deepEqual(await client.workspaceMembership(workspace),group,'Native hosts may return the already enriched, exact membership record.');
- for(const mutate of [value=>{value.name='Other';},value=>{value.folders[1].ordinal=0;},value=>{value.unexpected=true;}]){const malformed=structuredClone(group);mutate(malformed);response=malformed;await assert.rejects(client.workspaceMembership(workspace));}
+ response={...group,name:'Git feature acceptance λ'};assert.deepEqual(await client.workspaceMembership(workspace),response,'A saved workspace name is display metadata, independent of its primary folder name.');
+ for(const mutate of [value=>{value.name='';},value=>{value.name='   ';},value=>{value.name='λ'.repeat(513);},value=>{value.name='Other\x7f';},value=>{value.name=42;},value=>{value.root='D:\\Other';},value=>{value.workspace_id='windows-local-file-v1:2:other';},value=>{value.folders[1].ordinal=0;},value=>{value.unexpected=true;}]){const malformed=structuredClone(group);mutate(malformed);response=malformed;await assert.rejects(client.workspaceMembership(workspace));}
  const invalid=new BackendClient('http://127.0.0.1:8765',()=> 'synthetic-client-token-32-bytes-long',async url=>({ok:true,json:async()=>url.endsWith('/v1/workspace')?workspace:{...nativeGroup,folders:[...nativeGroup.folders,{folder_id:nativeGroup.folders[0].folder_id,root:'D:\\Other'}]}}));
  await assert.rejects(invalid.workspaceMembership(),/invalid workspace folder/i);
 });
