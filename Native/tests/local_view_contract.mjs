@@ -106,6 +106,8 @@ try{
  ]){
   const denied=await fetch(origin+route,{method:'POST',headers,body:JSON.stringify({workspace_id:hostGroup.workspace_id,root:path.win32.resolve(privateFolder)})});
   assert.equal(denied.status,403,await denied.clone().text());assert.match((await denied.json()).detail,/Backend configuration cannot be a model workspace/);
+  const missing=await fetch(origin+route,{method:'POST',headers,body:JSON.stringify({workspace_id:hostGroup.workspace_id,root:path.win32.resolve(base,'missing-folder')})});
+  assert.equal(missing.status,400,await missing.clone().text());assert.match((await missing.json()).detail,/Workspace file or directory unavailable/);
   await expectBrowserMembership(hostGroup);
   assert.equal((await fetch(browserOrigin+'/v1/health',{headers:browserMembershipHeaders()})).status,200,'Rejected folder must preserve authentication and selected backend');
  }
