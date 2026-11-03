@@ -6,9 +6,9 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 ## Current work and preserved installation
 
-- Native10db0fcb fixes host manifest and missing-parent approval guidance. First183/189 had five ASGI-env setup failures and one Rust90s failure; corrected7/7 passes. Full189 passes with23907 inputs/environment/tools unchanged. See doc/evidence/native-host-path-and-creation-20261103.json.
+- Native92c126d2 qualified189/23907 inputs;4aa98dfb fixes first-handoff explicit process reimport (red60.62s, green118.41s), full189 passes/23907 unchanged inputs. Live owner46516 at57048/57058 recovered by supported resume with exact25-message preservation; latest fix not deployed. See doc/evidence/explicit-process-reimport-20261103.json.
 - SDK e1491db3 in .agentflow/xlang3-windows-exports:58 permitted/11 fixed perf pass; engine unchanged, sibling main clean. Earlier manifest was not embedded. Keep interpreter probe empty, bridge OFF, CPython pickle oracle disabled/excluded; audit wrappers. Initial incident retained in archive.
-- Cantor19445/v1 setup/save/reload passes after221/536 routing fix. New test key revoked, replacement enrolled. NEVER replay expense roots9d2dfdde884d4fcbbcbc8adb0aabf266 or5d218554c80f4333b150d011cd226477: both failed, seven complete new model responses/eight missing-parent calls, no file effects. Preserve keys, quota and external browser.
+- Cantor19445/v1: setup/save/reload passes after221/536 routing fix; replacement key enrolled. NEVER replay roots9d2dfdde884d4fcbbcbc8adb0aabf266,5d218554c80f4333b150d011cd226477 or948c88ab48e24126808616a713b5311e. Third hit deadline after2approved package files and xlang3 pytest exit1 (no pytest); all3original files unchanged. No project pass. Preserve keys, quota, browser.
 - User: keep existing run/staging/profile/workspace paths; no shortening workaround or duplicate test runtimes. Cleanup review blocked three directories (~726MiB); nothing deleted. Never retry them through another route.
 
 - Preserve Cantor NodeID `618367c4896d99c06ae8cf663909a519` and saved portal auth.

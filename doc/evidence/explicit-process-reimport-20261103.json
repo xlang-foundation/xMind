@@ -1,0 +1,115 @@
+{
+  "date": "2026-11-03",
+  "source": "4aa98dfb",
+  "preceding_qualified_source": "92c126d2",
+  "preceding_native_gate": "189/189 in860.21s;23907 inputs/environment/tools unchanged",
+  "runtime_refresh": {
+    "directory": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103",
+    "path_unchanged": true,
+    "files": 2875,
+    "changed_members": [
+      "xmind.exe",
+      "xlang3.exe",
+      "provenance.json"
+    ],
+    "engine_byte_unchanged": true,
+    "manifest_sha256": "17a3e983b7e4dc24f69c9dcdec0c6f0f426700aa872d0891d4a242ea1bc905a2",
+    "scope": "Qualified development runtime; no new installation acceptance"
+  },
+  "actual_handoff": {
+    "old_owner": {
+      "pid": 43040,
+      "birth": "134381697672710547"
+    },
+    "identity_check": "Held native process handle and exact100ns birth/image match. WMI truncates birth precision and reports an extended path; its initial preflight rejection made no changes.",
+    "initial": "Terminal exit2: replacement rejected changed registered xlang3 executable identity. Protected handoff preserved database/profile and the initial failed logs.",
+    "initial_log": ".agentflow/blockers-20261102/host-parent-live-upgrade-error.log",
+    "recovery": "Supported --upgrade-backend resume with the same explicitly supplied trusted process document reimports it and reaches readiness; no saved-state or SQLite edits",
+    "new_owner": {
+      "pid": 46516,
+      "birth": "134381768901072043"
+    },
+    "api_origin": "http://127.0.0.1:57048",
+    "browser_origin": "http://127.0.0.1:57058/ui/",
+    "worker_mode": "process-code with standard xlang3 IPC",
+    "history": "Exactly25 native message records unchanged before/after recovery",
+    "browser": "Actual reload restores workspace, session, encrypted provider/model and failed histories without sign-in or model request"
+  },
+  "cause_and_fix": {
+    "cause": "First handoff forwarded a process document only when its path/content digest changed. Same-document executable identity updates were marked pending only on receipt resume, so the first replacement loaded stale registered executable identity.",
+    "fix": "Forward an explicitly supplied trusted process document when preparing the first handoff even if its digest is unchanged. Existing executable identity validation and owner-receipt import guards remain.",
+    "regression": "Own188KiB executable copy changes identity while process JSON remains byte-identical. Explicit process-code to thread handoff must succeed on its first invocation, retain profile/origin/history and import the new executable revision.",
+    "before": {
+      "passed": 0,
+      "total": 1,
+      "seconds": 60.62,
+      "log": ".agentflow/blockers-20261102/first-handoff-reimport-before-tests.log"
+    },
+    "after": {
+      "passed": 1,
+      "total": 1,
+      "seconds": 118.41,
+      "log": ".agentflow/blockers-20261102/first-handoff-reimport-after-tests.log"
+    },
+    "focused_inputs_environment_tools_unchanged": 23907,
+    "complete_native_requalification": {
+      "passed": 189,
+      "total": 189,
+      "seconds": 856.3,
+      "input_files": 23907,
+      "environment_and_tools_unchanged": true,
+      "inventory_matches": true,
+      "log_sha256": "ebc13cbd9cd4e1a1333b59909b94587e6447715accb56e2999bbaca1065e9a75",
+      "source": "4aa98dfb"
+    },
+    "latest_fix_deployed_to_live_owner": false
+  },
+  "ordinary_project_continuation": {
+    "session": "cf9a08a851124f88ae28de15ee01229e",
+    "root": "948c88ab48e24126808616a713b5311e",
+    "prompt": "Add a --version option that prints 0.1.0, and finish the expense-report CLI and its --help usage example. Run the existing project tests with xlang3 and keep those tests unchanged.",
+    "outcome": "Terminal failed deadline; no replay",
+    "model_calls_started": 5,
+    "model_responses_completed": 4,
+    "recovery": "First create_file received the new missing-parent hint. The next model response explicitly requested parent creation; the actual UI approval bound the directory and file together.",
+    "approved_file_effects": [
+      {
+        "operation": "8a2d79026600fa9e1f83f82ce6410b76",
+        "path": "expense_report/__init__.py",
+        "parent": "expense_report",
+        "state": "succeeded"
+      },
+      {
+        "operation": "647f70f7e5e0f693a767e07d214458b3",
+        "path": "expense_report/__main__.py",
+        "state": "succeeded"
+      }
+    ],
+    "command": {
+      "operation": "548c1b2292ab6fe0d2f91830f6bc5afc",
+      "profile": "xlang3",
+      "revision": 2,
+      "arguments": [
+        "-B",
+        "-m",
+        "pytest",
+        "tests",
+        "-v"
+      ],
+      "exit_code": 1,
+      "seconds": 0.17,
+      "stderr": "No module named pytest",
+      "scope": "Process dispatch completed; acceptance tests did not pass or run"
+    },
+    "original_three_files": "Complete file hashes unchanged; only two model-generated package files added",
+    "native_event_records_returned": 99,
+    "worker_retirement": "worker.lease.retired; dispatch_error, uncertain_model_dispatches0; terminal run.failed reason deadline",
+    "trace": ".agentflow/blockers-20261102/expense-third-events.json.gz",
+    "audit": ".agentflow/blockers-20261102/expense-third-audit.json",
+    "screenshot": "cantorserve-expense-parent-recovery-20261103.png",
+    "manual_project_edits_diagnostic_prompts_or_test_changes": false,
+    "project_acceptance": false
+  },
+  "preservation": "Same staging/workspace/profile paths; required prior runtime copies, installation and user state preserved. Cleanup of three unused artifact directories (~726MiB) was rejected by automatic approval review as blocked by policy; nothing deleted and no alternate route attempted.",
+  "release_accepted": false
+}

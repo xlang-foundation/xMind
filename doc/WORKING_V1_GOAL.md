@@ -70,6 +70,17 @@ remain the qualified client source baseline. Preserve existing runtime/profile
 paths and use supported handoff after qualification.
 [Current reproduction, failures and scope](evidence/native-host-path-and-creation-20261103.json).
 
+Protected handoff then exposed a first-replacement process-profile reimport bug.
+Supported resume restored the same profile and origins with exact25-message
+preservation; fix4aa98dfb passes its red/green regression and passes full
+Native189 in856.30s with23907 inputs/environment/tools unchanged. A new process-code project turn independently used the
+parent hint and created two explicitly approved files. Its xlang3 pytest command
+exited1 because pytest is absent, and the run subsequently reached its deadline.
+The original three files remain unchanged. No project test pass, cold-client
+startup or new installed release is claimed. Never replay any of the three
+failed expense roots.
+[Handoff and actual project receipts](evidence/explicit-process-reimport-20261103.json).
+
 ## Outside the current delivery goal
 
 Advanced graph workflows, wider provider coverage, additional MCP/A2A workflows and generic connection enhancements are outside this delivery goal unless needed to unblock the v1 path. Preserve functioning existing capabilities. Do not present unfinished controls as working. Cross-node worker execution belongs to later Cantor Cluster work; private Nexus features and broad xlang3 optimization remain excluded.
