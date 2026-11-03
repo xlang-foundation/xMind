@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-03",
+  "base_commit": "a95f9962",
+  "problem": "Selecting a new Custom server route posts discardProviderKey. Its metadata refresh rebuilt the route selector and reset it to openai.responses; an entered key could then be submitted to the wrong provider. Add profile also reverted to an active saved profile on refresh.",
+  "live_observation": "Initial discovery returned HTTP401 invalid_api_key; the form subsequently showed openai.responses. The unintended provider request is inferred from the observed selection and reproduced submission path; no credential-bearing network trace was collected.",
+  "credential_response": {
+    "original_test_key": "xMind project validation 2026-11-03",
+    "original_status": "Revoked, independently visible in portal screenshot",
+    "replacement": "xMind project validation 2026-11-03 repaired",
+    "project": "Serving acceptance 2026-10-29",
+    "existing_keys_and_quotas": "unchanged",
+    "revocation_screenshot": "provider-test-key-revoked-20261103.png"
+  },
+  "fix": "Preserve the chosen profile/route only while public profile revision, provider, owned route and route wire still match. Retain Add profile during metadata refresh. Clear the entered key if the destination binding changes or disappears.",
+  "regressions": {
+    "before": {
+      "tests": 2,
+      "passed": 0,
+      "failed": 2,
+      "log": ".agentflow/blockers-20261102/provider-route-before.log"
+    },
+    "after": {
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "log": ".agentflow/blockers-20261102/provider-route-after.log"
+    },
+    "coverage": [
+      "Repeated route refreshes with and without an active saved profile",
+      "Submission contains only the chosen compatible route",
+      "Clear key on withdrawn route, changed provider/wire or changed/removed saved profile",
+      "DeepSeek fixture follows actual discovery-completion acknowledgement before profile save"
+    ]
+  },
+  "source": {
+    "extensions/vscode/media/chat.js": "93d7785a8b3a6e7b2dc5aa07da70d2a94db99fa0ff001b30d5ead2ef812f3f59",
+    "extensions/vscode/tests/renderer.test.js": "deca1274c20d265a9a612b1d27ac2e797fd1baed7f6f9bba966a882eaab82d2b"
+  },
+  "gates": {
+    "browser": {
+      "passed": 221,
+      "total": 221,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 42.1110157,
+      "log": ".agentflow/blockers-20261102/provider-route-browser-tests.log",
+      "sha256": "04ef8998a29acab926bc48eb87e0d94fbc18407503fb8071a3feaa2d1b942061"
+    },
+    "extension": {
+      "passed": 536,
+      "total": 536,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 4.743541100000001,
+      "log": ".agentflow/blockers-20261102/provider-route-extension-tests.log",
+      "sha256": "fc08b22f313782202df5660f14ebe806ca863dd028826eb2be83d2b97e19c594"
+    }
+  },
+  "inputs": {
+    "inputFiles": 23337,
+    "changed": [],
+    "added": [],
+    "removed": []
+  },
+  "delta_from_previous_client_gate": {
+    "inputFiles": 23337,
+    "changed": [
+      "browser-assets/chat.js",
+      "xmind/extensions/vscode/media/chat.js",
+      "xmind/extensions/vscode/tests/renderer.test.js"
+    ],
+    "added": [],
+    "removed": []
+  },
+  "native_scope": "No native C++/SDK/runtime binary changes. Prior complete189-contract qualification remains evidence for those unchanged components; no fresh full native run claimed.",
+  "actual_ui": {
+    "origin": "http://127.0.0.1:57058/ui/",
+    "process_id": 43040,
+    "process_birth": "134381697672710547",
+    "runtime": "embedded-fastapi/xlang3-ipc",
+    "endpoint": "http://127.0.0.1:19445/v1",
+    "model": "qwen3.8-27b-chat-32k",
+    "eligible_models": 1,
+    "provider_saved": true,
+    "cold_page_reload_restores_model_and_saved_key": true,
+    "screenshot": "cantorserve-xmind-provider-20261103.png"
+  },
+  "real_project": {
+    "workspace": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/cantorserve-20261103-expense",
+    "session": "cf9a08a851124f88ae28de15ee01229e",
+    "run": "9d2dfdde884d4fcbbcbc8adb0aabf266",
+    "state": "running at checkpoint; NEVER replay",
+    "tests": "Six unchanged independent acceptance tests; Python execution through registered xlang3 only"
+  },
+  "release_accepted": false
+}

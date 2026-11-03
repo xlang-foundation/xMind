@@ -25,7 +25,7 @@
         "Tool-call/result continuation",
         "Usage and actionable errors"
       ],
-      "status": "Portal 27B basic inference passed; xMind integration pending"
+      "status": "Actual xMind CantorServe discovery, encrypted-key/model save and page reload pass after provider-routing fix; real coding/SSE/tool continuation in progress"
     },
     {
       "area": "Project coding",
@@ -36,7 +36,7 @@
         "Actual build/test outputs",
         "Ordinary multi-turn recovery with unchanged tests"
       ],
-      "status": "Fresh real-project qualification pending"
+      "status": "Fresh expense-report UI run in progress; no pass claimed and no replay"
     },
     {
       "area": "Permissions and process execution",
@@ -82,7 +82,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete 534 extension tests passed, including cold-start selection restoration; actual current editor acceptance pending"
+      "status": "Complete 536 extension tests pass including route safety and cold-start selection restoration; actual current editor qualification pending"
     },
     {
       "area": "CLI client",
@@ -161,9 +161,9 @@
   ],
   "automated_clients": {
     "browser": 221,
-    "extension": 534,
+    "extension": 536,
     "input_files": 23337,
     "input_changes": 0,
-    "evidence": "native-qualification-20261103.json"
+    "evidence": "provider-route-refresh-20261103.json"
   }
 }

@@ -231,6 +231,37 @@ test('Settings keeps a chosen saved provider selected while host refreshes its p
  }finally{r.dom.window.close();}
 });
 
+test('Settings retains a new provider route and credential through metadata refreshes',()=>{
+ for(const savedActive of [false,true]){
+  const r=renderer(),doc=r.dom.window.document,key='synthetic-compatible-renderer-key';
+  const routes=[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'openai.compatible',provider:'openai-compatible',wire:'chat-completions',discovery:true}];
+  const profiles=savedActive?[{id:'saved',provider:'openai',route_id:'openai.responses',revision:1}]:[],state={type:'provider-profiles',active:savedActive?'saved':'',profiles,routes};
+  try{
+   r.send(state);doc.getElementById('settings').click();const profile=doc.getElementById('provider-profile'),route=doc.getElementById('provider-name'),input=doc.getElementById('provider-key');
+   if(savedActive){profile.value='';profile.dispatchEvent(new r.dom.window.Event('change'));r.send(state);assert.equal(profile.value,'','Refreshing metadata must retain Add profile even with an active saved profile');}
+   route.value='openai.compatible';route.dispatchEvent(new r.dom.window.Event('change'));assert.equal(r.posted.at(-1).type,'discardProviderKey');input.value=key;
+   for(let refresh=0;refresh<3;refresh++){r.send(state);assert.equal(route.value,'openai.compatible','Refreshing metadata must not redirect an entered credential');assert.equal(input.value,key);}
+   doc.getElementById('provider-form').dispatchEvent(new r.dom.window.Event('submit',{cancelable:true}));
+   assert.deepEqual(JSON.parse(JSON.stringify(r.posted.at(-1))),{type:'saveProviderKey',key,profile:'',route:'openai.compatible'});assert.equal(input.value,'');
+  }finally{r.dom.window.close();}
+ }
+});
+
+test('Settings clears an entered credential when refreshed profile or route identity changes',()=>{
+ for(const change of ['withdrawn','provider','wire','profile-revision','profile-removed']){
+  const r=renderer(),doc=r.dom.window.document;
+  const routes=[{id:'openai.responses',provider:'openai',wire:'responses',discovery:true},{id:'openai.compatible',provider:'openai-compatible',wire:'chat-completions',discovery:true}];
+  const saved=change.startsWith('profile'),profiles=saved?[{id:'saved',provider:'openai-compatible',route_id:'openai.compatible',revision:1}]:[];
+  try{
+   r.send({type:'provider-profiles',active:saved?'saved':'',profiles,routes});doc.getElementById('settings').click();const route=doc.getElementById('provider-name'),input=doc.getElementById('provider-key');route.value='openai.compatible';route.dispatchEvent(new r.dom.window.Event('change'));input.value='synthetic-retired-route-key';
+   const nextRoutes=routes.map(value=>({...value})),nextProfiles=profiles.map(value=>({...value}));
+   if(change==='withdrawn')nextRoutes.pop();else if(change==='provider')nextRoutes[1].provider='replacement-provider';else if(change==='wire')nextRoutes[1].wire='responses';else if(change==='profile-revision')nextProfiles[0].revision=2;else nextProfiles.pop();
+   r.send({type:'provider-profiles',active:nextProfiles[0]?.id||'',profiles:nextProfiles,routes:nextRoutes});assert.equal(input.value,'','A credential must never survive a changed destination binding: '+change);
+   assert.equal(r.posted.filter(message=>message.type==='saveProviderKey').length,0,'Metadata refresh cannot submit a credential');
+  }finally{r.dom.window.close();}
+ }
+});
+
 test('model picker explains that a saved provider must be chosen before model discovery',()=>{
  const r=renderer(),doc=r.dom.window.document,model=doc.querySelector('footer #model');
  try{
@@ -279,6 +310,8 @@ test('DeepSeek Settings enrollment uses the footer model chooser and saved respo
     r.send({type:'model-list',models:[{id:model},{id:'deepseek-v4-pro'}]});
     assert.deepEqual([...doc.querySelector('footer #model').options].map(option=>option.value),['',model,'deepseek-v4-pro']);
     assert.equal(doc.querySelector('#provider-settings #model'),null);
+    r.send({type:'settings-state',busy:false,complete:true,text:'Choose a model below to save this profile'});
+    assert.equal(doc.getElementById('provider-settings').open,false,'Discovery completion closes Settings before the model saves a new profile');
     const context={profile_id:'synthetic-deepseek-profile',profile_revision:3,route_id:'deepseek.chat',provider:'deepseek',wire:'chat-completions',model_id:model};
     r.send({type:'provider-profiles',active:context.profile_id,profiles:[{id:context.profile_id,provider:'deepseek',model,route_id:context.route_id,revision:3}],routes});
     r.send({type:'history',history:[{role:'assistant',data:{content:'Synthetic recorded DeepSeek response',model,provider_context:context,usage:{prompt_tokens:42,completion_tokens:9,total_tokens:51,prompt_cache_hit_tokens:7,prompt_cache_miss_tokens:35,prompt_tokens_details:{cached_tokens:7},completion_tokens_details:{reasoning_tokens:2}}}}]});

@@ -11,7 +11,7 @@ Deliver an installable, verified xMind v1 whose browser UI, VS Code extension an
 - The packaged version starts reliably and exposes usable browser, VS Code and CLI entry points.
 - Workspace creation/selection/switching changes the actual backend context, files and scoped history consistently.
 - The UI has a stable conversation/footer layout, responsive controls, visible progress, clear errors and explicit unavailable states.
-- Provider setup and model selection support the working coding path without leaking credentials. Development verification uses controlled peers rather than paid inference.
+- Provider setup and model selection support the working coding path without leaking credentials. Use controlled peers for contract tests and the configured CantorServe endpoint for authorized project exercises.
 - A coding task can read files, propose and apply approved edits, request command approval and return actual command results. Denial and cancellation behave predictably.
 - History, settings, workspace selection and completed task state restore correctly after reload/restart; restoration never replays completed effects.
 - The actual packaged browser, extension and CLI each receive fresh end-to-end verification. Existing successful task histories, owners, user settings, profiles and backups remain preserved.
@@ -55,9 +55,10 @@ project tests; do not coach diagnostic recovery through project prompts.
 
 CantorServe now responds at `http://127.0.0.1:19445/v1`; supplied-account portal
 sign-in and one real 27B inference pass through the existing acceptance project.
-xMind project-key discovery, streaming and tool-call acceptance are still pending.
-The native rebuild exposed old xlang3 import-library artifacts lacking required
-IPC exports; rebuild a matching runtime before qualifying the current backend.
+xMind project-key discovery, provider/model save and page reload now pass after
+a repaired provider-route refresh bug. Streaming and tool-call/project acceptance
+remain in progress. The matching SDK compatibility build and all189 native
+contracts passed; the repaired clients pass browser221 and extension536.
 [Current endpoint and build/lifecycle evidence](evidence/local-blockers-20261102.json).
 
 ## Outside the current delivery goal

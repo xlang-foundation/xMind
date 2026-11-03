@@ -712,10 +712,14 @@ byId('footer-provider').onchange=()=>{
   savedProviders();if(!profileState?.profiles.some(value=>value.id===id)||id===profileState.active)return;
   byId('provider-key').value='';api.postMessage({type:'select-provider',id});
 };
-function profileRoutes(){
+function profileRoutes(previous){
   if(!profileState)return;const selected=profileState.profiles.find(value=>value.id===byId('provider-profile').value),routes=profileState.routes.filter(value=>value.discovery&&providerWireLabel(value.wire)&&(!selected||value.provider===selected.provider));
+  // Metadata refreshes acknowledge backend state; they must not redirect a
+  // credential being entered for another route or for a new profile.
+  const retained=previous&&previous.profile===byId('provider-profile').value&&previous.saved?.revision===selected?.revision&&previous.saved?.provider===selected?.provider&&previous.saved?.route_id===selected?.route_id&&routes.find(route=>route.id===previous.route?.id&&route.provider===previous.route.provider&&route.wire===previous.route.wire);
+  if(previous&&!retained){if(byId('provider-key').value)byId('settings-status').textContent='Provider settings changed. Review the provider and enter its key again.';byId('provider-key').value='';}
   const choose=byId('provider-name');choose.replaceChildren();for(const route of routes){const option=node('option',providerLabel(route.provider,selected?.id)+' · '+providerWireLabels[route.wire]);option.value=route.id;choose.append(option);}
-  if(selected)choose.value=selected.route_id;else if(routes.some(value=>value.id==='openai.responses'))choose.value='openai.responses';
+  if(retained)choose.value=retained.id;else if(selected)choose.value=selected.route_id;else if(routes.some(value=>value.id==='openai.responses'))choose.value='openai.responses';
   byId('provider-key').required=!selected;byId('provider-key-label').textContent=selected?'API key (optional)':'API key';byId('provider-key-help').textContent=selected?'Leave blank to use the saved key. Enter a new key only to replace it.':'Enter the key for this new profile, then choose a model below after fetching.';
   const keyStatus=byId('provider-key-status');keyStatus.hidden=!selected;keyStatus.textContent=selected?'Saved provider key is configured on this xMind backend and will be used automatically. You do not need to enter it here.':'';
   choose.disabled=!routes.length;byId('profile-use').disabled=!selected||selected.id===profileState.active;
@@ -882,7 +886,12 @@ window.addEventListener('message',event=>{
   else if(m.type==='restore-prompt'){if(typeof m.prompt==='string'&&m.prompt.length>0&&m.prompt.length<=1024){const prompt=byId('prompt'),value=prompt.value.trim()?prompt.value.trimEnd()+'\n\n'+m.prompt:m.prompt,limit=prompt.maxLength>=0?prompt.maxLength:1048576;if(value.length<=limit){prompt.value=value;prompt.dispatchEvent(new Event('input',{bubbles:true}));prompt.focus();byId('status').textContent='Restore request prepared. Send it when ready using the selected permissions.';}}}
   else if(m.type==='model-list'){renderModels(m.models||[],m.model);}
   else if(m.type==='provider-clear'){profileState=undefined;savedProviders();byId('profile-controls').hidden=true;byId('provider-key').value='';}
-  else if(m.type==='provider-profiles'){profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider,profile.id)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);const preferred=settings.open&&settingsProfileSelection!==undefined&&m.profiles.some(profile=>profile.id===settingsProfileSelection)?settingsProfileSelection:m.active;profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes();refreshSendControl();}
+  else if(m.type==='provider-profiles'){
+    const previous=settings.open?{profile:byId('provider-profile').value,saved:profileState?.profiles.find(profile=>profile.id===byId('provider-profile').value),route:profileState?.routes.find(route=>route.id===byId('provider-name').value)}:undefined;
+    profileState=m;savedProviders();byId('profile-controls').hidden=false;const profiles=byId('provider-profile');profiles.replaceChildren();for(const profile of m.profiles){const option=node('option',providerLabel(profile.provider,profile.id)+' · '+(profile.model||'Choose a model'));option.value=profile.id;profiles.append(option);}const add=node('option','Add profile');add.value='';profiles.append(add);
+    const preferred=settings.open&&settingsProfileSelection!==undefined&&(settingsProfileSelection===''||m.profiles.some(profile=>profile.id===settingsProfileSelection))?settingsProfileSelection:m.active;
+    profiles.value=preferred;settingsProfileSelection=profiles.value;profileRoutes(previous);refreshSendControl();
+  }
   else if(m.type==='connection-snapshot-inspection'){showRemoteSnapshotInspection(m);}
   else if(m.type==='connection-run-inspection'){showRemoteRunInspection(m);}
   else if(m.type==='connection-authentication'){showConnectionAuthentication(m);}

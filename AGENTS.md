@@ -8,7 +8,7 @@ checkpoint prose belongs in doc/evidence or the [verbatim archive](doc/developme
 
 - 2026-11-03: Native 189/189 passes; 20,460 frozen inputs unchanged. Fixture TEMP/TMP belongs under build/skill-state-native/test-temp-20261103, NEVER under reserved .agentflow. Original setup failures retained. Live-model/client/package acceptance pending: doc/evidence/feature-acceptance-20261103.json.
 - SDK 87512a5e in sparse .agentflow/xlang3-windows-exports leaves sibling main unchanged; see doc/evidence/sdk-integration-20261103.json for its build overlay. SDK 57 permitted tests / 11 performance cases pass. Initial accidental CPython pickle oracle was reported/retained. Keep the interpreter probe empty, bridge OFF and xlang3_cli_pickle_interop excluded/disabled; audit transitive wrappers. Python work and pip stay xlang3-only.
-- CantorServe http://127.0.0.1:19445/v1 portal/27B smoke passes. Reuse Serving acceptance 2026-10-29 project; no new quota/key created. Fresh xMind key/SSE/tools/project coding still pending. Preserve user external browser, Cantor identity and portal auth; credentials never belong in logs, source or command arguments.
+- CantorServe19445/v1: exact27B discovery/save/reload passes. Provider refresh reset Custom server to OpenAI; fixed with221/536 client passes. Dedicated test key revoked; replacement enrolled. See doc/evidence/provider-route-refresh-20261103.json. Preserve other keys, quota, external browser and Cantor identity. Never log credentials or replay the active expense-project root.
 
 - Preserve Cantor NodeID `618367c4896d99c06ae8cf663909a519` and saved portal auth.
 
