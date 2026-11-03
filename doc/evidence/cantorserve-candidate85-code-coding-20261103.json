@@ -155,5 +155,11 @@
   ],
   "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/workflow-ninth-events.json.gz",
   "release_accepted": false,
-  "remaining": "Native CLI fresh root2cd8ee2992ac0fcec5c4b986919ce904 running, stock-editor/final release gates pending"
+  "remaining": "Native CLI fresh root2cd8ee2992ac0fcec5c4b986919ce904 running, stock-editor/final release gates pending",
+  "capture_scope": "Historical milestone snapshot at its recorded timestamp. Counts and remaining-work fields describe that capture, not the current aggregate state. Original observations are preserved.",
+  "subsequent_evidence": [
+    "cantorserve-candidate85-cli-coding-20261103.json",
+    "candidate85-real-provider-safety-20261103.json",
+    "regular-vscode-candidate85-20261103.json"
+  ]
 }

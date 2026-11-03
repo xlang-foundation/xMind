@@ -1,0 +1,214 @@
+{
+  "at": "2026-11-03T19:06:51.645Z",
+  "scope": "Regular desktop VS Code installation and attempted editor-refresh verification; no fresh desktop coding acceptance claimed.",
+  "source": {
+    "qualifiedNative": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "qualifiedSdk": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "latestMainFetched": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+    "latestXlang3MainFetched": "6186ffa61203789ed8ff18669c81fff32125259c",
+    "programChangesThisCheckpoint": false
+  },
+  "installation": {
+    "at": "2026-11-03T18:59:11.316Z",
+    "installed": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.85",
+    "version": "0.1.85",
+    "verifiedUnmodifiedMembers": 2919,
+    "totalInstalledFiles": 2921,
+    "completeInstalledFileSetVerified": true,
+    "relocatedVsixMetadataHashVerified": true,
+    "manifestSemanticallyEqual": true,
+    "installerMetadataAdded": true,
+    "manifestSha256": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+    "nativeFiles": 2875
+  },
+  "rollback": {
+    "previouslyDocumentedBackupDirectoriesAbsentAtPreflight": true,
+    "verifiedFromStillInstalledVersionsBeforeUpdate": [
+      {
+        "version": "0.1.75",
+        "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.75",
+        "output": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/regular-code-rollback-0.1.75.zip",
+        "files": 2442,
+        "bytes": 35455555,
+        "sha256": "63e9cf8b541ed629166984beb81ab4984aa1c1efcca1786f938041fadb1ebaf4",
+        "verified": true
+      },
+      {
+        "version": "0.1.76",
+        "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.76",
+        "output": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/regular-code-rollback-0.1.76.zip",
+        "files": 2442,
+        "bytes": 35501207,
+        "sha256": "ca605fde80ed29fff91e6128e4f888e733b8d02612c4d86a277791fc19515d82",
+        "verified": true
+      },
+      {
+        "version": "0.1.80",
+        "source": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.80",
+        "output": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/regular-code-rollback-0.1.80.zip",
+        "files": 2381,
+        "bytes": 35239039,
+        "sha256": "d0a3e0389d5beca24630408cbbae1b0e4994017bc6c57e19fa17b92145afedf3",
+        "verified": true
+      }
+    ],
+    "fullUncompressedRuntimeBackupDirectoriesCreated": 0
+  },
+  "preservation": {
+    "at": "2026-11-03T19:05:01.239Z",
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "settingsBytesUnchanged": true,
+    "extensionRegistryDelta": [
+      {
+        "id": "openai.codex-audio",
+        "before": [
+          "26.1007.21434"
+        ],
+        "after": [
+          "26.1021.22027"
+        ]
+      },
+      {
+        "id": "ms-vscode.cpptools",
+        "before": [
+          "1.34.4"
+        ],
+        "after": [
+          "1.35.6"
+        ]
+      },
+      {
+        "id": "openai.chatgpt",
+        "before": [
+          "26.1007.21434"
+        ],
+        "after": [
+          "26.1021.22027"
+        ]
+      },
+      {
+        "id": "agentflow-local.agentflow",
+        "before": [
+          "0.1.80"
+        ],
+        "after": [
+          "0.1.85"
+        ]
+      }
+    ],
+    "unrelatedRegistryUnchanged": false,
+    "note": "Regular VS Code automatically updated three unrelated installed extensions after startup; do not undo user-configured automatic updates.",
+    "fixtureFileHashes": {
+      "README.md": "7820950133f3aec202bff7b4d5d59ca95debbdd7f6c9c1e5e841032167bd28c9",
+      "tracked.txt": "85462b6c455d4c172d9613a91ac661f5efd3bb54cc7170a7b840c358d15d70b6",
+      "staged.txt": "02ee784c923c0252219107c70867324564e9a37b8f0e7977f3c3311a9d4e135b",
+      "notes λ.txt": "612c97d7a619838515d7c644458e567ed590eaca67cece50bf863c56a1f0a420"
+    },
+    "allFourFixtureFilesUnchanged": true
+  },
+  "desktop": {
+    "regularUserDataAndExtensionDirectories": true,
+    "existingOwnedGitFixtureReused": true,
+    "version": "1.143.0",
+    "commit": "2d0b7506a36c1d6db9a466440131a8e01eab2289",
+    "normalCliStatusObservedTrackedFileOpen": true,
+    "screenshot": "Black capture",
+    "inputError": "GetCursorPos failed: Access is denied. (0x80070005)",
+    "failedInputAttempts": [
+      "Open tracked.txt through Explorer",
+      "Activate regular window once after refreshing selection"
+    ],
+    "accessibilitySnapshotStaleAfterCliFileOpen": true,
+    "fileUpdateProbeRun": false,
+    "editorAutoRefreshVerified": false,
+    "modelRequests": 0,
+    "additionalNativeBackendOrRuntimeGenerationStarted": false,
+    "pythonExtensionsDisabledForThisLaunchOnly": [
+      "ms-python.python",
+      "ms-python.debugpy",
+      "ms-python.vscode-pylance",
+      "ms-python.vscode-python-envs"
+    ],
+    "normalAutomaticExtensionUpdatesObserved": [
+      {
+        "id": "openai.codex-audio",
+        "before": [
+          "26.1007.21434"
+        ],
+        "after": [
+          "26.1021.22027"
+        ]
+      },
+      {
+        "id": "ms-vscode.cpptools",
+        "before": [
+          "1.34.4"
+        ],
+        "after": [
+          "1.35.6"
+        ]
+      },
+      {
+        "id": "openai.chatgpt",
+        "before": [
+          "26.1007.21434"
+        ],
+        "after": [
+          "26.1021.22027"
+        ]
+      }
+    ],
+    "normalVsCodeBackgroundUpdaterObserved": true
+  },
+  "remaining": {
+    "supportedLoopbackCodeServerWatcherFailure": "Existing Windows absolute-exclusion parcel regex_error(error_escape) remains unresolved. Official loopback Code Server support is still declared in extensions/vscode/README.md; this checkpoint does not narrow support or count the desktop attempt as a fix.",
+    "relatedUpstreamIssue": {
+      "url": "https://github.com/microsoft/vscode/issues/317176",
+      "statusAtRecheck": "Open",
+      "differentReportedSymptom": "Remote SSH regex_error(error_backref); related path/glob handling only, not proof of this exact local failure."
+    },
+    "desktopRefreshAcceptance": "Pending actual usable desktop observation/control",
+    "releaseAccepted": false,
+    "goalStatus": "active"
+  },
+  "evidence": {
+    "priorFullQualification": "feature-acceptance-20261103.json",
+    "threeClientCoding": [
+      "cantorserve-candidate85-coding-20261103.json",
+      "cantorserve-candidate85-code-coding-20261103.json",
+      "cantorserve-candidate85-cli-coding-20261103.json"
+    ],
+    "realProviderSafety": "candidate85-real-provider-safety-20261103.json",
+    "finalPrimaryCounts": {
+      "sessions": 2,
+      "messages": 89,
+      "roots": 12,
+      "events": 1345,
+      "operations": 21,
+      "projectFiles": 6
+    },
+    "currentVersion": "0.1.4",
+    "allEarlierRecordsAndCompletedEffectsPreserved": true,
+    "finalReadOnlyPreservation": {
+      "primary": "All earlier 2sessions/85messages/11roots/1261events/20operations and all6files exact; final89messages/12roots/1345events/21operations after the already-completed denied edit.",
+      "cold": "Exact5messages/3roots/28events,0operations/model events; original project files unchanged, checked again after regular desktop launch."
+    },
+    "portalReachabilityAtFinalAudit": {
+      "at": "2026-11-03T19:08:57.207Z",
+      "status": 200,
+      "scope": "Portal only; no inference or authenticated provider capacity recheck."
+    }
+  },
+  "installedNativeReadOnlySmoke": {
+    "at": "2026-11-03T19:08:14.616Z",
+    "exe": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.85/native-runtime/xmind.exe",
+    "sha256": "adc3f76d6a6ef79a974b1b74dab9473f0f879ad994b388f7b8f279f7440e9c42",
+    "exitCode": 0,
+    "owner": {
+      "process_birth": "134382033024934914",
+      "process_id": 50000
+    },
+    "noBackendStarted": true,
+    "noModelRequests": true
+  }
+}

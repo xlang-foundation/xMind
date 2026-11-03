@@ -159,5 +159,11 @@
     "files": 6,
     "only_model_approved_main_changed": true,
     "version": "0.1.4"
-  }
+  },
+  "capture_scope": "Historical milestone snapshot at its recorded timestamp. Counts and remaining-work fields describe that capture, not the current aggregate state. Original observations are preserved.",
+  "subsequent_evidence": [
+    "cantorserve-candidate85-cli-coding-20261103.json",
+    "candidate85-real-provider-safety-20261103.json",
+    "regular-vscode-candidate85-20261103.json"
+  ]
 }
