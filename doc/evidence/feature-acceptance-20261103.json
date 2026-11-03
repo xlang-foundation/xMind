@@ -1,12 +1,12 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "deed03f0b02a484cdeed4a32686cca42aee623bc",
+  "source_base": "9f31157cf1dc28edfd48c48dd6efe28cf3da4ca0",
   "native_inventory": {
     "registered_tests": 189,
     "source_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
     "artifact": ".agentflow/blockers-20261102/request-id-native-qualified-inventory.json",
-    "full_current_suite": "189/189 atdeed03f0,902.02s,23912inputs/environment/tools unchanged. Active stage remains9ea/92aa; fresh packaged acceptance pending."
+    "full_current_suite": "189/189 atdeed03f0,902.02s,23912inputs/environment/tools unchanged. Same qualified executable now staged and installed83; no broader real-provider claim."
   },
   "sdk": {
     "compatibility_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
@@ -26,7 +26,7 @@
         "Tool-call/result continuation",
         "Usage and actionable errors"
       ],
-      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending. Native deed03f0 now preserves validated response request IDs/status through actual worker IPC/journal tests, including failure/timeout controls. This code is not yet staged in live owners; original failure remains uncorrelated."
+      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending. Native deed03f0 now preserves validated response request IDs/status through actual worker IPC/journal tests, including failure/timeout controls. Now deployed in primary38048/stage76ec/isolated installed83; original failure remains uncorrelated, no new inference."
     },
     {
       "area": "Project coding",
@@ -61,7 +61,7 @@
         "Selected-run restoration",
         "Reload/restart without effect replay"
       ],
-      "status": "Actual browser and Code automatic auth/run/history restoration verified. Cold profile retains exact five-message/three-graph native snapshots across reload, earlier-run selection, CLI observation and supported live owner replacement. Other workspace/session lifecycle scopes remain pending."
+      "status": "Actual browser and Code automatic auth/run/history restoration verified. Cold profile retains exact five-message/three-graph native snapshots across reload, earlier-run selection, CLI observation and supported live owner replacement. Other workspace/session lifecycle scopes remain pending. Installed83 supported handoff preserves exact2sessions/62messages/6roots/538events/13operations and6project files; browser and Code selections/auth restore on existing ports without replay."
     },
     {
       "area": "Browser client",
@@ -72,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending."
+      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending. Refreshed Native deed03f0 primary now passes actual reload/auth/history/selected-root restoration and terminal echo/exit0output retention/Close with no resources left. New full223 gate uses stage76ec."
     },
     {
       "area": "VS Code client",
@@ -83,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete540 source checks. Actual source-only82 with existing qualified external Native9ea/SDK92aa fixes numeric terminal exit reporting and native resource leak: exit7 notification, normal exit0 and explicit close all pass with empty terminal inventories and exact children gone. Auth/workspace/run restoration persists. Candidate81 contains the reproduced defect and requires refresh; stock Code Server nested watcher remains blocked by upstream absolute-Windows-glob regex_error."
+      "status": "Complete540 checks with refreshed stage. Actual bundled installed83 reports numeric exit7, normal exit0 and explicit close correctly; native resources/children released. Automatic auth, exact workspace/provider/model/session/run restoration and supported live native handoff pass with complete unchanged profile snapshots. Candidate81 remains withheld for its preserved regression. Stock Code Server nested watcher remains independently unqualified (absolute-Windows-glob regex_error); no vendor patch or forced overwrite."
     },
     {
       "area": "CLI client",
@@ -94,7 +94,7 @@
         "Reconnect/history",
         "Actual command outcomes"
       ],
-      "status": "Actual profile discovery, graph/history/event/operation inspection and terminal graph-watch observation pass with exact no-replay snapshots. Installed candidate81 CLI independently preserves exact five-message/three-root/28event snapshots and web reattaches the same owner/browser. Fresh complete packaged coding/approval/cancellation remains pending. Rebuilt xmind_cli usage correctly lists terminals SESSION; actual usage receipt verified."
+      "status": "Actual installed83 bundled executable verifies and observes cold profile/graphs/history/events/operations with exact5messages/3roots/28events and0model events. Cold owner remains9ea/92aa; this is observation, not new graph execution. Rebuilt CLI help documents terminals SESSION. Fresh complete packaged coding/approvals/cancellation remain pending."
     },
     {
       "area": "Language services and Git",
@@ -149,7 +149,7 @@
         "Qualified package smoke",
         "User-state preservation and required rollback copies"
       ],
-      "status": "Same cold profile and SQLite history survive supported stopped-owner recovery/live handoff on Native9ea/SDK92aa. Candidate81 archive2922 members and isolated installed2919 members plus semantic manifest verify; manifest14a unchanged after activation. Bundled installed editor/CLI observation passes. Production80/required backups untargeted; complete coding, remaining feature and final production preservation/install gates pending. Subsequent actual terminal acceptance reproduces a release blocker in unchanged candidate81; repair is qualified in source-only82 against the existing stage. Full package refresh required before release."
+      "status": "Candidate83 archive2922 members and complete isolated installation2921 files verify before/after actual activation. Bundled83 Code native view and live primary execute qualified deed03f0/SDK92aa; stage refreshed in place to76ec. Supported handoff preserves all62messages/6roots/538events/13operations/project files and old ports; cold profile unchanged. Required managed runtime generation created, immediate rollback retained; production80/75/76 untargeted. Complete coding, stock-editor refresh, remaining feature and final production installation gates pending. Ten obsolete cleanup targets retained after automatic review rejection."
     }
   ],
   "rules": [
@@ -165,12 +165,14 @@
     "extension": 540,
     "source_input_files": 23912,
     "runtime_input_files": 23339,
-    "evidence": "provider-request-correlation-20261103.json"
+    "evidence": "candidate83-installed-20261103.json",
+    "runtime_manifest_sha256": "76ecdb2edcca8f598fb515509a7237e4c195e4c042c552a0b668db6b0f42e459"
   },
   "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
   "current_cold_client_evidence": "cold-client-graphs-20261103.json",
   "current_terminal_evidence": "browser-terminal-exit-20261103.json",
-  "current_candidate_evidence": "candidate-package-20261103.json",
+  "current_candidate_evidence": "candidate83-installed-20261103.json",
   "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json",
-  "current_request_correlation_evidence": "provider-request-correlation-20261103.json"
+  "current_request_correlation_evidence": "provider-request-correlation-20261103.json",
+  "current_installed_terminal_evidence": "candidate83-installed-20261103.json"
 }
