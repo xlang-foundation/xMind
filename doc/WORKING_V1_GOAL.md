@@ -44,6 +44,22 @@ from main `952a8a178613f0bb1e9560896cc8114cb9a7af5e`, with sibling xlang3 main
   including restart/restoration, approvals and cancellation, before replacing
   the installed release. Preserve user data, settled runs and required backups.
 
+User continuation, 2026-11-02: use the deployed CantorServe endpoint to develop
+xMind against real projects and test all existing features. This includes coding,
+file and command approvals, denial/cancellation, workspace/history restoration,
+all three clients, MCP, skills, and existing graph workflows. Test existing
+capabilities without expanding the product backlog. Separate complete registered
+contract inventories from actual model-backed UI/project acceptance, and mark
+unsupported or untested cases explicitly. Preserve failed runs and original
+project tests; do not coach diagnostic recovery through project prompts.
+
+CantorServe now responds at `http://127.0.0.1:19445/v1`; supplied-account portal
+sign-in and one real 27B inference pass through the existing acceptance project.
+xMind project-key discovery, streaming and tool-call acceptance are still pending.
+The native rebuild exposed old xlang3 import-library artifacts lacking required
+IPC exports; rebuild a matching runtime before qualifying the current backend.
+[Current endpoint and build/lifecycle evidence](evidence/local-blockers-20261102.json).
+
 ## Outside the current delivery goal
 
 Advanced graph workflows, wider provider coverage, additional MCP/A2A workflows and generic connection enhancements are outside this delivery goal unless needed to unblock the v1 path. Preserve functioning existing capabilities. Do not present unfinished controls as working. Cross-node worker execution belongs to later Cantor Cluster work; private Nexus features and broad xlang3 optimization remain excluded.

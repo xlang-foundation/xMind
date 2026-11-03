@@ -1,0 +1,61 @@
+{
+  "build_artifact_exists": true,
+  "control": "release-trycompile",
+  "environment": [
+    [
+      "MSBUILDDISABLENODEREUSE",
+      "1"
+    ]
+  ],
+  "executable": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+  "executable_identity": "windows-local-executable-v1:windows-local-file-v1:fec0809ac0805ab3:e3580d00000006000000000000000000:87fafbe6507d4b23c38ccaf72a1859219d070acb57ef0160332df10945d2dfac",
+  "passed": true,
+  "scope": "Fresh native foreground CMake lifecycle diagnostic; no agent/model/IPC acceptance",
+  "steps": [
+    {
+      "arguments": [
+        "-S",
+        "D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\cmake-lifecycle-release\\source",
+        "-B",
+        "D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\cmake-lifecycle-release\\build",
+        "-G",
+        "Visual Studio 18 2026",
+        "-A",
+        "x64",
+        "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release"
+      ],
+      "elapsed_ms": 1738,
+      "exit_code": 0,
+      "phase": "configure",
+      "pid": 40444,
+      "stderr": "",
+      "stderr_bytes": 0,
+      "stdout": "-- Selecting Windows SDK version 10.0.26100.0 to target Windows 10.0.26200.\n-- The CXX compiler identification is MSVC 19.51.36256.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx86/x64/cl.exe - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Configuring done (1.7s)\n-- Generating done (0.0s)\n-- Build files have been written to: D:/CantorAI2026/xMind/.agentflow/blockers-20261102/cmake-lifecycle-release/build\n",
+      "stdout_bytes": 604,
+      "termination": "exited",
+      "truncated": false
+    },
+    {
+      "arguments": [
+        "--build",
+        "D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\cmake-lifecycle-release\\build",
+        "--config",
+        "Release",
+        "--parallel",
+        "2"
+      ],
+      "elapsed_ms": 985,
+      "exit_code": 0,
+      "phase": "build",
+      "pid": 39088,
+      "stderr": "",
+      "stderr_bytes": 0,
+      "stdout": "MSBuild version 18.9.1+a81b43525 for .NET Framework\r\n\r\n  1>Checking Build System\r\n  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/blockers-20261102/cmake-lifecycle-release/source/CMakeLists.txt\r\n  main.cpp\r\n  probe.vcxproj -> D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\cmake-lifecycle-release\\build\\Release\\probe.exe\r\n  Building Custom Rule D:/CantorAI2026/xMind/.agentflow/blockers-20261102/cmake-lifecycle-release/source/CMakeLists.txt\r\n",
+      "stdout_bytes": 455,
+      "termination": "exited",
+      "truncated": false
+    }
+  ],
+  "timeout_ms": 120000,
+  "working_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\cmake-lifecycle-release"
+}
