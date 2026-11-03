@@ -1324,6 +1324,7 @@ if(BUILD_TESTING)
       set_tests_properties(native_skill_context_contract PROPERTIES TIMEOUT 30)
     endif()
     add_executable(agentflow_chat_provider_contract tests/chat_provider_contract.cpp)
+    target_include_directories(agentflow_chat_provider_contract PRIVATE third_party)
     target_link_libraries(agentflow_chat_provider_contract PRIVATE agentflow_chat_provider)
     if(AGENTFLOW_NODE_EXECUTABLE)
       add_test(NAME native_chat_provider_contract COMMAND "${AGENTFLOW_NODE_EXECUTABLE}"

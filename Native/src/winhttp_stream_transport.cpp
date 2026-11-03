@@ -122,6 +122,26 @@ std::optional<std::string> response_field(HINTERNET request,const wchar_t* name,
         if(result->size()>8192)throw TransportError("Oversized MCP HTTP response metadata");
     }
 }
+std::optional<std::string> provider_request_id(HINTERNET request,const SecretBytes* bearer){
+    struct Buffer {std::array<wchar_t,64> value{};~Buffer(){SecureZeroMemory(value.data(),sizeof(value));}} first,extra;
+    DWORD index=0,size=sizeof(first.value);
+    if(!WinHttpQueryHeaders(request,WINHTTP_QUERY_CUSTOM,L"x-request-id",first.value.data(),&size,&index)||size%sizeof(wchar_t)||size>=sizeof(first.value))return std::nullopt;
+    const auto value=std::wstring_view(first.value.data(),size/sizeof(wchar_t));
+    const auto hex=[](wchar_t c){return (c>=L'0'&&c<=L'9')||(c>=L'a'&&c<=L'f')||(c>=L'A'&&c<=L'F');};
+    const bool prefixed=value.starts_with(L"req_");const auto core=prefixed?value.substr(4):value;
+    bool valid=core.size()==32&&std::all_of(core.begin(),core.end(),hex);
+    if(!prefixed&&value.size()==36){valid=true;for(std::size_t i=0;i<value.size();++i)if((i==8||i==13||i==18||i==23)?value[i]!=L'-':!hex(value[i])){valid=false;break;}}
+    if(!valid)return std::nullopt;
+    // Ambiguous, oversized and unrecognized diagnostics are omitted, never
+    // allowed to change the authoritative response or provider output.
+    size=sizeof(extra.value);
+    if(WinHttpQueryHeaders(request,WINHTTP_QUERY_CUSTOM,L"x-request-id",extra.value.data(),&size,&index)||GetLastError()!=ERROR_WINHTTP_HEADER_NOT_FOUND)return std::nullopt;
+    if(bearer){
+        const auto secret=bearer->view();const auto contains=[&](std::wstring_view text){return std::search(secret.begin(),secret.end(),text.begin(),text.end(),[](std::uint8_t a,wchar_t b){return a==b;})!=secret.end();};
+        if(contains(value)||(prefixed&&contains(core)))return std::nullopt;
+    }
+    std::string result;result.reserve(value.size());for(auto c:value)result.push_back(static_cast<char>(c));return result;
+}
 }
 static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     const std::function<void(std::string_view)>& consume,std::stop_token cancel,
@@ -230,6 +250,7 @@ static void transfer(const HttpStreamRequest& input,const SecretBytes* bearer,
     state.prepare();checked(WinHttpReceiveResponse(request.value,nullptr));state.wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE,deadline,cancel);
     DWORD status=0,size=sizeof(status);
     checked(WinHttpQueryHeaders(request.value,WINHTTP_QUERY_STATUS_CODE|WINHTTP_QUERY_FLAG_NUMBER,WINHTTP_HEADER_NAME_BY_INDEX,&status,&size,WINHTTP_NO_HEADER_INDEX));
+    if(!mcp&&!formMode&&input.observe_provider_request)if(const auto id=provider_request_id(request.value,bearer))input.observe_provider_request(static_cast<int>(status),*id);
     if(!mcp && (status<200 || status>=300)) {
         ProviderHttpError failure(static_cast<int>(status));
         // OAuth errors may echo authorization codes/verifiers. Do not parse or

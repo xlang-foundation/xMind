@@ -41,6 +41,9 @@ struct HttpStreamRequest {
     // stop from a possibly delivered remote request.
     std::function<void()> on_sending;
     std::optional<RemoteHttpBinding> remote_binding;
+    // Optional backend diagnostic: only a validated server-generated request ID,
+    // never arbitrary headers or credential bytes. Observed before body reads.
+    std::function<void(int,std::string_view)> observe_provider_request;
 };
 // Platform transport, outside the core. HTTPS uses OS certificate verification;
 // unencrypted HTTP is accepted only for explicitly configured loopback endpoints.

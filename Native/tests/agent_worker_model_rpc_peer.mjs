@@ -241,7 +241,7 @@ const server=createServer((request,response)=>{
   if(mode==='overflow'||mode==='other_error'||mode==='runner_error'){
    response.writeHead(400,{'content-type':'application/json'});response.end(JSON.stringify({error:{code:mode==='overflow'?'context_length_exceeded':'rate_limit_exceeded',type:'invalid_request_error',param:'messages',message:'private-provider-message must not cross the worker boundary'}}));return;
   }
-  response.writeHead(200,{'content-type':'text/event-stream'});chunk(response,mode,{role:'assistant',content:`Actual native RPC ${mode}.`});
+  response.writeHead(200,{'content-type':'text/event-stream',...(mode==='normal'?{'x-request-id':'0123456789abcdef0123456789abcdef'}:{})});chunk(response,mode,{role:'assistant',content:`Actual native RPC ${mode}.`});
   if(mode==='cancel'||mode==='crash'||mode==='runner_cancel'){response.on('close',()=>aborted.add(mode));return;}
   chunk(response,mode,{},'stop',usage);response.end('data: [DONE]\n\n');
  }catch(error){failure=error;response.writeHead(500);response.end();}});

@@ -4,6 +4,7 @@
 #include "agentflow/gemini_provider.hpp"
 #include "agentflow/gemini_history.hpp"
 #include "agentflow/deepseek_provider.hpp"
+#include "provider_response_observer.hpp"
 #include "nlohmann/json.hpp"
 #include <random>
 #include <sstream>
@@ -40,7 +41,7 @@ ModelCompletion complete_chat(const ChatProviderConfig& config,const ModelReques
     if(!sink) throw std::invalid_argument("Model event sink is required");
     if(config.chat_dialect==ChatDialect::deepseek&&!bearer)throw std::invalid_argument("DeepSeek requires a backend credential");
     ChatCompletionStream stream([&](const ModelEvent& event){if(event.kind!="model.done") sink(event);},config.chat_dialect,config.model);
-    post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout},bearer,
+    post_event_stream(observed_provider_request({config.endpoint,body,config.deadline,config.idle_timeout},sink),bearer,
         [&](std::string_view bytes){stream.feed(bytes);},cancel);
     auto result=stream.finish();
     if(config.chat_dialect==ChatDialect::deepseek&&!request.tools.empty()&&
@@ -86,7 +87,7 @@ ModelCompletion complete_model(const ChatProviderConfig& config,const ModelReque
             if(event.kind=="model.done")return;
             if(event.kind=="model.usage")sink({event.kind,anthropic_model_usage(event.json)});else sink(event);
         });
-        post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_api_key,ProviderHttpProtocol::anthropic},bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
+        post_event_stream(observed_provider_request({config.endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_api_key,ProviderHttpProtocol::anthropic},sink),bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
         auto result=stream.finish();
         result.usage_json=anthropic_model_usage(result.usage_json);
         std::set<std::string> names;for(const auto& tool:history.tools)names.insert(tool.name);
@@ -96,7 +97,7 @@ ModelCompletion complete_model(const ChatProviderConfig& config,const ModelReque
     if(config.wire!=ProviderWire::responses)throw std::invalid_argument("Unsupported provider wire");
     const auto body=serialize_responses_request(config,history);if(!sink)throw std::invalid_argument("Model event sink is required");
     ResponsesStream stream([&](const ModelEvent& event){if(event.kind!="model.done")sink(event);});
-    post_event_stream({config.endpoint,body,config.deadline,config.idle_timeout},bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
+    post_event_stream(observed_provider_request({config.endpoint,body,config.deadline,config.idle_timeout},sink),bearer,[&](std::string_view bytes){stream.feed(bytes);},cancel);
     auto result=stream.finish();std::set<std::string> names;for(const auto& tool:history.tools)names.insert(tool.name);for(const auto& call:result.tool_calls)if(!names.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");sink({"model.done","{}"});return result;
 }
 }

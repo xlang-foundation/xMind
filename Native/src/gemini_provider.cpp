@@ -1,5 +1,6 @@
 #include "agentflow/gemini_provider.hpp"
 #include "nlohmann/json.hpp"
+#include "provider_response_observer.hpp"
 #include <set>
 
 namespace agentflow {
@@ -20,7 +21,7 @@ GeminiCompletion complete_gemini(const GeminiProviderConfig& config,const Gemini
     if(!sink)throw std::invalid_argument("Model event sink is required");
     const auto endpoint=gemini_stream_endpoint(config);const auto body=serialize_gemini_request(request);
     GeminiStream stream([&](const ModelEvent& event){if(event.kind!="model.done"&&event.kind!="model.finish")sink(event);});
-    post_event_stream({endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_goog_api_key},api_key,[&](std::string_view bytes){stream.feed(bytes);},cancel);
+    post_event_stream(observed_provider_request({endpoint,body,config.deadline,config.idle_timeout,CredentialHeader::x_goog_api_key},sink),api_key,[&](std::string_view bytes){stream.feed(bytes);},cancel);
     auto result=stream.finish();std::set<std::string> offered;for(const auto& tool:request.tools)offered.insert(tool.name);
     for(const auto& call:result.function_calls)if(!offered.contains(call.name))throw ModelProtocolError("Provider requested a tool outside this request");
     sink({"model.finish",nlohmann::json{{"reason",result.finish_reason},{"provider_reason",result.provider_finish_reason}}.dump()});

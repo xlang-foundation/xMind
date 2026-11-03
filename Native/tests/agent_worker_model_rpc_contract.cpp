@@ -132,6 +132,9 @@ int child(int argc,char** argv){
         auto sink=[&](const ModelEvent& event){++observed;if(event.kind=="model.text"){text=true;if(mode=="crash")TerminateProcess(GetCurrentProcess(),73);if(mode=="cancel")cancellation.request_stop();}const auto saved=journal.events(id);require(std::any_of(saved.begin(),saved.end(),[&](const Event& e){return e.kind==event.kind&&e.json==event.json;}),"Nested journal RPC must observe the backend-recorded actual model event");require(self->call("fixture.observe_event",encode_agent_model_event(event))=="recorded","Stream callback must complete nested RPC without deadlock");};
         if(mode=="cancel"){rejects<TransportCancelled>([&]{client.complete(attempt,input,sink,cancellation.get_token());});require(text&&self->call("fixture.ping","")=="pong","Cancellation must acknowledge the actual stream and keep the RPC session usable");return Json{{"cancelled",true},{"pid",GetCurrentProcessId()},{"observed_events",observed}}.dump();}
         const auto result=client.complete(attempt,input,sink);require(text&&observed>=2,"Native child must receive actual streamed model events");
+        if(mode=="normal"){
+            const auto recorded=journal.events(id);require(std::any_of(recorded.begin(),recorded.end(),[](const Event& event){return event.kind=="model.http_response"&&Json::parse(event.json)==Json{{"status",200},{"request_id","0123456789abcdef0123456789abcdef"}};}),"Actual server request ID must survive standard worker RPC and exact backend journal observation");
+        }
         std::string actual_assistant;
         if(mode=="normal"||mode=="completion"||mode=="completion_delivery"||mode=="completion_rollback"||mode=="completion_hold"){
             rejects<Conflict>([&]{journal.complete_run(attempt);});

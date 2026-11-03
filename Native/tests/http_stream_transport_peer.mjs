@@ -11,11 +11,21 @@ import {createHash} from 'node:crypto';
 const execute=promisify(execFile);
 const [executable,openssl]=process.argv.slice(2);
 const folder=await mkdtemp(join(tmpdir(),'xmind-transport-'));
-let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map(),mcpRequests=new Map(),formRequests=new Map();
+let redirected=0,requests=0,plain,tls;const credentialRequests=new Map(),jsonPostRequests=new Map(),mcpRequests=new Map(),formRequests=new Map(),requestIdRequests=new Map();
 const jsonPostBody=String.raw`{"input":"native 🌍","decimal":1.00000000000000000001,"pa\u0074h":"raw"}`;
 const jsonPostReply='{"input_tokens":19,"opaque":"synthetic 🌍"}';
 const wire='data: '+JSON.stringify({choices:[{index:0,delta:{content:'transport fixture'},finish_reason:'stop'}]})+'\n\ndata: [DONE]\n\n';
 function handler(request,response) {
+  if(request.url.startsWith('/request-id/')){
+    const mode=request.url.slice('/request-id/'.length),id='0123456789abcdef0123456789abcdef';
+    requestIdRequests.set(mode,(requestIdRequests.get(mode)??0)+1);
+    assert.equal(request.method,'POST');assert.equal(request.headers.authorization,'Bearer '+(mode==='credential'?'synthetic-prefix-'+id:'transport-test-token-not-a-real-key'));
+    request.resume();
+    const header=mode==='uuid'?'01234567-89ab-cdef-0123-456789abcdef':mode==='prefixed'?'req_'+id:mode==='duplicate'?[id,id]:mode==='invalid'?'private-unrecognized-metadata':mode==='oversized'?'a'.repeat(4096):id;
+    response.writeHead(mode==='error'?429:200,{'Content-Type':mode==='error'?'application/json':'text/event-stream','X-Request-Id':header});
+    if(mode==='stall'){response.flushHeaders();return;}
+    response.end(mode==='error'?'{}':wire);return;
+  }
   requests++;
   if(request.url.startsWith('/form/')){
     formRequests.set(request.url,(formRequests.get(request.url)??0)+1);assert.equal(request.method,'POST');assert.equal(request.headers['content-type'],'application/x-www-form-urlencoded');assert.equal(request.headers.accept,'application/json');
@@ -148,6 +158,7 @@ try {
   assert.deepEqual(Object.fromEntries(credentialRequests),{'/auth/api-key':1,'/json-auth/api-key':1,'/auth/api-key/redirect':1,'/auth/google-key':1,'/json-auth/google-key':1,'/auth/google-key/redirect':1},'Only selected-header requests reach the wire; missing/injected credentials are rejected before sending');
   assert.deepEqual(Object.fromEntries(jsonPostRequests),{'/post-json/bearer':1,'/post-json/api-key':1,'/post-json/google-key':1,'/post-json/claude-protocol':1,'/post-json/boundary':2,'/post-json/large':1,'/post-json/oversized':1,'/post-json/wrong-media':1,'/post-json/redirect':1,'/post-json/diagnostic':1,'/post-json/delay':2,'/post-json/stall':1,'/post-json/after-failure':1},'Exact native JSON POST requests reach the wire once; invalid requests, TLS failure and pre-cancellation never dispatch');
   assert.deepEqual(Object.fromEntries(formRequests),{'/form/token':1,'/form/error':1,'/form/redirect':1,'/form/wrong-media':1,'/form/oversized':1,'/form/delay':2,'/form/grant':1},'Private native form POST must have exact bytes, no ambient credentials/retries, bounded bodies and zero invalid/pre-cancel/TLS dispatch');
+  assert.deepEqual(Object.fromEntries(requestIdRequests),{valid:1,uuid:1,prefixed:1,duplicate:1,invalid:1,oversized:1,credential:1,error:1,stall:1},'Request-ID diagnostics must not retry provider effects');
   assert.ok(requests>=9,'Protocol cases must reach real native sockets');
   process.stdout.write(result.stdout);
 } finally {

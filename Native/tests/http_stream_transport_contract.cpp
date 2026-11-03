@@ -23,6 +23,19 @@ int main(int argc,char** argv) {
         SecretBytes secret({reinterpret_cast<const std::uint8_t*>(synthetic.data()),synthetic.size()});
         auto request=[&](const std::string& path) {return HttpStreamRequest{base+path,R"({"fixture":"transport"})",10s,5s};};
         auto discovery=[&](const std::string& path){return HttpStreamRequest{base+path,"",10s,5s};};
+        const std::string trace="0123456789abcdef0123456789abcdef";
+        for(const std::string name:{"valid","uuid","prefixed","duplicate","invalid","oversized","credential","error","stall"}){
+            auto input=request("/request-id/"+name);std::size_t observed=0;int status=0;std::string captured;
+            input.observe_provider_request=[&](int code,std::string_view id){observed++;status=code;captured=id;};
+            const std::string credential="synthetic-prefix-"+trace;SecretBytes reflected({reinterpret_cast<const std::uint8_t*>(credential.data()),credential.size()});
+            const auto* key=name=="credential"?&reflected:&secret;
+            if(name=="stall"){input.deadline=300ms;rejects<TransportTimeout>([&]{post_event_stream(input,key,[](std::string_view){});});}
+            else if(name=="error")rejects<ProviderHttpError>([&]{post_event_stream(input,key,[](std::string_view){});});
+            else {ChatCompletionStream decoder([](const ModelEvent&){});post_event_stream(input,key,[&](std::string_view bytes){decoder.feed(bytes);});require(decoder.finish().content=="transport fixture","Optional request-ID diagnostics must not change valid provider output");}
+            const bool expected=name=="valid"||name=="uuid"||name=="prefixed"||name=="error"||name=="stall";
+            require(observed==(expected?1:0),"Provider request ID must be observed once, only when unique, bounded, recognized and not credential-derived");
+            if(expected){require(status==(name=="error"?429:200),"Request-ID observation must preserve actual HTTP status before a stream failure");require(captured==(name=="uuid"?"01234567-89ab-cdef-0123-456789abcdef":name=="prefixed"?"req_"+trace:trace),"Server request ID must be preserved exactly");}
+        }
         const std::string json_post_body=R"({"input":"native )"+std::string("\xf0\x9f\x8c\x8d")+R"(","decimal":1.00000000000000000001,"pa\u0074h":"raw"})";
         const std::string json_post_reply=R"({"input_tokens":19,"opaque":"synthetic )"+std::string("\xf0\x9f\x8c\x8d")+R"("})";
         auto post_request=[&](const std::string& path){return HttpStreamRequest{base+"/post-json/"+path,json_post_body,10s,5s};};

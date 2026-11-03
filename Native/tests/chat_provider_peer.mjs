@@ -16,7 +16,8 @@ const server=createServer((request,response)=>{
       assert.equal(body.tools[0].function.name,'read_file');assert.equal(body.tools[0].function.parameters.required[0],'path');
       assert.equal(body.stream_options.include_usage,true);assert.equal(body.max_completion_tokens,64);
       assert.ok(!source.includes('provider-protocol-test-not-a-real-key'),'Credential must not enter model request body');
-      response.writeHead(200,{'Content-Type':'text/event-stream'});
+      if(request.url==='/http-error'){response.writeHead(429,{'Content-Type':'application/json','X-Request-Id':'0123456789abcdef0123456789abcdef'});response.end('{}');return;}
+      response.writeHead(200,{'Content-Type':'text/event-stream',...(request.url==='/chat'?{'X-Request-Id':'0123456789abcdef0123456789abcdef'}:{})});
       if(request.url==='/incomplete') {
         response.end('data: '+JSON.stringify({choices:[{index:0,delta:{content:'partial'}}]})+'\n\n');return;
       }
@@ -35,6 +36,6 @@ try {
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const result=await execute(process.argv[2],[`http://127.0.0.1:${server.address().port}`],{windowsHide:true,timeout:15000});
   if(failure) throw failure;
-  assert.deepEqual(routes,['/chat','/unknown','/incomplete']);
+  assert.deepEqual(routes,['/chat','/unknown','/incomplete','/http-error']);
   process.stdout.write(result.stdout);
 } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
