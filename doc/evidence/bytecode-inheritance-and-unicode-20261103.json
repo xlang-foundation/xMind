@@ -36,8 +36,24 @@
     "changed": [],
     "unlisted_cache_files": 66,
     "cache_bytes": 5650997,
-    "cause": "Actual project tests launch child xlang3 without parent -B; bytecode caches appear in the paired immutable runtime.",
-    "recovery": "Pending qualified package; no cleanup/retirement yet. Existing paths preserved."
+    "cause": "Project subprocesses created66 caches and changed runtime directory metadata. All2875declared payload members were unchanged. Removing caches did not restore live guard acceptance; no verifier weakening is claimed.",
+    "recovery": {
+      "owner": {
+        "pid": 45908,
+        "birth": "134381834279238332",
+        "image": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/live-profiles/b183694a8331a8c9653174795f5a08ce8fa2e0e820a48f770e28e993ab0d02ec/runtime-96cc8ef9101130823b3d9e3fb4f50f0626e4e5be0e3d663e4e210e85c020d91a/xmind.exe"
+      },
+      "api": "http://127.0.0.1:57048",
+      "browser": "http://127.0.0.1:57058/ui/",
+      "runtime_path_unchanged": true,
+      "runtime_files": 2875,
+      "manifest_sha256": "14a9a3dbfca8e9b8cc1307d3980330029d9675d2120cec549788e237936ac4be",
+      "history": "Pre-recovery and immediate post-recovery snapshots exactly preserve2sessions,59messages,5terminalroots,12settled operations. The later root6 is recorded separately.",
+      "cache_cleanup": "Only66 proven generated cache files (5650997B) and9empty directories removed after exact identity/idle/inventory checks; all2875manifested files preserved.",
+      "handoff": "Supported live quiesce still rejected after cache removal. After fresh idle/history verification and exact held-handle retirement of test owner40016, supported stopped-owner factory upgrade succeeded to45908 on the same paths and origins. No direct profile/SQLite edits.",
+      "new_runtime_cache_directories": 0,
+      "note": "Root6 executed one approved edit but no commands, so real project subprocess inheritance on the updated runtime is not yet accepted."
+    }
   },
   "fixes": {
     "native": "Bind PYTHONDONTWRITEBYTECODE=1 in approved xlang3 process environment, retaining -B, approvals and deadlines.",
@@ -144,11 +160,28 @@
     ]
   },
   "remaining": [
-    "Matching complete Native189",
-    "Safe same-profile runtime recovery/history preservation",
-    "Complete ordinary CantorServe turn without replay",
-    "Resolve observed stale clean editor buffer",
-    "Qualify packaging/installation; installed80/backups75/76 unchanged"
+    "Complete a fresh ordinary CantorServe coding turn after exact serving failure correlation; never replay terminal roots.",
+    "Resolve stock Code Server nested-buffer watcher failure without forced revert or dirty-buffer overwrite.",
+    "Qualify original cold-client profile, remaining feature/graph workflows and final packaged installation."
   ],
-  "sdk_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050"
+  "sdk_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "native_complete": {
+    "revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
+    "passed": 189,
+    "total": 189,
+    "seconds": 891.03,
+    "terminal": {
+      "completed": "2026-11-03T12:40:23.5502514Z",
+      "test_exit": 0,
+      "input_exit": 0,
+      "environment_and_tools_unchanged": true
+    },
+    "comparison": {
+      "inputFiles": 23911,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "log_sha256": "7fd0031ead04a20bc5ae344a7a5f26b855b254597b82b2f5516945d03141fc37"
+  }
 }

@@ -131,5 +131,39 @@
     "4f0c5547d86c414db02b5af7c1069324"
   ],
   "tests_screenshot": "cantorserve-expense-six-tests-20261103.png",
-  "installed_release_accepted": false
+  "installed_release_accepted": false,
+  "version_0_1_1": {
+    "endpoint": "http://127.0.0.1:19445/v1",
+    "model": "qwen3.8-27b-chat-32k",
+    "root": "d114abd36fd84c4f9c3ac3a2dda54ffb",
+    "state": "failed",
+    "reason": "dispatch_error",
+    "events": 37,
+    "model_calls": 2,
+    "complete_model_calls": 1,
+    "usage": [
+      {
+        "completion_tokens": 76,
+        "prompt_tokens": 10700,
+        "total_tokens": 10776
+      }
+    ],
+    "approved_edit": "a87ed79bb456f633167bb09596b0dcb2",
+    "original_project_files_unchanged": true,
+    "test_commands": 0,
+    "native_attempt_id": "2387419832e0565872a07a67f86807d2",
+    "failure_code": "deadline",
+    "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/expense-sixth-events.json.gz",
+    "remaining_root_budget_ms": 465288,
+    "provider_defaults": {
+      "total_ms": 120000,
+      "idle_ms": 60000
+    },
+    "portal_candidate": "bb69d1ba-7e01-49… at04:47:46PST, reserved Awaiting reconciliation; correlation and full server request ID unconfirmed.",
+    "never_replay": true
+  },
+  "editor_watcher": {
+    "evidence": "source-client-and-serving-blockers-20261103.json",
+    "stock_editor_nested_refresh_accepted": false
+  }
 }

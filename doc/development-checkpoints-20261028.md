@@ -163,3 +163,10 @@ Settings supports provider enrollment and model discovery through the native API
 - Historical installed44/TestProj43/55921/u28 exact owner identities and NEVER-replay namespaces remain verbatim in [the owner archive](doc/development-checkpoints-20261025.md). Preserve all those owners, pages, profiles and completed tasks; global ownership/retirement rules below still apply.
 
 <!-- End of verbatim November 3 checkpoint archive. -->
+
+## 2026-11-03 pre-recovery checkpoint (superseded)
+
+- Current: Native3caa54ef passes full189 in897.40s/23907 unchanged inputs. New Native bytecode-inheritance guard passes focused2 in13.32s/23911; its full189 is pending. SDK candidate CLI policy and two missed Unicode package-path conversions pass60; fixed11 performance passes with matched empty caches; original asymmetric-cache failure retained. Sibling main6186ffa6 is clean. Keep CPython bridge OFF/interpreter probe empty and pickle oracle excluded. See current-task.json under .agentflow/blockers-20261102 and forthcoming bytecode evidence.
+- Cantor19445/v1 project6tests/pretty/help/version pass under xlang3, but worker deadline prevents complete-turn acceptance. NEVER replay roots9d2dfdde884d4fcbbcbc8adb0aabf266,5d218554c80f4333b150d011cd226477,948c88ab48e24126808616a713b5311e,753db94c51a54791b850ecbd74ba2d65 or4f0c5547d86c414db02b5af7c1069324. Original3files unchanged. Latest version-only edit succeeded; pytest absent, unittest approval cancelled at deadline. Preserve keys/quota/history.
+- Currentowner40016 at57048/57058: upgrade rejected because project subprocesses added66unlisted stdlib caches; all2875manifested files unchanged. No cleanup/retirement yet. Preserve until qualified recovery. Source editor approved edit but clean buffer stayed stale; no forced revert/dirty-buffer overwrite. CodeServer57118 stays; its test tab closed to release SDK IPC bridge. Installed80/backups unchanged.
+- Keep existing run/staging/profile/workspace paths. Cleanup review blocked three directories (~726MiB); nothing deleted. Never retry those targets through another route.
