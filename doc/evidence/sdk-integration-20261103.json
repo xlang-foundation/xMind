@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-03",
+  "xmind_base": "f44530d9",
+  "sdk_base": "6186ffa61203789ed8ff18669c81fff32125259c",
+  "sdk_compatibility_commit": "87512a5e",
+  "sdk_branch": "codex/xmind-windows-exports-20261103",
+  "sdk_evidence": "https://github.com/CantorAI/xlang3/blob/87512a5e/doc/performance/data/windows-runtime-exports-validation-20261103.json",
+  "preservation": "Sibling xlang3 main source unchanged; compatibility work is in a sparse isolated worktree. Existing incremental build uses a documented CMake project-include overlay adding the branch's .def and disabling legacy CPython interoperability registration. No IPC removal or replacement runtime lock.",
+  "sdk_results": {
+    "full_release_build": "passed after export fix",
+    "permitted_tests": {"passed": 57, "total": 57, "elapsed_seconds": 68.58},
+    "excluded": "xlang3_cli_pickle_interop requires CPython",
+    "performance": {"passed": 11, "total": 11, "repeats": 21, "warmup": 5, "threshold": 0.1, "exit_code": 0},
+    "exports": {"preserved": 20861, "removed": 0, "added": 3},
+    "binary_inventory": {"files": 54, "changes_during_permitted_tests": 0},
+    "logs": ".agentflow/blockers-20261102/xlang3-permitted-tests.log and xlang3-export-performance.json"
+  },
+  "interpreter_policy_incident": "The initial unfiltered SDK test run mistakenly invoked the legacy pickle wrapper, which launched CPython internally. That run is retained and is not xlang3-only acceptance. The wrapper now requires an explicit oracle; configuration disables this test when the interpreter variable is empty. The subsequent permitted 57-test run excludes it. No CPython fallback was used for xMind or package installation.",
+  "xmind_results": {
+    "rebuilt_targets": ["agentflow_process_contract", "xmind", "xmind_server", "xmind_cli", "xmind_admin"],
+    "target_build_exit_code": 0,
+    "native_process_adapter_contract": {"passed": 1, "total": 1, "elapsed_seconds": 4.94},
+    "full_native_build_and_189_test_gate": "in progress; no full-suite pass claimed"
+  },
+  "web_dependencies": {
+    "installer": "Rebuilt xlang3.exe -m pip",
+    "requirements": "views/browser/requirements-web.txt",
+    "target": ".agentflow/web-python/site-packages",
+    "dependency_resolution": "normal resolver with --only-binary=:all: and SDK-native local wheel; no --no-deps",
+    "exit_code": 0,
+    "native_core": "pydantic-core 2.50.1+xlang3; wheel built by repository nativeDependencyWheels from the matching SDK binding and public facade",
+    "cpython_pyd_files": 0,
+    "log": ".agentflow/blockers-20261102/web-pip-install.log",
+    "scope": "Installation only; actual embedded web startup and transport tests remain pending"
+  },
+  "next": "Finish full native build, run the complete 189-test native inventory and browser gates with the rebuilt SDK and installed packages, then validate project-key discovery, real streaming/tool continuation and normal multi-turn project coding through xMind. Keep installed package acceptance separate."
+}
