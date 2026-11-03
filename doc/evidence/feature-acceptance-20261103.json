@@ -5,22 +5,151 @@
   "native_inventory": {
     "registered_tests": 189,
     "artifact": ".agentflow/blockers-20261102/native-test-inventory.json",
-    "full_current_suite": "pending"
+    "full_current_suite": "189/189 passed; 20,460 unchanged inputs"
   },
-  "sdk": {"compatibility_commit": "87512a5e", "permitted_tests_passed": 57, "permitted_tests_total": 57, "performance_cases_passed": 11, "performance_cases_total": 11, "evidence": "sdk-integration-20261103.json"},
+  "sdk": {
+    "compatibility_commit": "87512a5e",
+    "permitted_tests_passed": 57,
+    "permitted_tests_total": 57,
+    "performance_cases_passed": 11,
+    "performance_cases_total": 11,
+    "evidence": "sdk-integration-20261103.json"
+  },
   "features": [
-    {"area": "Provider setup and models", "checks": ["Project-key discovery", "Model selection/persistence", "Real SSE streaming", "Tool-call/result continuation", "Usage and actionable errors"], "status": "Portal 27B basic inference passed; xMind integration pending"},
-    {"area": "Project coding", "checks": ["Read/search/list", "Create/edit/patch", "Diff review and restore", "Actual build/test outputs", "Ordinary multi-turn recovery with unchanged tests"], "status": "Fresh real-project qualification pending"},
-    {"area": "Permissions and process execution", "checks": ["Allow/deny exact effects", "Access modes and grants", "Cancellation", "Child/descendant cleanup", "Command output paging", "Foreground and persistent terminal lifecycle"], "status": "Current native process adapter contract passed; broader live checks pending"},
-    {"area": "Workspace and conversation lifecycle", "checks": ["Multi-folder isolation", "Workspace/session switching", "Rename/fork/archive/delete on disposable fixtures", "History paging", "Selected-run restoration", "Reload/restart without effect replay"], "status": "Extension contract suite passes cold-start selection fix; live current-source checks pending"},
-    {"area": "Browser client", "checks": ["Responsive layout", "Composer and file context", "Progress/activity/approvals", "File preview", "Authentication/reconnect"], "status": "Current embedded-xlang3 dependency and live qualification pending"},
-    {"area": "VS Code client", "checks": ["Editor selection and buffer refresh", "Native backend attachment", "Automatic authentication", "Run inspection restoration", "Terminal and Git views"], "status": "Complete extension JavaScript suite passed for run-selection fix; fresh actual editor qualification pending"},
-    {"area": "CLI client", "checks": ["Interactive coding", "Session/workspace commands", "Approvals", "Reconnect/history", "Actual command outcomes"], "status": "Matching-SDK native targets rebuilt; fresh coding qualification pending"},
-    {"area": "Language services and Git", "checks": ["Diagnostics/completion and unavailable states", "Workspace-bound language server lifecycle", "Git status/diff/review", "No fabricated clean diagnostics"], "status": "Current contract and project checks pending"},
-    {"area": "Agents, skills and context", "checks": ["Named agent selection", "Skill discovery and invocation", "Selection/files context", "Long-history paging/compaction", "Budgets and cancellation"], "status": "Current contract and live qualification pending"},
-    {"area": "Existing graph workflows", "checks": ["Graph execution and observation", "Local worker IPC", "Human pause/input/resume", "Nested outcomes/budgets", "No completed-effect replay"], "status": "Current native inventory and live qualification pending; no new graph features planned"},
-    {"area": "Existing MCP/A2A and connection features", "checks": ["Configured tools/resources", "OAuth lifecycle using controlled peers", "Protocol errors and recovery", "Browser MCP continuity", "Scoped connection observations"], "status": "Controlled native protocol gates and available live services pending; unavailable external dependencies must be labelled explicitly"},
-    {"area": "Persistence, packaging and installation", "checks": ["SQLite through embedded xlang3", "Encrypted credentials", "Backend handoff", "Runtime/content manifests", "Qualified package smoke", "User-state preservation and required rollback copies"], "status": "Historical 0.1.80 retained; current candidate qualification pending"}
+    {
+      "area": "Provider setup and models",
+      "checks": [
+        "Project-key discovery",
+        "Model selection/persistence",
+        "Real SSE streaming",
+        "Tool-call/result continuation",
+        "Usage and actionable errors"
+      ],
+      "status": "Portal 27B basic inference passed; xMind integration pending"
+    },
+    {
+      "area": "Project coding",
+      "checks": [
+        "Read/search/list",
+        "Create/edit/patch",
+        "Diff review and restore",
+        "Actual build/test outputs",
+        "Ordinary multi-turn recovery with unchanged tests"
+      ],
+      "status": "Fresh real-project qualification pending"
+    },
+    {
+      "area": "Permissions and process execution",
+      "checks": [
+        "Allow/deny exact effects",
+        "Access modes and grants",
+        "Cancellation",
+        "Child/descendant cleanup",
+        "Command output paging",
+        "Foreground and persistent terminal lifecycle"
+      ],
+      "status": "Full native 189-test inventory passed including process/permissions/lifecycle contracts; broader live checks pending"
+    },
+    {
+      "area": "Workspace and conversation lifecycle",
+      "checks": [
+        "Multi-folder isolation",
+        "Workspace/session switching",
+        "Rename/fork/archive/delete on disposable fixtures",
+        "History paging",
+        "Selected-run restoration",
+        "Reload/restart without effect replay"
+      ],
+      "status": "Extension contract suite passes cold-start selection fix; live current-source checks pending"
+    },
+    {
+      "area": "Browser client",
+      "checks": [
+        "Responsive layout",
+        "Composer and file context",
+        "Progress/activity/approvals",
+        "File preview",
+        "Authentication/reconnect"
+      ],
+      "status": "Complete 221 browser tests passed against matching embedded xlang3 runtime; rendered real-project acceptance pending"
+    },
+    {
+      "area": "VS Code client",
+      "checks": [
+        "Editor selection and buffer refresh",
+        "Native backend attachment",
+        "Automatic authentication",
+        "Run inspection restoration",
+        "Terminal and Git views"
+      ],
+      "status": "Complete 534 extension tests passed, including cold-start selection restoration; actual current editor acceptance pending"
+    },
+    {
+      "area": "CLI client",
+      "checks": [
+        "Interactive coding",
+        "Session/workspace commands",
+        "Approvals",
+        "Reconnect/history",
+        "Actual command outcomes"
+      ],
+      "status": "Matching-SDK native targets rebuilt; fresh coding qualification pending"
+    },
+    {
+      "area": "Language services and Git",
+      "checks": [
+        "Diagnostics/completion and unavailable states",
+        "Workspace-bound language server lifecycle",
+        "Git status/diff/review",
+        "No fabricated clean diagnostics"
+      ],
+      "status": "Current controlled native contracts passed in full189 gate; live/project qualification and external-service availability pending"
+    },
+    {
+      "area": "Agents, skills and context",
+      "checks": [
+        "Named agent selection",
+        "Skill discovery and invocation",
+        "Selection/files context",
+        "Long-history paging/compaction",
+        "Budgets and cancellation"
+      ],
+      "status": "Current controlled native contracts passed in full189 gate; live/project qualification and external-service availability pending"
+    },
+    {
+      "area": "Existing graph workflows",
+      "checks": [
+        "Graph execution and observation",
+        "Local worker IPC",
+        "Human pause/input/resume",
+        "Nested outcomes/budgets",
+        "No completed-effect replay"
+      ],
+      "status": "Current controlled native contracts passed in full189 gate; live/project qualification and external-service availability pending"
+    },
+    {
+      "area": "Existing MCP/A2A and connection features",
+      "checks": [
+        "Configured tools/resources",
+        "OAuth lifecycle using controlled peers",
+        "Protocol errors and recovery",
+        "Browser MCP continuity",
+        "Scoped connection observations"
+      ],
+      "status": "Current controlled native contracts passed in full189 gate; live/project qualification and external-service availability pending"
+    },
+    {
+      "area": "Persistence, packaging and installation",
+      "checks": [
+        "SQLite through embedded xlang3",
+        "Encrypted credentials",
+        "Backend handoff",
+        "Runtime/content manifests",
+        "Qualified package smoke",
+        "User-state preservation and required rollback copies"
+      ],
+      "status": "Historical 0.1.80 retained; current candidate qualification pending"
+    }
   ],
   "rules": [
     "Unit/contract results, real provider results, actual rendered clients and installed package results are separate evidence scopes",
@@ -29,5 +158,12 @@
     "No CPython interpreter or CPython native extension fallback",
     "No cluster/Nexus implementation or advanced feature expansion",
     "Do not report all features passed while any required scope is pending or unsupported"
-  ]
+  ],
+  "automated_clients": {
+    "browser": 221,
+    "extension": 534,
+    "input_files": 23337,
+    "input_changes": 0,
+    "evidence": "native-qualification-20261103.json"
+  }
 }

@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-03",
+  "native_source": "eb656d034a1c26d3a0cdcb811572c5a35f34f7c6",
+  "sdk_source": "87512a5ea1e31ad9d7b9178de884f583b572ebf1",
+  "native": {
+    "reported": 189,
+    "failed": 0,
+    "elapsed_seconds": 888.61,
+    "inventory_differences": [],
+    "disabled": 0,
+    "registered": 189,
+    "log": ".agentflow/blockers-20261102/native-full-tests-allowed-root.log",
+    "log_sha256": "8117754f89a9c40993539de11a66bc7c86f8a89c04864b7d203d2689953dc874",
+    "input_comparison": {
+      "inputFiles": 20460,
+      "changed": [],
+      "added": [],
+      "removed": []
+    }
+  },
+  "clients": {
+    "browser": {
+      "passed": 221,
+      "total": 221,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_seconds": 42.1054027,
+      "log": ".agentflow/blockers-20261102/browser-full-tests.log",
+      "log_sha256": "e5dbf654110dfd3643bbf2565e7b3c397a34bc49f67cc9cab14a7e9722221376"
+    },
+    "extension": {
+      "passed": 534,
+      "total": 534,
+      "failed": 0,
+      "skipped": 0,
+      "elapsed_seconds": 4.6005598,
+      "log": ".agentflow/blockers-20261102/extension-full-tests.log",
+      "log_sha256": "4c86f47a47ec6c6fd8312d051177d270c14fcbb226e3b99375ed7ac63030f117"
+    },
+    "input_comparison": {
+      "inputFiles": 23337,
+      "changed": [],
+      "added": [],
+      "removed": []
+    }
+  },
+  "staging": {
+    "nativeRevision": "eb656d034a1c26d3a0cdcb811572c5a35f34f7c6",
+    "sdkRevision": "87512a5ea1e31ad9d7b9178de884f583b572ebf1",
+    "sourceFiles": 53,
+    "sourceManifestSha256": "0a7dbed0d1f119f2e4d256131d300d8eab016cfe22be2d344ae570964728331b",
+    "output": "D:\\CantorAI2026\\xMind\\.agentflow\\acceptance-runtime-20261103",
+    "manifestSha256": "0b79ecff71631ab00c03dc350aa265f14ec3d47c9630599a640b60af38b331ab",
+    "nativeFiles": 5,
+    "pureSourceFiles": 1869,
+    "files": 2875,
+    "nativeExecuted": false,
+    "configAccessed": false,
+    "installed": false,
+    "webVerified": true,
+    "releaseAccepted": false
+  },
+  "initial_attempt": {
+    "tests": 189,
+    "failed": 80,
+    "exit_code": 8,
+    "cause": "Fixture TEMP/TMP was under reserved .agentflow; product correctly rejected model workspaces there. Original complete log/XML retained. Changed fixture TEMP/TMP only; no product guard, test or deadline change."
+  },
+  "scope": "Complete native contracts and browser/extension automated inventories; not real-provider project, rendered editor or installed-release acceptance. Embedded xlang3/FastAPI and standard local xlang3 IPC preserved."
+}
