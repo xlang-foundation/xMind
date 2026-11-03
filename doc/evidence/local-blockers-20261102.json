@@ -28,7 +28,36 @@
     "exit_code": 1,
     "cause": "Old sibling xlang3 import library lacks x3_runtime_register_remote_object and x3_runtime_lrpc_listen required by current SDK headers",
     "log": ".agentflow/blockers-20261102/process-build.log",
-    "limits": "No current native contract or full-suite pass. Required IPC exports were not removed or bypassed. Current xlang3 runtime build required."
+    "limits": "No current native contract or full-suite pass. Required IPC exports were not removed or bypassed. Current xlang3 runtime build required.",
+    "runtime_rebuild": {
+      "exit_code": 0,
+      "target": "xlang3",
+      "required_exports": [
+        "x3_runtime_register_remote_object",
+        "x3_runtime_lrpc_listen"
+      ],
+      "artifacts": [
+        {
+          "Path": "D:\\CantorAI2026\\xlang3\\build\\Release\\xlang3.exe",
+          "Hash": "67273E139330EFABDA656EEED6002C337E15B62A8C1CB22E946A5E95C2981A48"
+        },
+        {
+          "Path": "D:\\CantorAI2026\\xlang3\\build\\Release\\xlang3_runtime.dll",
+          "Hash": "057CFC154FB896CF471A3629CD62FC1BEBC260E784969E3CD66858D8D8E47C80"
+        },
+        {
+          "Path": "D:\\CantorAI2026\\xlang3\\build\\Release\\xlang3_runtime.lib",
+          "Hash": "9AF907480CF33FF1295113AAFF825B098635CAF86BD2412BF4ADF082CE956596"
+        }
+      ],
+      "scope": "Runtime build/export/CLI smoke only. Module rebuilds, correctness, native suite, and package acceptance remain pending.",
+      "source": "6186ffa61203789ed8ff18669c81fff32125259c",
+      "cli_probe": "xlang3 -c print: passed",
+      "configure_cpython_probe": "Disabled with empty XLANG3_PYTHON314_EXECUTABLE",
+      "bridge_enabled": false,
+      "baseline": ".agentflow/blockers-20261102/sdk-before-build",
+      "configuration": "Release"
+    }
   },
   "cmake_lifecycle": {
     "scope": "Fresh empty project through current native ForegroundProcess adapter; not original user project, agent or IPC workflow",
@@ -41,15 +70,28 @@
       "report": "cmake-lifecycle-default-20261102.json"
     },
     "embedded_debug_control": {
-      "environment": {"_CL_": "/Z7", "MSBUILDDISABLENODEREUSE": "1"},
+      "environment": {
+        "_CL_": "/Z7",
+        "MSBUILDDISABLENODEREUSE": "1"
+      },
       "result": "Configure still timed out with root exit0; PDB server observed. Not accepted as a remedy.",
       "report": "cmake-lifecycle-embedded-debug-20261102.json"
     },
     "release_control": {
       "configure_argument": "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
-      "environment": {"MSBUILDDISABLENODEREUSE": "1"},
-      "configure": {"exit_code": 0, "termination": "exited", "elapsed_ms": 1738},
-      "build": {"exit_code": 0, "termination": "exited", "elapsed_ms": 985},
+      "environment": {
+        "MSBUILDDISABLENODEREUSE": "1"
+      },
+      "configure": {
+        "exit_code": 0,
+        "termination": "exited",
+        "elapsed_ms": 1738
+      },
+      "build": {
+        "exit_code": 0,
+        "termination": "exited",
+        "elapsed_ms": 985
+      },
       "artifact_exists": true,
       "report": "cmake-lifecycle-release-20261102.json"
     },

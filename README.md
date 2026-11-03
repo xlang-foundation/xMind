@@ -13,29 +13,28 @@ programs through the native authoring API. See the [architecture](doc/architectu
 
 ## Current preview
 
-The local development installation is **0.1.43**, including the coding-diagnostics
-fix. This is a development preview, without a
-Marketplace or general-release claim. The xlang3 SDK is pinned at
-`58a8aab9b40a464e38a741129b4804ac36e27a53`.
+The latest recorded qualified local installation is **0.1.80**, including the
+VS Code authentication-persistence fix. This is a development preview, without
+a Marketplace or general-release claim. That installation is a preserved
+baseline; it does not qualify subsequent source changes as a new release.
+[Installed qualification](doc/evidence/vscode-auth-persistence-0.1.80-20261025.json).
 
-| Check | Verified scope |
-| --- | --- |
-| Installed native runtime | All 154 local contracts pass in 994.99 seconds with checked inputs and binaries unchanged. A separate real TypeScript check returns 0/0/1/0 diagnostics for clean/changed-clean/invalid/repaired buffers. |
-| Installed clients | 0.1.43 passes 429 extension and 147 browser fixtures locally and on exact-source hosted CI; package and installed payloads verify. |
-| Installed coding | Actual configured-Claude CLI and browser checks pass: one reviewed edit, fresh clean diagnostics and compiler exit 0. The preview refreshes automatically; reload retains 17 messages/eight usage records. |
-| Earlier application lifecycle | Separate installed 0.1.37/0.1.38 tasks verify a Vue edit, 32 xlang3 tests, production build, FastAPI/Vite startup, and explicit service shutdown. |
-| Preserved work | After installation, 27 checked older owners, 11 runtime inventories, 10 webpages, settings and prior profile directories remain intact. |
-| Still open | Actual VS Code pane activation, Rust semantic startup, hosted native acceptance, broader protocol recovery and process-bound agent execution. |
+The current delivery goal is reliable browser, VS Code and CLI coding through
+the native C++ backend, embedded xlang3 and SQLite. Development now uses
+CantorServe for real project exercises and qualification of existing features.
+Keep original project tests and failed-run evidence, and verify restoration
+without replaying completed effects. A local contract pass alone does not
+establish installed or model-backed acceptance.
 
-The installed runtime refreshes invalidated push-only language-server analysis and
-returns an unavailable tool result when its transport fails, allowing other
-coding checks to continue. Missing diagnostics are never reported as clean.
-Workspace and provider metadata remain responsive while an editor query waits.
+Current source work includes a tested fix for cold-start run selection and an
+investigation of Windows compiler-server lifetimes. A matching xlang3 runtime
+has been rebuilt from main; native and packaged qualification remain in progress.
+The registered native inventory currently contains 189 tests, not a claim that
+they have all passed on this source.
 
-[Current validation status](doc/VALIDATION_STATUS.md),
-[complete native result](doc/evidence/lsp-clean-edit-full-native-20261019.json),
-[installed 0.1.43 coding scope](doc/evidence/coding-package-0.1.43-20261019.json),
-[earlier application lifecycle](doc/evidence/coding-package-0.1.38-20261019.json).
+[Working v1 goal and current acceptance](doc/WORKING_V1_GOAL.md),
+[validation history](doc/VALIDATION_STATUS.md),
+[current endpoint and build evidence](doc/evidence/local-blockers-20261102.json).
 
 ## Use in VS Code
 
@@ -120,8 +119,9 @@ in an isolated xlang3 branch.
 ## Scope and history
 
 xMind OSS runs locally with SQLite, CLI, webpage and VS Code. Generic Local and
-Nexus connection profiles belong to the public architecture; authenticated
-Nexus enrollment and distributed worker execution remain unfinished. Private
+Nexus connection profiles belong to the public architecture. Workers execute
+locally through standard xlang3 IPC; cross-node execution belongs to later
+Cantor Cluster work and is outside this delivery goal. Private
 Nexus owns the team server, PostgreSQL, WebRTC and standalone Electron IDE.
 
 OpenCode and LiteLLM are references for workflow and provider research.
