@@ -183,5 +183,16 @@
   "sources": {
     "injectedExclusion": "https://raw.githubusercontent.com/microsoft/vscode/2d0b7506a36c1d6db9a466440131a8e01eab2289/src/vs/server/node/remoteFileSystemProviderServer.ts",
     "serverDataArgument": "https://raw.githubusercontent.com/microsoft/vscode/2d0b7506a36c1d6db9a466440131a8e01eab2289/src/vs/server/node/server.main.ts"
+  },
+  "browserAbortReconnectObservation": {
+    "at": "2026-11-03T19:45:29.469Z",
+    "primaryReloaded": true,
+    "elapsedObservedMs": 65712,
+    "abortVisibleAfterReconnect": false,
+    "completedVisible": true,
+    "coldProfileNotReloaded": true,
+    "newModelRequests": 0,
+    "rootCauseConfirmed": false,
+    "next": "Reproduce and identify the failing observer before changing timeout, retry or error handling."
   }
 }
