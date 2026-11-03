@@ -1,7 +1,7 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "8642314d5fe23aeeb582b3941aa60b1f466a81f9",
+  "source_base": "921ead20e56338dcd70aeabab1cfacc9871ff88f",
   "native_inventory": {
     "registered_tests": 189,
     "source_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
@@ -83,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete538 source checks. Candidate81 installed in the existing isolated Code Server root uses bundled Native/SDK after removal of its external-runtime override; actual automatic auth/history/selected-run/failure-copy restoration and fresh encrypted saved-key model discovery pass. Stock Code Server nested buffers remain stale; vendor absolute Windows glob independently reproduces regex_error matching open upstream microsoft/vscode#317176; vendor unchanged."
+      "status": "Complete540 source checks. Actual source-only82 with existing qualified external Native9ea/SDK92aa fixes numeric terminal exit reporting and native resource leak: exit7 notification, normal exit0 and explicit close all pass with empty terminal inventories and exact children gone. Auth/workspace/run restoration persists. Candidate81 contains the reproduced defect and requires refresh; stock Code Server nested watcher remains blocked by upstream absolute-Windows-glob regex_error."
     },
     {
       "area": "CLI client",
@@ -104,7 +104,7 @@
         "Git status/diff/review",
         "No fabricated clean diagnostics"
       ],
-      "status": "Current controlled native contracts passed in full189 gate; live/project qualification and external-service availability pending"
+      "status": "Native189 controlled contracts pass. Actual editor Git status explicitly warns the current expense folder may not be a repository; independent Git exits128 and Native empty branch confirm it. No Git initialization or edits. Positive Git status/diff and live language-service qualification remain pending."
     },
     {
       "area": "Agents, skills and context",
@@ -149,7 +149,7 @@
         "Qualified package smoke",
         "User-state preservation and required rollback copies"
       ],
-      "status": "Same cold profile and SQLite history survive supported stopped-owner recovery/live handoff on Native9ea/SDK92aa. Candidate81 archive2922 members and isolated installed2919 members plus semantic manifest verify; manifest14a unchanged after activation. Bundled installed editor/CLI observation passes. Production80/required backups untargeted; complete coding, remaining feature and final production preservation/install gates pending."
+      "status": "Same cold profile and SQLite history survive supported stopped-owner recovery/live handoff on Native9ea/SDK92aa. Candidate81 archive2922 members and isolated installed2919 members plus semantic manifest verify; manifest14a unchanged after activation. Bundled installed editor/CLI observation passes. Production80/required backups untargeted; complete coding, remaining feature and final production preservation/install gates pending. Subsequent actual terminal acceptance reproduces a release blocker in unchanged candidate81; repair is qualified in source-only82 against the existing stage. Full package refresh required before release."
     }
   ],
   "rules": [
@@ -162,13 +162,14 @@
   ],
   "automated_clients": {
     "browser": 223,
-    "extension": 538,
+    "extension": 540,
     "source_input_files": 23911,
     "runtime_input_files": 23338,
-    "evidence": "browser-terminal-exit-20261103.json"
+    "evidence": "code-terminal-lifecycle-20261103.json"
   },
   "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
   "current_cold_client_evidence": "cold-client-graphs-20261103.json",
   "current_terminal_evidence": "browser-terminal-exit-20261103.json",
-  "current_candidate_evidence": "candidate-package-20261103.json"
+  "current_candidate_evidence": "candidate-package-20261103.json",
+  "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json"
 }

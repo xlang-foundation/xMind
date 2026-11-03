@@ -1,0 +1,130 @@
+{
+  "date": "2026-11-03",
+  "source_revision": "921ead20e56338dcd70aeabab1cfacc9871ff88f",
+  "scope": "VS Code terminal exit reporting and native resource release; no complete coding or release claim",
+  "defect": {
+    "actual_installed_reproduction": "Candidate81 native terminal accepts echo and exit7. Native reports running=false/exit_code7, but Code shows neither failure status nor closure. Even after the user-facing Kill Terminal action removes the view, Native still lists the ended terminal.",
+    "terminal_id": "2fb12f3de7415862530cc01a00ef7dc6",
+    "native_output_sequence": 451,
+    "causes": [
+      "Pseudoterminal.onDidClose received {code:7} instead of the API's numeric exit code",
+      "Natural finish marked the adapter closed and removed its tracking entry without calling closeTerminal; a later close returned early"
+    ],
+    "api_reference": "https://code.visualstudio.com/api/references/vscode-api#Pseudoterminal",
+    "api_contract": "onDidClose is Event<number | void>; a nonzero numeric result reports terminal failure",
+    "failure_evidence": ".agentflow/blockers-20261102/code-terminal-after-ui-close.json",
+    "failure_screenshot": "code-terminal-exit-before-20261103.png",
+    "red_resource_cleanup": "After preserving reproduction, supported CLI terminal-close releases only this exact ended terminal"
+  },
+  "repair": {
+    "file": "extensions/vscode/terminal.js",
+    "behavior": "One idempotent finish path handles explicit close and natural exit, captures/clears the exact native ID, releases that native resource once, flushes output and emits a nonnegative numeric exit code or undefined",
+    "pending_creation": "An explicitly closed adapter still releases a subsequently returned native resource without publishing late output or firing duplicate completion",
+    "core_or_sdk_changes": false
+  },
+  "validation": {
+    "focused_before": {
+      "passed": 3,
+      "total": 4,
+      "failure": "Numeric exit event expected7 but received {code:7}"
+    },
+    "focused_after": {
+      "passed": 4,
+      "total": 4
+    },
+    "complete_browser": {
+      "passed": 223,
+      "total": 223
+    },
+    "complete_extension": {
+      "passed": 540,
+      "total": 540
+    },
+    "source_input_files_unchanged": 23911,
+    "runtime_input_files_unchanged": 23338,
+    "environment_and_tools_unchanged": true,
+    "terminal_receipt": ".agentflow/blockers-20261102/code-terminal-qualified-terminal.json",
+    "native_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
+    "sdk_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "native_manifest_sha256": "14a9a3dbfca8e9b8cc1307d3980330029d9675d2120cec549788e237936ac4be"
+  },
+  "actual_corrected_editor": {
+    "official_code_server": "http://127.0.0.1:57118/",
+    "source_adapter_version": "0.1.82",
+    "source_adapter_files": 26,
+    "source_adapter_path_reused": ".agentflow/blockers-20261102/code-source.vsix",
+    "prepared_source_directory_reused": ".agentflow/blockers-20261102/code-source-extension",
+    "installed_terminal_matches_source": true,
+    "runtime": "Existing .agentflow/acceptance-runtime-20261103 through the original isolated runtimeDirectory override; this small source-only adapter is not a bundled release",
+    "machine_settings": "Exact original seven settings restored for source-only validation; global desktop and workspace settings untargeted",
+    "native_view": {
+      "pid": 46312,
+      "birth": "134381900253887243",
+      "image": ".agentflow/acceptance-runtime-20261103/xmind.exe"
+    },
+    "old_candidate_view": "35704 no longer exists after normal editor reload/disposal; no manual owner kill",
+    "restoration": "Automatic auth and same workspace/session75c7a39896be45508cf70283e2360eca/rootd114/provider/model/Default permissions restored",
+    "nonzero_exit": {
+      "terminal": "40634a8d799b0ec68650b185e8d97960",
+      "command": "echo marker then exit7",
+      "actual_ui": "The terminal process terminated with exit code:7",
+      "native_terminal_list_after": [],
+      "shell": {
+        "pid": 44352,
+        "birth": "134381900407118472",
+        "original_identity_gone": true
+      },
+      "screenshot": "code-terminal-exit-after-20261103.png"
+    },
+    "zero_exit": {
+      "terminal": "d6241ee483ad29fb7e22d7a5a8c8c935",
+      "command": "echo marker then exit0",
+      "actual_ui": "Terminal closes normally without a new failure notification",
+      "native_terminal_list_after": [],
+      "shell": {
+        "pid": 37328,
+        "birth": "134381901419171333",
+        "original_identity_gone": true
+      }
+    },
+    "explicit_close": {
+      "terminal": "8d880d53877cb11007668b8e58f915fb",
+      "actual_output": "Echo command and its separate marker output verified in native hex output and rendered terminal before Kill Terminal",
+      "native_terminal_list_after": [],
+      "shell": {
+        "pid": 27096,
+        "birth": "134381902657280820",
+        "original_identity_gone": true
+      },
+      "screenshot": "code-terminal-output-20261103.png"
+    },
+    "setup_failure_retained": "First adapter packaging query used the prepared-directory Git cwd, selected0files and was rejected before installation. Corrected to explicit repository -C root; copied18source files, matched terminal.js, packaged26members and installed successfully. Original invalid-archive hash and setup log retained; same small output path reused.",
+    "source_adapter_bytes": 195302,
+    "source_adapter_sha256": "63856eaeff8bf8af2d57cbef23ac53bdd045ceb72e95e244344ceb68bec7885c"
+  },
+  "other_feature_observation": {
+    "git": "Actual Workspace Git > Git status reports no changed files with explicit warning that this folder may not be a Git repository. Native git-info returns empty branch; independent git rev-parse exits128, confirming no repository. No git-init or project changes; positive Git diff acceptance remains pending.",
+    "cli_help_gap": "CLI help currently lists terminals without its required SESSION argument. Actual grammar requires terminals SESSION; source inspection and one failed argument-only probe establish this minor usability gap. No C++ change in this checkpoint; retain for the next native batch."
+  },
+  "preservation": {
+    "new_model_inference": 0,
+    "main_owner": {
+      "pid": 45908,
+      "birth": "134381834279238332",
+      "unchanged": true
+    },
+    "cold_owner": {
+      "pid": 14932,
+      "birth": "134381868661814000",
+      "unchanged": true
+    },
+    "latest_expense_root": "37events/2model calls/1complete; original terminal dispatch_error atseq538 unchanged",
+    "original_project_files_unchanged": 3,
+    "cold_snapshots": "Exact5messages/3roots/28events/0operations remain unchanged",
+    "run_staging_profile_workspace_paths_changed": false,
+    "extra_native_runtime_copy_or_generation_created": false,
+    "production80_and_required75_76_backups": "Untargeted",
+    "policy_blocked_cleanup": "Nine previously rejected directories untouched; no alternate deletion route"
+  },
+  "release_state": "Candidate81 remains unchanged but contains this reproduced defect and must not be released. Corrected source-only82 uses external qualified runtime. Refresh the full package after remaining gates; complete real-model coding, stock-editor refresh, other feature scopes and final release preservation/install acceptance remain pending."
+}
