@@ -1,7 +1,7 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "7fb7d23e96501a3c4ea0aded1cbb2dc4d95c1c48",
+  "source_base": "8f08d822ea445b39126519bfcd63e4358f1da6de",
   "native_inventory": {
     "registered_tests": 189,
     "source_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
@@ -26,7 +26,7 @@
         "Tool-call/result continuation",
         "Usage and actionable errors"
       ],
-      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending. Native deed03f0 now preserves validated response request IDs/status through actual worker IPC/journal tests, including failure/timeout controls. Now deployed in primary38048/stage76ec/isolated installed83; original failure remains uncorrelated, no new inference."
+      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending. Native deed03f0 now preserves validated response request IDs/status through actual worker IPC/journal tests, including failure/timeout controls. Now deployed in primary38048/stage76ec/isolated installed83; original failure remains uncorrelated, no new inference. Portal08:28PST confirms configured27B resource onrtx5090 has both providers Unavailable0/0capacity; exact serving readiness is now the current external blocker. Other-profile readiness/uncorrelated usage is not coding acceptance."
     },
     {
       "area": "Project coding",
@@ -72,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending. Refreshed Native deed03f0 primary now passes actual reload/auth/history/selected-root restoration and terminal echo/exit0output retention/Close with no resources left. New full223 gate uses stage76ec. Actual rename/archive persisted across reload, restore and before-first-message fork pass. Archive membership persists; archived-view filter resets to active after reload."
+      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending. Refreshed Native deed03f0 primary now passes actual reload/auth/history/selected-root restoration and terminal echo/exit0output retention/Close with no resources left. New full223 gate uses stage76ec. Actual rename/archive persisted across reload, restore and before-first-message fork pass. Archive membership persists; archived-view filter resets to active after reload. Actual nested-file search and CSV/Python previews equal disk bytes; README/CSV draft chips attach/remove without Send. Delivery and arbitrary browser upload are not qualified."
     },
     {
       "area": "VS Code client",
@@ -149,7 +149,7 @@
         "Qualified package smoke",
         "User-state preservation and required rollback copies"
       ],
-      "status": "Candidate83 archive2922 members and complete isolated installation2921 files verify before/after actual activation. Bundled83 Code native view and live primary execute qualified deed03f0/SDK92aa; stage refreshed in place to76ec. Supported handoff preserves all62messages/6roots/538events/13operations/project files and old ports; cold profile unchanged. Required managed runtime generation created, immediate rollback retained; production80/75/76 untargeted. Complete coding, stock-editor refresh, remaining feature and final production installation gates pending. Ten obsolete cleanup targets retained after automatic review rejection."
+      "status": "Candidate83 archive2922 members and complete isolated installation2921 files verify before/after actual activation. Bundled83 Code native view and live primary execute qualified deed03f0/SDK92aa; stage refreshed in place to76ec. Supported handoff preserves all62messages/6roots/538events/13operations/project files and old ports; cold profile unchanged. Required managed runtime generation created, immediate rollback retained; production80/75/76 untargeted. Complete coding, stock-editor refresh, remaining feature and final production installation gates pending. Eleven cleanup targets retained after automatic review rejection, including redundant private full portal PNG. No alternate deletion route."
     }
   ],
   "rules": [
@@ -175,5 +175,6 @@
   "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json",
   "current_request_correlation_evidence": "provider-request-correlation-20261103.json",
   "current_installed_terminal_evidence": "candidate83-installed-20261103.json",
-  "current_conversation_lifecycle_evidence": "conversation-lifecycle-20261103.json"
+  "current_conversation_lifecycle_evidence": "conversation-lifecycle-20261103.json",
+  "current_serving_readiness_and_file_context_evidence": "provider-readiness-and-file-context-20261103.json"
 }
