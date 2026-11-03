@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-11-03T20:06:34.348Z",
+  "scope": "Regular desktop VS Code stock open-file buffer auto-refresh; xMind runtime activation is not asserted by this test.",
+  "windowId": 133150,
+  "editorVersion": "1.143.0",
+  "ownedWorkspace": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/git-feature-acceptance-20261103",
+  "externalMarkerVisible": true,
+  "originalTextVisibleAfterExternalRestore": true,
+  "noEditorReloadOrManualBufferRefresh": true,
+  "automationNote": "Each observation used a fresh native accessibility client because its previous snapshot was cached. The VS Code window was not reloaded.",
+  "temporaryAccessibilitySetting": "editor.accessibilitySupport = on, then original settings bytes restored",
+  "settingsBytewiseRestored": true,
+  "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+  "allFourOwnedFilesBytewiseRestored": true,
+  "ownedFileSha256": {
+    "README.md": "7820950133f3aec202bff7b4d5d59ca95debbdd7f6c9c1e5e841032167bd28c9",
+    "tracked.txt": "85462b6c455d4c172d9613a91ac661f5efd3bb54cc7170a7b840c358d15d70b6",
+    "staged.txt": "02ee784c923c0252219107c70867324564e9a37b8f0e7977f3c3311a9d4e135b",
+    "notes λ.txt": "612c97d7a619838515d7c644458e567ed590eaca67cece50bf863c56a1f0a420"
+  }
+}

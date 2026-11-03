@@ -194,5 +194,11 @@
     "newModelRequests": 0,
     "rootCauseConfirmed": false,
     "next": "Reproduce and identify the failing observer before changing timeout, retry or error handling."
-  }
+  },
+  "capture_scope": "Historical pre-0.1.86 checkpoint. Original pending/failure fields are preserved as-at-capture; subsequent qualification is linked below.",
+  "subsequent_evidence": [
+    "regular-vscode-refresh-20261103.json",
+    "browser-stream-deadline-20261103.json",
+    "candidate86-release-20261103.json"
+  ]
 }

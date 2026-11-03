@@ -1,0 +1,61 @@
+{
+  "at": "2026-11-03T20:31:09.392Z",
+  "source": "89a31036a14a33b35c6caee7bb1ecd70410bc758",
+  "problem": "The browser compatibility helper labelled its 35-second event-observation deadline AbortError, bypassing the shared client bounded transport retry.",
+  "change": "Deadline cancellation now carries TimeoutError; parent cancellation remains AbortError. Existing cursor retention, retry limits and execution budgets are unchanged.",
+  "deadlineMs": 35000,
+  "retryDelaysMs": [
+    500,
+    1000,
+    2000
+  ],
+  "controlledRegression": {
+    "file": "views/browser/tests/stream-deadline.test.cjs",
+    "before": "fails: first accepted event is retained but the deadline ends observation",
+    "after": "passes: resumes after cursor 1, accepts event 2 once, with no mutation or parent cancellation",
+    "beforeLog": ".agentflow/blockers-20261102/browser-stream-deadline-before.log",
+    "afterLog": ".agentflow/blockers-20261102/browser-stream-deadline-after.log"
+  },
+  "completeQualification": {
+    "browser": 226,
+    "editor": 540,
+    "sourceInputs": 23913,
+    "runtimeInputs": 23340,
+    "inputSetsAndHashesUnchanged": true,
+    "environmentAndToolsUnchanged": true,
+    "nativePayloadUnchanged": true,
+    "native189QualificationRetained": true
+  },
+  "servedBundle": {
+    "at": "2026-11-03T20:25:29.157Z",
+    "url": "http://127.0.0.1:57058/ui/browser.js",
+    "status": 200,
+    "bytes": 154495,
+    "sha256": "063e7011c779ca36b75d7948911df48d11b70c3b33f5d10a53cc71319afa941e",
+    "bytewiseEqualToInstalledCandidate86": true,
+    "cacheControl": "no-store",
+    "etag": null
+  },
+  "liveBrowserApprovalHold": {
+    "at": "2026-11-03T20:21:15.469Z",
+    "elapsedMs": 82554,
+    "approvalStillVisible": true,
+    "abortErrorVisible": false,
+    "root": "e1039d8e044743528185de8ea5fb1a46",
+    "operation": "d77a025a6d2317338095a58a60d80f50"
+  },
+  "completedOrdinaryTask": {
+    "root": "e1039d8e044743528185de8ea5fb1a46",
+    "approvedEdit": true,
+    "approvedXlang3Tests": 6,
+    "passed": 6,
+    "unchangedTests": true
+  },
+  "reconnect": {
+    "at": "2026-11-03T20:28:19.687Z",
+    "allThreeSessionsHistoriesAllThirteenRootsEventsOperationsAndFilesExact": true,
+    "additionalModelRequests": 0,
+    "additionalManagedRuntimeDirectoriesSince85": 0
+  },
+  "scope": "The controlled regression identifies a concrete deadline failure path. The live 82-second approval check proves continued usability, without claiming which individual transport deadline fired. Historical abort headlines alone do not identify every possible AbortError cause."
+}

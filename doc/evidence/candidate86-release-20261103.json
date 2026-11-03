@@ -1,0 +1,568 @@
+{
+  "at": "2026-11-03T20:49:24.273Z",
+  "releaseAccepted": true,
+  "version": "0.1.86",
+  "target": "win32-x64",
+  "scope": "Working v1 local acceptance: browser, official loopback Microsoft Code Server extension, and installed native C++ interactive CLI. Regular desktop installation and stock editor auto-refresh are separately verified.",
+  "sourceRevision": "89a31036a14a33b35c6caee7bb1ecd70410bc758",
+  "nativeRevision": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "mains": {
+    "xmind": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+    "xlang3": "6186ffa61203789ed8ff18669c81fff32125259c",
+    "localMainEqualsOriginMain": true,
+    "qualifiedBranchesIncludeMain": true
+  },
+  "architecture": {
+    "core": "Native C++",
+    "scriptingAndDatabaseIO": "Embedded xlang3",
+    "persistence": "SQLite",
+    "workers": "Local native processes using standard xlang3 IPC root objects and subobjects",
+    "cpythonUsed": false
+  },
+  "package": {
+    "path": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/xmind-0.1.86-candidate.vsix",
+    "sha256": "6f5aaba88b911439f0067fc94678961458e7687462861a4f2b1092aa01b29223",
+    "bytes": 37185177,
+    "archiveMembers": 2922,
+    "completeArchiveVerified": true,
+    "sourceInputs": 2919,
+    "manifestSha256": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+    "duplicateRuntimeDirectoryCreated": false,
+    "stageUnchanged": true,
+    "sourceVersionChanged": false
+  },
+  "installed": {
+    "codeServer": {
+      "at": "2026-11-03T20:39:21.527Z",
+      "installed": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.86",
+      "version": "0.1.86",
+      "verifiedUnmodifiedMembers": 2919,
+      "totalInstalledFiles": 2921,
+      "completeInstalledFileSetVerified": true,
+      "relocatedVsixMetadataHashVerified": true,
+      "manifestSemanticallyEqual": true,
+      "installerMetadataAdded": true,
+      "manifestSha256": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+      "nativeFiles": 2875
+    },
+    "regularDesktop": {
+      "at": "2026-11-03T20:39:23.863Z",
+      "installed": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.86",
+      "version": "0.1.86",
+      "verifiedUnmodifiedMembers": 2919,
+      "totalInstalledFiles": 2921,
+      "completeInstalledFileSetVerified": true,
+      "relocatedVsixMetadataHashVerified": true,
+      "manifestSemanticallyEqual": true,
+      "installerMetadataAdded": true,
+      "manifestSha256": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+      "nativeFiles": 2875
+    }
+  },
+  "qualification": {
+    "native": {
+      "passed": 189,
+      "total": 189,
+      "seconds": 1066.64,
+      "sourceRevision": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+      "nativePayloadUnchangedForThisBrowserOnlyFix": true
+    },
+    "browser": {
+      "passed": 226,
+      "total": 226
+    },
+    "editor": {
+      "passed": 540,
+      "total": 540
+    },
+    "sdk": {
+      "correctnessPassed": 60,
+      "matchedColdPerformanceCasesPassed": 11,
+      "sourceRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050"
+    },
+    "sourceInputs": 23913,
+    "runtimeInputs": 23340,
+    "inputFileSetsAndHashesUnchanged": true,
+    "environmentAndToolsUnchanged": true,
+    "scope": "Complete registered contract inventories; separate actual UI/project receipts follow."
+  },
+  "browserDeadlineFix": "browser-stream-deadline-20261103.json",
+  "endpoint": "http://127.0.0.1:19445/v1",
+  "model": "qwen3.8-27b-chat-32k",
+  "providerProfile": "openai-compatible-cdb563ab-2fc5-4e10-8495-ce05054e9d25",
+  "providerProfileRevision": 1,
+  "freshSession": "af50001e07e644d78aa199ad4b6c96c7",
+  "ordinaryTaskScope": "Three version-only project feature requests; existing six project tests unchanged; all proposals and decisions through actual UI/interactive console; no manual project correction or diagnostic coaching.",
+  "tasks": [
+    {
+      "entry": "browser",
+      "root": "e1039d8e044743528185de8ea5fb1a46",
+      "neverReplay": true,
+      "state": "completed",
+      "fromVersion": "0.1.4",
+      "toVersion": "0.1.6",
+      "events": 254,
+      "approvedEdit": "d77a025a6d2317338095a58a60d80f50",
+      "approvedCommand": "72e3f1d8e86aa6a3e5b9b0b93ce3d86b",
+      "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+      "executableId": "windows-local-executable-v1:windows-local-file-v1:10ca0a03ca09e5b6:04000000000000006eb4110000000000:5c7f0f824754870bbaf3dec3db849912ef0b67fca8aed1441a5a71303ddfd897",
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "processProfileRevision": 3,
+      "testResult": {
+        "passed": 6,
+        "failed": 0,
+        "exitCode": 0,
+        "elapsedMs": 1248,
+        "testFilesUnchanged": true,
+        "processTreeRetired": true,
+        "pid": 50220
+      },
+      "httpResponses": [
+        {
+          "request_id": "5c9e936eb59547f0aeb635a32f349313",
+          "status": 200
+        },
+        {
+          "request_id": "d9a1fa6163434e5d8e9f642b52588ab9",
+          "status": 200
+        },
+        {
+          "request_id": "32b8cf0aa51345448ce4498d5275359f",
+          "status": 200
+        },
+        {
+          "request_id": "8ba2d45a42674c0bb953c0f1af3745c6",
+          "status": 200
+        },
+        {
+          "request_id": "67cdc7fb10a04eeaba7fc17a729dd72a",
+          "status": 200
+        },
+        {
+          "request_id": "3df2ebcddf634c14bb30331f54e804e3",
+          "status": 200
+        },
+        {
+          "request_id": "f611bb6b1c8848cf810851f6927d2d29",
+          "status": 200
+        }
+      ],
+      "usageByCall": [
+        {
+          "completion_tokens": 67,
+          "prompt_tokens": 7274,
+          "total_tokens": 7341
+        },
+        {
+          "completion_tokens": 51,
+          "prompt_tokens": 7678,
+          "total_tokens": 7729
+        },
+        {
+          "completion_tokens": 90,
+          "prompt_tokens": 8037,
+          "total_tokens": 8127
+        },
+        {
+          "completion_tokens": 28,
+          "prompt_tokens": 10244,
+          "total_tokens": 10272
+        },
+        {
+          "completion_tokens": 76,
+          "prompt_tokens": 10476,
+          "total_tokens": 10552
+        },
+        {
+          "completion_tokens": 77,
+          "prompt_tokens": 10753,
+          "total_tokens": 10830
+        },
+        {
+          "completion_tokens": 91,
+          "prompt_tokens": 11238,
+          "total_tokens": 11329
+        }
+      ],
+      "usageTotal": {
+        "input": 65700,
+        "output": 480,
+        "total": 66180
+      },
+      "worker": {
+        "generation": "48ab99dd20045c1ce2d0fcab8e9acf3c",
+        "pid": 28824,
+        "root_run_id": "e1039d8e044743528185de8ea5fb1a46",
+        "reason": "completed",
+        "uncertain_model_dispatches": 0,
+        "observedAbsent": true
+      },
+      "testChildObservedAbsent": true,
+      "budget": {
+        "modelTotalMs": 120000,
+        "modelIdleMs": 60000,
+        "rootMs": 600000,
+        "activeElapsedMs": 380704,
+        "remainingActiveMs": 219296
+      },
+      "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/candidate86-preservation-browser.json.gz"
+    },
+    {
+      "entry": "code",
+      "root": "fee2d7795dd14494ba43876be9bd898e",
+      "neverReplay": true,
+      "state": "completed",
+      "fromVersion": "0.1.6",
+      "toVersion": "0.1.7",
+      "events": 150,
+      "approvedEdit": "6314dc8e7212cec553534d4fc9dda069",
+      "approvedCommand": "bf11de5b7e7ac2b334d7d21aea79852d",
+      "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+      "executableId": "windows-local-executable-v1:windows-local-file-v1:10ca0a03ca09e5b6:04000000000000006eb4110000000000:5c7f0f824754870bbaf3dec3db849912ef0b67fca8aed1441a5a71303ddfd897",
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "processProfileRevision": 3,
+      "testResult": {
+        "passed": 6,
+        "failed": 0,
+        "exitCode": 0,
+        "elapsedMs": 1122,
+        "testFilesUnchanged": true,
+        "processTreeRetired": true,
+        "pid": 48300
+      },
+      "httpResponses": [
+        {
+          "request_id": "046bf6c690c747669c23c0bc4264925d",
+          "status": 200
+        },
+        {
+          "request_id": "705643aee0cf49919481cce3ad1a7b6f",
+          "status": 200
+        },
+        {
+          "request_id": "02acf6a8a8e3400b95559feddfe1efd4",
+          "status": 200
+        }
+      ],
+      "usageByCall": [
+        {
+          "completion_tokens": 76,
+          "prompt_tokens": 11365,
+          "total_tokens": 11441
+        },
+        {
+          "completion_tokens": 77,
+          "prompt_tokens": 11630,
+          "total_tokens": 11707
+        },
+        {
+          "completion_tokens": 82,
+          "prompt_tokens": 12106,
+          "total_tokens": 12188
+        }
+      ],
+      "usageTotal": {
+        "input": 35101,
+        "output": 235,
+        "total": 35336
+      },
+      "worker": {
+        "generation": "bcc6e0325d53543d453b91e17a3cf2b3",
+        "pid": 52640,
+        "root_run_id": "fee2d7795dd14494ba43876be9bd898e",
+        "reason": "completed",
+        "uncertain_model_dispatches": 0,
+        "observedAbsent": true
+      },
+      "testChildObservedAbsent": true,
+      "budget": {
+        "modelTotalMs": 120000,
+        "modelIdleMs": 60000,
+        "rootMs": 600000,
+        "activeElapsedMs": 171869,
+        "remainingActiveMs": 428131
+      },
+      "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/candidate86-preservation-code.json.gz"
+    },
+    {
+      "entry": "cli",
+      "root": "eddd7a1daf8d9225b4987a0fcef20904",
+      "neverReplay": true,
+      "state": "completed",
+      "fromVersion": "0.1.7",
+      "toVersion": "0.1.8",
+      "events": 149,
+      "approvedEdit": "a5786649c066316fd87c6cd15fd784de",
+      "approvedCommand": "0a696537fb747db3bb2b16db1a83d003",
+      "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+      "executableId": "windows-local-executable-v1:windows-local-file-v1:10ca0a03ca09e5b6:04000000000000006eb4110000000000:5c7f0f824754870bbaf3dec3db849912ef0b67fca8aed1441a5a71303ddfd897",
+      "arguments": [
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "processProfileRevision": 3,
+      "testResult": {
+        "passed": 6,
+        "failed": 0,
+        "exitCode": 0,
+        "elapsedMs": 1150,
+        "testFilesUnchanged": true,
+        "processTreeRetired": true,
+        "pid": 33280
+      },
+      "httpResponses": [
+        {
+          "request_id": "16c40da2ab734b56afa135237c70ae9a",
+          "status": 200
+        },
+        {
+          "request_id": "ce46890b2d054381b6acda6c660cbae0",
+          "status": 200
+        },
+        {
+          "request_id": "73c46d5c007b4a128ff8d411c90be080",
+          "status": 200
+        }
+      ],
+      "usageByCall": [
+        {
+          "completion_tokens": 76,
+          "prompt_tokens": 12224,
+          "total_tokens": 12300
+        },
+        {
+          "completion_tokens": 77,
+          "prompt_tokens": 12494,
+          "total_tokens": 12571
+        },
+        {
+          "completion_tokens": 82,
+          "prompt_tokens": 12973,
+          "total_tokens": 13055
+        }
+      ],
+      "usageTotal": {
+        "input": 37691,
+        "output": 235,
+        "total": 37926
+      },
+      "worker": {
+        "generation": "0cca2eab95cd7f5f0a09a7260ab46602",
+        "pid": 41544,
+        "root_run_id": "eddd7a1daf8d9225b4987a0fcef20904",
+        "reason": "completed",
+        "uncertain_model_dispatches": 0,
+        "observedAbsent": true
+      },
+      "testChildObservedAbsent": true,
+      "budget": {
+        "modelTotalMs": 120000,
+        "modelIdleMs": 60000,
+        "rootMs": 600000,
+        "activeElapsedMs": 230462,
+        "remainingActiveMs": 369538
+      },
+      "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/candidate86-preservation-cli.json.gz"
+    }
+  ],
+  "usageTotal": {
+    "input": 138492,
+    "output": 950,
+    "total": 139442
+  },
+  "cost": "Not reported; no monetary estimate",
+  "reconnect": {
+    "browser": {
+      "at": "2026-11-03T20:28:19.687Z",
+      "allThreeSessionsHistoriesAllThirteenRootsEventsOperationsAndFilesExact": true,
+      "additionalModelRequests": 0,
+      "additionalManagedRuntimeDirectoriesSince85": 0
+    },
+    "editor": {
+      "at": "2026-11-03T20:36:19.948Z",
+      "allThreeSessionsHistoriesAllFourteenRootsEventsOperationsAndFilesExact": true,
+      "additionalModelRequests": 0,
+      "additionalManagedRuntimeDirectories": 0
+    },
+    "editorRendered": {
+      "at": "2026-11-03T20:34:16.730Z",
+      "renderedHistoryExact": true,
+      "characters": 3902,
+      "sha256": "4787f83db489ec0835386f40242349918bb3603e82690027e1a404e3594175e8",
+      "restoredRoot": "fee2d7795dd14494ba43876be9bd898e",
+      "savedAuthenticationWorkspaceProviderModelPermissionsRestored": true,
+      "source": "Actual installed 0.1.86 Code Server extension"
+    },
+    "cli": {
+      "at": "2026-11-03T20:48:06.727Z",
+      "allThreeSessionsHistoriesAllFifteenRootsEventsOperationsAndFilesExact": true,
+      "additionalModelRequests": 0,
+      "additionalManagedRuntimeDirectories": 0,
+      "bothConsolesExitedZero": true
+    },
+    "newModelRequests": 0
+  },
+  "preservation": {
+    "before": {
+      "sessions": 2,
+      "messages": 89,
+      "roots": 12,
+      "events": 1345,
+      "operations": 21,
+      "projectFiles": 6
+    },
+    "after": {
+      "sessions": 3,
+      "messages": 119,
+      "roots": 15,
+      "events": 1898,
+      "operations": 27,
+      "projectFiles": 6
+    },
+    "allOriginalSessionRowsFullHistoriesRunsEventsAndOperationsExact": true,
+    "allEarlierFreshCompletedRootsPreservedExactly": true,
+    "projectFileSetExact": true,
+    "onlyChangedProjectFile": "expense_report/__main__.py",
+    "onlyModelApprovedVersionChanges": true,
+    "otherFiveFilesBytewiseExact": true,
+    "currentMainVersion": "0.1.8",
+    "currentMainSha256": "ed9dc6bd25985dcb988a28bf4671d0585de68c3ee21727d25c43403f3ab66421",
+    "allSettingsAndTrustedConfigHashesExact": true,
+    "noNewManagedRuntimeDirectories": true,
+    "managedOwners": {
+      "at": "2026-11-03T20:45:08.287Z",
+      "identities": [
+        {
+          "process_birth": "134382033024934914",
+          "process_id": 50000
+        },
+        {
+          "process_birth": "134381868661814000",
+          "process_id": 14932
+        },
+        {
+          "process_birth": "134381979678344628",
+          "process_id": 17052
+        },
+        {
+          "process_birth": "134382115986759185",
+          "process_id": 43716
+        }
+      ],
+      "threeExistingManagedOwnersUnchanged": true,
+      "newCodeViewPackage": "0.1.86"
+    },
+    "cold": {
+      "messages": 5,
+      "roots": 3,
+      "events": 28,
+      "operations": 0,
+      "modelEvents": 0,
+      "exact": true,
+      "renderedHistoryExact": true,
+      "stableObservation": {
+        "at": "2026-11-03T20:45:42.913Z",
+        "elapsedSinceFirstRestoredSnapshotMs": 298206.74658203125,
+        "completedVisible": true,
+        "abortErrorVisible": false,
+        "providerStillExplicitlyUnavailable": true
+      }
+    },
+    "requiredRollbackArchives": [
+      {
+        "version": "0.1.75",
+        "files": 2442,
+        "bytes": 35455555,
+        "sha256": "63e9cf8b541ed629166984beb81ab4984aa1c1efcca1786f938041fadb1ebaf4"
+      },
+      {
+        "version": "0.1.76",
+        "files": 2442,
+        "bytes": 35501207,
+        "sha256": "ca605fde80ed29fff91e6128e4f888e733b8d02612c4d86a277791fc19515d82"
+      },
+      {
+        "version": "0.1.80",
+        "files": 2381,
+        "bytes": 35239039,
+        "sha256": "d0a3e0389d5beca24630408cbbae1b0e4994017bc6c57e19fa17b92145afedf3"
+      }
+    ],
+    "immediateRollback": "xmind-0.1.85-candidate.vsix"
+  },
+  "regularDesktop": {
+    "checkedAt": "2026-11-03T20:06:34.348Z",
+    "scope": "Regular desktop VS Code stock open-file buffer auto-refresh; xMind runtime activation is not asserted by this test.",
+    "windowId": 133150,
+    "editorVersion": "1.143.0",
+    "ownedWorkspace": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/git-feature-acceptance-20261103",
+    "externalMarkerVisible": true,
+    "originalTextVisibleAfterExternalRestore": true,
+    "noEditorReloadOrManualBufferRefresh": true,
+    "automationNote": "Each observation used a fresh native accessibility client because its previous snapshot was cached. The VS Code window was not reloaded.",
+    "temporaryAccessibilitySetting": "editor.accessibilitySupport = on, then original settings bytes restored",
+    "settingsBytewiseRestored": true,
+    "settingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "allFourOwnedFilesBytewiseRestored": true,
+    "ownedFileSha256": {
+      "README.md": "7820950133f3aec202bff7b4d5d59ca95debbdd7f6c9c1e5e841032167bd28c9",
+      "tracked.txt": "85462b6c455d4c172d9613a91ac661f5efd3bb54cc7170a7b840c358d15d70b6",
+      "staged.txt": "02ee784c923c0252219107c70867324564e9a37b8f0e7977f3c3311a9d4e135b",
+      "notes λ.txt": "612c97d7a619838515d7c644458e567ed590eaca67cece50bf863c56a1f0a420"
+    }
+  },
+  "existingFeatureEvidence": {
+    "workspaceFilesAttachmentsGit": "workspace-git-and-folder-denial-20261103.json",
+    "conversationLifecycle": "conversation-lifecycle-20261103.json",
+    "providerAndFileContext": "provider-readiness-and-file-context-20261103.json",
+    "terminalAndInstall": "candidate85-installed-20261103.json",
+    "realProviderCancelAndDeny": "candidate85-real-provider-safety-20261103.json",
+    "basicReadHumanInputCancelGraphs": "cold-client-graphs-20261103.json",
+    "codeServerWatcher": "code-server-watcher-case-20261103.json",
+    "mcpSkillsContextPlansAndOtherRegisteredContracts": "Complete native/browser/editor inventories above; external service breadth is outside the working-v1 goal."
+  },
+  "proofs": {
+    "browser": "candidate86-browser-complete-20261103.png",
+    "editor": "candidate86-code-complete-20261103.png",
+    "sharedFinal": "candidate86-all-clients-completed-20261103.png"
+  },
+  "limitations": [
+    "Regular desktop stock buffer auto-refresh is verified through native accessibility; full regular-desktop coding, native input and pixel capture are not claimed. Actual extension coding uses official loopback Code Server 1.143.0.",
+    "Official Windows Code Server requires the documented same-directory XMind path-casing workaround on this pinned version; vendor code is unchanged.",
+    "Qualification covers the working-v1 path and complete registered contracts, with actual project exercises documented above. Wider provider/service coverage, benchmark completion, advanced backlog, Cluster and Nexus are excluded.",
+    "Historical serving timeout d114abd36fd84c4f9c3ac3a2dda54ffb remains uncorrelated; new successful request IDs do not identify that old failure."
+  ],
+  "cleanup": {
+    "reviewedTargets": 12,
+    "includesNestedOverlap": true,
+    "executed": false,
+    "reason": "Automatic approval review rejected deletion as blocked by policy; no alternate route used.",
+    "unrelatedFilesPreserved": [
+      "endpoint.obj",
+      "probe.obj",
+      "sibling xlang3 untracked work"
+    ]
+  }
+}
