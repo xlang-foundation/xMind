@@ -950,11 +950,13 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
         const bool process_configuration_changed=!options.process_config.empty()&&
             (state.value("process_config",std::string{})!=requested_process_path||
              state.value("process_config_digest",std::string{})!=requested_process_digest);
+        const bool process_reimport_requested=options.upgrade_backend&&!options.process_config.empty();
         if(state.contains("owner_receipt")&&process_configuration_changed)
             throw std::invalid_argument("A backend handoff is already in progress; finish reconnecting before changing process configuration");
-        if(state.contains("owner_receipt")&&options.upgrade_backend&&!options.process_config.empty()&&!process_configuration_changed){
+        if(process_reimport_requested&&!process_configuration_changed){
             // An explicit reimport of the same trusted document must reach the
-            // replacement even when only the executable's file identity changed.
+            // replacement or stopped-owner recovery even when only the
+            // executable's file identity changed.
             state["process_config_pending"]=true;store.write(state);
         }
         if(process_configuration_changed&&!options.upgrade_backend)
@@ -1012,7 +1014,7 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
             state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;
             store.write(state);
         }
-        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(web_configuration_changed||provider_configuration_changed||process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
+        if(state.contains("owner_receipt")||(options.upgrade_backend&&!recovered_stopped_owner&&(web_configuration_changed||provider_configuration_changed||process_reimport_requested||process_configuration_changed||mcp_configuration_changed||language_server_configuration_changed||edit_policy_changed||execution_changed||state.contains("upgrade_intent")||state.at("manifest").get<std::string>()!=loaded_manifest))){
             bool deferred_busy_upgrade=false;
             if(!state.contains("owner_receipt")){
                 if(state.contains("upgrade_intent")&&state.value("replacement_manifest",std::string{})!=loaded_manifest){

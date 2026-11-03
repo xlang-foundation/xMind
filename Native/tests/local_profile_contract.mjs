@@ -53,6 +53,22 @@ try{
  const reimported=JSON.parse(sameDocumentUpgrade.stdout);pids.delete(upgraded.process_id);pids.add(reimported.process_id);
  assert.equal(reimported.started,true);assert.notEqual(reimported.process_id,upgraded.process_id);assert.equal(reimported.origin,upgraded.origin);assert.equal(reimported.profile_directory,upgraded.profile_directory);assert.equal(reimported.agent_execution,'thread');upgraded.process_id=reimported.process_id;
  assert.deepEqual(await command('process-profiles'),{profiles:[{id:'fixture-process',revision:3,max_timeout_ms:2000}],runtime_state:'per_operation'});
+ // An explicit import is itself an upgrade request even when the runtime,
+ // policy and trusted document are unchanged; do not silently clear it.
+ await fs.appendFile(fixtureProcessExe,Buffer.from([0]));assert.deepEqual(await fs.readFile(processConfig),unchangedProcessDocument);
+ const importOnly=await invoke(['--process-config',processConfig,'--upgrade-backend','profile-info']);
+ assert.equal(importOnly.code,0,importOnly.stderr);const importedOnly=JSON.parse(importOnly.stdout);pids.add(importedOnly.process_id);
+ assert.equal(importedOnly.started,true,'Explicit same-document executable reimport cannot be a no-op');assert.notEqual(importedOnly.process_id,upgraded.process_id);assert.equal(importedOnly.origin,upgraded.origin);assert.equal(importedOnly.profile_directory,upgraded.profile_directory);pids.delete(upgraded.process_id);upgraded.process_id=importedOnly.process_id;
+ assert.deepEqual(await command('process-profiles'),{profiles:[{id:'fixture-process',revision:4,max_timeout_ms:2000}],runtime_state:'per_operation'});
+ // The same explicit reimport is required when the registered owner has
+ // already stopped before the executable update. Preserve the saved profile.
+ await stop(upgraded.process_id);await fs.appendFile(fixtureProcessExe,Buffer.from([0]));
+ assert.deepEqual(await fs.readFile(processConfig),unchangedProcessDocument);
+ const stoppedReimport=await invoke(['--process-config',processConfig,'--upgrade-backend','profile-info']);
+ assert.equal(stoppedReimport.code,0,'Stopped-owner recovery must reimport an explicitly supplied unchanged process document: '+stoppedReimport.stderr);
+ const stoppedOwner=JSON.parse(stoppedReimport.stdout);pids.add(stoppedOwner.process_id);
+ assert.equal(stoppedOwner.started,true);assert.notEqual(stoppedOwner.process_id,upgraded.process_id);assert.equal(stoppedOwner.origin,upgraded.origin);assert.equal(stoppedOwner.profile_directory,upgraded.profile_directory);upgraded.process_id=stoppedOwner.process_id;
+ assert.deepEqual(await command('process-profiles'),{profiles:[{id:'fixture-process',revision:5,max_timeout_ms:2000}],runtime_state:'per_operation'});
  await fs.rm(processConfig);await fs.rm(mcpConfig);assert.deepEqual(await command('mcp-servers'),{servers:[{id:'fixture-mcp',revision:2,enabled:false,transport:'http'}],runtime_state:'per_run'});assert.deepEqual(await command('sessions'),saved);assert.deepEqual(await command('history',session.id),history);assert.equal((await command('graph',run.id)).run.state,'completed');started.process_id=upgraded.process_id;const repeated=JSON.parse((await invoke(['--upgrade-backend','profile-info'])).stdout);assert.equal(repeated.started,false);assert.equal(repeated.process_id,upgraded.process_id);
 const sourceManifestPath=path.join(runtime,'native-runtime-manifest.json'),nextSourceManifest=JSON.parse(await fs.readFile(sourceManifestPath,'utf8'));nextSourceManifest.nativeRevision='d'.repeat(40);await fs.writeFile(sourceManifestPath,JSON.stringify(nextSourceManifest));
  const humanGraph=(await command('graphs')).graphs.find(g=>g.id==='profile.pause');assert.ok(humanGraph);const waiting=await command('graph-run',session.id,humanGraph.id,String(humanGraph.revision),'Hold the managed profile open');let waitState;const waitUntil=Date.now()+15000;while(Date.now()<waitUntil){waitState=await command('graph',waiting.id);if(waitState.run.state==='paused')break;await new Promise(resolve=>setTimeout(resolve,25));}assert.equal(waitState.run.state,'paused');const refusedUpgrade=await invoke(['--upgrade-backend','profile-info']);assert.notEqual(refusedUpgrade.code,0,'An outstanding human graph must prevent backend retirement');assert.equal((await inspect()).process_id,upgraded.process_id,'A pending upgrade must not block normal access to the current owner');assert.equal((await command('graph',waiting.id)).run.state,'paused');
