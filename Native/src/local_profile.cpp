@@ -1034,7 +1034,9 @@ LocalProfileConnection connect_local_profile(const LocalProfileOptions &options)
                     auto [target,digest]=stage_current_runtime(store,workspace);
                     state["replacement_runtime"]=text(target);state["replacement_manifest"]=digest;state["replacement_port"]=state.at("port");
                     if(provider_configuration_changed)state["provider_config"]=requested_provider_path;
-                    if(process_configuration_changed){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
+                    // Explicit reimport also binds a replacement executable at
+                    // the same path when the trusted document is unchanged.
+                    if(!options.process_config.empty()){state["process_config"]=requested_process_path;state["process_config_digest"]=requested_process_digest;state["process_config_pending"]=true;}
                     if(mcp_configuration_changed){state["mcp_config"]=requested_mcp_path;state["mcp_config_digest"]=requested_mcp_digest;state["mcp_config_pending"]=true;}
                     if(language_server_configuration_changed){state["language_server_config"]=requested_language_server_path;state["language_server_config_pending"]=true;}
                     if(policy_requested){state["approved_edits"]=requested_edits;state["agent_execution"]=requested_execution;}
