@@ -1,0 +1,187 @@
+{
+  "at": "2026-11-03T19:35:11.085Z",
+  "scope": "Official Windows Code Server launch workaround and actual nested editor auto-refresh; regular desktop remains separately unverified.",
+  "package": {
+    "version": "0.1.85",
+    "native": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "sdk": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "manifest": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+    "programOrVendorChanges": false
+  },
+  "diagnosis": {
+    "at": "2026-11-03T19:13:44.486Z",
+    "root": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/git-feature-acceptance-20261103",
+    "wrapperBefore": "aff6fa51c1a1d8bd792a0f082b98200bac568def3e5c1442ada78c915e924406",
+    "cases": [
+      {
+        "name": "actual",
+        "input": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\server-data\\extensions",
+        "canonical": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\server-data\\extensions",
+        "subscribed": false,
+        "errors": [],
+        "error": "regex_error(error_escape): The expression contained an invalid escaped character, or a trailing escape."
+      },
+      {
+        "name": "uppercase-xmind-segment",
+        "input": "D:\\CantorAI2026\\XMind\\.agentflow\\rendered-vscode-server\\server-data\\extensions",
+        "canonical": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\server-data\\extensions",
+        "subscribed": true,
+        "errors": []
+      },
+      {
+        "name": "uppercase-directory",
+        "input": "D:\\CANTORAI2026\\XMIND\\.AGENTFLOW\\RENDERED-VSCODE-SERVER\\SERVER-DATA\\EXTENSIONS",
+        "canonical": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\server-data\\extensions",
+        "subscribed": true,
+        "errors": []
+      },
+      {
+        "name": "regular-desktop",
+        "input": "C:\\Users\\shaw9\\.vscode\\extensions",
+        "canonical": "C:\\Users\\shaw9\\.vscode\\extensions",
+        "subscribed": true,
+        "errors": []
+      }
+    ],
+    "wrapperAfter": "aff6fa51c1a1d8bd792a0f082b98200bac568def3e5c1442ada78c915e924406"
+  },
+  "lowLevelEventDelivery": {
+    "at": "2026-11-03T19:20:43.511Z",
+    "pid": 17388,
+    "image": "C:\\Program Files\\nodejs\\node.exe",
+    "root": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/git-feature-acceptance-20261103",
+    "exclude": "D:\\CantorAI2026\\XMind\\.agentflow\\rendered-vscode-server\\server-data\\extensions/**",
+    "events": [
+      {
+        "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\git-feature-acceptance-20261103\\tracked.txt",
+        "type": "update"
+      },
+      {
+        "path": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\git-feature-acceptance-20261103\\tracked.txt",
+        "type": "update"
+      }
+    ],
+    "fileRestored": true,
+    "allFourFilesExact": true,
+    "scope": "Unmodified vendor watcher only; no running editor acceptance or server configuration change.",
+    "changeEventObserved": true,
+    "restoreEventObserved": true,
+    "after": {
+      "README.md": "7820950133f3aec202bff7b4d5d59ca95debbdd7f6c9c1e5e841032167bd28c9",
+      "tracked.txt": "85462b6c455d4c172d9613a91ac661f5efd3bb54cc7170a7b840c358d15d70b6",
+      "staged.txt": "02ee784c923c0252219107c70867324564e9a37b8f0e7977f3c3311a9d4e135b",
+      "notes λ.txt": "612c97d7a619838515d7c644458e567ed590eaca67cece50bf863c56a1f0a420"
+    },
+    "normalExitCode": 0
+  },
+  "launch": {
+    "at": "2026-11-03T19:27:06.034Z",
+    "before": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data",
+    "after": "D:/CantorAI2026/XMind/.agentflow/rendered-vscode-server/server-data",
+    "canonical": "D:\\CantorAI2026\\xMind\\.agentflow\\rendered-vscode-server\\server-data",
+    "samePhysicalDirectory": true,
+    "machineSettingsSha256": "e839500763ce4dcbb4edddd7def7bd15a442696190c58f735220d6fa08147054",
+    "onlyLaunchChange": "server-data-dir argument path casing",
+    "retiredCodeServer": {
+      "pid": 47584,
+      "birth": "134381796250578821"
+    },
+    "retiredServerNode": {
+      "pid": 38088,
+      "birth": "134381797417010254"
+    },
+    "current": {
+      "canonicalDataDirectory": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data",
+      "origin": "http://127.0.0.1:57118",
+      "launchDataDirectory": "D:/CantorAI2026/XMind/.agentflow/rendered-vscode-server/server-data",
+      "image": "C:\\Users\\shaw9\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code-tunnel.exe",
+      "birth": "134382076261413074",
+      "pid": 3840
+    },
+    "currentServerNode": 38696,
+    "clientView": {
+      "previous": 40940,
+      "current": 18836,
+      "birth": "134382076897732187"
+    },
+    "nativePrimary": {
+      "pid": 50000,
+      "birth": "134382033024934914",
+      "unchanged": true
+    },
+    "reconnection": "Server restart required the actual Reload Window button; saved authentication, workspace, selected run/provider/model restored without sign-in."
+  },
+  "rendered": {
+    "before": "Owned nested text editor stayed on baseline A while disk contained B.",
+    "after": "After restart/reload loaded B; a new external write to C appeared in the editor without another reload, revert or buffer edit.",
+    "proofBefore": "code-server-watcher-stale-before-20261103.png",
+    "proofAfter": "code-server-watcher-live-after-20261103.png",
+    "restoredOriginalEditorProof": "code-server-watcher-restored-20261103.png",
+    "fullHistoryCharacters": 12579,
+    "fullNormalizedHistorySha256": "184314f6cf8fbcf68992ec7bb8cb70f0984aa8c91c99ddffcdf7afb054cda0ff",
+    "fullHistoryExact": true,
+    "selectedRun": "a0e1eab0c0854143a1f04aa02d076513",
+    "provider": "openai-compatible-cdb563ab-2fc5-4e10-8495-ce05054e9d25",
+    "model": "qwen3.8-27b-chat-32k",
+    "permissions": "Default",
+    "ownedTemporaryProbeRemoved": true
+  },
+  "preservation": {
+    "at": "2026-11-03T19:30:46.419Z",
+    "all89MessagesAnd12RootsExact": true,
+    "all6ProjectFilesExact": true,
+    "noNewRuntimeDirectories": true,
+    "machineAndRegularSettingsExact": true,
+    "unmodifiedVendorWrapper": true,
+    "managedRuntimeRootsChecked": [
+      "live-profiles/b183694a8331a8c9653174795f5a08ce8fa2e0e820a48f770e28e993ab0d02ec",
+      "live-profiles/1b3723db407cc81194fdb68feff3d3f09d03c843dd143f1c5aef7d81a2aa8b3d",
+      "client-profiles/b183694a8331a8c9653174795f5a08ce8fa2e0e820a48f770e28e993ab0d02ec"
+    ],
+    "primary": {
+      "sessions": 2,
+      "messages": 89,
+      "roots": 12,
+      "events": 1345,
+      "operations": 21,
+      "files": 6
+    },
+    "cold": {
+      "messages": 5,
+      "roots": 3,
+      "events": 28,
+      "operations": 0,
+      "modelEvents": 0,
+      "exact": true
+    },
+    "newModelRequests": 0,
+    "mainVersion": "0.1.4",
+    "mainSha256": "3bfe64b650240149da39695d0473bc9855bc56a83c8937754587414e5f3be512"
+  },
+  "cantorServeRecheck": {
+    "endpoint": "http://127.0.0.1:19445/v1",
+    "profile": "qwen38_27b_nvfp4_chat_32k_v2",
+    "node": "rtx5090",
+    "providers": [
+      {
+        "state": "Ready",
+        "available": 1,
+        "capacity": 1
+      },
+      {
+        "state": "Ready",
+        "available": 1,
+        "capacity": 1
+      }
+    ]
+  },
+  "remaining": {
+    "regularDesktop": "Fresh automation session reads current tracked.txt window but screenshot remains black and activation returns GetCursorPos failed: Access is denied. (0x80070005).",
+    "browserIdleError": "Both retained browser profiles now show signal is aborted without reason over completed runs. Failure preserved in browser-idle-abort-before-20261103.png and private AX snapshots; investigation required.",
+    "releaseAccepted": false
+  },
+  "sources": {
+    "injectedExclusion": "https://raw.githubusercontent.com/microsoft/vscode/2d0b7506a36c1d6db9a466440131a8e01eab2289/src/vs/server/node/remoteFileSystemProviderServer.ts",
+    "serverDataArgument": "https://raw.githubusercontent.com/microsoft/vscode/2d0b7506a36c1d6db9a466440131a8e01eab2289/src/vs/server/node/server.main.ts"
+  }
+}
