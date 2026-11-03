@@ -61,7 +61,7 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
     {
         PersistenceService store(database,{argv[1],argv[2]});store.create_session("session","Actual file-host fixture").get();store.start_prompt_run("run","session",R"({"content":"file-host fixture"})").get();store.transition("run",RunState::queued,RunState::running).get();
         AgentFileToolOwnerContext owner;owner.run_id="run";owner.primary_workspace=&workspace;owner.workspace_members=&members;owner.repository_context=[&](std::size_t index){return index==0?&root_context:&attached_context;};owner.allowed_tools={"edit_file","create_file","apply_patch","restore_operation"};
-        owner.permission_layers={{{"create_file","blocked.txt","deny"},{"apply_patch","blocked.txt","deny"}},{{"*","*","allow"}}};
+        owner.permission_layers={{{"create_file","blocked.txt","deny"},{"create_file","blocked-dir/*","deny"},{"apply_patch","blocked.txt","deny"}},{{"*","*","allow"}}};
         auto host=make_agent_file_tool_host(store,owner);
         const auto call=[&](const std::string& id,const std::string& tool,Json args){AgentFileToolInvocation value;value.run_id="run";value.attempt_id="model-turn-1";value.call_id=id;value.workspace_id=workspace_id;value.workspace_revision=7;value.folder_id=workspace_id;value.tool_name=tool;value.arguments_json=args.dump();return value;};
         auto creation=call("create-\xe9\x9b\xaa","create_file",{{"path","actual.txt"},{"content","created\n"}});
@@ -79,6 +79,15 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
         need(store.operations("run").get().empty()&&!std::filesystem::exists(primary/"actual.txt")&&!std::filesystem::exists(secondary/"actual.txt"),"Invalid/foreign/cancelled requests cannot propose or write");
         rejects<AgentPermissionDenied>([&]{host->invoke(call("blocked","create_file",{{"path","blocked.txt"},{"content","denied"}}));});need(store.operations("run").get().empty(),"A later allow layer cannot erase inherited denial");
         rejects<AgentPermissionDenied>([&]{host->invoke(call("blocked-patch","apply_patch",{{"patch_text","*** Begin Patch\n*** Add File: blocked.txt\n+denied\n*** End Patch\n"}}));});need(store.operations("run").get().empty(),"Prepared patch paths must retain inherited denial before approval");
+        {
+            const auto result=host->invoke(call("missing-parent","create_file",{{"path","package/new.py"},{"content","VALUE = 1\n"}}));
+            const auto error=Json::parse(result.output_json).at("error");
+            need(!result.success&&error.at("code")=="file_unavailable"&&error.at("message").get<std::string>().find("create_parents=true")!=std::string::npos,"Missing creation parents must explain the explicit recovery option");
+            need(store.operations("run").get().empty()&&!std::filesystem::exists(primary/"package"),"A missing-parent hint cannot propose or create directories/files");
+            rejects<AgentPermissionDenied>([&]{host->invoke(call("denied-parent","create_file",{{"path","blocked-dir/new.py"},{"content","denied"}}));});
+            rejects<ToolAccessDenied>([&]{host->invoke(call("outside-parent","create_file",{{"path","../outside/new.py"},{"content","denied"}}));});
+            need(store.operations("run").get().empty(),"Recovery hints cannot bypass resource or workspace authorization");
+        }
         {
             Task task(*host,creation);const auto proposal=pending(store,0);created_operation=proposal.id;need(!std::filesystem::exists(primary/"actual.txt"),"Actual creation requires approval");
             const auto bound=Json::parse(proposal.spec.arguments_json);need(bound["folder_id"]==workspace_id&&bound["workspace_revision"]==7,"Owner must bind its exact admitted folder/revision");
@@ -108,6 +117,15 @@ int main(int argc,char** argv){if(argc!=3)return 2;try{
             revoked(call("authority-restore","restore_operation",{{"operation_id",seed_id}}),[&]{need(read(primary/"authority-restore.txt")=="retain this file\n","Revoked owner cannot apply an approved inverse operation");},true);
             {const auto count=store.operations("run").get().size(),before=checks.load();Task task(*guarded,call("authority-partial","apply_patch",{{"patch_text","*** Begin Patch\n*** Add File: authority-partial-a.txt\n+actual first effect\n*** Add File: authority-partial-b.txt\n+must not exist\n*** End Patch\n"}}));const auto first=pending(store,count,&task);need(checks==before,"Patch authority cannot run before first approval");store.decide_operation(first.id,OperationDecision::allow,"fixture-controller").get();const auto second=pending(store,count+1,&task);need(checks==before+1&&read(primary/"authority-partial-a.txt")=="actual first effect\n","First actual approved effect must remain before later revocation");authority=false;store.decide_operation(second.id,OperationDecision::allow,"fixture-controller").get();const auto result=task.result.get();authority=true;need(!result.success&&Json::parse(result.output_json)["state"]=="partial"&&checks==before+2&&!std::filesystem::exists(primary/"authority-partial-b.txt")&&store.operation(first.id).get().state==OperationState::succeeded&&store.operation(second.id).get().state==OperationState::failed,"Each refreshed patch file must independently revalidate authority and retain actual partial outcomes");}
             std::cout<<"Native file-effect authority verified after approval for create, edit, restore and refreshed patches; revocation blocks each pending effect and preserves a prior actual partial patch without replay."<<std::endl;
+        }
+        {
+            root_context.prepare();
+            const auto count=store.operations("run").get().size();
+            Task task(*host,call("explicit-parent-creation","create_file",{{"path","package/new.py"},{"content","VALUE = 1\n"},{"create_parents",true}}));
+            const auto proposal=pending(store,count,&task);const auto bound=Json::parse(proposal.spec.arguments_json);
+            need(bound.at("create_directories")==Json::array({"package"})&&!std::filesystem::exists(primary/"package"),"Explicit recovery must bind missing directories in the approval before effects");
+            store.decide_operation(proposal.id,OperationDecision::allow,"fixture-controller").get();
+            need(task.result.get().success&&read(primary/"package/new.py")=="VALUE = 1\n","Only the newly approved proposal may create the parent and file");
         }
         store.transition("run",RunState::running,RunState::completed).get();rejects<ToolAccessDenied>([&]{host->invoke(call("retired","create_file",{{"path","retired.txt"},{"content","must not write"}}));});need(!std::filesystem::exists(primary/"retired.txt"),"A retired owner cannot dispatch more file work");store.close();
     }

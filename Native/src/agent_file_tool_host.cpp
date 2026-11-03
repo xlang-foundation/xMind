@@ -62,7 +62,15 @@ public:
             if(!args.contains("path")||!args["path"].is_string())throw std::invalid_argument("Scoped file tool requires a path");
             auto scope=args["path"].get<std::string>();
             if(call.tool_name=="create_file"&&args.contains("create_parents")&&!args["create_parents"].is_boolean())throw std::invalid_argument("Invalid creation parent option");
-            scope=call.tool_name=="create_file"&&args.value("create_parents",false)?workspace->creation_directory(scope,cancel):RepositoryInstructionContext::file_directory(scope);
+            if(call.tool_name=="create_file"){
+                const auto existing=workspace->creation_directory(scope,cancel);
+                const auto parent=RepositoryInstructionContext::file_directory(scope);
+                if(!args.value("create_parents",false)&&!WorkspaceTools::same_relative_path(existing,parent)){
+                    if(!ready)return guidance_required();
+                    return {false,R"({"error":{"code":"file_unavailable","message":"No approval proposal or file effect occurred. A parent directory is missing. Set create_parents=true to include missing directories in the same file-creation approval."}})"};
+                }
+                scope=args.value("create_parents",false)?existing:parent;
+            }else scope=RepositoryInstructionContext::file_directory(scope);
             ready=ready&&context->ready(scope,cancel);if(ready)guidance=bind_authority(context->precondition(scope),call);
         }
         const auto expiry=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
