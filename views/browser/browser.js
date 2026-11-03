@@ -25,7 +25,21 @@ function browserRuntime(){return typeof window==='undefined'?globalThis:window;}
 function promptSessionTitle(prompt){return Array.from(prompt.replace(/\s+/gu,' ').trim()).slice(0,64).join('');}
 function browserTimeoutSignal(milliseconds){const Controller=browserRuntime().AbortController;if(typeof Controller!=='function')return undefined;try{const controller=new Controller(),timer=setTimeout(()=>controller.abort(),milliseconds);controller.signal.addEventListener('abort',()=>clearTimeout(timer),{once:true});return controller.signal;}catch{return undefined;}}
 function browserAbortedSignal(){const Controller=browserRuntime().AbortController;if(typeof Controller!=='function')return undefined;try{const controller=new Controller();controller.abort();return controller.signal;}catch{return undefined;}}
-function browserCombinedTimeoutSignal(signal,milliseconds){const Controller=browserRuntime().AbortController;if(typeof Controller!=='function'||!signal)return signal;try{const controller=new Controller(),abort=()=>controller.abort();if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});const timer=setTimeout(abort,milliseconds);controller.signal.addEventListener('abort',()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);},{once:true});return controller.signal;}catch{return signal;}}
+function browserCombinedTimeoutSignal(signal,milliseconds){
+  const Controller=browserRuntime().AbortController;if(typeof Controller!=='function'||!signal)return signal;
+  try{
+    const controller=new Controller(),abort=()=>controller.abort();
+    if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});
+    const timer=setTimeout(()=>{
+      // Expiry retires this read request, not the selected subscription. The
+      // shared client resumes transport failures from its accepted cursor.
+      const error=new Error('Native event observation request timed out');
+      error.name='TimeoutError';controller.abort(error);
+    },milliseconds);
+    controller.signal.addEventListener('abort',()=>{clearTimeout(timer);signal.removeEventListener('abort',abort);},{once:true});
+    return controller.signal;
+  }catch{return signal;}
+}
 async function browserFetch(input,options={}){const runtime=browserRuntime();try{return await runtime.fetch(input,options);}catch(error){if(!options?.signal||!/signal[\s\S]*AbortSignal/i.test(String(error?.message)))throw error;const compatible={...options};delete compatible.signal;return runtime.fetch(input,compatible);}}
 // Browser authentication stays in an HttpOnly cookie. Domain validation and
 // committed-event parsing remain shared with the native editor client.
