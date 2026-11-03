@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-03",
+  "status": "SDK compatibility/performance and focused Native qualified; complete matching Native189 pending",
+  "main": {
+    "xmind": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+    "xlang3": "6186ffa61203789ed8ff18669c81fff32125259c",
+    "fresh_fetch": "xMind main is an ancestor; sibling xlang3 main is tracked-clean."
+  },
+  "previous_native_full": {
+    "source": "3caa54ef",
+    "passed": 189,
+    "total": 189,
+    "seconds": 897.4,
+    "inputs": 23907,
+    "terminal": {
+      "completed": "2026-11-03T11:52:59.5027195Z",
+      "test_exit": 0,
+      "environment_and_tools_unchanged": true,
+      "input_exit": 0
+    },
+    "comparison": {
+      "inputFiles": 23907,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "log_sha256": "b2481d07624b2318b076bf6da121c240a3558a7bd8843f8e17c5b48f625cefd0",
+    "scope": "Explicit process-reimport fixes; precedes the new bytecode/Unicode changes."
+  },
+  "live_rejection": {
+    "pid": 40016,
+    "api": "http://127.0.0.1:57048",
+    "browser": "http://127.0.0.1:57058/ui/",
+    "error": "Supported upgrade rejected at owner/quiesce: Native runtime package cannot be qualified",
+    "unchanged_manifest_files": 2875,
+    "changed": [],
+    "unlisted_cache_files": 66,
+    "cache_bytes": 5650997,
+    "cause": "Actual project tests launch child xlang3 without parent -B; bytecode caches appear in the paired immutable runtime.",
+    "recovery": "Pending qualified package; no cleanup/retirement yet. Existing paths preserved."
+  },
+  "fixes": {
+    "native": "Bind PYTHONDONTWRITEBYTECODE=1 in approved xlang3 process environment, retaining -B, approvals and deadlines.",
+    "sdk_cli": "Honor nonempty bytecode policy unless environment ignored by -E/-I.",
+    "sdk_import": "Complete main8151a334 UTF-8 fix for both string/list nested package __path__ using u8path.",
+    "candidate_cli": "5c7f0f824754870bbaf3dec3db849912ef0b67fca8aed1441a5a71303ddfd897",
+    "candidate_dll": "88388aced264c77b5be1d8c82b1d8f9192476af05fa9b25484d581ecbe2692ec",
+    "build": "Explicit source-equivalent isolated overlay; sibling main unchanged. All SDK targets and matching Native targets built. CPython bridge OFF; interpreter probe empty; pickle oracle excluded."
+  },
+  "regressions": {
+    "cli": "Old CLI reports0False despite inherited policy; candidate passes policy flags, actual no-cache import, unset/nonempty0, -E/-I and explicit-B checks.",
+    "unicode": "Exact Unicode nested package fails before fix; list/string __path__ cases pass after.",
+    "native_initial": "Nested-child regression first fails on Unicode encodings import before reaching child-policy assertion. Native environment fix alone passes1/2; both fixes pass2/2.",
+    "native_final": {
+      "passed": 2,
+      "total": 2,
+      "seconds": 13.32,
+      "inputs": 23911,
+      "terminal": {
+        "completed": "2026-11-03T12:08:42.4853326Z",
+        "test_exit": 0,
+        "input_exit": 0,
+        "environment_and_tools_unchanged": true
+      },
+      "comparison": {
+        "inputFiles": 23911,
+        "changed": [],
+        "added": [],
+        "removed": []
+      },
+      "log_sha256": "4a5f55ced97f87101defc77ef76076d9b52128e85725b0b314f0318b3b5a3935"
+    }
+  },
+  "sdk_correctness": {
+    "passed": 60,
+    "total": 60,
+    "seconds": 74.57,
+    "inputs": 23911,
+    "terminal": {
+      "completed": "2026-11-03T12:10:27.3984930Z",
+      "test_exit": 0,
+      "input_exit": 0
+    },
+    "comparison": {
+      "inputFiles": 23911,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "log_sha256": "97272fe9e3f09216eb3eab8095a29989555290331bbc99c2f751595e5a5529a6"
+  },
+  "performance": {
+    "status": "pass on matched fresh-cache conditions; original failed comparison retained",
+    "passed": 11,
+    "total": 11,
+    "repeats": 21,
+    "warmup": 5,
+    "threshold": 0.1,
+    "terminal": {
+      "initial_cache_files": 0,
+      "performance_exit": 0,
+      "input_exit": 0,
+      "final_cache_files": 0,
+      "completed": "2026-11-03T12:21:52.6818249Z"
+    },
+    "comparison": {
+      "inputFiles": 23911,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "ratios": {
+      "local_slots": 0.9811707074797621,
+      "scalar_arithmetic": 0.9993756483352714,
+      "range_for": 0.9973870674649137,
+      "function_calls": 0.9962073916262676,
+      "class_construct": 0.9953259836042828,
+      "list_append": 0.9690101549694642,
+      "property_access": 0.9973077260702573,
+      "deepcopy_memo": 1.0026888616815317,
+      "json_dumps": 0.9808404651732437,
+      "gc_traversal": 0.9902568431458715,
+      "subparsers": 1.0141857655620354
+    },
+    "baseline": {
+      "executable": "D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\sdk-export-baseline\\xlang3.exe",
+      "sha256": {
+        "xlang3.exe": "67273e139330efabda656eeed6002c337e15b62a8c1cb22e946a5e95c2981a48",
+        "xlang3_runtime.dll": "057cfc154fb896cf471a3629cd62fc1bebc260e784969e3cd66858d8d8e47c80"
+      }
+    },
+    "candidate": {
+      "executable": "D:\\CantorAI2026\\xlang3\\build\\Release\\xlang3.exe",
+      "sha256": {
+        "xlang3.exe": "5c7f0f824754870bbaf3dec3db849912ef0b67fca8aed1441a5a71303ddfd897",
+        "xlang3_runtime.dll": "88388aced264c77b5be1d8c82b1d8f9192476af05fa9b25484d581ecbe2692ec"
+      }
+    },
+    "history": [
+      "Initial performance attempt invalid before measurements: omitted work directory.",
+      "Next full gate10/11: subparsers1.538x from asymmetric bytecode caches. Baseline had59 cached modules, candidate0.",
+      "Three-way controls: fixed baseline, previously accepted stage and new candidate all about300ms with fresh cache. Swapping only DLL does not change this; exact candidate DLL restored.",
+      "Final unchanged default gate uses fresh empty per-runtime cache prefixes and -B equally. Existing baseline binaries and old cache are untouched. No VM optimization, threshold/workload reduction or baseline reset."
+    ]
+  },
+  "remaining": [
+    "Matching complete Native189",
+    "Safe same-profile runtime recovery/history preservation",
+    "Complete ordinary CantorServe turn without replay",
+    "Resolve observed stale clean editor buffer",
+    "Qualify packaging/installation; installed80/backups75/76 unchanged"
+  ],
+  "sdk_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050"
+}

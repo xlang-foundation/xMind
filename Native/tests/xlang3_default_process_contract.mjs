@@ -21,7 +21,7 @@ const expectedSite=join(await realpath(library),'site.py').replaceAll('\\','/');
 await mkdir(workspace);await writeFile(join(workspace,'AGENTS.md'),'Use the xlang3 process profile for Python-compatible commands.');
 const commandShell=join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');await stat(commandShell);
 await writeFile(legacyProcessConfig,JSON.stringify({profiles:[{id:'powershell',executable:commandShell,prefix_arguments:['-NoLogo','-NoProfile','-NonInteractive','-Command'],max_timeout_ms:240000,auto_approve:true}]}));await writeFile(emptyProcessConfig,JSON.stringify({profiles:[]}));
-const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;
+const token=randomBytes(32).toString('hex'),env={...process.env,XMIND_AUTH_TOKEN:token};delete env.XMIND_API_KEY;delete env.PYTHONDONTWRITEBYTECODE;
 const marker='XMIND_XLANG3_RUNTIME_PROFILE_OK';let requests=0,providerError,serverProcess,origin,verified=false;
 const provider=createServer((request,response)=>{let raw='';request.on('data',chunk=>raw+=chunk);request.on('end',()=>{try{
   const body=JSON.parse(raw);++requests;assert.equal(body.model,'synthetic-xmind-runtime-profile');
@@ -41,7 +41,7 @@ const provider=createServer((request,response)=>{let raw='';request.on('data',ch
   assert.ok(processTool.parameters.properties.profile.enum.includes('xlang3'));
   const result=body.messages.findLast(message=>message.role==='tool');
   let delta,finish;
-  if(!result){delta={tool_calls:[{index:0,id:'runtime-profile-call',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'xlang3',arguments:['-c',`import os, site; assert os.path.realpath(site.__file__).replace('\\\\','/') == ${JSON.stringify(expectedSite)}, repr(site.__file__); print('${marker}')`],workdir:'.'})}}]};finish='tool_calls';}
+  if(!result){delta={tool_calls:[{index:0,id:'runtime-profile-call',type:'function',function:{name:'run_process',arguments:JSON.stringify({profile:'xlang3',arguments:['-c',`import os, site; assert os.path.realpath(site.__file__).replace('\\\\','/') == ${JSON.stringify(expectedSite)}, repr(site.__file__); import subprocess, sys; assert subprocess.check_output([sys.executable, '-c', 'import sys, site; assert sys.dont_write_bytecode; print(73)'], text=True).strip() == '73'; print('${marker}')`],workdir:'.'})}}]};finish='tool_calls';}
   else{assert.equal(result.tool_call_id,'runtime-profile-call');const outcome=JSON.parse(result.content);assert.equal(outcome.exit_code,0,'Paired xlang3 process failed: '+JSON.stringify({exit_code:outcome.exit_code,stdout:outcome.stdout,stderr:outcome.stderr}).slice(0,8192));assert.equal(outcome.profile_id,'xlang3');assert.ok(outcome.stdout.data.includes(marker));delta={content:'The pinned xlang3 process ran the requested script successfully.'};finish='stop';}
   response.writeHead(200,{'Content-Type':'text/event-stream'});
   response.end(`data: ${JSON.stringify({choices:[{index:0,delta,finish_reason:null}]})}\n\ndata: ${JSON.stringify({choices:[{index:0,delta:{},finish_reason:finish}]})}\n\ndata: [DONE]\n\n`);
@@ -69,6 +69,8 @@ try{
  const result=JSON.parse(operations[0].result_json);assert.equal(result.profile_id,'xlang3');assert.equal(Object.hasOwn(result,'executable_id'),false,'Private executable identity must not leak into public result data');assert.equal(result.exit_code,0);assert.ok(result.stdout.data.includes(marker));
  const environment=JSON.parse(operations[0].arguments_json).environment;
  assert.ok(environment.some(entry=>entry.name==='XLANG3_PYTHON_LIB'&&entry.value===library),'Approval must bind the backend-configured pure library used by its child runtime');
+ assert.ok(environment.some(entry=>entry.name==='PYTHONDONTWRITEBYTECODE'&&entry.value==='1'),'Approval must bind the bytecode policy inherited by descendant interpreters');
+ assert.equal(await stat(join(library,'__pycache__')).then(()=>true,error=>{if(error.code!=='ENOENT')throw error;return false;}),false,'Nested xlang3 processes must leave the paired library immutable');
  const runtimeEvents=await api(`/v1/runs/${run.id}/events`);assert.ok(runtimeEvents.some(event=>event.kind==='process.output'&&event.data.profile_id==='xlang3'&&Buffer.from(event.data.data,'hex').toString('utf8').includes(marker)));
  verified=true;console.log('Native AgentRunner executed the bundled xlang3 runtime with its configured pure-source library, preserved shell approval/timeout policy, kept explicit empty profiles disabled and avoided PATH lookup.');
 }finally{

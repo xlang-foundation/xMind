@@ -323,6 +323,9 @@ std::string ProcessExecutor::invoke_scoped(const std::string& id,const std::stri
     launch.working_directory=utf8((std::filesystem::u8path(root)/path).lexically_normal());launch.working_directory_id=ForegroundProcess::directory_identity(launch.working_directory);
     if(launch.working_directory_id!=public_directory_id)throw ToolAccessDenied("Process working directory changed during public workspace admission");
     if(found->id=="xlang3") {
+        // Unlike -B, this policy also reaches child interpreters launched by
+        // project test runners. Their imports must not mutate the runtime.
+        launch.environment.emplace_back("PYTHONDONTWRITEBYTECODE","1");
         if(!found->xlang3_library.empty())launch.environment.emplace_back("XLANG3_PYTHON_LIB",found->xlang3_library);
         std::vector<std::filesystem::path> import_paths;
         const auto modules=std::filesystem::u8path(found->executable).parent_path()/L"modules";

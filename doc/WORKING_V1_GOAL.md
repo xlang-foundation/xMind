@@ -19,6 +19,8 @@ Deliver an installable, verified xMind v1 whose browser UI, VS Code extension an
 
 ## Current continuation — 2026-11-02
 
+Latest November3 checkpoint: SDK92aaafb5 passes60 contracts and11 fixed-baseline performance cases; Native inherited-bytecode policy passes2 focused contracts, with matching full189 pending. Earlier3caa54ef full189 qualifies only the preceding reimport fix. Project6tests and CLI commands pass, but complete ordinary-turn acceptance remains open after deadlines. Generated caches block an old-owner runtime upgrade, and an actual clean editor buffer stays stale. Preserve all terminal roots and existing paths; qualified native recovery and package/install acceptance remain pending. [Current evidence](evidence/bytecode-inheritance-and-unicode-20261103.json), [project/editor scope](evidence/cantorserve-expense-project-20261103.json).
+
 The goal above remains the delivery target. The qualified 0.1.79 release and
 0.1.80 authentication fix are historical baselines; they do not qualify all
 subsequent main changes as a new installed release. This continuation started

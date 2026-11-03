@@ -124,7 +124,7 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         Task xlang_task(xlang_executor,"xlang3-import-path",xlang_request);const auto xlang_record=proposed(store,"xlang3-import-path");const auto xlang_payload=Json::parse(xlang_record.spec.arguments_json);
         require(xlang_payload["arguments"][0]=="-B"&&xlang_payload["arguments"][1]=="-c","xlang3 executions must disable writes into the paired runtime package");
         Json xlang_environment=Json::object();for(const auto& entry:xlang_payload.at("environment")){const auto name=entry.at("name").get<std::string>();require(!xlang_environment.contains(name),"Approved child environment cannot contain duplicate names");xlang_environment[name]=entry.at("value");}
-        require(xlang_environment.size()==2&&xlang_environment.contains("PYTHONPATH")&&xlang_environment.value("XLANG3_PYTHON_LIB","")==argv[5],"Approved xlang3 process proposal must bind its workspace import path and configured pure library");
+        require(xlang_environment.size()==3&&xlang_environment.contains("PYTHONPATH")&&xlang_environment.value("XLANG3_PYTHON_LIB","")==argv[5]&&xlang_environment.value("PYTHONDONTWRITEBYTECODE","")=="1","Approved xlang3 process proposal must bind its workspace import path, pure library and inherited bytecode policy");
         const auto xlang_path=xlang_environment.at("PYTHONPATH").get<std::string>();
         require(xlang_path.find(".xlang3-site")!=std::string::npos&&xlang_path.find("modules")!=std::string::npos,"Approved xlang3 process proposal must bind the paired runtime and workspace package search paths");
         store.decide_operation("xlang3-import-path",OperationDecision::allow,"actual-fixture-controller").get();
