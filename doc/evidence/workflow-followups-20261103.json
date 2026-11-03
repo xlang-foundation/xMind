@@ -1,0 +1,141 @@
+{
+  "at": "2026-11-03T17:49:25.952Z",
+  "source": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "release_accepted": false,
+  "candidate84": {
+    "version": "0.1.84",
+    "archive_sha256": "827660d3ce62497523ff565c015e03075d02e1795ad257e055bb77de8a7c96bb",
+    "manifest_sha256": "43ce272b30ab125291d76d3210b4f84844680f2d90f31deeddb31b6ede0d41aa",
+    "archive_members": 2922,
+    "installed_files": 2921,
+    "primary_owner": {
+      "pid": 45256,
+      "birth": "134382010783761421",
+      "generation": "runtime-88b6b94643b68572106c6bfa2f17a9b565de7f018c5d4fa12fd8478cff1df7d7"
+    },
+    "preservation": {
+      "exact": true,
+      "sessions": 2,
+      "messages": 66,
+      "roots": 7,
+      "events": 719,
+      "operations": 14,
+      "project_files": 6,
+      "sha256": "619403420074436b736b972dbd61d2e301a2b8a7971ace5f3d0c89564d03c093",
+      "model_submissions": 0
+    },
+    "browser_private_folder_denial": "Backend configuration cannot be a model workspace",
+    "browser_git": {
+      "status": true,
+      "working_diff": true,
+      "patches": [
+        "README.md",
+        "notes λ.txt",
+        "staged.txt"
+      ],
+      "models": 0
+    },
+    "proof": [
+      "workspace-folder-denial-after-20261103.png",
+      "git-diff-query-after-20261103.png"
+    ]
+  },
+  "followups": [
+    {
+      "commit": "288043e6",
+      "issue": "Missing folder returned generic Native view observation unavailable",
+      "change": "Map scoped ToolFileError to400 with actual unavailable-folder message",
+      "proof": "workspace-missing-folder-before-20261103.png",
+      "qualification": "Native-view1/1 pass77.51s and complete189/189 pass1066.64s with23912inputs/environment/tools unchanged; live installed proof pending",
+      "live": "Installed85 actual browser now shows Workspace file or directory unavailable(code2), private boundary still denied; original membership unchanged"
+    },
+    {
+      "commit": "d708a30d",
+      "issue": "Code rejects browser-created custom workspace name as changed identity",
+      "change": "Validate and retain bounded native name; preserve exact workspace ID, root, primary-folder and membership checks",
+      "proof": "code-named-workspace-before-20261103.png",
+      "regression": "Fails before with actual error, passes after; malformed name and identity controls retained",
+      "qualification": "Complete225browser/540editor pass with frozen source/runtime inputs/environment/tools; live installed proof pending",
+      "live": "Installed85 Code connects custom-name workspace, native tree lists all3files, review command renders actual README patch; original expense restored"
+    },
+    {
+      "commit": "55103280",
+      "issue": "Git result summary and comparison base persist after switching to another workspace",
+      "change": "Clear Git summary, comparison mode and base with existing workspace reset",
+      "proof": "browser-git-scope-before-20261103.png",
+      "regression": "Fails before hidden=false, passes after",
+      "qualification": "Complete225browser/540editor pass with frozen source/runtime inputs/environment/tools; live installed proof pending"
+    }
+  ],
+  "native": {
+    "previous_full": {
+      "source": "4cc2ac56",
+      "passed": 189,
+      "total": 189,
+      "seconds": 909.72,
+      "inputs": 23912,
+      "inputs_environment_tools_unchanged": true
+    },
+    "current": {
+      "source": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+      "label": "workflow-followups-native-qualified",
+      "passed": 189,
+      "total": 189,
+      "seconds": 1066.64,
+      "inputs": 23912,
+      "input_changes": [],
+      "input_additions": [],
+      "input_removals": [],
+      "inputs_environment_tools_unchanged": true,
+      "completed": "2026-11-03T18:12:13.2494880Z",
+      "executable_sha256": "adc3f76d6a6ef79a974b1b74dab9473f0f879ad994b388f7b8f279f7440e9c42",
+      "receipt": ".agentflow/blockers-20261102/workflow-followups-native-qualified-terminal.json"
+    },
+    "focused": {
+      "label": "workflow-followup-native-view",
+      "passed": 1,
+      "total": 1,
+      "seconds": 77.51,
+      "inputs": 23912,
+      "inputs_environment_tools_unchanged": true
+    }
+  },
+  "serving": {
+    "ready": true,
+    "completed_test_root": "a1c5735019644a9792c98ff5d341e7ec",
+    "never_replay": true,
+    "receipt": "cantorserve-expense-tests-20261103.json",
+    "latest_portal_recheck": "2026-11-03T17:53Z: both configured27B providers Ready1/1; user deployment reply confirmed"
+  },
+  "next": "Follow fresh root0ab1299f29e14edfb4a9838d38f6618f without replay; all source/package/runtime stages fixed while active",
+  "browser_assets": "Rebuilt in place at existing .agentflow/browser-assets; source55103280, no new asset path",
+  "clients": {
+    "source": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "browser": {
+      "passed": 225,
+      "total": 225,
+      "milliseconds": 45169.3621
+    },
+    "editor": {
+      "passed": 540,
+      "total": 540,
+      "milliseconds": 4877.0764
+    },
+    "source_inputs": 23912,
+    "runtime_inputs": 23339,
+    "stage_manifest": "43ce272b30ab125291d76d3210b4f84844680f2d90f31deeddb31b6ede0d41aa",
+    "inputs_environment_tools_unchanged": true,
+    "receipt": ".agentflow/blockers-20261102/workflow-followups-clients-qualified-terminal.json"
+  },
+  "source_browser_reset": {
+    "actual_ui_verified": true,
+    "browser_assets_source": "55103280",
+    "installed_native": "4cc2ac56",
+    "summary_cleared": true,
+    "mode": "working",
+    "base_empty": true,
+    "patch_empty": true,
+    "source_only": true
+  },
+  "candidate85": "candidate85-installed-20261103.json"
+}

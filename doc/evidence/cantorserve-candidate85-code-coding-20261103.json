@@ -1,0 +1,159 @@
+{
+  "at": "2026-11-03T18:35:50.040Z",
+  "scope": "Fresh ordinary coding via actual installed Code client; native edit/test/final path passes, stock host editor-refresh remains a separate observed failure",
+  "package": "0.1.85",
+  "native": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "sdk": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "manifest": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+  "endpoint": "http://127.0.0.1:19445/v1",
+  "model": "qwen3.8-27b-chat-32k",
+  "session": "75c7a39896be45508cf70283e2360eca",
+  "root": "a0e1eab0c0854143a1f04aa02d076513",
+  "state": "completed",
+  "never_replay": true,
+  "prompt": "Bump the CLI version to 0.1.3. Run the existing project tests using xlang3, keep those tests unchanged, and report the results.",
+  "entry": "Actual Code57118 composer from original expense workspace",
+  "new_run_following": "Sending intentionally switched old d114 inspection to the new a0e1 root; no stale failure shown for the new run",
+  "approvals": {
+    "edit": "97a7f0681b592094a15e9b6d56e3f6ea",
+    "command": "800d3f3c656834eb70199e1b18d3b98c",
+    "actor": "local-owner",
+    "both_through_actual_code_ui": true,
+    "permissions": "Default"
+  },
+  "edit": {
+    "path": "expense_report/__main__.py",
+    "before_version": "0.1.2",
+    "after_version": "0.1.3",
+    "before_sha256": "ebc731b71d728f31a984744b849a04d57cf9ee3d4905470d37c110a388b7a1b5",
+    "after_sha256": "5356d93adb0ce5c919f744f9e6eb54c46b20396ae16318db80ccc0275b7df42d",
+    "size": 1368
+  },
+  "tests": {
+    "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+    "arguments": [
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ],
+    "profile": "xlang3",
+    "revision": 3,
+    "timeout_ms": 120000,
+    "output_limit": 65536,
+    "exit_code": 0,
+    "elapsed_ms": 1120,
+    "tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "test_seconds": 0.446,
+    "pid": 43892,
+    "tree_retired": true,
+    "stdout_bytes": 0,
+    "stderr_bytes": 701,
+    "test_files_unchanged": true,
+    "cpython_used": false
+  },
+  "http_responses": [
+    {
+      "request_id": "ffe8f3c3ac894755b20e016e146065f6",
+      "status": 200
+    },
+    {
+      "request_id": "3663f9a573954fafa7e3c7ae322f1a03",
+      "status": 200
+    },
+    {
+      "request_id": "affe258d25c0439ab366426112e7dea7",
+      "status": 200
+    }
+  ],
+  "usage_by_call": [
+    {
+      "completion_tokens": 76,
+      "prompt_tokens": 12559,
+      "total_tokens": 12635
+    },
+    {
+      "completion_tokens": 77,
+      "prompt_tokens": 12831,
+      "total_tokens": 12908
+    },
+    {
+      "completion_tokens": 108,
+      "prompt_tokens": 13319,
+      "total_tokens": 13427
+    }
+  ],
+  "usage_total": {
+    "input": 38709,
+    "output": 261,
+    "total": 38970
+  },
+  "cost": "Not reported; no monetary estimate",
+  "worker": {
+    "pid": 53096,
+    "generation": "4aea4abd8600b455a30dc4495ba06c3b",
+    "retired": "completed",
+    "uncertain_model_dispatches": 0,
+    "observed_process_absent": true
+  },
+  "test_child_observed_absent": true,
+  "original": {
+    "sessions": 2,
+    "messages": 72,
+    "roots": 8,
+    "events": 894,
+    "operations": 16,
+    "exactRecordsAndHistoryPrefixes": true,
+    "unchangedProjectFiles": 5
+  },
+  "current_at_completion": {
+    "sessions": 2,
+    "messages": 78,
+    "roots": 9,
+    "events": 1069,
+    "operations": 18,
+    "project_files": 6,
+    "only_changed_file": "expense_report/__main__.py"
+  },
+  "reload": {
+    "at": "2026-11-03T18:32:20.236Z",
+    "root": "a0e1eab0c0854143a1f04aa02d076513",
+    "state": "completed",
+    "sha256": "6484354f45bd703894d9be47030bef1fa2ea45e04944314cc126f884368e00c3",
+    "exactFullRootHistoryOperationsAndFiles": true,
+    "additionalModelRequests": 0,
+    "events": 175,
+    "operations": 2,
+    "sessionMessages": 33
+  },
+  "automatic_auth_provider_model_workspace_and_completed_run_restored": true,
+  "manual_project_edits": false,
+  "budgets_unchanged": {
+    "model_total_ms": 120000,
+    "model_idle_ms": 60000,
+    "root_ms": 600000
+  },
+  "stock_editor": {
+    "status": "Unqualified",
+    "observed": "Open buffer remains0.1.1 after native model writes0.1.2 and0.1.3; full window reload loads disk content",
+    "environment": "Official isolated Windows CodeServer1.143 commit2d0b7506a36c1d6db9a466440131a8e01eab2289",
+    "cause_control": "Mandatory extension-directory backslash glob reproduces parcel regex_error(error_escape); slash-normalized control subscribes",
+    "related_open_upstream": "https://github.com/microsoft/vscode/issues/317176",
+    "vendor_modified": false,
+    "forced_revert": false,
+    "dirty_overwrite": false,
+    "desktop_generalization": false
+  },
+  "proof": [
+    "cantorserve-candidate85-code-coding-before-reload-20261103.png",
+    "cantorserve-candidate85-code-coding-after-reload-20261103.png"
+  ],
+  "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/workflow-ninth-events.json.gz",
+  "release_accepted": false,
+  "remaining": "Native CLI fresh root2cd8ee2992ac0fcec5c4b986919ce904 running, stock-editor/final release gates pending"
+}

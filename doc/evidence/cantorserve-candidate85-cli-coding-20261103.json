@@ -1,0 +1,154 @@
+{
+  "at": "2026-11-03T18:42:00.480Z",
+  "scope": "Fresh ordinary small version edit/test/final via packaged native interactive console; no API chat scripts",
+  "package": "0.1.85",
+  "native": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "sdk": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "manifest": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+  "endpoint": "http://127.0.0.1:19445/v1",
+  "model": "qwen3.8-27b-chat-32k",
+  "session": "75c7a39896be45508cf70283e2360eca",
+  "root": "2cd8ee2992ac0fcec5c4b986919ce904",
+  "state": "completed",
+  "never_replay": true,
+  "prompt": "Bump the CLI version to 0.1.4. Run the existing project tests using xlang3, keep those tests unchanged, and report the results.",
+  "entry": {
+    "console_session": 65960,
+    "reconnected_console_session": 68239,
+    "existing_profile_and_workspace_reused": true,
+    "first_exit": 0,
+    "reconnect_exit": 0,
+    "transcript": ".agentflow/blockers-20261102/workflow-native-cli-transcript.json"
+  },
+  "approvals": {
+    "edit": "bcc9130c2e9e95cc83bba49dda10cea7",
+    "command": "7b74dc52444bc9ad3c3ee62e499829da",
+    "actor": "local-owner",
+    "via_actual_interactive_console": true,
+    "exact_operation_ids": true,
+    "full_edit_proposal_reviewed": true,
+    "permissions": "Default"
+  },
+  "edit": {
+    "path": "expense_report/__main__.py",
+    "before_version": "0.1.3",
+    "after_version": "0.1.4",
+    "before_sha256": "5356d93adb0ce5c919f744f9e6eb54c46b20396ae16318db80ccc0275b7df42d",
+    "after_sha256": "3bfe64b650240149da39695d0473bc9855bc56a83c8937754587414e5f3be512",
+    "bytes": 1368
+  },
+  "tests": {
+    "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+    "arguments": [
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ],
+    "profile": "xlang3",
+    "revision": 3,
+    "timeout_ms": 120000,
+    "output_limit": 65536,
+    "exit_code": 0,
+    "elapsed_ms": 1139,
+    "tests": 6,
+    "passed": 6,
+    "failed": 0,
+    "test_seconds": 0.458,
+    "pid": 49716,
+    "tree_retired": true,
+    "stderr_bytes": 701,
+    "stdout_bytes": 0,
+    "test_files_unchanged": true,
+    "cpython_used": false
+  },
+  "http_responses": [
+    {
+      "request_id": "cb07ae24e9414150833eef67432a819f",
+      "status": 200
+    },
+    {
+      "request_id": "fa271f621d1b45b382ccb3242a9696db",
+      "status": 200
+    },
+    {
+      "request_id": "05980e7ecdc740c7a88ba7b21c7b27f2",
+      "status": 200
+    }
+  ],
+  "usage_by_call": [
+    {
+      "completion_tokens": 76,
+      "prompt_tokens": 13463,
+      "total_tokens": 13539
+    },
+    {
+      "completion_tokens": 77,
+      "prompt_tokens": 13732,
+      "total_tokens": 13809
+    },
+    {
+      "completion_tokens": 108,
+      "prompt_tokens": 14208,
+      "total_tokens": 14316
+    }
+  ],
+  "usage_total": {
+    "input": 41403,
+    "output": 261,
+    "total": 41664
+  },
+  "cost": "Not reported; no monetary estimate",
+  "worker": {
+    "pid": 29248,
+    "generation": "9f70ff7c30c62a52ed66cff655ee7fbb",
+    "retired": "completed",
+    "uncertain_model_dispatches": 0,
+    "observed_process_absent": true
+  },
+  "test_child_observed_absent": true,
+  "original": {
+    "sessions": 2,
+    "messages": 78,
+    "roots": 9,
+    "events": 1069,
+    "operations": 18,
+    "exactRecordsAndHistoryPrefixes": true,
+    "unchangedProjectFiles": 5
+  },
+  "current_at_completion": {
+    "sessions": 2,
+    "messages": 84,
+    "roots": 10,
+    "events": 1245,
+    "operations": 20,
+    "project_files": 6,
+    "only_changed_file": "expense_report/__main__.py"
+  },
+  "reconnect": {
+    "at": "2026-11-03T18:39:47.510Z",
+    "root": "2cd8ee2992ac0fcec5c4b986919ce904",
+    "state": "completed",
+    "sha256": "8078a8ec2639059e96611cb5c18cf7b86e9ce6f26850afc1a656b9ea7e2eab03",
+    "exactFullRootHistoryOperationsAndFiles": true,
+    "additionalModelRequests": 0,
+    "events": 176,
+    "operations": 2,
+    "sessionMessages": 39,
+    "cliReconnectedToSameSavedSession": true
+  },
+  "complete_fixed_stage_owned_runtime_and_installation_verified_after_three_turns": true,
+  "machine_settings_unchanged": 6,
+  "manual_project_edits": false,
+  "budgets_unchanged": {
+    "model_total_ms": 120000,
+    "model_idle_ms": 60000,
+    "root_ms": 600000
+  },
+  "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/workflow-tenth-events.json.gz",
+  "release_accepted": false,
+  "remaining": "Stock isolated Windows Code Server open-editor refresh and final release acceptance"
+}

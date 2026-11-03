@@ -1,0 +1,136 @@
+{
+  "at": "2026-11-03T18:52:19.292Z",
+  "package": "0.1.85",
+  "native": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "sdk": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "entry": "Actual browser UI with Default permissions and saved CantorServe provider",
+  "budgets_unchanged": {
+    "model_total_ms": 120000,
+    "model_idle_ms": 60000,
+    "root_ms": 600000
+  },
+  "cancellation": {
+    "root": "9be6562d347b4d45bc9afd3be323c5d7",
+    "prompt": "Explain how the expense CSV parser handles invalid rows. Do not change files or run commands.",
+    "state": "cancelled",
+    "model_dispatch_confirmed": true,
+    "http": [
+      {
+        "request_id": "671d6f58682e4345ad25df3c8cb4c09f",
+        "status": 200
+      }
+    ],
+    "usage": "No completed usage report; not estimated",
+    "stop_clicked_once": true,
+    "worker": {
+      "pid": 49652,
+      "generation": "221accee9ae01be73dc57c93879c3c00",
+      "retired_reason": "cancelled",
+      "final_uncertain_model_dispatches": 0,
+      "observed_process_absent": true
+    },
+    "operations": 0,
+    "original": {
+      "sessions": 2,
+      "messages": 84,
+      "roots": 10,
+      "events": 1245,
+      "operations": 20,
+      "exactRecordsAndHistoryPrefixes": true,
+      "all6ProjectFilesExact": true
+    },
+    "reload": {
+      "at": "2026-11-03T18:46:25.824Z",
+      "root": "9be6562d347b4d45bc9afd3be323c5d7",
+      "state": "cancelled",
+      "sha256": "cb653374906cd2b09689e35d95e0efe6b1126defbd69cc344f0f79d172456cc2",
+      "exact": true,
+      "additionalModelRequests": 0,
+      "events": 16,
+      "operations": 0,
+      "files": 6
+    },
+    "remote_gpu_cancellation_not_claimed": true,
+    "proof": "candidate85-real-model-cancel-20261103.png"
+  },
+  "denial": {
+    "root": "1260348f29454dc4b43a8cf288bdc044",
+    "prompt": "Bump the CLI version to 0.1.5. Run the existing project tests using xlang3, keep those tests unchanged, and report the results.",
+    "state": "completed",
+    "operation": "35f6abda993606d7846af39bfabab02d",
+    "operation_state": "denied",
+    "actor": "local-owner",
+    "denied_through_actual_ui": true,
+    "worker": {
+      "pid": 52984,
+      "generation": "b5e93e9a167538bc197885b0b94dd4c3",
+      "retired_reason": "completed",
+      "final_uncertain_model_dispatches": 0,
+      "observed_process_absent": true
+    },
+    "http": [
+      {
+        "request_id": "c3cdf372a30d486b9119b5dc1fb056c9",
+        "status": 200
+      },
+      {
+        "request_id": "9909f455fe984d0cacbee55722de5e22",
+        "status": 200
+      }
+    ],
+    "usage": [
+      {
+        "completion_tokens": 76,
+        "prompt_tokens": 14376,
+        "total_tokens": 14452
+      },
+      {
+        "completion_tokens": 45,
+        "prompt_tokens": 14502,
+        "total_tokens": 14547
+      }
+    ],
+    "automatic_retry": false,
+    "manual_recovery_prompt": false,
+    "final_answer": "The version bump was denied by the controller, so no change was made. I did not run the tests since the requested change wasn't applied. Let me know if you'd like me to retry or adjust the request.",
+    "commands_proposed": 0,
+    "original": {
+      "sessions": 2,
+      "messages": 85,
+      "roots": 11,
+      "events": 1261,
+      "operations": 20,
+      "exactRecordsAndHistoryPrefixes": true,
+      "all6ProjectFilesExact": true
+    },
+    "reload": {
+      "at": "2026-11-03T18:51:50.004Z",
+      "root": "1260348f29454dc4b43a8cf288bdc044",
+      "state": "completed",
+      "sha256": "8381ac0fd85161ceca138c4b3ec438a4e96e40aaee7bbeb499255f38066cddb2",
+      "exact": true,
+      "additionalModelRequests": 0,
+      "events": 84,
+      "operations": 1,
+      "all6filesExact": true
+    },
+    "proof": "candidate85-real-edit-deny-20261103.png"
+  },
+  "final": {
+    "sessions": 2,
+    "messages": 89,
+    "roots": 12,
+    "events": 1345,
+    "operations": 21,
+    "files": 6,
+    "all_safety_check_files_exact": true,
+    "main_version": "0.1.4",
+    "main_sha256": "3bfe64b650240149da39695d0473bc9855bc56a83c8937754587414e5f3be512"
+  },
+  "never_replay": [
+    "9be6562d347b4d45bc9afd3be323c5d7",
+    "1260348f29454dc4b43a8cf288bdc044"
+  ],
+  "release_accepted": false,
+  "remaining": "Stock isolated Windows CodeServer open-editor auto-refresh; desktop comparison constrained by archived visible-window instruction"
+}

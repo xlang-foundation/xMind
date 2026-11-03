@@ -1,0 +1,147 @@
+{
+  "at": "2026-11-03T18:29:39.802Z",
+  "scope": "Fresh ordinary browser edit/test/final turn on actual installed candidate85; small version change, not a general coding benchmark",
+  "entry": "Actual browser at unchanged57058 URL",
+  "package": "0.1.85",
+  "native_revision": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "sdk_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "runtime_manifest": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+  "endpoint": "http://127.0.0.1:19445/v1",
+  "model": "qwen3.8-27b-chat-32k",
+  "profile": "qwen38_27b_nvfp4_chat_32k_v2",
+  "session": "75c7a39896be45508cf70283e2360eca",
+  "root": "0ab1299f29e14edfb4a9838d38f6618f",
+  "state": "completed",
+  "never_replay": true,
+  "prompt": "Bump the CLI version to 0.1.2. Run the existing project tests using xlang3, keep those tests unchanged, and report the results.",
+  "approvals": {
+    "edit": "c868e78a176603d3ff724fb6ca88c3f5",
+    "command": "ee8e83343f65339438d3ad550f123e63",
+    "actor": "local-owner",
+    "both_through_actual_browser_ui": true,
+    "access_mode": "Default"
+  },
+  "edit": {
+    "path": "expense_report/__main__.py",
+    "before_version": "0.1.1",
+    "after_version": "0.1.2",
+    "before_sha256": "97c0629337a51fb8844ea9704fa44d11630a6bce2e78f7780dc5e80eb5833241",
+    "after_sha256": "ebc731b71d728f31a984744b849a04d57cf9ee3d4905470d37c110a388b7a1b5",
+    "bytes": 1368,
+    "approved_receipt_matches_disk": true
+  },
+  "tests": {
+    "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+    "arguments": [
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ],
+    "profile": "xlang3",
+    "revision": 3,
+    "timeoutMs": 120000,
+    "outputLimit": 65536,
+    "elapsedMs": 1165,
+    "exitCode": 0,
+    "pid": 48404,
+    "treeRetired": true,
+    "stderrBytes": 701,
+    "stdoutBytes": 0,
+    "passed": 6,
+    "failed": 0,
+    "seconds": 0.454,
+    "test_files_unchanged": true,
+    "cpython_used": false
+  },
+  "server_responses": [
+    {
+      "request_id": "b5f45239f5684285a50d0323be169537",
+      "status": 200
+    },
+    {
+      "request_id": "809cb2e2763b4c64ab63c3b1142016fa",
+      "status": 200
+    },
+    {
+      "request_id": "18fb734116764e139df6a4ce3f216fbf",
+      "status": 200
+    }
+  ],
+  "usage_by_call": [
+    {
+      "completion_tokens": 76,
+      "prompt_tokens": 11654,
+      "total_tokens": 11730
+    },
+    {
+      "completion_tokens": 77,
+      "prompt_tokens": 11930,
+      "total_tokens": 12007
+    },
+    {
+      "completion_tokens": 108,
+      "prompt_tokens": 12415,
+      "total_tokens": 12523
+    }
+  ],
+  "usage_total": {
+    "input": 35999,
+    "output": 261,
+    "total": 36260
+  },
+  "cost": "Not reported; no monetary estimate",
+  "worker": {
+    "pid": 15264,
+    "generation": "ba59945de479333547e7d54cb2af950b",
+    "retired_reason": "completed",
+    "uncertain_model_dispatches": 0,
+    "observed_process_absent": true
+  },
+  "process_child_observed_absent": true,
+  "original": {
+    "sessions": 2,
+    "messages": 66,
+    "roots": 7,
+    "events": 719,
+    "operations": 14,
+    "exactRecordsAndHistoryPrefixes": true,
+    "unchangedProjectFiles": 5
+  },
+  "current_at_completion": {
+    "sessions": 2,
+    "messages": 72,
+    "roots": 8,
+    "events": 894,
+    "operations": 16,
+    "project_files": 6,
+    "only_changed_file": "expense_report/__main__.py"
+  },
+  "reload": {
+    "at": "2026-11-03T18:25:44.634Z",
+    "root": "0ab1299f29e14edfb4a9838d38f6618f",
+    "state": "completed",
+    "normalizedSha256": "f1c36d5ee295da949eb6391d18f93f6f4146b2d9d213e10ac14154feab13e993",
+    "exactFullRootHistoryOperationsAndFiles": true,
+    "additionalModelRequests": 0,
+    "events": 175,
+    "operations": 2,
+    "sessionMessages": 27
+  },
+  "complete_fixed_stage_and_owned_runtime_verify_after_turn": true,
+  "budgets": {
+    "model_total_ms": 120000,
+    "model_idle_ms": 60000,
+    "root_ms": 600000,
+    "unchanged": true
+  },
+  "manual_project_edits": false,
+  "project_prompts_and_approvals_via_ui_only": true,
+  "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/workflow-eighth-events.json.gz",
+  "proof": "cantorserve-candidate85-coding-completed-20261103.png",
+  "release_accepted": false,
+  "remaining": "Fresh Code/CLI coding and stock-editor/final release gates; Code roota0e1eab0c0854143a1f04aa02d076513 running separately"
+}

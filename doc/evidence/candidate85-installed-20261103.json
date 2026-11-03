@@ -1,0 +1,163 @@
+{
+  "at": "2026-11-03T18:20:29.669Z",
+  "version": "0.1.85",
+  "source": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "native_revision": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+  "sdk_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "archive": {
+    "sha256": "669ed8d895050bedbb04e89aa8a3e96322d7a7fe9426d50e2619e05238b14c8f",
+    "bytes": 37185052,
+    "members": 2922,
+    "complete_member_verification": true,
+    "inputs_unchanged": true,
+    "no_duplicate_runtime_directory": true,
+    "official_vsce_processors_and_secret_scan": true
+  },
+  "installation": {
+    "at": "2026-11-03T18:14:08.447Z",
+    "installed": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.85",
+    "version": "0.1.85",
+    "verifiedUnmodifiedMembers": 2919,
+    "totalInstalledFiles": 2921,
+    "completeInstalledFileSetVerified": true,
+    "relocatedVsixMetadataHashVerified": true,
+    "manifestSemanticallyEqual": true,
+    "installerMetadataAdded": true,
+    "manifestSha256": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+    "nativeFiles": 2875,
+    "path": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.85"
+  },
+  "stage": {
+    "at": "2026-11-03T18:13:31.006Z",
+    "runtime": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103",
+    "unchangedRuntimePath": true,
+    "manifestSha256": "72823e366cd70981aba7d3564f114756917e755a796f5281e62d30048dc66467",
+    "nativeRevision": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "files": 2875,
+    "changedMembers": [
+      "xmind.exe",
+      "provenance.json",
+      "native-runtime-manifest.json"
+    ],
+    "sdkBytesUnchanged": true,
+    "rollback": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/live-profiles/b183694a8331a8c9653174795f5a08ce8fa2e0e820a48f770e28e993ab0d02ec/runtime-88b6b94643b68572106c6bfa2f17a9b565de7f018c5d4fa12fd8478cff1df7d7",
+    "extraRuntimeDirectoryCreated": false,
+    "releaseAccepted": false
+  },
+  "primary": {
+    "pid": 50000,
+    "birth": "134382033024934914",
+    "runtime": "runtime-58429e6c2b780e57f486ae7299ae00af567591eeb95e386f709102d20592ee39",
+    "api": "http://127.0.0.1:57048",
+    "browser": "http://127.0.0.1:57058/ui/"
+  },
+  "preservation": {
+    "at": "2026-11-03T18:19:05.993Z",
+    "phase": "after",
+    "baseline": "git-package-profile-before.json.gz",
+    "owner": 50000,
+    "sessions": 2,
+    "messages": 66,
+    "roots": 7,
+    "events": 719,
+    "operations": 14,
+    "projectFiles": 6,
+    "snapshotSha256": "619403420074436b736b972dbd61d2e301a2b8a7971ace5f3d0c89564d03c093",
+    "exactSnapshot": true,
+    "allRootsTerminal": true,
+    "modelRequestsSubmitted": 0
+  },
+  "settings": {
+    "at": "2026-11-03T18:14:08.735Z",
+    "originalMachineSettingsUnchanged": true,
+    "settingsCount": 6,
+    "runtimeOverrideAbsent": true,
+    "retainedOlderDirectories": {
+      "81": true,
+      "83": true,
+      "84": true
+    },
+    "owners": [
+      {
+        "process_birth": "134381868661814000",
+        "process_id": 14932
+      },
+      {
+        "process_birth": "134381979678344628",
+        "process_id": 17052
+      },
+      {
+        "process_birth": "134382010783761421",
+        "process_id": 45256
+      },
+      {
+        "process_birth": "134382015524716545",
+        "process_id": 36964
+      }
+    ]
+  },
+  "cold_preservation": {
+    "messages": 5,
+    "roots": 3,
+    "events": 28,
+    "operations": 0,
+    "models": 0,
+    "exact": true
+  },
+  "live": {
+    "automatic_auth_and_saved_provider_model": true,
+    "original_expense_workspace_restored": true,
+    "intentional_old_run_inspection": "d114abd36fd84c4f9c3ac3a2dda54ffb",
+    "completed_test_root_preserved": "a1c5735019644a9792c98ff5d341e7ec",
+    "private_folder_denial": true,
+    "missing_folder_unavailable_message": true,
+    "code_named_workspace": true,
+    "code_native_git_tree_files": [
+      "README.md",
+      "notes λ.txt",
+      "staged.txt"
+    ],
+    "code_native_working_patch": true,
+    "git_target_backend": "Retained17052 Native83/thread mode,0sessions/roots/models; candidate85 front-end/native view",
+    "owned_untitled_inspection_buffer_closed_without_save": true,
+    "original_project_files_unchanged_before_new_turn": true
+  },
+  "fresh_coding": {
+    "browser": {
+      "root": "0ab1299f29e14edfb4a9838d38f6618f",
+      "state": "completed",
+      "evidence": "cantorserve-candidate85-coding-20261103.json"
+    },
+    "code": {
+      "root": "a0e1eab0c0854143a1f04aa02d076513",
+      "state": "completed",
+      "evidence": "cantorserve-candidate85-code-coding-20261103.json"
+    },
+    "cli": {
+      "root": "2cd8ee2992ac0fcec5c4b986919ce904",
+      "state": "completed",
+      "evidence": "cantorserve-candidate85-cli-coding-20261103.json"
+    },
+    "never_replay": true
+  },
+  "proof": [
+    "workspace-missing-folder-after-20261103.png",
+    "code-named-workspace-after-20261103.png"
+  ],
+  "release_accepted": false,
+  "remaining": [
+    "Stock Windows CodeServer open-editor auto-refresh",
+    "Final release acceptance"
+  ],
+  "final_state": {
+    "sessions": 2,
+    "messages": 84,
+    "roots": 10,
+    "events": 1245,
+    "operations": 20,
+    "files": 6,
+    "only_model_approved_main_changed": true,
+    "version": "0.1.4"
+  }
+}

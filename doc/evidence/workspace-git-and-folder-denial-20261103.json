@@ -1,0 +1,245 @@
+{
+  "date": "2026-11-03",
+  "source_revision": "4cc2ac56389e96a8dda0f73629255490c15ea5e6",
+  "latest_main_included": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+  "scope": "Two reproduced browser workflow errors corrected in source; installed83 real Git status/CLI patches and workspace restoration; refreshed package and live fixes still pending",
+  "folder_denial": {
+    "before": "Acceptance folder initially chosen under .agentflow; rejection correct. Browser displayed Native view observation unavailable while installed CLI reported Backend configuration cannot be a model workspace. Membership stayed at original revision1",
+    "fix": "181eaec3693baac437ef7265ffb35ad8f43bc2bc: catch ToolAccessDenied in native folder attachment and return403 with actual reason, preserving folder authority",
+    "gate": "Actual Native view contract1/1,73.43s; host and browser UI routes403, existing unsupported direct browser mutation route404; membership/authentication preserved",
+    "source_inputs": 23912,
+    "inputs_environment_tools_unchanged": true,
+    "first_test_failure": "Harness incorrectly expected browser /v1/workspaces/add to be supported; real browser mutation uses /ui/workspaces/add. Corrected test retains404 boundary; first failed log preserved",
+    "build_executable_sha256": "540bf89836af53f981bf01ad5d1923460afa1665a5d67ed98ec7b11f2085a2af",
+    "installed83_still_old_behavior": true,
+    "installed84_after": "Actual browser reports Backend configuration cannot be a model workspace; original one-folder membership retained"
+  },
+  "git_query": {
+    "before": "Actual installed browser Git status succeeds, but Review diff reports Invalid browser request. Installed CLI returns all3 real patches. ASGI validator lacked the native VCS query schemas",
+    "fix": "4041acf8: bounded folder identity for status/info/branches/base; mandatory supported diff mode plus optional base/context/folder. Native C++ still owns repository resolution and Git operations",
+    "regression": "New actual embedded-xlang3 ASGI test fails400 vs200 before fix, then complete224browser/540editor pass; accepted target/auth unchanged and malformed/duplicate/unknown fields rejected before native dispatch",
+    "browser": {
+      "passed": 224,
+      "total": 224,
+      "seconds": 44.5468345
+    },
+    "editor": {
+      "passed": 540,
+      "total": 540,
+      "seconds": 4.7710509
+    },
+    "source_inputs": 23912,
+    "runtime_inputs": 23339,
+    "inputs_environment_tools_unchanged": true,
+    "live_browser_after_fix_qualification": "Candidate84 primary Native4cc2/SDK92: actual status and working diff with all3tracked/staged/Unicode patches pass"
+  },
+  "acceptance_workspace": {
+    "name": "Git feature acceptance",
+    "root": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/git-feature-acceptance-20261103",
+    "creation": "Actual browser Create workspace at unchanged57058 URL; separate Native profile created by supported product flow",
+    "original_paths_changed": false,
+    "only_new_test_repository_moved_from_private_area": true,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\blockers-20261102\\live-profiles\\1b3723db407cc81194fdb68feff3d3f09d03c843dd143f1c5aef7d81a2aa8b3d",
+    "owner": {
+      "process_birth": "134381979678344628",
+      "process_id": 17052
+    },
+    "api": "http://127.0.0.1:62058",
+    "runtime_generation": "runtime-10aa605d4d7e857e4611c49b3a175319eda18bf06180a4756700a64762e9e0ce",
+    "manifest_sha256": "76ecdb2edcca8f598fb515509a7237e4c195e4c042c552a0b668db6b0f42e459",
+    "one_required_product_managed_generation": true,
+    "extra_manual_build_runtime_copy": false,
+    "agent_execution": "thread",
+    "provider": "None saved; Send disabled",
+    "model_use": "Read-only Git acceptance only; do not run agents here before trusted process-code/xlang3 configuration",
+    "sessions": 0,
+    "roots": 0,
+    "models": 0,
+    "real_git": {
+      "branch": "acceptance",
+      "status": [
+        {
+          "additions": 1,
+          "deletions": 0,
+          "file": "README.md",
+          "status": "modified"
+        },
+        {
+          "additions": 1,
+          "deletions": 0,
+          "file": "notes λ.txt",
+          "status": "added"
+        },
+        {
+          "additions": 1,
+          "deletions": 0,
+          "file": "staged.txt",
+          "status": "added"
+        }
+      ],
+      "working_patches": [
+        {
+          "file": "README.md",
+          "additions": 1,
+          "deletions": 0,
+          "sha256": "2766f8c6a6e32f399d30de2661fa2fa7929c69676191f6902823642a8060589d"
+        },
+        {
+          "file": "notes λ.txt",
+          "additions": 1,
+          "deletions": 0,
+          "sha256": "268e1badf95873bb03f9aa9c479c0dc70b86974f21acb21e04796d220a9927fe"
+        },
+        {
+          "file": "staged.txt",
+          "additions": 1,
+          "deletions": 0,
+          "sha256": "e4b6be2a1f78ed1a95e381880ac1ea0be8a812857da2eaab1fe4f7996f2fe26f"
+        }
+      ],
+      "baseline_head": "bbd6257b8ad2e8c2bd07e5152b017fbf876e54fd",
+      "fixture_contents_sha256": {
+        "README.md": "7820950133f3aec202bff7b4d5d59ca95debbdd7f6c9c1e5e841032167bd28c9",
+        "tracked.txt": "85462b6c455d4c172d9613a91ac661f5efd3bb54cc7170a7b840c358d15d70b6",
+        "staged.txt": "02ee784c923c0252219107c70867324564e9a37b8f0e7977f3c3311a9d4e135b",
+        "notes λ.txt": "612c97d7a619838515d7c644458e567ed590eaca67cece50bf863c56a1f0a420"
+      }
+    },
+    "rendered_scope": "Actual browser status and all3working patches pass through candidate84 adapter. Code custom-name connection failure preserved; source d708a30d regression passes, installed correction pending",
+    "retained_reason": "Reuse this single dedicated workspace for pending installed Git/remaining acceptance; no successful fixture chat history created"
+  },
+  "preservation": {
+    "primary": {
+      "at": "2026-11-03T16:53:28.144Z",
+      "mode": "after",
+      "owner": 38048,
+      "sessions": 2,
+      "messages": 62,
+      "roots": 6,
+      "events": 538,
+      "operations": 13,
+      "projectFiles": 6,
+      "snapshotSha256": "5380c7720057dd89f03f74e5acf0f926f9eab2fbc67e4d5e45ee9d469d92ce36",
+      "exactSnapshot": true,
+      "allRootsTerminal": true,
+      "modelRequestsSubmitted": 0
+    },
+    "cold": {
+      "messages": 5,
+      "roots": 3,
+      "events": 28,
+      "models": 0,
+      "exact_snapshot": true
+    },
+    "original_membership": "Still one expense folder at revision1; denied attachment never changed it",
+    "browser": "Switch back restores expense workspace, saved provider/model, original session and older4f root automatically; returned Activity with Run details collapsed",
+    "code": "Original expense workspace/session/d114 remains; no Code reload or edit this turn",
+    "new_model_requests": 0
+  },
+  "serving": {
+    "observed_at": "2026-11-03T16:43:59.265Z",
+    "alias_rechecked_at": "2026-11-03T16:45:00.612Z",
+    "alias": "qwen3.8-27b-chat-32k",
+    "profile": "qwen38_27b_nvfp4_chat_32k_v2",
+    "resource": "GarnetQwen3827BChat32KRTX5090V2",
+    "node": "rtx5090",
+    "remaining_registered_provider_cards": 1,
+    "state": "Unavailable",
+    "available_capacity": "0 / 0",
+    "change": "Previously2unavailable cards; now1. No inferred deployment completion or historical timeout correlation",
+    "model_turns_held": true,
+    "current": "Ready; fresh test root a1c5735019644a9792c98ff5d341e7ec completed, see cantorserve-expense-tests-20261103.json"
+  },
+  "cleanup": {
+    "new_failed_fixture": "build/skill-state-native/test-temp-20261103/xmind-local-view-Mtkpjm",
+    "bytes": 362921349,
+    "files": 9461,
+    "preflight_live_references": 0,
+    "automatic_review": "Removal rejected as blocked by policy before command execution; target retained",
+    "reviewed_targets_including_nested_overlap": 12,
+    "previous_targets_not_retried": true,
+    "alternate_route": false,
+    "success_test_fixture": "Normal harness cleanup on passing run; no deletion of the blocked failure fixture"
+  },
+  "current_full_native_gate": {
+    "label": "native-fixture-reader-qualified",
+    "source": "4cc2ac56389e96a8dda0f73629255490c15ea5e6",
+    "passed": 189,
+    "total": 189,
+    "seconds": 909.72,
+    "status": "completed",
+    "test_exit": 0,
+    "input_exit": 0,
+    "inputs": 23912,
+    "inputs_environment_tools_unchanged": true,
+    "completed": "2026-11-03T17:32:55.5335661Z",
+    "receipt": ".agentflow/blockers-20261102/native-fixture-reader-qualified-terminal.json"
+  },
+  "release": "Candidate84 installed and supported handoff preserves exact66messages/7roots/719events/14ops/6files; new55103280 follow-ups need qualification/package85. Not accepted release",
+  "private_receipts": [
+    ".agentflow/blockers-20261102/folder-denial-focused-tests.log",
+    ".agentflow/blockers-20261102/folder-denial-focused-qualified-tests.log",
+    ".agentflow/blockers-20261102/folder-denial-focused-qualified-terminal.json",
+    ".agentflow/blockers-20261102/git-query-red.log",
+    ".agentflow/blockers-20261102/git-query-clients-qualified-terminal.json",
+    ".agentflow/blockers-20261102/git-feature-native-observed.json",
+    ".agentflow/blockers-20261102/git-feature-relocation.json",
+    ".agentflow/blockers-20261102/git-workspace-browser-restored.json",
+    ".agentflow/blockers-20261102/request-package-profile-after.json",
+    ".agentflow/blockers-20261102/cold-graphs-git-view-final.json",
+    ".agentflow/blockers-20261102/folder-denial-owned-fixture-cleanup-preflight.json",
+    ".agentflow/blockers-20261102/folder-denial-owned-fixture-cleanup-blocked.json",
+    ".agentflow/blockers-20261102/git-view-native-qualified-terminal.json",
+    ".agentflow/blockers-20261102/git-view-native-qualified-tests.xml",
+    ".agentflow/blockers-20261102/native-fixture-reader-build-terminal.json",
+    ".agentflow/blockers-20261102/native-fixture-reader-focused-terminal.json"
+  ],
+  "images": [
+    {
+      "path": "workspace-folder-denial-before-20261103.png",
+      "sha256": "c74887d14bfd735071b3b770bf4b502ebf225673c2b381a5c5dd17a9d02cbfbf"
+    },
+    {
+      "path": "git-diff-query-before-20261103.png",
+      "sha256": "0d19c4e15ecd1f050f6f6fc4cddb40749e9803df9eb3230b45442a14afa5faf6"
+    },
+    "workspace-folder-denial-after-20261103.png",
+    "git-diff-query-after-20261103.png"
+  ],
+  "client_source_revision": "4041acf869c12e1e842da0a582f9fe3ea8f83bc8",
+  "first_full_native_gate": {
+    "label": "git-view-native-qualified",
+    "source": "4041acf869c12e1e842da0a582f9fe3ea8f83bc8",
+    "passed": 188,
+    "total": 189,
+    "seconds": 897.68,
+    "failed": "native_agent_worker_model_rpc_contract",
+    "failure": "Queued root is not proof of completed drain",
+    "inputs": 23912,
+    "inputs_environment_tools_unchanged": true,
+    "receipt": ".agentflow/blockers-20261102/git-view-native-qualified-terminal.json",
+    "original_failure_preserved": true
+  },
+  "test_fixture_fix": {
+    "revision": "4cc2ac56389e96a8dda0f73629255490c15ea5e6",
+    "file": "Native/tests/agent_worker_rpc_fixture.cpp",
+    "cause": "Fixture peer unconditionally starts a reader that opens the fixture-only xlang3 mailbox service, even for production xmind workers exposing native execution only. Background failure races the queued-root liveness assertion",
+    "change": "Start mailbox reader only for fixture mailbox peers; bound production NativeExecutionClient remains the control path. Existing physical-worker/canonical-drain assertions and all budgets retained",
+    "production_source_changed": false,
+    "production_project_references_fixture_library": false,
+    "focused": {
+      "passed": 1,
+      "total": 1,
+      "seconds": 57.2,
+      "inputs": 23912,
+      "inputs_environment_tools_unchanged": true
+    },
+    "current_build_executable_sha256": "61106ad38a7982e29b24b6b1823eddf1953d3b04ed17b6e835627aa7a2fe196f",
+    "failed_owned_worker_pid": 38028,
+    "failed_owned_worker_birth": "134381987760303669",
+    "failed_worker_observed_exited": true,
+    "failed_cpp_fixture": "build/skill-state-native/test-temp-20261103/xmind-model-rpc-1238196778-3839573741",
+    "failed_cpp_fixture_retained_for_diagnosis": true
+  },
+  "followups": "workflow-followups-20261103.json"
+}

@@ -1,12 +1,12 @@
 {
   "date": "2026-11-03",
-  "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "8f08d822ea445b39126519bfcd63e4358f1da6de",
+  "goal": "Deliver reliable installable xMind v1 using native C++/embedded xlang3/SQLite/standard xlang3 IPC, verifying essential browser/Code/CLI workflows and preserving user data; advanced breadth is outside delivery unless blocking v1",
+  "source_base": "551032804e630fd692d8d7a8908d8b6c641a0a07",
   "native_inventory": {
     "registered_tests": 189,
-    "source_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
-    "artifact": ".agentflow/blockers-20261102/request-id-native-qualified-inventory.json",
-    "full_current_suite": "189/189 atdeed03f0,902.02s,23912inputs/environment/tools unchanged. Same qualified executable now staged and installed83; no broader real-provider claim."
+    "source_revision": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "artifact": ".agentflow/blockers-20261102/workflow-followups-native-qualified-inventory.json",
+    "full_current_suite": "Complete189/189 pass1066.64s;23912source/runtime/SDK inputs and environment/tools unchanged. Earlier188/189 fixture failure and corrective57.20s focus remain historical evidence."
   },
   "sdk": {
     "compatibility_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
@@ -26,7 +26,7 @@
         "Tool-call/result continuation",
         "Usage and actionable errors"
       ],
-      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending. Native deed03f0 now preserves validated response request IDs/status through actual worker IPC/journal tests, including failure/timeout controls. Now deployed in primary38048/stage76ec/isolated installed83; original failure remains uncorrelated, no new inference. Portal08:28PST confirms configured27B resource onrtx5090 has both providers Unavailable0/0capacity; exact serving readiness is now the current external blocker. Other-profile readiness/uncorrelated usage is not coding acceptance."
+      "status": "Configured27B Ready1/1 each. Actual installed85 browser/Code/nativeCLI each complete ordinary edit/test/final through saved encrypted key,9HTTP200responses with validated server IDs, original120s/60s budgets. Real-provider cancellation also passes with HTTP200metadata before body cancellation. Existing project/key/quota preserved; old timeout ID remains unconfirmed."
     },
     {
       "area": "Project coding",
@@ -37,7 +37,7 @@
         "Actual build/test outputs",
         "Ordinary multi-turn recovery with unchanged tests"
       ],
-      "status": "Earlier ordinary turn passed all six unchanged tests and pretty/help/version commands under xlang3, but run failed its deadline. Latest updated-runtime turn applied version0.1.1, then failed before tests. No complete-turn or updated-runtime process acceptance."
+      "status": "Installed85 actual browser/Code/nativeCLI each complete fresh ordinary version edits,6unchanged tests via xlang3-B,3HTTP200s/final/worker retirement. Prior66messages/7roots/719events/14ops and later completed-root prefixes exact; current84/10/1245/20/6, only model-approved main0.1.4. Reload/reconnect0replay. Stock Windows CodeServer open-editor refresh fails separately; full release not accepted."
     },
     {
       "area": "Permissions and process execution",
@@ -49,7 +49,7 @@
         "Command output paging",
         "Foreground and persistent terminal lifecycle"
       ],
-      "status": "Native189 covers permission/process lifecycle contracts. Actual scoped edits and earlier xlang3 commands succeeded. Current cold-browser graph cancellation passes; real-model/command cancellation and remaining feature scopes are separate. Actual native PTY input/output/resize/natural exit/explicit close now verified; all terminal resources released."
+      "status": "Complete189Native permission/process lifecycle contracts pass. Installed85 actual6scoped approvals across3coding turns succeed; each xlang3 child exits0/retired and worker quiesces. Real-provider readonly model cancellation viaStop retires worker49652 with uncertainty0,0ops/files changed. Actual proposed edit denial remainsdenied, no file change/no automatic retry, truthful modelfinal; worker52984 retires. Both exact reload0replay. Earlier actual native PTY/graph cancellation scopes retained."
     },
     {
       "area": "Workspace and conversation lifecycle",
@@ -61,7 +61,7 @@
         "Selected-run restoration",
         "Reload/restart without effect replay"
       ],
-      "status": "Installed83 CLI through-fork/export/import preserves all17payloads with0runs; browser before-first fork yields empty history. Browser rename/archive/reload/restore, stale rename fence, unsupported archive rejection, four history pages5/5/5/2 and exact single lookup pass. Code imported-copy full reload restores history/provider/workspace without previous run/failure. All3owned copies removed; exact original2sessions/62messages/6roots/538events/13operations/6files and cold5/3/28 preserved. Transfer/deletion qualification is CLI; remaining rendered transfer/deletion controls, multi-folder and larger-history scopes are separate."
+      "status": "Installed83 CLI through-fork/export/import preserves all17payloads with0runs; browser before-first fork yields empty history. Browser rename/archive/reload/restore, stale rename fence, unsupported archive rejection, four history pages5/5/5/2 and exact single lookup pass. Code imported-copy full reload restores history/provider/workspace without previous run/failure. All3owned copies removed; exact original2sessions/62messages/6roots/538events/13operations/6files and cold5/3/28 preserved. Transfer/deletion qualification is CLI; remaining rendered transfer/deletion controls, multi-folder and larger-history scopes are separate. Actual new-workspace/switch-back round trip restores original expense provider/session/older4f; separate fixture0sessions/models and original membership remains revision1. One required product generation created; no duplicate manual stage."
     },
     {
       "area": "Browser client",
@@ -72,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending. Refreshed Native deed03f0 primary now passes actual reload/auth/history/selected-root restoration and terminal echo/exit0output retention/Close with no resources left. New full223 gate uses stage76ec. Actual rename/archive persisted across reload, restore and before-first-message fork pass. Archive membership persists; archived-view filter resets to active after reload. Actual nested-file search and CSV/Python previews equal disk bytes; README/CSV draft chips attach/remove without Send. Delivery and arbitrary browser upload are not qualified."
+      "status": "Complete225source checks pass. Installed85 ordinary version0.1.2 edit/six unchanged xlang3 tests/final/retirement and exact reload0replay pass. Actual private403/missing-folder400, all3Git patches and reset of old repository summary/base pass. Earlier terminal/conversation/file-context qualification retained. Real-provider read-only cancellation now passes with unchanged6files."
     },
     {
       "area": "VS Code client",
@@ -83,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete540 checks with refreshed stage. Actual bundled installed83 reports numeric exit7, normal exit0 and explicit close correctly; native resources/children released. Automatic auth, exact workspace/provider/model/session/run restoration and supported live native handoff pass with complete unchanged profile snapshots. Candidate81 remains withheld for its preserved regression. Stock Code Server nested watcher remains independently unqualified (absolute-Windows-glob regex_error); no vendor patch or forced overwrite. Actual imported conversation with17saved messages survives full Code reload without an inherited run or failure; original d114selection restored afterward."
+      "status": "Complete540source checks pass. Installed85 custom workspace name connects, native Git tree and actual working patch render. Ordinary version0.1.3 edit/six unchanged xlang3 tests/final/retirement and exact auto-auth/provider/model/completed-run reload0replay pass. Sending from old d114 inspection follows the new run. Stock isolated Windows CodeServer open editor remains stale after Native writes; explicit full reload reads disk, vendor untouched. Final editor-refresh gate unqualified."
     },
     {
       "area": "CLI client",
@@ -94,7 +94,7 @@
         "Reconnect/history",
         "Actual command outcomes"
       ],
-      "status": "Actual installed83 bundled executable verifies and observes cold profile/graphs/history/events/operations with exact5messages/3roots/28events and0model events. Cold owner remains9ea/92aa; this is observation, not new graph execution. Rebuilt CLI help documents terminals SESSION. Fresh complete packaged coding/approvals/cancellation remain pending. Installed83 fork/export/import/rename-conflict/paging/single-message/unsupported-archive/deletion of owned copies now pass against primary Native83 with exact original snapshot restored."
+      "status": "Installed85 actual interactive native console completes ordinary version0.1.4 edit/six unchanged xlang3 tests/final/retirement. Exact /allow IDs reviewed/approved in console, no API chat script. Both console sessions exit0; reconnect restores same saved history/provider/model with0new model requests and exact records/files. Earlier cold graph/history/transfer contracts retained."
     },
     {
       "area": "Language services and Git",
@@ -104,7 +104,7 @@
         "Git status/diff/review",
         "No fabricated clean diagnostics"
       ],
-      "status": "Native189 controlled contracts pass. Actual editor Git status explicitly warns the current expense folder may not be a repository; independent Git exits128 and Native empty branch confirm it. No Git initialization or edits. Positive Git status/diff and live language-service qualification remain pending."
+      "status": "Complete189Native controlled contracts include Rust LSP fixtures/diagnostics and VCS scopes. Actual dedicated Git repository: installed85 browser status/all3tracked-staged-Unicode patches, Code native tree and patch viewer, and CLI patches match disk; no model or project membership mutation. Remaining rendered language-service combinations are unqualified and outside v1 unless blocking coding."
     },
     {
       "area": "Agents, skills and context",
@@ -149,7 +149,7 @@
         "Qualified package smoke",
         "User-state preservation and required rollback copies"
       ],
-      "status": "Candidate83 archive2922 members and complete isolated installation2921 files verify before/after actual activation. Bundled83 Code native view and live primary execute qualified deed03f0/SDK92aa; stage refreshed in place to76ec. Supported handoff preserves all62messages/6roots/538events/13operations/project files and old ports; cold profile unchanged. Required managed runtime generation created, immediate rollback retained; production80/75/76 untargeted. Complete coding, stock-editor refresh, remaining feature and final production installation gates pending. Eleven cleanup targets retained after automatic review rejection, including redundant private full portal PNG. No alternate deletion route."
+      "status": "Candidate85 all2922archive/2921installed files verify. Supported owner handoff preserves exact old66messages/7roots/719events/14ops/6files and cold5/3/28. After3legitimate coding turns current84/10/1245/20/6; only model-approved main0.1.4 changes, other5bytes exact. Complete stage/ownedruntime2875files and6original Machine settings verify after all3turns. Original80/75/76 and isolated81/83/84 retained; same paths, no manual runtime copy. Native model cancellation adds one terminal read-only root, no file effects. Final release withheld for stock editor gate."
     }
   ],
   "rules": [
@@ -161,20 +161,62 @@
     "Do not report all features passed while any required scope is pending or unsupported"
   ],
   "automated_clients": {
-    "browser": 223,
+    "browser": 225,
     "extension": 540,
     "source_input_files": 23912,
     "runtime_input_files": 23339,
-    "evidence": "candidate83-installed-20261103.json",
-    "runtime_manifest_sha256": "76ecdb2edcca8f598fb515509a7237e4c195e4c042c552a0b668db6b0f42e459"
+    "evidence": "workflow-followups-20261103.json",
+    "runtime_manifest_sha256": "43ce272b30ab125291d76d3210b4f84844680f2d90f31deeddb31b6ede0d41aa",
+    "scope": "Full source contracts with rebuilt Native hosts before candidate85 stage refresh; final package72823 verified independently"
   },
   "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
   "current_cold_client_evidence": "cold-client-graphs-20261103.json",
   "current_terminal_evidence": "browser-terminal-exit-20261103.json",
-  "current_candidate_evidence": "candidate83-installed-20261103.json",
+  "current_candidate_evidence": "candidate85-installed-20261103.json",
   "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json",
   "current_request_correlation_evidence": "provider-request-correlation-20261103.json",
   "current_installed_terminal_evidence": "candidate83-installed-20261103.json",
   "current_conversation_lifecycle_evidence": "conversation-lifecycle-20261103.json",
-  "current_serving_readiness_and_file_context_evidence": "provider-readiness-and-file-context-20261103.json"
+  "current_serving_readiness_and_file_context_evidence": "provider-readiness-and-file-context-20261103.json",
+  "current_workspace_git_evidence": "workspace-git-and-folder-denial-20261103.json",
+  "current_test_fixture_correction": "workspace-git-and-folder-denial-20261103.json",
+  "current_real_provider_test_evidence": "cantorserve-expense-tests-20261103.json",
+  "current_workflow_followups": "workflow-followups-20261103.json",
+  "current_native_qualification": {
+    "source": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "label": "workflow-followups-native-qualified",
+    "passed": 189,
+    "total": 189,
+    "seconds": 1066.64,
+    "inputs": 23912,
+    "input_changes": [],
+    "input_additions": [],
+    "input_removals": [],
+    "inputs_environment_tools_unchanged": true,
+    "completed": "2026-11-03T18:12:13.2494880Z",
+    "executable_sha256": "adc3f76d6a6ef79a974b1b74dab9473f0f879ad994b388f7b8f279f7440e9c42",
+    "receipt": ".agentflow/blockers-20261102/workflow-followups-native-qualified-terminal.json"
+  },
+  "current_source_client_qualification": {
+    "source": "551032804e630fd692d8d7a8908d8b6c641a0a07",
+    "browser": {
+      "passed": 225,
+      "total": 225,
+      "milliseconds": 45169.3621
+    },
+    "editor": {
+      "passed": 540,
+      "total": 540,
+      "milliseconds": 4877.0764
+    },
+    "source_inputs": 23912,
+    "runtime_inputs": 23339,
+    "stage_manifest": "43ce272b30ab125291d76d3210b4f84844680f2d90f31deeddb31b6ede0d41aa",
+    "inputs_environment_tools_unchanged": true,
+    "receipt": ".agentflow/blockers-20261102/workflow-followups-clients-qualified-terminal.json"
+  },
+  "current_real_coding_evidence": "cantorserve-candidate85-coding-20261103.json",
+  "current_real_code_coding_evidence": "cantorserve-candidate85-code-coding-20261103.json",
+  "current_real_cli_coding_evidence": "cantorserve-candidate85-cli-coding-20261103.json",
+  "current_real_provider_safety_evidence": "candidate85-real-provider-safety-20261103.json"
 }
