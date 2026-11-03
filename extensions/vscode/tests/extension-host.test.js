@@ -833,6 +833,48 @@ test('workflow choice persists for the same backend and restores only an adverti
 const uncertainPlan=JSON.parse(uncertainEdit.arguments_json),uncertainTarget=uncertainPlan.target_workspace_id||uncertainEdit.workspace_id;
 const inspectionFingerprint={workspace_id:uncertainTarget,file_id:'fixture-file',content_sha256:'a'.repeat(64),size:12};
 const inspectionFixture={operation:uncertainEdit,observed:{path:uncertainPlan.path,workspace_id:uncertainTarget,...inspectionFingerprint},match:'after',same_file:true,observed_unix_ms:Date.now(),quarantine_released:false,action:'update',paths:[{path:uncertainPlan.path,exists:true,fingerprint:inspectionFingerprint}]};
+test('cold host startup restores the inspected run before active-session reconciliation',async()=>{
+  const scope={workspace_id:'windows-local-file-v1:1:0',profile_directory:'C:\\Profiles\\TestProj'};
+  const h=harness({stateScope:scope,initialSessionRecord:{...scope,id:'saved'},health:{agent_execution:true,active_session_map:true},runs:[{id:'older',state:'completed'},{id:'latest',state:'completed'}]});
+  // A fresh host has no in-memory run selection. Native may also have changed
+  // its loopback port since this workspace's last connection.
+  h.state.set('xmind.observedRun',{...scope,url:'http://127.0.0.1:9999',session_id:'saved',id:'older'});
+  let releaseHistory;h.pauseHistory(new Promise(resolve=>{releaseHistory=resolve;}));
+  await h.commands.get('agentflow.open')();const view=h.views[0];
+  try{
+    view.receive({type:'ready'});
+    await until(()=>h.requests.includes('/v1/sessions/saved/messages?limit=40'));
+    assert.ok(!h.scheduledTasks.some(task=>task.delay===5000),'Periodic reconciliation must wait for initial restoration');
+    assert.equal(h.state.get('xmind.observedRun').id,'older');
+    releaseHistory([]);
+    await until(()=>view.posted.some(message=>message.type==='status'&&message.text==='completed'));
+    assert.equal(view.posted.findLast(message=>message.type==='runs').selected,'older');
+    assert.equal(h.state.get('xmind.observedRun').id,'older');
+    assert.ok(!h.requests.some(route=>route.startsWith('/v1/runs/latest')),'Startup must not inspect or save the latest run before restoring selection');
+    assert.ok(!h.requests.includes('/v1/runs'),'Restoration must not admit a new run');
+    assert.equal(h.decisions.length,0);
+    assert.deepEqual(h.errors,[]);
+  }finally{view.close();}
+});
+
+for(const [reason,record] of [
+  ['foreign profile',{profile_directory:'C:\\Profiles\\OtherProject'}],
+  ['another session',{session_id:'other-session'}],
+  ['removed run',{id:'removed'}]
+])test(`cold host startup falls back from a ${reason} run selection`,async()=>{
+  const scope={workspace_id:'windows-local-file-v1:1:0',profile_directory:'C:\\Profiles\\TestProj'};
+  const h=harness({stateScope:scope,initialSessionRecord:{...scope,id:'saved'},health:{agent_execution:true,active_session_map:true},runs:[{id:'older',state:'completed'},{id:'latest',state:'completed'}]});
+  h.state.set('xmind.observedRun',{...scope,session_id:'saved',id:'older',...record});
+  await h.commands.get('agentflow.open')();const view=h.views[0];
+  try{
+    view.receive({type:'ready'});
+    await until(()=>view.posted.some(message=>message.type==='status'&&message.text==='completed'));
+    assert.equal(view.posted.findLast(message=>message.type==='runs').selected,'latest');
+    assert.ok(!h.requests.some(route=>route.startsWith('/v1/runs/older')||route.includes('/removed')||route.includes('/other-session')));
+    assert.deepEqual(h.errors,[]);
+  }finally{view.close();}
+});
+
 test('older run inspection remains accessible and selected run persists across view reopening',async()=>{
   const older={...uncertainEdit,run_id:'older'};
   const h=harness({runs:[{id:'older',state:'failed'},{id:'latest',state:'completed'}],operationsByRun:{older:[older]},inspection:{...inspectionFixture,operation:older}});

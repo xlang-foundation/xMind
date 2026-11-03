@@ -17,6 +17,33 @@ Deliver an installable, verified xMind v1 whose browser UI, VS Code extension an
 - The actual packaged browser, extension and CLI each receive fresh end-to-end verification. Existing successful task histories, owners, user settings, profiles and backups remain preserved.
 - Installation uses qualified artifacts with a verified backup, a preservation audit and a fresh installed smoke check. Local unit/contract passes alone do not establish release readiness.
 
+## Current continuation — 2026-11-02
+
+The goal above remains the delivery target. The qualified 0.1.79 release and
+0.1.80 authentication fix are historical baselines; they do not qualify all
+subsequent main changes as a new installed release. This continuation started
+from main `952a8a178613f0bb1e9560896cc8114cb9a7af5e`, with sibling xlang3 main
+`6186ffa61203789ed8ff18669c81fff32125259c`.
+
+- While CantorServe deployment is pending, reproduce and fix local product
+  blockers without model inference. Preserve C++ ownership, embedded xlang3,
+  SQLite and xlang3 IPC; execute Python tooling only with xlang3.
+- The recorded VS Code earlier-run reset is reproduced and repaired in source.
+  Complete extension tests pass; installed editor verification remains pending.
+  [Reproduction and scope](evidence/vscode-run-restoration-20261102.json).
+- CantorServe has one recorded successful xMind public coding exercise with
+  eight unchanged tests. Ordinary multi-turn coding needs fresh qualification
+  against the deployed endpoint. Earlier failed runs remain preserved;
+  benchmark completion and general coding reliability are not established.
+  [Latest model evidence](evidence/demo-20261029.json).
+- Reassess the recorded native process timeout and xlang3 compatibility findings
+  against current sources before treating old failures as current defects.
+  Project-generated errors are evidence of coding quality, not authorization
+  to manually correct the projects or coach their diagnostic recovery.
+- After fixes, qualify the resulting packaged browser, VS Code and CLI workflows,
+  including restart/restoration, approvals and cancellation, before replacing
+  the installed release. Preserve user data, settled runs and required backups.
+
 ## Outside the current delivery goal
 
 Advanced graph workflows, wider provider coverage, additional MCP/A2A workflows and generic connection enhancements are outside this delivery goal unless needed to unblock the v1 path. Preserve functioning existing capabilities. Do not present unfinished controls as working. Cross-node worker execution belongs to later Cantor Cluster work; private Nexus features and broad xlang3 optimization remain excluded.

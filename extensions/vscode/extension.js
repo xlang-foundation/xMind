@@ -441,7 +441,7 @@ async function activate(context) {
     await poll();watch();
   }
 
-  async function refresh() {
+  async function refresh({reconcileRuns=true}={}) {
     const version = generation;
     let sessions = await client.sessions();
     if (version !== generation || !panel) return;
@@ -461,7 +461,7 @@ async function activate(context) {
     const signature=JSON.stringify([sessionId,sessions.map(item=>[item.id,item.title,item.active===true])]);if(signature!==sessionCatalogueSignature){sessionCatalogueSignature=signature;post({ type: 'sessions', sessions, selected: sessionId });}
     // A different client can admit and even finish a turn while this view is
     // idle. Reconcile its run list without replacing the user's inspected run.
-    if(health?.active_session_map===true&&sessionId&&!busySession()){
+    if(reconcileRuns&&health?.active_session_map===true&&sessionId&&!busySession()){
       const target=client,session=sessionId,runs=await target.runs(session);
       if(version!==generation||!panel||target!==client||session!==sessionId)return;
       if(JSON.stringify(runs)!==JSON.stringify(sessionRuns)){
@@ -605,8 +605,11 @@ async function activate(context) {
           contextReadyView=view;const pending=pendingEditorContexts;pendingEditorContexts=[];
           for(const item of pending)if(item.view===view&&item.client===client&&item.generation===generation&&item.epoch===workspaceBackend.epoch)post(item.message);
           post({ type: 'capabilities', execution: health.agent_execution, renameSessions:health.session_rename===true,forkSessions:health.session_fork===true,agentSelection:health.agent_selection===true, model:selectedModel, models:modelCatalogue.models });
-          await refresh();scheduleSessionRefresh();
+          // Restore the saved inspected run before periodic discovery can
+          // adopt an external run and overwrite that persisted selection.
+          await refresh({reconcileRuns:false});
           if (sessionId) await selectSession(sessionId);
+          scheduleSessionRefresh();
           await refreshGraphs();
           // Fetch with the saved backend key; settings handles a rejected key.
           try{await configureModel();}catch{}

@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-02",
+  "source_base": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+  "branch": "codex/fix-observed-run-restore",
+  "finding": "vscode-run-picker-reset",
+  "original_evidence": "webui-project-test-findings-20261025.json",
+  "reproduction": {
+    "boundary": "Deterministic VS Code host and HTTP fixtures; fresh host memory with persisted workspace selection",
+    "native_capability": "active_session_map=true",
+    "before": "Cold startup selected latest instead of saved older run; regression exited 1",
+    "cause": "Initial refresh reconciled external runs before selectSession restored xmind.observedRun, overwriting the persisted choice",
+    "previous_test_gap": "View reopening in the same host retained in-memory run selection and did not reproduce cold startup"
+  },
+  "fix": "Initial catalogue refresh skips run reconciliation. Periodic refresh is scheduled only after initial session and run restoration; subsequent external run discovery remains enabled.",
+  "validation": {
+    "command": "node --test --test-reporter=dot extensions/vscode/tests/*.test.js",
+    "exit_code": 0,
+    "scope": "Complete extension JavaScript test suite",
+    "new_coverage": [
+      "Cold startup preserves saved earlier run within native workspace/profile scope despite changed loopback port",
+      "Delayed history restoration cannot start periodic run reconciliation",
+      "Foreign-profile, other-session and removed-run selections fall back to latest without inspecting foreign runs",
+      "Restoration does not admit a run or approve an operation"
+    ],
+    "existing_coverage_retained": "External running/completed run discovery and empty-session adoption"
+  },
+  "limits": "Source fix only. No actual editor rendering, installed package, native full suite, performance gate or CantorServe inference acceptance claimed.",
+  "preservation": "No native/xlang3 code, IPC, runtime, installed files, user profiles, histories or completed roots changed. No Python interpreter or model inference used. Node executed extension adapter tests."
+}
