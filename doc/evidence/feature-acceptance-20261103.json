@@ -1,12 +1,12 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "921ead20e56338dcd70aeabab1cfacc9871ff88f",
+  "source_base": "deed03f0b02a484cdeed4a32686cca42aee623bc",
   "native_inventory": {
     "registered_tests": 189,
-    "source_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
-    "artifact": ".agentflow/blockers-20261102/bytecode-unicode-native-qualified-inventory.json",
-    "full_current_suite": "189/189 at9ea02226,891.03s,23911 inputs/environment/tools unchanged; later UI-only change qualified separately."
+    "source_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
+    "artifact": ".agentflow/blockers-20261102/request-id-native-qualified-inventory.json",
+    "full_current_suite": "189/189 atdeed03f0,902.02s,23912inputs/environment/tools unchanged. Active stage remains9ea/92aa; fresh packaged acceptance pending."
   },
   "sdk": {
     "compatibility_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
@@ -26,7 +26,7 @@
         "Tool-call/result continuation",
         "Usage and actionable errors"
       ],
-      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending."
+      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending. Native deed03f0 now preserves validated response request IDs/status through actual worker IPC/journal tests, including failure/timeout controls. This code is not yet staged in live owners; original failure remains uncorrelated."
     },
     {
       "area": "Project coding",
@@ -94,7 +94,7 @@
         "Reconnect/history",
         "Actual command outcomes"
       ],
-      "status": "Actual profile discovery, graph/history/event/operation inspection and terminal graph-watch observation pass with exact no-replay snapshots. Installed candidate81 CLI independently preserves exact five-message/three-root/28event snapshots and web reattaches the same owner/browser. Fresh complete packaged coding/approval/cancellation remains pending."
+      "status": "Actual profile discovery, graph/history/event/operation inspection and terminal graph-watch observation pass with exact no-replay snapshots. Installed candidate81 CLI independently preserves exact five-message/three-root/28event snapshots and web reattaches the same owner/browser. Fresh complete packaged coding/approval/cancellation remains pending. Rebuilt xmind_cli usage correctly lists terminals SESSION; actual usage receipt verified."
     },
     {
       "area": "Language services and Git",
@@ -163,13 +163,14 @@
   "automated_clients": {
     "browser": 223,
     "extension": 540,
-    "source_input_files": 23911,
-    "runtime_input_files": 23338,
-    "evidence": "code-terminal-lifecycle-20261103.json"
+    "source_input_files": 23912,
+    "runtime_input_files": 23339,
+    "evidence": "provider-request-correlation-20261103.json"
   },
   "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
   "current_cold_client_evidence": "cold-client-graphs-20261103.json",
   "current_terminal_evidence": "browser-terminal-exit-20261103.json",
   "current_candidate_evidence": "candidate-package-20261103.json",
-  "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json"
+  "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json",
+  "current_request_correlation_evidence": "provider-request-correlation-20261103.json"
 }

@@ -1,0 +1,119 @@
+{
+  "date": "2026-11-03",
+  "source_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
+  "scope": "Native model request correlation and CLI help; controlled contracts, not new real-model or installed-release acceptance",
+  "latest_main": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+  "main_is_ancestor": true,
+  "sibling_main": "6186ffa61203789ed8ff18669c81fff32125259c",
+  "sdk_compatibility_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "finding": {
+    "live_endpoint": "http://127.0.0.1:19445/v1",
+    "unauthenticated_control": "GET /v1/models returns401 with a server x-request-id. A second unauthenticated GET supplying a synthetic X-Request-Id receives a different generated ID; do not equate xMind attempts or supplied IDs with serving IDs.",
+    "control_receipt": ".agentflow/blockers-20261102/cantor-request-id-unauthenticated-control.json",
+    "previous_gap": "Native transport discarded the server request-ID header. The original failed project trace therefore cannot recover it retroactively.",
+    "old_native_attempt": "2387419832e0565872a07a67f86807d2",
+    "old_trace": ".agentflow/blockers-20261102/expense-sixth-events.json.gz",
+    "old_server_request_id": "Unconfirmed"
+  },
+  "implementation": {
+    "incoming_header": "x-request-id",
+    "recognized_formats": [
+      "32 hexadecimal characters",
+      "Canonical hexadecimal UUID",
+      "req_ followed by32 hexadecimal characters"
+    ],
+    "validation": "Require one unique bounded recognized header. Omit duplicates, oversized/unrecognized values and literal credential/nonce substrings. Scratch wide-header buffers are wiped before return; no arbitrary headers or error messages are published.",
+    "observation": "Opted-in model adapters observe the validated header before HTTP error handling and body reads, preserving available correlation even if the stream subsequently times out",
+    "event": "model.http_response",
+    "event_fields": [
+      "status",
+      "request_id"
+    ],
+    "supported_adapter_paths": [
+      "Chat Completions including existing dialects",
+      "Responses",
+      "Anthropic Messages",
+      "Gemini generate-content"
+    ],
+    "persistence": "Existing backend model-event receipt and journal path, SQLite through embedded xlang3. Actual child observation and nested journal acknowledgement use the existing standard xlang3 IPC path.",
+    "outgoing_request_body_or_headers_changed": false,
+    "request_deadline_ms": 120000,
+    "idle_timeout_ms": 60000,
+    "automatic_retries_added": false,
+    "non_model_form_and_mcp_diagnostics": "Not opted into model request correlation"
+  },
+  "validation": {
+    "red": "native_http_stream_transport_contract fails because a valid returned ID is not observed; actual1-test terminal failure retained,23911 frozen inputs unchanged",
+    "red_receipt": ".agentflow/blockers-20261102/request-id-red-terminal.json",
+    "focused": "2/2 transport/provider contracts pass in12.00s,23912 inputs unchanged",
+    "focused_cases": [
+      "Unique hex, UUID and prefixed IDs",
+      "Duplicate, unrecognized and oversized IDs omitted without changing valid model output",
+      "Credential-derived ID omitted",
+      "Actual HTTP429 correlation before failure",
+      "Headers retained before subsequent stream timeout",
+      "Exact one request per control case; no retries",
+      "Actual model event sink receives only status and validated ID"
+    ],
+    "worker_rpc": "native_agent_worker_model_rpc_contract passes in56.31s; the actual child reads the exact captured response ID from the backend journal over standard IPC and acknowledges streamed events through nested RPC",
+    "complete_native": {
+      "passed": 189,
+      "total": 189,
+      "seconds": 902.02,
+      "source_input_files_unchanged": 23912,
+      "environment_and_tools_unchanged": true
+    },
+    "complete_native_receipt": ".agentflow/blockers-20261102/request-id-native-qualified-terminal.json",
+    "complete_native_inventory": ".agentflow/blockers-20261102/request-id-native-qualified-inventory.json",
+    "complete_clients": {
+      "browser": 223,
+      "extension": 540,
+      "source_input_files_unchanged": 23912,
+      "runtime_input_files_unchanged": 23339,
+      "environment_and_tools_unchanged": true
+    },
+    "complete_client_receipt": ".agentflow/blockers-20261102/request-id-clients-qualified-terminal.json",
+    "client_runtime_scope": "Rebuilt host fixtures plus existing verified stage14a/Native9ea/SDK92aa. This does not claim that active owners or the shipped package already contain the new Native binary.",
+    "native_executable": "build/skill-state-native/Release/xmind.exe",
+    "native_executable_sha256": "677e9fe91d7eb349eabf6a79e5845ad9807d60ff601ddebd179343366db680be",
+    "cli_help": "Actual rebuilt xmind_cli.exe usage now lists terminals SESSION; expected usage exit1, receipt confirms the required argument",
+    "cli_help_receipt": ".agentflow/blockers-20261102/request-id-cli-help-qualified-receipt.json"
+  },
+  "retained_setup_and_build_failures": [
+    "An early test invocation was rejected by the existing busy guard while the exact first build was still running; no overlapping native test started.",
+    "First provider-fixture build lacked a private third_party JSON include path. Added the target include; original C1083 log retained, subsequent focused build/test pass.",
+    "Full parallel2 build reaches a terminal exit1 with C1002/C1060/LNK1102/MSBuild out-of-memory failures under observed host memory pressure. No user process or memory setting changed. Subsequent same-directory incremental parallel1 build exits0, without changing test budgets or scope; both terminal receipts retained.",
+    "Initial manual xmind.exe cli probe used the wrong entry point. Its negative receipt is retained separately; correct xmind_cli.exe usage verified."
+  ],
+  "preservation": {
+    "new_model_inference": 0,
+    "sdk_source_changes": false,
+    "active_stage": ".agentflow/acceptance-runtime-20261103",
+    "active_manifest": "14a9a3dbfca8e9b8cc1307d3980330029d9675d2120cec549788e237936ac4be",
+    "live_owner": {
+      "pid": 45908,
+      "birth": "134381834279238332"
+    },
+    "cold_owner": {
+      "pid": 14932,
+      "birth": "134381868661814000"
+    },
+    "source_editor_view": {
+      "pid": 46312,
+      "birth": "134381900253887243"
+    },
+    "latest_project_run": "Same37events/2model calls/1complete model call; terminal dispatch_error atseq538 unchanged",
+    "original_project_files_unchanged": 3,
+    "cold_snapshots": "Exact5messages/3roots/28events/0operations unchanged",
+    "production80_and_required75_76_backups": "Untargeted",
+    "nine_policy_blocked_cleanup_targets": "Untouched; no retry by another deletion route",
+    "extra_acceptance_runtime_directory_or_generation_created": false
+  },
+  "limits": [
+    "An absent, ambiguous, unrecognized or credential-derived header produces no correlation event; no ID is invented",
+    "A failure before response headers cannot provide a server ID through this mechanism",
+    "The old serving timeout remains uncorrelated; no new authenticated generation test occurred",
+    "Qualified Native source must still be staged/packaged and exercised through fresh real client workflows",
+    "Candidate81 remains withheld for its separately reproduced terminal defect; full package refresh, other feature scopes, stock-editor refresh and final release preservation/install acceptance remain pending"
+  ]
+}
