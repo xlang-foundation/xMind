@@ -1,7 +1,7 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "6f31e173a809682d5d3ccd43d07f169362028d17",
+  "source_base": "8642314d5fe23aeeb582b3941aa60b1f466a81f9",
   "native_inventory": {
     "registered_tests": 189,
     "source_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
@@ -72,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. No packaged or real-model completion claim."
+      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending."
     },
     {
       "area": "VS Code client",
@@ -83,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete538 source checks and actual automatic auth/history/selected-run/failure-copy restoration pass. Stock Code Server nested buffers remain stale; vendor absolute Windows glob independently reproduces regex_error. Watcher reproduction matches open upstream microsoft/vscode#317176; vendor unchanged."
+      "status": "Complete538 source checks. Candidate81 installed in the existing isolated Code Server root uses bundled Native/SDK after removal of its external-runtime override; actual automatic auth/history/selected-run/failure-copy restoration and fresh encrypted saved-key model discovery pass. Stock Code Server nested buffers remain stale; vendor absolute Windows glob independently reproduces regex_error matching open upstream microsoft/vscode#317176; vendor unchanged."
     },
     {
       "area": "CLI client",
@@ -94,7 +94,7 @@
         "Reconnect/history",
         "Actual command outcomes"
       ],
-      "status": "Actual profile discovery, graph/history/event/operation inspection and terminal graph-watch observation pass with exact no-replay snapshots. Fresh complete coding and packaged CLI acceptance remain pending."
+      "status": "Actual profile discovery, graph/history/event/operation inspection and terminal graph-watch observation pass with exact no-replay snapshots. Installed candidate81 CLI independently preserves exact five-message/three-root/28event snapshots and web reattaches the same owner/browser. Fresh complete packaged coding/approval/cancellation remains pending."
     },
     {
       "area": "Language services and Git",
@@ -149,7 +149,7 @@
         "Qualified package smoke",
         "User-state preservation and required rollback copies"
       ],
-      "status": "Same cold profile and SQLite history survive supported stopped-owner recovery and subsequent live handoff on Native9ea/SDK92aa. Manifest14a verified; historical installed80 and required backups unchanged. New package/install acceptance pending."
+      "status": "Same cold profile and SQLite history survive supported stopped-owner recovery/live handoff on Native9ea/SDK92aa. Candidate81 archive2922 members and isolated installed2919 members plus semantic manifest verify; manifest14a unchanged after activation. Bundled installed editor/CLI observation passes. Production80/required backups untargeted; complete coding, remaining feature and final production preservation/install gates pending."
     }
   ],
   "rules": [
@@ -169,5 +169,6 @@
   },
   "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
   "current_cold_client_evidence": "cold-client-graphs-20261103.json",
-  "current_terminal_evidence": "browser-terminal-exit-20261103.json"
+  "current_terminal_evidence": "browser-terminal-exit-20261103.json",
+  "current_candidate_evidence": "candidate-package-20261103.json"
 }

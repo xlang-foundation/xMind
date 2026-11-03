@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-03",
+  "scope": "Reviewable 0.1.81 candidate and isolated installed-client checks; not a production release or complete coding acceptance",
+  "sources": {
+    "client": "8642314d5fe23aeeb582b3941aa60b1f466a81f9",
+    "native": "9ea02226ea451be91f642ee645860cb97d9cda36",
+    "sdk": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "latest_main_fetched": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+    "main_is_ancestor": true,
+    "sibling_main_fetched_and_checked_out": "6186ffa61203789ed8ff18669c81fff32125259c",
+    "sibling_tracked_files_clean": true,
+    "sibling_untracked_artifacts": "Preserved; not owned by this packaging work"
+  },
+  "package": {
+    "artifact": ".agentflow/blockers-20261102/xmind-0.1.81-candidate.vsix",
+    "target": "win32-x64",
+    "bytes": 37181856,
+    "sha256": "f6c5e98ff453985202d67425e62f8f1ee2f9a4342e46e8e34d009c89729f1bc3",
+    "members": 2922,
+    "native_members_including_manifest": 2876,
+    "uncompressed_bytes": 116108597,
+    "native_manifest_sha256": "14a9a3dbfca8e9b8cc1307d3980330029d9675d2120cec549788e237936ac4be",
+    "complete_member_set_and_hash_verification": true,
+    "official_vsce_processors_and_secret_scan": "Passed; no secret-scan bypass",
+    "streamed_from_existing_qualified_inputs": true,
+    "extra_build_runtime_directory_created": false,
+    "source_package_version_changed": false,
+    "source_input_files_unchanged_during_build": 23911,
+    "runtime_input_files_unchanged_during_build": 23338,
+    "terminal": ".agentflow/blockers-20261102/candidate-package-qualified-terminal.json",
+    "member_inventory": ".agentflow/blockers-20261102/candidate-0.1.81-members.json.gz",
+    "builder_sha256": "4b037c5be9e58ea743ecab3c97725d818e6a0a656eb156efa99f93d812e862bb",
+    "initial_setup_failure": "First packaging helper call omitted the options argument to VSCE secret scanning and exited1 before archive creation. Source/runtime comparisons passed. Corrected the helper signature; retained candidate-package.log and original terminal. Qualified attempt exits0, with both input comparisons0."
+  },
+  "isolated_installation": {
+    "directory": ".agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.81",
+    "official_server_cli_install_exit": 0,
+    "verified_unmodified_installed_members": 2919,
+    "complete_installed_file_set": 2921,
+    "relocated_vsix_metadata_hash_and_win32_x64_target_verified": true,
+    "package_manifest": "Semantically identical to the candidate, apart from official installer __metadata",
+    "native_files_verified": 2875,
+    "native_manifest_sha256": "14a9a3dbfca8e9b8cc1307d3980330029d9675d2120cec549788e237936ac4be",
+    "generated_bytecode_directories_after_activation": 0,
+    "external_runtime_override": "Removed only in this isolated Code Server Machine configuration; other six settings preserved; original seven-setting file backed up",
+    "loaded_native_view": {
+      "pid": 35704,
+      "birth": "134381890545466406",
+      "image": ".agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.81/native-runtime/xmind.exe",
+      "loaded_sdk": ".agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.81/native-runtime/xlang3_runtime.dll"
+    },
+    "actual_editor": "Reload restores automatic authentication, same expense workspace, saved conversation75c7a39896be45508cf70283e2360eca, selected rootd114abd36fd84c4f9c3ac3a2dda54ffb, Custom server/qwen3.8-27b-chat-32k, Default permissions and actionable dispatch_error explanation",
+    "fresh_provider_discovery": "Actual Settings > Fetch models with blank key reuses the encrypted saved credential, completes and returns the sidebar with the same Custom server/model. No new key, model inference or coding root submitted.",
+    "editor_screenshot": "candidate-package-code-20261103.png",
+    "production_installation": "No operation targets installed80 or required75/76 rollback copies; their final full preservation audit remains a later release gate"
+  },
+  "packaged_cli_and_browser": {
+    "native_cli": "Invoked from the isolated installed candidate native-runtime directory",
+    "checks": "Actual profile-info, graph, events, children, operations, runs and history observation match the exact preserved snapshot",
+    "profile_root": ".agentflow/blockers-20261102/client-profiles",
+    "owner": {
+      "pid": 14932,
+      "birth": "134381868661814000",
+      "api_port": 62774,
+      "browser_port": 52887
+    },
+    "same_owner_reused": true,
+    "new_managed_runtime_generation_created": false,
+    "session": "e1cc694744574289bfdf0d9744da0a6d",
+    "roots_never_replayed": [
+      "1fc7ffc280ad4ae2824446399f97b7ea",
+      "e9d4b158ec854a3083737a1504471364",
+      "74172bab6e8e49beb67bb66542086a6b"
+    ],
+    "exact_history_messages": 5,
+    "exact_events": 28,
+    "operations": 0,
+    "model_events": 0,
+    "web_entrypoint": "Installed xmind web returns the existing52887/ui browser and embedded-fastapi/xlang3-ipc transport without --upgrade-backend",
+    "assets": "Retained .agentflow/browser-assets run path; all20 files are byte-identical to candidate browser-runtime/assets members verified in both archive and installation",
+    "actual_browser_reload": "Automatic authentication, same selected earlier acceptance.read graph, five visible messages and exact native snapshots restored",
+    "browser_screenshot": "candidate-package-browser-20261103.png",
+    "limits": "This reuses the retained browser asset path and owner. Fresh browser startup from the installed asset path and fresh complete coding/approvals/cancellation remain unqualified."
+  },
+  "preservation": {
+    "main_owner": {
+      "pid": 45908,
+      "birth": "134381834279238332",
+      "unchanged": true
+    },
+    "latest_expense_root": "d114abd36fd84c4f9c3ac3a2dda54ffb",
+    "before_after_latest_root": "37events,2model calls,1complete model call; terminal dispatch_error atseq538 unchanged",
+    "original_project_fixtures_unchanged": 3,
+    "coding_project_edited_by_packaging_work": false,
+    "new_model_inference": 0,
+    "run_staging_profile_workspace_paths_changed": false,
+    "cleanup": "No repeat attempt against nine directories previously rejected by automatic review as blocked by policy; targets retained",
+    "direct_sqlite_or_profile_rewrites": false
+  },
+  "remaining_release_gates": [
+    "Correlate the exact failed CantorServe dispatch before new model turns; Native attempt2387419832e0565872a07a67f86807d2 and .agentflow/blockers-20261102/expense-sixth-events.json.gz; full server request UUID remains unconfirmed",
+    "Complete ordinary real-model coding with actual xlang3 tests and command results in all required client scopes",
+    "Stock Code Server nested watcher refresh remains blocked by the official Windows absolute exclusion/parcel regex_error; no vendor patch or forced buffer revert",
+    "Remaining feature scopes in feature-acceptance-20261103.json",
+    "Final package, complete user-state/rollback preservation audit and fresh production installed smoke"
+  ],
+  "release_accepted": false
+}
