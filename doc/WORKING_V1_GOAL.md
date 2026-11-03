@@ -53,13 +53,22 @@ contract inventories from actual model-backed UI/project acceptance, and mark
 unsupported or untested cases explicitly. Preserve failed runs and original
 project tests; do not coach diagnostic recovery through project prompts.
 
-CantorServe now responds at `http://127.0.0.1:19445/v1`; supplied-account portal
-sign-in and one real 27B inference pass through the existing acceptance project.
-xMind project-key discovery, provider/model save and page reload now pass after
-a repaired provider-route refresh bug. Streaming and tool-call/project acceptance
-remain in progress. The matching SDK compatibility build and all189 native
-contracts passed; the repaired clients pass browser221 and extension536.
-[Current endpoint and build/lifecycle evidence](evidence/local-blockers-20261102.json).
+CantorServe responds at `http://127.0.0.1:19445/v1`; encrypted project-key discovery,
+model save and page restoration pass after the provider-route fix. After the
+reported serving repair, one new ordinary feature turn received seven complete
+model responses but reached its overall deadline after eight missing-parent file
+calls. Both failed roots are preserved and must never be replayed; all three
+original project files remain unchanged. No coding acceptance is claimed.
+
+The earlier SDK long-path manifest existed on main but was not embedded in the
+actual C++ host. The SDK build correction passes58 permitted contracts and11
+fixed performance cases without changing its runtime DLL. The equivalent xMind
+host manifest and an actionable, approval-preserving parent-creation error are
+committed. Corrected complete Native189 passes in860.21s with23907 inputs, environment
+and tools unchanged; original183/189 and corrected7/7 records are retained. Browser221/extension536
+remain the qualified client source baseline. Preserve existing runtime/profile
+paths and use supported handoff after qualification.
+[Current reproduction, failures and scope](evidence/native-host-path-and-creation-20261103.json).
 
 ## Outside the current delivery goal
 

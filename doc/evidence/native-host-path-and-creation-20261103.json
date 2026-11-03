@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-03",
+  "source": "10db0fcb",
+  "main": {
+    "xmind": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+    "xlang3": "6186ffa61203789ed8ff18669c81fff32125259c",
+    "fresh_fetch_included": true
+  },
+  "windows_host": {
+    "cause": "Earlier SDK main commit fcecf499 supplied a longPathAware manifest, but VS_GLOBAL_ApplicationManifest did not embed it in the actual C++ executable. Both the SDK CLI and xMind host lacked the flag.",
+    "reproduction": "Same Pydantic file bytes import at a 116-character path and fail at the existing 260-character private-runtime path. The system long-path registry setting was already enabled and was not changed.",
+    "control": "A diagnostic copy of only the CLI with its existing manifest merged imports the unchanged long-path package. The permanent SDK fix registers the existing manifest as a target source; the Native host receives the equivalent manifest.",
+    "sdk_commit": "e1491db3bb5a792e26838a1668494e06d3ddcd04",
+    "sdk_branch": "codex/xmind-windows-exports-20261103",
+    "native_manifest_commit": "9e01ddde",
+    "sdk_contracts": "58/58 permitted; legacy CPython pickle interoperability remains disabled and excluded",
+    "sdk_performance": "11/11 default fixed cases, 21 repeats and 5 warmups with the unchanged 10-percent guard; ratios 0.983–1.016",
+    "sdk_frozen_inputs": 23906,
+    "sdk_engine_sha256_unchanged": "0538772a80f05ac714bbe96ed08c784535a31b6c0ffcd297061b8fa0ea488d26",
+    "sdk_evidence": "https://github.com/CantorAI/xlang3/blob/e1491db3bb5a792e26838a1668494e06d3ddcd04/doc/performance/data/windows-host-manifest-qualification-20261103.json",
+    "scope": "Host manifest/build correction; no VM, import loader, IPC, native ABI fallback, registry change or alternate runtime path",
+    "original_cold_profile_acceptance": "pending supported runtime update at the same profile path"
+  },
+  "cantorserve": {
+    "endpoint": "http://127.0.0.1:19445/v1",
+    "reported_service_repair": "User relayed the serving agent's successful 192-token and long-tool-call controls; the original xMind failure was not replayed.",
+    "session": "cf9a08a851124f88ae28de15ee01229e",
+    "earlier_root": "9d2dfdde884d4fcbbcbc8adb0aabf266",
+    "earlier_outcome": "provider_timeout, no project writes",
+    "new_ordinary_feature_root": "5d218554c80f4333b150d011cd226477",
+    "new_outcome": "agent_timeout after seven complete model responses and eight failed create_file calls omitting the already-supported create_parents option",
+    "new_model_calls_started": 8,
+    "new_model_responses_completed": 7,
+    "new_reported_usage": [
+      {
+        "prompt_tokens": 9169,
+        "completion_tokens": 1017,
+        "total_tokens": 10186
+      },
+      {
+        "prompt_tokens": 10254,
+        "completion_tokens": 707,
+        "total_tokens": 10961
+      },
+      {
+        "prompt_tokens": 11001,
+        "completion_tokens": 707,
+        "total_tokens": 11708
+      },
+      {
+        "prompt_tokens": 11748,
+        "completion_tokens": 707,
+        "total_tokens": 12455
+      },
+      {
+        "prompt_tokens": 12495,
+        "completion_tokens": 707,
+        "total_tokens": 13202
+      },
+      {
+        "prompt_tokens": 13242,
+        "completion_tokens": 707,
+        "total_tokens": 13949
+      },
+      {
+        "prompt_tokens": 13989,
+        "completion_tokens": 707,
+        "total_tokens": 14696
+      }
+    ],
+    "approvals_or_effects": 0,
+    "original_project_files": "All three file hashes unchanged; no added files",
+    "native_event_records_returned": 85,
+    "event_trace": ".agentflow/blockers-20261102/expense-continuation-events.json.gz",
+    "audit": ".agentflow/blockers-20261102/expense-continuation-audit.json",
+    "screenshot": "cantorserve-expense-repeat-20261103.png",
+    "never_replay_either_root": true,
+    "project_acceptance": false
+  },
+  "creation_error": {
+    "commit": "10db0fcb",
+    "change": "An authorized missing-parent create_file call now explains create_parents=true without proposing or executing an effect. Explicit parent creation still binds directories and file content in the existing approval.",
+    "regression_before": "Original host fails the unchanged new assertion; parent-hint-before.log retained",
+    "regression_after": "native_agent_file_tool_host_contract passes in 3.63 seconds, including no-effect hint, inherited denial, traversal denial, and exact explicit parent/file approval",
+    "permission_or_tool_schema_expansion": false
+  },
+  "native_requalification": {
+    "initial": {
+      "passed": 183,
+      "total": 189,
+      "seconds": 835.35,
+      "unchanged_inputs": 23907,
+      "log": ".agentflow/blockers-20261102/host-parent-native-tests.log",
+      "failures": "Five omitted embedded-web fixture environment failures; one Rust Analyzer document-symbol failure at its existing 90-second deadline"
+    },
+    "corrected_focus": {
+      "passed": 7,
+      "total": 7,
+      "seconds": 177.08,
+      "unchanged_inputs": 23907,
+      "rust_seconds": 16.95,
+      "scope": "Correct ASGI environment and existing LSP diagnostic option; fresh fixtures and original assertions/deadlines, no Rust source fix claimed"
+    },
+    "complete_current": {
+      "passed": 189,
+      "total": 189,
+      "seconds": 860.21,
+      "unchanged_inputs": 23907,
+      "environment_and_tools_unchanged": true,
+      "inventory_matches": true,
+      "log_sha256": "aa445c7680cc716ff085d0d34596a74e184bc679a29fbdaa39f2e65ecfe97153",
+      "log": ".agentflow/blockers-20261102/host-parent-qualified-tests.log",
+      "input_comparison": ".agentflow/blockers-20261102/host-parent-qualified-input-comparison.json",
+      "terminal": ".agentflow/blockers-20261102/host-parent-qualified-terminal.json"
+    },
+    "environment_and_tool_records": ".agentflow/blockers-20261102/host-parent-qualified-environment.json"
+  },
+  "preservation": {
+    "instruction": "Keep existing staging, workspace and profile paths. Do not shorten paths to bypass the Windows host defect, replay settled roots, manually repair generated project code or edit original project tests.",
+    "cleanup": "Automatic approval review rejected deletion of three unused artifact directories (~726 MiB), stating blocked by policy. Nothing deleted; no alternative deletion route attempted.",
+    "release_accepted": false,
+    "installed_extension_changed": false
+  }
+}
