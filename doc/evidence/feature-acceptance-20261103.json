@@ -49,7 +49,7 @@
         "Command output paging",
         "Foreground and persistent terminal lifecycle"
       ],
-      "status": "Native189 covers permission/process lifecycle contracts. Actual scoped edits and earlier xlang3 commands succeeded. Current cold-browser graph cancellation passes; real-model/command cancellation and remaining feature scopes are separate."
+      "status": "Native189 covers permission/process lifecycle contracts. Actual scoped edits and earlier xlang3 commands succeeded. Current cold-browser graph cancellation passes; real-model/command cancellation and remaining feature scopes are separate. Actual native PTY input/output/resize/natural exit/explicit close now verified; all terminal resources released."
     },
     {
       "area": "Workspace and conversation lifecycle",
@@ -72,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete221 source checks pass. Actual original cold profile starts, authenticates and exercises read/human-answer/cancel graphs, paused reload and terminal-run restoration. This is model-free staged-client acceptance, not a packaged release pass."
+      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. No packaged or real-model completion claim."
     },
     {
       "area": "VS Code client",
@@ -83,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete538 source checks and actual automatic auth/history/selected-run/failure-copy restoration pass. Stock Code Server nested buffers remain stale; vendor absolute Windows glob independently reproduces regex_error."
+      "status": "Complete538 source checks and actual automatic auth/history/selected-run/failure-copy restoration pass. Stock Code Server nested buffers remain stale; vendor absolute Windows glob independently reproduces regex_error. Watcher reproduction matches open upstream microsoft/vscode#317176; vendor unchanged."
     },
     {
       "area": "CLI client",
@@ -161,11 +161,13 @@
     "Do not report all features passed while any required scope is pending or unsupported"
   ],
   "automated_clients": {
-    "browser": 221,
+    "browser": 223,
     "extension": 538,
     "source_input_files": 23911,
-    "evidence": "source-client-and-serving-blockers-20261103.json"
+    "runtime_input_files": 23338,
+    "evidence": "browser-terminal-exit-20261103.json"
   },
   "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
-  "current_cold_client_evidence": "cold-client-graphs-20261103.json"
+  "current_cold_client_evidence": "cold-client-graphs-20261103.json",
+  "current_terminal_evidence": "browser-terminal-exit-20261103.json"
 }

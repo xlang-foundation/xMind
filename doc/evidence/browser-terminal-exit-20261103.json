@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-03",
+  "scope": "Browser terminal lifecycle fix, source-client gates and actual native PTY; no new Native/SDK build, model inference or installed-release acceptance.",
+  "native_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
+  "sdk_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "reproduction": {
+    "terminal": "7b5aae967004819c1ec4f8e48280d2f7",
+    "native_exit_code": 0,
+    "native_output_retained": true,
+    "ui": {
+      "detailsWidth": "360",
+      "panelHidden": true,
+      "status": "Connected to the selected conversation terminal.",
+      "terminalChildren": 0
+    },
+    "screenshot": "terminal-exit-hidden-before-20261103.png",
+    "problem": "Normal shell exit disposed the xterm renderer and hid the panel. Status still said Connected. Startup errors were also discarded."
+  },
+  "fix": "Keep ended/error views readable until explicit Close or workspace/conversation disposal. Disable stdin and native input/resize/polling after exit; retain layout fitting. Explicit Close releases the native resource and disposes once.",
+  "regressions": {
+    "before": "2 existing tests pass;2 new lifecycle regressions fail",
+    "after": "4/4 pass",
+    "before_log_sha256": "fd5303212a1abea72d08c6a2656dd684416a5840da95a6910c63400944f83e76",
+    "after_log_sha256": "7a0209b9e1ef9686cc7e32411bb443d2fbbca563d9392d2fa2c1556631d87a53"
+  },
+  "clients": {
+    "browser": 223,
+    "extension": 538,
+    "terminal": {
+      "runtime_exit": 0,
+      "browser_exit": 0,
+      "extension_exit": 0,
+      "completed": "2026-11-03T14:03:12.7504497Z",
+      "environment_and_tools_unchanged": true,
+      "input_exit": 0
+    },
+    "inputs": {
+      "inputFiles": 23911,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "runtime_inputs": {
+      "inputFiles": 23338,
+      "changed": [],
+      "added": [],
+      "removed": []
+    },
+    "browser_log_sha256": "11a7102d8c5adfb40c0416e5aa73e4bd2a5960040131422d6fadeabe6db46266",
+    "extension_log_sha256": "88e793df7651c8b6a9fa3dc72d68d983cbae1abe45b8586d6cb96b007db174c0"
+  },
+  "assets": {
+    "path": "D:/CantorAI2026/xMind/.agentflow/browser-assets",
+    "same_path": true,
+    "changed": [
+      "chat.js",
+      "terminal.js"
+    ],
+    "files": 20,
+    "note": "Canonical build refreshed only terminal.js and the previously source-qualified chat.js failure copy; final full suites run after refresh."
+  },
+  "actual": {
+    "profile_root": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/client-profiles",
+    "session": "e1cc694744574289bfdf0d9744da0a6d",
+    "terminal": "b91283fa74b2a577df160d62857556c5",
+    "marker": "XMIND_TERMINAL_RETAINED_20261103",
+    "marker_echo_and_output_confirmed": true,
+    "native_exit_code": 0,
+    "ui": {
+      "detailsWidth": "360",
+      "panelHidden": false,
+      "status": "Terminal exited with code 0.",
+      "terminalChildren": 1
+    },
+    "shell": {
+      "pid": 30868,
+      "birth": "134381881398188122",
+      "image": "C:\\Windows\\System32\\cmd.exe"
+    },
+    "shell_exit": {
+      "same_process_still_live": false,
+      "pid": 30868,
+      "birth": "134381881398188122"
+    },
+    "columns_before": 48,
+    "columns_after_resize": 52,
+    "original_width_restored": true,
+    "after_explicit_close": {
+      "terminals": []
+    },
+    "screenshot": "terminal-exit-retained-after-20261103.png"
+  },
+  "preservation": {
+    "messages": 5,
+    "roots": 3,
+    "events": 28,
+    "complete_snapshot_before_sha256": "ef613b66e842a9d559c02b0e8e02f497e405d9f0106f662950a55c88468d1063",
+    "complete_snapshot_after_sha256": "ef613b66e842a9d559c02b0e8e02f497e405d9f0106f662950a55c88468d1063",
+    "original_project_files_unchanged": true,
+    "model_events": 0,
+    "installed80_and_required_backups_unchanged": true
+  },
+  "editor_dependency": {
+    "report": "https://github.com/microsoft/vscode/issues/317176",
+    "observed_status": "Open; no linked fix shown",
+    "relation": "Primary upstream report describes the same automatically injected absolute Windows extensions-path exclusion. Local no-ignore/normalized controls and nested stale buffer evidence remain separate authoritative reproductions.",
+    "vendor_modified": false
+  },
+  "remaining": [
+    "Complete ordinary CantorServe multi-turn coding and remaining real-model feature scopes.",
+    "Resolve stock Code Server nested-file refresh or qualify the actual unmodified desktop client.",
+    "Finish remaining feature checks and final package/install acceptance."
+  ]
+}
