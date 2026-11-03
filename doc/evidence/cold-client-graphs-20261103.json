@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-03",
+  "scope": "Current staged Native/SDK, actual cold browser, model-free existing graphs and read-only CLI observation; no installed-release or CantorServe coding pass.",
+  "native_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
+  "client_source_revision": "6f31e173a809682d5d3ccd43d07f169362028d17",
+  "sdk_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "manifest_sha256": "14a9a3dbfca8e9b8cc1307d3980330029d9675d2120cec549788e237936ac4be",
+  "profile_root": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/client-profiles",
+  "workspace": "D:\\CantorAI2026\\TestProj\\webui-project-tests-20261025\\cantorserve-20261103-expense",
+  "session": "e1cc694744574289bfdf0d9744da0a6d",
+  "cold_start": {
+    "prior_failure": "Nested pydantic import at long managed-runtime path, then stale process image registration. Original failed logs/profile retained.",
+    "result": "Supported stopped-owner upgrade with the identical trusted process/graph documents now starts successfully at the original profile/workspace path.",
+    "first_owner": {
+      "pid": 45424,
+      "birth": "134381861979462037"
+    },
+    "process_mode": "process-code",
+    "workspace_edits": "approved"
+  },
+  "graphs": [
+    {
+      "id": "1fc7ffc280ad4ae2824446399f97b7ea",
+      "graph": "acceptance.read",
+      "state": "completed",
+      "checkpoint_revision": 3,
+      "event_count": 13,
+      "operations": 0,
+      "children": 1
+    },
+    {
+      "id": "e9d4b158ec854a3083737a1504471364",
+      "graph": "acceptance.pause",
+      "state": "completed",
+      "checkpoint_revision": 3,
+      "event_count": 9,
+      "operations": 0,
+      "children": 0
+    },
+    {
+      "id": "74172bab6e8e49beb67bb66542086a6b",
+      "graph": "acceptance.pause",
+      "state": "cancelled",
+      "checkpoint_revision": 3,
+      "event_count": 6,
+      "operations": 0,
+      "children": 0
+    }
+  ],
+  "history_messages": 5,
+  "model_events": 0,
+  "original_project_files_unchanged": true,
+  "restoration": {
+    "paused_reload": {
+      "same_run": true,
+      "exact_history": true,
+      "exact_checkpoint": true
+    },
+    "older_selected_terminal_reload": {
+      "same_run": true,
+      "exact_history": true,
+      "exact_graph": true
+    },
+    "live_handoff": {
+      "exit_code": 0,
+      "previous_birth": "134381861979462037",
+      "previous_owner_observed_exit": true,
+      "completed": "2026-11-03T13:41:07.8566010Z",
+      "previous_pid": 45424,
+      "new_owner": {
+        "pid": 14932,
+        "birth": "134381868661814000",
+        "image": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/client-profiles/b183694a8331a8c9653174795f5a08ce8fa2e0e820a48f770e28e993ab0d02ec/runtime-a1f39a6ed90cf833692b88e7509b786fbd19fbb3175fdc2ba6443219d7d7a469/xmind.exe"
+      },
+      "api_origin": "http://127.0.0.1:62774",
+      "browser_url": "http://127.0.0.1:52887/ui/",
+      "origins_unchanged": true,
+      "automatic_browser_auth": true,
+      "same_selected_run": true,
+      "exact_rendered_history": true,
+      "exact_rendered_graph": true,
+      "api_origin_unchanged": true,
+      "browser_url_unchanged": true
+    },
+    "native_snapshot": {
+      "before_sha256": "ef613b66e842a9d559c02b0e8e02f497e405d9f0106f662950a55c88468d1063",
+      "after_sha256": "ef613b66e842a9d559c02b0e8e02f497e405d9f0106f662950a55c88468d1063",
+      "contents": "Complete graph checkpoints/events/operations/children, full five-message history and three-run list exactly unchanged after reload, CLI watch and live handoff."
+    }
+  },
+  "cli": {
+    "command": "graph-watch 1fc7ffc280ad4ae2824446399f97b7ea",
+    "exit_code": 0,
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scope": "Observed existing terminal events; did not execute read_file again. Native snapshots remain exact."
+  },
+  "assets": {
+    "browser_js": "25163fe54a82302355626a8d5d711c03d12af0960d7f02f95531507b4d08812f",
+    "chat_js": "98282fbcd5b7321bd11a73719519d0726d22d1f1bc921c6ccf33ccaa7393447f",
+    "layout_js": "eaf5aaeb8aeb36d3b008ddc3dd286363f4c938d627065e4583b196bb63c77747"
+  },
+  "screenshot": "cold-client-graphs-20261103.png",
+  "cleanup": {
+    "executed": false,
+    "reason": "Automatic approval review rejected recursive removal: blocked by policy",
+    "targets": 6,
+    "bytes": 684412569,
+    "note": "All six old cold-test generations still exist. Current generation and immediate qualified rollback preserved. Original three policy-blocked targets also untouched; no alternate deletion route."
+  },
+  "remaining": [
+    "Ordinary CantorServe multi-turn project completion and remaining real-model feature scopes.",
+    "Stock Code Server nested buffer refresh.",
+    "Remaining client/feature checks and final package/installation acceptance."
+  ],
+  "never_replay": [
+    "1fc7ffc280ad4ae2824446399f97b7ea",
+    "e9d4b158ec854a3083737a1504471364",
+    "74172bab6e8e49beb67bb66542086a6b"
+  ]
+}

@@ -1,19 +1,20 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "4aa98dfb",
+  "source_base": "6f31e173a809682d5d3ccd43d07f169362028d17",
   "native_inventory": {
     "registered_tests": 189,
-    "artifact": ".agentflow/blockers-20261102/first-handoff-reimport-qualified-inventory.json",
-    "full_current_suite": "189/189 passed at4aa98dfb in856.30s;23907 inputs/environment/tools unchanged; exact original inventory."
+    "source_revision": "9ea02226ea451be91f642ee645860cb97d9cda36",
+    "artifact": ".agentflow/blockers-20261102/bytecode-unicode-native-qualified-inventory.json",
+    "full_current_suite": "189/189 at9ea02226,891.03s,23911 inputs/environment/tools unchanged; later UI-only change qualified separately."
   },
   "sdk": {
-    "compatibility_commit": "e1491db3bb5a792e26838a1668494e06d3ddcd04",
-    "permitted_tests_passed": 58,
-    "permitted_tests_total": 58,
+    "compatibility_commit": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "permitted_tests_passed": 60,
+    "permitted_tests_total": 60,
     "performance_cases_passed": 11,
     "performance_cases_total": 11,
-    "evidence": "native-host-path-and-creation-20261103.json"
+    "evidence": "bytecode-inheritance-and-unicode-20261103.json"
   },
   "features": [
     {
@@ -25,7 +26,7 @@
         "Tool-call/result continuation",
         "Usage and actionable errors"
       ],
-      "status": "Discovery, encrypted-key/model save and cold-page restoration pass. Fresh post-repair turn receives seven complete model/tool responses; overall run fails on repeated missing-parent creation calls. No project/release pass."
+      "status": "Encrypted-key discovery/save/restoration passed. Latest ordinary version-bump turn completed its first request and approved edit, then second model dispatch hit deadline; exact serving correlation remains pending."
     },
     {
       "area": "Project coding",
@@ -36,7 +37,7 @@
         "Actual build/test outputs",
         "Ordinary multi-turn recovery with unchanged tests"
       ],
-      "status": "Fresh process-code version/help turn recovered missing-parent guidance and created2files through actual scoped approval; xlang3 pytest exited1 (module absent), then run hit deadline. Original3file hashes unchanged. Three failed roots preserved; no replay/coaching/manual project edits. Actual6test pass pending."
+      "status": "Earlier ordinary turn passed all six unchanged tests and pretty/help/version commands under xlang3, but run failed its deadline. Latest updated-runtime turn applied version0.1.1, then failed before tests. No complete-turn or updated-runtime process acceptance."
     },
     {
       "area": "Permissions and process execution",
@@ -48,7 +49,7 @@
         "Command output paging",
         "Foreground and persistent terminal lifecycle"
       ],
-      "status": "Complete current Native189 passes including first-handoff exact explicit process reimport and lifecycle/permission contracts. Actual scoped file approval and process-code xlang3 dispatch verified; project test attempt exited1 (pytest absent). Further live checks pending."
+      "status": "Native189 covers permission/process lifecycle contracts. Actual scoped edits and earlier xlang3 commands succeeded. Current cold-browser graph cancellation passes; real-model/command cancellation and remaining feature scopes are separate."
     },
     {
       "area": "Workspace and conversation lifecycle",
@@ -60,7 +61,7 @@
         "Selected-run restoration",
         "Reload/restart without effect replay"
       ],
-      "status": "Extension contract suite passes cold-start selection fix; live current-source checks pending"
+      "status": "Actual browser and Code automatic auth/run/history restoration verified. Cold profile retains exact five-message/three-graph native snapshots across reload, earlier-run selection, CLI observation and supported live owner replacement. Other workspace/session lifecycle scopes remain pending."
     },
     {
       "area": "Browser client",
@@ -71,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete 221 browser tests passed against matching embedded xlang3 runtime; rendered real-project acceptance pending"
+      "status": "Complete221 source checks pass. Actual original cold profile starts, authenticates and exercises read/human-answer/cancel graphs, paused reload and terminal-run restoration. This is model-free staged-client acceptance, not a packaged release pass."
     },
     {
       "area": "VS Code client",
@@ -82,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete 536 extension tests pass including route safety and cold-start selection restoration; actual current editor qualification pending"
+      "status": "Complete538 source checks and actual automatic auth/history/selected-run/failure-copy restoration pass. Stock Code Server nested buffers remain stale; vendor absolute Windows glob independently reproduces regex_error."
     },
     {
       "area": "CLI client",
@@ -93,7 +94,7 @@
         "Reconnect/history",
         "Actual command outcomes"
       ],
-      "status": "Matching-SDK native targets rebuilt; fresh coding qualification pending"
+      "status": "Actual profile discovery, graph/history/event/operation inspection and terminal graph-watch observation pass with exact no-replay snapshots. Fresh complete coding and packaged CLI acceptance remain pending."
     },
     {
       "area": "Language services and Git",
@@ -125,7 +126,7 @@
         "Nested outcomes/budgets",
         "No completed-effect replay"
       ],
-      "status": "Current controlled native contracts passed in full189 gate; live/project qualification and external-service availability pending"
+      "status": "Actual browser registered tool-read graph completes; human checkpoint survives reload and completes once on answer; separate waiting graph cancels. All28events/5messages/3roots remain exact across CLI watch and live backend handoff,0model events. Model-backed/nested and broader workflow scopes remain unverified."
     },
     {
       "area": "Existing MCP/A2A and connection features",
@@ -148,7 +149,7 @@
         "Qualified package smoke",
         "User-state preservation and required rollback copies"
       ],
-      "status": "Historical 0.1.80 retained; current candidate qualification pending"
+      "status": "Same cold profile and SQLite history survive supported stopped-owner recovery and subsequent live handoff on Native9ea/SDK92aa. Manifest14a verified; historical installed80 and required backups unchanged. New package/install acceptance pending."
     }
   ],
   "rules": [
@@ -161,10 +162,10 @@
   ],
   "automated_clients": {
     "browser": 221,
-    "extension": 536,
-    "input_files": 23337,
-    "input_changes": 0,
-    "evidence": "provider-route-refresh-20261103.json"
+    "extension": 538,
+    "source_input_files": 23911,
+    "evidence": "source-client-and-serving-blockers-20261103.json"
   },
-  "current_blocker_evidence": "explicit-process-reimport-20261103.json"
+  "current_blocker_evidence": "source-client-and-serving-blockers-20261103.json",
+  "current_cold_client_evidence": "cold-client-graphs-20261103.json"
 }
