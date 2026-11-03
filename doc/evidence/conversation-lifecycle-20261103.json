@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-03",
+  "scope": "Actual installed83 Native CLI, browser conversation lifecycle and Code conversation restoration; no model-backed coding or full-release claim",
+  "source_revision": "7fb7d23e96501a3c4ea0aded1cbb2dc4d95c1c48",
+  "native_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
+  "sdk_revision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "latest_main_included": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+  "sibling_main": "6186ffa61203789ed8ff18669c81fff32125259c",
+  "package": "Unchanged isolated installed0.1.83, verified manifest76ecdb2edcca8f598fb515509a7237e4c195e4c042c552a0b668db6b0f42e459",
+  "fixture_lifecycle": {
+    "original_source_session": "75c7a39896be45508cf70283e2360eca",
+    "cli_through_fork": {
+      "id": "92c6a1f518e41d6cc99a6202a880fdde",
+      "boundary": "through msg_62",
+      "source_messages": 17,
+      "copied_messages": 17,
+      "copied_runs": 0,
+      "source_history_exact": true
+    },
+    "browser_rename": "Rename dialog persisted v1 lifecycle acceptance 2026-11-03 on the fork only",
+    "stale_rename": {
+      "exit": 1,
+      "detail": "Session title changed; refresh before renaming",
+      "current_title_unchanged": true
+    },
+    "export": {
+      "format": "xmind.session",
+      "version": 2,
+      "messages": 17,
+      "archive_sha256": "c367fd4bdf2d6851aa0fcafb1407ad008977f1a76ccb7fba30ce8c86f4fe0554",
+      "artifact": ".agentflow/blockers-20261102/conversation-lifecycle-export.json",
+      "archive_retained": true
+    },
+    "cli_import": {
+      "id": "0bd0d30cc7e5cdb3be17bdb81d288f92",
+      "messages": 17,
+      "fresh_identity": true,
+      "all_role_and_data_payloads_preserved": true,
+      "runs": 0,
+      "cli_rename": "v1 lifecycle imported 2026-11-03"
+    },
+    "paging": {
+      "pages": 4,
+      "sizes": [5, 5, 5, 2],
+      "unique_ids": 17,
+      "exact_complete_history": true,
+      "single_message_lookup_exact": true
+    },
+    "unsupported_archive": {
+      "version": 99,
+      "exit": 1,
+      "detail": "Unsupported or malformed xMind session archive",
+      "session_set_unchanged": true
+    },
+    "browser_archive": "Archive hides the fork from active sessions; archived count1 persists across reload; archived view exposes Restore and restores it with count0. The active/archived view filter itself resets to active on reload; no stronger filter-persistence claim",
+    "browser_before_first_fork": {
+      "id": "3a763af7d373e2308957f0b00654265b",
+      "parent": "92c6a1f518e41d6cc99a6202a880fdde",
+      "boundary": "before msg_63",
+      "messages": 0,
+      "runs": 0,
+      "rendered_empty_conversation": true
+    },
+    "code_imported_restore": "Actual conversation selection clears previous run/failure; full Developer: Reload Window restores imported conversation, copied history, workspace, provider/model and Default permissions without a run picker or stale failure. No message submitted",
+    "cleanup": {
+      "method": "Installed Native CLI delete-session, after exact owned-ID/title/no-run checks; leaf fork first",
+      "owned_ids_removed": ["3a763af7d373e2308957f0b00654265b", "0bd0d30cc7e5cdb3be17bdb81d288f92", "92c6a1f518e41d6cc99a6202a880fdde"],
+      "each_native_result_deleted_true": true,
+      "original_sessions_never_targeted": true,
+      "test_copies_remaining": 0
+    }
+  },
+  "preservation": {
+    "exact_original_snapshot": true,
+    "snapshot_sha256": "5380c7720057dd89f03f74e5acf0f926f9eab2fbc67e4d5e45ee9d469d92ce36",
+    "sessions": 2,
+    "messages": 62,
+    "terminal_roots": 6,
+    "events": 538,
+    "operations": 13,
+    "project_files": 6,
+    "original_project_fixtures_unchanged": 3,
+    "cold_profile": "Exact5messages/3roots/28events/0operations;0model events; owner14932 unchanged",
+    "primary_owner": {"pid": 38048, "birth": "134381939851373843"},
+    "code_view_after_normal_reload": {"pid": 44852, "birth": "134381954430825584"},
+    "code_selected_run_restored": "d114abd36fd84c4f9c3ac3a2dda54ffb",
+    "browser_selected_run_restored": "4f0c5547d86c414db02b5af7c1069324",
+    "new_inference": 0,
+    "implementation_changes": false,
+    "new_runtime_directories_or_generations": 0,
+    "production80_and_required75_76_backups": "Untargeted",
+    "ten_policy_blocked_filesystem_targets": "Untouched; no new deletion attempt or alternate route. Session-copy cleanup is a separate Native product feature exercise"
+  },
+  "watcher_investigation": {
+    "result": "Do not add a no-op non-recursive watcher adapter. The exact Code version skips ordinary non-recursive watches inside a workspace unless configured exclusion coverage requires them; default recursive watching remains broken on this host. No configuration or vendor changes made",
+    "version_source": "https://raw.githubusercontent.com/microsoft/vscode/2d0b7506a36c1d6db9a466440131a8e01eab2289/src/vs/workbench/api/common/extHostFileSystemEventService.ts",
+    "api_reference": "https://code.visualstudio.com/api/references/vscode-api#workspace.createFileSystemWatcher",
+    "related_open_upstream_issue": "https://github.com/microsoft/vscode/issues/317176"
+  },
+  "serving": "Saved-key model discovery succeeds during actual reload; no complete coding inference claim. No connected CantorServe deployment chat available on the local host inventory; old dispatch timeout remains uncorrelated. No messages sent to other chats",
+  "setup_limits": [
+    "Initial stale-title probe incorrectly required numeral409 in CLI error text. Actual CLI returns a JSON detail with exit1; later distinct captured control and title readback establish rejection",
+    "A copied preservation-helper baseline filename was wrong on its first invocation; corrected helper and original unfiltered audit both prove the same exact original snapshot",
+    "One semantic Run details locator did not match the summary element; observed accessibility control selected the saved earlier run"
+  ],
+  "private_receipts": ["conversation-lifecycle-state.json", "conversation-lifecycle-stale-rename.json", "conversation-lifecycle-transfer-receipt.json", "conversation-lifecycle-paging.json", "conversation-lifecycle-unsupported-version-result.json", "conversation-lifecycle-cleanup.json", "conversation-lifecycle-preservation-after.json", "request-package-profile-after.json", "cold-graphs-conversation-lifecycle-final.json", "conversation-lifecycle-owners.json"],
+  "screenshot": "conversation-lifecycle-code-20261103.png",
+  "remaining": "Ordinary CantorServe complete multi-turn coding/approvals/cancellation, remaining feature/client scopes, editor refresh and final production release acceptance remain pending",
+  "goal_complete": false
+}

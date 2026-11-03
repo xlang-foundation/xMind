@@ -1,7 +1,7 @@
 {
   "date": "2026-11-03",
   "goal": "Develop xMind with CantorServe on real projects and verify all existing features, preserving C++ ownership, embedded xlang3, SQLite, IPC and user data",
-  "source_base": "9f31157cf1dc28edfd48c48dd6efe28cf3da4ca0",
+  "source_base": "7fb7d23e96501a3c4ea0aded1cbb2dc4d95c1c48",
   "native_inventory": {
     "registered_tests": 189,
     "source_revision": "deed03f0b02a484cdeed4a32686cca42aee623bc",
@@ -61,7 +61,7 @@
         "Selected-run restoration",
         "Reload/restart without effect replay"
       ],
-      "status": "Actual browser and Code automatic auth/run/history restoration verified. Cold profile retains exact five-message/three-graph native snapshots across reload, earlier-run selection, CLI observation and supported live owner replacement. Other workspace/session lifecycle scopes remain pending. Installed83 supported handoff preserves exact2sessions/62messages/6roots/538events/13operations and6project files; browser and Code selections/auth restore on existing ports without replay."
+      "status": "Installed83 CLI through-fork/export/import preserves all17payloads with0runs; browser before-first fork yields empty history. Browser rename/archive/reload/restore, stale rename fence, unsupported archive rejection, four history pages5/5/5/2 and exact single lookup pass. Code imported-copy full reload restores history/provider/workspace without previous run/failure. All3owned copies removed; exact original2sessions/62messages/6roots/538events/13operations/6files and cold5/3/28 preserved. Transfer/deletion qualification is CLI; remaining rendered transfer/deletion controls, multi-folder and larger-history scopes are separate."
     },
     {
       "area": "Browser client",
@@ -72,7 +72,7 @@
         "File preview",
         "Authentication/reconnect"
       ],
-      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending. Refreshed Native deed03f0 primary now passes actual reload/auth/history/selected-root restoration and terminal echo/exit0output retention/Close with no resources left. New full223 gate uses stage76ec."
+      "status": "Complete223 source checks and actual cold graph/auth/history restoration pass. Native terminal input,48→52→48resize,exit0output retention and explicit close verified. Startup-error retention covered by regression. Packaged web CLI reattaches the same browser/owner on its retained byte-identical asset path; exact history/graphs survive reload. Fresh startup from bundled assets and real-model completion pending. Refreshed Native deed03f0 primary now passes actual reload/auth/history/selected-root restoration and terminal echo/exit0output retention/Close with no resources left. New full223 gate uses stage76ec. Actual rename/archive persisted across reload, restore and before-first-message fork pass. Archive membership persists; archived-view filter resets to active after reload."
     },
     {
       "area": "VS Code client",
@@ -83,7 +83,7 @@
         "Run inspection restoration",
         "Terminal and Git views"
       ],
-      "status": "Complete540 checks with refreshed stage. Actual bundled installed83 reports numeric exit7, normal exit0 and explicit close correctly; native resources/children released. Automatic auth, exact workspace/provider/model/session/run restoration and supported live native handoff pass with complete unchanged profile snapshots. Candidate81 remains withheld for its preserved regression. Stock Code Server nested watcher remains independently unqualified (absolute-Windows-glob regex_error); no vendor patch or forced overwrite."
+      "status": "Complete540 checks with refreshed stage. Actual bundled installed83 reports numeric exit7, normal exit0 and explicit close correctly; native resources/children released. Automatic auth, exact workspace/provider/model/session/run restoration and supported live native handoff pass with complete unchanged profile snapshots. Candidate81 remains withheld for its preserved regression. Stock Code Server nested watcher remains independently unqualified (absolute-Windows-glob regex_error); no vendor patch or forced overwrite. Actual imported conversation with17saved messages survives full Code reload without an inherited run or failure; original d114selection restored afterward."
     },
     {
       "area": "CLI client",
@@ -94,7 +94,7 @@
         "Reconnect/history",
         "Actual command outcomes"
       ],
-      "status": "Actual installed83 bundled executable verifies and observes cold profile/graphs/history/events/operations with exact5messages/3roots/28events and0model events. Cold owner remains9ea/92aa; this is observation, not new graph execution. Rebuilt CLI help documents terminals SESSION. Fresh complete packaged coding/approvals/cancellation remain pending."
+      "status": "Actual installed83 bundled executable verifies and observes cold profile/graphs/history/events/operations with exact5messages/3roots/28events and0model events. Cold owner remains9ea/92aa; this is observation, not new graph execution. Rebuilt CLI help documents terminals SESSION. Fresh complete packaged coding/approvals/cancellation remain pending. Installed83 fork/export/import/rename-conflict/paging/single-message/unsupported-archive/deletion of owned copies now pass against primary Native83 with exact original snapshot restored."
     },
     {
       "area": "Language services and Git",
@@ -174,5 +174,6 @@
   "current_candidate_evidence": "candidate83-installed-20261103.json",
   "current_code_terminal_evidence": "code-terminal-lifecycle-20261103.json",
   "current_request_correlation_evidence": "provider-request-correlation-20261103.json",
-  "current_installed_terminal_evidence": "candidate83-installed-20261103.json"
+  "current_installed_terminal_evidence": "candidate83-installed-20261103.json",
+  "current_conversation_lifecycle_evidence": "conversation-lifecycle-20261103.json"
 }

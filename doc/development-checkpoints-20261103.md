@@ -17,3 +17,7 @@ Historical checkpoint text preserved verbatim when compacting current repository
 - Direct browser JS gates require XMIND_BROWSER_TEST_RUNTIME at the verified staging path, plus XMIND_BROWSER_TEST_HOST/MODULES/STDLIB/PACKAGES and valid TEMP/TMP. Both omitted-variable failures are retained; final unchanged full221 passes. Keep CPython bridge OFF, interpreter probe empty and pickle oracle excluded.
 
 - Keep existing run/staging/profile/workspace paths. Automatic cleanup review blocked three directories (~726MiB); those three targets were not deleted. Never retry them through another route.
+
+## Superseded before conversation lifecycle acceptance
+
+- Browser terminal exit/startup-error retention fix remains qualified; current83/new backend actual marker/exit0/read-only output until Close passes. Earlier native resize48→52→48 and red→green receipts remain in doc/evidence/browser-terminal-exit-20261103.json. Source and bundled acceptance scopes remain separate.
