@@ -38,7 +38,13 @@ struct FixtureWorkerRpcPeer::Impl {
     std::map<std::uint64_t,std::shared_ptr<Pending>> pending;std::map<std::uint64_t,std::shared_ptr<Incoming>> active;
     std::vector<Flight> flights;std::stop_source session_stop;std::jthread reader;
     Impl(AgentWorkerChannel& channel,FixtureWorkerRpcHandler callback,AgentWorkerChannel::Deadline deadline,std::shared_ptr<NativeWorkerModelClient> sdk):sdk_services(std::move(sdk)),channel(channel),handler(std::move(callback)),deadline(deadline){if(!handler||std::chrono::steady_clock::now()>=deadline)throw std::invalid_argument("Native RPC requires its handler and live deadline");}
-    void start(){std::lock_guard lock(state);if(started||closed)throw AgentWorkerRpcClosed("Native worker RPC cannot restart");started=true;reader=std::jthread([this]{read();});}
+    void start(){
+        std::lock_guard lock(state);if(started||closed)throw AgentWorkerRpcClosed("Native worker RPC cannot restart");started=true;
+        // Production workers expose the typed native execution object, not the
+        // fixture mailbox. A speculative mailbox reader races the live native
+        // control and can mark this fixture closed without a worker exit.
+        if(!native_execution)reader=std::jthread([this]{read();});
+    }
     void fail(const std::string& reason){
         std::vector<std::stop_source> stops;{std::lock_guard lock(state);if(closed)return;closed=true;for(auto& [id,call]:pending)if(!call->done){call->done=true;call->local_failure=true;call->code=reason;}for(const auto& [id,owner]:active)stops.push_back(owner->stop);}
         session_stop.request_stop();for(auto& stop:stops)stop.request_stop();changed.notify_all();
