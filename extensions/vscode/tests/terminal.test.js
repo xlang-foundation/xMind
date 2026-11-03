@@ -40,3 +40,31 @@ test('VS Code pseudoterminal refuses backend output after workspace admission is
  assert.equal(writes.length,1,'only the local terminal title is written before admission revocation');
  assert.match(writes[0],/xMind workspace terminal/);
 });
+
+test('natural terminal exit reports a numeric VS Code exit code and releases its native resource once',async()=>{
+ const id='e'.repeat(32),closed=[],released=[],writes=[];let disposed=0,polled=0;
+ const client={
+  async createTerminal(){return{id,title:'Exit test',output_sequence:0};},
+  async terminalOutput(){polled++;return{data:'c3a9',next_sequence:2,truncated:false,running:false,exit_code:7};},
+  async closeTerminal(value){released.push(value);},
+  async terminalInput(){throw Error('input after exit');},
+  async resizeTerminal(){throw Error('resize after exit');}
+ };
+ const pty=new XMindPseudoterminal(vscode,client,'session-one',{onDispose:()=>disposed++});
+ pty.onDidWrite(value=>writes.push(value));pty.onDidClose(value=>closed.push(value));pty.open();
+ await until(()=>closed.length===1);
+ assert.deepEqual(closed,[7],'Pseudoterminal.onDidClose is Event<number | void>');
+ assert.deepEqual(released,[id],'natural completion must release the native terminal, not only the editor view');
+ assert.ok(writes.includes('é'));
+ pty.handleInput('ignored');pty.setDimensions({rows:40,columns:120});pty.close();pty.dispose();
+ assert.deepEqual(released,[id]);assert.equal(disposed,1);assert.equal(polled,1);
+});
+
+test('closing while native terminal creation is pending releases the late resource without duplicate completion',async()=>{
+ const id='f'.repeat(32),released=[],closed=[],writes=[];let resolveCreate,disposed=0;
+ const client={createTerminal:()=>new Promise(resolve=>{resolveCreate=resolve;}),closeTerminal:async value=>{released.push(value);}};
+ const pty=new XMindPseudoterminal(vscode,client,'session-one',{onDispose:()=>disposed++});
+ pty.onDidWrite(value=>writes.push(value));pty.onDidClose(value=>closed.push(value));pty.open();pty.close();pty.dispose();
+ resolveCreate({id,title:'Late terminal',output_sequence:0});await until(()=>released.length===1);
+ assert.deepEqual(released,[id]);assert.deepEqual(closed,[undefined]);assert.equal(disposed,1);assert.deepEqual(writes,[]);
+});

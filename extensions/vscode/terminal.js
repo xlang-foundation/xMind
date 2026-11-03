@@ -113,25 +113,22 @@ class XMindPseudoterminal {
   }
 
   close() {
-    if (this.closed) return;
-    this.closed = true;
-    clearTimeout(this.timer);
-    const id = this.id;
-    this.id = undefined;
-    if (id) this.client.closeTerminal(id).catch(() => {});
     this.finish();
   }
 
   dispose() { this.close(); }
 
   finish(code) {
-    if (this.closed && this.finished) return;
+    if (this.finished) return;
     this.closed = true;
     this.finished = true;
     clearTimeout(this.timer);
+    const id = this.id;
+    this.id = undefined;
+    if (id) this.client.closeTerminal(id).catch(() => {});
     const tail = this.decoder.end();
     if (tail) this.writeEmitter.fire(tail);
-    this.closeEmitter.fire(code === undefined ? undefined : { code });
+    this.closeEmitter.fire(Number.isSafeInteger(code) && code >= 0 ? code : undefined);
     this.onDispose(this);
   }
 }
