@@ -549,6 +549,7 @@ test('failure review stays outside transcript scrolling and navigates without re
 
 for(const [reason,explanation] of [
  ['agent_timeout',/run reached its time limit/],
+ ['deadline',/run reached its time limit/],
  ['process_effect_uncertain',/command ended without a confirmed outcome/]
 ])test(`recorded ${reason} explains why coding stopped without replaying commands`,()=>{
  const r=renderer(),doc=r.dom.window.document,initialPosts=r.posted.length;

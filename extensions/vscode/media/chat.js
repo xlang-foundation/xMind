@@ -304,7 +304,7 @@ function runFailure(data){
     ?'This run reached its execution budget. Completed edits and command results remain saved. Review the recorded outcomes, then send a follow-up prompt for the remaining work.'
     :data?.reason==='model_turn_limit'
     ?'This run reached its model turn limit. Completed edits and command results remain saved. Review the recorded outcomes, then send a follow-up prompt for the remaining work.'
-    :data?.reason==='agent_timeout'
+    :data?.reason==='agent_timeout'||data?.reason==='deadline'
     ?'This run reached its time limit before completing. Review the recorded edits and command results before sending a follow-up prompt for the remaining work.'
     :data?.reason==='process_effect_uncertain'
     ?'A command ended without a confirmed outcome, so this run stopped. It may already have changed files or started a service. Review the recorded command outcome and check the workspace before running it again.'

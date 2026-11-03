@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-03",
+  "reproduction": "Actual process-code run948c88ab48e24126808616a713b5311e preserves run.failed reason deadline but renders a generic Execution failed message; agent_timeout already explains the time limit.",
+  "change": "Shared renderer maps both existing timeout reasons to the same explicit time-limit message, preserving the recorded reason, draft, history and no-replay guidance.",
+  "regression_before": ".agentflow/blockers-20261102/worker-deadline-before.log:1 failed",
+  "regression_after": ".agentflow/blockers-20261102/worker-deadline-after.log:1 passed",
+  "regression_scope": "Explanation, saved draft, absence of a retry button and assistant fabrication, private payload suppression, and zero outgoing commands",
+  "complete_clients": {"browser_passed":221,"browser_total":221,"extension_passed":537,"extension_total":537,"input_files_unchanged":23338,"runtime_files":2875,"log_prefix":".agentflow/blockers-20261102/worker-deadline-"},
+  "actual_ui": "Reload at57058 automatically restores expense workspace/session and saved Custom server/qwen3.8-27b-chat-32k. Selected failed process-worker run now explicitly says it reached its time limit and to review saved edits/command results before a follow-up.",
+  "screenshot": "process-worker-deadline-message-20261103.png",
+  "runtime_handoff": {"first_invocation_passed":true,"owner_pid":40016,"owner_birth":"134381785440856322","api_origin":"http://127.0.0.1:57048","browser_origin":"http://127.0.0.1:57058/ui/","history_records":34,"history_exactly_unchanged":true,"staging_path_unchanged":true,"runtime_manifest_sha256":"f0fcf4d865132847ae0e1a09925ccad5c58673fe44ffadc51a07132c033cc029"},
+  "limits": "Existing partial project roots remain failed; no test pass or installed-release acceptance. A related stopped-owner same-document process reimport case remains under regression. No deadline, approval or executable-identity guard weakened."
+}
