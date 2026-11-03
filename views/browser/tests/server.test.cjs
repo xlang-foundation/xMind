@@ -4,6 +4,35 @@
 // behavior. It is not evidence of C++ persistence or real model execution.
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createServer}=require('node:http'),{resolve}=require('node:path');
+test('browser Git observation queries retain native parameters and reject invalid shapes',async()=>{
+ const {createNativeBrowserFixture}=await import('./native-host.mjs');
+ const master='git-query-fixture-owner'.padEnd(64,'x'),credential='a'.repeat(64)+'.'+'b'.repeat(64),observed=[];
+ let view;
+ const peer=createServer(async(request,response)=>{
+  for await(const _ of request){}
+  response.setHeader('Content-Type','application/json');
+  if(request.url==='/v1/view-sessions'&&request.headers.authorization==='Bearer '+master){response.end(JSON.stringify({credential,expires_unix_ms:Date.now()+28800000,max_age_seconds:28800}));return;}
+  assert.equal(request.headers.authorization,'View '+credential);
+  observed.push(request.url);response.end(JSON.stringify({target:request.url}));
+ });
+ try{
+  await new Promise(ready=>peer.listen(0,'127.0.0.1',ready));
+  view=await createNativeBrowserFixture({backend:'http://127.0.0.1:'+peer.address().port,assetRoot:resolve(process.env.XMIND_BROWSER_TEST_ASSETS||'.agentflow/browser-assets'),localAccessToken:master});
+  const origin=await view.listen(),login=await fetch(origin+'/ui/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','Sec-Fetch-Site':'same-origin'},body:'{}'});
+  assert.equal(login.status,200);const headers={Cookie:login.headers.get('set-cookie').split(';')[0],'Sec-Fetch-Site':'same-origin'};
+  const folder=encodeURIComponent('windows-local-file-v1:git-fixture');
+  const routes=[...['status','info','branches','base'].map(name=>'/v1/vcs/'+name+'?folder_id='+folder),
+   '/v1/vcs/diff?mode=working&context=3',
+   '/v1/vcs/diff?mode=branch&base=main&context=0&folder_id='+folder,
+   '/v1/vcs/diff?mode=committed&base=HEAD~1&context=1000'];
+  for(const route of routes){const response=await fetch(origin+route,{headers});assert.equal(response.status,200,route+' '+await response.clone().text());assert.deepEqual(await response.json(),{target:route});assert.equal(observed.at(-1),route);}
+  const count=observed.length;
+  const invalid=[...['status','info','branches','base'].flatMap(name=>['folder_id=','folder_id=unregistered-path','folder_id='+folder+'&folder_id='+folder,'extra=x'].map(query=>'/v1/vcs/'+name+'?'+query)),
+   ...['','mode=','mode=unknown','mode=working&mode=branch','mode=working&context=-1','mode=working&context=1001','mode=working&context=abc','mode=working&context=3&context=4','mode=branch&base=','mode=branch&base=x%0Ay','mode=branch&base=x%00y','mode=branch&base='+'x'.repeat(1025),'mode=working&folder_id=bad','mode=working&extra=x'].map(query=>'/v1/vcs/diff'+(query?'?'+query:''))];
+  for(const route of invalid)assert.equal((await fetch(origin+route,{headers})).status,400,route);
+  assert.equal(observed.length,count,'Invalid Git queries must be rejected before native dispatch');
+ }finally{await view?.close();peer.closeAllConnections();await new Promise(done=>peer.close(done));}
+});
 test('public entry permits top-level navigation while API and session origins stay exact',async()=>{
  const {request}=require('node:http'),{createNativeBrowserFixture}=await import('./native-host.mjs');let view;
  const peer=createServer((request,response)=>{response.writeHead(500);response.end();});

@@ -103,6 +103,17 @@ def valid_query(path, method, query, has_query):
     def number(key, maximum, zero=False):
         return key not in query or bool(re.fullmatch(r'0|[1-9][0-9]*' if zero else r'[1-9][0-9]*', query[key])) and int(query[key]) <= maximum
 
+    def vcs_folder():
+        return 'folder_id' not in query or bool(re.fullmatch(r'windows-local-file-v1:[A-Za-z0-9:._-]{1,200}', query['folder_id']))
+
+    if path in ('/v1/vcs/status', '/v1/vcs/info', '/v1/vcs/branches', '/v1/vcs/base'):
+        return shape({'folder_id'}) and vcs_folder()
+    if path == '/v1/vcs/diff':
+        return ('mode' in query and shape({'mode', 'base', 'context', 'folder_id'})
+                and query['mode'] in ('working', 'branch', 'committed')
+                and text('base', 1024) and ('base' not in query or not any(c in query['base'] for c in ('\r', '\n', '\0')))
+                and number('context', 1000, zero=True) and vcs_folder())
+
     if re.fullmatch(r'/v1/sessions/[A-Za-z0-9_-]+/messages', path):
         return (not has_query or bool(query)) and shape({'limit', 'before'}) and number('limit', 1000) and ('before' not in query or bool(re.fullmatch(r'msg_[1-9][0-9]*', query['before'])) and int(query['before'][4:]) <= 9007199254740991)
     if re.fullmatch(r'/v1/sessions/[A-Za-z0-9_-]+/messages/[A-Za-z0-9_-]+', path):
