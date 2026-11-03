@@ -98,6 +98,18 @@ try{
  const browserMembershipHeaders=()=>({Cookie:cookie,Origin:browserOrigin,'Sec-Fetch-Site':'same-origin'});
  async function expectBrowserMembership(expected){const response=await fetch(browserOrigin+'/v1/workspace/membership',{headers:browserMembershipHeaders()});assert.equal(response.status,200,await response.clone().text());assert.deepEqual(await response.json(),expected);}
  await expectBrowserMembership(hostGroup);
+ // A rejected private folder is an actionable access denial, not a lost native view.
+ const privateFolder=path.join(base,'.agentflow','denied-folder');await fs.mkdir(privateFolder,{recursive:true});
+ for(const [origin,route,headers] of [
+  [owner.origin,'/v1/workspaces/add',{Authorization:'Bearer '+access,'Content-Type':'application/json'}],
+  [browserOrigin,'/ui/workspaces/add',{...browserMembershipHeaders(),'Content-Type':'application/json'}]
+ ]){
+  const denied=await fetch(origin+route,{method:'POST',headers,body:JSON.stringify({workspace_id:hostGroup.workspace_id,root:path.win32.resolve(privateFolder)})});
+  assert.equal(denied.status,403,await denied.clone().text());assert.match((await denied.json()).detail,/Backend configuration cannot be a model workspace/);
+  await expectBrowserMembership(hostGroup);
+  assert.equal((await fetch(browserOrigin+'/v1/health',{headers:browserMembershipHeaders()})).status,200,'Rejected folder must preserve authentication and selected backend');
+ }
+ assert.equal((await fetch(browserOrigin+'/v1/workspaces/add',{method:'POST',headers:{...browserMembershipHeaders(),'Content-Type':'application/json'},body:JSON.stringify({workspace_id:hostGroup.workspace_id,root:path.win32.resolve(privateFolder)})})).status,404,'Browser mutation must retain its existing UI-route boundary');
  assert.equal((await fetch(browserOrigin+'/v1/workspace/membership?extra=1',{headers:browserMembershipHeaders()})).status,400);
  assert.equal((await fetch(browserOrigin+'/v1/workspace/membership',{method:'POST',headers:{...browserMembershipHeaders(),Origin:browserOrigin,'Content-Type':'application/json'},body:'{}'})).status,404);
  const membershipViewHeaders={Authorization:'View '+cookie.slice(cookie.indexOf('=')+1),'X-XMind-View-Origin':browserOrigin};

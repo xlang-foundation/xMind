@@ -820,6 +820,8 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
                                                 {"root", group.folders.front().root}, {"revision", group.revision},
                                                 {"primary_folder_id", group.primary_folder_id}, {"folders", std::move(folders)}}.dump(),
                                            "application/json");
+                    } catch (const agentflow::ToolAccessDenied &error) {
+                        response(output, 403, error.what());
                     } catch (const std::invalid_argument &error) {
                         response(output, 400, error.what());
                     } catch (const std::out_of_range &error) {
