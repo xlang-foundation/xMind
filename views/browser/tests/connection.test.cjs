@@ -35,6 +35,19 @@ test('switching workspace from an open file preview returns the new workspace to
  const f=await fixture();
  try{await until(()=>f.element('workspace-files').querySelector('button[data-kind="file"]'));f.element('workspace-files').querySelector('button[data-kind="file"]').click();await until(()=>f.element('file-content').textContent==='Workspace preview content\n');f.element('workspace-canvas').dataset.preview='true';const picker=f.element('workspace-picker');picker.value='windows-local-file-v1:other';picker.dispatchEvent(new f.window.Event('change'));await until(()=>f.element('workspace-info').title.includes('Other')&&f.element('workspace-refresh').disabled===false);assert.equal(f.element('workspace-canvas').dataset.preview,'false');assert.equal(f.element('file-title').textContent,'Select a file');assert.ok(f.element('workspace-files').querySelector('button[data-kind="file"]'));}finally{f.close();}
 });
+test('switching workspace clears the previous Git comparison and its base',async()=>{
+ const f=await fixture({vcsDiff:[{file:'old.txt',patch:'old workspace patch',additions:1,deletions:0,status:'modified'}]});
+ try{
+  f.element('workspace-vcs-diff').click();await until(()=>f.element('workspace-vcs-patch').textContent==='old workspace patch');
+  assert.match(f.element('workspace-vcs-state').textContent,/Git working diff/);
+  f.element('workspace-vcs-mode').value='branch';f.element('workspace-vcs-base').value='previous-repository-base';
+  const picker=f.element('workspace-picker');picker.value='windows-local-file-v1:other';picker.dispatchEvent(new f.window.Event('change'));
+  await until(()=>f.element('workspace-info').title.includes('Other')&&f.element('workspace-control').dataset.switching==='false');
+  assert.equal(f.element('workspace-vcs-state').hidden,true);assert.equal(f.element('workspace-vcs-state').textContent,'');
+  assert.equal(f.element('workspace-vcs-mode').value,'working');assert.equal(f.element('workspace-vcs-base').value,'');
+  assert.equal(f.element('workspace-vcs-patch').textContent,'');assert.equal(f.element('workspace-vcs-files').disabled,true);
+ }finally{f.close();}
+});
 test('expanding an inactive workspace reads only its scoped session catalogue without selecting it',async()=>{
  const other='windows-local-file-v1:other',f=await fixture({nativeReply:url=>url.pathname==='/ui/workspaces/sessions'?{workspace_id:other,sessions:[{id:'other-only',title:'Other workspace chat',active:false,archived:false}],archive_capability:true}:undefined});
  try{f.window.xMindView.postMessage({type:'workspace-session-list',workspace_id:other});await until(()=>f.posted.some(message=>message.type==='workspace-session-catalogue'));assert.equal(f.posted.findLast(message=>message.type==='workspace-session-catalogue').sessions[0].id,'other-only');assert.equal(f.element('workspace-picker').value,'windows-local-file-v1:synthetic');assert.equal(f.requests.filter(route=>route==='/ui/workspaces/select').length,0);await until(()=>f.element('workspace-control').dataset.switching==='false');const reads=f.requests.filter(route=>route.endsWith('/messages')).length;f.window.xMindView.postMessage({type:'workspace-session-select',workspace_id:'windows-local-file-v1:synthetic',id:'existing'});await new Promise(resolve=>setImmediate(resolve));assert.equal(f.requests.filter(route=>route.endsWith('/messages')).length,reads,'Opening an already restored session must preserve its inspected run instead of selecting the latest root');}finally{f.close();}
