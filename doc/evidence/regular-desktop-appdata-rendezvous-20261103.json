@@ -61,7 +61,7 @@
       "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
       "sourceRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
       "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
-      "installed": false,
+      "installed": true,
       "releaseAccepted": false
     },
     "actualRegularDesktopCoding": "Pending; native computer-use tool recorded physical Escape stop before verification. Resume question is pending.",
@@ -104,6 +104,36 @@
       "removed": 0,
       "environmentAndToolsUnchanged": true,
       "privateLabel": "desktop-appdata-clients-qualified"
+    },
+    "installedVerification": {
+      "regular": {
+        "at": "2026-11-04T04:26:35.077Z",
+        "installed": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.87",
+        "version": "0.1.87",
+        "verifiedUnmodifiedMembers": 2919,
+        "totalInstalledFiles": 2921,
+        "completeInstalledFileSetVerified": true,
+        "relocatedVsixMetadataHashVerified": true,
+        "manifestSemanticallyEqual": true,
+        "installerMetadataAdded": true,
+        "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
+        "nativeFiles": 2875
+      },
+      "codeServer": {
+        "at": "2026-11-04T04:26:53.835Z",
+        "installed": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.87",
+        "version": "0.1.87",
+        "verifiedUnmodifiedMembers": 2919,
+        "totalInstalledFiles": 2921,
+        "completeInstalledFileSetVerified": true,
+        "relocatedVsixMetadataHashVerified": true,
+        "manifestSemanticallyEqual": true,
+        "installerMetadataAdded": true,
+        "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
+        "nativeFiles": 2875
+      },
+      "guiWindowsOpenedSwitchedOrReloaded": false,
+      "runtimeLoadedInDesktop": "not yet verified"
     }
   },
   "preservation": {
@@ -120,8 +150,8 @@
     "beforeSnapshot": "candidate86-preservation-desktop-before.json.gz",
     "runPathsChanged": false,
     "sdkOrIPCChanged": false,
-    "verifiedAt": "2026-11-04T04:22:07.997Z",
-    "latestImmutableSnapshot": "candidate87-preservation-package-before.json.gz",
+    "verifiedAt": "2026-11-04T04:27:06.391Z",
+    "latestImmutableSnapshot": "candidate87-preservation-installed-before.json.gz",
     "allPriorRecordsExact": true,
     "configsExact": true,
     "runtimeDirectoriesExact": true,
@@ -161,7 +191,7 @@
     "xmind": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
     "xlang3": "6186ffa61203789ed8ff18669c81fff32125259c"
   },
-  "updatedAt": "2026-11-04T04:23:33.656Z",
+  "updatedAt": "2026-11-04T04:29:02.841Z",
   "productRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
   "providerReadiness": {
     "recheckedThroughActualPortal": true,
