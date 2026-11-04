@@ -1370,18 +1370,15 @@ void publish_local_view_ready(const std::string &file, const std::string &metada
                               const std::string &workspace_root) {
     const auto target = absolute(validate_local_view_ready(file, workspace_root));
     Store store(target.parent_path());
-    auto value = parse(metadata);
+    const auto value = parse(metadata);
     require(value.is_object() && !value.contains("auth") && !value.contains("token") &&
-            !value.contains("rendezvous_directory") && metadata.size() <= 16384);
-    value["rendezvous_directory"] = text(store.directory);
-    const auto published = value.dump();
-    require(published.size() <= 16384);
+            metadata.size() <= 16384);
     const auto pending = wide("view-" + random_id() + ".tmp");
     auto output = store.open(pending.c_str(), GENERIC_WRITE, CREATE_NEW);
     DWORD written = 0;
     require(
-        WriteFile(output.value, published.data(), static_cast<DWORD>(published.size()), &written, nullptr) &&
-        written == published.size() && FlushFileBuffers(output.value));
+        WriteFile(output.value, metadata.data(), static_cast<DWORD>(metadata.size()), &written, nullptr) &&
+        written == metadata.size() && FlushFileBuffers(output.value));
     CloseHandle(output.value);
     output.value = INVALID_HANDLE_VALUE;
     // Existence is the readiness signal. Publish only the complete, closed

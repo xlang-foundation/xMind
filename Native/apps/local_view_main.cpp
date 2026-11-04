@@ -1193,9 +1193,13 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
             try{tray=std::make_unique<agentflow::WindowsTray>(origin+"/ui/",connection->workspace,std::move(stop));}
             catch(...){std::cerr<<"Windows tray unavailable; the web UI remains available\n";}
         }
+        const auto rendezvous_parent = std::filesystem::u8path(ready).parent_path().u8string();
+        const std::string rendezvous_directory(reinterpret_cast<const char *>(rendezvous_parent.data()),
+                                               rendezvous_parent.size());
         agentflow::publish_local_view_ready(
             ready,
             Json{{"origin", origin},
+                 {"rendezvous_directory", rendezvous_directory},
                  {"workspace", workspace},
                  {"process_id", GetCurrentProcessId()},
                  {"process_birth", agentflow::inspect_owner_process_birth(GetCurrentProcessId())},

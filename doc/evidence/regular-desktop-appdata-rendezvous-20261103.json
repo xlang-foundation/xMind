@@ -17,7 +17,8 @@
   "repair": {
     "native": "Only a leaf successfully created by this native call can be rebound; verify protected user-owned leaf and reopen the entire physical chain with ordinary guards. Existing aliases and all profile storage remain strict.",
     "adapter": "Pin resolved fresh nonce directory to native-published rendezvous_directory; refuse metadata mismatch and overlap with every opened workspace folder.",
-    "existingRendezvous": "Logical and physical collisions preserved; replacement rejected"
+    "existingRendezvous": "Logical and physical collisions preserved; replacement rejected",
+    "metadataScope": "rendezvous_directory belongs only in actual view-ready construction, preserving generic publication bytes exactly"
   },
   "validation": {
     "nativeBuild": "passed",
@@ -35,10 +36,37 @@
       "removed": 0,
       "environmentAndToolsUnchanged": true
     },
-    "newFullNative": "pending",
+    "newFullNative": "fresh complete native-final gate pending",
     "newFullEditor": "pending",
     "package": "pending",
-    "actualRegularDesktopCoding": "pending"
+    "actualRegularDesktopCoding": "pending",
+    "firstFullNative": {
+      "passed": 188,
+      "total": 189,
+      "seconds": 929.35,
+      "failed": "native_request_session_contract",
+      "failure": "Generic readiness publisher changed caller bytes by adding rendezvous_directory",
+      "inputs": 23913,
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "environmentAndToolsUnchanged": true
+    },
+    "publicationRepairFocused": {
+      "passed": 2,
+      "total": 2,
+      "seconds": 72.14,
+      "tests": [
+        "native_request_session_contract",
+        "native_local_view_contract"
+      ],
+      "requestSessionTestUnmodified": true,
+      "inputs": 23913,
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "environmentAndToolsUnchanged": true
+    }
   },
   "preservation": {
     "newModelCalls": 0,
