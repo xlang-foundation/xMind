@@ -1,0 +1,386 @@
+{
+  "at": "2026-11-04T04:48:16.838Z",
+  "version": "0.1.87",
+  "releaseAccepted": true,
+  "scope": "Qualified Windows native/host contracts and fresh regular desktop VS Code end-to-end coding. Prior qualified0.1.86 browser/official Code Server/native CLI real-model receipts are retained in their original scope.",
+  "productRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
+  "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+  "architecture": {
+    "core": "native C++",
+    "database": "SQLite through embedded xlang3",
+    "workers": "standard local xlang3 IPC",
+    "bridgeEnabled": false,
+    "CPythonExecuted": false
+  },
+  "package": {
+    "at": "2026-11-04T04:21:27.072Z",
+    "output": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/xmind-0.1.87-candidate.vsix",
+    "version": "0.1.87",
+    "target": "win32-x64",
+    "sourceRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
+    "nativeRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
+    "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+    "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
+    "members": 2922,
+    "nativeMembers": 2876,
+    "archiveBytes": 37187204,
+    "uncompressedBytes": 116120802,
+    "sha256": "4aa073480301131e0ad540fcd8436af6bb034c0390950f53e4049d7595832799",
+    "memberInventorySha256": "8c92c14e62732fa785f4f841fc8c9397d33efd860e264ea8fc609c2eec541129",
+    "sourceInputFiles": 2919,
+    "inputsUnchanged": true,
+    "completeMemberVerification": true,
+    "duplicateRuntimeDirectoryCreated": false,
+    "virtualRuntimeOverlay": false,
+    "baseStageUnchanged": true,
+    "sourceVersionChanged": false,
+    "installed": true,
+    "releaseAccepted": true,
+    "builderSha256": "c8dd99c4c8ef7d7dcdd9d053b3c18fa7a468101e9a3d5be4be568438accc74a9"
+  },
+  "contracts": {
+    "native": {
+      "passed": 189,
+      "total": 189,
+      "seconds": 902.11,
+      "privateLabel": "desktop-appdata-native-final"
+    },
+    "browser": {
+      "passed": 226,
+      "total": 226
+    },
+    "editor": {
+      "passed": 543,
+      "total": 543
+    },
+    "sourceInputFiles": 23913,
+    "runtimeInputFiles": 23340,
+    "sourceRuntimeEnvironmentAndToolsUnchanged": true,
+    "firstFailed188Of189Retained": true,
+    "publicationContractTestUnmodified": true
+  },
+  "installed": {
+    "regular": {
+      "at": "2026-11-04T04:45:56.994Z",
+      "installed": "C:/Users/shaw9/.vscode/extensions/agentflow-local.agentflow-0.1.87",
+      "version": "0.1.87",
+      "verifiedUnmodifiedMembers": 2919,
+      "totalInstalledFiles": 2921,
+      "completeInstalledFileSetVerified": true,
+      "relocatedVsixMetadataHashVerified": true,
+      "manifestSemanticallyEqual": true,
+      "installerMetadataAdded": true,
+      "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
+      "nativeFiles": 2875
+    },
+    "codeServer": {
+      "at": "2026-11-04T04:45:58.572Z",
+      "installed": "D:/CantorAI2026/xMind/.agentflow/rendered-vscode-server/server-data/extensions/agentflow-local.agentflow-0.1.87",
+      "version": "0.1.87",
+      "verifiedUnmodifiedMembers": 2919,
+      "totalInstalledFiles": 2921,
+      "completeInstalledFileSetVerified": true,
+      "relocatedVsixMetadataHashVerified": true,
+      "manifestSemanticallyEqual": true,
+      "installerMetadataAdded": true,
+      "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
+      "nativeFiles": 2875
+    },
+    "actualRegularRuntimeLoaded": true,
+    "codeServer87RenderedCoding": "Not repeated; retained actual86 Code Server receipt remains historical evidence"
+  },
+  "actualDesktop": {
+    "workspace": "D:/CantorAI2026/TestProj/webui-project-tests-20261025/cantorserve-20261103-expense",
+    "session": "c3a3c3f9fa2b4ad88a6ef13387438fc8",
+    "root": "7391d734bcb2442cb933f17e57a1a214",
+    "viewPidBeforeReload": 48412,
+    "backendPid": 50000,
+    "backendBirth": "134382033024934914",
+    "backendGenerationUnchanged": true,
+    "model": {
+      "model_id": "qwen3.8-27b-chat-32k",
+      "profile_id": "openai-compatible-cdb563ab-2fc5-4e10-8495-ce05054e9d25",
+      "profile_revision": 1,
+      "provider": "openai-compatible",
+      "route_id": "openai.compatible",
+      "wire": "chat-completions"
+    },
+    "state": "completed",
+    "events": 308,
+    "operations": [
+      {
+        "id": "a4075935a74687954e1baa58d4bb4063",
+        "tool": "replace_file",
+        "state": "succeeded",
+        "arguments": {
+          "after_content": "\"\"\"Command-line interface for the expense_report package.\"\"\"\n\nimport argparse\nimport json\nimport sys\n\nfrom expense_report import summarize_csv\n\n__version__ = \"0.1.9\"\n\n\ndef build_parser():\n    parser = argparse.ArgumentParser(\n        prog=\"xlang3 -m expense_report\",\n        description=\"Summarize an expense CSV file by category and print the result as JSON.\",\n        epilog=\"Example: xlang3 -m expense_report example.csv\",\n    )\n    parser.add_argument(\"input\", help=\"path to the input CSV file with category and amount columns\")\n    parser.add_argument(\"--pretty\", action=\"store_true\", help=\"print the JSON result with indentation\")\n    parser.add_argument(\"--version\", action=\"version\", version=__version__)\n    return parser\n\n\ndef main(argv=None):\n    parser = build_parser()\n    args = parser.parse_args(argv)\n    try:\n        with open(args.input, \"r\", encoding=\"utf-8\") as handle:\n            text = handle.read()\n    except OSError as exc:\n        print(f\"error: cannot read {args.input}: {exc}\", file=sys.stderr)\n        return 1\n    try:\n        result = summarize_csv(text)\n    except ValueError as exc:\n        print(f\"error: invalid input: {exc}\", file=sys.stderr)\n        return 1\n    if args.pretty:\n        print(json.dumps(result, indent=2))\n    else:\n        print(json.dumps(result))\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n",
+          "after_sha256": "c2691a2ec666df5d261b02f794d6deecdac66d5b7104809a5ffce75cf5a50dc9",
+          "before_content": "\"\"\"Command-line interface for the expense_report package.\"\"\"\n\nimport argparse\nimport json\nimport sys\n\nfrom expense_report import summarize_csv\n\n__version__ = \"0.1.8\"\n\n\ndef build_parser():\n    parser = argparse.ArgumentParser(\n        prog=\"xlang3 -m expense_report\",\n        description=\"Summarize an expense CSV file by category and print the result as JSON.\",\n        epilog=\"Example: xlang3 -m expense_report example.csv\",\n    )\n    parser.add_argument(\"input\", help=\"path to the input CSV file with category and amount columns\")\n    parser.add_argument(\"--pretty\", action=\"store_true\", help=\"print the JSON result with indentation\")\n    parser.add_argument(\"--version\", action=\"version\", version=__version__)\n    return parser\n\n\ndef main(argv=None):\n    parser = build_parser()\n    args = parser.parse_args(argv)\n    try:\n        with open(args.input, \"r\", encoding=\"utf-8\") as handle:\n            text = handle.read()\n    except OSError as exc:\n        print(f\"error: cannot read {args.input}: {exc}\", file=sys.stderr)\n        return 1\n    try:\n        result = summarize_csv(text)\n    except ValueError as exc:\n        print(f\"error: invalid input: {exc}\", file=sys.stderr)\n        return 1\n    if args.pretty:\n        print(json.dumps(result, indent=2))\n    else:\n        print(json.dumps(result))\n    return 0\n\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n",
+          "before_sha256": "ed9dc6bd25985dcb988a28bf4671d0585de68c3ee21727d25c43403f3ab66421",
+          "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0300000000000000dcff110000000000",
+          "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "path": "expense_report/__main__.py",
+          "replaced_occurrences": 1,
+          "repository_guidance": {
+            "directory": "expense_report",
+            "sources": [],
+            "version": 1
+          },
+          "target_workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "workspace_revision": 1
+        },
+        "result": {
+          "after_sha256": "c2691a2ec666df5d261b02f794d6deecdac66d5b7104809a5ffce75cf5a50dc9",
+          "before_sha256": "ed9dc6bd25985dcb988a28bf4671d0585de68c3ee21727d25c43403f3ab66421",
+          "file_id": "windows-local-file-v1:10ca0a03ca09e5b6:0300000000000000dcff110000000000",
+          "path": "expense_report/__main__.py",
+          "size": 1368,
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000"
+        }
+      },
+      {
+        "id": "6ad539335ecea89de5758c3a08d150cb",
+        "tool": "run_process",
+        "state": "succeeded",
+        "arguments": {
+          "arguments": [
+            "-B",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-v"
+          ],
+          "background": false,
+          "directory_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "executable": "D:/CantorAI2026/xMind/.agentflow/acceptance-runtime-20261103/xlang3.exe",
+          "executable_id": "windows-local-executable-v1:windows-local-file-v1:10ca0a03ca09e5b6:04000000000000006eb4110000000000:5c7f0f824754870bbaf3dec3db849912ef0b67fca8aed1441a5a71303ddfd897",
+          "folder_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "output_limit": 65536,
+          "persistent": false,
+          "profile_id": "xlang3",
+          "profile_revision": 3,
+          "repository_guidance": {
+            "directory": ".",
+            "sources": [],
+            "version": 1
+          },
+          "target_workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "timeout_ms": 120000,
+          "workdir": ".",
+          "workspace_id": "windows-local-file-v1:10ca0a03ca09e5b6:0000000000000000cfb5110000000000",
+          "workspace_revision": 1,
+          "environmentOverrideCount": 4
+        },
+        "result": {
+          "elapsed_ms": 1438,
+          "exit_code": 0,
+          "independently_verified": false,
+          "job_id": "6ad539335ecea89de5758c3a08d150cb",
+          "operation_id": "6ad539335ecea89de5758c3a08d150cb",
+          "output_artifact": {
+            "operation_id": "6ad539335ecea89de5758c3a08d150cb",
+            "state": "complete",
+            "stderr_bytes": 701,
+            "stdout_bytes": 0
+          },
+          "pid": 48856,
+          "process_tree_retired": true,
+          "profile_id": "xlang3",
+          "stderr": {
+            "byte_count": 701,
+            "data": "test_cli (test_expense_report.ExpenseReportTests.test_cli) ... ok\r\ntest_decimal_arithmetic_and_negative_amount (test_expense_report.ExpenseReportTests.test_decimal_arithmetic_and_negative_amount) ... ok\r\ntest_grouped_totals (test_expense_report.ExpenseReportTests.test_grouped_totals) ... ok\r\ntest_invalid_rows (test_expense_report.ExpenseReportTests.test_invalid_rows) ... ok\r\ntest_missing_columns (test_expense_report.ExpenseReportTests.test_missing_columns) ... ok\r\ntest_quoted_unicode_trim_and_blank_rows (test_expense_report.ExpenseReportTests.test_quoted_unicode_trim_and_blank_rows) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 6 tests in 0.533s\r\n\r\nOK\r\n",
+            "encoding": "utf-8",
+            "retained_bytes": 701
+          },
+          "stdout": {
+            "byte_count": 0,
+            "data": "",
+            "encoding": "utf-8",
+            "retained_bytes": 0
+          },
+          "termination": "exited",
+          "truncated": false
+        }
+      }
+    ],
+    "testsPassed": 6,
+    "testsUnchanged": true,
+    "finalAnswerDelivered": true,
+    "workerPid": 54388,
+    "commandPid": 48856,
+    "workerAndCommandPidsObservedAbsent": true,
+    "leaseRetired": {
+      "generation": "2366148c0804429beb9743886ef781e6",
+      "reason": "completed",
+      "uncertain_model_dispatches": 0
+    },
+    "editorAutoRefresh": {
+      "visuallyVerified": true,
+      "from": "0.1.8",
+      "to": "0.1.9",
+      "reloadOrManualRefreshUsed": false,
+      "pixelScreenshot": "regular-desktop-editor-autorefresh-20261103.png",
+      "accessibilityValueInitiallyStale": true
+    },
+    "reload": {
+      "at": "2026-11-04T04:42:43.993Z",
+      "actualRegularDesktopReload": true,
+      "renderedHistoryExactlyEqual": true,
+      "normalizedHistoryCharacters": 2243,
+      "normalizedHistorySha256": "0f98fefc108b871ae9c918f8b1a390fced8003c3c7bbd65aecc751b3066326d0",
+      "selectedRoot": "7391d734bcb2442cb933f17e57a1a214",
+      "savedProviderRestored": true,
+      "modelRestored": "qwen3.8-27b-chat-32k",
+      "defaultPermissionsRestored": true,
+      "fullRecordsFilesAndRuntimeDirectoriesExact": true,
+      "newModelCalls": 0,
+      "replayedEffects": 0,
+      "screenshot": "regular-desktop-coding-reloaded-20261103.png"
+    },
+    "http": [
+      {
+        "request_id": "294d0c73e6c04c1ba5d50e107dac08a7",
+        "status": 200
+      },
+      {
+        "request_id": "1904220f46984907a156be1cd70ac997",
+        "status": 200
+      },
+      {
+        "request_id": "aa0d3373f2714df89c5e13fc24d8472a",
+        "status": 200
+      },
+      {
+        "request_id": "154a2d5b9ae045d6b4b632e9cacfc286",
+        "status": 200
+      },
+      {
+        "request_id": "a39a3b237c9a45eaa9cc3337cbe85da2",
+        "status": 200
+      },
+      {
+        "request_id": "7b8d747463144618b9cc9e9a9f568a83",
+        "status": 200
+      }
+    ],
+    "usage": {
+      "input": 53182,
+      "output": 505,
+      "total": 53687
+    },
+    "usageSource": "Six provider-supplied model.usage records; no monetary estimate",
+    "budgetsChanged": false
+  },
+  "preservation": {
+    "at": "2026-11-04T04:44:07.719Z",
+    "label": "restored",
+    "totals": {
+      "sessions": 4,
+      "messages": 135,
+      "roots": 16,
+      "events": 2206,
+      "operations": 29,
+      "files": 6
+    },
+    "allPriorRecordsExact": true,
+    "configsExact": true,
+    "temporarySettingsVerified": false,
+    "runtimeDirectoriesExact": true,
+    "owner": {
+      "process_birth": "134382033024934914",
+      "process_id": 50000
+    },
+    "mainVersion": "0.1.9",
+    "mainSha256": "c2691a2ec666df5d261b02f794d6deecdac66d5b7104809a5ffce75cf5a50dc9",
+    "freshSession": "c3a3c3f9fa2b4ad88a6ef13387438fc8",
+    "freshRuns": [
+      {
+        "id": "7391d734bcb2442cb933f17e57a1a214",
+        "state": "completed",
+        "events": 308,
+        "operations": 2
+      }
+    ],
+    "trace": "D:/CantorAI2026/xMind/.agentflow/blockers-20261102/candidate87-preservation-restored.json.gz",
+    "ownerExecutablesPinnedForReadOnlyAudits": true,
+    "allPriorThreeSessionsAndFifteenRootsExact": true,
+    "cold": {
+      "at": "2026-11-04T04:46:38.088Z",
+      "coldFullRecordsExactlyPreserved": true,
+      "coldMessages": 5,
+      "coldRoots": 3,
+      "coldEvents": 28,
+      "coldOperations": 0,
+      "gitSessionsUnchanged": 0,
+      "pinnedExistingOwnerExecutablesUsed": true,
+      "modelCalls": 0
+    },
+    "gitFiles": {
+      "at": "2026-11-04T04:47:39.228Z",
+      "allFourFilesExact": true,
+      "files": {
+        "README.md": "7820950133f3aec202bff7b4d5d59ca95debbdd7f6c9c1e5e841032167bd28c9",
+        "tracked.txt": "85462b6c455d4c172d9613a91ac661f5efd3bb54cc7170a7b840c358d15d70b6",
+        "staged.txt": "02ee784c923c0252219107c70867324564e9a37b8f0e7977f3c3311a9d4e135b",
+        "notes λ.txt": "612c97d7a619838515d7c644458e567ed590eaca67cece50bf863c56a1f0a420"
+      }
+    },
+    "backups": {
+      "at": "2026-11-04T04:45:55.312Z",
+      "allExact": true,
+      "files": [
+        {
+          "name": "regular-code-rollback-0.1.75.zip",
+          "bytes": 35455555,
+          "sha256": "63e9cf8b541ed629166984beb81ab4984aa1c1efcca1786f938041fadb1ebaf4"
+        },
+        {
+          "name": "regular-code-rollback-0.1.76.zip",
+          "bytes": 35501207,
+          "sha256": "ca605fde80ed29fff91e6128e4f888e733b8d02612c4d86a277791fc19515d82"
+        },
+        {
+          "name": "regular-code-rollback-0.1.80.zip",
+          "bytes": 35239039,
+          "sha256": "d0a3e0389d5beca24630408cbbae1b0e4994017bc6c57e19fa17b92145afedf3"
+        },
+        {
+          "name": "xmind-0.1.86-candidate.vsix",
+          "bytes": 37185177,
+          "sha256": "6f5aaba88b911439f0067fc94678961458e7687462861a4f2b1092aa01b29223"
+        }
+      ]
+    },
+    "regularSettingsRestoredBytewise": true,
+    "originalGitWorkspaceAndUnchangedBufferObserved": true,
+    "originalSettingsSha256": "5ebaae377da6f275bccf11baa53946a6c0e7ad2fc0d7f24acabae040cf60043b",
+    "noNewManagedRuntimeDirectory": true,
+    "mainOnlyVersionChanged": true
+  },
+  "previousEvidence": {
+    "release86": "candidate86-release-20261103.json",
+    "requestTimeoutD114": "Still uncorrelated; these successful request IDs do not identify that earlier failure",
+    "cleanup": "Twelve earlier blocked targets retained; no alternate deletion route"
+  },
+  "notReplayed": [
+    "9d2dfdde884d4fcbbcbc8adb0aabf266",
+    "5d218554c80f4333b150d011cd226477",
+    "948c88ab48e24126808616a713b5311e",
+    "753db94c51a54791b850ecbd74ba2d65",
+    "4f0c5547d86c414db02b5af7c1069324",
+    "d114abd36fd84c4f9c3ac3a2dda54ffb",
+    "a1c5735019644a9792c98ff5d341e7ec",
+    "0ab1299f29e14edfb4a9838d38f6618f",
+    "a0e1eab0c0854143a1f04aa02d076513",
+    "2cd8ee2992ac0fcec5c4b986919ce904",
+    "9be6562d347b4d45bc9afd3be323c5d7",
+    "1260348f29454dc4b43a8cf288bdc044",
+    "e1039d8e044743528185de8ea5fb1a46",
+    "fee2d7795dd14494ba43876be9bd898e",
+    "eddd7a1daf8d9225b4987a0fcef20904",
+    "7391d734bcb2442cb933f17e57a1a214"
+  ]
+}

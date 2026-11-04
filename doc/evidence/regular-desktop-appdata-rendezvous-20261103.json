@@ -1,8 +1,8 @@
 {
   "at": "2026-11-04T03:40:08.717Z",
   "scope": "Reopened regular desktop VS Code acceptance; prior release scope retained",
-  "releaseAccepted": false,
-  "desktopModelAcceptance": false,
+  "releaseAccepted": true,
+  "desktopModelAcceptance": true,
   "failedInstalledVersion": "0.1.86",
   "failure": {
     "actualDesktop": "Native view did not become ready",
@@ -62,9 +62,18 @@
       "sourceRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
       "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
       "installed": true,
-      "releaseAccepted": false
+      "releaseAccepted": true
     },
-    "actualRegularDesktopCoding": "Pending; native computer-use tool recorded physical Escape stop before verification. Resume question is pending.",
+    "actualRegularDesktopCoding": {
+      "passed": true,
+      "session": "c3a3c3f9fa2b4ad88a6ef13387438fc8",
+      "root": "7391d734bcb2442cb933f17e57a1a214",
+      "testsPassed": 6,
+      "workerRetired": true,
+      "editorVisiblyAutoRefreshed": true,
+      "fullReloadHistoryExactlyEqual": true,
+      "zeroReplayAndNewInference": true
+    },
     "firstFullNative": {
       "passed": 188,
       "total": 189,
@@ -133,11 +142,11 @@
         "nativeFiles": 2875
       },
       "guiWindowsOpenedSwitchedOrReloaded": false,
-      "runtimeLoadedInDesktop": "not yet verified"
+      "runtimeLoadedInDesktop": "Verified actual0.1.87 native view48412 and successful fresh coding/reload"
     }
   },
   "preservation": {
-    "newModelCalls": 0,
+    "newModelCalls": 6,
     "regularSettingsRestoredBytewise": true,
     "regularWorkspaceRestored": true,
     "baseline": {
@@ -150,8 +159,8 @@
     "beforeSnapshot": "candidate86-preservation-desktop-before.json.gz",
     "runPathsChanged": false,
     "sdkOrIPCChanged": false,
-    "verifiedAt": "2026-11-04T04:27:06.391Z",
-    "latestImmutableSnapshot": "candidate87-preservation-installed-before.json.gz",
+    "verifiedAt": "2026-11-04T04:44:07.719Z",
+    "latestImmutableSnapshot": "candidate87-preservation-restored.json.gz",
     "allPriorRecordsExact": true,
     "configsExact": true,
     "runtimeDirectoriesExact": true,
@@ -185,13 +194,30 @@
         }
       ],
       "newModelCalls": 0
-    }
+    },
+    "baselineBeforeDesktop": {
+      "sessions": 3,
+      "messages": 119,
+      "roots": 15,
+      "events": 1898,
+      "operations": 27
+    },
+    "current": {
+      "sessions": 4,
+      "messages": 135,
+      "roots": 16,
+      "events": 2206,
+      "operations": 29,
+      "files": 6
+    },
+    "mainVersion": "0.1.9",
+    "mainSha256": "c2691a2ec666df5d261b02f794d6deecdac66d5b7104809a5ffce75cf5a50dc9"
   },
   "mains": {
     "xmind": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
     "xlang3": "6186ffa61203789ed8ff18669c81fff32125259c"
   },
-  "updatedAt": "2026-11-04T04:29:02.841Z",
+  "updatedAt": "2026-11-04T04:48:16.838Z",
   "productRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
   "providerReadiness": {
     "recheckedThroughActualPortal": true,
@@ -202,5 +228,6 @@
     "capacityPerProvider": "1 / 1",
     "screenshot": "cantorserve-provider-ready-desktop-20261103.png",
     "newModelRequests": 0
-  }
+  },
+  "releaseReceipt": "candidate87-release-20261103.json"
 }
