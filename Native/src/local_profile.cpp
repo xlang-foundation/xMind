@@ -231,14 +231,16 @@ class Store {
     Security security;
     fs::path directory;
     std::vector<Handle> ancestors;
-    explicit Store(fs::path path, bool create = false) : directory(std::move(path)) {
+    explicit Store(fs::path path, bool create = false, bool fresh_view = false)
+        : directory(std::move(path)) {
         auto part = directory.root_path();
         for (const auto &component : directory.relative_path()) {
             part /= component;
             const auto native_part = extended(part);
+            bool created = false;
             if (create && !fs::exists(fs::path(native_part))) {
-                require(CreateDirectoryW(native_part.c_str(), &security.attributes) != 0 ||
-                            GetLastError() == ERROR_ALREADY_EXISTS,
+                created = CreateDirectoryW(native_part.c_str(), &security.attributes) != 0;
+                require(created || GetLastError() == ERROR_ALREADY_EXISTS,
                         "Cannot create protected local profile directory");
             }
             Handle held(CreateFileW(native_part.c_str(), FILE_READ_ATTRIBUTES | READ_CONTROL,
@@ -252,9 +254,20 @@ class Store {
             require(!(info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT),
                     "Local profile path component is a reparse point: " + text(part));
             const auto resolved = final_path(held.value);
-            require(same(resolved, part.native()),
-                    "Local profile path component resolves to a different directory: " + text(part) +
-                        " -> " + text(fs::path(resolved)));
+            if (!same(resolved, part.native())) {
+                require(fresh_view && created && part == directory,
+                        "Local profile path component resolves to a different directory: " + text(part) +
+                            " -> " + text(fs::path(resolved)));
+                // MSIX can redirect a new AppData write without a reparse point.
+                // Only a leaf created here with our protected user DACL may be
+                // rebound. Reopen its physical chain with every ordinary guard;
+                // existing aliases and all profile storage retain strict rules.
+                security.verify(held.value);
+                Store physical{fs::path(resolved)};
+                directory = physical.directory;
+                ancestors = std::move(physical.ancestors);
+                return;
+            }
             ancestors.push_back(std::move(held));
         }
         require(!ancestors.empty());
@@ -1339,29 +1352,36 @@ void publish_managed_web_port(const std::string& directory,int port){
     require(state.at("phase")=="ready"&&state.at("pid")==GetCurrentProcessId()&&state.at("birth")==inspect_owner_process_birth(GetCurrentProcessId())&&state.at("runtime")==loaded_root(),"Browser port requires its exact managed owner");
     state["web_port"]=port;store.write(state);
 }
-void validate_local_view_ready(const std::string &file, const std::string &workspace_root) {
+std::string validate_local_view_ready(const std::string &file, const std::string &workspace_root) {
     const auto target = absolute(file);
     WorkspaceTools workspace(workspace_root);
     require(!contains(absolute(workspace.root_path()), target.parent_path()) &&
                 !contains(target.parent_path(), absolute(workspace.root_path())),
             "View rendezvous overlaps the selected workspace");
-    Store store(target.parent_path(), true);
-    require(!fs::exists(target), "View rendezvous already exists; its data was preserved");
+    Store store(target.parent_path(), true, true);
+    require(!contains(absolute(workspace.root_path()), store.directory) &&
+                !contains(store.directory, absolute(workspace.root_path())),
+            "Physical view rendezvous overlaps the selected workspace");
+    const auto physical = store.directory / target.filename();
+    require(!fs::exists(physical), "View rendezvous already exists; its data was preserved");
+    return text(physical);
 }
 void publish_local_view_ready(const std::string &file, const std::string &metadata,
                               const std::string &workspace_root) {
-    validate_local_view_ready(file, workspace_root);
-    const auto target = absolute(file);
+    const auto target = absolute(validate_local_view_ready(file, workspace_root));
     Store store(target.parent_path());
-    const auto value = parse(metadata);
+    auto value = parse(metadata);
     require(value.is_object() && !value.contains("auth") && !value.contains("token") &&
-            metadata.size() <= 16384);
+            !value.contains("rendezvous_directory") && metadata.size() <= 16384);
+    value["rendezvous_directory"] = text(store.directory);
+    const auto published = value.dump();
+    require(published.size() <= 16384);
     const auto pending = wide("view-" + random_id() + ".tmp");
     auto output = store.open(pending.c_str(), GENERIC_WRITE, CREATE_NEW);
     DWORD written = 0;
     require(
-        WriteFile(output.value, metadata.data(), static_cast<DWORD>(metadata.size()), &written, nullptr) &&
-        written == metadata.size() && FlushFileBuffers(output.value));
+        WriteFile(output.value, published.data(), static_cast<DWORD>(published.size()), &written, nullptr) &&
+        written == published.size() && FlushFileBuffers(output.value));
     CloseHandle(output.value);
     output.value = INVALID_HANDLE_VALUE;
     // Existence is the readiness signal. Publish only the complete, closed

@@ -245,7 +245,7 @@ int run_local_view_impl(int argc, char **argv,std::shared_ptr<agentflow::LocalPr
         // package differs. Only an explicit --upgrade-backend requests handoff;
         // active native work can still defer that requested upgrade safely.
         options.defer_busy_upgrade = true;
-        agentflow::validate_local_view_ready(ready, options.workspace);
+        ready = agentflow::validate_local_view_ready(ready, options.workspace);
         require(trusted_provider_config.empty() ||
                     std::filesystem::path(trusted_provider_config).is_absolute(),
                 "Trusted provider configuration path must be absolute");

@@ -197,6 +197,26 @@ test('a published rendezvous directory alias is refused before authentication',a
  await assert.rejects(h.manager.connect(),/different directory/);assert.equal(h.launches.length,1);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
 });
 
+test('native-published physical rendezvous preserves the fresh nonce and authenticates normally',async()=>{
+ const physical='C:\\PackageCache\\native-view-'+('1'.padStart(32,'0'));
+ const h=harness({alias:value=>/\\native-view-[a-f0-9]{32}$/.test(value)?physical:value,ready:info=>{info.rendezvous_directory=physical;}});
+ const owner=await h.manager.connect();assert.equal(owner.privateDirectory,physical);assert.equal(owner.child.kills,0);assert.equal(h.secrets.get('xmind.auth:'+owner.origin),'c'.repeat(64));
+});
+
+test('physical rendezvous requires native metadata for the exact resolved path and original fresh nonce',async()=>{
+ const nonce='1'.padStart(32,'0');
+ for(const [physical,published] of [['C:\\PackageCache\\native-view-'+nonce,'C:\\Other\\native-view-'+nonce],['C:\\PackageCache\\different-leaf','C:\\PackageCache\\different-leaf'],['C:\\PackageCache\\native-view-'+nonce,1]]){
+  const h=harness({alias:value=>/\\native-view-[a-f0-9]{32}$/.test(value)?physical:value,ready:info=>{info.rendezvous_directory=published;}});
+  await assert.rejects(h.manager.connect(),/different directory/);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
+ }
+});
+
+test('native-published physical rendezvous cannot overlap another opened workspace folder',async()=>{
+ const physical='C:\\OtherFolder\\native-view-'+('1'.padStart(32,'0'));
+ const h=harness({folders:[folder('Example','D:\\Projects\\Example'),folder('Other','C:\\OtherFolder')],alias:value=>/\\native-view-[a-f0-9]{32}$/.test(value)?physical:value,ready:info=>{info.rendezvous_directory=physical;}});
+ await assert.rejects(h.manager.connect(),/inside an opened workspace/);assert.equal(h.launches[0].child.kills,1);assert.equal(h.secrets.size,0);
+});
+
 
 test('loopback Code server connects to its local file workspace and still fences trust and host changes',async()=>{
  const h=harness({remote:'127.0.0.1:50495'}),owner=await h.manager.connect();

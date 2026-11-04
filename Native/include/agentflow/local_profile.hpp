@@ -59,7 +59,9 @@ void publish_local_profile_ready(const std::string &state_file, int port, const 
                                  const std::string &workspace, const std::string &workspace_id,
                                  const std::string &authority,const std::string &ipc_endpoint={});
 // Publish only public adapter metadata outside the selected workspace.
-void validate_local_view_ready(const std::string &file, const std::string &workspace);
+// Returns the protected physical rendezvous path. A fresh native-owned leaf
+// may be redirected by MSIX; existing aliases and profile paths stay rejected.
+std::string validate_local_view_ready(const std::string &file, const std::string &workspace);
 void publish_local_view_ready(const std::string &file, const std::string &metadata,
                               const std::string &workspace);
 } // namespace agentflow

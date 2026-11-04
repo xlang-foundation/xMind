@@ -218,11 +218,19 @@ class WorkspaceBackend {
         try{const errorFile=path.win32.join(directory,'error.json'),info=await this.deps.fs.lstat(errorFile);if(info.isFile()&&!info.isSymbolicLink()&&info.nlink===1&&info.size<=4096){const error=JSON.parse(await this.deps.fs.readFile(errorFile,'utf8'));if(error.process_id===child.pid&&error.error_code==='native_view_startup_failed'&&typeof error.detail==='string'&&error.detail.length>0&&error.detail.length<=1024)detail=error.detail;}}catch{}
         throw new Error(detail);
       }
-      if(keyPath(canonicalPath(await this.deps.fs.realpath(directory)))!==keyPath(directory))throw new Error('View rendezvous resolves to a different directory.');
+      const physicalDirectory=canonicalPath(await this.deps.fs.realpath(directory));
+      // Native alone creates the fresh protected leaf and validates its entire
+      // physical path. MSIX can redirect that creation without a reparse point.
+      // Accept a relocation only when native published that exact destination
+      // with our fresh nonce; retain the collision and all-folder overlap guards.
+      if((keyPath(physicalDirectory)!==keyPath(directory)||metadata.rendezvous_directory!==undefined)&&
+        (typeof metadata.rendezvous_directory!=='string'||keyPath(canonicalPath(metadata.rendezvous_directory))!==keyPath(physicalDirectory)||
+         path.win32.basename(physicalDirectory)!==path.win32.basename(directory)))throw new Error('View rendezvous resolves to a different directory.');
+      if(roots.some(root=>contained(root,physicalDirectory)||contained(physicalDirectory,root)))throw new Error('View rendezvous resolves inside an opened workspace.');
       if(metadata.process_id!==child.pid||typeof metadata.process_birth!=='string'||!/^[1-9][0-9]{0,19}$/.test(metadata.process_birth)||!Number.isSafeInteger(metadata.backend_process_id)||metadata.backend_process_id<1||!/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}$/.test(metadata.origin))throw new Error('Native view process metadata differs.');
       const actual=workspaceMetadata(metadata.workspace),profileDirectory=canonicalPath(metadata.profile_directory);
       if(!actual.configured||keyPath(actual.root)!==keyPath(canonical)||roots.some(root=>contained(root,profileDirectory)||contained(profileDirectory,root)))throw new Error('Native workspace or private profile differs from the opened folder set.');
-      owner={origin:metadata.origin,canonical,scope,metadata:actual,child,pid:child.pid,backendPid:metadata.backend_process_id,privateDirectory:directory,profileDirectory,runtime};
+      owner={origin:metadata.origin,canonical,scope,metadata:actual,child,pid:child.pid,backendPid:metadata.backend_process_id,privateDirectory:physicalDirectory,profileDirectory,runtime};
       await this.context.secrets.store('xmind.auth:'+owner.origin,token);
       await this.observe(owner);
       await this.importProviders(owner.origin,token,runtime.providerConfig);
