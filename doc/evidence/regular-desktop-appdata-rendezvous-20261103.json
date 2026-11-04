@@ -36,10 +36,35 @@
       "removed": 0,
       "environmentAndToolsUnchanged": true
     },
-    "newFullNative": "fresh complete native-final gate pending",
-    "newFullEditor": "pending",
-    "package": "pending",
-    "actualRegularDesktopCoding": "pending",
+    "newFullNative": {
+      "passed": 189,
+      "total": 189,
+      "seconds": 902.11,
+      "inputs": 23913,
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "environmentAndToolsUnchanged": true,
+      "privateLabel": "desktop-appdata-native-final"
+    },
+    "newFullEditor": {
+      "passed": 543,
+      "total": 543
+    },
+    "package": {
+      "version": "0.1.87",
+      "sha256": "4aa073480301131e0ad540fcd8436af6bb034c0390950f53e4049d7595832799",
+      "archiveBytes": 37187204,
+      "members": 2922,
+      "nativeMembers": 2876,
+      "completeMemberVerification": true,
+      "manifestSha256": "68d2b1336e83163095ad880377ed1d5f505e4cae961ae794c455c7d0ccc0df19",
+      "sourceRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
+      "sdkRevision": "92aaafb56d89ea15d42eaac74a9ce9ae23c43050",
+      "installed": false,
+      "releaseAccepted": false
+    },
+    "actualRegularDesktopCoding": "Pending; native computer-use tool recorded physical Escape stop before verification. Resume question is pending.",
     "firstFullNative": {
       "passed": 188,
       "total": 189,
@@ -66,6 +91,19 @@
       "added": 0,
       "removed": 0,
       "environmentAndToolsUnchanged": true
+    },
+    "newFullBrowser": {
+      "passed": 226,
+      "total": 226
+    },
+    "clientClosure": {
+      "sourceInputFiles": 23913,
+      "runtimeInputFiles": 23340,
+      "changed": 0,
+      "added": 0,
+      "removed": 0,
+      "environmentAndToolsUnchanged": true,
+      "privateLabel": "desktop-appdata-clients-qualified"
     }
   },
   "preservation": {
@@ -81,10 +119,58 @@
     },
     "beforeSnapshot": "candidate86-preservation-desktop-before.json.gz",
     "runPathsChanged": false,
-    "sdkOrIPCChanged": false
+    "sdkOrIPCChanged": false,
+    "verifiedAt": "2026-11-04T04:22:07.997Z",
+    "latestImmutableSnapshot": "candidate87-preservation-package-before.json.gz",
+    "allPriorRecordsExact": true,
+    "configsExact": true,
+    "runtimeDirectoriesExact": true,
+    "owner": {
+      "process_birth": "134382033024934914",
+      "process_id": 50000
+    },
+    "existingOwnerCheck": {
+      "at": "2026-11-04T04:24:10.307Z",
+      "allFiveExistingOwnersVerified": true,
+      "owners": [
+        {
+          "process_birth": "134382033024934914",
+          "process_id": 50000
+        },
+        {
+          "process_birth": "134381868661814000",
+          "process_id": 14932
+        },
+        {
+          "process_birth": "134381979678344628",
+          "process_id": 17052
+        },
+        {
+          "process_birth": "134382076261413074",
+          "process_id": 3840
+        },
+        {
+          "process_birth": "134382115986759185",
+          "process_id": 43716
+        }
+      ],
+      "newModelCalls": 0
+    }
   },
   "mains": {
     "xmind": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
     "xlang3": "6186ffa61203789ed8ff18669c81fff32125259c"
+  },
+  "updatedAt": "2026-11-04T04:23:33.656Z",
+  "productRevision": "fea618e18f7b09dd455d5d1e1082b7054e1cff3e",
+  "providerReadiness": {
+    "recheckedThroughActualPortal": true,
+    "alias": "qwen3.8-27b-chat-32k",
+    "providerModel": "qwen38_27b_nvfp4_chat_32k_v2",
+    "node": "rtx5090",
+    "readyProviders": 2,
+    "capacityPerProvider": "1 / 1",
+    "screenshot": "cantorserve-provider-ready-desktop-20261103.png",
+    "newModelRequests": 0
   }
 }
