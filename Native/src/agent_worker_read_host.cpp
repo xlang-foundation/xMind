@@ -30,6 +30,7 @@ AgentReadToolResult AgentWorkerReadHost::invoke(const AgentWorkspaceInvocation& 
     try{if(is_agent_guidance_tool(call.tool_name)){const auto actual=guidance_->invoke(call,stop.get_token());result={actual.success,actual.output_json};}else result=native_->invoke(call,stop.get_token());}
     catch(const AgentPermissionDenied&){result={false,R"({"error":{"code":"agent_permission_denied","message":"The selected agent permission rules denied this resource; the tool was not dispatched"}})"};}
     catch(const PermissionDenied&){result={false,R"({"error":{"code":"permission_denied","message":"Controller denied this operation; the requested effect was not dispatched"}})"};}
+    catch(const ToolAccessDenied&){result={false,R"({"error":{"code":"access_denied","message":"Workspace policy denied this operation"}})"};}
     catch(...){const auto original=std::current_exception();save({false,R"({"error":{"code":"worker_read_failed","message":"The backend read did not return a result."}})"});std::rethrow_exception(original);}
     save(result);
     // Retain an actual late result as fact, but do not hand its bytes to a
