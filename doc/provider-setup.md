@@ -46,6 +46,22 @@ synthetic peer. It does not claim live account or per-model acceptance.
 
 ## Local YAML configuration and native profile integration
 
+For the public CantorServe endpoint, use `https://serve.cantorai.com/v1` as
+the trusted `openai_compatible.base_url`. Omit both `model` and `models` from
+that route to discover the server's current `/models` catalogue with the saved
+key. Also omit the profile's optional `model` when no initial selection is
+intended. An exact `models` mapping is an explicit whitelist, not automatic
+server discovery. Selecting a discovered model in the UI does not change past
+runs: each run retains its captured model and provider revision.
+
+The public endpoint returned 17 model IDs during the November 25 local trial.
+That standard catalogue does not establish readiness, free capacity, context
+limits or per-model tool support. CantorServe's separate authenticated
+`/cantor/v1/models` metadata reports those details; the generic compatible
+adapter does not infer them from model names. Declare route capabilities only
+for the server/models being tested and select a suitable available chat model.
+Keep the key in private configuration or the encrypted saved profile.
+
 Trusted local provider YAML can register an OpenAI-compatible Chat Completions
 endpoint. The base URL includes the API prefix, such as `/v1`; Native appends
 `/models` and `/chat/completions`. For example:
