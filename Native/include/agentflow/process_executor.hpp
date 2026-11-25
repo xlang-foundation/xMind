@@ -11,6 +11,11 @@
 
 namespace agentflow {
 struct ProcessOutcomeUnrecorded : std::runtime_error {using std::runtime_error::runtime_error;};
+struct ProcessTimeoutLimitExceeded : std::invalid_argument {
+    explicit ProcessTimeoutLimitExceeded(std::int64_t maximum)
+        :std::invalid_argument("Process timeout exceeds profile budget"),max_timeout_ms(maximum){}
+    const std::int64_t max_timeout_ms;
+};
 struct ProcessProfile {
     std::string id,executable;
     std::int64_t revision;

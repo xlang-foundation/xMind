@@ -57,7 +57,8 @@ public:
             if(owner_.before_effect)guidance.before_effect=[check=owner_.before_effect,call](const std::string& operation,std::stop_token token){check(call,operation,token);};
             AgentProcessInvocation invocation;invocation.operation_id=operation_id();invocation.run_id=owner_.run_id;invocation.workspace_id=workspace_id_;invocation.workspace_revision=revision_;invocation.folder_id=call.folder_id;invocation.arguments_json=call.arguments_json;invocation.allow_background=owner_.allow_background;invocation.background_cancel=owner_.background_cancel;
             invocation.expires_unix_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
-            return {true,owner_.process->invoke(invocation,cancel,std::move(guidance))};
+            try{return {true,owner_.process->invoke(invocation,cancel,std::move(guidance))};}
+            catch(const ProcessTimeoutLimitExceeded& error){return {false,Json{{"error",{{"code","process_timeout_exceeded"},{"message","No command was dispatched. Choose timeout_ms at or below max_timeout_ms for this registered profile, or omit timeout_ms to use that maximum."},{"max_timeout_ms",error.max_timeout_ms}}}}.dump()};}
         }
         if(owner_.before_effect){if(!args.contains("job_id")||!args.at("job_id").is_string())throw std::invalid_argument("Process control requires a captured job ID");owner_.before_effect(call,args.at("job_id").get<std::string>(),cancel);}
         auto result=call.tool_name=="wait_process"?owner_.process->wait(owner_.run_id,call.arguments_json,cancel):owner_.process->stop(owner_.run_id,call.arguments_json,cancel);

@@ -76,6 +76,10 @@ int main(int argc,char** argv){if(argc!=8)return 2;try{
         }
         phase("request-validation");
         const auto definition=Json::parse(executor.definition().input_schema_json);require(definition["properties"]["profile"]["enum"]==Json::array({"fixture"}),"Model schema must expose registered IDs only");
+        require(definition["properties"]["timeout_ms"]["maximum"]==10000,"Model timeout schema must use the registered profile limit");
+        require(executor.definition().description.find("fixture: max_timeout_ms=10000, approval=required")!=std::string::npos,"Model must see its profile's actual timeout and approval policy");
+        {auto mixed=profiles;auto shorter=profiles.front();shorter.id="shorter";shorter.max_timeout=5s;shorter.auto_approve=true;mixed.push_back(shorter);ProcessExecutor varied(store,workspace,root.string(),mixed);
+            require(Json::parse(varied.definition().input_schema_json)["properties"]["timeout_ms"]["maximum"]==10000&&varied.definition().description.find("shorter: max_timeout_ms=5000, approval=preauthorized")!=std::string::npos,"Mixed profiles must advertise their separate limits without inventing a larger budget");}
         for(const auto source:{R"({"profile":"unknown","arguments":[]})",R"({"profile":"fixture","arguments":[],"executable":"spoof"})",R"({"profile":"fixture","arguments":[],"environment":{"SECRET":"spoof"}})",R"({"profile":"fixture","profile":"fixture","arguments":[]})",R"({"profile":"fixture","arguments":[],"timeout_ms":10001})"})
             rejects<std::invalid_argument>([&]{executor.invoke("invalid","run",source,now()+600000);});
         rejects<ToolAccessDenied>([&]{executor.invoke("invalid","run",args("normal","escape.txt",".."),now()+600000);});rejects<NotFound>([&]{store.operation("invalid").get();});
