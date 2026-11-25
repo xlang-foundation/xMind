@@ -287,8 +287,16 @@ public:
                     if(store_.run(request.run_id).get().state==RunState::completed)return supervisor->drain_completed(Clock::now()+5s).run;
                     if((segment||planning_child())&&store_.run(request.run_id).get().state==RunState::paused)return supervisor->drain_paused(segment?segment->id:dynamic_owner_->budget->segment_id(),Clock::now()+5s).run;
                     const bool cancelled=cancel.stop_requested();std::string reason=cancelled?"cancelled":Clock::now()>=deadline?"deadline":"dispatch_error";
-                    // Only backend model-host events may establish provider failure.
-                    if(!cancelled&&reason!="deadline")for(const auto& event:store_.events(request.run_id).get()){if(event.kind!="worker.model.uncertain")continue;const auto data=Json::parse(event.json,nullptr,false);if(data.is_object()&&data.contains("generation")&&data["generation"]==supervisor->lease().generation&&data.contains("failure_code")&&data["failure_code"]=="provider_failure")reason="provider_failure";}
+                    // Preserve the backend's model deadline even when the root
+                    // still has time. Only this worker generation's durable
+                    // model-host facts can refine a generic dispatch failure.
+                    if(!cancelled&&reason!="deadline")for(const auto& event:store_.events(request.run_id).get()){
+                        if(event.kind!="worker.model.uncertain")continue;
+                        const auto data=Json::parse(event.json,nullptr,false);
+                        if(!data.is_object()||!data.contains("generation")||data["generation"]!=supervisor->lease().generation)continue;
+                        if(data.value("failure_code",std::string{})=="deadline")reason="deadline";
+                        else if(reason!="deadline"&&data.value("failure_code",std::string{})=="provider_failure")reason="provider_failure";
+                    }
                     const auto elapsed=segment?std::max<std::int64_t>(0,std::chrono::ceil<std::chrono::milliseconds>(Clock::now()-(deadline-std::chrono::milliseconds(segment->remaining_active_ms))).count()):0;
                     const auto observed=segment?supervisor->drain_planning_terminal(cancelled?RunState::cancelled:RunState::failed,reason,segment->id,elapsed,Clock::now()+5s).run:supervisor->drain_terminal(cancelled?RunState::cancelled:RunState::failed,reason,Clock::now()+5s).run;
                     // Preserve the backend's uncertain receipt after physical
