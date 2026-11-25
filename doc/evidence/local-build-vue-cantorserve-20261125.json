@@ -1,0 +1,213 @@
+{
+  "date": "2026-11-25",
+  "scope": "Local source build and one fresh real-model public Vue project trial; not a qualified release",
+  "source": {
+    "branch": "codex/fix-observed-run-restore",
+    "revision": "ca562e549d587c188e6ca7dfe72b5fa236598d05",
+    "previousRevision": "952a8a178613f0bb1e9560896cc8114cb9a7af5e",
+    "trackedImplementationChanged": false
+  },
+  "sdk": {
+    "source": "D:/CantorAI/xlang3",
+    "revision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d",
+    "runtimeDirectory": "D:/CantorAI/xlang3/build/Release",
+    "cpythonBridge": false,
+    "cpythonExecuted": false
+  },
+  "build": {
+    "directory": "build/skill-state-native",
+    "configuration": "Release",
+    "generator": "Visual Studio 18 2026",
+    "compiled": true,
+    "executableTargets": 150
+  },
+  "native": {
+    "registered": 186,
+    "passed": 177,
+    "failed": 9,
+    "seconds": 537.25,
+    "exitCode": 8,
+    "failures": {
+      "missingWebFixtureEnvironment": [
+        "native_mcp_oauth_service_contract",
+        "native_mcp_oauth_renewal_negative_contract",
+        "native_skill_catalogue_contract"
+      ],
+      "xlang3ChildExit3": [
+        "native_xlang3_default_process_contract"
+      ],
+      "corruptUnicodeMoveArrow": [
+        "native_agent_patch_http_contract",
+        "native_unified_patch_http_contract"
+      ],
+      "managedStartup": [
+        "native_local_profile_contract",
+        "native_local_view_contract",
+        "native_local_view_provider_config_contract"
+      ]
+    },
+    "qualification": "Original complete failure retained. No full pass claimed; Windows locale/Unicode and child-runtime failures remain unresolved."
+  },
+  "clients": {
+    "editor": {
+      "passed": 543,
+      "failed": 0,
+      "seconds": 4.0920496
+    },
+    "browserInitial": {
+      "passed": 225,
+      "failed": 1,
+      "reason": "Production async fixture required XMIND_BROWSER_TEST_RUNTIME"
+    },
+    "browserConfigured": {
+      "passed": 226,
+      "failed": 0,
+      "seconds": 33.1053916
+    },
+    "rendered": "Actual hidden browser opens the workspace and restores the failed run/model/provider/history without authentication or replay."
+  },
+  "frozenInputs": {
+    "count": 32623,
+    "unchangedAcrossNativeClientsAndTrial": true,
+    "manifest": ".agentflow/local-build-20261125-inputs.json.gz",
+    "rawSha256": "8ab2583fc15de08984968401d6a4d896c869edc42583d45ef006680896600d12",
+    "compressedSha256": "e6fbd06afadae5764a365d14ff3ab202a1c4c0b46d84bde96594c6d9827e0600",
+    "identicalSnapshots": [
+      ".agentflow/local-build-20261125-tests-before.json",
+      ".agentflow/local-build-20261125-tests-after.json",
+      ".agentflow/local-build-20261125-clients-after.json",
+      ".agentflow/local-build-20261125-final-inputs.json"
+    ],
+    "comparisonFiles": [
+      ".agentflow/local-build-20261125-native-input-comparison.json",
+      ".agentflow/local-build-20261125-client-input-comparison.json",
+      ".agentflow/local-build-20261125-final-input-comparison.json"
+    ]
+  },
+  "runtime": {
+    "runtime": "D:\\CantorAI2026\\xMind\\.agentflow\\local-runtime",
+    "nativeRevision": "ca562e549d587c188e6ca7dfe72b5fa236598d05",
+    "sdkRevision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d",
+    "changedFiles": 5,
+    "files": 1710,
+    "manifestSha256": "d310296edb678e6d5d0642592426673aec025725ab85f0da9a424024a7ed93a3",
+    "rollback": ".agentflow/local-build-20261125-runtime-rollback.zip",
+    "releaseAccepted": false,
+    "installedReleaseChanged": false,
+    "existingUserProfilesTargeted": false
+  },
+  "service": {
+    "url": "http://127.0.0.1:49395/ui/",
+    "pid": 36084,
+    "birth": "134400709602833284",
+    "profileRoot": "D:/CantorAI2026/xMind/.agentflow/local-build-20261125-profiles",
+    "retained": true
+  },
+  "project": {
+    "source": "https://github.com/vuejs/core",
+    "revision": "50aaa3c75d4caed0a73b85e870ed907a76f9ec44",
+    "workspace": "D:/CantorAI2026/TestProj/xmind-public-vue-core-20261125",
+    "trackedFiles": 704,
+    "dependenciesInstalled": true,
+    "sourceAndTestsUnchanged": true,
+    "unchangedFileCount": 704,
+    "manualProjectFixes": false
+  },
+  "provider": {
+    "baseUrl": "https://serve.cantorai.com/v1",
+    "model": "qwen3.8-27b-chat-32k",
+    "setupReference": {
+      "chatTitle": "Check Cantor nodes with model",
+      "threadId": "01a211b0-f3d3-7372-9576-61619c80db3f"
+    },
+    "existingSavedCredentialReused": true,
+    "credentialInEvidence": false
+  },
+  "trial": {
+    "session": "eeb0cb40e3ac4ad59ebfe1ec96046d28",
+    "root": "33f726cdc70949eca4d2c91bf7e2cfdc",
+    "state": "failed",
+    "neverReplay": true,
+    "prompt": "Add a public toValueOr helper to Vue. It should accept a value, ref, or zero-argument getter and a fallback value. Return the fallback only when the resolved input is null or undefined; keep valid falsy values such as 0, false, and an empty string. Make it available from both @vue/reactivity and vue. Include unit tests and TypeScript type coverage, then run the relevant existing checks and summarize the results.",
+    "promptsAndApprovalsThroughUI": true,
+    "completedReads": 5,
+    "operations": 0,
+    "edits": 0,
+    "projectTestCommands": 0,
+    "httpResponses": [
+      {
+        "request_id": "713d2208d7be4df7a3151ca70d35917a",
+        "status": 200
+      },
+      {
+        "request_id": "23219222e2454c37a481a265b9cb8400",
+        "status": 200
+      },
+      {
+        "request_id": "0e55ed866ce5437c97736401336cd903",
+        "status": 200
+      },
+      {
+        "request_id": "fd36d779a32c4a2e95af1aeb29e5701a",
+        "status": 200
+      }
+    ],
+    "suppliedUsage": [
+      {
+        "completion_tokens": 25,
+        "prompt_tokens": 7324,
+        "total_tokens": 7349
+      },
+      {
+        "completion_tokens": 51,
+        "prompt_tokens": 7796,
+        "total_tokens": 7847
+      },
+      {
+        "completion_tokens": 53,
+        "prompt_tokens": 10175,
+        "total_tokens": 10228
+      }
+    ],
+    "fourthCallUsage": "Not supplied; not inferred",
+    "failure": {
+      "attempt_id": "c6a39b13ae956f5cea2988b19bc058c1",
+      "failure_code": "deadline",
+      "generation": "c6e5eae81830fd34c7dce48d1ac91609"
+    },
+    "activeElapsedMs": 227279,
+    "remainingRootBudgetMs": 372721,
+    "workerPid": 7456,
+    "workerExited": true,
+    "deadlineChanged": false,
+    "automaticRetry": false,
+    "reload": {
+      "historyIdentical": true,
+      "eventsIdentical": true,
+      "historySha256": "5CC0B877626EE0206D8DDC7EBCF702854D50C22C745347849035F58DC4B8FE7E",
+      "eventsSha256": "5DC08BC4C20409CA3BD222D96ADC0EB4448734512C4AA69F527AA80203002BAF"
+    },
+    "outcome": "Real coding did not complete: the fourth model call hit its deadline after HTTP 200. No project edit, test or build acceptance."
+  },
+  "startupSetup": {
+    "failuresPreserved": [
+      "Unknown process configuration field (extra version field in test setup)",
+      "Process configuration changed; explicit supported update required"
+    ],
+    "correctedConfiguration": true
+  },
+  "artifactSha256": {
+    ".agentflow/local-build-20261125-native.log": "911296df7734e36217f2c99e0a0e3240b87fd416f615b7f2f08c64ef3c406b28",
+    ".agentflow/local-build-20261125-browser.log": "95a7a14bac6f7f74c4da4aeda7efdae9e3440c0247d8e2e8975c748def74bc56",
+    ".agentflow/local-build-20261125-browser-configured.log": "a431b695ab51822be21c3fd49cc6a80af87b0cd93410d5ec37c535ffde346247",
+    ".agentflow/local-build-20261125-editor.log": "3f57a5cdd952b261ebc173652e96f02dc236faa703063f938b869c66bb12e5af",
+    ".agentflow/local-build-20261125-test-inventory.json": "a187575662c5e53d7141a68e4e46523d9de6379099fc6331ae78513b3f8362c8",
+    ".agentflow/local-build-20261125-turn1-events.json": "5dc08bc4c20409ca3bd222d96adc0eb4448734512c4aa69f527aa80203002baf",
+    ".agentflow/local-build-20261125-history-before-reload.json": "5cc0b877626ee0206d8ddc7ebcf702854d50c22c745347849035f58dc4b8fe7e",
+    ".agentflow/local-build-20261125-history-after-reload.json": "5cc0b877626ee0206d8ddc7ebcf702854d50c22c745347849035f58dc4b8fe7e",
+    ".agentflow/local-build-20261125-operations.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+    ".agentflow/local-build-20261125-project-before.json": "20b2dd6f755d860592cfa6daaa978fd18a74d023637b5c2122b9a43951d81fab",
+    ".agentflow/local-build-20261125-project-after-failure.json": "20b2dd6f755d860592cfa6daaa978fd18a74d023637b5c2122b9a43951d81fab",
+    ".agentflow/local-build-20261125-runtime-rollback.zip": "d2960525961a9e83680a8749c444b66600e17c306a5a84cb8ec6f090cf20f8b5"
+  }
+}
