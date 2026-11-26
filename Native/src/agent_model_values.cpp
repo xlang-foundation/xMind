@@ -20,8 +20,8 @@ MessageRole role(const std::string& role){if(role=="system")return MessageRole::
 Json calls(const std::vector<ModelToolCall>& input){if(input.size()>4096)invalid();Json result=Json::array();for(const auto& call:input)result.push_back({{"id",call.id},{"name",call.name},{"arguments_json",call.arguments_json}});return result;}
 std::vector<ModelToolCall> calls(const Json& input){array(input,4096);std::vector<ModelToolCall> result;for(const auto& call:input){object(call,3);result.push_back({call.at("id").get<std::string>(),call.at("name").get<std::string>(),call.at("arguments_json").get<std::string>()});}return result;}
 std::string bounded(const Json& value,std::size_t limit){auto result=value.dump();if(result.size()>limit)invalid();return result;}
-bool reference_previous_inspections(ModelRequest& request,std::size_t latest_user){
-    std::vector<std::pair<std::size_t,std::string>> candidates;std::size_t bytes=0;
+bool reference_previous_inspections(ModelRequest& request,std::size_t latest_user,std::vector<std::size_t>* protected_indices){
+    std::vector<std::pair<std::size_t,std::size_t>> groups;std::size_t bytes=0,read_calls=0;
     for(std::size_t index=0;index<latest_user;++index){
         const auto& assistant=request.messages[index];const auto count=assistant.tool_calls.size();
         if(assistant.role!=MessageRole::assistant||!assistant.content.empty()||!assistant.refusal.empty()||assistant.provider_items_json!="[]"||!count||count>=latest_user-index)continue;
@@ -29,7 +29,7 @@ bool reference_previous_inspections(ModelRequest& request,std::size_t latest_use
         for(const auto& call:assistant.tool_calls){
             if((call.name!="read_file"&&call.name!="list_files"&&call.name!="search_files"&&call.name!="find_files"&&call.name!="glob_files")||!names.emplace(call.id,call.name).second){eligible=false;break;}
         }
-        std::vector<std::pair<std::size_t,std::string>> group;std::size_t group_bytes=0;
+        std::size_t group_bytes=0;
         for(std::size_t offset=1;eligible&&offset<=count;++offset){
             const auto position=index+offset;const auto& result=request.messages[position];const auto found=names.find(result.tool_call_id);
             if(result.role!=MessageRole::tool||result.provider_items_json!="[]"||found==names.end()){eligible=false;break;}
@@ -39,14 +39,31 @@ bool reference_previous_inspections(ModelRequest& request,std::size_t latest_use
                  name=="search_files"?(value.contains("matches")&&value["matches"].is_array()):
                  name=="glob_files"?(value.contains("paths")&&value["paths"].is_array()):(value.contains("entries")&&value["entries"].is_array()));
             if(!shape){eligible=false;break;}
-            const auto original=value.contains("historical_excerpt")&&value["historical_excerpt"]==true&&value.contains("original_observation_sha256")&&value["original_observation_sha256"].is_string()?value["original_observation_sha256"].get<std::string>():context_digest(result.content);
-            group.emplace_back(position,original);group_bytes+=result.content.size();names.erase(found);
+            group_bytes+=result.content.size();names.erase(found);
         }
-        if(eligible){candidates.insert(candidates.end(),group.begin(),group.end());bytes+=group_bytes;index+=count;}
+        if(eligible){groups.emplace_back(index,index+count);bytes+=group_bytes;read_calls+=count;index+=count;}
     }
     if(bytes<=32*1024)return false;
-    for(const auto& [index,original]:candidates)request.messages[index].content=Json{{"historical_read_only_reference",true},{"original_observation_sha256",original}}.dump();
-    return !candidates.empty();
+    const auto original_size=request.messages.size();std::vector<bool> omitted(original_size,false);Json proof=Json::array();
+    for(const auto& [begin,end]:groups)for(auto index=begin;index<=end;++index){
+        const auto& message=request.messages[index];omitted[index]=true;
+        const auto original=Json{{"role",role(message.role)},{"content",message.content},{"tool_calls",calls(message.tool_calls)},{"tool_call_id",message.tool_call_id},{"refusal",message.refusal},{"provider_items_json",message.provider_items_json}}.dump();
+        proof.push_back({{"index",index},{"sha256",context_digest(original)}});
+    }
+    // Replace whole closed groups so obsolete tool-call patterns do not remain
+    // in the next task's model window. Original records are never rewritten.
+    const auto note="Native model-history reference: "+Json{{"policy","native.inspection-groups.v1"},{"closed_read_only_groups",groups.size()},{"read_calls",read_calls},{"source_groups_sha256",context_digest(proof.dump())},{"stored_originals_preserved",true}}.dump();
+    std::size_t insertion=0;while(insertion<original_size&&(request.messages[insertion].role==MessageRole::system||request.messages[insertion].role==MessageRole::developer))++insertion;
+    const bool append_note=original_size&&request.messages.front().role==MessageRole::system&&request.messages.front().content.size()+note.size()+2<=65536&&(!protected_indices||std::find(protected_indices->begin(),protected_indices->end(),0)==protected_indices->end());
+    std::vector<ModelMessage> projected;std::vector<std::size_t> remap(original_size,original_size);
+    for(std::size_t index=0;index<original_size;++index){
+        if(!append_note&&index==insertion)projected.push_back({MessageRole::system,note});
+        if(!omitted[index]){remap[index]=projected.size();projected.push_back(request.messages[index]);if(append_note&&index==0)projected.back().content+="\n\n"+note;}
+    }
+    std::vector<std::size_t> retained_indices;
+    if(protected_indices)for(const auto index:*protected_indices){if(index>=original_size||remap[index]>=projected.size())throw ModelProtocolError("History projection would remove a protected provider continuation");retained_indices.push_back(remap[index]);}
+    request.messages=std::move(projected);if(protected_indices)*protected_indices=std::move(retained_indices);
+    return true;
 }
 }
 ModelMessage model_message_from_history(const Message& stored) {
@@ -69,10 +86,11 @@ ModelMessage model_message_from_history(const Message& stored) {
     if(data.contains("tool_calls")) for(const auto& call:data["tool_calls"]) result.tool_calls.push_back({call.at("id").get<std::string>(),call.at("name").get<std::string>(),call.at("arguments").get<std::string>()});
     return result;
 }
-bool bound_historical_file_reads(ModelRequest& request){
+bool bound_historical_file_reads(ModelRequest& request,std::vector<std::size_t>* protected_indices){
     if(request.canonical_window)return false;
     std::size_t latest_user=0;for(std::size_t index=0;index<request.messages.size();++index)if(request.messages[index].role==MessageRole::user)latest_user=index;
-    std::map<std::string,std::string> pending;bool changed=reference_previous_inspections(request,latest_user);
+    std::map<std::string,std::string> pending;bool changed=reference_previous_inspections(request,latest_user,protected_indices);
+    if(changed)for(std::size_t index=0;index<request.messages.size();++index)if(request.messages[index].role==MessageRole::user)latest_user=index;
     std::vector<std::pair<std::size_t,Json>> reads;
     for(std::size_t index=0;index<request.messages.size();++index){
         const auto& message=request.messages[index];

@@ -46,7 +46,7 @@ AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token 
     if(policy_.history_owner){
         const auto history=store_.provider_history(*policy_.history_owner).get();std::vector<std::size_t> projected;
         for(const auto& payload:history.groups)for(const auto& original:payload.source.originals){auto decoded=model_message_from_history(original);if(payload.reproject_provider_items&&decoded.role==MessageRole::assistant&&decoded.provider_items_json!="[]")projected.push_back(result.request.messages.size());result.request.messages.push_back(std::move(decoded));}
-        const bool bounded=bound_historical_file_reads(result.request);
+        const bool bounded=bound_historical_file_reads(result.request,&projected);
         if(!projected.empty())result.request=reproject_checked_provider_history(*policy_.history_provider,result.request,projected);
         if(!projected.empty())result.replay=ProviderHistoryReplaySpec{*policy_.history_owner,{},history.source_binding,context_digest(serialize_provider_history_projection(*policy_.history_provider,result.request))};
         if(bounded)result.excerpt_source_binding=history.source_binding;
@@ -63,7 +63,7 @@ void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest
     if(encode_agent_model_request(candidate.request)!=encode_agent_model_request(request))throw Conflict("Worker model request changed backend instructions or history");
     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="dispatching")throw Conflict("Worker guidance has no captured live model dispatch");
     if(candidate.replay){if(full_window)candidate.replay->projection_binding=context_digest(serialize_provider_history_projection(*policy_.history_provider,*full_window));store_.record_provider_history_replay(*candidate.replay).get();}
-    if(!candidate.excerpt_source_binding.empty())store_.append_event(lease_.owner_run_id,"agent.read_history_excerpted",Json{{"policy","native.file-history-excerpt.v3"},{"source_binding",candidate.excerpt_source_binding},{"projection_binding",context_digest(serialize_provider_history_projection(*policy_.history_provider,full_window?*full_window:request))}}.dump()).get();
+    if(!candidate.excerpt_source_binding.empty())store_.append_event(lease_.owner_run_id,"agent.read_history_excerpted",Json{{"policy","native.file-history-excerpt.v4"},{"source_binding",candidate.excerpt_source_binding},{"projection_binding",context_digest(serialize_provider_history_projection(*policy_.history_provider,full_window?*full_window:request))}}.dump()).get();
     Json metadata=Json::array();for(std::size_t index=0;index<candidate.contexts.size();++index)metadata.push_back({{"folder_id",owner_.workspace_members?owner_.workspace_members->folders().at(index).folder_id:lease_.workspace_id},{"guidance",Json::parse(candidate.contexts[index]->metadata())}});
     store_.append_event(lease_.owner_run_id,"agent.repository_scope",Json{{"snapshot","worker_before_model_dispatch"},{"attempt_id",attempt},{"contexts",std::move(metadata)}}.dump()).get();check(cancel);contexts_=std::move(candidate.contexts);admitted_attempt_=attempt;prepared_budget_advisory_.clear();
 }
