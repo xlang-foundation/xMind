@@ -202,6 +202,11 @@ int main(int argc,char** argv) {
         const auto endings=tools.read_file_page("range-ending.txt");require(endings.content=="\n\r\nlast"&&endings.lines_read==3&&!endings.next_offset,"Empty lines and unterminated last line remain exact");
         rejects<ToolFileError>([&]{tools.read_file_page("README.txt",4);});rejects<ToolFileError>([&]{tools.read_file_page("range-empty.txt",2);});
         const auto large=tools.read_file_page("range-large.txt",99999,2);require(large.content=="line 99999 \xe4\xb8\xad\r\nline 100000 \xe4\xb8\xad\r\n"&&large.lines_read==2&&!large.next_offset,"Native streaming must reach requested lines in a file above one MiB");
+        const auto default_page=Json::parse(tools.invoke("read_file",R"({"path":"range-large.txt"})"));
+        require(default_page.at("offset")==1&&default_page.at("lines_read")==200&&default_page.at("next_offset")==201&&default_page.at("truncated")==true,"Path-only model reads must be bounded pages with an explicit continuation");
+        require(default_page.at("content").get<std::string>().starts_with("line 1 \xe4\xb8\xad\r\n")&&default_page.at("content").get<std::string>().ends_with("line 200 \xe4\xb8\xad\r\n"),"Default pages must preserve actual Unicode and line endings");
+        const auto default_budget=tools.invoke("read_file",R"({"path":"range-budget.txt"})");
+        require(default_budget.size()<=20*1024&&Json::parse(default_budget).at("has_more")==true,"Default reads must also bound escaped JSON bytes, not just line count");
         const auto boundary=tools.read_file_page("range-boundary.txt",2,1);require(boundary.content=="\xf0\x9f\x98\x80" "end"&&boundary.lines_read==1,"UTF-8 validation must span OS read-buffer boundaries even on skipped lines");
         const auto astral=tools.read_file_page("range-astral.txt",1,1);require(astral.content.size()==8001&&astral.content.back()=='\n'&&astral.truncated_lines==std::vector<std::size_t>{1}&&!astral.next_offset,"Clipping uses complete Unicode characters and reports a clipped EOF line without a false continuation");
         for(std::size_t i=0;i<astral.content.size()-1;i+=4)require(astral.content.substr(i,4)=="\xf0\x9f\x98\x80","Clipped UTF-8 stays intact");

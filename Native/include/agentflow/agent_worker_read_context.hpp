@@ -27,6 +27,7 @@ struct AgentWorkerReadRequestPolicy {
     std::shared_ptr<RootExecutionBudget> context_budget;
     // Backend-only orchestration. The worker supplies no assistant or result.
     std::function<AgentReadToolResult(const AgentWorkspaceInvocation&,const std::string&,std::stop_token)> delegation;
+    bool show_execution_budget=false; // Backend-owned coding advisory only.
 };
 // Backend-owned ordinary read context. Preparing a request works on copies of
 // real native guidance state. Only admission of a claimed, exact model request
@@ -54,6 +55,8 @@ private:
     std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts_;
     std::unique_ptr<AgentWorkerReadHost> native_;
     std::string admitted_attempt_;
+    std::string prepared_budget_advisory_;
+    std::size_t inspection_calls_completed_=0;
     std::mutex mutex_;
 };
 }

@@ -7,6 +7,7 @@
 #include "agentflow/agent_worker_journal_rpc.hpp"
 #include "agentflow/agent_worker_retirement.hpp"
 #include "agentflow/agent_model_values.hpp"
+#include "agentflow/context_records.hpp"
 #include "agentflow/persistence_service.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agent_worker_runner_fixture.hpp"
@@ -71,6 +72,18 @@ void values_contract(){
     ModelRequest request;request.messages.push_back({MessageRole::assistant,std::string("owned\0text",10),{{"call-one","fixture_tool",R"({"number":1.0000000000000001})"}},"","",R"([{"opaque":"exact","number":1.0000000000000001}])"});request.tools.push_back({"fixture_tool","Owned definition",R"({"type":"object","default":1.0000000000000001})"});request.include_usage=true;request.max_output_tokens=123;
     const auto bytes=encode_agent_model_request(request);const auto decoded=decode_agent_model_request(bytes);require(encode_agent_model_request(decoded)==bytes&&decoded.messages[0].provider_items_json==request.messages[0].provider_items_json&&decoded.messages[0].tool_calls[0].arguments_json==request.messages[0].tool_calls[0].arguments_json,"Owned model request must retain exact opaque and argument bytes");
     auto forged=Json::parse(bytes);forged["endpoint"]="must-not-route";rejects<ModelProtocolError>([&]{decode_agent_model_request(forged.dump());});rejects<ModelProtocolError>([&]{decode_agent_model_request(std::string("{\"include_usage\":true,")+bytes.substr(1));});
+    ModelRequest legacy;std::string original_text;for(int line=1;line<=500;++line)original_text+="line "+std::to_string(line)+" \xe4\xb8\xad\n";
+    const auto original_output=Json{{"path","types.ts"},{"content",original_text},{"workspace_id","owned-workspace"}}.dump();
+    legacy.messages={{MessageRole::user,"Preserve the actual request."},{MessageRole::assistant,"",{{"legacy-read","read_file",R"({"path":"types.ts"})"}},"","",R"([{"opaque":"retained"}])"},{MessageRole::tool,original_output,{},"legacy-read"}};
+    const auto original_request=encode_agent_model_request(legacy);auto projected=legacy;
+    require(bound_historical_file_reads(projected),"Legacy full-file history must receive a bounded model-only projection");
+    const auto excerpt=Json::parse(projected.messages[2].content);
+    require(excerpt.at("historical_excerpt")==true&&excerpt.at("truncated")==true&&excerpt.at("content").get<std::string>().ends_with("line 200 \xe4\xb8\xad\n")&&excerpt.at("suggested_current_read_offset")==201,"Historical excerpts must preserve exact UTF-8 and a usable line boundary");
+    require(excerpt.at("original_content_bytes")==original_text.size()&&excerpt.at("original_observation_sha256")==context_digest(original_output)&&excerpt.at("workspace_id")=="owned-workspace"&&encode_agent_model_request(legacy)==original_request,"Projection must retain provenance without rewriting the source conversation");
+    require(projected.messages[0].content==legacy.messages[0].content&&projected.messages[1].provider_items_json==legacy.messages[1].provider_items_json&&projected.messages[2].tool_call_id=="legacy-read"&&!bound_historical_file_reads(projected),"Projection must be idempotent and retain user text, opaque assistant values and tool correlation");
+    auto non_file=legacy;non_file.messages[1].tool_calls[0].name="mcp_read_file";const auto non_file_before=encode_agent_model_request(non_file);require(!bound_historical_file_reads(non_file)&&encode_agent_model_request(non_file)==non_file_before,"Unrelated peer results must not be rewritten by native file history policy");
+    auto paged=legacy;auto page_output=Json::parse(original_output);page_output["offset"]=1;paged.messages[2].content=page_output.dump();const auto paged_before=encode_agent_model_request(paged);require(!bound_historical_file_reads(paged)&&encode_agent_model_request(paged)==paged_before,"Already explicit page observations must retain their supplied range metadata");
+    std::string one_line(16383,'x');one_line+="\xf0\x9f\x98\x80";one_line+=std::string(2000,'y');auto unicode=legacy;unicode.messages[2].content=Json{{"path","single.ts"},{"content",one_line}}.dump();require(bound_historical_file_reads(unicode),"Long source lines also require a bounded projection");require(Json::parse(unicode.messages[2].content).at("content").get<std::string>()==std::string(16383,'x'),"A historical byte boundary must not split a UTF-8 code point");
     ModelCompletion response{"Owned completion","","stop",R"({"total_tokens":10})",{},R"([{"opaque":"exact","number":1.0000000000000001}])"};require(encode_agent_model_completion(decode_agent_model_completion(encode_agent_model_completion(response)))==encode_agent_model_completion(response),"Model response must round-trip supplied usage/private bytes");
 }
 ModelRequest request(const std::string& mode){ModelRequest value;value.include_usage=true;value.messages.push_back({MessageRole::user,"Native child model RPC "+mode+"."});return value;}

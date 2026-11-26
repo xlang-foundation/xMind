@@ -11,7 +11,7 @@
 
 namespace agentflow {
 using Json=nlohmann::json;
-struct AgentWorkerReadContext::Preview {ModelRequest request;std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;std::optional<ProviderHistoryReplaySpec> replay;};
+struct AgentWorkerReadContext::Preview {ModelRequest request;std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;std::optional<ProviderHistoryReplaySpec> replay;std::string excerpt_source_binding;};
 AgentWorkerReadContext::AgentWorkerReadContext(AgentRunJournal& journal,PersistenceService& store,AgentWorkerLeaseSpec lease,AgentReadToolOwnerContext owner,AgentWorkerReadRequestPolicy policy,std::stop_token cancel)
     :store_(store),lease_(std::move(lease)),owner_(std::move(owner)),policy_(std::move(policy)),owner_cancel_(cancel){
     const bool model_only=lease_.workspace_id=="workspace:none";
@@ -40,27 +40,36 @@ AgentWorkerReadContext::Preview AgentWorkerReadContext::preview(std::stop_token 
     const auto selected=contexts_.empty()?SkillSelections{}:store_.initialize_run_skills(lease_.owner_run_id,lease_.workspace_id).get();
     for(std::size_t index=0;index<contexts_.size();++index){auto copy=std::make_unique<RepositoryInstructionContext>(*contexts_[index]);if(!index)copy->skills().restore(selected,cancel);if(index)instructions+="\n\nRepository guidance for registered workspace folder "+owner_.workspace_members->folders().at(index).folder_id+" (paths relative to this folder):\n";instructions+=copy->prepare(cancel);result.contexts.push_back(std::move(copy));}
     instructions+=policy_.instruction_suffix;
+    if(policy_.show_execution_budget&&instructions.size()+prepared_budget_advisory_.size()<=65536)instructions+=prepared_budget_advisory_;
     if(instructions.size()>65536)throw ToolFileError("Combined backend worker instructions exceed limits");if(!instructions.empty())result.request.messages.push_back({MessageRole::system,std::move(instructions)});
     result.request.tools=policy_.tools;result.request.include_usage=policy_.include_usage;result.request.max_output_tokens=policy_.max_output_tokens;
     if(policy_.history_owner){
         const auto history=store_.provider_history(*policy_.history_owner).get();std::vector<std::size_t> projected;
         for(const auto& payload:history.groups)for(const auto& original:payload.source.originals){auto decoded=model_message_from_history(original);if(payload.reproject_provider_items&&decoded.role==MessageRole::assistant&&decoded.provider_items_json!="[]")projected.push_back(result.request.messages.size());result.request.messages.push_back(std::move(decoded));}
-        if(!projected.empty()){result.request=reproject_checked_provider_history(*policy_.history_provider,result.request,projected);result.replay=ProviderHistoryReplaySpec{*policy_.history_owner,{},history.source_binding,context_digest(serialize_provider_history_projection(*policy_.history_provider,result.request))};}
-    }else{const auto history=std::get<std::vector<Message>>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::history,lease_.owner_run_id}).get());for(const auto& message:history)result.request.messages.push_back(model_message_from_history(message));}
+        const bool bounded=bound_historical_file_reads(result.request);
+        if(!projected.empty())result.request=reproject_checked_provider_history(*policy_.history_provider,result.request,projected);
+        if(!projected.empty())result.replay=ProviderHistoryReplaySpec{*policy_.history_owner,{},history.source_binding,context_digest(serialize_provider_history_projection(*policy_.history_provider,result.request))};
+        if(bounded)result.excerpt_source_binding=history.source_binding;
+    }else{const auto history=std::get<std::vector<Message>>(store_.read_agent_worker_journal(lease_,{AgentWorkerJournalReadKind::history,lease_.owner_run_id}).get());for(const auto& message:history)result.request.messages.push_back(model_message_from_history(message));bound_historical_file_reads(result.request);}
     check(cancel);return result;
 }
-ModelRequest AgentWorkerReadContext::prepare(std::stop_token cancel){std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");return preview(cancel).request;}
+ModelRequest AgentWorkerReadContext::prepare(std::stop_token cancel){
+    std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");
+    if(policy_.show_execution_budget&&prepared_budget_advisory_.empty())prepared_budget_advisory_=execution_budget_advisory(std::chrono::duration_cast<std::chrono::milliseconds>(owner_.deadline-std::chrono::steady_clock::now()).count(),inspection_calls_completed_);
+    return preview(cancel).request;
+}
 void AgentWorkerReadContext::admit(const std::string& attempt,const ModelRequest& request,std::stop_token cancel,const ModelRequest* full_window){
     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");store_.validate_agent_worker_model_window(lease_,owner_.deadline,owner_cancel_,cancel).get();auto candidate=preview(cancel);
     if(encode_agent_model_request(candidate.request)!=encode_agent_model_request(request))throw Conflict("Worker model request changed backend instructions or history");
     const auto claim=store_.agent_worker_model_claim(lease_.root_run_id,attempt).get();if(claim.spec.generation!=lease_.generation||claim.spec.owner_run_id!=lease_.owner_run_id||claim.state!="dispatching")throw Conflict("Worker guidance has no captured live model dispatch");
     if(candidate.replay){if(full_window)candidate.replay->projection_binding=context_digest(serialize_provider_history_projection(*policy_.history_provider,*full_window));store_.record_provider_history_replay(*candidate.replay).get();}
+    if(!candidate.excerpt_source_binding.empty())store_.append_event(lease_.owner_run_id,"agent.read_history_excerpted",Json{{"policy","native.file-history-excerpt.v1"},{"source_binding",candidate.excerpt_source_binding},{"projection_binding",context_digest(serialize_provider_history_projection(*policy_.history_provider,full_window?*full_window:request))}}.dump()).get();
     Json metadata=Json::array();for(std::size_t index=0;index<candidate.contexts.size();++index)metadata.push_back({{"folder_id",owner_.workspace_members?owner_.workspace_members->folders().at(index).folder_id:lease_.workspace_id},{"guidance",Json::parse(candidate.contexts[index]->metadata())}});
-    store_.append_event(lease_.owner_run_id,"agent.repository_scope",Json{{"snapshot","worker_before_model_dispatch"},{"attempt_id",attempt},{"contexts",std::move(metadata)}}.dump()).get();check(cancel);contexts_=std::move(candidate.contexts);admitted_attempt_=attempt;
+    store_.append_event(lease_.owner_run_id,"agent.repository_scope",Json{{"snapshot","worker_before_model_dispatch"},{"attempt_id",attempt},{"contexts",std::move(metadata)}}.dump()).get();check(cancel);contexts_=std::move(candidate.contexts);admitted_attempt_=attempt;prepared_budget_advisory_.clear();
 }
 AgentReadToolResult AgentWorkerReadContext::invoke(const AgentWorkspaceInvocation& call,std::stop_token cancel){
     std::unique_lock lock(mutex_,std::try_to_lock);if(!lock.owns_lock())throw Conflict("Worker read context is busy");check(cancel);if(!native_)throw Conflict("Model-only worker has no workspace tool authority");if(call.attempt_id!=admitted_attempt_)throw Conflict("Worker read has no actually admitted guidance window");
-    if(call.tool_name!="delegate_tasks")return native_->invoke(call,cancel);
+    if(call.tool_name!="delegate_tasks"){auto result=native_->invoke(call,cancel);++inspection_calls_completed_;return result;}
     if(!policy_.delegation||lease_.root_run_id!=lease_.owner_run_id||!owner_.offered_tool(call.tool_name)||std::none_of(policy_.tools.begin(),policy_.tools.end(),[&](const auto& tool){return tool.name==call.tool_name;}))throw Conflict("Worker has no captured delegation capability");
     const auto claimed=store_.claim_agent_worker_read(lease_,call,owner_.deadline,owner_cancel_,cancel).get();
     AgentReadToolResult result;bool denied=agent_permission_denies(owner_.permission_rules,call.tool_name,"*");for(const auto& layer:owner_.inherited_permission_layers)denied=denied||agent_permission_denies(layer,call.tool_name,"*");

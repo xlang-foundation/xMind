@@ -280,9 +280,9 @@ std::string WorkspaceTools::directory_identity(const std::string& input,std::sto
 WorkspaceFile WorkspaceTools::read_file(const std::string& input,std::stop_token cancel) const {
     auto result=read_snapshot(input,false,cancel);return {std::move(result.path),std::move(result.content)};
 }
-WorkspaceFilePage WorkspaceTools::read_file_page(const std::string& input,std::size_t offset,std::size_t limit,std::stop_token cancel) const {
-    constexpr std::size_t scan_limit=64*1024*1024,page_limit=50*1024,line_limit=2000;
-    if(!offset||offset>scan_limit||!limit||limit>2000)throw std::invalid_argument("Invalid read page bounds");
+WorkspaceFilePage WorkspaceTools::read_file_page(const std::string& input,std::size_t offset,std::size_t limit,std::stop_token cancel,std::size_t page_limit) const {
+    constexpr std::size_t scan_limit=64*1024*1024,line_limit=2000;
+    if(!offset||offset>scan_limit||!limit||limit>2000||page_limit<16*1024||page_limit>50*1024)throw std::invalid_argument("Invalid read page bounds");
     check_cancel(cancel);const auto relative=relative_path(input),workspace=identity();
     Handle file(CreateFileW(impl_->path(relative).c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,nullptr));
     impl_->verify(file.value);BY_HANDLE_FILE_INFORMATION info{};

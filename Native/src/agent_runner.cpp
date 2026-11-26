@@ -884,11 +884,13 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                         if(payload.reproject_provider_items&&decoded.role==MessageRole::assistant&&decoded.provider_items_json!="[]")projected.push_back(request.messages.size());
                         request.messages.push_back(std::move(decoded));
                     }
+                    const bool bounded_reads=bound_historical_file_reads(request);
+                    if(!projected.empty())request=reproject_checked_provider_history(provider,request,projected);
                     if(!projected.empty()){
-                        request=reproject_checked_provider_history(provider,request,projected);
                         context_journal_.record_provider_history_replay({owner,{},history.source_binding,
                             context_digest(serialize_provider_history_projection(provider,request))}).get();
                     }
+                    if(bounded_reads&&!read_workspace_)journal_.append_event(id,"agent.read_history_excerpted",Json{{"policy","native.file-history-excerpt.v1"},{"source_binding",history.source_binding},{"projection_binding",context_digest(serialize_provider_history_projection(provider,request))}}.dump()).get();
                 }
                 reservation=planning_continuation.empty()?budget->reserve(id,leaf||graph_agent?ModelCallRole::leaf:ModelCallRole::parent,token):(remote_planning?journal_.reserve_dynamic_continuation(planning_continuation,"").get():budget->reserve_continuation(planning_continuation,token));
                 planning_continuation.clear();

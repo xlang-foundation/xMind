@@ -1,6 +1,8 @@
 #include "agentflow/agent_model_values.hpp"
 #include "agentflow/records.hpp"
+#include "agentflow/context_records.hpp"
 #include "nlohmann/json.hpp"
+#include <map>
 #include <set>
 
 namespace agentflow {
@@ -37,6 +39,32 @@ ModelMessage model_message_from_history(const Message& stored) {
     if(data.contains("tool_call_id")) result.tool_call_id=data["tool_call_id"].get<std::string>();
     if(data.contains("tool_calls")) for(const auto& call:data["tool_calls"]) result.tool_calls.push_back({call.at("id").get<std::string>(),call.at("name").get<std::string>(),call.at("arguments").get<std::string>()});
     return result;
+}
+bool bound_historical_file_reads(ModelRequest& request){
+    std::map<std::string,std::string> pending;bool changed=false;
+    for(auto& message:request.messages){
+        if(message.role==MessageRole::assistant)for(const auto& call:message.tool_calls)pending[call.id]=call.name;
+        if(message.role!=MessageRole::tool)continue;
+        const auto found=pending.find(message.tool_call_id);if(found==pending.end())continue;
+        const bool file=found->second=="read_file";pending.erase(found);if(!file)continue;
+        auto value=Json::parse(message.content,nullptr,false);
+        if(!value.is_object()||value.contains("offset")||value.contains("historical_excerpt")||!value.contains("path")||!value["path"].is_string()||!value.contains("content")||!value["content"].is_string())continue;
+        const auto& text=value["content"].get_ref<const std::string&>();
+        std::size_t end=0,lines=0;while(end<text.size()&&end<16*1024&&lines<200){if(text[end++]=='\n')++lines;}
+        if(end==text.size())continue;
+        // Preserve complete UTF-8 code points, even when one source line fills
+        // the byte allowance. This is explicitly an excerpt, not a new read.
+        while(end&&(static_cast<unsigned char>(text[end])&0xc0)==0x80)--end;
+        Json excerpt={{"path",value["path"]},{"content",text.substr(0,end)},{"historical_excerpt",true},{"truncated",true},{"original_content_bytes",text.size()},{"original_observation_sha256",context_digest(message.content)},{"guidance","Excerpt of an earlier whole-file read, not a current file snapshot. The exact original remains stored. Use search_files or a focused read_file page for any omitted code."}};
+        for(const auto* field:{"folder_id","workspace_id","workspace_revision"})if(value.contains(field))excerpt[field]=value[field];
+        if(end&&text[end-1]=='\n')excerpt["suggested_current_read_offset"]=lines+1;
+        message.content=excerpt.dump();changed=true;
+    }
+    return changed;
+}
+std::string execution_budget_advisory(std::int64_t remaining_ms,std::size_t inspections){
+    if(remaining_ms<0)remaining_ms=0;
+    return "\n\nNative execution budget snapshot: remaining_active_ms="+std::to_string(remaining_ms)+"; inspection_calls_completed="+std::to_string(inspections)+". This is time already available, not an extension. Batch independent inspections. Once existing observations are sufficient, perform the user's pending changes and validation instead of gathering more broad context. If validation has passed, report its actual results immediately. If time is insufficient, report remaining work honestly; never claim an unrun check passed.";
 }
 std::string encode_agent_model_request(const ModelRequest& request){
     if(request.messages.size()>4096||request.tools.size()>64)invalid();Json messages=Json::array(),tools=Json::array();for(const auto& m:request.messages)messages.push_back({{"role",role(m.role)},{"content",m.content},{"tool_calls",calls(m.tool_calls)},{"tool_call_id",m.tool_call_id},{"refusal",m.refusal},{"provider_items_json",m.provider_items_json}});for(const auto& t:request.tools)tools.push_back({{"name",t.name},{"description",t.description},{"input_schema_json",t.input_schema_json}});

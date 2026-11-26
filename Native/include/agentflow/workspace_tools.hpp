@@ -124,7 +124,7 @@ public:
     // A bounded UTF-8 line page, not an edit snapshot. Offsets are 1-based.
     // Preserves source bytes/line endings except explicitly clipped lines.
     WorkspaceFilePage read_file_page(const std::string& path,std::size_t offset=1,
-        std::size_t limit=2000,std::stop_token cancel={}) const;
+        std::size_t limit=2000,std::stop_token cancel={},std::size_t output_budget=50*1024) const;
     // Backend edit preconditions captured from one verified file handle.
     // Capturing a snapshot does not grant permission or mutate the file.
     WorkspaceSnapshot snapshot_file(const std::string& path,std::stop_token cancel={}) const;
