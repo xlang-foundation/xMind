@@ -1,0 +1,1096 @@
+{
+  "date": "2026-11-25",
+  "scope": "Local xMind reliability fixes and ordinary UI Vue/CantorServe trial; no installed-release qualification",
+  "nativeRevision": "6376e9fcef1b7975c4be49da6dc7300768c56ff3",
+  "sdk": {
+    "sdkSource": "D:/CantorAI2026/xMind/.agentflow/xlang3-xmind-compat-20261125",
+    "sdkRevision": "9c55df9409d4219805746a8392519de9c4335b65",
+    "sourceClean": true,
+    "correctness": {
+      "windowsCases": 6,
+      "existingCliCompatibility": true
+    },
+    "performance": {
+      "status": "pass",
+      "defaultsUnchanged": true,
+      "cases": 11,
+      "repeats": 21,
+      "warmup": 5,
+      "threshold": 0.1,
+      "preservedBaseline": {
+        "executable": "D:\\CantorAI2026\\xMind\\.agentflow\\xlang3-compat-baseline-20261125\\xlang3.exe",
+        "sha256": {
+          "xlang3.exe": "794fb6853cddefc38ee3e458f1b1128dd37aca96682b0a9a5e890ccc3db7aace",
+          "xlang3_runtime.dll": "cce34419c4f0774e8c26c2b2a043123a3ae28d253001480554543d78e1f4c548"
+        }
+      },
+      "candidate": {
+        "executable": "D:\\CantorAI2026\\xMind\\.agentflow\\xlang3-xmind-compat-20261125\\build\\Release\\xlang3.exe",
+        "sha256": {
+          "xlang3.exe": "ea15706c01d66697af945230724594fcb3d20e9384b4aa36c63429ddbfa8a725",
+          "xlang3_runtime.dll": "3512b92432bd0a3df9d1bd8ab77002f080b35709537faff8cd955d27ecd64233"
+        }
+      },
+      "casesResults": {
+        "local_slots": {
+          "status": "pass",
+          "ratio": 0.9949208186235592,
+          "interval": [
+            0.9907022093135325,
+            1.0001732740993081
+          ]
+        },
+        "scalar_arithmetic": {
+          "status": "pass",
+          "ratio": 0.9975793885934909,
+          "interval": [
+            0.9894653816901795,
+            1.006008211075175
+          ]
+        },
+        "range_for": {
+          "status": "pass",
+          "ratio": 1.0125032988175455,
+          "interval": [
+            1.0023572788662096,
+            1.0209303625971535
+          ]
+        },
+        "function_calls": {
+          "status": "pass",
+          "ratio": 1.0068983838024068,
+          "interval": [
+            1.003803295225337,
+            1.0193915682138261
+          ]
+        },
+        "class_construct": {
+          "status": "pass",
+          "ratio": 1.004361584099373,
+          "interval": [
+            0.9918722433022531,
+            1.0140723819239317
+          ]
+        },
+        "list_append": {
+          "status": "pass",
+          "ratio": 0.9991174470062618,
+          "interval": [
+            0.9907692304732827,
+            1.0269957974704804
+          ]
+        },
+        "property_access": {
+          "status": "pass",
+          "ratio": 0.9997362304883498,
+          "interval": [
+            0.9947188478925677,
+            1.0075819292021746
+          ]
+        },
+        "deepcopy_memo": {
+          "status": "pass",
+          "ratio": 1.0171730412537978,
+          "interval": [
+            1.0098163296001097,
+            1.0244498986445343
+          ]
+        },
+        "json_dumps": {
+          "status": "pass",
+          "ratio": 1.0121504086236797,
+          "interval": [
+            0.9946039689803553,
+            1.0159781627272944
+          ]
+        },
+        "gc_traversal": {
+          "status": "pass",
+          "ratio": 0.9647880226278176,
+          "interval": [
+            0.9428939729811733,
+            0.9902333016433541
+          ]
+        },
+        "subparsers": {
+          "status": "pass",
+          "ratio": 1.0169843160027159,
+          "interval": [
+            1.00896740896897,
+            1.0207949150423203
+          ]
+        }
+      }
+    },
+    "raw": [
+      {
+        "path": ".agentflow/xlang3-compat-performance-20261125.json",
+        "sha256": "1fa67c00fd650cf4ff9e72ad1f4a48dfdf61d50726747c90113ac7f093b2f281"
+      },
+      {
+        "path": ".agentflow/xlang3-nested-import-performance-20261125.json",
+        "sha256": "666087b235003ab485a7f2b7430b9dd02623a48d2a1e2837dabd4189bbb2a940"
+      }
+    ]
+  },
+  "fixes": [
+    "Pass the exact monotonic execution deadline across the native worker journal; preserve typed deadline failures.",
+    "Return known controller denials without dispatch and suppress identical denied commands for the rest of the same turn.",
+    "Deliver the shared bounded coding workflow to process-mode workers, including denial and repeated-diagnostic guidance.",
+    "Compile both CLI targets with MSVC UTF-8 source encoding so Unicode review previews remain exact.",
+    "Keep Windows Python import, package, cache, sys startup and mkdir paths in UTF-8; inherit PYTHONDONTWRITEBYTECODE unless environment processing is disabled."
+  ],
+  "validation": {
+    "fullNative": {
+      "passed": 187,
+      "total": 187,
+      "seconds": 613.24,
+      "terminal": {
+        "exitCode": 0,
+        "finishedUtc": "2026-11-26T01:51:39.0479715Z"
+      },
+      "inventoryCount": 187,
+      "inputClosure": {
+        "unchanged": true,
+        "filesBefore": 36162,
+        "filesAfter": 36162,
+        "changed": []
+      }
+    },
+    "retainedFailures": [
+      {
+        "passed": 177,
+        "total": 186,
+        "scope": "Original source18b baseline, earlier receipt retained"
+      },
+      {
+        "passed": 183,
+        "total": 187,
+        "scope": "Working native candidate before final process-mode workflow delivery; original SDK18b"
+      },
+      {
+        "passed": 186,
+        "total": 187,
+        "seconds": 608.6,
+        "scope": "Native6376/SDKef53 before nested package-path correction"
+      }
+    ],
+    "editorAndBrowserUnitTests": "Prior543/226 results remain scoped to ca562; not relabeled as fresh tests for Native6376/SDK9c55."
+  },
+  "provider": {
+    "discovery": "Saved-key UI discovery now returns18model IDs; newly registered9B appears without a model-list source/config edit.",
+    "configuredModel": "qwen3.8-27b-chat-32k",
+    "profileRevision": 13,
+    "profileRevisions": "11:27B,12:2B coding comparison,13:27B; selected through actual UI, immutable per-root contexts retained.",
+    "modelDeadlineMs": 120000,
+    "idleDeadlineMs": 60000,
+    "rootActiveBudgetMs": 600000,
+    "trustedProcessBudgetMs": 120000,
+    "credentials": "Existing private configuration reused; no credentials in this receipt."
+  },
+  "liveRuntime": {
+    "process_birth": "134401315361582698",
+    "process_id": 63500,
+    "profile_directory": "D:\\CantorAI2026\\xMind\\.agentflow\\local-build-20261125-profiles\\3b1a0606d86721b1fde18fc5ef003fc3b88bf6930c7199429cac593771f48c92",
+    "transport": "embedded-fastapi/xlang3-ipc",
+    "url": "http://127.0.0.1:49395/ui/",
+    "windows_tray": true,
+    "nativeManifestSha256": "90af38df80b12a1d6e9f7094195c2a24ebd9b36409c5e84ac2024de0ffc29f52",
+    "files": 1710,
+    "priorSettledRootsPreservedExactly": 19,
+    "installedReleaseUntouched": true
+  },
+  "firstNewTrial": {
+    "sessionId": "3ef1b7ed4de44dc78500bf11e943a8ed",
+    "rootId": "53400bee3d174adf8df3a38012f6ad0e",
+    "neverReplay": true,
+    "state": "failed",
+    "reason": "deadline",
+    "activeElapsedMs": 64261,
+    "httpResponses": 0,
+    "operations": 0,
+    "projectFilesUnchanged": 705,
+    "workerRetired": true,
+    "availabilityObservation": {
+      "observedUtc": "2026-11-26T01:55:29.253Z",
+      "httpStatus": 200,
+      "topLevelKeys": [
+        "data",
+        "observed_at",
+        "test_nodes"
+      ],
+      "modelCount": 18,
+      "selected": [
+        {
+          "id": "qwen3.8-27b-chat-32k",
+          "task": "llm",
+          "profiles": [
+            {
+              "id": "qwen38_27b_nvfp4_chat_32k_v2",
+              "model_id": "Qwen3.8-27B",
+              "provider_capabilities": []
+            }
+          ],
+          "availability": {
+            "state": "can_load",
+            "ready_instances": 0,
+            "available_capacity": null
+          }
+        },
+        {
+          "id": "qwen3.8-27b-chat-4k",
+          "task": "llm",
+          "profiles": [
+            {
+              "id": "qwen38_27b_nvfp4_chat_4k_v1",
+              "model_id": "Qwen3.8-27B",
+              "provider_capabilities": []
+            }
+          ],
+          "availability": {
+            "state": "not_deployed",
+            "ready_instances": 0,
+            "available_capacity": null
+          }
+        }
+      ]
+    }
+  },
+  "vue": {
+    "state": "pending-external-service-recovery",
+    "featureValidated": false,
+    "project": "D:/CantorAI2026/TestProj/xmind-public-vue-core-20261125",
+    "revision": "50aaa3c75d4caed0a73b85e870ed907a76f9ec44",
+    "source": {
+      "before": 705,
+      "after": 707,
+      "unchangedOriginalFiles": 703,
+      "changed": [
+        {
+          "path": "packages/reactivity/src/index.ts",
+          "sha256": "e9b96ecefa3ffe3497e4417cf4317391beb8df8f18a6a3863756e739ac808f44"
+        },
+        {
+          "path": "packages/runtime-core/src/index.ts",
+          "sha256": "13dab5a1f67cca7473856070d6fe48d44992fb3948ef7e7d8dc1725d1bb5bf5c"
+        }
+      ],
+      "added": [
+        {
+          "path": "packages/reactivity/__tests__/toValueOr.spec.ts",
+          "sha256": "c6b6773d6899b2858c0024662433a568cd5ed52534c2b123b9b833261f2d9383"
+        },
+        {
+          "path": "packages/reactivity/src/toValueOr.ts",
+          "sha256": "bc0888efa1ff3a825e59f6f2621b5bd98c34c804a5a9190a4d7fde927ebcbf1c"
+        }
+      ],
+      "ownership": "Four effects were proposed by the actual model and approved once in the UI; no manual project edits.",
+      "validation": "No process command, unit-test suite, build or declaration check has run on these new edits. Export/type correctness is unqualified."
+    },
+    "preservation": {
+      "sessions": 14,
+      "settledRoots": 27,
+      "neverReplayRootIds": [
+        "33f726cdc70949eca4d2c91bf7e2cfdc",
+        "5632e0df56de442fbcfe309196e79d70",
+        "cb99b46029234a6e9f78de4fae6d6a97",
+        "8f9c2ac798474402971639ca1e66613d",
+        "640aeb76015043438736594ebd6b3f89",
+        "99736375dbee4e45a3f5f1a29bf50d84",
+        "e173c1b8ad4f42b1abf84e929400ee74",
+        "7ff1e68d076b4e36b9cc6728f9226a1c",
+        "b291e0ac787b4a329603accfe7a96ff8",
+        "a841fa3d716c4e929f2403461c8d2996",
+        "ebaa8ae927764b949b6c152e41bcc4e7",
+        "0d01d4cdc1b04d9fb3532fecf66ae79e",
+        "7ec54f8bde464426babb7f14be20ee4f",
+        "54d8df3055544f0f95a437c1374d6264",
+        "bea317219abc457c82fca86dd3842835",
+        "7b7b06d1779b4128b6eb761f68f4db66",
+        "a8898ab93baa436ca5fbaf5f81bb4ccd",
+        "81fc8bf12ecf4902bc36d50b70f0ed79",
+        "036c3023dd0a4ef3b321a91e693c9836",
+        "53400bee3d174adf8df3a38012f6ad0e",
+        "89586cc5fba243a49cb007c6e1c3063c",
+        "cd79d67a08f844ebac624f9cba7c9d1a",
+        "d46f1810a20d43e8b8c1ef8cf30db96f",
+        "4afd1c79a00942f99a74c5b527ea1beb",
+        "666384c940b149468e827f5647515677",
+        "57f6f5f6469242b69ab32cdd9c5f23d6",
+        "4b2b2d8dea6f4d7da9a759ecf6f0bfba"
+      ],
+      "snapshot": {
+        "path": ".agentflow/reliability-records-before-outage-checkpoint-20261125.json.gz",
+        "bytes": 289283,
+        "sha256": "6c72e47b24ca74b65ac9e29c6b6d36769f4a6e6735941667cbdbddb1f8f2c4c1"
+      },
+      "nativeInputs": {
+        "unchanged": true,
+        "filesBefore": 36162,
+        "filesAfter": 36162,
+        "changed": []
+      }
+    },
+    "priorSuccess": "Root81fc8bf12ecf4902bc36d50b70f0ed79 built7bundles and passed458existing tests/4GCskips before these edits. It is not validation of the new feature.",
+    "externalOutage": {
+      "observation": "Latest actual UI unit-only request failed before HTTP after64351ms. A separate authenticated metadata GET timed out after30seconds (tool exec session2411, exit1/TimeoutError); no response JSON was produced.",
+      "coordinatorReport": "Other authorized Codex chat reports Azure available memory below100MB followed by stalled access, restart and power-cycle recovery in progress. This is a reported diagnosis, not independently established by xMind.",
+      "paidRequestsHeld": true
+    },
+    "unresolved": [
+      "Whole-goal600second exhaustion during repeated model inspection.",
+      "Large-history120second model timeout.",
+      "External provider first-response/availability failures.",
+      "New Vue feature validation and any test-reported repairs."
+    ],
+    "trials": [
+      {
+        "id": "53400bee3d174adf8df3a38012f6ad0e",
+        "sessionId": "3ef1b7ed4de44dc78500bf11e943a8ed",
+        "neverReplay": true,
+        "state": "failed",
+        "reason": "deadline",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [],
+        "usage": {
+          "callsStarted": 1,
+          "records": 0,
+          "incomplete": true,
+          "reportedOnly": true,
+          "totals": null
+        },
+        "toolActions": {},
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 64261,
+            "remaining_active_ms": 535739,
+            "segment_id": "014028b0a1307a85d904779e47e04091"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "a7dc684ec30d7cecb0aee639f790edb2",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "89586cc5fba243a49cb007c6e1c3063c",
+        "sessionId": "3cf0b6bad537410a968e740acbe59b0a",
+        "neverReplay": true,
+        "state": "failed",
+        "reason": "deadline",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [
+          {
+            "request_id": "4f3d95c436dd4044847ee41779ba128b",
+            "status": 200
+          },
+          {
+            "request_id": "4e991ceabe3d4ba599ecae6f7c3dae06",
+            "status": 200
+          },
+          {
+            "request_id": "5d989fdcef894129adfde54153e70abb",
+            "status": 200
+          },
+          {
+            "request_id": "03c1d43b07704ad282b6298abf6664d9",
+            "status": 200
+          },
+          {
+            "request_id": "a78750ae9e1e4c86842a6e566cf07a74",
+            "status": 200
+          },
+          {
+            "request_id": "7195985c8c5440d480ad91f058054e1f",
+            "status": 200
+          },
+          {
+            "request_id": "e72b56a53c434154b28ad0607cba21d6",
+            "status": 200
+          },
+          {
+            "request_id": "37914bb3cf0844f1aa08208f51e7ff76",
+            "status": 200
+          },
+          {
+            "request_id": "4c6ddae9975b4e30b6e0b04f3cc41beb",
+            "status": 200
+          },
+          {
+            "request_id": "68ae2faaf3414628ba664474e2a17be2",
+            "status": 200
+          },
+          {
+            "request_id": "c6a0449f18d64522b8adf62efc36dffb",
+            "status": 200
+          },
+          {
+            "request_id": "3af9641ec9924ce69729c22381347982",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "callsStarted": 12,
+          "records": 11,
+          "incomplete": true,
+          "reportedOnly": true,
+          "totals": {
+            "prompt_tokens": 145146,
+            "completion_tokens": 858,
+            "total_tokens": 146004
+          }
+        },
+        "toolActions": {
+          "read_repository_instructions": 1,
+          "list_files": 3,
+          "search_files": 6,
+          "read_file": 11
+        },
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 600006,
+            "remaining_active_ms": 0,
+            "segment_id": "702a37ca7d8b52bb6eeb4b000b73f3c2"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "cdc7bd33c9868a8937d08f1ca0d591df",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "cd79d67a08f844ebac624f9cba7c9d1a",
+        "sessionId": "3cf0b6bad537410a968e740acbe59b0a",
+        "neverReplay": true,
+        "state": "failed",
+        "reason": "deadline",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [
+          {
+            "request_id": "8aa03f476b474b95aa46aac54136a5f3",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "callsStarted": 1,
+          "records": 0,
+          "incomplete": true,
+          "reportedOnly": true,
+          "totals": null
+        },
+        "toolActions": {},
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 120326,
+            "remaining_active_ms": 479674,
+            "segment_id": "7c73dc5798263999fef61cd8c4a8d9ea"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "4b268c7ccc5edccd936a9ef3df0b2805",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "d46f1810a20d43e8b8c1ef8cf30db96f",
+        "sessionId": "80c42de3f91043cd8042280c542c7118",
+        "neverReplay": true,
+        "state": "failed",
+        "reason": "deadline",
+        "provider": {
+          "model_id": "qwen3.5-2b-code-32k-shawn",
+          "profile_id": "cantorserve",
+          "profile_revision": 12,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [
+          {
+            "request_id": "b8e7c312384f4dbbb478b9cfe16835f0",
+            "status": 200
+          },
+          {
+            "request_id": "4da04a6fc57f46abb1a10bb096870ce0",
+            "status": 200
+          },
+          {
+            "request_id": "942b1344dcd24a2bae773c7f2cd72efc",
+            "status": 200
+          },
+          {
+            "request_id": "cb6f94ed4d5740c1a001748009de6156",
+            "status": 200
+          },
+          {
+            "request_id": "4965312f3f9242479a393dadeb31e810",
+            "status": 200
+          },
+          {
+            "request_id": "2277ee573548426e835237a3c92812b1",
+            "status": 200
+          },
+          {
+            "request_id": "29ed4245ef984b858b872fb95e28dba7",
+            "status": 200
+          },
+          {
+            "request_id": "eb6abade44414b9db5956fc57a96de96",
+            "status": 200
+          },
+          {
+            "request_id": "0ecce55f253c42f29edba71bd9155bbe",
+            "status": 200
+          },
+          {
+            "request_id": "620b70cda45f4d02b7f32eee6f6d6f9a",
+            "status": 200
+          },
+          {
+            "request_id": "653ba75b3d544ef2b810d117ed4f96b0",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "callsStarted": 11,
+          "records": 10,
+          "incomplete": true,
+          "reportedOnly": true,
+          "totals": {
+            "prompt_tokens": 110026,
+            "completion_tokens": 1024,
+            "total_tokens": 111050
+          }
+        },
+        "toolActions": {
+          "read_repository_instructions": 1,
+          "list_files": 4,
+          "read_file": 4,
+          "search_files": 1
+        },
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 600003,
+            "remaining_active_ms": 0,
+            "segment_id": "271545ba5931d9715d2ed748df83eee8"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "c83bb8b8c7597a95a3c681c9acf8fc51",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "4afd1c79a00942f99a74c5b527ea1beb",
+        "sessionId": "cf719b47fa1f4d989762cf7e83b074a8",
+        "neverReplay": true,
+        "state": "completed",
+        "reason": null,
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 13,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [
+          {
+            "request_id": "44ac4b61dedf42dfa40282d1181b3e65",
+            "status": 200
+          },
+          {
+            "request_id": "7c91a44f5e45438e9cf5072f9f4f9e0d",
+            "status": 200
+          },
+          {
+            "request_id": "e1ec6a71a8b4472c8e42be05105fdda8",
+            "status": 200
+          },
+          {
+            "request_id": "b92dd9294307448fa6e6ba5a9518a7ed",
+            "status": 200
+          },
+          {
+            "request_id": "ae4b47f578794017b0c180ff6312fe24",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "callsStarted": 5,
+          "records": 5,
+          "incomplete": false,
+          "reportedOnly": true,
+          "totals": {
+            "prompt_tokens": 51676,
+            "completion_tokens": 702,
+            "total_tokens": 52378
+          }
+        },
+        "toolActions": {
+          "list_files": 1,
+          "search_files": 1,
+          "read_file": 3,
+          "create_file": 1
+        },
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 276601,
+            "remaining_active_ms": 323399,
+            "segment_id": "cd27f01810bd9ba9bdc45f4c6f940462"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "bf98c47a4d06cc45bd7c87623ec56c07",
+            "reason": "completed",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "9decf9feab07a899bd9f46c9b8b980fa",
+            "tool": "create_file",
+            "state": "succeeded",
+            "decisionActor": "local-owner",
+            "result": {
+              "after_sha256": "bc0888efa1ff3a825e59f6f2621b5bd98c34c804a5a9190a4d7fde927ebcbf1c",
+              "file_id": "windows-local-file-v1:746a389f6a386052:0f00000000000000cc072d0000000000",
+              "parent_id": "windows-local-file-v1:746a389f6a386052:0000000000000000cc072d0000000000",
+              "path": "packages/reactivity/src/toValueOr.ts",
+              "size": 1095,
+              "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+            }
+          }
+        ]
+      },
+      {
+        "id": "666384c940b149468e827f5647515677",
+        "sessionId": "cf719b47fa1f4d989762cf7e83b074a8",
+        "neverReplay": true,
+        "state": "completed",
+        "reason": null,
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 13,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [
+          {
+            "request_id": "c778ccd767d644988bd025574f7a33cc",
+            "status": 200
+          },
+          {
+            "request_id": "d5fcdf4023754001b809a138616f51b8",
+            "status": 200
+          },
+          {
+            "request_id": "8f9bc50584214ecfac43f958a8153b7d",
+            "status": 200
+          },
+          {
+            "request_id": "610fefb6d6074e1d813fa48d528d32e3",
+            "status": 200
+          },
+          {
+            "request_id": "6718586923e74dc2bacb9f46824edeeb",
+            "status": 200
+          },
+          {
+            "request_id": "1a36c1316126498f85eb51c2d05fb748",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "callsStarted": 6,
+          "records": 6,
+          "incomplete": false,
+          "reportedOnly": true,
+          "totals": {
+            "prompt_tokens": 86386,
+            "completion_tokens": 1841,
+            "total_tokens": 88227
+          }
+        },
+        "toolActions": {
+          "read_file": 3,
+          "apply_patch": 3,
+          "create_file": 1
+        },
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 589756,
+            "remaining_active_ms": 10244,
+            "segment_id": "4666de09cfc8eae6a487b45a1aaea351"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "6ae629e7fda3e4915ffeb34467a244d8",
+            "reason": "completed",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "914b4b9c3a63c16b306f412d4bdb1ffe-0",
+            "tool": "patch_file",
+            "state": "succeeded",
+            "decisionActor": "local-owner",
+            "result": {
+              "action": "update",
+              "after_exists": true,
+              "after_sha256": "e9b96ecefa3ffe3497e4417cf4317391beb8df8f18a6a3863756e739ac808f44",
+              "before_sha256": "544c9c181c973e0341e08c326dd9aef97e4b26f69ca2872ca7a7bba015897019",
+              "created_directory_bindings": [],
+              "file_id": "windows-local-file-v1:746a389f6a386052:0a00000000000000cc072d0000000000",
+              "operation_id": "914b4b9c3a63c16b306f412d4bdb1ffe-0",
+              "patch_id": "914b4b9c3a63c16b306f412d4bdb1ffe",
+              "patch_index": 0,
+              "path": "packages/reactivity/src/index.ts",
+              "size": 1825,
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+            }
+          },
+          {
+            "id": "1421543a8bcf8c5c2d4c719f169d0592-0",
+            "tool": "patch_file",
+            "state": "succeeded",
+            "decisionActor": "local-owner",
+            "result": {
+              "action": "update",
+              "after_exists": true,
+              "after_sha256": "13dab5a1f67cca7473856070d6fe48d44992fb3948ef7e7d8dc1725d1bb5bf5c",
+              "before_sha256": "067f105768c3094437cead9f39958c7843b848f6c6e93d324f85361f944adbf7",
+              "created_directory_bindings": [],
+              "file_id": "windows-local-file-v1:746a389f6a386052:1c00000000000000d1072d0000000000",
+              "operation_id": "1421543a8bcf8c5c2d4c719f169d0592-0",
+              "patch_id": "1421543a8bcf8c5c2d4c719f169d0592",
+              "patch_index": 0,
+              "path": "packages/runtime-core/src/index.ts",
+              "size": 12268,
+              "state": "succeeded",
+              "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+            }
+          },
+          {
+            "id": "3f771d07adc73540050e6be291070516",
+            "tool": "create_file",
+            "state": "succeeded",
+            "decisionActor": "local-owner",
+            "result": {
+              "after_sha256": "c6b6773d6899b2858c0024662433a568cd5ed52534c2b123b9b833261f2d9383",
+              "file_id": "windows-local-file-v1:746a389f6a386052:0e00000000000000ca072d0000000000",
+              "parent_id": "windows-local-file-v1:746a389f6a386052:0000000000000000ca072d0000000000",
+              "path": "packages/reactivity/__tests__/toValueOr.spec.ts",
+              "size": 1724,
+              "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+            }
+          }
+        ]
+      },
+      {
+        "id": "57f6f5f6469242b69ab32cdd9c5f23d6",
+        "sessionId": "1b56f21df39141b78613537a6a3fc657",
+        "neverReplay": true,
+        "state": "failed",
+        "reason": "deadline",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 13,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [
+          {
+            "request_id": "5b88b4be91464a62b3707a9c64b485be",
+            "status": 200
+          },
+          {
+            "request_id": "a2a74227600f4e21a428f67e8a3fdd01",
+            "status": 200
+          },
+          {
+            "request_id": "c6f3bb6f7cf24d329ef5bad120b9c24d",
+            "status": 200
+          },
+          {
+            "request_id": "d49abdb9f9c842c2aa9c0b8f1740ec8c",
+            "status": 200
+          },
+          {
+            "request_id": "c2bdc1a8b2f74f0991ea8fd01cb43143",
+            "status": 200
+          },
+          {
+            "request_id": "798bf5410d5e4d519522c533c1ede049",
+            "status": 200
+          },
+          {
+            "request_id": "b9be9996e10549b1ab04edcc22d80d71",
+            "status": 200
+          },
+          {
+            "request_id": "ee5575bcb52046669a331e373bdde505",
+            "status": 200
+          },
+          {
+            "request_id": "5a5741274a3942c79ddb33ec2b02ec79",
+            "status": 200
+          },
+          {
+            "request_id": "d9e90186a5bd44b2a7f236d070cbfa97",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "callsStarted": 10,
+          "records": 9,
+          "incomplete": true,
+          "reportedOnly": true,
+          "totals": {
+            "prompt_tokens": 134566,
+            "completion_tokens": 437,
+            "total_tokens": 135003
+          }
+        },
+        "toolActions": {
+          "read_repository_instructions": 1,
+          "list_files": 2,
+          "read_file": 11,
+          "search_files": 1
+        },
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 600011,
+            "remaining_active_ms": 0,
+            "segment_id": "ed1a33867ddb8036a2d233d1f70bab23"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "2bb1c01d02a72563146e6248ec56a044",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": []
+      },
+      {
+        "id": "4b2b2d8dea6f4d7da9a759ecf6f0bfba",
+        "sessionId": "bb5cae82958d47fb94544da8939606d6",
+        "neverReplay": true,
+        "state": "failed",
+        "reason": "deadline",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 13,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "http": [],
+        "usage": {
+          "callsStarted": 1,
+          "records": 0,
+          "incomplete": true,
+          "reportedOnly": true,
+          "totals": null
+        },
+        "toolActions": {},
+        "budgetSegments": [
+          {
+            "active_elapsed_ms": 64351,
+            "remaining_active_ms": 535649,
+            "segment_id": "bcf706c3dab44bc7d11b234461507abd"
+          }
+        ],
+        "retiredLeases": [
+          {
+            "generation": "9e6bf5c4c23e39871375ebbbd17ad20b",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": []
+      }
+    ]
+  },
+  "originalSdk": {
+    "path": "D:/CantorAI/xlang3",
+    "revision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d",
+    "trackedWorktreeClean": true
+  },
+  "raw": [
+    {
+      "path": ".agentflow/reliability-full-native-20261125.log",
+      "bytes": 35109,
+      "sha256": "5d7f72192f0578c721b7eaf1e32bc587209864c0ad89a9fb912dbca69894d671"
+    },
+    {
+      "path": ".agentflow/reliability-final-full-native-20261125.log",
+      "bytes": 30379,
+      "sha256": "2d730a5bd1fb02502550cc7699bc76aaec2ae69ae36d9e047696b9bb6fbb5aef"
+    },
+    {
+      "path": ".agentflow/reliability-qualified-full-native-20261125.log",
+      "bytes": 28491,
+      "sha256": "6aabd67217002ec13a2651164214949aedb016a235017349e3b7f891083cd4cc"
+    },
+    {
+      "path": ".agentflow/reliability-qualified-full-inventory-20261125.json",
+      "bytes": 160164,
+      "sha256": "8c928bf8e1a23ba39f2eb1e03f7fd4d374378fc4d9b72eb31bbc23be89d9bf6d"
+    },
+    {
+      "path": ".agentflow/reliability-qualified-full-inputs-before-20261125.json",
+      "bytes": 5229606,
+      "sha256": "70dbe18382ce77fd3ab751430990bbf81a94ec66821bcaad6c36e616b55bbc96"
+    },
+    {
+      "path": ".agentflow/reliability-qualified-full-inputs-after-20261125.json",
+      "bytes": 5229606,
+      "sha256": "70dbe18382ce77fd3ab751430990bbf81a94ec66821bcaad6c36e616b55bbc96"
+    },
+    {
+      "path": ".agentflow/reliability-clock-before-20261125.log",
+      "bytes": 34,
+      "sha256": "2cec6c7bf12596a59f7eb2d58fdead7531cbbc41daf95fa53241690800c1195a"
+    },
+    {
+      "path": ".agentflow/reliability-clock-fixed-20261125.log",
+      "bytes": 176,
+      "sha256": "323a14b022ab183e1910e7d0d7bb61279b25a0e4b868d16101cf61c6dbcae72e"
+    },
+    {
+      "path": ".agentflow/reliability-denial-before-20261125.log",
+      "bytes": 2660,
+      "sha256": "b893c85a99c492021610fe4dbe86ef957546bcd9f3cd6fc80412e09140ada14c"
+    },
+    {
+      "path": ".agentflow/reliability-denial-and-unicode-before-20261125.log",
+      "bytes": 5963,
+      "sha256": "e3b366b6e7b87a7c416e2737beb73e6870091b4bd518aaa18416ea4bb9792514"
+    },
+    {
+      "path": ".agentflow/reliability-workflow-fixed-test-20261125.log",
+      "bytes": 282,
+      "sha256": "73ac409d57e3b2c257acf048391079959fa6cc78b25f61c263e1d38e5989a698"
+    },
+    {
+      "path": ".agentflow/xlang3-nested-import-before-20261125.log",
+      "bytes": 1275,
+      "sha256": "770c2c975521ab8bd1043d63d1e283b215323c3499fd5a2e88bc826031920cad"
+    },
+    {
+      "path": ".agentflow/xlang3-nested-import-fixed-20261125.log",
+      "bytes": 823,
+      "sha256": "50347d300d8069188ea79f6407dd6a1fdcab714e171fee4437381bf4e825c43c"
+    },
+    {
+      "path": ".agentflow/xlang3-nested-import-existing-cli-20261125.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".agentflow/xlang3-nested-import-performance-20261125.json",
+      "bytes": 61831,
+      "sha256": "666087b235003ab485a7f2b7430b9dd02623a48d2a1e2837dabd4189bbb2a940"
+    },
+    {
+      "path": ".agentflow/reliability-records-before-20261125.json.gz",
+      "bytes": 180292,
+      "sha256": "4753205c9d3e14aaf17deca61a7ae42827deff422a363a695f2df002313df5f1"
+    },
+    {
+      "path": ".agentflow/reliability-records-after-20261125.json.gz",
+      "bytes": 180292,
+      "sha256": "4753205c9d3e14aaf17deca61a7ae42827deff422a363a695f2df002313df5f1"
+    },
+    {
+      "path": ".agentflow/reliability-runtime-rollback-20261125.zip",
+      "bytes": 11981068,
+      "sha256": "398d1e1355ab4e85b419c4dd970d906c5600b336c36f3d2992c5b42e4ef2331a"
+    },
+    {
+      "path": ".agentflow/reliability-nested-runtime-rollback-20261125.zip",
+      "bytes": 11982283,
+      "sha256": "74d6e65e62303aaeae8d75d0c78a0aa3d822fb96bffab8de1406c67c714a18cc"
+    },
+    {
+      "path": ".agentflow/reliability-proof-bundle-20261125.json.gz",
+      "bytes": 35011,
+      "sha256": "65ec76f3c6082976d8be285753e1a2cff07ec1b308f97dcf216e81ad031ab6ae"
+    },
+    {
+      "path": ".agentflow/reliability-records-before-outage-checkpoint-20261125.json.gz",
+      "bytes": 289283,
+      "sha256": "6c72e47b24ca74b65ac9e29c6b6d36769f4a6e6735941667cbdbddb1f8f2c4c1"
+    },
+    {
+      "path": ".agentflow/reliability-vue-native-inputs-before-20261125.json",
+      "bytes": 5229606,
+      "sha256": "70dbe18382ce77fd3ab751430990bbf81a94ec66821bcaad6c36e616b55bbc96"
+    },
+    {
+      "path": ".agentflow/reliability-vue-native-inputs-outage-checkpoint-20261125.json",
+      "bytes": 5229606,
+      "sha256": "70dbe18382ce77fd3ab751430990bbf81a94ec66821bcaad6c36e616b55bbc96"
+    },
+    {
+      "path": ".agentflow/reliability-vue-native-checkpoint-input-comparison-20261125.json",
+      "bytes": 72,
+      "sha256": "fe63f7887c5808c2001cbdc269b2a2592093704af3490c2a8af628d31be1011c"
+    },
+    {
+      "path": ".agentflow/reliability-runtime-audit-20261125.json",
+      "bytes": 1140,
+      "sha256": "edfb225f2f970b6111c08b3fc62c8ee2bcfe1482f9c01fb071b3cc4525dd93a3"
+    }
+  ]
+}
