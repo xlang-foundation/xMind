@@ -1,0 +1,2385 @@
+{
+  "date": "2026-11-26",
+  "state": "native-fixes-and-completed-consumer-type-validation",
+  "wholeRequestTimeoutQualified": false,
+  "scope": "Native context and patch-feedback fixes pass their full inventory. A separate actual UI declaration/consumer validation continuation completes under the unchanged 600-second limit. No from-scratch whole-feature or installed-release qualification is inferred.",
+  "native": {
+    "contextRevision": "645b3c7ff5d3f3649bf25a81af95fa675525805e",
+    "contextFull": {
+      "passed": 187,
+      "total": 187,
+      "seconds": 618.02,
+      "frozenFiles": 36168,
+      "inputComparison": {
+        "unchanged": true,
+        "filesBefore": 36168,
+        "filesAfter": 36168,
+        "changed": []
+      }
+    },
+    "diagnosticRevision": "f4418bfc",
+    "diagnosticFocused": {
+      "passed": 6,
+      "total": 6,
+      "seconds": 62.19,
+      "frozenFiles": 36168,
+      "inputComparison": {
+        "unchanged": true,
+        "filesBefore": 36168,
+        "filesAfter": 36168,
+        "changed": []
+      }
+    },
+    "fullSuiteForDiagnosticRevision": false,
+    "liveInputComparison": {
+      "unchanged": true,
+      "filesBefore": 36168,
+      "filesAfter": 36168,
+      "changed": []
+    },
+    "finalProcessLogRevision": "fb932446",
+    "finalFull": {
+      "passed": 187,
+      "total": 187,
+      "seconds": 609.8,
+      "frozenFiles": 36168,
+      "inputComparison": {
+        "unchanged": true,
+        "filesBefore": 36168,
+        "filesAfter": 36168,
+        "changed": []
+      },
+      "sourceRevision": "e7832b1515a5a232d77723c9815302bd1a73fc3e",
+      "beforeManifestSha256": "93c1c43e57b11dbdf750c3ad8df417586bcea913d67dfcc44e07958934f38adc",
+      "afterManifestSha256": "93c1c43e57b11dbdf750c3ad8df417586bcea913d67dfcc44e07958934f38adc"
+    },
+    "validationWorkflowRevision": "bf23c75c",
+    "validationWorkflowFocused": {
+      "passed": 6,
+      "total": 6,
+      "seconds": 62.08,
+      "inputComparison": {
+        "unchanged": true,
+        "filesBefore": 36168,
+        "filesAfter": 36168,
+        "changed": []
+      }
+    },
+    "fullSuiteForFinalRevision": true
+  },
+  "sdk": {
+    "originalPath": "D:/CantorAI/xlang3",
+    "originalRevision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d",
+    "compatibleIsolatedRevision": "9c55df9409d4219805746a8392519de9c4335b65",
+    "execution": "Native C++ with embedded xlang3; no CPython interpreter",
+    "originalPreservation": {
+      "path": "D:/CantorAI/xlang3",
+      "revision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d",
+      "trackedClean": true,
+      "files": {
+        "xlang3.exe": "794fb6853cddefc38ee3e458f1b1128dd37aca96682b0a9a5e890ccc3db7aace",
+        "xlang3_runtime.dll": "cce34419c4f0774e8c26c2b2a043123a3ae28d253001480554543d78e1f4c548"
+      }
+    }
+  },
+  "provider": {
+    "source": "Authenticated dynamic CantorServe catalogue; saved private credentials reused",
+    "model": "qwen3.8-27b-chat-32k",
+    "profileRevision": 13,
+    "limits": {
+      "modelMs": 120000,
+      "idleMs": 60000,
+      "rootMs": 600000,
+      "processMs": 120000
+    },
+    "limitsChanged": false,
+    "moneyEstimate": null,
+    "discoveredModels": 18
+  },
+  "runtime": {
+    "owner": {
+      "pid": 131380,
+      "image": "D:\\CantorAI2026\\xMind\\.agentflow\\local-build-20261125-profiles\\3b1a0606d86721b1fde18fc5ef003fc3b88bf6930c7199429cac593771f48c92\\runtime-924036b131acd5469a87d25f893cc64ffa3a8f3beeee8969b68166ab8a16507c\\xmind.exe",
+      "birth": "134401577240968359"
+    },
+    "audits": [
+      {
+        "root": "D:\\CantorAI2026\\xMind\\.agentflow\\local-runtime",
+        "manifestSha256": "1b7997ce26cc3d6781cfe971f63acd7980844f4282425599d21fbe73c4c51ede",
+        "files": 1710,
+        "nativeRevision": "e7832b1515a5a232d77723c9815302bd1a73fc3e",
+        "sdkRevision": "9c55df9409d4219805746a8392519de9c4335b65"
+      },
+      {
+        "root": "D:\\CantorAI2026\\xMind\\.agentflow\\local-build-20261125-profiles\\3b1a0606d86721b1fde18fc5ef003fc3b88bf6930c7199429cac593771f48c92\\runtime-924036b131acd5469a87d25f893cc64ffa3a8f3beeee8969b68166ab8a16507c",
+        "manifestSha256": "1b7997ce26cc3d6781cfe971f63acd7980844f4282425599d21fbe73c4c51ede",
+        "files": 1710,
+        "nativeRevision": "e7832b1515a5a232d77723c9815302bd1a73fc3e",
+        "sdkRevision": "9c55df9409d4219805746a8392519de9c4335b65"
+      }
+    ]
+  },
+  "project": {
+    "path": "D:/CantorAI2026/TestProj/xmind-public-vue-core-20261125",
+    "revision": "50aaa3c75d4caed0a73b85e870ed907a76f9ec44",
+    "baselineWithGuide": 705,
+    "files": 707,
+    "unchangedBaselineFiles": 702,
+    "changed": [
+      "packages-private/dts-test/ref.test-d.ts",
+      "packages/reactivity/src/index.ts",
+      "packages/runtime-core/src/index.ts"
+    ],
+    "added": [
+      "packages/reactivity/__tests__/toValueOr.spec.ts",
+      "packages/reactivity/src/toValueOr.ts"
+    ],
+    "removed": [],
+    "manualProjectFixes": 0,
+    "diagnosticCoaching": false,
+    "sourceHashes": {
+      "packages-private/dts-test/ref.test-d.ts": "210861f317de3973fa082a456fa4df6af7502bb4af601a531d11cb368bc24035",
+      "packages/reactivity/src/index.ts": "e56df273f0068769b05f00d718f2a49b911f123a859f98caf6b0b5690a2739ef",
+      "packages/runtime-core/src/index.ts": "13dab5a1f67cca7473856070d6fe48d44992fb3948ef7e7d8dc1725d1bb5bf5c",
+      "packages/reactivity/__tests__/toValueOr.spec.ts": "c6b6773d6899b2858c0024662433a568cd5ed52534c2b123b9b833261f2d9383",
+      "packages/reactivity/src/toValueOr.ts": "a8f06dd731b1a9ac3d4f52f8e964602814e41b1732de306da55e4a8f6a1ceba5"
+    }
+  },
+  "trials": [
+    {
+      "root": "bb362eaf933c4756b6448eb2eb02f5cb",
+      "state": "failed",
+      "activeElapsedMs": 562911,
+      "remainingActiveMs": 37089,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 7,
+      "usage": [
+        {
+          "completion_tokens": 55,
+          "prompt_tokens": 11021,
+          "total_tokens": 11076
+        },
+        {
+          "completion_tokens": 62,
+          "prompt_tokens": 11523,
+          "total_tokens": 11585
+        },
+        {
+          "completion_tokens": 59,
+          "prompt_tokens": 12848,
+          "total_tokens": 12907
+        },
+        {
+          "completion_tokens": 62,
+          "prompt_tokens": 14159,
+          "total_tokens": 14221
+        },
+        {
+          "completion_tokens": 56,
+          "prompt_tokens": 16541,
+          "total_tokens": 16597
+        },
+        {
+          "completion_tokens": 59,
+          "prompt_tokens": 20277,
+          "total_tokens": 20336
+        },
+        {
+          "completion_tokens": 67,
+          "prompt_tokens": 20935,
+          "total_tokens": 21002
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 42310,
+          "firstTokenMs": 42253,
+          "usage": {
+            "completion_tokens": 55,
+            "prompt_tokens": 11021,
+            "total_tokens": 11076
+          },
+          "tools": [
+            "list_files",
+            "list_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 45866,
+          "firstTokenMs": 45820,
+          "usage": {
+            "completion_tokens": 62,
+            "prompt_tokens": 11523,
+            "total_tokens": 11585
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 51072,
+          "firstTokenMs": 51014,
+          "usage": {
+            "completion_tokens": 59,
+            "prompt_tokens": 12848,
+            "total_tokens": 12907
+          },
+          "tools": [
+            "read_file",
+            "list_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 55123,
+          "firstTokenMs": 55064,
+          "usage": {
+            "completion_tokens": 62,
+            "prompt_tokens": 14159,
+            "total_tokens": 14221
+          },
+          "tools": [
+            "read_file",
+            "search_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 65780,
+          "firstTokenMs": 65732,
+          "usage": {
+            "completion_tokens": 56,
+            "prompt_tokens": 16541,
+            "total_tokens": 16597
+          },
+          "tools": [
+            "read_file",
+            "list_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 86037,
+          "firstTokenMs": 85976,
+          "usage": {
+            "completion_tokens": 59,
+            "prompt_tokens": 20277,
+            "total_tokens": 20336
+          },
+          "tools": [
+            "list_files",
+            "list_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 91028,
+          "firstTokenMs": 90985,
+          "usage": {
+            "completion_tokens": 67,
+            "prompt_tokens": 20935,
+            "total_tokens": 21002
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "list_files",
+          "arguments": {
+            "path": "packages/reactivity/src"
+          }
+        },
+        {
+          "name": "list_files",
+          "arguments": {
+            "path": "packages/vue/src"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/vue/src/index.ts"
+          }
+        },
+        {
+          "name": "list_files",
+          "arguments": {
+            "path": "packages/reactivity/__tests__"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "query": "toValueOr"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "list_files",
+          "arguments": {
+            "path": "packages-private"
+          }
+        },
+        {
+          "name": "list_files",
+          "arguments": {
+            "path": "packages-private/dts-test"
+          }
+        },
+        {
+          "name": "list_files",
+          "arguments": {
+            "path": "packages-private/dts-built-test"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages-private/dts-test/reactivity.test-d.ts"
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 0,
+      "successfulOperations": 0,
+      "terminal": {
+        "generation": "23ac4f2d6a03de7c3b661712b62c0086",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "7e9da3230d8249be884c6a392a4a5b0c",
+      "state": "failed",
+      "activeElapsedMs": 441308,
+      "remainingActiveMs": 158692,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 3,
+      "usage": [
+        {
+          "completion_tokens": 65,
+          "prompt_tokens": 22872,
+          "total_tokens": 22937
+        },
+        {
+          "completion_tokens": 57,
+          "prompt_tokens": 23513,
+          "total_tokens": 23570
+        },
+        {
+          "completion_tokens": 74,
+          "prompt_tokens": 25019,
+          "total_tokens": 25093
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 99287,
+          "firstTokenMs": 99256,
+          "usage": {
+            "completion_tokens": 65,
+            "prompt_tokens": 22872,
+            "total_tokens": 22937
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 105572,
+          "firstTokenMs": 105541,
+          "usage": {
+            "completion_tokens": 57,
+            "prompt_tokens": 23513,
+            "total_tokens": 23570
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 115857,
+          "firstTokenMs": 115822,
+          "usage": {
+            "completion_tokens": 74,
+            "prompt_tokens": 25019,
+            "total_tokens": 25093
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages-private/dts-test/utils.d.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages-private/dts-test/tsconfig.test.json"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/vue/src/runtime.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/vue/package.json"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/runtime-dom/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 120,
+            "path": "packages/reactivity/src/ref.ts"
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 0,
+      "successfulOperations": 0,
+      "terminal": {
+        "generation": "8a6a01f480cee8345f47092d90881816",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "361b80059eec45f995e0ce4fb2e66d14",
+      "state": "failed",
+      "activeElapsedMs": 600003,
+      "remainingActiveMs": 0,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 6,
+      "usage": [
+        {
+          "completion_tokens": 95,
+          "prompt_tokens": 19242,
+          "total_tokens": 19337
+        },
+        {
+          "completion_tokens": 87,
+          "prompt_tokens": 19895,
+          "total_tokens": 19982
+        },
+        {
+          "completion_tokens": 88,
+          "prompt_tokens": 20422,
+          "total_tokens": 20510
+        },
+        {
+          "completion_tokens": 98,
+          "prompt_tokens": 21226,
+          "total_tokens": 21324
+        },
+        {
+          "completion_tokens": 112,
+          "prompt_tokens": 21786,
+          "total_tokens": 21898
+        },
+        {
+          "completion_tokens": 119,
+          "prompt_tokens": 22483,
+          "total_tokens": 22602
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 83771,
+          "firstTokenMs": 83740,
+          "usage": {
+            "completion_tokens": 95,
+            "prompt_tokens": 19242,
+            "total_tokens": 19337
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 85941,
+          "firstTokenMs": 85913,
+          "usage": {
+            "completion_tokens": 87,
+            "prompt_tokens": 19895,
+            "total_tokens": 19982
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 87551,
+          "firstTokenMs": 87521,
+          "usage": {
+            "completion_tokens": 88,
+            "prompt_tokens": 20422,
+            "total_tokens": 20510
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 94173,
+          "firstTokenMs": 94142,
+          "usage": {
+            "completion_tokens": 98,
+            "prompt_tokens": 21226,
+            "total_tokens": 21324
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 95778,
+          "firstTokenMs": 95749,
+          "usage": {
+            "completion_tokens": 112,
+            "prompt_tokens": 21786,
+            "total_tokens": 21898
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 102056,
+          "firstTokenMs": 102019,
+          "usage": {
+            "completion_tokens": 119,
+            "prompt_tokens": 22483,
+            "total_tokens": 22602
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/vue/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/runtime-dom/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/vue/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "path": "packages/vue/src/runtime.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 0,
+      "successfulOperations": 0,
+      "terminal": {
+        "generation": "93cf91ecfa400e1f770a05e562132890",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "e674ab63e0414419b7fd5a60d39e0a20",
+      "state": "failed",
+      "activeElapsedMs": 594479,
+      "remainingActiveMs": 5521,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 6,
+      "usage": [
+        {
+          "completion_tokens": 119,
+          "prompt_tokens": 12543,
+          "total_tokens": 12662
+        },
+        {
+          "completion_tokens": 111,
+          "prompt_tokens": 13977,
+          "total_tokens": 14088
+        },
+        {
+          "completion_tokens": 112,
+          "prompt_tokens": 15833,
+          "total_tokens": 15945
+        },
+        {
+          "completion_tokens": 109,
+          "prompt_tokens": 19249,
+          "total_tokens": 19358
+        },
+        {
+          "completion_tokens": 115,
+          "prompt_tokens": 20858,
+          "total_tokens": 20973
+        },
+        {
+          "completion_tokens": 118,
+          "prompt_tokens": 24617,
+          "total_tokens": 24735
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 50849,
+          "firstTokenMs": 50815,
+          "usage": {
+            "completion_tokens": 119,
+            "prompt_tokens": 12543,
+            "total_tokens": 12662
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 57998,
+          "firstTokenMs": 57967,
+          "usage": {
+            "completion_tokens": 111,
+            "prompt_tokens": 13977,
+            "total_tokens": 14088
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 65710,
+          "firstTokenMs": 65678,
+          "usage": {
+            "completion_tokens": 112,
+            "prompt_tokens": 15833,
+            "total_tokens": 15945
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 84463,
+          "firstTokenMs": 84433,
+          "usage": {
+            "completion_tokens": 109,
+            "prompt_tokens": 19249,
+            "total_tokens": 19358
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 97053,
+          "firstTokenMs": 97018,
+          "usage": {
+            "completion_tokens": 115,
+            "prompt_tokens": 20858,
+            "total_tokens": 20973
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 117102,
+          "firstTokenMs": 117065,
+          "usage": {
+            "completion_tokens": 118,
+            "prompt_tokens": 24617,
+            "total_tokens": 24735
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/vue/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/runtime-dom/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/vue/src/runtime.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/vue/package.json"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages/reactivity/src/ref.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages-private/dts-test/reactivity.test-d.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 200,
+            "offset": 1,
+            "path": "packages-private/dts-test/utils.d.ts"
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 0,
+      "successfulOperations": 0,
+      "terminal": {
+        "generation": "6ff0f5e8d53df6b37582e3f22ad363c3",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "5268b949f96041cf928df4eb4c59e8d0",
+      "state": "failed",
+      "activeElapsedMs": 600001,
+      "remainingActiveMs": 0,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 9,
+      "usage": [
+        {
+          "completion_tokens": 26,
+          "prompt_tokens": 8300,
+          "total_tokens": 8326
+        },
+        {
+          "completion_tokens": 97,
+          "prompt_tokens": 11054,
+          "total_tokens": 11151
+        },
+        {
+          "completion_tokens": 89,
+          "prompt_tokens": 13146,
+          "total_tokens": 13235
+        },
+        {
+          "completion_tokens": 99,
+          "prompt_tokens": 14332,
+          "total_tokens": 14431
+        },
+        {
+          "completion_tokens": 355,
+          "prompt_tokens": 15045,
+          "total_tokens": 15400
+        },
+        {
+          "completion_tokens": 339,
+          "prompt_tokens": 15437,
+          "total_tokens": 15776
+        },
+        {
+          "completion_tokens": 125,
+          "prompt_tokens": 15813,
+          "total_tokens": 15938
+        },
+        {
+          "completion_tokens": 320,
+          "prompt_tokens": 16143,
+          "total_tokens": 16463
+        },
+        {
+          "completion_tokens": 39,
+          "prompt_tokens": 16656,
+          "total_tokens": 16695
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 36832,
+          "firstTokenMs": 36807,
+          "usage": {
+            "completion_tokens": 26,
+            "prompt_tokens": 8300,
+            "total_tokens": 8326
+          },
+          "tools": [
+            "search_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 46451,
+          "firstTokenMs": 46411,
+          "usage": {
+            "completion_tokens": 97,
+            "prompt_tokens": 11054,
+            "total_tokens": 11151
+          },
+          "tools": [
+            "read_file",
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 55817,
+          "firstTokenMs": 55788,
+          "usage": {
+            "completion_tokens": 89,
+            "prompt_tokens": 13146,
+            "total_tokens": 13235
+          },
+          "tools": [
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 61364,
+          "firstTokenMs": 61333,
+          "usage": {
+            "completion_tokens": 99,
+            "prompt_tokens": 14332,
+            "total_tokens": 14431
+          },
+          "tools": [
+            "search_files",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 73169,
+          "firstTokenMs": 73142,
+          "usage": {
+            "completion_tokens": 355,
+            "prompt_tokens": 15045,
+            "total_tokens": 15400
+          },
+          "tools": [
+            "apply_patch"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 78014,
+          "firstTokenMs": 77990,
+          "usage": {
+            "completion_tokens": 339,
+            "prompt_tokens": 15437,
+            "total_tokens": 15776
+          },
+          "tools": [
+            "apply_patch"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 71528,
+          "firstTokenMs": 71502,
+          "usage": {
+            "completion_tokens": 125,
+            "prompt_tokens": 15813,
+            "total_tokens": 15938
+          },
+          "tools": [
+            "edit_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 81839,
+          "firstTokenMs": 81810,
+          "usage": {
+            "completion_tokens": 320,
+            "prompt_tokens": 16143,
+            "total_tokens": 16463
+          },
+          "tools": [
+            "edit_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 71632,
+          "firstTokenMs": 71604,
+          "usage": {
+            "completion_tokens": 39,
+            "prompt_tokens": 16656,
+            "total_tokens": 16695
+          },
+          "tools": [
+            "read_file"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "search_files",
+          "arguments": {
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 60,
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 60,
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages-private",
+            "query": "toValueOr"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 30,
+            "offset": 550,
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "apply_patch",
+          "arguments": {
+            "patch_text": "*** Update File: packages-private/dts-test/ref.test-d.ts\n@@\n   toRef,\n   toRefs,\n   toValue,\n+  toValueOr,\n   unref,\n   useTemplateRef,\n } from 'vue'\n@@\n// toValue\nexpectType<number>(toValue(unref1))\nexpectType<string>(toValue(unref2))\n+\n+// toValueOr\n+expectType<number>(toValueOr(1, 0))\n+expectType<number>(toValueOr(ref(1), 0))\n+expectType<number>(toValueOr(() => 1, 0))\n+expectType<string>(toValueOr(null, 'fallback'))\n+expectType<string>(toValueOr(ref(null), 'fallback'))\n+expectType<string>(toValueOr(() => null, 'fallback'))\n+expectType<string>(toValueOr(undefined, 'fallback'))\n+expectType<string>(toValueOr(ref(undefined), 'fallback'))\n+expectType<string>(toValueOr(() => undefined, 'fallback'))\n+expectType<false>(toValueOr(false, true))\n+expectType<0>(toValueOr(0, 1))\n+expectType<''>(toValueOr('', 'x'))\n+expectType<string>(toValueOr(ref<string | null>(null), 'fallback'))\n+expectType<string>(toValueOr(() => null, 'fallback'))\n+expectType<number | string>(toValueOr(ref<number | string>(1), 'fallback'))"
+          }
+        },
+        {
+          "name": "apply_patch",
+          "arguments": {
+            "patch_text": "*** Update File: packages-private/dts-test/ref.test-d.ts\n@@\n   toRef,\n   toRefs,\n   toValue,\n+  toValueOr,\n   unref,\n   useTemplateRef,\n } from 'vue'\n@@\n// toValue\nexpectType<number>(toValue(unref1))\nexpectType<string>(toValue(unref2))\n+\n+// toValueOr\n+expectType<number>(toValueOr(1, 0))\n+expectType<number>(toValueOr(ref(1), 0))\n+expectType<number>(toValueOr(() => 1, 0))\n+expectType<string>(toValueOr(null, 'fallback'))\n+expectType<string>(toValueOr(ref(null), 'fallback'))\n+expectType<string>(toValueOr(() => null, 'fallback'))\n+expectType<string>(toValueOr(undefined, 'fallback'))\n+expectType<string>(toValueOr(ref(undefined), 'fallback'))\n+expectType<string>(toValueOr(() => undefined, 'fallback'))\n+expectType<false>(toValueOr(false, true))\n+expectType<0>(toValueOr(0, 1))\n+expectType<''>(toValueOr('', 'x'))\n+expectType<string>(toValueOr(ref<string | null>(null), 'fallback'))\n+expectType<number | string>(toValueOr(ref<number | string>(1), 'fallback'))"
+          }
+        },
+        {
+          "name": "edit_file",
+          "arguments": {
+            "new_text": "  toRef,\n  toRefs,\n  toValue,\n  toValueOr,\n  unref,\n  useTemplateRef,\n} from 'vue'",
+            "old_text": "  toRef,\n  toRefs,\n  toValue,\n  unref,\n  useTemplateRef,\n} from 'vue'",
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "edit_file",
+          "arguments": {
+            "new_text": "// toValue\nexpectType<number>(toValue(unref1))\nexpectType<string>(toValue(unref2))\n\n// toValueOr\nexpectType<number>(toValueOr(1, 0))\nexpectType<number>(toValueOr(ref(1), 0))\nexpectType<number>(toValueOr(() => 1, 0))\nexpectType<string>(toValueOr(null, 'fallback'))\nexpectType<string>(toValueOr(ref(null), 'fallback'))\nexpectType<string>(toValueOr(() => null, 'fallback'))\nexpectType<string>(toValueOr(undefined, 'fallback'))\nexpectType<string>(toValueOr(ref(undefined), 'fallback'))\nexpectType<string>(toValueOr(() => undefined, 'fallback'))\nexpectType<false>(toValueOr(false, true))\nexpectType<0>(toValueOr(0, 1))\nexpectType<''>(toValueOr('', 'x'))\nexpectType<string>(toValueOr(ref<string | null>(null), 'fallback'))\nexpectType<number | string>(toValueOr(ref<number | string>(1), 'fallback'))",
+            "old_text": "// toValue\nexpectType<number>(toValue(unref1))\nexpectType<string>(toValue(unref2))",
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 60,
+            "path": "package.json"
+          }
+        }
+      ],
+      "failedTools": [
+        {
+          "activity_id": "5268b949f96041cf928df4eb4c59e8d0:35d8de90850d688d971dc7510d805fba:0",
+          "call_id": "call_08f90715986d48f8a2556aa02ac33b0e",
+          "data": {
+            "error": {
+              "code": "invalid_tool_arguments",
+              "message": "The native file call rejected its argument schema"
+            }
+          },
+          "name": "apply_patch"
+        },
+        {
+          "activity_id": "5268b949f96041cf928df4eb4c59e8d0:07202700bfa370f43bebd3ae36fa63d2:0",
+          "call_id": "call_0461605754f4499eb7e3021b56d0974e",
+          "data": {
+            "error": {
+              "code": "invalid_tool_arguments",
+              "message": "The native file call rejected its argument schema"
+            }
+          },
+          "name": "apply_patch"
+        }
+      ],
+      "operations": 2,
+      "successfulOperations": 2,
+      "terminal": {
+        "generation": "7ecbc25b9524d218681d87901a49529a",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "05c664065d844248be00b1f9c011c185",
+      "state": "failed",
+      "activeElapsedMs": 600003,
+      "remainingActiveMs": 0,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 8,
+      "usage": [
+        {
+          "completion_tokens": 67,
+          "prompt_tokens": 10048,
+          "total_tokens": 10115
+        },
+        {
+          "completion_tokens": 97,
+          "prompt_tokens": 12334,
+          "total_tokens": 12431
+        },
+        {
+          "completion_tokens": 79,
+          "prompt_tokens": 14426,
+          "total_tokens": 14505
+        },
+        {
+          "completion_tokens": 29,
+          "prompt_tokens": 16008,
+          "total_tokens": 16037
+        },
+        {
+          "completion_tokens": 78,
+          "prompt_tokens": 17001,
+          "total_tokens": 17079
+        },
+        {
+          "completion_tokens": 55,
+          "prompt_tokens": 17480,
+          "total_tokens": 17535
+        },
+        {
+          "completion_tokens": 58,
+          "prompt_tokens": 17923,
+          "total_tokens": 17981
+        },
+        {
+          "completion_tokens": 26,
+          "prompt_tokens": 18425,
+          "total_tokens": 18451
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 41480,
+          "firstTokenMs": 41448,
+          "usage": {
+            "completion_tokens": 67,
+            "prompt_tokens": 10048,
+            "total_tokens": 10115
+          },
+          "tools": [
+            "search_files",
+            "search_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 54124,
+          "firstTokenMs": 54087,
+          "usage": {
+            "completion_tokens": 97,
+            "prompt_tokens": 12334,
+            "total_tokens": 12431
+          },
+          "tools": [
+            "read_file",
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 69364,
+          "firstTokenMs": 69332,
+          "usage": {
+            "completion_tokens": 79,
+            "prompt_tokens": 14426,
+            "total_tokens": 14505
+          },
+          "tools": [
+            "search_files",
+            "search_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 67378,
+          "firstTokenMs": 67352,
+          "usage": {
+            "completion_tokens": 29,
+            "prompt_tokens": 16008,
+            "total_tokens": 16037
+          },
+          "tools": [
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 73545,
+          "firstTokenMs": 73514,
+          "usage": {
+            "completion_tokens": 78,
+            "prompt_tokens": 17001,
+            "total_tokens": 17079
+          },
+          "tools": [
+            "search_files",
+            "search_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 78541,
+          "firstTokenMs": 78516,
+          "usage": {
+            "completion_tokens": 55,
+            "prompt_tokens": 17480,
+            "total_tokens": 17535
+          },
+          "tools": [
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 77148,
+          "firstTokenMs": 77120,
+          "usage": {
+            "completion_tokens": 58,
+            "prompt_tokens": 17923,
+            "total_tokens": 17981
+          },
+          "tools": [
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 82767,
+          "firstTokenMs": 82741,
+          "usage": {
+            "completion_tokens": 26,
+            "prompt_tokens": 18425,
+            "total_tokens": 18451
+          },
+          "tools": [
+            "read_file"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "search_files",
+          "arguments": {
+            "query": "export function toValue"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages/reactivity",
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages/vue",
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages-private/dts-test",
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/vue/src/index.ts"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages/runtime-dom",
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages/runtime-core",
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 40,
+            "offset": 1,
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "limit": 40,
+            "offset": 1,
+            "path": "packages-private/dts-test/ref.test-d.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "package.json"
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 0,
+      "successfulOperations": 0,
+      "terminal": {
+        "generation": "b0592d288033df3cf81714f78654d9f8",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "7847b4497c634337aec4a66674a25746",
+      "state": "failed",
+      "activeElapsedMs": 600003,
+      "remainingActiveMs": 0,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 7,
+      "usage": [
+        {
+          "completion_tokens": 67,
+          "prompt_tokens": 10082,
+          "total_tokens": 10149
+        },
+        {
+          "completion_tokens": 127,
+          "prompt_tokens": 13112,
+          "total_tokens": 13239
+        },
+        {
+          "completion_tokens": 26,
+          "prompt_tokens": 16814,
+          "total_tokens": 16840
+        },
+        {
+          "completion_tokens": 86,
+          "prompt_tokens": 18910,
+          "total_tokens": 18996
+        },
+        {
+          "completion_tokens": 88,
+          "prompt_tokens": 19242,
+          "total_tokens": 19330
+        },
+        {
+          "completion_tokens": 74,
+          "prompt_tokens": 20130,
+          "total_tokens": 20204
+        },
+        {
+          "completion_tokens": 78,
+          "prompt_tokens": 20435,
+          "total_tokens": 20513
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 42523,
+          "firstTokenMs": 42491,
+          "usage": {
+            "completion_tokens": 67,
+            "prompt_tokens": 10082,
+            "total_tokens": 10149
+          },
+          "tools": [
+            "search_files",
+            "search_files"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 56190,
+          "firstTokenMs": 56143,
+          "usage": {
+            "completion_tokens": 127,
+            "prompt_tokens": 13112,
+            "total_tokens": 13239
+          },
+          "tools": [
+            "read_file",
+            "read_file",
+            "read_file",
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 67380,
+          "firstTokenMs": 67353,
+          "usage": {
+            "completion_tokens": 26,
+            "prompt_tokens": 16814,
+            "total_tokens": 16840
+          },
+          "tools": [
+            "read_file"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 83426,
+          "firstTokenMs": 83399,
+          "usage": {
+            "completion_tokens": 86,
+            "prompt_tokens": 18910,
+            "total_tokens": 18996
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 86205,
+          "firstTokenMs": 86174,
+          "usage": {
+            "completion_tokens": 88,
+            "prompt_tokens": 19242,
+            "total_tokens": 19330
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 90376,
+          "firstTokenMs": 90347,
+          "usage": {
+            "completion_tokens": 74,
+            "prompt_tokens": 20130,
+            "total_tokens": 20204
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 91865,
+          "firstTokenMs": 91838,
+          "usage": {
+            "completion_tokens": 78,
+            "prompt_tokens": 20435,
+            "total_tokens": 20513
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "search_files",
+          "arguments": {
+            "query": "toValueOr"
+          }
+        },
+        {
+          "name": "search_files",
+          "arguments": {
+            "path": "packages/reactivity/src",
+            "query": "toValue"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/toValueOr.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/reactivity/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "packages/runtime-core/src/index.ts"
+          }
+        },
+        {
+          "name": "read_file",
+          "arguments": {
+            "path": "package.json"
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "-m",
+              "vitest",
+              "run",
+              "--project",
+              "unit",
+              "packages/reactivity/__tests__/toValueOr.spec.ts"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/vitest/vitest.mjs",
+              "run",
+              "--project",
+              "unit",
+              "packages/reactivity/__tests__/toValueOr.spec.ts"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "--incremental",
+              "--noEmit"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "tsconfig.build.json",
+              "--noCheck"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 4,
+      "successfulOperations": 4,
+      "terminal": {
+        "generation": "38df0f12946b55d54290ceb5bf326d9d",
+        "reason": "deadline"
+      }
+    },
+    {
+      "root": "c29e2784312741baaf82019a0d7081e1",
+      "state": "failed",
+      "activeElapsedMs": 116140,
+      "remainingActiveMs": 483860,
+      "httpResponses": [
+        200,
+        200,
+        400
+      ],
+      "completedReplies": 2,
+      "usage": [
+        {
+          "completion_tokens": 78,
+          "prompt_tokens": 12026,
+          "total_tokens": 12104
+        },
+        {
+          "completion_tokens": 83,
+          "prompt_tokens": 12341,
+          "total_tokens": 12424
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 53714,
+          "firstTokenMs": 53687,
+          "usage": {
+            "completion_tokens": 78,
+            "prompt_tokens": 12026,
+            "total_tokens": 12104
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 52454,
+          "firstTokenMs": 52424,
+          "usage": {
+            "completion_tokens": 83,
+            "prompt_tokens": 12341,
+            "total_tokens": 12424
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        }
+      ],
+      "tools": [
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "tsconfig.json",
+              "--noEmit"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "tsconfig.json",
+              "--noEmit",
+              "--listFilesOnly"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 2,
+      "successfulOperations": 2,
+      "terminal": {
+        "generation": "6f3300920c63617975e6c0ac27f6208d",
+        "reason": "provider_failure"
+      }
+    },
+    {
+      "root": "93ab2953692a4265a32558af56bda26b",
+      "state": "completed",
+      "activeElapsedMs": 591772,
+      "remainingActiveMs": 8228,
+      "httpResponses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "completedReplies": 8,
+      "usage": [
+        {
+          "completion_tokens": 80,
+          "prompt_tokens": 14325,
+          "total_tokens": 14405
+        },
+        {
+          "completion_tokens": 79,
+          "prompt_tokens": 15548,
+          "total_tokens": 15627
+        },
+        {
+          "completion_tokens": 79,
+          "prompt_tokens": 15846,
+          "total_tokens": 15925
+        },
+        {
+          "completion_tokens": 78,
+          "prompt_tokens": 16141,
+          "total_tokens": 16219
+        },
+        {
+          "completion_tokens": 79,
+          "prompt_tokens": 16450,
+          "total_tokens": 16529
+        },
+        {
+          "completion_tokens": 79,
+          "prompt_tokens": 18343,
+          "total_tokens": 18422
+        },
+        {
+          "completion_tokens": 79,
+          "prompt_tokens": 18641,
+          "total_tokens": 18720
+        },
+        {
+          "completion_tokens": 259,
+          "prompt_tokens": 18944,
+          "total_tokens": 19203
+        }
+      ],
+      "modelReplies": [
+        {
+          "elapsedMs": 63083,
+          "firstTokenMs": 63056,
+          "usage": {
+            "completion_tokens": 80,
+            "prompt_tokens": 14325,
+            "total_tokens": 14405
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 64068,
+          "firstTokenMs": 64040,
+          "usage": {
+            "completion_tokens": 79,
+            "prompt_tokens": 15548,
+            "total_tokens": 15627
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 68936,
+          "firstTokenMs": 68904,
+          "usage": {
+            "completion_tokens": 79,
+            "prompt_tokens": 15846,
+            "total_tokens": 15925
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 65830,
+          "firstTokenMs": 65801,
+          "usage": {
+            "completion_tokens": 78,
+            "prompt_tokens": 16141,
+            "total_tokens": 16219
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 68594,
+          "firstTokenMs": 68564,
+          "usage": {
+            "completion_tokens": 79,
+            "prompt_tokens": 16450,
+            "total_tokens": 16529
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 76849,
+          "firstTokenMs": 76812,
+          "usage": {
+            "completion_tokens": 79,
+            "prompt_tokens": 18343,
+            "total_tokens": 18422
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 83346,
+          "firstTokenMs": 83318,
+          "usage": {
+            "completion_tokens": 79,
+            "prompt_tokens": 18641,
+            "total_tokens": 18720
+          },
+          "tools": [
+            "run_process"
+          ],
+          "publicContent": ""
+        },
+        {
+          "elapsedMs": 88877,
+          "firstTokenMs": 77667,
+          "usage": {
+            "completion_tokens": 259,
+            "prompt_tokens": 18944,
+            "total_tokens": 19203
+          },
+          "publicContent": "All checks pass. Summary of the actual results:\n\n**Declaration build (`build-dts`)**\n- `tsc -p tsconfig.build.json --noCheck` — exit 0, no output\n- `rollup -c rollup.dts.config.js` — exit 0, all 11 package `.d.ts` files created (including `packages/reactivity/dist/reactivity.d.ts` and `packages/vue/dist/vue.d.ts`)\n\n**Consumer type tests (`test-dts-only`)**\n- `tsc -p packages-private/dts-built-test/tsconfig.json` — exit 0, no errors (validates the built declarations)\n- `tsc -p packages-private/dts-test/tsconfig.test.json` — exit 0, no errors (validates the source declarations, including the new `toValueOr` assertions in `packages-private/dts-test/ref.test-d.ts`)\n\nNo failures were reported, so no repairs were needed. The new `toValueOr` type assertions (value / ref / zero-arg getter inputs, `null`/`undefined` fallback, and falsy-value preservation for `0`, `false`, `''`) all type-check cleanly against both the source and the built declaration outputs."
+        }
+      ],
+      "tools": [
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "-e",
+              "const p=require('./package.json'); console.log(JSON.stringify(p.scripts,null,2))"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "packages-private/dts-test/tsconfig.test.json"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "packages-private/dts-built-test/tsconfig.json"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "tsconfig.build.json",
+              "--noCheck"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/rollup/dist/bin/rollup",
+              "-c",
+              "rollup.dts.config.js"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "packages-private/dts-built-test/tsconfig.json"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        },
+        {
+          "name": "run_process",
+          "arguments": {
+            "arguments": [
+              "node_modules/typescript/bin/tsc",
+              "-p",
+              "packages-private/dts-test/tsconfig.test.json"
+            ],
+            "profile": "node",
+            "timeout_ms": 120000
+          }
+        }
+      ],
+      "failedTools": [],
+      "operations": 7,
+      "successfulOperations": 7,
+      "terminal": {}
+    }
+  ],
+  "preservation": {
+    "settledRoots": 44,
+    "priorRootsNeverReplayed": true,
+    "historyAndRecordsExactAfterReload": true,
+    "installedReleaseUntouched": true,
+    "unrelatedSettingsAndWindowsPreserved": true
+  },
+  "modelProjection": {
+    "processLogs": {
+      "previousEscapedBytes": 4096,
+      "currentEscapedBytes": 16384,
+      "perResultEscapedBytes": 8192,
+      "headAndTail": true,
+      "shortStderrFirst": true,
+      "originalCaptureAndStatusPreserved": true
+    },
+    "files": {
+      "previousBytes": 8192,
+      "currentBytes": 32768,
+      "perFileBytes": 16384
+    },
+    "oldClosedInspections": "Model-only group compaction with source/projection digests; immutable original history retained",
+    "canonicalAndOpaqueProviderDataPreserved": true
+  },
+  "dependencies": {
+    "unchanged": true,
+    "files": 16875,
+    "directoryBindings": 5085
+  },
+  "privateConfiguration": {
+    "unchanged": true,
+    "files": 2
+  },
+  "renderedReload": {
+    "renderedHistoryExact": true,
+    "characters": 4114,
+    "sha256": "3db7e882b6d629500acc4296ed1c9d77841f1f7268c8643aaaba48e37b5e402c",
+    "completed": true,
+    "providerRetained": true,
+    "modelRetained": true,
+    "permissionsRetained": true
+  },
+  "consumerValidation": {
+    "root": "93ab2953692a4265a32558af56bda26b",
+    "completed": true,
+    "activeElapsedMs": 591772,
+    "remainingActiveMs": 8228,
+    "providedUsage": [
+      {
+        "completion_tokens": 80,
+        "prompt_tokens": 14325,
+        "total_tokens": 14405
+      },
+      {
+        "completion_tokens": 79,
+        "prompt_tokens": 15548,
+        "total_tokens": 15627
+      },
+      {
+        "completion_tokens": 79,
+        "prompt_tokens": 15846,
+        "total_tokens": 15925
+      },
+      {
+        "completion_tokens": 78,
+        "prompt_tokens": 16141,
+        "total_tokens": 16219
+      },
+      {
+        "completion_tokens": 79,
+        "prompt_tokens": 16450,
+        "total_tokens": 16529
+      },
+      {
+        "completion_tokens": 79,
+        "prompt_tokens": 18343,
+        "total_tokens": 18422
+      },
+      {
+        "completion_tokens": 79,
+        "prompt_tokens": 18641,
+        "total_tokens": 18720
+      },
+      {
+        "completion_tokens": 259,
+        "prompt_tokens": 18944,
+        "total_tokens": 19203
+      }
+    ],
+    "commands": [
+      {
+        "arguments": {
+          "arguments": [
+            "-e",
+            "const p=require('./package.json'); console.log(JSON.stringify(p.scripts,null,2))"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 100,
+        "exitCode": 0,
+        "stdoutBytes": 2937,
+        "stderrBytes": 0
+      },
+      {
+        "arguments": {
+          "arguments": [
+            "node_modules/typescript/bin/tsc",
+            "-p",
+            "packages-private/dts-test/tsconfig.test.json"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 2704,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      },
+      {
+        "arguments": {
+          "arguments": [
+            "node_modules/typescript/bin/tsc",
+            "-p",
+            "packages-private/dts-built-test/tsconfig.json"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 1758,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      },
+      {
+        "arguments": {
+          "arguments": [
+            "node_modules/typescript/bin/tsc",
+            "-p",
+            "tsconfig.build.json",
+            "--noCheck"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 1107,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      },
+      {
+        "arguments": {
+          "arguments": [
+            "node_modules/rollup/dist/bin/rollup",
+            "-c",
+            "rollup.dts.config.js"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 818,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 2273
+      },
+      {
+        "arguments": {
+          "arguments": [
+            "node_modules/typescript/bin/tsc",
+            "-p",
+            "packages-private/dts-built-test/tsconfig.json"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 1780,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      },
+      {
+        "arguments": {
+          "arguments": [
+            "node_modules/typescript/bin/tsc",
+            "-p",
+            "packages-private/dts-test/tsconfig.test.json"
+          ],
+          "profile": "node",
+          "timeout_ms": 120000
+        },
+        "elapsedMs": 2743,
+        "exitCode": 0,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      }
+    ],
+    "projectSourceUnchanged": {
+      "unchanged": true,
+      "filesBefore": 707,
+      "filesAfter": 707,
+      "changed": []
+    },
+    "scope": "Both named TypeScript configurations pass, including the new ref.test-d.ts assertions. Declaration emission with --noCheck is a separate non-typechecking step. Rollup builds eleven package declarations; the type projects are rerun after that build. Earlier seven helper unit tests belong to root42 and are not relabelled as new unit executions here.",
+    "newTypeAssertions": 14,
+    "suppliedTokens": {
+      "input": 134238,
+      "output": 812,
+      "total": 135050
+    }
+  },
+  "providerTimeoutObservation": {
+    "status": 400,
+    "root": "c29e2784312741baaf82019a0d7081e1",
+    "requestId": "ff800628237c4b9f8858e30dffc20fbe",
+    "precedingCapturedStdoutBytes": 91979,
+    "precedingInlineRetainedBytes": 65536,
+    "providerBodyUnavailableInControllerEvents": true,
+    "exactCauseNotInferredFromStatusAlone": true
+  },
+  "raw": {
+    "path": "doc/evidence/vue-retry-context-and-patch-diagnostics-20261126.json.gz",
+    "bytes": 211114,
+    "sha256": "d6d692277cd861fa3df2e56bd21c20bc8a44a3acfc62a83fdb5ecf2498b4c0be"
+  }
+}
