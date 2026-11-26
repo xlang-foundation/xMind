@@ -1,0 +1,1804 @@
+{
+  "schema": 1,
+  "date": "2026-11-25",
+  "title": "CantorServe discovery, native recovery fixes and actual public Vue reactivity build/test",
+  "qualification": "Local development checkpoint; not a qualified release or a new full Native pass.",
+  "product": {
+    "nativeCommit": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+    "sdkSource": "D:/CantorAI/xlang3",
+    "sdkCommit": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d",
+    "sdkBuild": "Release",
+    "architecture": "C++ backend, embedded xlang3 and standard local xlang3 IPC; SQLite I/O through xlang3. Node/pnpm only build tools. No CPython interpreter invocation.",
+    "installedReleaseChanged": false
+  },
+  "discovery": {
+    "endpoint": "https://serve.cantorai.com/v1",
+    "previousProblem": "A reused single-model test configuration restricted discovery and supplied a default model.",
+    "routeModelPin": false,
+    "routeModelsWhitelist": false,
+    "profileModelDefault": false,
+    "existingSavedKeyReused": true,
+    "credentialsLocation": "Private .config YAML and encrypted native saved profile; no credential included in this receipt.",
+    "catalogueSource": "Authenticated GET /v1/models and actual saved-key UI discovery",
+    "modelIds": [
+      "qwen3-1.7b-demo",
+      "qwen3-tts-0.6b-customvoice",
+      "qwen3-vl-2b-desktop-fast",
+      "qwen3.5-2b-code-32k",
+      "qwen3.5-2b-code-32k-shawn",
+      "qwen3.5-4b",
+      "qwen3.8-27b-chat-32k",
+      "qwen3.8-27b-chat-4k",
+      "qwen3-vl-4b-shawn-egpu",
+      "qwen3-tts-1.7b-english-ryan",
+      "qwen3-asr-0.6b",
+      "qwen3-0.6b-metal-128",
+      "flux2-klein-4b",
+      "wan22-ti2v-5b-image",
+      "wan22-ti2v-5b",
+      "qwen3-tts-0.6b-english-ryan",
+      "gpt-oss-120b-4080x2"
+    ],
+    "readinessSource": "Authenticated GET /cantor/v1/models; separate from standard IDs.",
+    "limitations": "Generic compatible discovery does not infer per-model task, tool support, context limits or readiness from IDs. The 27B model was selected in the UI; each old run retains its captured model/revision."
+  },
+  "nativeFixes": [
+    {
+      "commit": "939f438d0683cdc68de72d1669f8db7da54a9dae",
+      "change": "Preserve a durable worker model deadline through supervision instead of reporting generic dispatch_error."
+    },
+    {
+      "commit": "e5a16e1544121559677dd6d80c4f3260056b21f9",
+      "change": "Derive advertised process timeouts from registered profiles; return process_timeout_exceeded/max_timeout_ms before dispatch for excessive budgets."
+    },
+    {
+      "commit": "f513ed8c951ddcd7e3f14ae59be9d41277ffff39",
+      "change": "Describe the literal argument contract and derive executable_name from the trusted registered program. The backend supplies the program and fixed prefix."
+    },
+    {
+      "commit": "f5fc474455cea8e6e1b4cd71946b825e0b3fcd0b",
+      "change": "Return policy-denied workspace reads as durable failed tool results; keep dependency/private traversal guards and ownership validation."
+    },
+    {
+      "commit": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+      "change": "Return typed missing/wrong-type/content file-read failures as recoverable tool results. Preserve cancellation, foreign ownership, stale lease and unrecordable-outcome failures."
+    }
+  ],
+  "validation": {
+    "latestFocusedNative": {
+      "passed": 6,
+      "failed": 0,
+      "seconds": 97.48,
+      "tests": [
+        "native_agent_worker_model_deadline_contract",
+        "native_process_executor_contract",
+        "native_agent_worker_model_rpc_contract",
+        "native_agent_worker_coding_server_contract",
+        "native_agent_worker_ledger_contract",
+        "native_agent_process_tool_host_contract"
+      ],
+      "inputFiles": 32626,
+      "inputsUnchanged": true,
+      "log": {
+        "path": ".agentflow/missing-path-focused-tests-20261125.log",
+        "sha256": "0938927e4435817736746f672bf73261a169ded76c4fc009fef7d4e10a540a24"
+      },
+      "comparison": {
+        "path": ".agentflow/missing-path-test-input-comparison-20261125.json",
+        "sha256": "f7079163ce164828c91dc9b4754e55cb6610d3cdd80eefcf7783f6c45b689ed0"
+      },
+      "sourceNote": "The frozen source changes were committed as99b9a67f after this run, without further implementation edits."
+    },
+    "regressionBeforeFix": {
+      "path": ".agentflow/missing-path-before-fix-tests-20261125.log",
+      "sha256": "f25d94918fda3a7ef235d1f3497362e953f086ffd51513cf1495ae7424f41d47"
+    },
+    "priorDeniedReadRegressionFailure": {
+      "path": ".agentflow/denied-read-before-fix-tests-20261125.log",
+      "sha256": "1f2bf0467a089653fe43c511938f9ce2a9ae6ee6f5100d7b48a4bd693fb5e33c"
+    },
+    "currentRegisteredInventory": 187,
+    "latestCompleteLocalNative": {
+      "commit": "ca562e54",
+      "passed": 177,
+      "total": 186,
+      "failed": 9,
+      "seconds": 537.25,
+      "newFullPassClaimed": false,
+      "evidence": "doc/evidence/local-build-vue-cantorserve-20261125.json"
+    },
+    "historicalClients": {
+      "commit": "ca562e54",
+      "editorPassed": 543,
+      "configuredBrowserPassed": 226,
+      "rerunForCurrentNativeFixes": false
+    }
+  },
+  "successfulTrial": {
+    "sessionId": "34c9eae2442a4df282295f19133d1721",
+    "rootId": "81fc8bf12ecf4902bc36d50b70f0ed79",
+    "neverReplay": true,
+    "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+    "note": "Fresh ordinary UI build/test request with direct repository-matched pnpm12.21.0 available from its first tool catalogue; actual results below.",
+    "provider": {
+      "model_id": "qwen3.8-27b-chat-32k",
+      "profile_id": "cantorserve",
+      "profile_revision": 11,
+      "provider": "openai-compatible",
+      "route_id": "openai.compatible",
+      "wire": "chat-completions"
+    },
+    "terminal": "run.completed",
+    "reason": null,
+    "budgets": [
+      {
+        "active_elapsed_ms": 435620,
+        "remaining_active_ms": 164380,
+        "segment_id": "7b095ecc3713233be63f1509d3a23534"
+      }
+    ],
+    "http": [
+      {
+        "request_id": "6394741e024b4161bbdc0205e1b5518f",
+        "status": 200
+      },
+      {
+        "request_id": "4cd014dae80342998b6477f4ec6fda45",
+        "status": 200
+      },
+      {
+        "request_id": "93220302208e496fbb522334a7ee6cf5",
+        "status": 200
+      },
+      {
+        "request_id": "7c6fb2daf5bb4b10a60444483a61cd17",
+        "status": 200
+      },
+      {
+        "request_id": "a489bff59fb843b099c7a25f614771ac",
+        "status": 200
+      },
+      {
+        "request_id": "9414761dded1456e922039920668b5c1",
+        "status": 200
+      }
+    ],
+    "usage": {
+      "records": 6,
+      "callsStarted": 6,
+      "incomplete": false,
+      "prompt_tokens": 71310,
+      "completion_tokens": 760,
+      "total_tokens": 72070
+    },
+    "leaseRetirement": [
+      {
+        "generation": "0d882084a3a37ed001ee8c145df13155",
+        "reason": "completed",
+        "uncertain_model_dispatches": 0
+      }
+    ],
+    "operations": [
+      {
+        "id": "bd42f67a59612a28a6572211c00639c5",
+        "tool": "run_process",
+        "state": "succeeded",
+        "exitCode": 0,
+        "termination": "exited",
+        "processTreeRetired": true,
+        "profile": "pnpm"
+      },
+      {
+        "id": "880c457a419640be927bf5a1ac4e4d5c",
+        "tool": "run_process",
+        "state": "succeeded",
+        "exitCode": 0,
+        "termination": "exited",
+        "processTreeRetired": true,
+        "profile": "pnpm"
+      }
+    ],
+    "preservedEvents": {
+      "count": 613,
+      "canonicalSha256": "e42a2997346cf9b51b6a3a4a031465ec7d288bc389ba50effd711334be4f0a06",
+      "originalRawPath": ".agentflow/pnpm-fresh-trial-events-20261125.json",
+      "originalRawSha256": "202e65b69b216beff78d13a4682f6342da5abb0bc1e661e08f9b485043ca2f96",
+      "exactRecords": true
+    },
+    "sessionTitle": "Vue reactivity: build passed, 458 passed / 4 skipped",
+    "project": "D:/CantorAI2026/TestProj/xmind-public-vue-core-20261125",
+    "upstream": "https://github.com/vuejs/core",
+    "projectCommit": "50aaa3c75d4caed0a73b85e870ed907a76f9ec44",
+    "trackedProjectFiles": 704,
+    "scope": "Reactivity package build and existing reactivity unit tests in the larger Vue repository; not the full Vue repository suite or a new helper implementation.",
+    "promptsAndApprovals": "Actual xMind browser UI; no scripted provider chat or manual project source fix.",
+    "permissions": "Default",
+    "processProfile": {
+      "id": "pnpm",
+      "revision": 2,
+      "version": "12.21.0",
+      "executableSha256": "f47deff368df05671564b2a1a340100f265a2cb2d9fe6158f708d1337348fbc4"
+    },
+    "commands": [
+      {
+        "operationId": "bd42f67a59612a28a6572211c00639c5",
+        "executable": "D:/.pnpm-store/v11/links/@/pnpm/12.21.0/2a7ab045d13d1d533679470f985ca3cee94562332b735192735e43e64550490d/node_modules/pnpm/pnpm.exe",
+        "arguments": [
+          "build",
+          "reactivity"
+        ],
+        "timeoutMs": 120000,
+        "exitCode": 0,
+        "elapsedMs": 1158,
+        "pid": 5052,
+        "processTreeRetired": true
+      },
+      {
+        "operationId": "880c457a419640be927bf5a1ac4e4d5c",
+        "executable": "D:/.pnpm-store/v11/links/@/pnpm/12.21.0/2a7ab045d13d1d533679470f985ca3cee94562332b735192735e43e64550490d/node_modules/pnpm/pnpm.exe",
+        "arguments": [
+          "vitest",
+          "run",
+          "packages/reactivity"
+        ],
+        "timeoutMs": 120000,
+        "exitCode": 0,
+        "elapsedMs": 1137,
+        "pid": 50616,
+        "processTreeRetired": true
+      }
+    ],
+    "buildArtifacts": [
+      {
+        "name": "reactivity.cjs.js",
+        "bytes": 60154,
+        "sha256": "42a10d37a0c46c8c025cccccc7beb4b454e5d2be4f27613c60060c2cd5d15eac"
+      },
+      {
+        "name": "reactivity.cjs.prod.js",
+        "bytes": 55885,
+        "sha256": "053d9a73021b0baa363d00b2863abaa764e2df8a050875d40797bd5b369a6204"
+      },
+      {
+        "name": "reactivity.esm-browser.js",
+        "bytes": 60497,
+        "sha256": "c946c8a53c8bea9effebd2a656db7973c34dcdb082d9180f4078e9a466924cb0"
+      },
+      {
+        "name": "reactivity.esm-browser.prod.js",
+        "bytes": 21836,
+        "sha256": "36ca000606bbdfa4fe3d51efc20827f667cad0b6ef50a7f9bcc0a88c94321850"
+      },
+      {
+        "name": "reactivity.esm-bundler.js",
+        "bytes": 60493,
+        "sha256": "e6a80fb3c29d23bd83d54634708bef11d43154b1c18dbb5f636e0ce0ba17f7d3"
+      },
+      {
+        "name": "reactivity.global.js",
+        "bytes": 66067,
+        "sha256": "666f780283bc778ff21c00656b618284c8d60f61355cbd216fdac9192996a45b"
+      },
+      {
+        "name": "reactivity.global.prod.js",
+        "bytes": 21677,
+        "sha256": "7fb4745518015f3362cd96ef3745bb6972de87bb183631fc873b14f47b162bdb"
+      }
+    ],
+    "tests": {
+      "runner": "Vitest4.1.11",
+      "filesPassed": 16,
+      "filesSkipped": 1,
+      "testsPassed": 458,
+      "testsSkipped": 4,
+      "total": 462,
+      "reportedDurationMs": 638,
+      "skip": "gc.spec.ts uses describe.skipIf(!global.gc); GC was not exposed for this normal invocation."
+    },
+    "noMoneyOrMissingUsageEstimate": true
+  },
+  "setup": {
+    "processLimitsUnchangedMs": 120000,
+    "modelTimeoutMs": 120000,
+    "modelIdleTimeoutMs": 60000,
+    "rootActiveBudgetMs": 600000,
+    "autoApproval": false,
+    "registeredProfiles": {
+      "profiles": [
+        {
+          "id": "pnpm",
+          "max_timeout_ms": 120000,
+          "revision": 2
+        },
+        {
+          "id": "node",
+          "max_timeout_ms": 120000,
+          "revision": 1
+        },
+        {
+          "id": "powershell",
+          "max_timeout_ms": 120000,
+          "revision": 2
+        },
+        {
+          "id": "xlang3",
+          "max_timeout_ms": 120000,
+          "revision": 1
+        }
+      ],
+      "runtime_state": "per_operation"
+    },
+    "packageRunner": "Existing bundled pnpm11.25 bootstrap selected repository-declared pnpm12.21.0; direct verified12.21 executable is now registered.",
+    "unexpectedSetupEffect": "The intended build-tool smoke check auto-ran install --verify-deps-before-run-install --use-stderr and lifecycle hooks, including Puppeteer and simple-git-hooks. This was disclosed. It is machine/dependency setup, not a model result; all705tracked/nonignored project files stayed exact.",
+    "setupProcessTrace": {
+      "path": ".agentflow/pnpm-setup-process-trace-20261125.json",
+      "sha256": "10f6c711a471f0066171fb95d01f26a41528030fb5e78ee52a94793c29ec7351"
+    },
+    "setupProjectComparison": {
+      "files": 705,
+      "unchanged": true
+    },
+    "dependencyBoundary": "The final real-model phase starts after that setup; its complete declared dependency file/directory inventory is frozen separately."
+  },
+  "preservation": {
+    "source": {
+      "unchanged": true,
+      "filesBefore": 32626,
+      "filesAfter": 32626,
+      "changed": []
+    },
+    "project": {
+      "unchanged": true,
+      "filesBefore": 705,
+      "filesAfter": 705,
+      "changed": []
+    },
+    "dependencies": {
+      "unchanged": true,
+      "hashEntriesBefore": 16875,
+      "hashEntriesAfter": 16875,
+      "changed": []
+    },
+    "dependencySnapshotBefore": {
+      "path": ".agentflow/pnpm-vue-inputs-verified-before-20261125.json.gz",
+      "sha256": "9f5e4fafac212a5067772b296a6413613a213015b2eaf8b7015fd62ef978153b"
+    },
+    "dependencySnapshotAfter": {
+      "path": ".agentflow/pnpm-vue-inputs-after-20261125.json.gz",
+      "sha256": "9f5e4fafac212a5067772b296a6413613a213015b2eaf8b7015fd62ef978153b"
+    },
+    "dependencyNote": "16874 file hashes plus one directory-binding metadata hash; generated __pycache__, .cache, .vite and .vite-temp excluded before capture. Workspace source aliases are covered by the separate705-file inventory.",
+    "runtime": {
+      "owner": {
+        "ProcessId": 42564,
+        "CreationDate": "2026-11-25T16:24:46.380565-08:00",
+        "ExecutablePath": "\\\\?\\D:\\CantorAI2026\\xMind\\.agentflow\\local-build-20261125-profiles\\3b1a0606d86721b1fde18fc5ef003fc3b88bf6930c7199429cac593771f48c92\\runtime-846aa3d240ec9a2ec31882f06b9fa62d4c93a17bb4447bc2532a8fb5dd7e4569\\xmind.exe"
+      },
+      "results": [
+        {
+          "root": "D:\\CantorAI2026\\xMind\\.agentflow\\local-runtime",
+          "manifestSha256": "475be4f4ca0a9d2010be5d8d91e489209053c825ca186ea4234d601c29f81d0a",
+          "files": 1710,
+          "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+          "sdkRevision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d"
+        },
+        {
+          "root": "D:\\CantorAI2026\\xMind\\.agentflow\\local-build-20261125-profiles\\3b1a0606d86721b1fde18fc5ef003fc3b88bf6930c7199429cac593771f48c92\\runtime-846aa3d240ec9a2ec31882f06b9fa62d4c93a17bb4447bc2532a8fb5dd7e4569",
+          "manifestSha256": "475be4f4ca0a9d2010be5d8d91e489209053c825ca186ea4234d601c29f81d0a",
+          "files": 1710,
+          "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+          "sdkRevision": "18b86c48a70bafbaaeb25fa99fc55ca1dd1eba2d"
+        }
+      ]
+    },
+    "url": "http://127.0.0.1:49395/ui/",
+    "profileRoot": "D:/CantorAI2026/xMind/.agentflow/local-build-20261125-profiles",
+    "reload": {
+      "historyIdentical": true,
+      "historySha256": "48d80ef4a82b7f761e7045edc6bd7d5effef207e5f59610cb89e8016f7dbfd21",
+      "eventsIdentical": true,
+      "eventsSha256": "202e65b69b216beff78d13a4682f6342da5abb0bc1e661e08f9b485043ca2f96",
+      "eventCount": 613,
+      "renderedHistoryIdentical": true,
+      "renderedRepresentation": "Accessibility history subtree with numeric AX node IDs removed; not a screenshot or a plain-text-only character count.",
+      "renderedCharacters": 3260,
+      "renderedSha256": "3846ab1abc6688b6234f8209b275ae3f5d39ed0b9e8a2b89093580ec2286182f",
+      "provider": "CantorServe",
+      "model": "qwen3.8-27b-chat-32k",
+      "permissions": "Default",
+      "newInference": 0,
+      "replayedEffects": 0
+    },
+    "worker": {
+      "identity": {
+        "ProcessId": 56780,
+        "CreationDate": "2026-11-25T16:34:18.829837-08:00",
+        "ExecutablePath": "\\\\?\\D:\\CantorAI2026\\xMind\\.agentflow\\local-build-20261125-profiles\\3b1a0606d86721b1fde18fc5ef003fc3b88bf6930c7199429cac593771f48c92\\runtime-846aa3d240ec9a2ec31882f06b9fa62d4c93a17bb4447bc2532a8fb5dd7e4569\\xmind.exe"
+      },
+      "absentAtFinalObservation": true
+    },
+    "originalFailedVueRoot": {
+      "root": "33f726cdc70949eca4d2c91bf7e2cfdc",
+      "historySha256": "5cc0b877626ee0206d8ddc7ebcf702854d50c22c745347849035f58dc4b8fe7e",
+      "eventsSha256": "5dc08bc4c20409ca3bd222d96adc0eb4448734512c4aa69f527aa80203002baf",
+      "sameAsOriginalEvidence": true
+    },
+    "settledRootsNeverReplay": [
+      {
+        "sessionId": "eeb0cb40e3ac4ad59ebfe1ec96046d28",
+        "rootId": "33f726cdc70949eca4d2c91bf7e2cfdc",
+        "neverReplay": true,
+        "nativeRevision": "ca562e54",
+        "note": "Original feature failed on fourth model call; no effects.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 1,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "dispatch_error",
+        "budgets": [
+          {
+            "active_elapsed_ms": 227279,
+            "remaining_active_ms": 372721,
+            "segment_id": "cb2c8f03ed6f190eb98453f20761cb4b"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "713d2208d7be4df7a3151ca70d35917a",
+            "status": 200
+          },
+          {
+            "request_id": "23219222e2454c37a481a265b9cb8400",
+            "status": 200
+          },
+          {
+            "request_id": "0e55ed866ce5437c97736401336cd903",
+            "status": 200
+          },
+          {
+            "request_id": "fd36d779a32c4a2e95af1aeb29e5701a",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 3,
+          "callsStarted": 4,
+          "incomplete": true,
+          "prompt_tokens": 25295,
+          "completion_tokens": 129,
+          "total_tokens": 25424
+        },
+        "leaseRetirement": [
+          {
+            "generation": "c6e5eae81830fd34c7dce48d1ac91609",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 82,
+          "canonicalSha256": "c32dfaf7dd2a3a5a3e69e35686358fe77dcd8da1782ebe8051de3da642d11ce8",
+          "originalRawPath": ".agentflow/local-build-20261125-turn1-events.json",
+          "originalRawSha256": "5dc08bc4c20409ca3bd222d96adc0eb4448734512c4aa69f527aa80203002baf",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "be5e1ad3c2d14109aa76677622301bfc",
+        "rootId": "5632e0df56de442fbcfe309196e79d70",
+        "neverReplay": true,
+        "nativeRevision": "939f438d",
+        "note": "2B root budget boundary cancellation classification remains unresolved.",
+        "provider": {
+          "model_id": "qwen3.5-2b-code-32k-shawn",
+          "profile_id": "cantorserve",
+          "profile_revision": 2,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "dispatch_error",
+        "budgets": [
+          {
+            "active_elapsed_ms": 599996,
+            "remaining_active_ms": 4,
+            "segment_id": "4a01cdf775f7bda97bc2929f94d3970a"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "b7addd3d142144748daa918fcc3c8419",
+            "status": 200
+          },
+          {
+            "request_id": "bf9cbc0f35b24e57a1a14870396e8b26",
+            "status": 200
+          },
+          {
+            "request_id": "eab36dcfc02643c0883b631be40a7998",
+            "status": 200
+          },
+          {
+            "request_id": "047614ecfd62420c82e39993442dd093",
+            "status": 200
+          },
+          {
+            "request_id": "c02b5a967ee8420a819ad1151c833034",
+            "status": 200
+          },
+          {
+            "request_id": "f139d4a303444b7bbd2c17298cb5bc5a",
+            "status": 200
+          },
+          {
+            "request_id": "1a1802b4496c4bc79553265dfeb9624b",
+            "status": 200
+          },
+          {
+            "request_id": "b12817ed47aa447e9a07bbc4bc4571a6",
+            "status": 200
+          },
+          {
+            "request_id": "c9994365cea44895a1e31c5a99c6f80b",
+            "status": 200
+          },
+          {
+            "request_id": "66dd8a4634624d729cb281fc0bddab42",
+            "status": 200
+          },
+          {
+            "request_id": "803a544853d3437086b553e60f8d6025",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 10,
+          "callsStarted": 11,
+          "incomplete": true,
+          "prompt_tokens": 111409,
+          "completion_tokens": 1111,
+          "total_tokens": 112520
+        },
+        "leaseRetirement": [
+          {
+            "generation": "d2900c164b23cff28e1dd1d085c492d2",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 359,
+          "canonicalSha256": "2735e083c24e829afe777673cd4f02a8e66367f81df88432111f5bed13fcff67",
+          "originalRawPath": ".agentflow/provider-deadline-fresh-trial-events-20261125.json",
+          "originalRawSha256": "a9bd6c8f5a48aebd611f621c356fd388eb7e67c6baf68895b17bd591ed3dbee9",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "ff0a07d742194ca0b6a3f8f07ec6821a",
+        "rootId": "640aeb76015043438736594ebd6b3f89",
+        "neverReplay": true,
+        "nativeRevision": "939f438d",
+        "note": "27B no HTTP response before deadline.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 3,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 64178,
+            "remaining_active_ms": 535822,
+            "segment_id": "ec3f197eb945171337ee46c40fb448bc"
+          }
+        ],
+        "http": [],
+        "usage": {
+          "records": 0,
+          "callsStarted": 1,
+          "incomplete": true,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "leaseRetirement": [
+          {
+            "generation": "506c599a3323aec36026b8bf2b1cc2bd",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 15,
+          "canonicalSha256": "936ccd5a7534e1b5e4b955ea8c681a3f1e355fab8d5035c78cfb8e1d83352299",
+          "originalRawPath": ".agentflow/provider-deadline-large-model-analysis-events-20261125.json",
+          "originalRawSha256": "bd918ef46b6f41ee45d2734b75599262569b579194ff24e724e638f1ffbfdbd3",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "be5e1ad3c2d14109aa76677622301bfc",
+        "rootId": "cb99b46029234a6e9f78de4fae6d6a97",
+        "neverReplay": true,
+        "nativeRevision": "939f438d",
+        "note": "2B partial tool call then deadline.",
+        "provider": {
+          "model_id": "qwen3.5-2b-code-32k-shawn",
+          "profile_id": "cantorserve",
+          "profile_revision": 3,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 120197,
+            "remaining_active_ms": 479803,
+            "segment_id": "8e3b5f20c8304f1a39e7d6afe4f03cf8"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "146825347db543e29aa5aef2a831dc93",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 0,
+          "callsStarted": 1,
+          "incomplete": true,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "leaseRetirement": [
+          {
+            "generation": "629a150d1768252638daae7fad49dd2d",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 116,
+          "canonicalSha256": "b2d277ee9128558553a463d5cffc4675ab90c9dc25a80388153545b8217642a3",
+          "originalRawPath": ".agentflow/provider-deadline-small-model-followup-events-20261125.json",
+          "originalRawSha256": "fe8e1e67ec71113de814fdb5fed5e36304b0ed403b979542d1885c6ccd02b5c4",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "be5e1ad3c2d14109aa76677622301bfc",
+        "rootId": "8f9c2ac798474402971639ca1e66613d",
+        "neverReplay": true,
+        "nativeRevision": "939f438d",
+        "note": "27B third call deadline; no effects.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 4,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 295657,
+            "remaining_active_ms": 304343,
+            "segment_id": "d22e55b0e0a88aeaac7e8a81cf15cf56"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "0bf12ce6d22340ccbc5249a11e73ee7b",
+            "status": 200
+          },
+          {
+            "request_id": "1c93b6aae137442fbd34e01f952bdb82",
+            "status": 200
+          },
+          {
+            "request_id": "f4fb1a7b0e5e457c9fdead41c3860db7",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 2,
+          "callsStarted": 3,
+          "incomplete": true,
+          "prompt_tokens": 41503,
+          "completion_tokens": 229,
+          "total_tokens": 41732
+        },
+        "leaseRetirement": [
+          {
+            "generation": "98e410e3938420d9cfc363c73a54e404",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 84,
+          "canonicalSha256": "49d8cee5aa51503663a42c9f3593ec8287dfd75cd49f7d6907f015457ba10aa8",
+          "originalRawPath": ".agentflow/provider-deadline-ready-27b-continuation-events-20261125.json",
+          "originalRawSha256": "1abe85c2180b7f3fc8655b15ec01f5b4b39c47af050f8cbc6177fcb95f47b33d",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "4c1b0381026d43c99d478b226d5ea5d7",
+        "rootId": "7ff1e68d076b4e36b9cc6728f9226a1c",
+        "neverReplay": true,
+        "nativeRevision": "939f438d",
+        "note": "Approved guide created; command budgets rejected before execution; root expired.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 4,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 600011,
+            "remaining_active_ms": 0,
+            "segment_id": "2b761a5b9360fabf306a0a29188d7f8c"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "92bac011ad6c4e7ea86ef63a97a54628",
+            "status": 200
+          },
+          {
+            "request_id": "b3bc460540804641b4330c9e312f36f7",
+            "status": 200
+          },
+          {
+            "request_id": "8dc28ab005454fe58a9b43998e6c217f",
+            "status": 200
+          },
+          {
+            "request_id": "d1f46a03916e44d4b8d52c321f0c4ed5",
+            "status": 200
+          },
+          {
+            "request_id": "b5c473c1236849a8b7c5509cf84a3481",
+            "status": 200
+          },
+          {
+            "request_id": "bca8f447e3d4434989568fab425367f9",
+            "status": 200
+          },
+          {
+            "request_id": "fb2692bdca32422483a2317e0726c557",
+            "status": 200
+          },
+          {
+            "request_id": "626221722f5b4c3297f22851faf874cf",
+            "status": 200
+          },
+          {
+            "request_id": "0b7949bc909a4101a1f67028822ca00d",
+            "status": 200
+          },
+          {
+            "request_id": "a6840adb2018491da5f0b9645614656b",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 9,
+          "callsStarted": 10,
+          "incomplete": true,
+          "prompt_tokens": 118328,
+          "completion_tokens": 1411,
+          "total_tokens": 119739
+        },
+        "leaseRetirement": [
+          {
+            "generation": "b90c2c4c12e94ef6b1f067c470520486",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "c58020c9d19cbc96875f61790c6f5eca",
+            "tool": "create_file",
+            "state": "succeeded",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          }
+        ],
+        "preservedEvents": {
+          "count": 219,
+          "canonicalSha256": "150f89a3bb63811b90e2711b272ab776dcffd7419816e462a15b712062a35161",
+          "originalRawPath": ".agentflow/provider-deadline-guide-events-20261125.json",
+          "originalRawSha256": "f3e4f684f233af951a8ab8b66d91e476e27e588f6ea9ecabbabc94a88e7f60d0",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "4c1b0381026d43c99d478b226d5ea5d7",
+        "rootId": "b291e0ac787b4a329603accfe7a96ff8",
+        "neverReplay": true,
+        "nativeRevision": "e5a16e15",
+        "note": "Budget correction observed; wrong xlang3 command exited2; duplicate proposals denied; UI cancellation.",
+        "provider": {
+          "model_id": "qwen3.5-2b-code-32k-shawn",
+          "profile_id": "cantorserve",
+          "profile_revision": 5,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.cancelled",
+        "reason": "cancelled",
+        "budgets": [
+          {
+            "active_elapsed_ms": 482890,
+            "remaining_active_ms": 117110,
+            "segment_id": "1c0477e46b08a25c7aabf4ad35ff34d5"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "c971895bf1cd4f0285c6ef34ca301847",
+            "status": 200
+          },
+          {
+            "request_id": "9a857f429c0141d78256bdb35cb53697",
+            "status": 200
+          },
+          {
+            "request_id": "0e977d44de5e47cf9ae3c98d4c56d449",
+            "status": 200
+          },
+          {
+            "request_id": "6cb221b7aaa548eb85add41cafb64394",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 4,
+          "callsStarted": 5,
+          "incomplete": true,
+          "prompt_tokens": 69084,
+          "completion_tokens": 280,
+          "total_tokens": 69364
+        },
+        "leaseRetirement": [
+          {
+            "generation": "017981f85008844d33bc8e11029df442",
+            "reason": "cancelled",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "ee06329963bdec46a5ca84f1b2e0674f",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 2,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "xlang3"
+          },
+          {
+            "id": "1a863c28142c71946b209ae9c5cbec61",
+            "tool": "run_process",
+            "state": "denied",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          },
+          {
+            "id": "fbfe3f053a0ac01594376b06d5bf8a77",
+            "tool": "run_process",
+            "state": "denied",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          }
+        ],
+        "preservedEvents": {
+          "count": 97,
+          "canonicalSha256": "b4dbb9816224c012470871410495d12a8cb2ff83275ea882fdc4f7d8e512d55c",
+          "originalRawPath": ".agentflow/command-timeout-guide-continuation-events-20261125.json",
+          "originalRawSha256": "d6494e133c0a85ab998079a0d6963eea219ff1e2e17a12328b78b4f2875dfc5a",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "ff0a07d742194ca0b6a3f8f07ec6821a",
+        "rootId": "99736375dbee4e45a3f5f1a29bf50d84",
+        "neverReplay": true,
+        "nativeRevision": "e5a16e15",
+        "note": "Availability-only control failed deadline; not coding acceptance.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 5,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 64726,
+            "remaining_active_ms": 535274,
+            "segment_id": "3d9d6860575339d7e18c96a96227ae7a"
+          }
+        ],
+        "http": [],
+        "usage": {
+          "records": 0,
+          "callsStarted": 1,
+          "incomplete": true,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "leaseRetirement": [
+          {
+            "generation": "83d2741f5ca40f92027d72e4639e26e2",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 15,
+          "canonicalSha256": "7ec3fa24273dcfdacdb251df08bfc40db118ebfa1b067ac462c9054cc7ae1e01",
+          "originalRawPath": ".agentflow/command-timeout-readiness-events-20261125.json",
+          "originalRawSha256": "ce48c6a56138d0b29a182f2456c29791bc9629a2d3fa4647cae073feb6983023",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "4c1b0381026d43c99d478b226d5ea5d7",
+        "rootId": "a841fa3d716c4e929f2403461c8d2996",
+        "neverReplay": true,
+        "nativeRevision": "e5a16e15",
+        "note": "Wrong interpreter proposal cancelled before execution.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 7,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.cancelled",
+        "reason": "cancelled",
+        "budgets": [
+          {
+            "active_elapsed_ms": 143274,
+            "remaining_active_ms": 456726,
+            "segment_id": "23ef8a113cd3b5fa195f1a6ddda02bc0"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "f952dea5d1d746d685b6e0e68907cc2f",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 1,
+          "callsStarted": 1,
+          "incomplete": false,
+          "prompt_tokens": 17742,
+          "completion_tokens": 70,
+          "total_tokens": 17812
+        },
+        "leaseRetirement": [
+          {
+            "generation": "8fa275dd19b4fd866eb7f2a4449a92b3",
+            "reason": "cancelled",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "76b15cba676044f5249e0557adf09e30",
+            "tool": "run_process",
+            "state": "cancelled",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          }
+        ],
+        "preservedEvents": {
+          "count": 26,
+          "canonicalSha256": "37ebca483aed3394ffb0c289a846cf7a6dc55a96867deb6a39184be0d576d894",
+          "originalRawPath": ".agentflow/command-timeout-ready-27b-events-20261125.json",
+          "originalRawSha256": "267e35747dc9b7837a229a300fd583c8aa27f28914193009da0c1ca9a98c02a4",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "d8becebf09c14e85ba3ccaabc7eba4e9",
+        "rootId": "ebaa8ae927764b949b6c152e41bcc4e7",
+        "neverReplay": true,
+        "nativeRevision": "e5a16e15",
+        "note": "Two approved Node build attempts exited1 (repeated launcher, then missing rollup PATH). Third proposal cancelled before execution.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 7,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.cancelled",
+        "reason": "cancelled",
+        "budgets": [
+          {
+            "active_elapsed_ms": 474893,
+            "remaining_active_ms": 125107,
+            "segment_id": "2c6f6d45a7b9b0a8904e02ea14acd844"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "d61db2be0be748009515b7c34fb3d9a4",
+            "status": 200
+          },
+          {
+            "request_id": "fe12c93616124f70af873f756fd0ee2b",
+            "status": 200
+          },
+          {
+            "request_id": "776fda5124e84c10b21820820ed956ab",
+            "status": 200
+          },
+          {
+            "request_id": "e22aff42d9f34aa0a70542eb4ba720d2",
+            "status": 200
+          },
+          {
+            "request_id": "3dad8bb28ff847b5b874801d6d0c6a8e",
+            "status": 200
+          },
+          {
+            "request_id": "c04180d081fd45aa861dc998330c58b6",
+            "status": 200
+          },
+          {
+            "request_id": "8876e2a32a2d4bc2a773dca64c9e5177",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 7,
+          "callsStarted": 7,
+          "incomplete": false,
+          "prompt_tokens": 83260,
+          "completion_tokens": 444,
+          "total_tokens": 83704
+        },
+        "leaseRetirement": [
+          {
+            "generation": "27151480599af656e3b751f0a98b7e21",
+            "reason": "cancelled",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "d5edadeea76cd3a503124122f3ab1e3f",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 1,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "9f1be6613674c8e51d9e7c19f9ffc26c",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 1,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "207bc51d7c6d91797dacbfbbfa1917f0",
+            "tool": "run_process",
+            "state": "cancelled",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          }
+        ],
+        "preservedEvents": {
+          "count": 170,
+          "canonicalSha256": "a4b41e08822f7f0bbd21e2ff5e5227524e89287a8bdf9ea343b598a7b915af0a",
+          "originalRawPath": ".agentflow/command-timeout-node-events-20261125.json",
+          "originalRawSha256": "0721dd5f1b8d9cf0a77c789950da67eef387d119aa7bc8c0260c49fa8d02834d",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "d8becebf09c14e85ba3ccaabc7eba4e9",
+        "rootId": "0d01d4cdc1b04d9fb3532fecf66ae79e",
+        "neverReplay": true,
+        "nativeRevision": "f513ed8c",
+        "note": "Denied dependency read aborted root; fixed separately with regression. After-input capture followed one regression edit; not an unchanged full-closure claim.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 7,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "dispatch_error",
+        "budgets": [
+          {
+            "active_elapsed_ms": 61520,
+            "remaining_active_ms": 538480,
+            "segment_id": "8c9cd75265fa674865ef1595ad77133c"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "0a4c4c9da0c648da869dd151e4a69ef0",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 1,
+          "callsStarted": 1,
+          "incomplete": false,
+          "prompt_tokens": 15758,
+          "completion_tokens": 54,
+          "total_tokens": 15812
+        },
+        "leaseRetirement": [
+          {
+            "generation": "5616b0214502bc6575e3df1eb5436db8",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 24,
+          "canonicalSha256": "60dc49c91a0fa71ddfe294ea232e88e79ca50f5cf6f2c9461795fe2e71dd92fa",
+          "originalRawPath": ".agentflow/literal-arguments-trial-events-20261125.json",
+          "originalRawSha256": "cc67142d9bc2a69404dd8c9b96bd27580d292ebaa8111616954f2fe382db01cd",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "ff0a07d742194ca0b6a3f8f07ec6821a",
+        "rootId": "e173c1b8ad4f42b1abf84e929400ee74",
+        "neverReplay": true,
+        "nativeRevision": "f5fc4744",
+        "note": "Availability-only control failed deadline with no HTTP response.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 7,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 62592,
+            "remaining_active_ms": 537408,
+            "segment_id": "69247ed9c50d240a46ea524820e56ea8"
+          }
+        ],
+        "http": [],
+        "usage": {
+          "records": 0,
+          "callsStarted": 1,
+          "incomplete": true,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        },
+        "leaseRetirement": [
+          {
+            "generation": "e3454fa2042d7a5998c05fe85981e573",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 15,
+          "canonicalSha256": "9462e4e98caa141ffa22c25b756f72dd8bf2d680565f2c67576dea6fb87bab76",
+          "originalRawPath": ".agentflow/denied-read-readiness-events-20261125.json",
+          "originalRawSha256": "ca6174a82b83de48ac2310fecbfd8626c460b3d37e588a57a4401fb069365d01",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "948a6eeb36a844e2bebe2f29c5a073c2",
+        "rootId": "7ec54f8bde464426babb7f14be20ee4f",
+        "neverReplay": true,
+        "nativeRevision": "f5fc4744",
+        "note": "Eight completed model calls, seven successful reads; missing gc directory aborted root. No commands/effects.",
+        "provider": {
+          "model_id": "qwen3.5-2b-code-32k-shawn",
+          "profile_id": "cantorserve",
+          "profile_revision": 8,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "dispatch_error",
+        "budgets": [
+          {
+            "active_elapsed_ms": 314969,
+            "remaining_active_ms": 285031,
+            "segment_id": "709fdc277bc26c6abd0b3d41effaa417"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "b42021d62c4e41a5852261e85c9c5002",
+            "status": 200
+          },
+          {
+            "request_id": "91839ab06ad4437ab7a23fd4caa26206",
+            "status": 200
+          },
+          {
+            "request_id": "2b5ddab789bd4bd89d5936adc03931f3",
+            "status": 200
+          },
+          {
+            "request_id": "5994804e39064044bd3082a9eb5c3eb7",
+            "status": 200
+          },
+          {
+            "request_id": "6405ac42830444e3ad0258067f15a0ac",
+            "status": 200
+          },
+          {
+            "request_id": "25bdfd84de254315b3365540ed4cab5f",
+            "status": 200
+          },
+          {
+            "request_id": "de7823c054c345129ba97c3a7215b803",
+            "status": 200
+          },
+          {
+            "request_id": "35d866bcab054c44bcc40d8017e91c3c",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 8,
+          "callsStarted": 8,
+          "incomplete": false,
+          "prompt_tokens": 69385,
+          "completion_tokens": 693,
+          "total_tokens": 70078
+        },
+        "leaseRetirement": [
+          {
+            "generation": "262d1d6a610cf3996276abebb1107767",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 149,
+          "canonicalSha256": "0c712ae7a9eec6bb24bd832e41f3aa5746de2872f0afc0c300b4ead6294352a7",
+          "originalRawPath": ".agentflow/denied-read-final-events-20261125.json",
+          "originalRawSha256": "27db10b7c90253b30a4d4e48f1177a98d6f63fc7714d27b4239914b68acd8238",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "948a6eeb36a844e2bebe2f29c5a073c2",
+        "rootId": "54d8df3055544f0f95a437c1374d6264",
+        "neverReplay": true,
+        "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+        "note": "UI cancelled the 2B browsing-only continuation when coordinated 27B became ready.",
+        "provider": {
+          "model_id": "qwen3.5-2b-code-32k-shawn",
+          "profile_id": "cantorserve",
+          "profile_revision": 10,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.cancelled",
+        "reason": "cancelled",
+        "budgets": [
+          {
+            "active_elapsed_ms": 292511,
+            "remaining_active_ms": 307489,
+            "segment_id": "ae1499b793a52aeafc98a1e9fcb3cccb"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "5de7b388c283436d9d52801fd2aca346",
+            "status": 200
+          },
+          {
+            "request_id": "06ec7c157e7c4f1b8d5548991e642b3a",
+            "status": 200
+          },
+          {
+            "request_id": "fc2f9425007a4000b612f927713235cd",
+            "status": 200
+          },
+          {
+            "request_id": "fa68eaa2b6b047abb74689a1c62a82eb",
+            "status": 200
+          },
+          {
+            "request_id": "5506103861f54843aa9d04126178488c",
+            "status": 200
+          },
+          {
+            "request_id": "60f280865a3846528825ebd188820353",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 5,
+          "callsStarted": 6,
+          "incomplete": true,
+          "prompt_tokens": 60006,
+          "completion_tokens": 484,
+          "total_tokens": 60490
+        },
+        "leaseRetirement": [
+          {
+            "generation": "aafc402680e8ada496eb635f25606d2e",
+            "reason": "cancelled",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 106,
+          "canonicalSha256": "c7c6a900232115eb0a234422ac004fed8eabbae75d339e75dc5101be668ed726",
+          "originalRawPath": ".agentflow/missing-path-live-events-20261125.json",
+          "originalRawSha256": "6c4dda4cb5aaf4c857c0d07e2fd61c7af0982869754653a24deca3d82e7f2856",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "948a6eeb36a844e2bebe2f29c5a073c2",
+        "rootId": "bea317219abc457c82fca86dd3842835",
+        "neverReplay": true,
+        "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+        "note": "Ready27B completed two configuration reads; third HTTP200 request64d5b26849894192abee8128e2831fa7 hit the model deadline.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "deadline",
+        "budgets": [
+          {
+            "active_elapsed_ms": 313460,
+            "remaining_active_ms": 286540,
+            "segment_id": "9cc78985121857630fa88db07248c4d6"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "4886903143e34bb3957850d57e65c128",
+            "status": 200
+          },
+          {
+            "request_id": "1a9a3e34920b44e49de26c80e7045bf5",
+            "status": 200
+          },
+          {
+            "request_id": "64d5b26849894192abee8128e2831fa7",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 2,
+          "callsStarted": 3,
+          "incomplete": true,
+          "prompt_tokens": 43661,
+          "completion_tokens": 188,
+          "total_tokens": 43849
+        },
+        "leaseRetirement": [
+          {
+            "generation": "d37db03e0b16184b49396b2d2919a69c",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [],
+        "preservedEvents": {
+          "count": 52,
+          "canonicalSha256": "d23bd22fa054b407a994652b00a21778a34c5e793a37543407389e7a3947f910",
+          "originalRawPath": ".agentflow/missing-path-27b-events-20261125.json",
+          "originalRawSha256": "4b07554bd07cf8b23ccb2fb99b6140a9521e6e19ca69283fda99d85f13147527",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "b38bfba89a454808b91ef65738fe9b2e",
+        "rootId": "7b7b06d1779b4128b6eb761f68f4db66",
+        "neverReplay": true,
+        "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+        "note": "Fresh context completed8model calls; ninthHTTP503 request54cc8f2c6d3b450bb9d5169615adad3a failed. Two Node build attempts exited1; three read-only build-tool probes exited0. No unit-test result.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.failed",
+        "reason": "provider_failure",
+        "budgets": [
+          {
+            "active_elapsed_ms": 547480,
+            "remaining_active_ms": 52520,
+            "segment_id": "8079ad2bbd4941535337087a14dd8d56"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "ca9a5acdb2e14a83b7ee80a35d4fa873",
+            "status": 200
+          },
+          {
+            "request_id": "8ea24c409be44765b7d7e0ab141bcbd3",
+            "status": 200
+          },
+          {
+            "request_id": "95692951e6254b05906bb3bca6f52df1",
+            "status": 200
+          },
+          {
+            "request_id": "7f90c57ce87d4893b38d153962928771",
+            "status": 200
+          },
+          {
+            "request_id": "a96a3a3ac97b458aaf57dddbf27be1d3",
+            "status": 200
+          },
+          {
+            "request_id": "4a6b0824ec6e40e495272dd269e78286",
+            "status": 200
+          },
+          {
+            "request_id": "4b628ce979b241cfa23ab3fe3c4682fc",
+            "status": 200
+          },
+          {
+            "request_id": "de8fadac59154b5693cf85c64a37eddf",
+            "status": 200
+          },
+          {
+            "request_id": "54cc8f2c6d3b450bb9d5169615adad3a",
+            "status": 503
+          }
+        ],
+        "usage": {
+          "records": 8,
+          "callsStarted": 9,
+          "incomplete": true,
+          "prompt_tokens": 93774,
+          "completion_tokens": 531,
+          "total_tokens": 94305
+        },
+        "leaseRetirement": [
+          {
+            "generation": "ed0da65e6294389966a3c37d6801463b",
+            "reason": "dispatch_error",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "c4f083292c5ef9cf6a66797c97e2a9f5",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 1,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "093e40145446ea04f5533f516ac2b55c",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 1,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "436ff9f5caa375ff11b442743350eb5c",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 0,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "6fe608e31d337b3164f29b7accbaa2be",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 0,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "331edd1a1d10ff479312bee22f2be397",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 0,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          }
+        ],
+        "preservedEvents": {
+          "count": 208,
+          "canonicalSha256": "90433f0fc5e9e4687381b97bd5c31db31562187c0f670279ed3a638dece18ade",
+          "originalRawPath": ".agentflow/missing-path-fresh-27b-events-20261125.json",
+          "originalRawSha256": "f9dda01561062891f4a1bb2f638ce20ba48e052db475dbcd85fdf8f1bf8f1315",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "b38bfba89a454808b91ef65738fe9b2e",
+        "rootId": "a8898ab93baa436ca5fbaf5f81bb4ccd",
+        "neverReplay": true,
+        "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+        "note": "Direct pnpm12.21.0 registered and exposed in profile metadata. Model repeated identical launcher probes; one allowed, two denied. UI cancelled this loop; no build/test completion.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.cancelled",
+        "reason": "cancelled",
+        "budgets": [
+          {
+            "active_elapsed_ms": 403638,
+            "remaining_active_ms": 196362,
+            "segment_id": "bf1e6184e6190d2f492c6d63b75026fb"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "9e23bb73f47d4ae187400d0d36b1c57c",
+            "status": 200
+          },
+          {
+            "request_id": "2ca3d0a63997442fa9228a26eb957c6c",
+            "status": 200
+          },
+          {
+            "request_id": "c92c0c3213194aba99eecf4da4603743",
+            "status": 200
+          },
+          {
+            "request_id": "35438e679d464fe291e864522de24165",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 4,
+          "callsStarted": 5,
+          "incomplete": true,
+          "prompt_tokens": 63364,
+          "completion_tokens": 311,
+          "total_tokens": 63675
+        },
+        "leaseRetirement": [
+          {
+            "generation": "4d35c5c3acd05d4decde2f04654f411c",
+            "reason": "cancelled",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "9417d6b508c7a1e961a06a29596254ee",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 0,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "node"
+          },
+          {
+            "id": "358fb30dc3d976eeed97170c3850e6d2",
+            "tool": "run_process",
+            "state": "denied",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          },
+          {
+            "id": "0c88452a2bb0d1788736e5170cf6e1fd",
+            "tool": "run_process",
+            "state": "denied",
+            "exitCode": null,
+            "termination": null,
+            "processTreeRetired": null,
+            "profile": null
+          }
+        ],
+        "preservedEvents": {
+          "count": 97,
+          "canonicalSha256": "a121c8497e8f7a57474c3ebc26c1b38080190455c43d56483025a4d1dcceaf19",
+          "originalRawPath": ".agentflow/pnpm-direct-trial-events-20261125.json",
+          "originalRawSha256": "493512d05b6512aca508724754cddf63cfe697e885ca3c1f24ff9097c2358c10",
+          "exactRecords": true
+        }
+      },
+      {
+        "sessionId": "34c9eae2442a4df282295f19133d1721",
+        "rootId": "81fc8bf12ecf4902bc36d50b70f0ed79",
+        "neverReplay": true,
+        "nativeRevision": "99b9a67fd4d43de28d938e9ee9c699b26a8b2294",
+        "note": "Fresh ordinary UI build/test request with direct repository-matched pnpm12.21.0 available from its first tool catalogue; actual results below.",
+        "provider": {
+          "model_id": "qwen3.8-27b-chat-32k",
+          "profile_id": "cantorserve",
+          "profile_revision": 11,
+          "provider": "openai-compatible",
+          "route_id": "openai.compatible",
+          "wire": "chat-completions"
+        },
+        "terminal": "run.completed",
+        "reason": null,
+        "budgets": [
+          {
+            "active_elapsed_ms": 435620,
+            "remaining_active_ms": 164380,
+            "segment_id": "7b095ecc3713233be63f1509d3a23534"
+          }
+        ],
+        "http": [
+          {
+            "request_id": "6394741e024b4161bbdc0205e1b5518f",
+            "status": 200
+          },
+          {
+            "request_id": "4cd014dae80342998b6477f4ec6fda45",
+            "status": 200
+          },
+          {
+            "request_id": "93220302208e496fbb522334a7ee6cf5",
+            "status": 200
+          },
+          {
+            "request_id": "7c6fb2daf5bb4b10a60444483a61cd17",
+            "status": 200
+          },
+          {
+            "request_id": "a489bff59fb843b099c7a25f614771ac",
+            "status": 200
+          },
+          {
+            "request_id": "9414761dded1456e922039920668b5c1",
+            "status": 200
+          }
+        ],
+        "usage": {
+          "records": 6,
+          "callsStarted": 6,
+          "incomplete": false,
+          "prompt_tokens": 71310,
+          "completion_tokens": 760,
+          "total_tokens": 72070
+        },
+        "leaseRetirement": [
+          {
+            "generation": "0d882084a3a37ed001ee8c145df13155",
+            "reason": "completed",
+            "uncertain_model_dispatches": 0
+          }
+        ],
+        "operations": [
+          {
+            "id": "bd42f67a59612a28a6572211c00639c5",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 0,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "pnpm"
+          },
+          {
+            "id": "880c457a419640be927bf5a1ac4e4d5c",
+            "tool": "run_process",
+            "state": "succeeded",
+            "exitCode": 0,
+            "termination": "exited",
+            "processTreeRetired": true,
+            "profile": "pnpm"
+          }
+        ],
+        "preservedEvents": {
+          "count": 613,
+          "canonicalSha256": "e42a2997346cf9b51b6a3a4a031465ec7d288bc389ba50effd711334be4f0a06",
+          "originalRawPath": ".agentflow/pnpm-fresh-trial-events-20261125.json",
+          "originalRawSha256": "202e65b69b216beff78d13a4682f6342da5abb0bc1e661e08f9b485043ca2f96",
+          "exactRecords": true
+        }
+      }
+    ],
+    "allRawRecords": {
+      "path": ".agentflow/cantorserve-all-records-final-20261125.json.gz",
+      "sha256": "0461c71d7003c5ee9ddf25da145f87731b4629a09c8604a5b8b83ee1203c51c4"
+    },
+    "rollback": {
+      "path": ".agentflow/missing-path-runtime-rollback-20261125.zip",
+      "sha256": "adfaede1ad8b63f046fa9e7eb29fedf7970eea450f28f13ab793327d98c386d4"
+    }
+  },
+  "remaining": [
+    "Original full Native9failures (including Unicode previews and xlang3 child/runtime gaps) remain open; no full187/current release acceptance.",
+    "Cold-start/readiness delays, the correlated larger-context deadline64d5b26849894192abee8128e2831fa7 and HTTP503 request54cc8f2c6d3b450bb9d5169615adad3a are preserved and not claimed fixed by the final success.",
+    "A separate root-budget clock-boundary cancellation classification remains unresolved.",
+    "The original toValueOr helper exercise was not implemented. Only the earlier approved contributor guide changed nonignored project files; final build/test source is unchanged.",
+    "Remote CantorServe deployment was coordinated with another user-authorized chat and was not frozen as local source. Native/SDK/dependency/source closure and request receipts are recorded separately."
+  ]
+}
