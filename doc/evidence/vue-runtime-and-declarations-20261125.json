@@ -1,0 +1,828 @@
+{
+  "date": "2026-11-25",
+  "scope": "Vue runtime and declaration validation before compiler repair; this is not final feature acceptance or installed-release qualification.",
+  "nativeRevision": "6376e9fcef1b7975c4be49da6dc7300768c56ff3",
+  "sdkRevision": "9c55df9409d4219805746a8392519de9c4335b65",
+  "nativeGate": "187/187 complete; see native-reliability-20261125.json.",
+  "source": {
+    "project": "D:/CantorAI2026/TestProj/xmind-public-vue-core-20261125",
+    "revision": "50aaa3c75d4caed0a73b85e870ed907a76f9ec44",
+    "beforeFiles": 705,
+    "currentFiles": 707,
+    "unchangedOriginalFiles": 703,
+    "changed": [
+      "packages/reactivity/src/index.ts",
+      "packages/runtime-core/src/index.ts"
+    ],
+    "added": [
+      "packages/reactivity/__tests__/toValueOr.spec.ts",
+      "packages/reactivity/src/toValueOr.ts"
+    ],
+    "unchangedThroughoutUnitBuildAndTypeCheck": true,
+    "manualProjectFixes": 0,
+    "modelOwnedApprovedSourceEffects": 5
+  },
+  "unit": {
+    "rootId": "5f486c4826b842f18182be1db91b4063",
+    "operationId": "ec45cba12ad5119b6530c255b9835c43",
+    "rootState": "completed",
+    "commandExitCode": 0,
+    "passed": 465,
+    "skipped": 4,
+    "filesPassed": 17,
+    "filesSkipped": 1,
+    "inventory": [
+      "packages/reactivity/__tests__/arrayIterator.spec.ts",
+      "packages/reactivity/__tests__/collections/Map.spec.ts",
+      "packages/reactivity/__tests__/collections/Set.spec.ts",
+      "packages/reactivity/__tests__/collections/WeakMap.spec.ts",
+      "packages/reactivity/__tests__/collections/WeakSet.spec.ts",
+      "packages/reactivity/__tests__/collections/shallowReadonly.spec.ts",
+      "packages/reactivity/__tests__/computed.spec.ts",
+      "packages/reactivity/__tests__/effect.spec.ts",
+      "packages/reactivity/__tests__/effectScope.spec.ts",
+      "packages/reactivity/__tests__/gc.spec.ts",
+      "packages/reactivity/__tests__/reactive.spec.ts",
+      "packages/reactivity/__tests__/reactiveArray.spec.ts",
+      "packages/reactivity/__tests__/readonly.spec.ts",
+      "packages/reactivity/__tests__/ref.spec.ts",
+      "packages/reactivity/__tests__/shallowReactive.spec.ts",
+      "packages/reactivity/__tests__/shallowReadonly.spec.ts",
+      "packages/reactivity/__tests__/toValueOr.spec.ts",
+      "packages/reactivity/__tests__/watch.spec.ts"
+    ],
+    "elapsedMs": 1126,
+    "skips": "Four existing GC tests in gc.spec.ts require the separate expose-gc configuration."
+  },
+  "build": {
+    "rootId": "8753155903414fa089cf0c73c771cf9b",
+    "operationId": "6acdcfaeafccf20dcdc29f503842082b",
+    "rootState": "failed",
+    "rootFailure": "600second deadline before model final response",
+    "commandExitCode": 0,
+    "elapsedMs": 3741,
+    "bundles": 7,
+    "declarationEmitted": true,
+    "sourceTypeChecked": false,
+    "workflow": "pnpm run build reactivity -t invokes declaration generation with tsc --noCheck."
+  },
+  "sourceTypeCheck": {
+    "rootId": "61e49ba9f83f4f6f9b6e57e2ad0c756b",
+    "operationId": "218a6ad581c26d496e0ca2f75075c45d",
+    "commandExitCode": 2,
+    "elapsedMs": 8673,
+    "diagnostics": "packages/reactivity/src/toValueOr.ts(33,50): error TS2322: Type 'F' is not assignable to type 'T extends null | undefined ? F : T'.\r\npackages/reactivity/src/toValueOr.ts(33,61): error TS2322: Type 'T & {}' is not assignable to type 'T extends null | undefined ? F : T'.\r\n",
+    "rootFailure": "provider_failure after HTTP200 before model final response"
+  },
+  "repair": {
+    "rootId": "79d86d65730409928f2e38144174eb77",
+    "state": "failed",
+    "http": 503,
+    "sourceEffects": 0,
+    "firstCall": true,
+    "status": "Pending CantorServe availability restoration. No manual Vue correction or diagnostic coaching."
+  },
+  "preservation": {
+    "settledRoots": 32,
+    "neverReplayRootIds": [
+      "33f726cdc70949eca4d2c91bf7e2cfdc",
+      "5632e0df56de442fbcfe309196e79d70",
+      "cb99b46029234a6e9f78de4fae6d6a97",
+      "8f9c2ac798474402971639ca1e66613d",
+      "640aeb76015043438736594ebd6b3f89",
+      "99736375dbee4e45a3f5f1a29bf50d84",
+      "e173c1b8ad4f42b1abf84e929400ee74",
+      "7ff1e68d076b4e36b9cc6728f9226a1c",
+      "b291e0ac787b4a329603accfe7a96ff8",
+      "a841fa3d716c4e929f2403461c8d2996",
+      "ebaa8ae927764b949b6c152e41bcc4e7",
+      "0d01d4cdc1b04d9fb3532fecf66ae79e",
+      "7ec54f8bde464426babb7f14be20ee4f",
+      "54d8df3055544f0f95a437c1374d6264",
+      "bea317219abc457c82fca86dd3842835",
+      "7b7b06d1779b4128b6eb761f68f4db66",
+      "a8898ab93baa436ca5fbaf5f81bb4ccd",
+      "81fc8bf12ecf4902bc36d50b70f0ed79",
+      "036c3023dd0a4ef3b321a91e693c9836",
+      "53400bee3d174adf8df3a38012f6ad0e",
+      "89586cc5fba243a49cb007c6e1c3063c",
+      "cd79d67a08f844ebac624f9cba7c9d1a",
+      "d46f1810a20d43e8b8c1ef8cf30db96f",
+      "4afd1c79a00942f99a74c5b527ea1beb",
+      "666384c940b149468e827f5647515677",
+      "57f6f5f6469242b69ab32cdd9c5f23d6",
+      "4b2b2d8dea6f4d7da9a759ecf6f0bfba",
+      "c72a217379984656a4fc0818b560a83f",
+      "5f486c4826b842f18182be1db91b4063",
+      "8753155903414fa089cf0c73c771cf9b",
+      "61e49ba9f83f4f6f9b6e57e2ad0c756b",
+      "79d86d65730409928f2e38144174eb77"
+    ],
+    "priorRootsExact": 30,
+    "snapshot": {
+      "path": ".agentflow/reliability-records-after-typecheck-provider-failures-20261125.json.gz",
+      "bytes": 366588,
+      "sha256": "ba013cbf85b4335c6e2a0c3705adb9d52f140d0d110c3c034afd56549a49357b"
+    },
+    "nativeInputFiles": 36164,
+    "nativeInputsExact": true,
+    "nativeInputManifestSha256": "ea77e7f6bc1da0cb3c83665061485b5454be55e9cbd4db0af703b142a8ecc31a",
+    "dependencyHashEntries": 16875,
+    "dependencyDirectoryBindings": 5085,
+    "dependenciesExact": true,
+    "dependencyManifestSha256": "ae5566f6772d25622bed08faa9fa64110824c800ccca7b25b183b1fd4c77f8f8"
+  },
+  "unchangedBudgets": {
+    "modelMs": 120000,
+    "idleMs": 60000,
+    "rootActiveMs": 600000,
+    "processMs": 120000
+  },
+  "limitations": [
+    "Runtime tests and declaration generation passed on the pre-repair source, but TypeScript source check failed.",
+    "Repeated inspection can exhaust600seconds, and provider/large-context failures remain open.",
+    "No completed build-model turn or final feature/release acceptance is claimed."
+  ],
+  "roots": [
+    {
+      "id": "4afd1c79a00942f99a74c5b527ea1beb",
+      "sessionId": "cf719b47fa1f4d989762cf7e83b074a8",
+      "state": "completed",
+      "reason": null,
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "44ac4b61dedf42dfa40282d1181b3e65",
+          "status": 200
+        },
+        {
+          "request_id": "7c91a44f5e45438e9cf5072f9f4f9e0d",
+          "status": 200
+        },
+        {
+          "request_id": "e1ec6a71a8b4472c8e42be05105fdda8",
+          "status": 200
+        },
+        {
+          "request_id": "b92dd9294307448fa6e6ba5a9518a7ed",
+          "status": 200
+        },
+        {
+          "request_id": "ae4b47f578794017b0c180ff6312fe24",
+          "status": 200
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 5,
+        "callsStarted": 5,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 51676,
+          "completion_tokens": 702,
+          "total_tokens": 52378
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 276601,
+          "remaining_active_ms": 323399,
+          "segment_id": "cd27f01810bd9ba9bdc45f4c6f940462"
+        }
+      ],
+      "operations": [
+        {
+          "id": "9decf9feab07a899bd9f46c9b8b980fa",
+          "tool": "create_file",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "after_sha256": "bc0888efa1ff3a825e59f6f2621b5bd98c34c804a5a9190a4d7fde927ebcbf1c",
+            "file_id": "windows-local-file-v1:746a389f6a386052:0f00000000000000cc072d0000000000",
+            "parent_id": "windows-local-file-v1:746a389f6a386052:0000000000000000cc072d0000000000",
+            "path": "packages/reactivity/src/toValueOr.ts",
+            "size": 1095,
+            "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+          }
+        }
+      ]
+    },
+    {
+      "id": "666384c940b149468e827f5647515677",
+      "sessionId": "cf719b47fa1f4d989762cf7e83b074a8",
+      "state": "completed",
+      "reason": null,
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "c778ccd767d644988bd025574f7a33cc",
+          "status": 200
+        },
+        {
+          "request_id": "d5fcdf4023754001b809a138616f51b8",
+          "status": 200
+        },
+        {
+          "request_id": "8f9bc50584214ecfac43f958a8153b7d",
+          "status": 200
+        },
+        {
+          "request_id": "610fefb6d6074e1d813fa48d528d32e3",
+          "status": 200
+        },
+        {
+          "request_id": "6718586923e74dc2bacb9f46824edeeb",
+          "status": 200
+        },
+        {
+          "request_id": "1a36c1316126498f85eb51c2d05fb748",
+          "status": 200
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 6,
+        "callsStarted": 6,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 86386,
+          "completion_tokens": 1841,
+          "total_tokens": 88227
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 589756,
+          "remaining_active_ms": 10244,
+          "segment_id": "4666de09cfc8eae6a487b45a1aaea351"
+        }
+      ],
+      "operations": [
+        {
+          "id": "914b4b9c3a63c16b306f412d4bdb1ffe-0",
+          "tool": "patch_file",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "action": "update",
+            "after_exists": true,
+            "after_sha256": "e9b96ecefa3ffe3497e4417cf4317391beb8df8f18a6a3863756e739ac808f44",
+            "before_sha256": "544c9c181c973e0341e08c326dd9aef97e4b26f69ca2872ca7a7bba015897019",
+            "created_directory_bindings": [],
+            "file_id": "windows-local-file-v1:746a389f6a386052:0a00000000000000cc072d0000000000",
+            "operation_id": "914b4b9c3a63c16b306f412d4bdb1ffe-0",
+            "patch_id": "914b4b9c3a63c16b306f412d4bdb1ffe",
+            "patch_index": 0,
+            "path": "packages/reactivity/src/index.ts",
+            "size": 1825,
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+          }
+        },
+        {
+          "id": "1421543a8bcf8c5c2d4c719f169d0592-0",
+          "tool": "patch_file",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "action": "update",
+            "after_exists": true,
+            "after_sha256": "13dab5a1f67cca7473856070d6fe48d44992fb3948ef7e7d8dc1725d1bb5bf5c",
+            "before_sha256": "067f105768c3094437cead9f39958c7843b848f6c6e93d324f85361f944adbf7",
+            "created_directory_bindings": [],
+            "file_id": "windows-local-file-v1:746a389f6a386052:1c00000000000000d1072d0000000000",
+            "operation_id": "1421543a8bcf8c5c2d4c719f169d0592-0",
+            "patch_id": "1421543a8bcf8c5c2d4c719f169d0592",
+            "patch_index": 0,
+            "path": "packages/runtime-core/src/index.ts",
+            "size": 12268,
+            "state": "succeeded",
+            "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+          }
+        },
+        {
+          "id": "3f771d07adc73540050e6be291070516",
+          "tool": "create_file",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "after_sha256": "c6b6773d6899b2858c0024662433a568cd5ed52534c2b123b9b833261f2d9383",
+            "file_id": "windows-local-file-v1:746a389f6a386052:0e00000000000000ca072d0000000000",
+            "parent_id": "windows-local-file-v1:746a389f6a386052:0000000000000000ca072d0000000000",
+            "path": "packages/reactivity/__tests__/toValueOr.spec.ts",
+            "size": 1724,
+            "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+          }
+        }
+      ]
+    },
+    {
+      "id": "c72a217379984656a4fc0818b560a83f",
+      "sessionId": "2514f376528d4898a7825efdeb9b0c8d",
+      "state": "failed",
+      "reason": "deadline",
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "0ed605a39beb439fb73c418f36d3239a",
+          "status": 200
+        },
+        {
+          "request_id": "a626fe86ccd34fff9df57dd0efe7745c",
+          "status": 200
+        },
+        {
+          "request_id": "35eba1c1bd2046b7809d365a97bcc6ac",
+          "status": 200
+        },
+        {
+          "request_id": "8708c01bbfef40b89f27318c20c7e23c",
+          "status": 200
+        },
+        {
+          "request_id": "7d6bf6f2981d4f8c91939a6cf2cd942c",
+          "status": 200
+        },
+        {
+          "request_id": "8f197497059a48e09351d98c692b89ee",
+          "status": 200
+        },
+        {
+          "request_id": "e74db187ca4c471399023015c7ba1789",
+          "status": 200
+        },
+        {
+          "request_id": "ac2a3a82a5a948bbb01e9faa844db2ce",
+          "status": 200
+        },
+        {
+          "request_id": "26beb6503f874d95b9118499110aa25b",
+          "status": 200
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 8,
+        "callsStarted": 9,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 124467,
+          "completion_tokens": 416,
+          "total_tokens": 124883
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 600001,
+          "remaining_active_ms": 0,
+          "segment_id": "58608d4e70fa3ad4c0ecec7226ac5a44"
+        }
+      ],
+      "operations": [
+        {
+          "id": "174e39e8ca7371b7ee1508f9fc6c62d2",
+          "tool": "run_process",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "elapsed_ms": 946,
+            "exit_code": 1,
+            "independently_verified": false,
+            "job_id": "174e39e8ca7371b7ee1508f9fc6c62d2",
+            "operation_id": "174e39e8ca7371b7ee1508f9fc6c62d2",
+            "output_artifact": {
+              "operation_id": "174e39e8ca7371b7ee1508f9fc6c62d2",
+              "state": "complete",
+              "stderr_bytes": 5492,
+              "stdout_bytes": 2685
+            },
+            "pid": 79536,
+            "process_tree_retired": true,
+            "profile_id": "pnpm",
+            "stderr": {
+              "byte_count": 5492,
+              "data": "\n\u001b[31m⎯⎯⎯⎯⎯⎯\u001b[39m\u001b[1m\u001b[41m Failed Suites 18 \u001b[49m\u001b[22m\u001b[31m⎯⎯⎯⎯⎯⎯\u001b[39m\n\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/arrayIterator.spec.ts\u001b[2m [ packages/reactivity/__tests__/arrayIterator.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/computed.spec.ts\u001b[2m [ packages/reactivity/__tests__/computed.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/effect.spec.ts\u001b[2m [ packages/reactivity/__tests__/effect.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/effectScope.spec.ts\u001b[2m [ packages/reactivity/__tests__/effectScope.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/gc.spec.ts\u001b[2m [ packages/reactivity/__tests__/gc.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/reactive.spec.ts\u001b[2m [ packages/reactivity/__tests__/reactive.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/reactiveArray.spec.ts\u001b[2m [ packages/reactivity/__tests__/reactiveArray.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/readonly.spec.ts\u001b[2m [ packages/reactivity/__tests__/readonly.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/ref.spec.ts\u001b[2m [ packages/reactivity/__tests__/ref.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/shallowReactive.spec.ts\u001b[2m [ packages/reactivity/__tests__/shallowReactive.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/shallowReadonly.spec.ts\u001b[2m [ packages/reactivity/__tests__/shallowReadonly.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/toValueOr.spec.ts\u001b[2m [ packages/reactivity/__tests__/toValueOr.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/watch.spec.ts\u001b[2m [ packages/reactivity/__tests__/watch.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/Map.spec.ts\u001b[2m [ packages/reactivity/__tests__/collections/Map.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/Set.spec.ts\u001b[2m [ packages/reactivity/__tests__/collections/Set.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/shallowReadonly.spec.ts\u001b[2m [ packages/reactivity/__tests__/collections/shallowReadonly.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/WeakMap.spec.ts\u001b[2m [ packages/reactivity/__tests__/collections/WeakMap.spec.ts ]\u001b[22m\n\u001b[41m\u001b[1m FAIL \u001b[22m\u001b[49m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/WeakSet.spec.ts\u001b[2m [ packages/reactivity/__tests__/collections/WeakSet.spec.ts ]\u001b[22m\n\u001b[31m\u001b[1mRolldownError\u001b[22m: Parse failure: Parse failed with 1 error:\nDuplicated export 'toValueOr'\n1: export { ref, shallowRef, isRef, toRef, toValue, toValueOr, toRefs, unref, proxyRefs, customRef, triggerRef } from \"/...\n                                                    ^\n2: export { toValueOr } from \"/packages/reactivity/src/toValueOr.ts\";\n3: export { reactive, readonly, isReactive, isReadonly, isShallow, isProxy, shallowReactive, shallowReadonly, markRaw, t...\n1: export { ref, shallowRef, isRef, toRef, toValue, toValueOr, toRefs, unref, proxyRefs, customRef, triggerRef } from \"/...\n2: export { toValueOr } from \"/packages/reactivity/src/toValueOr.ts\";\n            ^\n3: export { reactive, readonly, isReactive, isReadonly, isShallow, isProxy, shallowReactive, shallowReadonly, markRaw, t...\n4: export { computed } from \"/packages/reactivity/src/computed.ts\";\nAt file: /packages/reactivity/src/index.ts:1:49\u001b[39m\n  File: \u001b[36m/packages/reactivity/src/index.ts\u001b[39m:1:49\n\u001b[33m  1  |  export { ref, shallowRef, isRef, toRef, toValue, toValueOr, toRefs, unref, proxyRefs, customRef, triggerRef } from \"/...\n     |                                                   ^\n  2  |  export { toValueOr } from \"/packages/reactivity/src/toValueOr.ts\";\n  3  |  export { reactive, readonly, isReactive, isReadonly, isShallow, isProxy, shallowReactive, shallowReadonly, markRaw, t...\u001b[39m\n\u001b[90m \u001b[2m❯\u001b[22m error node_modules/.pnpm/rolldown@1.2.19/node_modules/rolldown/dist/shared/logs-DyTyzzWG.mjs:\u001b[2m164:24\u001b[22m\u001b[39m\n\u001b[90m \u001b[2m❯\u001b[22m normalizeParseError node_modules/.pnpm/rolldown@1.2.19/node_modules/rolldown/dist/parse-ast-index.mjs:\u001b[2m25:9\u001b[22m\u001b[39m\n\u001b[90m \u001b[2m❯\u001b[22m wrap node_modules/.pnpm/rolldown@1.2.19/node_modules/rolldown/dist/parse-ast-index.mjs:\u001b[2m5:39\u001b[22m\u001b[39m\n\u001b[90m \u001b[2m❯\u001b[22m parseAstAsync node_modules/.pnpm/rolldown@1.2.19/node_modules/rolldown/dist/parse-ast-index.mjs:\u001b[2m54:9\u001b[22m\u001b[39m\n\u001b[90m \u001b[2m❯\u001b[22m ssrTransformScript node_modules/.pnpm/vite@8.3.8_@types+node@26.6_e31a2e1cdae526d3d7c28b9497a04258/node_modules/vite/dist/node/chunks/node.js:\u001b[2m16480:9\u001b[22m\u001b[39m\n\u001b[90m \u001b[2m❯\u001b[22m loadAndTransform node_modules/.pnpm/vite@8.3.8_@types+node@26.6_e31a2e1cdae526d3d7c28b9497a04258/node_modules/vite/dist/node/chunks/node.js:\u001b[2m20146:64\u001b[22m\u001b[39m\n\n\u001b[31m\u001b[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/18]⎯\u001b[22m\u001b[39m\n\n",
+              "encoding": "utf-8",
+              "retained_bytes": 5492
+            },
+            "stdout": {
+              "byte_count": 2685,
+              "data": "\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv4.1.11 \u001b[39m\u001b[90mD:/CantorAI2026/TestProj/xmind-public-vue-core-20261125\u001b[39m\n\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/gc.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/shallowReadonly.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/Set.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/readonly.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/ref.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/effect.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/toValueOr.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/shallowReadonly.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/watch.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/WeakSet.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/WeakMap.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/Map.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/computed.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/effectScope.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/reactiveArray.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/reactive.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/arrayIterator.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n \u001b[31m❯\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/shallowReactive.spec.ts \u001b[2m(\u001b[22m\u001b[2m0 test\u001b[22m\u001b[2m)\u001b[22m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[31m18 failed\u001b[39m\u001b[22m\u001b[90m (18)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[2mno tests\u001b[22m\n\u001b[2m   Start at \u001b[22m 19:26:51\n\u001b[2m   Duration \u001b[22m 501ms\u001b[2m (transform 1.81s, setup 393ms, import 0ms, tests 0ms, environment 1ms)\u001b[22m\n\n",
+              "encoding": "utf-8",
+              "retained_bytes": 2685
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        },
+        {
+          "id": "3d7fe5b1e8407c157520f2e79ffea811",
+          "tool": "replace_file",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "after_sha256": "e56df273f0068769b05f00d718f2a49b911f123a859f98caf6b0b5690a2739ef",
+            "before_sha256": "e9b96ecefa3ffe3497e4417cf4317391beb8df8f18a6a3863756e739ac808f44",
+            "file_id": "windows-local-file-v1:746a389f6a386052:0a00000000000000cc072d0000000000",
+            "path": "packages/reactivity/src/index.ts",
+            "size": 1812,
+            "workspace_id": "windows-local-file-v1:746a389f6a386052:000000000000000086072d0000000000"
+          }
+        }
+      ]
+    },
+    {
+      "id": "5f486c4826b842f18182be1db91b4063",
+      "sessionId": "822c90ac2eec4344bd32b11006024219",
+      "state": "completed",
+      "reason": null,
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "78197e52da2f4cb8b8c8fb3b603e61b1",
+          "status": 200
+        },
+        {
+          "request_id": "b00d259a78584d2488d20fc0415ddf7f",
+          "status": 200
+        },
+        {
+          "request_id": "7afbca519a8045b7a8f08bb74056e201",
+          "status": 200
+        },
+        {
+          "request_id": "84e5271d06d4430a813c55e7d3e7797b",
+          "status": 200
+        },
+        {
+          "request_id": "2df50a0eb30f45aeacf9495d2aa35ef2",
+          "status": 200
+        },
+        {
+          "request_id": "69af2c133da441d0845e0bd5c67f18e1",
+          "status": 200
+        },
+        {
+          "request_id": "419137d3f0eb45e3b84cd666e5f7688c",
+          "status": 200
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 7,
+        "callsStarted": 7,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 79034,
+          "completion_tokens": 813,
+          "total_tokens": 79847
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 334115,
+          "remaining_active_ms": 265885,
+          "segment_id": "a9ba3cd4763c01a3ca9b1e509b0785bc"
+        }
+      ],
+      "operations": [
+        {
+          "id": "ec45cba12ad5119b6530c255b9835c43",
+          "tool": "run_process",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "elapsed_ms": 1126,
+            "exit_code": 0,
+            "independently_verified": false,
+            "job_id": "ec45cba12ad5119b6530c255b9835c43",
+            "operation_id": "ec45cba12ad5119b6530c255b9835c43",
+            "output_artifact": {
+              "operation_id": "ec45cba12ad5119b6530c255b9835c43",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 3257
+            },
+            "pid": 82008,
+            "process_tree_retired": true,
+            "profile_id": "pnpm",
+            "stderr": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "stdout": {
+              "byte_count": 3257,
+              "data": "\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv4.1.11 \u001b[39m\u001b[90mD:/CantorAI2026/TestProj/xmind-public-vue-core-20261125\u001b[39m\n\n \u001b[2m\u001b[90m↓\u001b[39m\u001b[22m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/gc.spec.ts \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m | \u001b[22m\u001b[33m4 skipped\u001b[39m\u001b[2m)\u001b[22m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/toValueOr.spec.ts \u001b[2m(\u001b[22m\u001b[2m7 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 5\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/shallowReadonly.spec.ts \u001b[2m(\u001b[22m\u001b[2m16 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 10\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/shallowReadonly.spec.ts \u001b[2m(\u001b[22m\u001b[2m10 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 8\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/WeakSet.spec.ts \u001b[2m(\u001b[22m\u001b[2m9 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 11\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/arrayIterator.spec.ts \u001b[2m(\u001b[22m\u001b[2m7 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 11\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/WeakMap.spec.ts \u001b[2m(\u001b[22m\u001b[2m11 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 13\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/watch.spec.ts \u001b[2m(\u001b[22m\u001b[2m14 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 14\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/Map.spec.ts \u001b[2m(\u001b[22m\u001b[2m32 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 15\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/collections/Set.spec.ts \u001b[2m(\u001b[22m\u001b[2m34 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 15\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/shallowReactive.spec.ts \u001b[2m(\u001b[22m\u001b[2m18 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 17\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/reactive.spec.ts \u001b[2m(\u001b[22m\u001b[2m39 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 23\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/readonly.spec.ts \u001b[2m(\u001b[22m\u001b[2m48 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 24\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/reactiveArray.spec.ts \u001b[2m(\u001b[22m\u001b[2m40 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 31\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/effectScope.spec.ts \u001b[2m(\u001b[22m\u001b[2m23 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 11\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/effect.spec.ts \u001b[2m(\u001b[22m\u001b[2m70 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 25\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/computed.spec.ts \u001b[2m(\u001b[22m\u001b[2m49 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 40\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m \u001b[30m\u001b[42m unit \u001b[49m\u001b[39m packages/reactivity/__tests__/ref.spec.ts \u001b[2m(\u001b[22m\u001b[2m38 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 15\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m17 passed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[33m1 skipped\u001b[39m\u001b[90m (18)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m465 passed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[33m4 skipped\u001b[39m\u001b[90m (469)\u001b[39m\n\u001b[2m   Start at \u001b[22m 19:40:10\n\u001b[2m   Duration \u001b[22m 668ms\u001b[2m (transform 2.71s, setup 268ms, import 3.84s, tests 286ms, environment 2ms)\u001b[22m\n\n",
+              "encoding": "utf-8",
+              "retained_bytes": 3257
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "8753155903414fa089cf0c73c771cf9b",
+      "sessionId": "ac4e4eb854f4477ca3230ac73c7407d0",
+      "state": "failed",
+      "reason": "deadline",
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "8e53fc2c1db64ff0a50e993cb640f862",
+          "status": 200
+        },
+        {
+          "request_id": "f46fd01e21f24cbb9c3218ab495a18b9",
+          "status": 200
+        },
+        {
+          "request_id": "489626288d8641eebfdccfccc16a18e3",
+          "status": 200
+        },
+        {
+          "request_id": "89df8a04872e4781b8982f7fac6e4c84",
+          "status": 200
+        },
+        {
+          "request_id": "b7ad5f2a44da424abbf84eb411e5080b",
+          "status": 200
+        },
+        {
+          "request_id": "a565e04cb7b447dd82f206f28a6041bc",
+          "status": 200
+        },
+        {
+          "request_id": "67bc3f7d152a4f289f3e79293e2524bd",
+          "status": 200
+        },
+        {
+          "request_id": "19d96c2b2d7c45fcb2f20825ee4d1c39",
+          "status": 200
+        },
+        {
+          "request_id": "0b42cd896c2747058eed8f8c3714abf8",
+          "status": 200
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 8,
+        "callsStarted": 9,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 122752,
+          "completion_tokens": 647,
+          "total_tokens": 123399
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 600002,
+          "remaining_active_ms": 0,
+          "segment_id": "fa50fe3dcedc5fd93ee21f28b381dfe0"
+        }
+      ],
+      "operations": [
+        {
+          "id": "a2160571a49ff8e10000261c73d7cd2d",
+          "tool": "run_process",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "elapsed_ms": 103,
+            "exit_code": 0,
+            "independently_verified": false,
+            "job_id": "a2160571a49ff8e10000261c73d7cd2d",
+            "operation_id": "a2160571a49ff8e10000261c73d7cd2d",
+            "output_artifact": {
+              "operation_id": "a2160571a49ff8e10000261c73d7cd2d",
+              "state": "complete",
+              "stderr_bytes": 0,
+              "stdout_bytes": 124
+            },
+            "pid": 25332,
+            "process_tree_retired": true,
+            "profile_id": "node",
+            "stderr": {
+              "byte_count": 0,
+              "data": "",
+              "encoding": "utf-8",
+              "retained_bytes": 0
+            },
+            "stdout": {
+              "byte_count": 124,
+              "data": "D:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\node_modules\\.pnpm\\rollup@4.68.7\\node_modules\\rollup\\dist\\rollup.js\n",
+              "encoding": "utf-8",
+              "retained_bytes": 124
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        },
+        {
+          "id": "6acdcfaeafccf20dcdc29f503842082b",
+          "tool": "run_process",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "elapsed_ms": 3741,
+            "exit_code": 0,
+            "independently_verified": false,
+            "job_id": "6acdcfaeafccf20dcdc29f503842082b",
+            "operation_id": "6acdcfaeafccf20dcdc29f503842082b",
+            "output_artifact": {
+              "operation_id": "6acdcfaeafccf20dcdc29f503842082b",
+              "state": "complete",
+              "stderr_bytes": 2229,
+              "stdout_bytes": 88
+            },
+            "pid": 77560,
+            "process_tree_retired": true,
+            "profile_id": "pnpm",
+            "stderr": {
+              "byte_count": 2229,
+              "data": "$ node scripts/build.js reactivity -t\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.esm-bundler.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.esm-bundler.js\u001b[22m in \u001b[1m114ms\u001b[22m\u001b[39m\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.esm-browser.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.esm-browser.js\u001b[22m in \u001b[1m60ms\u001b[22m\u001b[39m\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.cjs.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.cjs.js\u001b[22m in \u001b[1m51ms\u001b[22m\u001b[39m\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.global.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.global.js\u001b[22m in \u001b[1m55ms\u001b[22m\u001b[39m\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.esm-browser.prod.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.esm-browser.prod.js\u001b[22m in \u001b[1m59ms\u001b[22m\u001b[39m\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.cjs.prod.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.cjs.prod.js\u001b[22m in \u001b[1m49ms\u001b[22m\u001b[39m\n\u001b[36m\n\u001b[1mD:\\CantorAI2026\\TestProj\\xmind-public-vue-core-20261125\\packages\\reactivity\\src\\index.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.global.prod.js\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.global.prod.js\u001b[22m in \u001b[1m54ms\u001b[22m\u001b[39m\n$ tsc -p tsconfig.build.json --noCheck && rollup -c rollup.dts.config.js \"--environment\" \"TARGETS:reactivity\"\n\u001b[36m\n\u001b[1m./temp/packages/reactivity/src/index.d.ts\u001b[22m → \u001b[1mpackages/reactivity/dist/reactivity.d.ts\u001b[22m...\u001b[39m\n\u001b[32mcreated \u001b[1mpackages/reactivity/dist/reactivity.d.ts\u001b[22m in \u001b[1m109ms\u001b[22m\u001b[39m\n",
+              "encoding": "utf-8",
+              "retained_bytes": 2229
+            },
+            "stdout": {
+              "byte_count": 88,
+              "data": "\n\u001b[90m\u001b[1mreactivity.global.prod.js\u001b[22m\u001b[39m min:21.8 kB / gzip:7.59 kB / brotli:7 kB\n\n",
+              "encoding": "utf-8",
+              "retained_bytes": 88
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "61e49ba9f83f4f6f9b6e57e2ad0c756b",
+      "sessionId": "64aa43207d5a4c63bda252844b0133b2",
+      "state": "failed",
+      "reason": "provider_failure",
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "eedb4d1a3535468b8132fd7eaf92f03b",
+          "status": 200
+        },
+        {
+          "request_id": "51d9f78fae82409daf3b9760e71edfed",
+          "status": 200
+        },
+        {
+          "request_id": "b488c524798f41958f821abf05be5121",
+          "status": 200
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 2,
+        "callsStarted": 3,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 17292,
+          "completion_tokens": 89,
+          "total_tokens": 17381
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 173638,
+          "remaining_active_ms": 426362,
+          "segment_id": "f8f5980562c0899de40f146440939d45"
+        }
+      ],
+      "operations": [
+        {
+          "id": "218a6ad581c26d496e0ca2f75075c45d",
+          "tool": "run_process",
+          "state": "succeeded",
+          "decisionActor": "local-owner",
+          "result": {
+            "elapsed_ms": 8673,
+            "exit_code": 2,
+            "independently_verified": false,
+            "job_id": "218a6ad581c26d496e0ca2f75075c45d",
+            "operation_id": "218a6ad581c26d496e0ca2f75075c45d",
+            "output_artifact": {
+              "operation_id": "218a6ad581c26d496e0ca2f75075c45d",
+              "state": "complete",
+              "stderr_bytes": 75,
+              "stdout_bytes": 271
+            },
+            "pid": 82952,
+            "process_tree_retired": true,
+            "profile_id": "pnpm",
+            "stderr": {
+              "byte_count": 75,
+              "data": "$ tsc --incremental --noEmit\n[ELIFECYCLE] Command failed with exit code 2.\n",
+              "encoding": "utf-8",
+              "retained_bytes": 75
+            },
+            "stdout": {
+              "byte_count": 271,
+              "data": "packages/reactivity/src/toValueOr.ts(33,50): error TS2322: Type 'F' is not assignable to type 'T extends null | undefined ? F : T'.\r\npackages/reactivity/src/toValueOr.ts(33,61): error TS2322: Type 'T & {}' is not assignable to type 'T extends null | undefined ? F : T'.\r\n",
+              "encoding": "utf-8",
+              "retained_bytes": 271
+            },
+            "termination": "exited",
+            "truncated": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "79d86d65730409928f2e38144174eb77",
+      "sessionId": "64aa43207d5a4c63bda252844b0133b2",
+      "state": "failed",
+      "reason": "provider_failure",
+      "neverReplay": true,
+      "provider": {
+        "model_id": "qwen3.8-27b-chat-32k",
+        "profile_id": "cantorserve",
+        "profile_revision": 13,
+        "provider": "openai-compatible",
+        "route_id": "openai.compatible",
+        "wire": "chat-completions"
+      },
+      "http": [
+        {
+          "request_id": "d68e090bda1b4171ba6ca95b430234bb",
+          "status": 503
+        }
+      ],
+      "usage": {
+        "suppliedRecords": 0,
+        "callsStarted": 1,
+        "reportedOnly": true,
+        "totals": {
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "budgetSegments": [
+        {
+          "active_elapsed_ms": 30752,
+          "remaining_active_ms": 569248,
+          "segment_id": "ee6c2843aee84bb35b669c4cb194790c"
+        }
+      ],
+      "operations": []
+    }
+  ],
+  "raw": {
+    "path": "doc/evidence/vue-runtime-and-declarations-20261125.json.gz",
+    "bytes": 167830,
+    "sha256": "c5b9336cc261b0a2cf1d02d80437eac1b3b702695013c244bef8e372f37989ea"
+  }
+}
