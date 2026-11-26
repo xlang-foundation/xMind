@@ -2,6 +2,7 @@
 #include "agentflow/records.hpp"
 #include "agentflow/context_records.hpp"
 #include "nlohmann/json.hpp"
+#include <algorithm>
 #include <map>
 #include <set>
 
@@ -19,6 +20,34 @@ MessageRole role(const std::string& role){if(role=="system")return MessageRole::
 Json calls(const std::vector<ModelToolCall>& input){if(input.size()>4096)invalid();Json result=Json::array();for(const auto& call:input)result.push_back({{"id",call.id},{"name",call.name},{"arguments_json",call.arguments_json}});return result;}
 std::vector<ModelToolCall> calls(const Json& input){array(input,4096);std::vector<ModelToolCall> result;for(const auto& call:input){object(call,3);result.push_back({call.at("id").get<std::string>(),call.at("name").get<std::string>(),call.at("arguments_json").get<std::string>()});}return result;}
 std::string bounded(const Json& value,std::size_t limit){auto result=value.dump();if(result.size()>limit)invalid();return result;}
+bool reference_previous_inspections(ModelRequest& request,std::size_t latest_user){
+    std::vector<std::pair<std::size_t,std::string>> candidates;std::size_t bytes=0;
+    for(std::size_t index=0;index<latest_user;++index){
+        const auto& assistant=request.messages[index];const auto count=assistant.tool_calls.size();
+        if(assistant.role!=MessageRole::assistant||!assistant.content.empty()||!assistant.refusal.empty()||assistant.provider_items_json!="[]"||!count||count>=latest_user-index)continue;
+        std::map<std::string,std::string> names;bool eligible=true;
+        for(const auto& call:assistant.tool_calls){
+            if((call.name!="read_file"&&call.name!="list_files"&&call.name!="search_files"&&call.name!="find_files"&&call.name!="glob_files")||!names.emplace(call.id,call.name).second){eligible=false;break;}
+        }
+        std::vector<std::pair<std::size_t,std::string>> group;std::size_t group_bytes=0;
+        for(std::size_t offset=1;eligible&&offset<=count;++offset){
+            const auto position=index+offset;const auto& result=request.messages[position];const auto found=names.find(result.tool_call_id);
+            if(result.role!=MessageRole::tool||result.provider_items_json!="[]"||found==names.end()){eligible=false;break;}
+            const auto value=Json::parse(result.content,nullptr,false);const auto& name=found->second;
+            const bool shape=value.is_object()&&!value.contains("error")&&
+                (name=="read_file"?(value.contains("path")&&value["path"].is_string()&&value.contains("content")&&value["content"].is_string()):
+                 name=="search_files"?(value.contains("matches")&&value["matches"].is_array()):
+                 name=="glob_files"?(value.contains("paths")&&value["paths"].is_array()):(value.contains("entries")&&value["entries"].is_array()));
+            if(!shape){eligible=false;break;}
+            const auto original=value.contains("historical_excerpt")&&value["historical_excerpt"]==true&&value.contains("original_observation_sha256")&&value["original_observation_sha256"].is_string()?value["original_observation_sha256"].get<std::string>():context_digest(result.content);
+            group.emplace_back(position,original);group_bytes+=result.content.size();names.erase(found);
+        }
+        if(eligible){candidates.insert(candidates.end(),group.begin(),group.end());bytes+=group_bytes;index+=count;}
+    }
+    if(bytes<=32*1024)return false;
+    for(const auto& [index,original]:candidates)request.messages[index].content=Json{{"historical_read_only_reference",true},{"original_observation_sha256",original}}.dump();
+    return !candidates.empty();
+}
 }
 ModelMessage model_message_from_history(const Message& stored) {
     const auto data=Json::parse(stored.json);
@@ -42,32 +71,33 @@ ModelMessage model_message_from_history(const Message& stored) {
 }
 bool bound_historical_file_reads(ModelRequest& request){
     if(request.canonical_window)return false;
-    std::map<std::string,std::string> pending;bool changed=false;
+    std::size_t latest_user=0;for(std::size_t index=0;index<request.messages.size();++index)if(request.messages[index].role==MessageRole::user)latest_user=index;
+    std::map<std::string,std::string> pending;bool changed=reference_previous_inspections(request,latest_user);
     std::vector<std::pair<std::size_t,Json>> reads;
     for(std::size_t index=0;index<request.messages.size();++index){
         const auto& message=request.messages[index];
         if(message.role==MessageRole::assistant)for(const auto& call:message.tool_calls)pending[call.id]=call.name;
-        if(message.role!=MessageRole::tool)continue;
+        if(message.role!=MessageRole::tool||message.provider_items_json!="[]")continue;
         const auto found=pending.find(message.tool_call_id);if(found==pending.end())continue;
         const bool file=found->second=="read_file";pending.erase(found);if(!file)continue;
         auto value=Json::parse(message.content,nullptr,false);
-        if(!value.is_object()||!value.contains("path")||!value["path"].is_string()||!value.contains("content")||!value["content"].is_string())continue;
+        if(!value.is_object()||value.contains("error")||!value.contains("path")||!value["path"].is_string()||!value.contains("content")||!value["content"].is_string())continue;
         reads.emplace_back(index,std::move(value));
     }
-    // One shared content allowance prevents many individually small reads,
-    // including explicit pages, from growing the model window without bound.
-    // Prefer recent observations; keep exact originals in the repository.
-    std::size_t remaining=8*1024;
+    // Keep an active multi-file working set independently of older turns.
+    // Exact originals stay in the repository; only the model view is bounded.
+    std::size_t previous_remaining=8*1024,current_remaining=32*1024;
     for(auto entry=reads.rbegin();entry!=reads.rend();++entry){
         auto& message=request.messages[entry->first];const auto& value=entry->second;
+        auto& remaining=entry->first<latest_user?previous_remaining:current_remaining;const auto allowance=std::min(remaining,std::size_t{16*1024});
         const auto& text=value["content"].get_ref<const std::string&>();
-        std::size_t end=0,lines=0;while(end<text.size()&&end<remaining&&(value.contains("offset")||value.contains("original_offset")||lines<200)){if(text[end++]=='\n')++lines;}
+        std::size_t end=0,lines=0;while(end<text.size()&&end<allowance&&(value.contains("offset")||value.contains("original_offset")||lines<200)){if(text[end++]=='\n')++lines;}
         // Preserve complete UTF-8 code points, even when one source line fills
         // the byte allowance. This is explicitly an excerpt, not a new read.
         while(end<text.size()&&end&&(static_cast<unsigned char>(text[end])&0xc0)==0x80)--end;
         remaining-=end;if(end==text.size())continue;
         const bool previous=value.contains("historical_excerpt")&&value["historical_excerpt"]==true;
-        Json excerpt={{"path",value["path"]},{"content",text.substr(0,end)},{"historical_excerpt",true},{"truncated",true},{"original_content_bytes",previous?value.at("original_content_bytes"):Json(text.size())},{"original_observation_sha256",previous?value.at("original_observation_sha256"):Json(context_digest(message.content))},{"guidance","Excerpt of an earlier file observation, not a current file snapshot. File observations share an 8 KiB content allowance, newest first. The exact original remains stored. Use search_files or a focused read_file page for omitted code."}};
+        Json excerpt={{"path",value["path"]},{"content",text.substr(0,end)},{"historical_excerpt",true},{"truncated",true},{"original_content_bytes",previous?value.at("original_content_bytes"):Json(text.size())},{"original_observation_sha256",previous?value.at("original_observation_sha256"):Json(context_digest(message.content))},{"guidance","Excerpt of a file observation, not a current file snapshot. File contents share separate allowances: 8 KiB for earlier turns and 32 KiB for the active turn, newest first. Exact originals remain stored. Use search_files or a focused read_file page for omitted code."}};
         for(const auto* field:{"folder_id","workspace_id","workspace_revision"})if(value.contains(field))excerpt[field]=value[field];
         for(const auto* field:{"offset","lines_read","next_offset","truncated_lines"})if(value.contains(field))excerpt[std::string("original_")+field]=value[field];
         for(const auto* field:{"original_offset","original_lines_read","original_next_offset","original_truncated_lines"})if(value.contains(field))excerpt[field]=value[field];
