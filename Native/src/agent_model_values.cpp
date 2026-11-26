@@ -41,23 +41,37 @@ ModelMessage model_message_from_history(const Message& stored) {
     return result;
 }
 bool bound_historical_file_reads(ModelRequest& request){
+    if(request.canonical_window)return false;
     std::map<std::string,std::string> pending;bool changed=false;
-    for(auto& message:request.messages){
+    std::vector<std::pair<std::size_t,Json>> reads;
+    for(std::size_t index=0;index<request.messages.size();++index){
+        const auto& message=request.messages[index];
         if(message.role==MessageRole::assistant)for(const auto& call:message.tool_calls)pending[call.id]=call.name;
         if(message.role!=MessageRole::tool)continue;
         const auto found=pending.find(message.tool_call_id);if(found==pending.end())continue;
         const bool file=found->second=="read_file";pending.erase(found);if(!file)continue;
         auto value=Json::parse(message.content,nullptr,false);
-        if(!value.is_object()||value.contains("offset")||value.contains("historical_excerpt")||!value.contains("path")||!value["path"].is_string()||!value.contains("content")||!value["content"].is_string())continue;
+        if(!value.is_object()||!value.contains("path")||!value["path"].is_string()||!value.contains("content")||!value["content"].is_string())continue;
+        reads.emplace_back(index,std::move(value));
+    }
+    // One shared content allowance prevents many individually small reads,
+    // including explicit pages, from growing the model window without bound.
+    // Prefer recent observations; keep exact originals in the repository.
+    std::size_t remaining=8*1024;
+    for(auto entry=reads.rbegin();entry!=reads.rend();++entry){
+        auto& message=request.messages[entry->first];const auto& value=entry->second;
         const auto& text=value["content"].get_ref<const std::string&>();
-        std::size_t end=0,lines=0;while(end<text.size()&&end<16*1024&&lines<200){if(text[end++]=='\n')++lines;}
-        if(end==text.size())continue;
+        std::size_t end=0,lines=0;while(end<text.size()&&end<remaining&&(value.contains("offset")||value.contains("original_offset")||lines<200)){if(text[end++]=='\n')++lines;}
         // Preserve complete UTF-8 code points, even when one source line fills
         // the byte allowance. This is explicitly an excerpt, not a new read.
-        while(end&&(static_cast<unsigned char>(text[end])&0xc0)==0x80)--end;
-        Json excerpt={{"path",value["path"]},{"content",text.substr(0,end)},{"historical_excerpt",true},{"truncated",true},{"original_content_bytes",text.size()},{"original_observation_sha256",context_digest(message.content)},{"guidance","Excerpt of an earlier whole-file read, not a current file snapshot. The exact original remains stored. Use search_files or a focused read_file page for any omitted code."}};
+        while(end<text.size()&&end&&(static_cast<unsigned char>(text[end])&0xc0)==0x80)--end;
+        remaining-=end;if(end==text.size())continue;
+        const bool previous=value.contains("historical_excerpt")&&value["historical_excerpt"]==true;
+        Json excerpt={{"path",value["path"]},{"content",text.substr(0,end)},{"historical_excerpt",true},{"truncated",true},{"original_content_bytes",previous?value.at("original_content_bytes"):Json(text.size())},{"original_observation_sha256",previous?value.at("original_observation_sha256"):Json(context_digest(message.content))},{"guidance","Excerpt of an earlier file observation, not a current file snapshot. File observations share an 8 KiB content allowance, newest first. The exact original remains stored. Use search_files or a focused read_file page for omitted code."}};
         for(const auto* field:{"folder_id","workspace_id","workspace_revision"})if(value.contains(field))excerpt[field]=value[field];
-        if(end&&text[end-1]=='\n')excerpt["suggested_current_read_offset"]=lines+1;
+        for(const auto* field:{"offset","lines_read","next_offset","truncated_lines"})if(value.contains(field))excerpt[std::string("original_")+field]=value[field];
+        for(const auto* field:{"original_offset","original_lines_read","original_next_offset","original_truncated_lines"})if(value.contains(field))excerpt[field]=value[field];
+        if(end&&text[end-1]=='\n')excerpt["suggested_current_read_offset"]=value.value("offset",value.value("original_offset",std::size_t{1}))+lines;
         message.content=excerpt.dump();changed=true;
     }
     return changed;
