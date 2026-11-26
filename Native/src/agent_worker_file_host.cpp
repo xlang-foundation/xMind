@@ -3,6 +3,8 @@
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/edit_executor.hpp"
 #include "agentflow/permission_waiter.hpp"
+#include "agentflow/file_patch.hpp"
+#include "agentflow/agent_coding_workflow.hpp"
 #include "nlohmann/json.hpp"
 #include <condition_variable>
 #include <thread>
@@ -50,6 +52,7 @@ AgentFileToolResult AgentWorkerFileHost::invoke(const AgentFileToolInvocation& c
     catch(const ToolEditNeedsPatch&){result=failure("edit_requires_patch","This edit requires apply_patch rather than exact text replacement");}
     catch(const ToolAccessDenied&){result=failure("file_access_denied","Native file access was denied; inspect operation receipts before requesting another change");}
     catch(const ToolFileError&){result=failure("native_file_error","The native file call could not access its requested file or directory");}
+    catch(const PatchInvalid&){result=failure("invalid_patch",native_patch_syntax_error.data());}
     catch(const std::invalid_argument&){result=failure("invalid_tool_arguments","The native file call rejected its argument schema");}
     catch(...){const auto error=std::current_exception();save(failure("worker_file_failed","The backend file call did not return a result; inspect native operation receipts before requesting another change"));std::rethrow_exception(error);}
     save(result);if(interrupted)std::rethrow_exception(interrupted);

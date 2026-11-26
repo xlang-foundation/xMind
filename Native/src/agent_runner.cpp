@@ -1072,6 +1072,7 @@ Run AgentRunner::execute(const std::string& id,std::stop_token token,const std::
                 catch(const AgentPermissionDenied&) {output={{"error",{{"code","agent_permission_denied"},{"message","The selected agent permission rules denied this resource; the tool was not dispatched"}}}};}
                 catch(const ToolAccessDenied&) {output={{"error",{{"code","access_denied"},{"message","Workspace policy denied this operation"}}}};}
                 catch(const ToolFileError&) {output={{"error",{{"code","file_unavailable"},{"message","File is unavailable, binary, outside limits or unreadable"}}}};}
+                catch(const PatchInvalid&) {output={{"error",{{"code","invalid_patch"},{"message",native_patch_syntax_error}}}};}
                 catch(const std::invalid_argument&) {output=invalid_tool_arguments(call,request.tools);}
                 cancelled(token);
                 journal_.append_event(id,success?"tool.completed":"tool.failed",Json{{"activity_id",activity},{"call_id",call.id},{"name",call.name},{"data",output}}.dump()).get();
