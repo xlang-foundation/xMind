@@ -14,8 +14,10 @@ bool AgentWorkerJournalClient::coding_workspace_admitted(){
     catch(const Json::exception&){invalid();}catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker coding admission rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker coding admission cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker coding admission elapsed");throw;}
 }
 AgentWorkerChannel::Deadline AgentWorkerJournalClient::execution_deadline(){
+    // Native local workers share the Windows monotonic clock. Preserve the
+    // backend deadline exactly; relative milliseconds lose precision and RPC time.
     const auto before=std::chrono::steady_clock::now();
-    try{const auto value=parse(peer_.services().journal_execution_window());object(value,1);const auto remaining=integer(value.at("remaining_ms"));if(remaining<0||remaining>3600000)invalid();return before+std::chrono::milliseconds(remaining);}
+    try{const auto value=parse(peer_.services().journal_execution_window());object(value,1);const auto ticks=integer(value.at("deadline_ns"));if(ticks<=0)invalid();const auto deadline=std::chrono::steady_clock::time_point(std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(ticks)));if(deadline>before+std::chrono::hours(1))invalid();if(deadline<=std::chrono::steady_clock::now())throw AgentWorkerRpcTimeout("Worker execution window elapsed");return deadline;}
     catch(const Json::exception&){invalid();}catch(const AgentWorkerRpcRemoteError& e){if(e.code()=="rejected")throw Conflict("Worker execution window rejected");if(e.code()=="cancelled")throw AgentWorkerRpcCancelled("Worker execution window cancelled");if(e.code()=="timeout")throw AgentWorkerRpcTimeout("Worker execution window elapsed");throw;}
 }
 Run AgentWorkerJournalClient::begin_run(){

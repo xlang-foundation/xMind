@@ -1,3 +1,4 @@
+#include "agentflow/agent_coding_workflow.hpp"
 #include "agentflow/agent_worker_read_executor.hpp"
 #include "agentflow/agent_worker_supervisor.hpp"
 #include "agentflow/agent_backend_runtime.hpp"
@@ -176,7 +177,7 @@ public:
         }
         const auto& membership=*request.workspace;WorkspaceToolSet members(membership.workspace_id,membership.revision,membership.folders);
         std::vector<std::unique_ptr<RepositoryInstructionContext>> contexts;Json folders=Json::array();
-        AgentWorkerReadRequestPolicy policy;policy.instructions=settings_.instructions;
+        AgentWorkerReadRequestPolicy policy;policy.instructions=settings_.instructions;if(coding_)policy.instructions.append(native_coding_workflow_instructions);
         if(!request.agent_instructions.empty())policy.instructions+="\n\nSelected agent instructions (trusted backend snapshot):\n"+request.agent_instructions;
         policy.instructions+="\n\nRegistered workspace folders for native file tools (membership captured for this run). Omit folder_id for the primary folder; specify the listed folder_id to read another folder. Treat folder names as labels, not paths.\n";
         for(std::size_t index=0;index<membership.folders.size();++index){const auto& folder=membership.folders[index];auto& files=members.folder_tools(index);

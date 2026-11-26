@@ -17,7 +17,7 @@ inline void check(bool value,const char* message){if(!value){std::cerr<<message<
 inline std::string child(FixtureWorkerRpcPeer& peer,const std::string& method){
     if(method!="fixture.run")throw AgentWorkerRpcRemoteError("unsupported");
     const auto& scope=peer.scope();const auto role=scope.root_id==scope.run_id?ModelCallRole::parent:ModelCallRole::leaf;
-    AgentWorkerJournalClient journal(peer);unsigned rejected=0;const bool graph=scope.root_id=="journal-graph-root";
+    AgentWorkerJournalClient journal(peer);const auto expected=Json::parse(peer.call("fixture.deadline","{}")).at("deadline_ns").get<std::int64_t>();check(journal.execution_deadline().time_since_epoch().count()==expected,"Worker must receive the exact backend monotonic deadline without rounding or transport subtraction");unsigned rejected=0;const bool graph=scope.root_id=="journal-graph-root";
     if(graph){const auto owned=make_agent_worker_ordinary_journal(peer,{});check(owned->child_admission(scope.run_id).get().graph_node_path=="outer/reader","Graph journal must retain its scoped nested path");bool denied=false;try{(void)make_agent_worker_coding_journal(peer,{});}catch(const Conflict&){denied=true;}check(denied,"Graph journal cannot acquire coding assembly");}
     for(const auto* phase:{"reserve","start","finish"}){
         auto invoke=[&](const std::string& attempt){if(std::string(phase)=="reserve")return journal.reserve_model_call(attempt);if(std::string(phase)=="start")return journal.start_model_call(attempt);return journal.finish_model_call(attempt);};
@@ -39,6 +39,8 @@ inline void parent(std::shared_ptr<const BoundProcessExecutable> image){
         auto worker=AgentWorkerProcess::launch(image,scope,deadline);
         unsigned calls=0;std::string active_attempt;
         FixtureWorkerRpcPeer peer(worker->channel(),[&](const std::string& method,const std::string& payload,AgentWorkerRpcSink,std::stop_token)->std::string{
+            if(method=="fixture.deadline")return Json{{"deadline_ns",deadline.time_since_epoch().count()}}.dump();
+            if(method=="journal.execution_window"){std::this_thread::sleep_for(20ms);return Json{{"deadline_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(deadline.time_since_epoch()).count()}}.dump();}
             if(graph&&method=="journal.workspace_mode")return R"({"coding":false})";
             if(graph&&method=="journal.run")return Json{{"id",scope.run_id},{"session_id","synthetic-graph-session"},{"state","queued"},{"parent_id","nested-graph-invocation"},{"node_id","reader"},{"graph_root",false},{"provider_context_json",""}}.dump();
             if(graph&&method=="journal.root_budget")return Json{{"root_run_id",scope.root_id},{"spec",{{"policy_id","native.graph-context"},{"policy_revision",1},{"workspace_identity","workspace:none"},{"provider_identity_json",R"({"wire":"responses","model_id":"synthetic-graph-model"})"},{"max_children",8},{"max_parallel",2},{"max_model_calls",32},{"wall_limit_ms",20000}}},{"children_admitted",1},{"model_calls_reserved",0},{"parent_calls_held",0},{"revision",1},{"planned_children_reserved",0},{"parent_model_calls_reserved",0}}.dump();

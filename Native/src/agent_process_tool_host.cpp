@@ -1,5 +1,7 @@
 #include "agentflow/agent_process_tool_host.hpp"
 #include "agentflow/process_executor.hpp"
+#include "agentflow/permission_waiter.hpp"
+#include "agentflow/context_records.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "agentflow/mcp_wire.hpp"
 #include "agentflow/model_provider.hpp"
@@ -15,6 +17,7 @@ namespace agentflow {
 namespace {
 using Json=nlohmann::json;
 bool bounded_id(const std::string& value,std::size_t maximum){return !value.empty()&&value.size()<=maximum&&std::none_of(value.begin(),value.end(),[](unsigned char c){return c<0x21||c>0x7e;});}
+AgentProcessToolResult command_denied(){return {false,R"({"error":{"code":"permission_denied","message":"Controller denied this command before dispatch. Do not repeat the same command in this turn; choose another permitted approach or explain the blocker."}})"};}
 std::string operation_id(){std::random_device random;std::ostringstream value;value<<std::hex<<std::setfill('0');for(int i=0;i<4;++i)value<<std::setw(8)<<random();return value.str();}
 class LocalProcessToolHost final:public AgentProcessOwnerHost {
 public:
@@ -55,9 +58,12 @@ public:
         if(!ready)return {false,R"({"error":{"code":"repository_instructions_required","message":"No requested action or approval proposal occurred. Updated repository or skill guidance will be supplied in the next model request; reconsider this call using it."}})"};
         if(call.tool_name=="run_process"){
             if(owner_.before_effect)guidance.before_effect=[check=owner_.before_effect,call](const std::string& operation,std::stop_token token){check(call,operation,token);};
+            const auto command_key=context_digest(Json{{"folder_id",call.folder_id},{"arguments",args}}.dump());
+            {std::lock_guard lock(calls_mutex_);if(denied_commands_.contains(command_key))return command_denied();}
             AgentProcessInvocation invocation;invocation.operation_id=operation_id();invocation.run_id=owner_.run_id;invocation.workspace_id=workspace_id_;invocation.workspace_revision=revision_;invocation.folder_id=call.folder_id;invocation.arguments_json=call.arguments_json;invocation.allow_background=owner_.allow_background;invocation.background_cancel=owner_.background_cancel;
             invocation.expires_unix_ms=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()+owner_.approval_timeout.count();
             try{return {true,owner_.process->invoke(invocation,cancel,std::move(guidance))};}
+            catch(const PermissionDenied&){std::lock_guard lock(calls_mutex_);denied_commands_.insert(command_key);return command_denied();}
             catch(const ProcessTimeoutLimitExceeded& error){return {false,Json{{"error",{{"code","process_timeout_exceeded"},{"message","No command was dispatched. Choose timeout_ms at or below max_timeout_ms for this registered profile, or omit timeout_ms to use that maximum."},{"max_timeout_ms",error.max_timeout_ms}}}}.dump()};}
         }
         if(owner_.before_effect){if(!args.contains("job_id")||!args.at("job_id").is_string())throw std::invalid_argument("Process control requires a captured job ID");owner_.before_effect(call,args.at("job_id").get<std::string>(),cancel);}
@@ -67,7 +73,7 @@ public:
     }
 private:
     PersistenceService& store_;AgentProcessToolOwnerContext owner_;std::string workspace_id_;std::int64_t revision_=1;
-    std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;
+    std::mutex calls_mutex_;std::set<std::pair<std::string,std::string>> calls_;std::set<std::string> denied_commands_;
 };
 }
 std::string format_joined_process_observation(const std::vector<std::string>& joined){

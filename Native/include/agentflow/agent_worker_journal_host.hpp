@@ -27,7 +27,7 @@ public:
     RootBudgetRecord root_budget(std::string,std::stop_token={});
     ChildAdmissionRecord child_admission(std::string,std::stop_token={});
     bool coding_workspace_admitted(std::stop_token={});
-    std::int64_t remaining_ms(std::stop_token={});
+    std::int64_t execution_deadline_ns(std::stop_token={});
     Run begin_run(std::stop_token={});
     ModelCallReservation reserve_model(std::string,std::stop_token={});
     ModelCallReservation reserve_planning_continuation(std::string call,std::string attempt,std::stop_token={});

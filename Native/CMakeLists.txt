@@ -348,6 +348,12 @@ if(WIN32)
 endif()
 add_executable(xmind apps/xmind_main.cpp apps/server_main.cpp apps/cli_main.cpp apps/schema_worker_main.cpp)
 target_compile_definitions(xmind PRIVATE XMIND_UNIFIED_EXECUTABLE)
+if(MSVC)
+  # Both console entry points contain UTF-8 review text. Never compile those
+  # literals using the developer machine's active ANSI code page.
+  target_compile_options(xmind PRIVATE /utf-8)
+  target_compile_options(xmind_cli PRIVATE /utf-8)
+endif()
 target_include_directories(xmind PRIVATE include third_party/cpp-httplib third_party)
 target_link_libraries(xmind PRIVATE agentflow_secrets agentflow_console_transport agentflow_http agentflow_instruction_configuration agentflow_json_schema agentflow_mcp_wire Threads::Threads)
 if(WIN32)

@@ -155,7 +155,7 @@ X::Value NativeWorkerJournalApi::Events(std::string id,std::int64_t after){retur
 X::Value NativeWorkerJournalApi::RootBudget(std::string id){return journal_result(state,Host(),[id](auto& host,std::stop_token stop){return encode_worker_journal_value(host.root_budget(id,stop));});}
 X::Value NativeWorkerJournalApi::ChildAdmission(std::string id){return journal_result(state,Host(),[id](auto& host,std::stop_token stop){return encode_worker_journal_value(host.child_admission(id,stop));});}
 X::Value NativeWorkerJournalApi::WorkspaceMode(){return journal_result(state,Host(),[](auto& host,std::stop_token stop){return nlohmann::json{{"coding",host.coding_workspace_admitted(stop)}}.dump();});}
-X::Value NativeWorkerJournalApi::ExecutionWindow(){return journal_result(state,Host(),[](auto& host,std::stop_token stop){return nlohmann::json{{"remaining_ms",host.remaining_ms(stop)}}.dump();});}
+X::Value NativeWorkerJournalApi::ExecutionWindow(){return journal_result(state,Host(),[](auto& host,std::stop_token stop){return nlohmann::json{{"deadline_ns",host.execution_deadline_ns(stop)}}.dump();});}
 X::Value NativeWorkerJournalApi::Begin(){return journal_result(state,Host(),[](auto& host,std::stop_token stop){return encode_worker_journal_value(host.begin_run(stop));});}
 X::Value NativeWorkerJournalApi::ReserveModel(std::string attempt){return begin_journal(state,[attempt](auto& host,std::stop_token stop){return encode_worker_model_reservation(host.reserve_model(attempt,stop));});}
 X::Value NativeWorkerJournalApi::ReservePlanningContinuation(std::string call,std::string attempt){return begin_journal(state,[call,attempt](auto& host,std::stop_token stop){return encode_worker_model_reservation(host.reserve_planning_continuation(call,attempt,stop));});}

@@ -6,6 +6,7 @@
 #include "agentflow/context_records.hpp"
 #include "agentflow/xlang_sqlite.hpp"
 #include "agentflow/process_executor.hpp"
+#include "agentflow/permission_waiter.hpp"
 #include "agentflow/repository_instruction_context.hpp"
 #include "nlohmann/json.hpp"
 #include <filesystem>
@@ -26,12 +27,12 @@ struct Directory{
 void write(const std::filesystem::path& path,const std::string& text){std::ofstream file(path,std::ios::binary);file<<text;file.close();need(bool(file),"Fixture write failed");}
 std::string read(const std::filesystem::path& path){std::ifstream file(path,std::ios::binary);need(bool(file),"Expected actual process output file");return {std::istreambuf_iterator<char>(file),{}};}
 struct RecordingProcess final:AgentProcessToolHost {
-    std::vector<AgentProcessInvocation> calls;std::vector<ProcessProfile> bindings;
+    std::vector<AgentProcessInvocation> calls;std::vector<ProcessProfile> bindings;bool deny_next=false;
     ModelToolDefinition definition()const override{return {"run_process","probe",R"({"type":"object"})"};}
     ModelToolDefinition wait_definition()const override{return {"wait_process","probe",R"({"type":"object"})"};}
     ModelToolDefinition stop_definition()const override{return {"stop_process","probe",R"({"type":"object"})"};}
     const std::vector<ProcessProfile>& profiles()const noexcept override{return bindings;}
-    std::string invoke(const AgentProcessInvocation& call,std::stop_token,InstructionPrecondition guidance)override{need(bool(guidance.verify),"Owner must supply its own guidance verifier");calls.push_back(call);return R"({"state":"succeeded"})";}
+    std::string invoke(const AgentProcessInvocation& call,std::stop_token,InstructionPrecondition guidance)override{need(bool(guidance.verify),"Owner must supply its own guidance verifier");calls.push_back(call);if(deny_next)throw PermissionDenied("fixture denial");return R"({"state":"succeeded"})";}
     std::string wait(const std::string&,const std::string&,std::stop_token)override{return R"({"state":"uncertain"})";}
     std::string stop(const std::string&,const std::string&,std::stop_token)override{return R"({"state":"stopping"})";}
     std::vector<std::string> join_run(const std::string&,std::stop_token)override{return {};}
@@ -82,6 +83,7 @@ int main(int argc,char** argv){if(argc!=4)return 2;try{
         need(recording.calls.empty()&&store.operations("run").get().empty(),"Invalid/denied/obsolete calls must not reach process preparation or approval");
         need(host->invoke(invocation).success,"Bound owner may dispatch once");need(recording.calls.size()==1,"Exactly one low-level dispatch expected");const auto& bound=recording.calls.front();need(bound.run_id=="run"&&bound.workspace_id==workspace_id&&bound.workspace_revision==7&&bound.folder_id==workspace_id&&!bound.allow_background&&bound.operation_id.size()==32&&bound.expires_unix_ms>0,"Backend must choose operation identity, expiry and background policy");
         rejects<ToolAccessDenied>([&]{host->invoke(invocation);});need(recording.calls.size()==1,"Duplicate call must not replay a process");
+        RecordingProcess denied_recording;denied_recording.deny_next=true;auto denial_owner=owner;denial_owner.process=&denied_recording;auto command_denial_host=make_agent_process_tool_host(store,denial_owner);auto denied_call=invocation;denied_call.call_id="denied-command";const auto denial=command_denial_host->invoke(denied_call);need(!denial.success&&Json::parse(denial.output_json).at("error").at("code")=="permission_denied","Known controller denial must return a recoverable no-dispatch result");const auto proposals=denied_recording.calls.size();denied_call.call_id="duplicate-denied-command";const auto repeated=command_denial_host->invoke(denied_call);need(!repeated.success&&Json::parse(repeated.output_json).at("error").at("code")=="permission_denied"&&denied_recording.calls.size()==proposals,"An identical denied command must not generate another approval proposal in the same turn");denied_recording.deny_next=false;denied_call.call_id="different-command";auto different_args=Json::parse(denied_call.arguments_json);different_args["arguments"].push_back("different");denied_call.arguments_json=different_args.dump();need(command_denial_host->invoke(denied_call).success&&denied_recording.calls.size()==proposals+1,"Denial suppression must stay scoped to the identical command, not other permitted work");
         need(!host->invoke(call("wait-uncertain","wait_process",{{"job_id","observed"}})).success,"Uncertain wait must remain unsuccessful");need(!host->invoke(call("stop-pending","stop_process",{{"job_id","observed"}})).success,"A stop request is not a confirmed completed stop");
         write(secondary/"AGENTS.md","New attached-folder instructions\n");auto guided=call("guided","run_process",{{"profile","xlang3"},{"arguments",Json::array()},{"folder_id",attached_id},{"workdir","."}});guided.folder_id=attached_id;
         const auto withheld=host->invoke(guided);need(!withheld.success&&Json::parse(withheld.output_json)["error"]["code"]=="repository_instructions_required"&&recording.calls.size()==1,"Undelivered folder guidance must withhold dispatch and approval");attached_context.prepare();
