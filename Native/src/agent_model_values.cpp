@@ -65,6 +65,31 @@ bool reference_previous_inspections(ModelRequest& request,std::size_t latest_use
     request.messages=std::move(projected);if(protected_indices)*protected_indices=std::move(retained_indices);
     return true;
 }
+std::string utf8_head(const std::string& text,std::size_t bytes){
+    auto end=std::min(bytes,text.size());while(end&&end<text.size()&&(static_cast<unsigned char>(text[end])&0xc0)==0x80)--end;return text.substr(0,end);
+}
+std::string utf8_tail(const std::string& text,std::size_t bytes){
+    auto begin=text.size()-std::min(bytes,text.size());while(begin<text.size()&&(static_cast<unsigned char>(text[begin])&0xc0)==0x80)++begin;return text.substr(begin);
+}
+std::size_t encoded_text_bytes(const std::string& text){return Json(text).dump().size()-2;}
+std::pair<bool,std::size_t> bound_process_stream(Json& stream,std::size_t allowance){
+    if(!stream.is_object()||!stream.contains("data")||!stream["data"].is_string())return {false,0};
+    const auto data=stream["data"].get<std::string>();const bool previous=stream.contains("historical_excerpt")&&stream["historical_excerpt"]==true&&stream.contains("tail_data")&&stream["tail_data"].is_string();
+    const auto tail=previous?stream["tail_data"].get<std::string>():std::string{};
+    const auto current=encoded_text_bytes(data)+encoded_text_bytes(tail);if(current<=allowance)return {false,current};
+    const auto pieces=[&](std::size_t bytes){auto head=utf8_head(data,bytes/2);auto end=utf8_tail(previous?tail:data,bytes-head.size());return std::pair{std::move(head),std::move(end)};};
+    std::size_t lower=0,upper=std::min(allowance,data.size()+tail.size());std::pair<std::string,std::string> kept;
+    // Charge JSON-escaped bytes: terminal controls can otherwise expand a
+    // short source log beyond the actual model payload allowance.
+    while(lower<upper){const auto candidate=lower+(upper-lower+1)/2;auto value=pieces(candidate);if(encoded_text_bytes(value.first)+encoded_text_bytes(value.second)<=allowance){lower=candidate;kept=std::move(value);}else upper=candidate-1;}
+    if(lower==0)kept={};else kept=pieces(lower);
+    const auto original_bytes=previous?stream.at("original_data_bytes").get<std::size_t>():data.size();
+    const auto original_hash=previous?stream.at("original_data_sha256").get<std::string>():context_digest(data);
+    const auto retained=kept.first.size()+kept.second.size(),used=encoded_text_bytes(kept.first)+encoded_text_bytes(kept.second);
+    stream["data"]=std::move(kept.first);stream["tail_data"]=std::move(kept.second);stream["historical_excerpt"]=true;
+    stream["original_data_bytes"]=original_bytes;stream["original_data_sha256"]=original_hash;stream["excerpt_retained_bytes"]=retained;stream["omitted_data_bytes"]=original_bytes-retained;
+    return {true,used};
+}
 }
 ModelMessage model_message_from_history(const Message& stored) {
     const auto data=Json::parse(stored.json);
@@ -91,14 +116,15 @@ bool bound_historical_file_reads(ModelRequest& request,std::vector<std::size_t>*
     std::size_t latest_user=0;for(std::size_t index=0;index<request.messages.size();++index)if(request.messages[index].role==MessageRole::user)latest_user=index;
     std::map<std::string,std::string> pending;bool changed=reference_previous_inspections(request,latest_user,protected_indices);
     if(changed)for(std::size_t index=0;index<request.messages.size();++index)if(request.messages[index].role==MessageRole::user)latest_user=index;
-    std::vector<std::pair<std::size_t,Json>> reads;
+    std::vector<std::pair<std::size_t,Json>> reads,processes;
     for(std::size_t index=0;index<request.messages.size();++index){
         const auto& message=request.messages[index];
         if(message.role==MessageRole::assistant)for(const auto& call:message.tool_calls)pending[call.id]=call.name;
         if(message.role!=MessageRole::tool||message.provider_items_json!="[]")continue;
         const auto found=pending.find(message.tool_call_id);if(found==pending.end())continue;
-        const bool file=found->second=="read_file";pending.erase(found);if(!file)continue;
+        const bool file=found->second=="read_file",process=found->second=="run_process"||found->second=="wait_process"||found->second=="stop_process";pending.erase(found);if(!file&&!process)continue;
         auto value=Json::parse(message.content,nullptr,false);
+        if(process){if(value.is_object()&&!value.contains("error")&&(value.contains("stdout")||value.contains("stderr")))processes.emplace_back(index,std::move(value));continue;}
         if(!value.is_object()||value.contains("error")||!value.contains("path")||!value["path"].is_string()||!value.contains("content")||!value["content"].is_string())continue;
         reads.emplace_back(index,std::move(value));
     }
@@ -121,6 +147,18 @@ bool bound_historical_file_reads(ModelRequest& request,std::vector<std::size_t>*
         for(const auto* field:{"original_offset","original_lines_read","original_next_offset","original_truncated_lines"})if(value.contains(field))excerpt[field]=value[field];
         if(end&&text[end-1]=='\n')excerpt["suggested_current_read_offset"]=value.value("offset",value.value("original_offset",std::size_t{1}))+lines;
         message.content=excerpt.dump();changed=true;
+    }
+    std::size_t prior_process_remaining=4096,current_process_remaining=16*1024;
+    for(auto entry=processes.rbegin();entry!=processes.rend();++entry){
+        auto& message=request.messages[entry->first];auto& value=entry->second;auto& remaining=entry->first<latest_user?prior_process_remaining:current_process_remaining;
+        auto allowance=std::min(remaining,std::size_t{8192});bool excerpted=false;
+        // Keep short compiler errors before allocating the rest to stdout.
+        for(const auto* stream:{"stderr","stdout"})if(value.contains(stream)){const auto [bounded,used]=bound_process_stream(value[stream],allowance);allowance-=used;remaining-=used;excerpted|=bounded;}
+        if(!excerpted)continue;
+        if(!value.contains("historical_process_excerpt")||value["historical_process_excerpt"]!=true)value["original_observation_sha256"]=context_digest(message.content);
+        value["historical_process_excerpt"]=true;
+        value["guidance"]="Model-only excerpts of captured command logs. data is the captured prefix; tail_data is the captured suffix, with omitted_data_bytes between them. Capture counts, exit status, ownership and original operation output remain unchanged. Use a narrowed diagnostic if the omitted middle is needed; do not repeat an identical command merely to repeat its result.";
+        message.content=value.dump();changed=true;
     }
     return changed;
 }
