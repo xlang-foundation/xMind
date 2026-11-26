@@ -114,6 +114,10 @@ std::string WorkspaceTools::invoke(const std::string& name,const std::string& so
             const auto file=read_file_page(args["path"].get<std::string>(),args.value("offset",std::size_t{1}),args.value("limit",std::size_t{200}),cancel,16*1024);
             result={{"path",file.path},{"content",file.content},{"offset",file.offset},{"lines_read",file.lines_read},{"has_more",file.next_offset.has_value()},{"truncated",file.next_offset.has_value()||!file.truncated_lines.empty()},{"truncated_lines",file.truncated_lines}};
             if(file.next_offset)result["next_offset"]=*file.next_offset;
+            // Keep the established whole-file result shape when an implicit
+            // bounded read contains the complete file. Explicit pages and any
+            // omitted or clipped bytes always retain their paging metadata.
+            if(!args.contains("offset")&&!args.contains("limit")&&!file.next_offset&&file.truncated_lines.empty())result={{"path",file.path},{"content",file.content}};
             if(result.dump().size()>20*1024)throw ToolFileError("Read page exceeds serialized result limit");
         }
     } else if(name=="list_files") {

@@ -188,7 +188,7 @@ int main(int argc,char** argv) {
         require(read.content=="first\r\nalpha[.]needle \xe4\xb8\xad\r\nlast\n","Actual UTF-8 file contents must survive");
         require(tools.read_file("README.TXT").content==read.content,"Normal Windows filename lookup must remain usable");
         require(tools.read_file("sub/inside.txt").content=="alpha[.]needle nested\n","Nested file read");
-        require(Json::parse(tools.invoke("read_file",R"({"path":"README.txt"})"))["content"]==read.content,"Typed tool invocation must perform actual read");
+        require(Json::parse(tools.invoke("read_file",R"({"path":"README.txt"})"))==Json{{"path","README.txt"},{"content",read.content}},"A complete bounded default read must preserve actual bytes and the established small-file result shape");
         AgentWorkspaceInvocation invocation{1,"run-1","attempt-1","call-1",tools.identity(),1,tools.identity(),"read_file",R"({"path":"README.txt"})"};
         require(Json::parse(tools.invoke(invocation))["content"]==read.content,"Single-folder host must validate run-scoped metadata before invoking a workspace tool");
         auto wrong_revision=invocation;wrong_revision.workspace_revision=2;rejects<ToolAccessDenied>([&]{tools.invoke(wrong_revision);});
